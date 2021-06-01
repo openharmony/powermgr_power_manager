@@ -1,0 +1,33 @@
+{
+  "subsystem": "powermgr",
+  "parts": {
+    "power_manager_native": {
+      "module_list": [
+        "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
+        "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
+        "//base/powermgr/power_manager/services:powermgrservice"
+      ],
+      "inner_kits": [
+        {
+          "name": "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
+          "header": {
+            "header_files": [
+              "ipower_mgr.h",
+              "ipower_state_callback.h",
+              "ishutdown_callback.h",
+              "power_mgr_client.h",
+              "power_state_machine_info.h",
+              "running_lock.h",
+              "running_lock_info.h",
+              "work_trigger.h"
+            ],
+            "header_base": "//base/powermgr/power_manager/interfaces/innerkits/native/include"
+          }
+        }
+      ],
+      "test_list": [
+        "//base/powermgr/power_manager/services/native/test:powermgr_test"
+      ]
+    }
+  }
+}

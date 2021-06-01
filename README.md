@@ -1,37 +1,40 @@
-# powermgr_power_manager
+# power\_manager<a name="EN-US_TOPIC_0000001115047353"></a>
 
-#### 介绍
-Power manager | 系统电源管理服务模块
+- [Introduction](#section11660541593)
+- [Directory Structure](#section19472752217)
+- [Repositories Involved](#section63151229062)
 
-#### 软件架构
-软件架构说明
+## Introduction<a name="section11660541593"></a>
 
+Power Manager provides the following functionalities:
 
-#### 安装教程
+1.  Rebooting the device
+2.  Managing running locks
+3.  Obtaining the power status
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+**Figure  1**  Power management subsystem architecture<a name="fig106301571239"></a>  
+![](figures/power-management-subsystem-architecture.png "power-management-subsystem-architecture")
 
-#### 使用说明
+## Directory Structure<a name="section19472752217"></a>
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+```
+/base/powermgr/power_manager
+├── interfaces                   # APIs
+│   ├── innerkits                # Internal APIs
+│   └── kits                     # External APIs
+├── sa_profile                   # SA profile
+└── services                     # Services
+│   ├── native                   # Native services
+│   └── zidl                     # zidl APIs
+└── utils                        # Utilities and common code
+```
 
-#### 参与贡献
+## Repositories Involved<a name="section63151229062"></a>
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+Power management subsystem
 
+powermgr_battery_manager
 
-#### 特技
+**powermgr_power_manager**
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+powermgr_display_manager
