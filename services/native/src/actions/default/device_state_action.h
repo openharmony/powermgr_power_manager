@@ -26,8 +26,9 @@ public:
     void ForceSuspend() override;
     void Wakeup(int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
         const std::string& pkgName) override;
-    void RefreshActivity(int64_t callTimeMs __unused, UserActivityType type __unused,
-        uint32_t flags __unused) override {}
+   void RefreshActivity(int64_t callTimeMs __attribute__((__unused__)),
+        UserActivityType type __attribute__((__unused__)),
+        uint32_t flags __attribute__((__unused__))) override {}
 };
 } // namespace PowerMgr
 } // namespace OHOS

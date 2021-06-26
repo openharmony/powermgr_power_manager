@@ -98,7 +98,7 @@ void PowerMgrMonitor::HandleScreenStateChanged(const IntentWant& want) const
     DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine()->ReceiveScreenEvent(isScreenOn);
 }
 
-void PowerMgrMonitor::HandleStartUpCompleted(const IntentWant& want __unused) const
+void PowerMgrMonitor::HandleStartUpCompleted(const IntentWant& want __attribute__((__unused__))) const
 {
     POWER_HILOGD(MODULE_SERVICE, "Start up completed");
 }
