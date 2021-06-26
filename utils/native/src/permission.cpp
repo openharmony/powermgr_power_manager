@@ -19,12 +19,12 @@ using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
-bool Permission::CheckSelfPermission(const string& perm __unused)
+bool Permission::CheckSelfPermission(const string& perm __attribute__((__unused__)))
 {
     return true;
 }
 
-bool Permission::CheckCallingPermission(const string& perm __unused)
+bool Permission::CheckCallingPermission(const string& perm __attribute__((__unused__)))
 {
     return true;
 }

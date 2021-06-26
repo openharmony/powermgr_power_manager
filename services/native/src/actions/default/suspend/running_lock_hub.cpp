@@ -16,7 +16,7 @@
 #include "suspend/running_lock_hub.h"
 
 #include <file_ex.h>
-#include <sys/capability.h>
+#include <linux/capability.h>
 #include <sys/eventfd.h>
 
 #include "errors.h"
