@@ -55,6 +55,7 @@ bool PowerStateMachineTest::IsTestSupported()
     return !SysParam::IsDeviceType(DeviceType::DEVICE_CAR) && !SysParam::IsDeviceType(DeviceType::DEVICE_TV);
 }
 
+#ifdef SHIELD
 /**
  * @tc.name: PowerStateMachine003
  * @tc.desc: test Suspend Device in proxy
@@ -195,6 +196,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
 
     GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device end.";
 }
+#endif
 
 /**
  * @tc.name: PowerStateMachine007
