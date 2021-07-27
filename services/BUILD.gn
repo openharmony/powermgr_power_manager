@@ -59,7 +59,7 @@ ohos_shared_library("powermgrservice") {
     "aafwk_standard:want",
     "appexecfwk_standard:appexecfwk_base",
     "appexecfwk_standard:libeventhandler",
-    "ces_standard:cesfwk_kits",
+    "ces_standard:cesfwk_innerkits",
     "hisysevent_native:libhisysevent",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
