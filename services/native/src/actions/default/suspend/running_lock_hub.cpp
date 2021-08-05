@@ -65,7 +65,7 @@ bool RunningLockHub::InitFd()
 {
     static bool inited = false;
     if (inited) {
-        return (lockFd_ >= 0 && lockFd_ >= 0);
+        return (lockFd_ >= 0 && unlockFd_ >= 0);
     }
     lockFd_ = UniqueFd(TEMP_FAILURE_RETRY(open(LOCK_PATH, O_RDWR | O_CLOEXEC)));
     unlockFd_ = UniqueFd(TEMP_FAILURE_RETRY(open(UNLOCK_PATH, O_RDWR | O_CLOEXEC)));
