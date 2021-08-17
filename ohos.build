@@ -5,7 +5,9 @@
       "module_list": [
         "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
         "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
-        "//base/powermgr/power_manager/services:powermgrservice"
+        "//base/powermgr/power_manager/services:powermgrservice",
+        "//base/powermgr/power_manager/interfaces/kits/js/napi/power:power",
+        "//base/powermgr/power_manager/interfaces/kits/js/napi/runninglock:runninglock"
       ],
       "inner_kits": [
         {
