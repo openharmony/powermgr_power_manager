@@ -19,8 +19,8 @@ import {AsyncCallback} from './basic';
  * Provides interfaces to manage power.
  *
  * @SysCap SystemCapability.PowerMgr.PowerManager
- * @devices phone, tablet
- * @since 6
+ * @devices phone, tablet, tv, wearable
+ * @since 7
  */
 declare namespace power {
   /**
@@ -29,9 +29,10 @@ declare namespace power {
    * <p>This method requires the ohos.permission.SHUTDOWN permission.
    *
    * @param reason Indicates the shutdown reason.
-   * @since 6
+   * @systemapi
+   * @since 7
    */
-  function shutownDevice(reason: string): void;
+  function shutdownDevice(reason: string): void;
 
   /**
    * Restarts the system.
@@ -40,7 +41,7 @@ declare namespace power {
    *
    * @param reason Indicates the restart reason. For example, "recovery" indicates entering the recovery mode
    * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
-   * @since 6
+   * @since 7
    */
   function rebootDevice(reason: string): void;
 
@@ -48,7 +49,7 @@ declare namespace power {
    * Checks whether the screen of a device is on or off.
    *
    * @return Returns true if the screen is on; returns false otherwise.
-   * @since 6
+   * @since 7
    */
   function isScreenOn(callback: AsyncCallback<boolean>): void;
   function isScreenOn(): Promise<boolean>;

@@ -25,18 +25,17 @@ import {AsyncCallback} from './basic.d.ts';
   * RunningLock} is set.
  *
  * @SysCap SystemCapability.PowerMgr.PowerManager
- * @devices phone, tablet
- * @since 6
+ * @devices phone, tablet, tv, wearable
+ * @since 7
  */
 declare namespace runningLock {
-
     class RunningLock {
         /**
          * Prevents the system from hibernating and sets the lock duration.
          *
          * @param timeout Indicates the lock duration (ms). After the lock duration times out, the lock is automatically
          * released and the system hibernates if no other {@link RunningLock} is set.
-         * @since 6
+         * @since 7
          */
         function lock(timeout: number): void;
 
@@ -44,14 +43,14 @@ declare namespace runningLock {
          * Checks whether a lock is held or in use.
          *
          * @return Returns true if the lock is held or in use; returns false if the lock has been released.
-         * @since 6
+         * @since 7
          */
         function isUsed(): boolean;
 
         /**
          * Release the {@link RunningLock} that prevents the system from hibernating.
          *
-         * @since 6
+         * @since 7
          */
         function unlock(): void;
     }
@@ -63,7 +62,7 @@ declare namespace runningLock {
      * {@link BACKGROUND} ensures that applications can run in the background.
      * {@link PROXIMITY_SCREEN_CONTROL} determines whether to turn on or off the screen based on the proximity sensor.
      *
-     * @since 6
+     * @since 7
      */
     export enum RunningLockType {
         /**
@@ -85,7 +84,7 @@ declare namespace runningLock {
      * @param type Indicates the specified {@link RunningLockType}.
      * @return Returns true if the specified {@link RunningLockType} is supported;
      * returns false otherwise.
-     * @since 6
+     * @since 7
      */
     function isRunningLockTypeSupported(type: RunningLockType, callback: AsyncCallback<boolean>): void;
     function isRunningLockTypeSupported(type: RunningLockType): Promise<boolean>;
@@ -100,7 +99,7 @@ declare namespace runningLock {
      * a suffix.
      * @param type Indicates the {@link RunningLockType}.
      * @return Returns the {@link RunningLock} object.
-     * @since 6
+     * @since 7
      */
     function createRunningLock(name: string, type: RunningLockType, callback: AsyncCallback<RunningLock>): void;
     function createRunningLock(name: string, type: RunningLockType): Promise<RunningLock>;
