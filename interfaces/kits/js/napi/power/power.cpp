@@ -122,6 +122,9 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
     napi_value jsthis;
     void *data = nullptr;
 
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
+    NAPI_ASSERT(env, (status == napi_ok), "IsScreenOn: failed to get cb info");
+
     auto asyncCallbackInfo = new PowerAsyncCallbackInfo();
     if (asyncCallbackInfo == nullptr) {
         POWER_HILOGE(MODULE_JS_NAPI, "%{public}s: new asyncCallbackInfo failed", __func__);
@@ -129,12 +132,14 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
     }
     asyncCallbackInfo->env = env;
 
-    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
-    NAPI_ASSERT(env, (status == napi_ok), "IsScreenOn: failed to get cb info");
     napi_valuetype type;
     if (argc == 1) {
         NAPI_CALL(env, napi_typeof(env, args[0], &type));
-        NAPI_ASSERT(env, type == napi_function, "IsScreenOn: wrong argument type. napi_function expected.");
+        if (type != napi_function) {
+            POWER_HILOGE(MODULE_JS_NAPI, "%{public}s: wrong argument type. napi_function expected", __func__);
+            delete asyncCallbackInfo;
+            return nullptr;
+        }
         napi_create_reference(env, args[0], 1, &asyncCallbackInfo->callbackRef);
     }
     napi_value result = nullptr;
