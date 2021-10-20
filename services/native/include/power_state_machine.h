@@ -25,21 +25,20 @@
 #include "power_common.h"
 #include "power_mgr_monitor.h"
 #include "power_state_machine_info.h"
+#include "running_lock_info.h"
+
+#define DEFAULT_DISPLAY_OFF_TIME    30000
+#define DEFAULT_SLEEP_TIME          5000
 
 namespace OHOS {
 namespace PowerMgr {
 class RunningLockMgr;
 class PowerMgrService;
 
-enum class ScreenStateType {
-    SCREEN_OFF = 0,
-    SCREEN_ON = 1,
-    SCREEN_DIM = 2,
-};
-
 struct ScreenState {
-    ScreenStateType state;
-    int64_t lastUpdateTime;
+    DisplayState state;
+    int64_t lastOnTime;
+    int64_t lastOffTime;
 };
 
 struct DevicePowerState {
@@ -54,10 +53,21 @@ struct DevicePowerState {
     int64_t lastSuspendDeviceTime;
 };
 
-class PowerStateMachine {
+enum class TransitResult {
+    SUCCESS = 0,
+    ALREADY_IN_STATE = 1,
+    LOCKING = 2,
+    HDI_ERR = 3,
+    OTHER_ERR = 99
+};
+
+class PowerStateMachine : public std::enable_shared_from_this<PowerStateMachine> {
 public:
     explicit PowerStateMachine(const wptr<PowerMgrService>& pms);
     ~PowerStateMachine();
+
+    static void  onSuspend();
+    static void  onWakeup();
 
     bool Init();
     void SuspendDeviceInner(pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed,
@@ -67,12 +77,21 @@ public:
     void RefreshActivityInner(pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
+    PowerState GetState()
+    {
+        return currentState_;
+    };
     bool ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs);
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
     void CancelDelayTimer(int32_t event);
-    void HandleDelayTimer();
+    void ResetInactiveTimer();
+    void ResetSleepTimer();
+    void HandleDelayTimer(int32_t event);
+    bool SetState(PowerState state, StateChangeReason reason, bool force = false);
+    void SetDisplaySuspend(bool enable);
+
     // only use for test
     int64_t GetLastSuspendDeviceTime() const
     {
@@ -96,25 +115,64 @@ public:
         virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
         virtual ~PowerStateCallbackDeathRecipient() = default;
     };
-
+    void DumpInfo(std::string& result);
+    void EnableMock(IDeviceStateAction* mockAction);
+    void SetDisplayOffTime(int64_t time);
+    void SetSleepTime(int64_t time);
 private:
+    class StateController {
+    public:
+        StateController(PowerState state, std::shared_ptr<PowerStateMachine> owner,
+            std::function<TransitResult()> action)
+            : state_(state), owner_(owner), action_(action) {}
+        ~StateController() = default;
+        PowerState GetState()
+        {
+            return state_;
+        }
+        TransitResult TransitTo(StateChangeReason reason, bool ignoreLock = false);
+        StateChangeReason lastReason_;
+        int64_t lastTime_;
+    protected:
+        bool CheckState();
+        PowerState state_;
+        std::weak_ptr<PowerStateMachine> owner_;
+        std::function<TransitResult()> action_;
+    };
+
     struct classcomp {
         bool operator() (const sptr<IPowerStateCallback>& l, const sptr<IPowerStateCallback>& r) const
         {
             return l->AsObject() < r->AsObject();
         }
     };
-
+    void InitStateMap();
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
+    bool CheckRunningLock(PowerState state);
+    int64_t GetDisplayOffTime();
+    int64_t GetSleepTime();
+    void HandleActivityTimeout();
+    void HandleActivityOffTimeout();
+    void HandleActivitySleepTimeout();
+    void HandleSystemWakeup();
+    StateChangeReason GetReasonByUserActivity(UserActivityType type);
+    StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
+    StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
 
     const wptr<PowerMgrService> pms_;
     PowerMgrMonitor powerMgrMonitor_;
+    PowerState currentState_;
+    std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
+    std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
     std::unique_ptr<IDeviceStateAction> stateAction_;
+    int64_t displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
+    int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
+    bool enableDisplaySuspend_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS

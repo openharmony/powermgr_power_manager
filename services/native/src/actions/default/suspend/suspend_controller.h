@@ -22,8 +22,12 @@
 #include <mutex>
 #include <thread>
 
+#include "power_hdf_client.h"
 #include "suspend/isuspend_controller.h"
+
+#ifdef POWER_SUSPEND_NO_HDI
 #include "unique_fd.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -35,8 +39,8 @@ public:
     SuspendController();
     ~SuspendController() = default;
 
-    void EnableSuspend() override;
-    void ForceSuspend() override;
+    void Suspend(SuspendCallback onSuspend, SuspendCallback onWakeup, bool force) override;
+    void Wakeup() override;
     void IncSuspendBlockCounter() override;
     void DecSuspendBlockCounter() override;
 
@@ -48,21 +52,28 @@ private:
         ~AutoSuspend() = default;
 
         void AutoSuspendLoop();
-        void Start();
+        void Start(SuspendCallback onSuspend, SuspendCallback onWakeup);
+        void Stop();
         bool SuspendEnter();
 
     private:
+        static bool started;
         std::string WaitWakeupCount();
         bool WriteWakeupCount(std::string wakeupCount);
 
+#ifdef POWER_SUSPEND_NO_HDI
         static constexpr const char * const SUSPEND_STATE = "mem";
         static constexpr const char * const SUSPEND_STATE_PATH = "/sys/power/state";
         static constexpr const char * const WAKEUP_COUNT_PATH = "/sys/power/wakeup_count";
-
         UniqueFd wakeupCountFd {-1};
+#endif
+
         std::chrono::milliseconds waitTime_ {100ms};
         std::unique_ptr<std::thread> daemon_;
         WaitingSuspendConditionFunc waitingFunc_;
+        SuspendCallback onSuspend_;
+        SuspendCallback onWakeup_;
+        std::unique_ptr<PowerHdfClient> client_;
     };
 
     bool SuspendConditionSatisfied();

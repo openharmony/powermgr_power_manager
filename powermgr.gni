@@ -19,6 +19,10 @@ powermgr_root_path = "//base/powermgr/power_manager"
 
 powermgr_service_path = "${powermgr_root_path}/services"
 
+powermgr_framework_path = "${powermgr_root_path}/frameworks"
+
+powermgr_hdi_path = "${powermgr_root_path}/hdi"
+
 powermgr_interfaces_path = "${powermgr_root_path}/interfaces"
 
 powermgr_native_innerkits_path = "${powermgr_interfaces_path}/innerkits"

@@ -35,7 +35,13 @@ public:
     void Shutdown(const std::string& reason);
     void AddShutdownCallback(const sptr<IShutdownCallback>& callback);
     void DelShutdownCallback(const sptr<IShutdownCallback>& callback);
-
+    bool IsShuttingDown();
+    void EnableMock(IDevicePowerAction* mockAction)
+    {
+        std::unique_ptr<IDevicePowerAction> mock(mockAction);
+        devicePowerAction_ = std::move(mock);
+        started_ = false;
+    }
 private:
     using IntentWant = OHOS::AAFwk::Want;
     class CallbackManager : public IRemoteObject::DeathRecipient {

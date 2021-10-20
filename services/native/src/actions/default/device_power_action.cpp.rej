@@ -1,0 +1,45 @@
+--- services/native/src/actions/default/device_power_action.cpp
++++ services/native/src/actions/default/device_power_action.cpp
+@@ -13,27 +13,38 @@
+  * limitations under the License.
+  */
+ 
+-#include "device_power_action.h"
+-
+ #include <linux/reboot.h>
+ #include <sys/syscall.h>
+ #include <sys/types.h>
+ #include <unistd.h>
++#include "parameters.h"
++#include "securec.h"
+ 
+ #include "hilog_wrapper.h"
++#include "device_power_action.h"
+ 
+ namespace OHOS {
+ namespace PowerMgr {
+ void DevicePowerAction::Reboot(const std::string& reason)
+ {
++    int32_t propertyMaxSize = PROPERTY_MAX_SIZE;
++    char updateCmd[propertyMaxSize];
++    if (snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "reboot,%s", reason.c_str()) == 0) {
++        return;
++    }
+     POWER_HILOGI(MODULE_SERVICE, "Reboot executing.");
+-    syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, reason.c_str());
++    OHOS::system::SetParameter("sys.powerctl", updateCmd);
+ }
+ 
+ void DevicePowerAction::Shutdown(const std::string& reason)
+ {
++    int32_t propertyMaxSize = PROPERTY_MAX_SIZE;
++    char updateCmd[propertyMaxSize];
++    if (snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "shutdown,%s", reason.c_str()) == 0) {
++        return;
++    }
+     POWER_HILOGI(MODULE_SERVICE, "Shutdown executing.");
+-    syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_POWER_OFF, reason.c_str());
++    OHOS::system::SetParameter("sys.powerctl", updateCmd);
+ }
+ } // namespace PowerMgr
+ } // namespace OHOS

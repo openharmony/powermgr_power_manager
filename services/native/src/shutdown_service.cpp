@@ -62,6 +62,12 @@ void ShutdownService::DelShutdownCallback(const sptr<IShutdownCallback>& callbac
     callbackMgr_.RemoveCallback(callback);
 }
 
+bool ShutdownService::IsShuttingDown()
+{
+    POWER_HILOGE(MODULE_SERVICE, "IsShuttingDown");
+    return started_;
+}
+
 void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 {
     if (started_) {
