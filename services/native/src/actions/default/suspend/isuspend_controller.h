@@ -21,11 +21,12 @@ namespace PowerMgr {
 namespace Suspend {
 class ISuspendController {
 public:
+    using SuspendCallback = std::function<void()>;
     ISuspendController() = default;
     virtual ~ISuspendController() = default;
 
-    virtual void EnableSuspend() = 0;
-    virtual void ForceSuspend() = 0;
+    virtual void Suspend(SuspendCallback onSuspend, SuspendCallback onWakeup, bool force) = 0;
+    virtual void Wakeup();
     virtual void IncSuspendBlockCounter() = 0;
     virtual void DecSuspendBlockCounter() = 0;
 };

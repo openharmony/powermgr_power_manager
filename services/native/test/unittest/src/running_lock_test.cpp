@@ -257,45 +257,6 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockInnerKit005
- * @tc.desc: Test RunningLockInnerKit function, dfx.
- * @tc.type: FUNC
- */
-HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level2)
-{
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
-    ASSERT_TRUE(runningLock1 != nullptr);
-    runningLock1->Lock();
-    DumpRunningLockInfo();
-    auto runningLock2 = powerMgrClient.CreateRunningLock("runninglock2", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    ASSERT_TRUE(runningLock2 != nullptr);
-    runningLock2->Lock();
-    DumpRunningLockInfo();
-    powerMgrClient.ProxyRunningLock(true, getuid(), getpid());
-    DumpRunningLockInfo();
-    powerMgrClient.ProxyRunningLock(false, getuid(), getpid());
-    DumpRunningLockInfo();
-    runningLock1->UnLock();
-    DumpRunningLockInfo();
-    runningLock1->Lock();
-    std::shared_ptr<WorkTrigger> worker1 = std::make_shared<WorkTrigger>(1, "worker1");
-    std::shared_ptr<WorkTrigger> worker2 = std::make_shared<WorkTrigger>(2, "worker2", 20);
-    std::shared_ptr<WorkTrigger> worker3 = std::make_shared<WorkTrigger>(3, "worker3", 30);
-    std::shared_ptr<WorkTrigger> worker4 = std::make_shared<WorkTrigger>();
-    WorkTriggerList worklist;
-    worklist.push_back(worker1);
-    worklist.push_back(worker2);
-    worklist.push_back(worker3);
-    worklist.push_back(worker4);
-    runningLock1->SetWorkTriggerList(worklist);
-    DumpRunningLockInfo();
-    sleep(70);
-    DumpRunningLockInfo();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit006.");
-}
-
-/**
  * @tc.name: RunningLockMgr001
  * @tc.desc: Test RunningLockMgr function, connect PowerMgrService and call member function.
  * @tc.type: FUNC

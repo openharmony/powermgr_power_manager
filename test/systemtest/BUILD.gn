@@ -1,0 +1,164 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/powermgr/power_manager/powermgr.gni")
+import("//build/test.gni")
+
+module_output_path = "${powermgr_native_part_name}/powermgr_native"
+
+###############################################################################
+config("module_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "include",
+    "mock",
+    "//utils/system/safwk/native/include",
+    "//third_party/googletest/googletest/include",
+    "//base/powermgr/power_manager/services/native/include",
+    "//base/powermgr/power_manager/services/native/src",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//utils/native/base/include",
+    "//foundation/distributedschedule/safwk/services/safwk/include",
+    "//base/powermgr/power_manager/interfaces/innerkits/native/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler/include",
+    "//base/notification/ces_standard/cesfwk/kits/native/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include",
+    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+    "//base/powermgr/power_manager/services/zidl/include",
+    "//base/powermgr/battery_manager/utils/native/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+    "//base/powermgr/power_manager/services/native/src/actions/default",
+    "//base/powermgr/display_manager/interfaces/innerkits/native/include",
+    "//base/powermgr/display_manager/service/native/include",
+    "//base/powermgr/display_manager/service/zidl/include",
+    "//drivers/peripheral/display/interfaces/include",
+    "//foundation/graphic/standard/utils/include",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//base/powermgr/power_manager/utils/native/include",
+    "//base/powermgr/power_manager/services/native/test/unittest/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/intent/include",
+    "//base/notification/ces_standard/cesfwk/innerkits/include",
+    "//base/notification/ces_standard/cesfwk/services/include",
+    "//base/notification/ces_standard/common/log/include",
+  ]
+}
+
+deps_ex = [
+  "aafwk_standard:base",
+  "aafwk_standard:want",
+  "appexecfwk_standard:appexecfwk_base",
+  "appexecfwk_standard:libeventhandler",
+  "ces_standard:cesfwk_innerkits",
+  "ipc:ipc_core",
+  "hiviewdfx_hilog_native:libhilog",
+  "safwk:system_ability_fwk",
+  "samgr_L2:samgr_proxy",
+]
+
+##############################sttest##########################################
+
+ohos_systemtest("test_power_st_mgr_mock") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_st_mock_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}:powermgr_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+##############################systemtest##########################################
+
+ohos_systemtest("test_power_mgr_mock_system") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_mock_system_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}:powermgr_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+################################powersavemode################################
+
+ohos_systemtest("test_power_mgr_powersavemode") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_powersavemode_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}:powermgr_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "aafwk_standard:base",
+    "aafwk_standard:want",
+    "appexecfwk_standard:appexecfwk_base",
+    "appexecfwk_standard:libeventhandler",
+    "ces_standard:cesfwk_innerkits",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_L2:samgr_proxy",
+  ]
+}
+
+group("systemtest_powermgr") {
+  testonly = true
+  deps = [
+    ":test_power_mgr_mock_system",
+    ":test_power_mgr_powersavemode",
+    ":test_power_st_mgr_mock",
+  ]
+}

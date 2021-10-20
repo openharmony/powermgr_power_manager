@@ -31,6 +31,9 @@ public:
     ~PowerMgrProxy() = default;
     DISALLOW_COPY_AND_MOVE(PowerMgrProxy);
 
+    virtual void CreateRunningLock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo) override;
+    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& token) override;
+    virtual bool IsRunningLockTypeSupported(uint32_t type) override;
     virtual void Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo,
         uint32_t timeOutMs) override;
     virtual void UnLock(const sptr<IRemoteObject>& token) override;
@@ -41,6 +44,7 @@ public:
     virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
+    virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
     virtual void RebootDevice(const std::string& reason) override;
@@ -49,6 +53,11 @@ public:
     virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
     virtual void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
+    virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual void SetDisplaySuspend(bool enable) override;
+    virtual void SetDeviceMode(const uint32_t& mode) override;
+    virtual uint32_t GetDeviceMode() override;
 private:
     static inline BrokerDelegator<PowerMgrProxy> delegator_;
 };

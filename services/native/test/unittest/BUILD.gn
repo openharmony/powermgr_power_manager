@@ -22,7 +22,30 @@ config("module_private_config") {
 
   include_dirs = [
     "include",
+    "mock",
     "//utils/system/safwk/native/include",
+    "//third_party/googletest/googletest/include",
+    "//base/powermgr/display_manager/interfaces/innerkits/native/include/",
+    "//base/powermgr/display_manager/service/native/include/",
+    "//base/powermgr/display_manager/service/zidl/include/",
+    "//drivers/peripheral/display/interfaces/include/",
+    "//base/powermgr/power_manager/services/native/test/unittest/include",
+    "//foundation/graphic/standard/utils/include/",
+  ]
+}
+config("module_private_event_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "//utils/native/base/include",
+    "//foundation/appexecfwk/standard/common/log/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler/include",
+    "//base/notification/ces_standard/cesfwk/innerkits/include",
+    "//base/notification/ces_standard/cesfwk/services/include",
+    "//base/notification/ces_standard/cesfwk/kits/native/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+    "//base/notification/ces_standard/common/log/include",
   ]
 }
 
@@ -38,7 +61,166 @@ deps_ex = [
   "samgr_L2:samgr_proxy",
 ]
 
+############################shutdown_callback_test#############################
+ohos_unittest("shutdown_callback_test") {
+  module_out_path = module_output_path
+  sources = [ "src/power_shutdown_callback_test.cpp" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+  external_deps = deps_ex
+}
+
+##############################shutdown_test#####################################
+ohos_unittest("shutdown_test") {
+  module_out_path = module_output_path
+  sources = [ "src/shutdown_test.cpp" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+  external_deps = deps_ex
+}
+
+##############################reboot_test#####################################
+ohos_unittest("reboot_test") {
+  module_out_path = module_output_path
+  sources = [ "src/reboot_test.cpp" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+  external_deps = deps_ex
+}
+
 ##############################unittest##########################################
+ohos_unittest("test_register_callback_mode") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_register_callback_mode_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_power_get_mode") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_get_mode_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_power_set_mode") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_set_mode_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_power_shutdown") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_shutdown_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_power_device_mode") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_device_mode_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_running_lock") {
   module_out_path = module_output_path
 
@@ -81,6 +263,29 @@ ohos_unittest("test_power_mgr_service") {
   external_deps = deps_ex
 }
 
+ohos_unittest("ces_system") {
+  module_out_path = module_output_path
+
+  sources = [ "src/ces_system_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_private_event_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}:powermgr_utils",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_power_state_machine") {
   module_out_path = module_output_path
 
@@ -96,6 +301,30 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_power_mgr_mock") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_mock_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}:powermgr_utils",
+    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
@@ -117,6 +346,8 @@ if (false) {
     deps = [
       "${powermgr_native_innerkits_path}:powermgr_client",
       "${powermgr_service_path}:powermgrservice",
+      "${powermgr_service_path}/native/src/actions:powermgr_actions",
+      "${powermgr_utils_path}:powermgr_utils",
       "//third_party/googletest:gtest_main",
       "//utils/native/base:utils",
     ]
@@ -128,7 +359,10 @@ if (false) {
 group("unittest") {
   testonly = true
   deps = [
+    ":shutdown_callback_test",
+    ":test_power_device_mode",
     ":test_power_mgr_service",
+    ":test_power_shutdown",
     ":test_power_state_machine",
     ":test_running_lock",
 

@@ -26,12 +26,14 @@ config("powermgr_public_config") {
 
 ohos_shared_library("powermgr_client") {
   sources = [
+    "${powermgr_framework_path}/native/power_mgr_client.cpp",
+    "${powermgr_framework_path}/native/running_lock.cpp",
+    "${powermgr_framework_path}/native/running_lock_info.cpp",
+    "${powermgr_framework_path}/native/running_lock_token_stub.cpp",
     "${powermgr_service_path}/zidl/src/power_mgr_proxy.cpp",
+    "${powermgr_service_path}/zidl/src/power_mode_callback_proxy.cpp",
+    "${powermgr_service_path}/zidl/src/power_shutdown_callback_proxy.cpp",
     "${powermgr_service_path}/zidl/src/power_state_callback_proxy.cpp",
-    "native/src/power_mgr_client.cpp",
-    "native/src/running_lock.cpp",
-    "native/src/running_lock_info.cpp",
-    "native/src/running_lock_token_stub.cpp",
   ]
 
   configs = [

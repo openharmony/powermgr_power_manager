@@ -17,12 +17,15 @@
 #define POWERMGR_STATE_MACHINE_TEST_H
 
 #include <gtest/gtest.h>
+#include <thread>
 
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
+#include "power_hdf_client.h"
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr int NEXT_WAIT_TIME_S = 1;
 constexpr int SLEEP_WAIT_TIME_S = 6;
 constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
 constexpr int SCREEN_OFF_WAIT_TIME_S = 15;
@@ -34,6 +37,13 @@ public:
     void SetUp();
     void TearDown();
     bool IsTestSupported();
+    void PowerClientInit();
+    void CheckWriteWakeCount();
+    void CheckReadWakeCount();
+    void WakeUpthread();
+    void Suspendthread();
+    void Rebootthread();
+    void Shutdownthread();
     class PowerStateTest1Callback : public PowerStateCallbackStub {
     public:
         PowerStateTest1Callback() {};
@@ -46,6 +56,8 @@ public:
         virtual ~PowerStateTest2Callback() {};
         virtual void OnPowerStateChanged(PowerState state) override;
     };
+private:
+    std::unique_ptr<PowerHdfClient> client_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

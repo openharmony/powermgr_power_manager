@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Power Mode Definitions:
+    DEFAULT_MODE = 600,
+    EXTREAM_MODE = 601,
+    NORMAL_MODE = 602,
+    POWER_SAVE_MODE = 603
+-->
+<!--
+    Action Definitions:
+    DisplayOffTime = 101,
+    SystemAutoSleepTime = 102,
+    AutoWindownRoration = 107,
+    SmartBacklight = 115,
+    VibratorsState = 120,
+-->
+<switch_proxy version="1">
+	<proxy id="600">
+		<switch id="101" value="-1" recover_flag="0"/>
+		<switch id="102" value="-1" recover_flag="0"/>
+	</proxy>
+	<proxy id="601">
+		<switch id="111" value="6" recover_flag="0"/>
+		<switch id="107" value="1" recover_flag="0"/>
+		<switch id="115" value="20" recover_flag="1"/>
+		<switch id="120" value="1" recover_flag="0"/>
+		<switch id="124" value="120" recover_flag="0"/>
+	</proxy>
+	<proxy id="602">
+		<switch id="111" value="6" recover_flag="0"/>
+		<switch id="107" value="0" recover_flag="1"/>
+		<switch id="115" value="40" recover_flag="1"/>
+		<switch id="120" value="0" recover_flag="1"/>
+		<switch id="124" value="60" recover_flag="0"/>
+	</proxy>
+	<proxy id="603">
+		<switch id="111" value="6" recover_flag="0"/>
+		<switch id="124" value="50" recover_flag="0"/>
+	</proxy>
+</switch_proxy>

@@ -28,6 +28,9 @@ public:
     enum {
         CHECK_RUNNINGLOCK_OVERTIME_MSG = 1,
         CHECK_USER_ACTIVITY_TIMEOUT_MSG = 2,
+        CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG = 3,
+        CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG = 4,
+        SYSTEM_WAKE_UP_MSG = 5,
     };
 
     PowermsEventHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,

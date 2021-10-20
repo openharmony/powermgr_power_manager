@@ -15,31 +15,84 @@
 
 #include "device_state_action.h"
 
-#include "display_manager.h"
+#include "display_power_mgr_client.h"
 #include "system_suspend_controller.h"
+#include "power_state_machine_info.h"
 
-using namespace OHOS::DisplayMgr;
 using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
+using namespace DisplayPowerMgr;
+
 void DeviceStateAction::Suspend(int64_t callTimeMs, SuspendDeviceType type, uint32_t flags)
 {
-    DisplayManager::SetScreenState(ScreenState::SCREEN_STATE_OFF);
-    SystemSuspendController::GetInstance().EnableSuspend();
+    // Display is controlled by PowerStateMachine
+    // Don't suspend until GoToSleep is called
 }
 
 void DeviceStateAction::ForceSuspend()
 {
-    DisplayManager::SetScreenState(ScreenState::SCREEN_STATE_OFF);
-    SystemSuspendController::GetInstance().ForceSuspend();
+    GoToSleep(nullptr, nullptr, true);
 }
 
 void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const string& details,
     const string& pkgName)
 {
-    SystemSuspendController::GetInstance().DisableSuspend();
-    DisplayManager::SetScreenState(ScreenState::SCREEN_STATE_ON);
+    SystemSuspendController::GetInstance().Wakeup();
+}
+
+DisplayState DeviceStateAction::GetDisplayState()
+{
+    DisplayPowerMgr::DisplayState state = DisplayPowerMgrClient::GetInstance().GetDisplayState();
+    DisplayState ret = DisplayState::DISPLAY_ON;
+    switch (state) {
+        case DisplayPowerMgr::DisplayState::DISPLAY_ON:
+            ret = DisplayState::DISPLAY_ON;
+            break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_DIM:
+            ret = DisplayState::DISPLAY_DIM;
+            break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_OFF:
+            ret = DisplayState::DISPLAY_OFF;
+            break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND:
+            ret = DisplayState::DISPLAY_SUSPEND;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+uint32_t DeviceStateAction::SetDisplayState(DisplayState state)
+{
+    DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
+    switch (state) {
+        case DisplayState::DISPLAY_ON:
+            dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
+            break;
+        case DisplayState::DISPLAY_DIM:
+            dispState = DisplayPowerMgr::DisplayState::DISPLAY_DIM;
+            break;
+        case DisplayState::DISPLAY_OFF:
+            dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
+            break;
+        case DisplayState::DISPLAY_SUSPEND:
+            dispState = DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND;
+            break;
+        default:
+            break;
+    }
+
+    bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState);
+    return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
+}
+
+uint32_t DeviceStateAction::GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force)
+{
+    SystemSuspendController::GetInstance().Suspend(onSuspend, onWakeup, force);
+    return ActionResult::SUCCESS;
 }
 } // namespace PowerMgr
 } // namespace OHOS

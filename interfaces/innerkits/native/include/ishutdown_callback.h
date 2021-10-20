@@ -18,13 +18,18 @@
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
+#include <iremote_proxy.h>
+#include <iremote_stub.h>
 
 namespace OHOS {
 namespace PowerMgr {
 class IShutdownCallback : public IRemoteBroker {
 public:
-    virtual void ShutdownCallback() = 0;
+    enum {
+        POWER_SHUTDOWN_CHANGED = 0,
+    };
 
+    virtual void ShutdownCallback() = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IShutdownCallback");
 };
 } // namespace PowerMgr

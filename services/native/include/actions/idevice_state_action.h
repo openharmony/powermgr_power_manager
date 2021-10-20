@@ -22,6 +22,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
+enum ActionResult {
+    SUCCESS = 0,
+    FAILED = 1,
+};
+
 class IDeviceStateAction {
 public:
     IDeviceStateAction() = default;
@@ -32,6 +37,9 @@ public:
     virtual void Wakeup(int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
         const std::string& pkgName) = 0;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, uint32_t flags) = 0;
+    virtual DisplayState GetDisplayState() = 0;
+    virtual uint32_t SetDisplayState(DisplayState state) = 0;
+    virtual uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS
