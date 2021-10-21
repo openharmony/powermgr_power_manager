@@ -24,6 +24,7 @@ namespace OHOS {
 namespace PowerMgr {
 class DevicePowerAction : public IDevicePowerAction {
 public:
+    int PROPERTY_MAX_SIZE = 92;
     void Reboot(const std::string& reason) override;
     void Shutdown(const std::string& reason) override;
 };

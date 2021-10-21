@@ -26,6 +26,8 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace Suspend {
+bool SuspendController::AutoSuspend::started = false;
+
 SuspendController::SuspendController()
 {
     auto f = std::bind(&SuspendController::WaitingSuspendCondition, this);
@@ -34,36 +36,77 @@ SuspendController::SuspendController()
 
 void SuspendController::AutoSuspend::AutoSuspendLoop()
 {
+    POWER_HILOGD(MODULE_SERVICE, "AutoSuspendLoop start");
     while (true) {
         std::this_thread::sleep_for(waitTime_);
+        if (!started) {
+            POWER_HILOGW(MODULE_SERVICE, "AutoSuspend is stopped");
+            break;
+        }
         const std::string wakeupCount = WaitWakeupCount();
         if (wakeupCount.empty()) {
+            POWER_HILOGD(MODULE_SERVICE, "Can't read wake count, continue");
             continue;
         }
         waitingFunc_();
         if (!WriteWakeupCount(wakeupCount)) {
+            POWER_HILOGD(MODULE_SERVICE, "Can't write wake count, continue");
             continue;
         }
+        if (onSuspend_ != nullptr) {
+            onSuspend_();
+        }
+        POWER_HILOGD(MODULE_SERVICE, "SuspendEnter");
         bool success = SuspendEnter();
         if (!success) {
             POWER_HILOGE(MODULE_SERVICE, "Start suspend failed!");
         }
+        if (onWakeup_ != nullptr) {
+            onWakeup_();
+        }
+        break;
     }
+    started = false;
+
+    POWER_HILOGD(MODULE_SERVICE, "AutoSuspendLoop end");
 }
 
-void SuspendController::AutoSuspend::Start()
+void SuspendController::AutoSuspend::Start(SuspendCallback onSuspend, SuspendCallback onWakeup)
 {
-    static bool started = false;
+    POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Start");
+    onSuspend_ = onSuspend;
+    onWakeup_ = onWakeup;
     if (started) {
+        POWER_HILOGW(MODULE_SERVICE, "AutoSuspend is already started");
         return;
     }
+    client_ = std::make_unique<PowerHdfClient>();
     daemon_ = std::make_unique<std::thread>(&AutoSuspend::AutoSuspendLoop, this);
     daemon_->detach();
+    POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Start detach");
     started = true;
+}
+
+void SuspendController::AutoSuspend::Stop()
+{
+    POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Stop");
+    if (started && daemon_.get() != nullptr) {
+        POWER_HILOGD(MODULE_SERVICE, "daemon join start");
+        started = false;
+        daemon_->join();
+        POWER_HILOGD(MODULE_SERVICE, "daemon join end");
+    }
 }
 
 bool SuspendController::AutoSuspend::SuspendEnter()
 {
+    POWER_HILOGE(MODULE_SERVICE, "SuspendController::AutoSuspend::SuspendEnter: fun is start!");
+#ifndef POWER_SUSPEND_NO_HDI
+    POWER_HILOGE(MODULE_SERVICE, "Before suspend!");
+    ErrCode ret = client_->Suspend();
+    POWER_HILOGE(MODULE_SERVICE, "After suspend!");
+    return ret == ERR_OK ? true : false;
+#else
     static bool inited = false;
     static UniqueFd suspendStateFd(TEMP_FAILURE_RETRY(open(SUSPEND_STATE_PATH, O_RDWR | O_CLOEXEC)));
     if (!inited) {
@@ -73,15 +116,24 @@ bool SuspendController::AutoSuspend::SuspendEnter()
         }
         inited = true;
     }
+    POWER_HILOGE(MODULE_SERVICE, "Before suspend!");
     bool ret = SaveStringToFd(suspendStateFd, SUSPEND_STATE);
+    POWER_HILOGE(MODULE_SERVICE, "After suspend!");
     if (!ret) {
         POWER_HILOGE(MODULE_SERVICE, "Failed to write the suspending state!");
     }
     return ret;
+#endif
 }
 
 std::string SuspendController::AutoSuspend::WaitWakeupCount()
 {
+    POWER_HILOGI(MODULE_SERVICE, "SuspendController::AutoSuspend::WaitWakeupCount: fun is start");
+#ifndef POWER_SUSPEND_NO_HDI
+    std::string count;
+    client_->ReadWakeCount(count);
+    return count;
+#else
     if (wakeupCountFd < 0) {
         wakeupCountFd = UniqueFd(TEMP_FAILURE_RETRY(open(WAKEUP_COUNT_PATH, O_RDWR | O_CLOEXEC)));
     }
@@ -92,10 +144,16 @@ std::string SuspendController::AutoSuspend::WaitWakeupCount()
         return std::string();
     }
     return wakeupCount;
+#endif
 }
 
 bool SuspendController::AutoSuspend::WriteWakeupCount(std::string wakeupCount)
 {
+    POWER_HILOGI(MODULE_SERVICE, "SuspendController::AutoSuspend::WriteWakeupCount: fun is start");
+#ifndef POWER_SUSPEND_NO_HDI
+    ErrCode ret = client_->WriteWakeCount(wakeupCount);
+    return ret == ERR_OK ? true : false;
+#else
     if (wakeupCountFd < 0) {
         return false;
     }
@@ -104,19 +162,30 @@ bool SuspendController::AutoSuspend::WriteWakeupCount(std::string wakeupCount)
         POWER_HILOGE(MODULE_SERVICE, "Failed to write the wakeup count!");
     }
     return ret;
+#endif
 }
 
-void SuspendController::EnableSuspend()
+void SuspendController::Suspend(SuspendCallback onSuspend, SuspendCallback onWakeup, bool force)
 {
-    suspend_->Start();
-    POWER_HILOGI(MODULE_SERVICE, "AutoSuspend enabled");
+    POWER_HILOGI(MODULE_SERVICE, "SuspendController::Suspend: fun is start");
+    if (force) {
+        POWER_HILOGI(MODULE_SERVICE, "SuspendController Suspend: force");
+        if (onSuspend != nullptr) {
+            onSuspend();
+        }
+        suspend_->SuspendEnter();
+        if (onWakeup != nullptr) {
+            onWakeup();
+        }
+    } else {
+        POWER_HILOGI(MODULE_SERVICE, "SuspendController Suspend: not force");
+        suspend_->Start(onSuspend, onWakeup);
+    }
 }
 
-void SuspendController::ForceSuspend()
+void SuspendController::Wakeup()
 {
-    std::lock_guard lock(suspendMutex_);
-    bool success = suspend_->SuspendEnter();
-    POWER_HILOGI(MODULE_SERVICE, "Forced suspend %{public}s", success ? "succeeded." : "failed!");
+    suspend_->Stop();
 }
 
 void SuspendController::IncSuspendBlockCounter()

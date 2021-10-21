@@ -31,10 +31,20 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerMgrService;
 class PowermsEventHandler;
+class PowerStateMachine;
 using RunningLockMap = std::map<const sptr<IRemoteObject>, std::shared_ptr<RunningLockInner>>;
 
 class RunningLockMgr {
 public:
+    enum class SystemLockType : uint32_t {
+        SYSTEM_LOCK_APP = 0,
+        SYSTEM_LOCK_DISPLAY = 1,
+        SYSTEM_LOCK_OTHER
+    };
+    enum {
+        PROXIMITY_AWAY = 0,
+        PROXIMITY_CLOSE
+    };
     using RunningLockProxyMap = std::unordered_map<pid_t, std::unordered_set<pid_t>>;
     explicit RunningLockMgr(const wptr<PowerMgrService>& pms) : pms_(pms) {}
     ~RunningLockMgr();
@@ -42,6 +52,9 @@ public:
     void Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo,
         const UserIPCInfo &userIPCinfo, uint32_t timeOutMS = 0);
     void UnLock(const sptr<IRemoteObject> token);
+    std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& token,
+        const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo);
+    void ReleaseLock(const sptr<IRemoteObject> token);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     void SetWorkTriggerList(const sptr<IRemoteObject>& token, const WorkTriggerList& workTriggerList);
@@ -61,27 +74,107 @@ public:
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     static constexpr uint32_t MAX_DUMP_NUM = 10;
     void CheckOverTime();
+    void SetProximity(uint32_t status);
     void DumpInfo(std::string& result);
-
+    void EnableMock(IRunningLockAction* mockAction);
 private:
+    static constexpr const char * const LOCK_TAG_APP = "lock_app";
+    static constexpr const char * const LOCK_TAG_DISPLAY = "lock_display";
+    static constexpr const char * const LOCK_TAG_OTHER = "lock_other";
+
+    void InitLocksTypeScreen();
+    void InitLocksTypeBackground();
+    void nitLocksTypeProximity();
+
+    class SystemLock {
+    public:
+        SystemLock(std::shared_ptr<IRunningLockAction> action, const char * const tag)
+            : action_(action), tag_(tag), locking_(false) {};
+        ~SystemLock() = default;
+        void Lock();
+        void Unlock();
+        bool IsLocking()
+        {
+            return locking_;
+        };
+        void EnableMock(std::shared_ptr<IRunningLockAction>& mock)
+        {
+            locking_ = false;
+            action_ = mock;
+        }
+    private:
+        std::shared_ptr<IRunningLockAction> action_;
+        const std::string tag_;
+        bool locking_;
+    };
+
+    class LockCounter {
+    public:
+        LockCounter(RunningLockType type, std::function<void(bool)> activate)
+            : type_(type), activate_(activate), counter_(0) {}
+        ~LockCounter() = default;
+        uint32_t Increase();
+        uint32_t Decrease();
+        void Clear();
+        uint32_t GetCount()
+        {
+            return counter_;
+        }
+        RunningLockType GetType()
+        {
+            return type_;
+        }
+    private:
+        const RunningLockType type_;
+        std::shared_ptr<IRunningLockAction> action_;
+        std::function<void(bool)> activate_;
+        uint32_t counter_;
+    };
+
+    class ProximityController {
+    public:
+        ProximityController();
+        ~ProximityController();
+        void Enable();
+        void Disable();
+        bool IsEnabled()
+        {
+            return enabled_;
+        }
+        bool IsClose();
+        void OnClose();
+        void OnAway();
+        uint32_t GetStatus()
+        {
+            return status_ ;
+        }
+        void Clear();
+    private:
+        bool enabled_;
+        bool isClose {false};
+        uint32_t status_;
+    };
+
     class RunningLockDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         RunningLockDeathRecipient() = default;
         virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
         virtual ~RunningLockDeathRecipient() = default;
     };
+    bool InitLocks();
     bool MatchProxyMap(const UserIPCInfo& userIPCinfo);
     void SetRunningLockDisableFlag(std::shared_ptr<RunningLockInner>& lockInner, bool forceRefresh = false);
     void LockReally(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner);
     void UnLockReally(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner);
     void ProxyRunningLockInner(bool proxyLock);
     void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& token, uint32_t timeOutMS = 0);
-    std::shared_ptr<RunningLockInner> CreateRunningLockInner(const sptr<IRemoteObject>& token,
-        const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo);
     const wptr<PowerMgrService> pms_;
+    ProximityController proximityController_;
     std::weak_ptr<PowermsEventHandler> handler_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
+    std::map<SystemLockType, std::shared_ptr<SystemLock>> systemLocks_;
+    std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
     RunningLockProxyMap proxyMap_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;

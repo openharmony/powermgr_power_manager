@@ -34,8 +34,8 @@ public:
         return LOCK_TAGS[ToUnderlying(type)];
     }
 
-    void Acquire(RunningLockType type);
-    void Release(RunningLockType type);
+    virtual void Acquire(RunningLockType type);
+    virtual void Release(RunningLockType type);
 
     virtual void Lock(RunningLockType type, const std::string& tag) = 0;
     virtual void Unlock(RunningLockType type, const std::string& tag) = 0;

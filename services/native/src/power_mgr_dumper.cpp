@@ -17,12 +17,15 @@
 
 #include "power_common.h"
 #include "power_mgr_service.h"
+#include "system_suspend_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_RUNNINGLOCK = "-runninglock";
+const std::string ARGS_STATE = "-state";
+const std::string ARGS_HDF = "-hdf";
 }
 
 bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& result)
@@ -33,16 +36,26 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
         ShowUsage(result);
         return true;
     }
-    if (args[0] == ARGS_RUNNINGLOCK) {
-        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms == nullptr) {
-            return true;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return true;
+    }
+    for (auto it = args.begin(); it != args.end(); it++) {
+        if (*it == ARGS_RUNNINGLOCK) {
+            auto runningLockMgr = pms->GetRunningLockMgr();
+            if (runningLockMgr == nullptr) {
+                continue;
+            }
+            runningLockMgr->DumpInfo(result);
+        } else if (*it == ARGS_STATE) {
+            auto stateMachine = pms->GetPowerStateMachine();
+            if (stateMachine == nullptr) {
+                continue;
+            }
+            stateMachine->DumpInfo(result);
+        } else if (*it == ARGS_HDF) {
+            SystemSuspendController::GetInstance().Dump(result);
         }
-        auto runningLockMgr = pms->GetRunningLockMgr();
-        if (runningLockMgr == nullptr) {
-            return true;
-        }
-        runningLockMgr->DumpInfo(result);
     }
     return true;
 }

@@ -31,12 +31,17 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mgr_monitor.cpp",
     "native/src/power_mgr_notify.cpp",
     "native/src/power_mgr_service.cpp",
+    "native/src/power_mode_module.cpp",
+    "native/src/power_mode_policy.cpp",
+    "native/src/power_save_model.cpp",
     "native/src/power_state_machine.cpp",
     "native/src/powerms_event_handler.cpp",
     "native/src/running_lock_inner.cpp",
     "native/src/running_lock_mgr.cpp",
     "native/src/shutdown_service.cpp",
     "zidl/src/power_mgr_stub.cpp",
+    "zidl/src/power_mode_callback_stub.cpp",
+    "zidl/src/power_shutdown_callback_stub.cpp",
     "zidl/src/power_state_callback_stub.cpp",
   ]
 
@@ -51,6 +56,7 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_native_innerkits_path}:powermgr_client",
     "${powermgr_utils_path}:powermgr_utils",
     "native/src/actions:powermgr_actions",
+    "//drivers/peripheral/display/hal:hdi_display_device",
     "//utils/native/base:utils",
   ]
 
@@ -68,4 +74,8 @@ ohos_shared_library("powermgrservice") {
   ]
 
   part_name = "${powermgr_native_part_name}"
+}
+
+group("power_service") {
+  deps = [ "native/profile:power_mode_config" ]
 }

@@ -21,6 +21,7 @@
 
 #include <singleton.h>
 
+#include "power_hdf_client.h"
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 
@@ -28,20 +29,19 @@ namespace OHOS {
 namespace PowerMgr {
 class SystemSuspendController : public DelayedRefSingleton<SystemSuspendController> {
 public:
-    void EnableSuspend();
-    void ForceSuspend();
-    void DisableSuspend();
+    void Suspend(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force);
+    void Wakeup();
     void AcquireRunningLock(const std::string& name);
     void ReleaseRunningLock(const std::string& name);
+    void Dump(std::string& info);
 
 private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static const std::string WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
-    bool suspendEnabled_ {false};
     std::mutex mutex_;
-    std::unique_ptr<Suspend::IRunningLockHub> rlh_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
+    std::unique_ptr<PowerHdfClient> client_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

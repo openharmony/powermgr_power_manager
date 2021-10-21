@@ -95,7 +95,7 @@ private:
     std::mutex mutex_;
     RunningLockInfo runningLockInfo_;
     UserIPCInfo userIPCinfo_;
-    bool disabled_ {false};
+    bool disabled_ {true};
     bool reallyLocked_ {false};
     bool overTimeFlag_ {false};
     int64_t lockTimeMs_ {0};

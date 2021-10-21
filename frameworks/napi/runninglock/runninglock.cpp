@@ -268,10 +268,15 @@ static void IsRunningLockTypeSupportedCallBack(napi_env env,
         resource,
         [](napi_env env, void *data) {
             RunningLockAsyncCallbackInfo *asyncCallbackInfo = (RunningLockAsyncCallbackInfo *)data;
-            if (asyncCallbackInfo->type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
+            if (asyncCallbackInfo->type == RunningLockType::RUNNINGLOCK_BACKGROUND
+                || asyncCallbackInfo->type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
                 asyncCallbackInfo->isSupported = true;
+            } else {
+                asyncCallbackInfo->isSupported = false;
             }
-            POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: runningLock isSupported %{public}s", __func__,
+            POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: runningLock(%{public}d) isSupported %{public}s",
+                __func__,
+                asyncCallbackInfo->type,
                 asyncCallbackInfo->isSupported ? "true" : "false");
         },
         [](napi_env env, napi_status status, void *data) {

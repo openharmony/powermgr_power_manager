@@ -44,16 +44,19 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
             runningLockMgr->CheckOverTime();
             break;
         }
-        case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
+        case CHECK_USER_ACTIVITY_TIMEOUT_MSG: // fallthrough
+        case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: // fallthrough
+        case CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG: // fallthrough
+        case SYSTEM_WAKE_UP_MSG: {
             auto powerStateMachine = pmsptr->GetPowerStateMachine();
             if (powerStateMachine == nullptr) {
                 return;
             }
-            powerStateMachine->HandleDelayTimer();
+            powerStateMachine->HandleDelayTimer(event->GetInnerEventId());
             break;
         }
         default:
-        POWER_HILOGD(MODULE_SERVICE, "PowermsEventHandler::no event id matched.");
+            POWER_HILOGD(MODULE_SERVICE, "PowermsEventHandler::no event id matched.");
     }
 }
 } // namespace PowerMgr
