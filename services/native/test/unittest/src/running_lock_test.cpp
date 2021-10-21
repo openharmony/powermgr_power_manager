@@ -35,6 +35,7 @@ void RunningLockTest::SetUpTestCase(void)
     ASSERT_TRUE(runningLockMgr_->Init());
 }
 
+#ifdef IPC_AVAILABLE
 /**
  * @tc.name: RunningLockInnerKit000
  * @tc.desc: Test RunningLockInnerKit function, connect PowerMgrService and call member function.
@@ -507,3 +508,4 @@ HWTEST_F (RunningLockTest, RunningLockMgr005, TestSize.Level0)
     runningLockMgr_->UnLock(token);
     POWER_HILOGD(MODULE_SERVICE, "RunningLockTest::RunningLockMgr005 end.");
 }
+#endif // IPC_AVAILABLE
