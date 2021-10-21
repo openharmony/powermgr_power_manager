@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-constexpr int APP_FIRST_UID = 10000;
+constexpr int APP_FIRST_UID = APP_FIRST_UID_VALUE;
 }
 
 PowerMgrClient::PowerMgrClient() {}
@@ -119,34 +119,31 @@ void PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
     POWER_HILOGI(MODULE_INNERKIT, " Calling SuspendDevice success.");
 }
 
-void PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& details)
+void PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& detail)
 {
     RETURN_IF(Connect() != ERR_OK);
-    // Param details's length must > 0
-    if (details.empty()) {
-        POWER_HILOGE(MODULE_INNERKIT, "%{public}s : detail length is 0, Wakeup failed!", __func__);
-        return;
-    }
 
-    std::string subDetails;
-    if (details.length() > MAX_STRING_LENGTH) {
-        POWER_HILOGI(MODULE_INNERKIT, "%{public}s : detail = %{public}s, length is larger than %{public}d, \
-                do substring!", __func__, details.c_str(), MAX_STRING_LENGTH);
-        subDetails = details.substr(0, MAX_STRING_LENGTH);
-    } else {
-        subDetails = details;
-    }
-    proxy_->WakeupDevice(GetTickCount(), reason, subDetails);
+    proxy_->WakeupDevice(GetTickCount(), reason, detail);
     POWER_HILOGI(MODULE_INNERKIT, " Calling WakeupDevice success.");
 }
 
-void PowerMgrClient::RefreshActivity(UserActivityType type, bool needChangeBacklight)
+void PowerMgrClient::RefreshActivity(UserActivityType type)
 {
     RETURN_IF_WITH_LOG(type == UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, " is not supported!");
     RETURN_IF(Connect() != ERR_OK);
 
-    proxy_->RefreshActivity(GetTickCount(), type, needChangeBacklight);
+    proxy_->RefreshActivity(GetTickCount(), type, true);
     POWER_HILOGI(MODULE_INNERKIT, " Calling RefreshActivity Success!");
+}
+
+bool PowerMgrClient::IsRunningLockTypeSupported(uint32_t type)
+{
+    if (type >= static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT)) {
+        return false;
+    }
+
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    return proxy_->IsRunningLockTypeSupported(type);
 }
 
 bool PowerMgrClient::ForceSuspendDevice()
@@ -166,8 +163,13 @@ bool PowerMgrClient::IsScreenOn()
     return ret;
 }
 
-std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string& name, RunningLockType type,
-                                                               const int screenOnFlag)
+PowerState PowerMgrClient::GetState()
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerState::UNKNOWN);
+    return proxy_->GetState();
+}
+
+std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string& name, RunningLockType type)
 {
     auto uid = IPCSkeleton::GetCallingUid();
     if (uid >= APP_FIRST_UID && !Permission::CheckSelfPermission("ohos.permission.RUNNING_LOCK")) {
@@ -176,15 +178,6 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     }
 
     RETURN_IF_WITH_RET(Connect() != ERR_OK, nullptr);
-    if (screenOnFlag == RunningLock::CREATE_WITH_SCREEN_ON) {
-        if (type != RunningLockType::RUNNINGLOCK_SCREEN) {
-            POWER_HILOGE(MODULE_INNERKIT, "%{public}s failed to create RunningLock due to screenOnFlag error",
-                __func__);
-            return nullptr;
-        } else {
-            WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "RunningLockWakeUpScreen");
-        }
-    }
 
     int nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
     std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy_, name.substr(0, nameLen), type);
@@ -198,14 +191,6 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     }
     POWER_HILOGI(MODULE_INNERKIT, "%{public}s :name %{public}s, type = %d", __func__, name.c_str(), type);
     return runningLock;
-}
-
-void PowerMgrClient::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
-{
-    RETURN_IF(Connect() != ERR_OK);
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s :proxyLock = %d, uid = %d, pid = %d", __func__,
-        proxyLock, uid, pid);
-    proxy_->ProxyRunningLock(proxyLock, uid, pid);
 }
 
 void PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
@@ -225,13 +210,50 @@ void PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback
 void PowerMgrClient::RegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
+    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->RegisterShutdownCallback(callback);
 }
 
 void PowerMgrClient::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
+    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->UnRegisterShutdownCallback(callback);
+}
+
+void PowerMgrClient::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+{
+    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
+    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
+    proxy_->RegisterPowerModeCallback(callback);
+}
+
+void PowerMgrClient::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+{
+    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
+    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
+    proxy_->UnRegisterPowerModeCallback(callback);
+}
+
+void PowerMgrClient::SetDisplaySuspend(bool enable)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
+    proxy_->SetDisplaySuspend(enable);
+}
+
+void PowerMgrClient::SetDeviceMode(const uint32_t mode)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
+    proxy_->SetDeviceMode(mode);
+}
+
+uint32_t PowerMgrClient::GetDeviceMode()
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, 0);
+    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
+    return proxy_->GetDeviceMode();
 }
 } // namespace PowerMgr
 }  // namespace OHOS

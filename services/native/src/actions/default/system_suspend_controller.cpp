@@ -23,44 +23,35 @@ namespace PowerMgr {
 SystemSuspendController::SystemSuspendController()
 {
     sc_ = std::make_shared<Suspend::SuspendController>();
-    rlh_ = std::make_unique<Suspend::RunningLockHub>(sc_);
-    rlh_->Acquire(WAKEUP_HOLDER);
+    client_ = std::make_unique<PowerHdfClient>();
 }
 
 SystemSuspendController::~SystemSuspendController() = default;
 
-void SystemSuspendController::EnableSuspend()
+void SystemSuspendController::Suspend(std::function<void()> onSuspend,
+    std::function<void()> onWakeup, bool force)
 {
-    std::lock_guard lock(mutex_);
-    sc_->EnableSuspend();
-    if (!suspendEnabled_) {
-        rlh_->Release(WAKEUP_HOLDER);
-        suspendEnabled_ = true;
-    }
+    sc_->Suspend(onSuspend, onWakeup, force);
 }
 
-void SystemSuspendController::ForceSuspend()
+void SystemSuspendController::Wakeup()
 {
-    sc_->ForceSuspend();
-}
-
-void SystemSuspendController::DisableSuspend()
-{
-    std::lock_guard lock(mutex_);
-    if (suspendEnabled_) {
-        rlh_->Acquire(WAKEUP_HOLDER);
-        suspendEnabled_ = false;
-    }
+    sc_->Wakeup();
 }
 
 void SystemSuspendController::AcquireRunningLock(const std::string& name)
 {
-    rlh_->Acquire(name);
+    client_->WakeLock(name);
 }
 
 void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 {
-    rlh_->Release(name);
+    client_->WakeUnlock(name);
+}
+
+void SystemSuspendController::Dump(std::string& info)
+{
+    client_->Dump(info);
 }
 } // namespace PowerMgr
 } // namespace OHOS

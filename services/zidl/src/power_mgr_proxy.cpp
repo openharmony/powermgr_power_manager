@@ -23,6 +23,84 @@
 
 namespace OHOS {
 namespace PowerMgr {
+void PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return;
+    }
+
+    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+    WRITE_PARCEL_NO_RET(data, Parcelable, &runningLockInfo);
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s SendRequest is failed, error code: %d", __func__, ret);
+        return;
+    }
+}
+
+void PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& token)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return;
+    }
+
+    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s SendRequest is failed, error code: %d", __func__, ret);
+        return;
+    }
+}
+
+bool PowerMgrProxy::IsRunningLockTypeSupported(uint32_t type)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return result;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, Uint32, static_cast<uint32_t>(type), false);
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::IS_RUNNINGLOCK_TYPE_SUPPORTED), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s SendRequest is failed, error code: %d", __func__, ret);
+        return result;
+    }
+
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s Readback fail!", __func__);
+    }
+
+    return result;
+}
+
 void PowerMgrProxy::Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo, uint32_t timeOutMs)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -295,6 +373,34 @@ bool PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs)
     return result;
 }
 
+PowerState PowerMgrProxy::GetState()
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerState::UNKNOWN);
+
+    uint32_t result = 0;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return PowerState::UNKNOWN;
+    }
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::GET_STATE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s SendRequest is failed, error code: %d", __func__, ret);
+        return PowerState::UNKNOWN;
+    }
+    if (!reply.ReadUint32(result)) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s Readback fail!", __func__);
+        return PowerState::UNKNOWN;
+    }
+
+    return static_cast<PowerState>(result);
+}
+
 bool PowerMgrProxy::IsScreenOn()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -412,6 +518,126 @@ void PowerMgrProxy::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& ca
         POWER_HILOGE(MODULE_INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
         return;
     }
+}
+
+void PowerMgrProxy::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF((remote == nullptr) || (callback == nullptr));
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "Write descriptor failed!");
+        return;
+    }
+
+    WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::REG_POWER_MODE_CALLBACK), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
+        return;
+    }
+}
+
+void PowerMgrProxy::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF((remote == nullptr) || (callback == nullptr));
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "Write descriptor failed!");
+        return;
+    }
+
+    WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::UNREG_POWER_MODE_CALLBACK), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
+        return;
+    }
+}
+
+void PowerMgrProxy::SetDisplaySuspend(bool enable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return;
+    }
+
+    WRITE_PARCEL_NO_RET(data, Bool, enable);
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SET_DISPLAY_SUSPEND), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s Transact is failed, error code: %d", __func__, ret);
+    }
+}
+
+void PowerMgrProxy::SetDeviceMode(const uint32_t& mode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return;
+    }
+
+    WRITE_PARCEL_NO_RET(data, Uint32, mode);
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SETMODE_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s Transact is failed, error code: %d", __func__, ret);
+    }
+}
+
+uint32_t PowerMgrProxy::GetDeviceMode()
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return 0;
+    }
+
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::GETMODE_DEVICE),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT,
+            "PowerMgrProxy::%{public}s SendRequest is failed, error code: %{public}d", __func__, ret);
+        return 0;
+    }
+
+    uint32_t used = 0;
+    if (!reply.ReadUint32(used)) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s Readback fail!", __func__);
+    }
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::GetDeviceMode, cmd = %{public}u.", used);
+    return used;
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -23,6 +23,8 @@
 #include "power_state_machine_info.h"
 #include "running_lock.h"
 
+#define APP_FIRST_UID_VALUE 10000
+
 namespace OHOS {
 namespace PowerMgr {
 class PowerMgrClient final : public DelayedRefSingleton<PowerMgrClient> {
@@ -49,19 +51,17 @@ public:
      * Suspend device and set screen off.
      *
      * @param reason The reason why will you suspend the device, such as timeout/powerkey/forcesuspend and so on.
-     * @param suspendImmed The flag indicating whether the system will go to sleep immediately.
      */
     void SuspendDevice(SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-                       bool suspendImmed = true);
+        bool suspendImmed = false);
 
     /**
      * Wake up the device and set the screen on.
      *
      * @param reason The reason for waking up the device, such as powerkey/plugin/application.
-     * @param details Details of the wakeup reason.
      */
     void WakeupDevice(WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
-                      const std::string& details = "SoftWare Wakeup");
+        const std::string& detail = std::string("app call"));
 
     /**
      * Refresh the screentimeout time, and keep the screen on. RefreshActivity works only when the screen is on.
@@ -70,8 +70,7 @@ public:
      * @param needChangeBacklight Whether to change the backlight state, for example, from DIM to BRIGHT.
      *                            Set it to false if you don't want to change the backlight state.
      */
-    void RefreshActivity(UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER,
-                         bool needChangeBacklight = true);
+    void RefreshActivity(UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER);
 
     /**
      * Check whether the device screen is on. The result may be true or false, depending on the system state.
@@ -79,17 +78,45 @@ public:
     bool IsScreenOn();
 
     /**
+     * Get Power state. The result is PowerState type.
+     */
+    PowerState GetState();
+
+    /**
      * Forcibly suspend the device into deepsleep, and return the suspend result.
      */
     bool ForceSuspendDevice();
 
-    std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type,
-                                                   const int screenOnFlag = 0);
-    void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid = INVALID_PID);
+    /**
+     * Check whether the type of running lock is supported
+     */
+    bool IsRunningLockTypeSupported(uint32_t type);
+
+    /**
+     * Enable/disable display suspend state
+     */
+    void SetDisplaySuspend(bool enable);
+
+     /* Set the device mode.
+     *
+     * @param set The mode the device.
+     */
+    void SetDeviceMode(const uint32_t mode);
+
+    /**
+     * Get the device mode.
+     *
+     * @param Get The mode the device.
+     */
+    uint32_t GetDeviceMode();
+
+    std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
     void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
+    void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
 
 private:
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {

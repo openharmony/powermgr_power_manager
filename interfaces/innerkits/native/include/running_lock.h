@@ -32,13 +32,6 @@ public:
     ~RunningLock();
     DISALLOW_COPY_AND_MOVE(RunningLock);
 
-    enum class RunningLockState {
-        UNUSED = 0,
-        USED,
-        UNKNOWN,
-        BUTT,
-    };
-
     bool Init();
     bool IsUsed();
 
@@ -68,9 +61,10 @@ public:
     static constexpr uint32_t CREATE_WITH_SCREEN_ON = 0x10000000;
 
 private:
+    void Create();
+    void Release();
     std::mutex mutex_;
     RunningLockInfo runningLockInfo_;
-    RunningLockState usedState_ {RunningLockState::UNUSED};
     sptr<IRemoteObject> token_;
     wptr<IPowerMgr> proxy_;
     bool CheckUsedNoLock();

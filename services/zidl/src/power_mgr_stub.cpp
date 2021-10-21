@@ -25,13 +25,16 @@ using namespace OHOS::HiviewDFX;
 
 namespace OHOS {
 namespace PowerMgr {
-int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::OnRemoteRequest, cmd = %u, flags= %d", code, option.GetFlags());
+    POWER_HILOGD(MODULE_SERVICE,
+        "PowerMgrStub::OnRemoteRequest, cmd = %{public}u, flags= %{public}d", code, option.GetFlags());
     std::u16string descripter = PowerMgrStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub::OnRemoteRequest failed, descriptor is not matched!");
+        POWER_HILOGE(MODULE_SERVICE,
+            "PowerMgrStub::OnRemoteRequest failed, descriptor is not matched!");
         return E_GET_POWER_SERVICE_FAILED;
     }
 
@@ -51,11 +54,23 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessagePar
         case static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE): {
             return ShutDownDeviceStub(data);
         }
+        case static_cast<int>(IPowerMgr::GET_STATE): {
+            return GetStateStub(reply);
+        }
         case static_cast<int>(IPowerMgr::IS_SCREEN_ON): {
             return IsScreeOnStub(reply);
         }
         case static_cast<int>(IPowerMgr::FORCE_DEVICE_SUSPEND): {
             return ForceSuspendDeviceStub(data, reply);
+        }
+        case static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK): {
+            return CreateRunningLockStub(data);
+        }
+        case static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK): {
+            return ReleaseRunningLockStub(data);
+        }
+        case static_cast<int>(IPowerMgr::IS_RUNNINGLOCK_TYPE_SUPPORTED): {
+            return IsRunningLockTypeSupportedStub(data);
         }
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK): {
             return LockStub(data);
@@ -84,10 +99,51 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessagePar
         case static_cast<int>(IPowerMgr::UNREG_SHUTDOWN_CALLBACK): {
             return UnRegisterShutdownCallbackStub(data);
         }
+        case static_cast<int>(IPowerMgr::REG_POWER_MODE_CALLBACK): {
+            return RegisterPowerModeCallbackStub(data);
+        }
+        case static_cast<int>(IPowerMgr::UNREG_POWER_MODE_CALLBACK): {
+            return UnRegisterPowerModeCallbackStub(data);
+        }
+        case static_cast<int>(IPowerMgr::SET_DISPLAY_SUSPEND): {
+            return SetDisplaySuspendStub(data);
+        }
+        case static_cast<int>(IPowerMgr::SETMODE_DEVICE): {
+            return SetDeviceModeStub(data);
+        }
+        case static_cast<int>(IPowerMgr::GETMODE_DEVICE): {
+            return GetDeviceModeStub(reply);
+        }
         default: {
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::CreateRunningLockStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
+    std::unique_ptr<RunningLockInfo> runningLockInfo(data.ReadParcelable<RunningLockInfo>());
+    RETURN_IF_WITH_RET((runningLockInfo == nullptr), E_READ_PARCEL_ERROR);
+    CreateRunningLock(token, *runningLockInfo);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::ReleaseRunningLockStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
+    ReleaseRunningLock(token);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data)
+{
+    uint32_t type = 0;
+    READ_PARCEL_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
+    IsRunningLockTypeSupported(type);
     return ERR_OK;
 }
 
@@ -212,6 +268,16 @@ int32_t PowerMgrStub::ForceSuspendDeviceStub(MessageParcel& data, MessageParcel&
     return ERR_OK;
 }
 
+int32_t PowerMgrStub::GetStateStub(MessageParcel& reply)
+{
+    PowerState ret = GetState();
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: GetStateStub Writeback Fail!");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
 int32_t PowerMgrStub::IsScreeOnStub(MessageParcel& reply)
 {
     bool ret = false;
@@ -260,6 +326,54 @@ int32_t PowerMgrStub::UnRegisterShutdownCallbackStub(MessageParcel& data)
     sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
     UnRegisterShutdownCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::RegisterPowerModeCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IPowerModeCallback> callback = iface_cast<IPowerModeCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    RegisterPowerModeCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::UnRegisterPowerModeCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IPowerModeCallback> callback = iface_cast<IPowerModeCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    UnRegisterPowerModeCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::SetDisplaySuspendStub(MessageParcel& data)
+{
+    bool enable = false;
+    READ_PARCEL_WITH_RET(data, Bool, enable, E_READ_PARCEL_ERROR);
+    SetDisplaySuspend(enable);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::SetDeviceModeStub(MessageParcel& data)
+{
+    uint32_t mode = 0;
+    READ_PARCEL_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
+    SetDeviceMode(mode);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::GetDeviceModeStub(MessageParcel& reply)
+{
+    uint32_t ret = 0;
+    ret = GetDeviceMode();
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::GetDeviceModeStub, cmd = %{public}u.", ret);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: Get device mode Fail!");
+        return E_WRITE_PARCEL_ERROR;
+    }
     return ERR_OK;
 }
 } // namespace PowerMgr

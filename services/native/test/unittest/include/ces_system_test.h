@@ -1,0 +1,46 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef CES_SYSTEM_TEST_H
+#define CES_SYSTEM_TEST_H
+
+#include <gtest/gtest.h>
+
+#include "power_mgr_service.h"
+#include "power_state_callback_stub.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
+
+namespace OHOS {
+namespace EventFwk {
+constexpr int SLEEP_WAIT_TIME_S = 6;
+class CesSystemTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+    bool PublishCommonEventTest(const std::string &eventName);
+    class CommonEventServiCesSystemTest : public CommonEventSubscriber {
+    public:
+        explicit CommonEventServiCesSystemTest(const CommonEventSubscribeInfo &subscriberInfo);
+        virtual ~CommonEventServiCesSystemTest() {};
+        virtual void OnReceiveEvent(const CommonEventData &data);
+};
+};
+} // namespace PowerMgr
+} // namespace OHOS
+#endif // CES_SYSTEM_TEST_H

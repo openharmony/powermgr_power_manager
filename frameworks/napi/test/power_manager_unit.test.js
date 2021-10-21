@@ -133,7 +133,7 @@ describe('appInfoTest', function () {
         runningLock.isRunningLockTypeSupported(runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL)
         .then(supported => {
             console.info('is_runninglock_type_supported_test_1 PROXIMITY_SCREEN_CONTROL supported is ' + supported);
-            expect(supported).assertFalse();
+            expect(supported).assertTrue();
             console.info('is_runninglock_type_supported_test_1 success');
             done();
         })

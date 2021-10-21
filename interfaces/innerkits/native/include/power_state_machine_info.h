@@ -51,7 +51,7 @@ enum class PowerState : uint32_t {
     /**
      * Power State: screen on and cpu on.
      */
-    AWAKE,
+    AWAKE = 0,
 
     /**
      * Power State: screen off and cpu on.
@@ -62,6 +62,21 @@ enum class PowerState : uint32_t {
      * Power State: screen off and cpu off.
      */
     SLEEP,
+
+    /**
+     * Power State: unknown.
+     */
+    UNKNOWN,
+};
+
+/**
+ * Display State of Device.
+ */
+enum class DisplayState : uint32_t {
+    DISPLAY_OFF = 0,
+    DISPLAY_DIM = 1,
+    DISPLAY_ON = 2,
+    DISPLAY_SUSPEND = 3,
 };
 
 // UserActivityType list, must sync with A_PMS
@@ -72,6 +87,7 @@ enum class UserActivityType : uint32_t {
     USER_ACTIVITY_TYPE_ACCESSIBILITY = 3,
     USER_ACTIVITY_TYPE_ATTENTION = 4,
     USER_ACTIVITY_TYPE_SOFTWARE = 5,
+    USER_ACTIVITY_TYPE_MAX = USER_ACTIVITY_TYPE_SOFTWARE,
 };
 
 // WakeupReasonType list
@@ -86,6 +102,7 @@ enum class WakeupDeviceType : uint32_t {
     WAKEUP_DEVICE_WAKE_MOTION = 7,
     WAKEUP_DEVICE_HDMI = 8,
     WAKEUP_DEVICE_LID = 9,
+    WAKEUP_DEVICE_MAX = WAKEUP_DEVICE_LID,
 };
 
 // SuspendDeviceType list
@@ -101,6 +118,28 @@ enum class SuspendDeviceType : uint32_t {
     SUSPEND_DEVICE_REASON_ACCESSIBILITY = 7,
     SUSPEND_DEVICE_REASON_FORCE_SUSPEND = 8,
     SUSPEND_DEVICE_REASON_MAX = SUSPEND_DEVICE_REASON_FORCE_SUSPEND,
+};
+
+enum class StateChangeReason : uint32_t {
+    STATE_CHANGE_REASON_INIT = 0,
+    STATE_CHANGE_REASON_TIMEOUT = 1,
+    STATE_CHANGE_REASON_RUNNING_LOCK = 2,
+    STATE_CHANGE_REASON_BATTERY = 3,
+    STATE_CHANGE_REASON_THERMAL = 4,
+    STATE_CHANGE_REASON_WORK = 5,
+    STATE_CHANGE_REASON_SYSTEM = 6,
+    STATE_CHANGE_REASON_APPLICATION = 10,
+    STATE_CHANGE_REASON_SETTINGS = 11,
+    STATE_CHANGE_REASON_HARD_KEY = 12,
+    STATE_CHANGE_REASON_TOUCH = 13,
+    STATE_CHANGE_REASON_CABLE = 14,
+    STATE_CHANGE_REASON_SENSOR = 15,
+    STATE_CHANGE_REASON_LID = 16,
+    STATE_CHANGE_REASON_CAMERA = 17,
+    STATE_CHANGE_REASON_ACCESSIBILITY = 18,
+    STATE_CHANGE_REASON_RESET = 19,
+    STATE_CHANGE_REASON_REMOTE = 100,
+    STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
 } // namespace PowerMgr
 } // namespace OHOS

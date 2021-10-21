@@ -28,6 +28,10 @@
 #include "running_lock_mgr.h"
 #include "shutdown_service.h"
 #include "sp_singleton.h"
+#include "power_mode_module.h"
+#include "power_save_mode.h"
+
+#define APP_FIRST_UID_VALUE 10000
 
 namespace OHOS {
 namespace PowerMgr {
@@ -42,21 +46,36 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     virtual void RebootDevice(const std::string& reason) override;
     virtual void ShutDownDevice(const std::string& reason) override;
-    virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
-    virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
-    virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
+    virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,
+        bool suspendImmed) override;
+    virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
+        const std::string& details) override;
+    virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type,
+        bool needChangeBacklight) override;
+    virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    void Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo, uint32_t timeOutMS) override;
-    void UnLock(const sptr<IRemoteObject>& token) override;
-    void ForceUnLock(const sptr<IRemoteObject>& token);
-    bool IsUsed(const sptr<IRemoteObject>& token) override;
-    void SetWorkTriggerList(const sptr<IRemoteObject>& token, const WorkTriggerList& workTriggerList) override;
-    void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
-    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
-    void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
+    virtual void CreateRunningLock(const sptr<IRemoteObject>& token,
+        const RunningLockInfo& runningLockInfo) override;
+    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& token) override;
+    virtual bool IsRunningLockTypeSupported(uint32_t type) override;
+    virtual void Lock(const sptr<IRemoteObject>& token,
+        const RunningLockInfo& runningLockInfo, uint32_t timeOutMS) override;
+    virtual void UnLock(const sptr<IRemoteObject>& token) override;
+    virtual void ForceUnLock(const sptr<IRemoteObject>& token);
+    virtual bool IsUsed(const sptr<IRemoteObject>& token) override;
+    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& token,
+        const WorkTriggerList& workTriggerList) override;
+    virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
+    virtual void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
+    virtual void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
+    virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual void SetDisplaySuspend(bool enable) override;
+    virtual void SetDeviceMode(const uint32_t& mode) override;
+    virtual uint32_t GetDeviceMode() override;
 
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
@@ -82,7 +101,33 @@ public:
     {
         return ready_;
     }
+    void SetDisplayOffTime(int64_t time)
+    {
+        powerStateMachine_->SetDisplayOffTime(time);
+    }
+    void SetSleepTime(int64_t time)
+    {
+        powerStateMachine_->SetSleepTime(time);
+    }
 
+    void EnableMock(IDeviceStateAction* stateAction, IDevicePowerAction* powerAction,
+        IRunningLockAction* lockAction)
+    {
+        POWER_HILOGE(MODULE_SERVICE, "Service EnableMock:%{public}d", mockCount_++);
+        runningLockMgr_->EnableMock(lockAction);
+        powerStateMachine_->EnableMock(stateAction);
+        shutdownService_.EnableMock(powerAction);
+    }
+    void MockProximity(uint32_t status)
+    {
+        POWER_HILOGE(MODULE_SERVICE, "MockProximity: fun is start");
+        runningLockMgr_->SetProximity(status);
+        POWER_HILOGE(MODULE_SERVICE, "MockProximity: fun is end");
+    }
+    void MockSystemWakeup()
+    {
+        PowerStateMachine::onWakeup();
+    }
 private:
     bool Init();
     bool PowerStateMachineInit();
@@ -96,6 +141,8 @@ private:
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
     ShutdownService shutdownService_;
+    PowerModeModule powerModeModule_;
+    uint32_t mockCount_ {0};
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -4,10 +4,12 @@
     "power_manager_native": {
       "module_list": [
         "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
+        "//base/powermgr/power_manager/frameworks/napi/power:power",
+        "//base/powermgr/power_manager/frameworks/napi/runninglock:runninglock",
         "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
         "//base/powermgr/power_manager/services:powermgrservice",
-        "//base/powermgr/power_manager/interfaces/kits/js/napi/power:power",
-        "//base/powermgr/power_manager/interfaces/kits/js/napi/runninglock:runninglock"
+        "//base/powermgr/power_manager/hdi:hdi_group",
+        "//base/powermgr/power_manager/services:power_service"
       ],
       "inner_kits": [
         {
@@ -28,7 +30,8 @@
         }
       ],
       "test_list": [
-        "//base/powermgr/power_manager/services/native/test:powermgr_test"
+        "//base/powermgr/power_manager/services/native/test:powermgr_test",
+        "//base/powermgr/power_manager/test:systemtest"
       ]
     }
   }
