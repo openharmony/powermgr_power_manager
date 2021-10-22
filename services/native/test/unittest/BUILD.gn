@@ -58,7 +58,7 @@ deps_ex = [
   "ipc:ipc_core",
   "hiviewdfx_hilog_native:libhilog",
   "safwk:system_ability_fwk",
-  "samgr_L2:samgr_proxy",
+  "samgr_standard:samgr_proxy",
 ]
 
 ############################shutdown_callback_test#############################
