@@ -80,7 +80,6 @@ void SuspendController::AutoSuspend::Start(SuspendCallback onSuspend, SuspendCal
         POWER_HILOGW(MODULE_SERVICE, "AutoSuspend is already started");
         return;
     }
-    client_ = std::make_unique<PowerHdfClient>();
     daemon_ = std::make_unique<std::thread>(&AutoSuspend::AutoSuspendLoop, this);
     daemon_->detach();
     POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Start detach");
@@ -101,12 +100,6 @@ void SuspendController::AutoSuspend::Stop()
 bool SuspendController::AutoSuspend::SuspendEnter()
 {
     POWER_HILOGE(MODULE_SERVICE, "SuspendController::AutoSuspend::SuspendEnter: fun is start!");
-#ifndef POWER_SUSPEND_NO_HDI
-    POWER_HILOGE(MODULE_SERVICE, "Before suspend!");
-    ErrCode ret = client_->Suspend();
-    POWER_HILOGE(MODULE_SERVICE, "After suspend!");
-    return ret == ERR_OK ? true : false;
-#else
     static bool inited = false;
     static UniqueFd suspendStateFd(TEMP_FAILURE_RETRY(open(SUSPEND_STATE_PATH, O_RDWR | O_CLOEXEC)));
     if (!inited) {
@@ -123,17 +116,11 @@ bool SuspendController::AutoSuspend::SuspendEnter()
         POWER_HILOGE(MODULE_SERVICE, "Failed to write the suspending state!");
     }
     return ret;
-#endif
 }
 
 std::string SuspendController::AutoSuspend::WaitWakeupCount()
 {
     POWER_HILOGI(MODULE_SERVICE, "SuspendController::AutoSuspend::WaitWakeupCount: fun is start");
-#ifndef POWER_SUSPEND_NO_HDI
-    std::string count;
-    client_->ReadWakeCount(count);
-    return count;
-#else
     if (wakeupCountFd < 0) {
         wakeupCountFd = UniqueFd(TEMP_FAILURE_RETRY(open(WAKEUP_COUNT_PATH, O_RDWR | O_CLOEXEC)));
     }
@@ -144,16 +131,11 @@ std::string SuspendController::AutoSuspend::WaitWakeupCount()
         return std::string();
     }
     return wakeupCount;
-#endif
 }
 
 bool SuspendController::AutoSuspend::WriteWakeupCount(std::string wakeupCount)
 {
     POWER_HILOGI(MODULE_SERVICE, "SuspendController::AutoSuspend::WriteWakeupCount: fun is start");
-#ifndef POWER_SUSPEND_NO_HDI
-    ErrCode ret = client_->WriteWakeCount(wakeupCount);
-    return ret == ERR_OK ? true : false;
-#else
     if (wakeupCountFd < 0) {
         return false;
     }
@@ -162,7 +144,6 @@ bool SuspendController::AutoSuspend::WriteWakeupCount(std::string wakeupCount)
         POWER_HILOGE(MODULE_SERVICE, "Failed to write the wakeup count!");
     }
     return ret;
-#endif
 }
 
 void SuspendController::Suspend(SuspendCallback onSuspend, SuspendCallback onWakeup, bool force)

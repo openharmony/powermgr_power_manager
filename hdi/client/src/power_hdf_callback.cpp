@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef POWER_HDF_INFO_H
-#define POWER_HDF_INFO_H
+#include "ipower_hdf_callback.h"
 
-enum PowerHdfCmd {
-    CMD_REGISTER_CALLBCK = 0,
-    CMD_START_SUSPEND,
-    CMD_STOP_SUSPEND,
-    CMD_FORCE_SUSPEND,
-    CMD_SUSPEND_BLOCK,
-    CMD_SUSPEND_UNBLOCK,
-    CMD_DUMP,
-};
-
-enum PowerHdfCallbackCmd {
-    CMD_ON_SUSPEND = 0,
-    CMD_ON_WAKEUP,
-};
-
-enum PowerHdfState {
-    AWAKE = 0,
-    INACTIVE,
-    SLEEP,
-};
-
-#endif // POWER_HDF_INFO_H
+namespace OHOS {
+namespace PowerMgr {
+int IPowerHdfCallback::OnRemoteRequest(uint32_t code,
+    MessageParcel &data,
+    MessageParcel &reply,
+    MessageOption &option)
+{
+    switch (code) {
+        case CMD_ON_SUSPEND: {
+            OnSuspend();
+            return ERR_OK;
+        }
+        case CMD_ON_WAKEUP: {
+            OnWakeup();
+            return ERR_OK;
+        }
+        default: {
+            return ERR_INVALID_OPERATION;
+        }
+    }
+}
+} // namespace PowerMgr
+} // namespace OHOS

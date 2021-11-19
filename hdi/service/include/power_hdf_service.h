@@ -16,10 +16,15 @@
 #ifndef POWER_HDF_SERVICE_H
 #define POWER_HDF_SERVICE_H
 
+#include <chrono>
 #include <mutex>
 #include <stdlib.h>
+#include <thread>
 #include "errors.h"
 #include "hdf_device_desc.h"
+#include "hdf_remote_service.h"
+#include "ipower_hdf_callback.h"
+#include "unique_fd.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -33,11 +38,12 @@ public:
 
     static int32_t Dispatch(struct HdfDeviceIoClient *client,
         int cmdId, struct HdfSBuf *data, struct HdfSBuf *reply);
-    static int32_t Suspend();
-    static int32_t ReadWakeCount(struct HdfSBuf *reply);
-    static int32_t WriteWakeCount(struct HdfSBuf *data);
-    static int32_t WakeLock(struct HdfSBuf *data);
-    static int32_t WakeUnlock(struct HdfSBuf *data);
+    static int32_t RegisterCallback(struct HdfSBuf *data);
+    static int32_t StartSuspend(struct HdfSBuf *data);
+    static int32_t StopSuspend(struct HdfSBuf *data);
+    static int32_t ForceSuspend(struct HdfSBuf *data);
+    static int32_t SuspendBlock(struct HdfSBuf *data);
+    static int32_t SuspendUnblock(struct HdfSBuf *data);
     static int32_t Dump(struct HdfSBuf *data);
 
     struct IDeviceIoService ioService;
@@ -48,7 +54,17 @@ private:
     static constexpr const char * const LOCK_PATH = "/sys/power/wake_lock";
     static constexpr const char * const UNLOCK_PATH = "/sys/power/wake_unlock";
     static constexpr const char * const WAKEUP_COUNT_PATH = "/sys/power/wakeup_count";
+    static std::chrono::milliseconds waitTime_; // {100ms};
     static std::mutex mutex_;
+    static std::unique_ptr<std::thread> daemon_;
+    static bool suspending_;
+    static struct HdfRemoteService *callback_;
+    static UniqueFd wakeupCountFd;
+    static void AutoSuspendLoop();
+    static int32_t DoSuspend();
+    static std::string ReadWakeCount();
+    static bool WriteWakeCount(const std::string& count);
+    static void NotifyCallback(int code);
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -21,12 +21,16 @@
 #include "hdf_sbuf.h"
 #include "power_hdf_info.h"
 #include "pubdef.h"
-#include "unique_fd.h"
 #include "utils/hdf_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
 std::mutex PowerHdfService::mutex_;
+std::unique_ptr<std::thread> PowerHdfService::daemon_;
+std::chrono::milliseconds PowerHdfService::waitTime_ = std::chrono::milliseconds(100);
+bool PowerHdfService::suspending_ = false;
+struct HdfRemoteService* PowerHdfService::callback_ = nullptr;
+UniqueFd PowerHdfService::wakeupCountFd = UniqueFd(-1);
 
 int32_t PowerHdfService::Bind(struct HdfDeviceObject *device)
 {
@@ -86,24 +90,24 @@ int32_t PowerHdfService::Dispatch(struct HdfDeviceIoClient *client,
     }
     int ret = HDF_ERR_NOT_SUPPORT;
     switch (cmdId) {
-        case CMD_SUSPEND: {
-            ret = PowerHdfService::Suspend();
+        case CMD_REGISTER_CALLBCK: {
+            ret = PowerHdfService::RegisterCallback(data);
             break;
         }
-        case CMD_READ_WAKE_COUNT: {
-            ret = PowerHdfService::ReadWakeCount(reply);
+        case CMD_START_SUSPEND: {
+            ret = PowerHdfService::StartSuspend(data);
             break;
         }
-        case CMD_WRITE_WAKE_COUNT: {
-            ret = PowerHdfService::WriteWakeCount(data);
+        case CMD_STOP_SUSPEND: {
+            ret = PowerHdfService::StopSuspend(data);
             break;
         }
-        case CMD_WAKE_LOCK: {
-            ret = PowerHdfService::WakeLock(data);
+        case CMD_SUSPEND_BLOCK: {
+            ret = PowerHdfService::SuspendBlock(data);
             break;
         }
-        case CMD_WAKE_UNLOCK: {
-            ret = PowerHdfService::WakeUnlock(data);
+        case CMD_SUSPEND_UNBLOCK: {
+            ret = PowerHdfService::SuspendUnblock(data);
             break;
         }
         case CMD_DUMP: {
@@ -121,7 +125,55 @@ int32_t PowerHdfService::Dispatch(struct HdfDeviceIoClient *client,
     return ret;
 }
 
-int32_t PowerHdfService::Suspend()
+int32_t PowerHdfService::RegisterCallback(struct HdfSBuf *data)
+{
+    HDF_LOGD("%{public}s enter", __func__);
+    std::lock_guard<std::mutex> lock(mutex_);
+    struct HdfRemoteService *remoteService = HdfSBufReadRemoteService(data);
+    callback_ = remoteService;
+    return HDF_SUCCESS;
+}
+
+int32_t PowerHdfService::StartSuspend(struct HdfSBuf *data)
+{
+    HDF_LOGD("%{public}s enter", __func__);
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (suspending_) {
+        return HDF_SUCCESS;
+    }
+    suspending_ = true;
+    daemon_ = std::make_unique<std::thread>(&AutoSuspendLoop);
+    daemon_->detach();
+    return HDF_SUCCESS;
+}
+
+void PowerHdfService::AutoSuspendLoop()
+{
+    HDF_LOGD("%{public}s enter", __func__);
+    while (suspending_) {
+        std::this_thread::sleep_for(waitTime_);
+
+        const std::string wakeupCount = ReadWakeCount();
+        if (wakeupCount.empty()) {
+            HDF_LOGD("Can't read wake count, continue");
+            continue;
+        }
+        if (!WriteWakeCount(wakeupCount)) {
+            HDF_LOGD("Can't write wake count, continue");
+            continue;
+        }
+        NotifyCallback(CMD_ON_SUSPEND);
+        bool success = DoSuspend();
+        if (!success) {
+            HDF_LOGE("Do suspend failed!");
+        }
+        NotifyCallback(CMD_ON_WAKEUP);
+        break;
+    }
+    suspending_ = false;
+}
+
+int32_t PowerHdfService::DoSuspend()
 {
     HDF_LOGD("%{public}s enter", __func__);
     std::lock_guard<std::mutex> lock(mutex_);
@@ -138,46 +190,59 @@ int32_t PowerHdfService::Suspend()
     return HDF_SUCCESS;
 }
 
-int32_t PowerHdfService::ReadWakeCount(struct HdfSBuf *reply)
+void PowerHdfService::NotifyCallback(int code)
+{
+    HDF_LOGI("%{public}s enter", __func__);
+    if (callback_ == nullptr) {
+        HDF_LOGD("%{public}s: subscriber is nullptr", __func__);
+        return;
+    }
+
+    struct HdfSBuf *data = HdfSBufTypedObtain(SBUF_IPC);
+    struct HdfSBuf *reply = HdfSBufTypedObtain(SBUF_IPC);
+    if (data == nullptr || reply == nullptr) {
+        HDF_LOGE("%{public}s: failed to obtain hdf sbuf", __func__);
+        return;
+    }
+
+    int ret = callback_->dispatcher->Dispatch(callback_, code, data, reply);
+    if (ret != HDF_SUCCESS) {
+        HDF_LOGE("%{public}s: failed to notify subscriber, ret: %{public}d", __func__, ret);
+    } else {
+        HDF_LOGD("%{public}s: succeed to notify subscriber", __func__);
+    }
+    HdfSBufRecycle(data);
+    HdfSBufRecycle(reply);
+}
+
+int32_t PowerHdfService::StopSuspend(struct HdfSBuf *data)
 {
     HDF_LOGD("%{public}s enter", __func__);
-    std::lock_guard<std::mutex> lock(mutex_);
-    UniqueFd fd(TEMP_FAILURE_RETRY(open(WAKEUP_COUNT_PATH, O_RDWR | O_CLOEXEC)));
-    if (fd < 0) {
-        HDF_LOGD("Failed to open the suspending state fd!");
-        return HDF_FAILURE;
+    if (suspending_) {
+        suspending_ = false;
+        daemon_->join();
     }
-    std::string count;
-    bool ret = LoadStringFromFd(fd, count);
-    if (!ret) {
-        HDF_LOGE("Failed to read wake count from kernel!");
-        return HDF_FAILURE;
-    }
-    HdfSbufWriteString(reply, count.c_str());
+
     return HDF_SUCCESS;
 }
 
-int32_t PowerHdfService::WriteWakeCount(struct HdfSBuf *data)
+int32_t PowerHdfService::ForceSuspend(struct HdfSBuf *data)
 {
     HDF_LOGD("%{public}s enter", __func__);
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (data == nullptr) {
-        return HDF_ERR_INVALID_PARAM;
+    if (suspending_) {
+        suspending_ = false;
+        daemon_->join();
     }
-    const char* count = HdfSbufReadString(data);
-    if (count == nullptr) {
-        return HDF_ERR_INVALID_PARAM;
+    NotifyCallback(CMD_ON_SUSPEND);
+    bool success = DoSuspend();
+    if (!success) {
+        HDF_LOGE("Do suspend failed!");
     }
-    UniqueFd fd(TEMP_FAILURE_RETRY(open(WAKEUP_COUNT_PATH, O_RDWR | O_CLOEXEC)));
-    bool ret = SaveStringToFd(fd, count);
-    if (!ret) {
-        HDF_LOGE("Failed to write the lock to kernel!");
-        return HDF_FAILURE;
-    }
+    NotifyCallback(CMD_ON_WAKEUP);
     return HDF_SUCCESS;
 }
 
-int32_t PowerHdfService::WakeLock(struct HdfSBuf *data)
+int32_t PowerHdfService::SuspendBlock(struct HdfSBuf *data)
 {
     HDF_LOGD("%{public}s enter", __func__);
     std::lock_guard<std::mutex> lock(mutex_);
@@ -197,7 +262,7 @@ int32_t PowerHdfService::WakeLock(struct HdfSBuf *data)
     return HDF_SUCCESS;
 }
 
-int32_t PowerHdfService::WakeUnlock(struct HdfSBuf *data)
+int32_t PowerHdfService::SuspendUnblock(struct HdfSBuf *data)
 {
     HDF_LOGD("%{public}s enter", __func__);
     std::lock_guard<std::mutex> lock(mutex_);
@@ -216,6 +281,33 @@ int32_t PowerHdfService::WakeUnlock(struct HdfSBuf *data)
     }
     return HDF_SUCCESS;
 }
+
+std::string PowerHdfService::ReadWakeCount()
+{
+    if (wakeupCountFd < 0) {
+        wakeupCountFd = UniqueFd(TEMP_FAILURE_RETRY(open(WAKEUP_COUNT_PATH, O_RDWR | O_CLOEXEC)));
+    }
+    std::string wakeupCount;
+    bool ret = LoadStringFromFd(wakeupCountFd, wakeupCount);
+    if (!ret) {
+        HDF_LOGE("Read wakeup count failed!");
+        return std::string();
+    }
+    return wakeupCount;
+}
+
+bool PowerHdfService::WriteWakeCount(const std::string& count)
+{
+    if (wakeupCountFd < 0) {
+        wakeupCountFd = UniqueFd(TEMP_FAILURE_RETRY(open(WAKEUP_COUNT_PATH, O_RDWR | O_CLOEXEC)));
+    }
+    bool ret = SaveStringToFd(wakeupCountFd, count.c_str());
+    if (!ret) {
+        HDF_LOGE("Failed to write the wakeup count!");
+    }
+    return ret;
+}
+
 
 static void loadSystemInfo(const char* const path, std::string& info)
 {
