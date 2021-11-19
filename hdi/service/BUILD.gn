@@ -47,7 +47,10 @@ ohos_shared_library("power_hdf_service") {
     "//utils/native/base:utils",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
 
   part_name = "power_manager_native"
 }

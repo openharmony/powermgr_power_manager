@@ -38,8 +38,10 @@ public:
     void TearDown();
     bool IsTestSupported();
     void PowerClientInit();
-    void CheckWriteWakeCount();
-    void CheckReadWakeCount();
+    void CheckSuspendBlock();
+    void CheckSuspendUnblock();
+    void CheckStartSuspend();
+    void CheckStopSuspend();
     void WakeUpthread();
     void Suspendthread();
     void Rebootthread();

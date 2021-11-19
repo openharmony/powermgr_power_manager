@@ -23,7 +23,10 @@ config("power_client_public_config") {
 }
 
 ohos_shared_library("power_hdf_client") {
-  sources = [ "src/power_hdf_client.cpp" ]
+  sources = [
+    "src/power_hdf_callback.cpp",
+    "src/power_hdf_client.cpp",
+  ]
 
   configs = [ "${powermgr_utils_path}:utils_config" ]
 
