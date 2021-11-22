@@ -39,9 +39,21 @@ private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static const std::string WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
+    class PowerHdfCallback : public IPowerHdfCallback {
+    public:
+        PowerHdfCallback() = default;
+        ~PowerHdfCallback() = default;
+        void OnSuspend() override;
+        void OnWakeup() override;
+        void SetListener(std::function<void()> suspend, std::function<void()> wakeup);
+    private:
+        std::function<void()> onSuspend_;
+        std::function<void()> onWakeup_;
+    };
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
     std::unique_ptr<PowerHdfClient> client_;
+    sptr<PowerHdfCallback> callback_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

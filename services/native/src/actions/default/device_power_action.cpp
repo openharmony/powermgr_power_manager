@@ -22,6 +22,14 @@
 
 #include "hilog_wrapper.h"
 #include "device_power_action.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+#include "init_reboot.h"
+#ifdef __cplusplus
+}
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -33,7 +41,7 @@ void DevicePowerAction::Reboot(const std::string& reason)
         return;
     }
     POWER_HILOGI(MODULE_SERVICE, "Reboot executing.");
-    OHOS::system::SetParameter("sys.powerctl", updateCmd);
+    DoReboot(updateCmd);
 }
 
 void DevicePowerAction::Shutdown(const std::string& reason)
@@ -44,7 +52,7 @@ void DevicePowerAction::Shutdown(const std::string& reason)
         return;
     }
     POWER_HILOGI(MODULE_SERVICE, "Shutdown executing.");
-    OHOS::system::SetParameter("sys.powerctl", updateCmd);
+    DoReboot(updateCmd);
 }
 } // namespace PowerMgr
 } // namespace OHOS

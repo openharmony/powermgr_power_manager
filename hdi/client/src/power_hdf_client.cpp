@@ -26,57 +26,55 @@ const std::string POWER_HDF_SERVICE = "power_hdf";
 
 using OHOS::HDI::ServiceManager::V1_0::IServiceManager;
 
-ErrCode PowerHdfClient::Suspend()
+ErrCode PowerHdfClient::RegisterCallback(const sptr<IPowerHdfCallback>& callback)
 {
-    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::Suspend: fun is start");
+    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::RegisterCallback: fun is start");
     MessageParcel data;
     MessageParcel reply;
-    return Dispatch(CMD_SUSPEND, data, reply);
+    data.WriteRemoteObject(callback);
+    return Dispatch(CMD_REGISTER_CALLBCK, data, reply);
 }
 
-ErrCode PowerHdfClient::ReadWakeCount(std::string& count)
+ErrCode PowerHdfClient::StartSuspend()
 {
-    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::ReadWakeCount: fun is start");
+    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::StartSuspend: fun is start");
     MessageParcel data;
     MessageParcel reply;
-    ErrCode ret = Dispatch(CMD_READ_WAKE_COUNT, data, reply);
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    count = reply.ReadString();
-    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::ReadWakeCount: %{public}s", count.c_str());
-    return ERR_OK;
+    return Dispatch(CMD_START_SUSPEND, data, reply);
 }
 
-ErrCode PowerHdfClient::WriteWakeCount(const std::string& count)
+ErrCode PowerHdfClient::StopSuspend()
 {
-    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::WriteWakeCount: fun is start");
+    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::StopSuspend: fun is start");
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString(count);
-    ErrCode ret = Dispatch(CMD_WRITE_WAKE_COUNT, data, reply);
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    return ERR_OK;
+    return Dispatch(CMD_STOP_SUSPEND, data, reply);
 }
 
-ErrCode PowerHdfClient::WakeLock(const std::string& name)
+ErrCode PowerHdfClient::ForceSuspend()
 {
-    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::WakeLock: fun is start");
+    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::ForceSuspend: fun is start");
+    MessageParcel data;
+    MessageParcel reply;
+    return Dispatch(CMD_FORCE_SUSPEND, data, reply);
+}
+
+ErrCode PowerHdfClient::SuspendBlock(const std::string& name)
+{
+    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::SuspendBlock: fun is start");
     MessageParcel data;
     MessageParcel reply;
     data.WriteString(name);
-    return Dispatch(CMD_WAKE_LOCK, data, reply);
+    return Dispatch(CMD_SUSPEND_BLOCK, data, reply);
 }
 
-ErrCode PowerHdfClient::WakeUnlock(const std::string& name)
+ErrCode PowerHdfClient::SuspendUnblock(const std::string& name)
 {
-    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::WakeUnlock: fun is start");
+    POWER_HILOGW(MODULE_SERVICE, "PowerHdfClient::SuspendUnblock: fun is start");
     MessageParcel data;
     MessageParcel reply;
     data.WriteString(name);
-    return Dispatch(CMD_WAKE_UNLOCK, data, reply);
+    return Dispatch(CMD_SUSPEND_UNBLOCK, data, reply);
 }
 
 sptr<IRemoteObject> PowerHdfClient::GetService()

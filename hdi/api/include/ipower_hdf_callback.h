@@ -13,30 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef POWER_HDF_CLIENT_H
-#define POWER_HDF_CLIENT_H
+#ifndef POWERMGR_IPOWER_HDF_SUSPEND_CALLBACK_H
+#define POWERMGR_IPOWER_HDF_SUSPEND_CALLBACK_H
 
-#include <stdlib.h>
-#include "ipower_hdf_callback.h"
+#include "ipc_object_stub.h"
+#include "power_hdf_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerHdfClient {
+class IPowerHdfCallback : public IPCObjectStub {
 public:
-    PowerHdfClient() = default;
-    ~PowerHdfClient() = default;
-    ErrCode RegisterCallback(const sptr<IPowerHdfCallback>& callback);
-    ErrCode StartSuspend();
-    ErrCode StopSuspend();
-    ErrCode ForceSuspend();
-    ErrCode SuspendBlock(const std::string& name);
-    ErrCode SuspendUnblock(const std::string& name);
-    ErrCode Dump(std::string& info);
-private:
-    ErrCode Dispatch(uint32_t cmd, MessageParcel &data, MessageParcel &reply);
-    sptr<IRemoteObject> GetService();
+    explicit IPowerHdfCallback() : IPCObjectStub(u"ohos.powermgr.IPowerHdfCallback") {};
+    virtual ~IPowerHdfCallback() = default;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    virtual void OnSuspend() = 0;
+    virtual void OnWakeup() = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS
-
-#endif // POWER_HDF_CLIENT_H
+#endif // POWERMGR_IPOWER_HDF_SUSPEND_CALLBACK_H
