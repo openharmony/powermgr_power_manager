@@ -406,22 +406,35 @@ void PowerStateMachineTest::PowerClientInit()
     client_ = std::make_unique<PowerHdfClient>();
 }
 
-void PowerStateMachineTest::CheckWriteWakeCount()
+void PowerStateMachineTest::CheckSuspendBlock()
 {
     POWER_HILOGD(MODULE_SERVICE, "PowerStateMachineTest::CheckWriteWakeCount.");
-    client_->WriteWakeCount(std::string("test"));
+    client_->SuspendBlock(std::string("test"));
 }
 
-void PowerStateMachineTest::CheckReadWakeCount()
+void PowerStateMachineTest::CheckSuspendUnblock()
 {
     POWER_HILOGD(MODULE_SERVICE, "PowerStateMachineTest::CheckReadWakeCount.");
     std::string count;
-    client_->ReadWakeCount(count);
+    client_->SuspendUnblock(std::string("test"));
+}
+
+void PowerStateMachineTest::CheckStartSuspend()
+{
+    POWER_HILOGD(MODULE_SERVICE, "PowerStateMachineTest::CheckWriteWakeCount.");
+    client_->StartSuspend();
+}
+
+void PowerStateMachineTest::CheckStopSuspend()
+{
+    POWER_HILOGD(MODULE_SERVICE, "PowerStateMachineTest::CheckReadWakeCount.");
+    std::string count;
+    client_->StopSuspend();
 }
 
 /**
  * @tc.name: PowerStateMachine008
- * @tc.desc: test WriteWakeCount
+ * @tc.desc: test SuspendBlock
  * @tc.type: FUNC
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine008, TestSize.Level0)
@@ -432,13 +445,13 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine008, TestSize.Level0)
     }
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine008: Suspend Device start.";
-    std::make_unique<std::thread>(&PowerStateMachineTest::CheckWriteWakeCount, this)->detach();
+    std::make_unique<std::thread>(&PowerStateMachineTest::CheckSuspendBlock, this)->detach();
     GTEST_LOG_(INFO) << "PowerStateMachine008: Suspend Device end.";
 }
 
 /**
  * @tc.name: PowerStateMachine009
- * @tc.desc: test ReadWakeCount
+ * @tc.desc: test SuspendUnblock
  * @tc.type: FUNC
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine009, TestSize.Level0)
@@ -449,6 +462,6 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine009, TestSize.Level0)
     }
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine009: Suspend Device start.";
-    std::make_unique<std::thread>(&PowerStateMachineTest::CheckReadWakeCount, this)->detach();
+    std::make_unique<std::thread>(&PowerStateMachineTest::CheckSuspendUnblock, this)->detach();
     GTEST_LOG_(INFO) << "PowerStateMachine009: Suspend Device end.";
 }

@@ -22,8 +22,13 @@ namespace OHOS {
 namespace PowerMgr {
 SystemSuspendController::SystemSuspendController()
 {
-    sc_ = std::make_shared<Suspend::SuspendController>();
+#ifndef POWER_SUSPEND_NO_HDI
+    callback_ = new PowerHdfCallback();
     client_ = std::make_unique<PowerHdfClient>();
+    client_->RegisterCallback(callback_);
+#else
+    sc_ = std::make_shared<Suspend::SuspendController>();
+#endif
 }
 
 SystemSuspendController::~SystemSuspendController() = default;
@@ -31,27 +36,67 @@ SystemSuspendController::~SystemSuspendController() = default;
 void SystemSuspendController::Suspend(std::function<void()> onSuspend,
     std::function<void()> onWakeup, bool force)
 {
+#ifndef POWER_SUSPEND_NO_HDI
+    if (force) {
+        client_->ForceSuspend();
+    } else {
+        client_->StartSuspend();
+    }
+#else
     sc_->Suspend(onSuspend, onWakeup, force);
+#endif
 }
 
 void SystemSuspendController::Wakeup()
 {
+#ifndef POWER_SUSPEND_NO_HDI
+    client_->StopSuspend();
+#else
     sc_->Wakeup();
+#endif
 }
 
 void SystemSuspendController::AcquireRunningLock(const std::string& name)
 {
-    client_->WakeLock(name);
+#ifndef POWER_SUSPEND_NO_HDI
+    client_->SuspendBlock(name);
+#endif
 }
 
 void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 {
-    client_->WakeUnlock(name);
+#ifndef POWER_SUSPEND_NO_HDI
+    client_->SuspendUnblock(name);
+#endif
 }
 
 void SystemSuspendController::Dump(std::string& info)
 {
+#ifndef POWER_SUSPEND_NO_HDI
     client_->Dump(info);
+#endif
+}
+
+void SystemSuspendController::PowerHdfCallback::OnSuspend()
+{
+    if (onSuspend_ != nullptr) {
+        onSuspend_();
+    }
+}
+
+void SystemSuspendController::PowerHdfCallback::OnWakeup()
+{
+    if (onWakeup_ != nullptr) {
+        onWakeup_();
+    }
+}
+
+void SystemSuspendController::PowerHdfCallback::SetListener(
+    std::function<void()> suspend,
+    std::function<void()> wakeup)
+{
+    onSuspend_ = suspend;
+    onWakeup_ = wakeup;
 }
 } // namespace PowerMgr
 } // namespace OHOS
