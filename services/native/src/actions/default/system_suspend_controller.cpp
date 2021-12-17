@@ -33,8 +33,8 @@ SystemSuspendController::SystemSuspendController()
 
 SystemSuspendController::~SystemSuspendController() = default;
 
-void SystemSuspendController::Suspend(const std::function<void()> onSuspend,
-    const std::function<void()> onWakeup, bool force)
+void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
+    const std::function<void()>& onWakeup, bool force)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (force) {
@@ -92,8 +92,8 @@ void SystemSuspendController::PowerHdfCallback::OnWakeup()
 }
 
 void SystemSuspendController::PowerHdfCallback::SetListener(
-    std::function<void()> suspend,
-    std::function<void()> wakeup)
+    std::function<void()>& suspend,
+    std::function<void()>& wakeup)
 {
     onSuspend_ = suspend;
     onWakeup_ = wakeup;
