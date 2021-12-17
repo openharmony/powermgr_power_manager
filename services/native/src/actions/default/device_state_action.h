@@ -26,10 +26,10 @@ public:
     void ForceSuspend() override;
     void Wakeup(int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
         const std::string& pkgName) override;
-    void RefreshActivity(int64_t callTimeMs, UserActivityType type,
-        uint32_t flags) override {}
+    void RefreshActivity(const int64_t callTimeMs, UserActivityType type,
+        const uint32_t flags) override {}
     DisplayState GetDisplayState() override;
-    uint32_t SetDisplayState(DisplayState state) override;
+    uint32_t SetDisplayState(const DisplayState state) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
 };
 } // namespace PowerMgr

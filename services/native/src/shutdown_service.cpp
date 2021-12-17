@@ -156,16 +156,13 @@ void ShutdownService::CallbackManager::WaitingCallback()
     packaged_task<void()> callbackTask(callbackStart);
     future<void> fut = callbackTask.get_future();
     make_unique<thread>(std::move(callbackTask))->detach();
-    time_t begin = time(nullptr);
-    POWER_HILOGI(MODULE_SERVICE, "Waiting for the callback execution is complete..."
-        " begin = %{public}" PRId64 ", callback size: %{public}zu", begin, callbacks_.size());
+
+    POWER_HILOGI(MODULE_SERVICE, "Waiting for the callback execution is complete...");
     future_status status = fut.wait_for(std::chrono::seconds(MAX_TIMEOUT_SEC));
     if (status == future_status::timeout) {
         POWER_HILOGW(MODULE_SERVICE, "Shutdown callback execution timedout!");
     }
-    time_t end = time(nullptr);
-    POWER_HILOGI(MODULE_SERVICE, "The callback execution is complete. begin = %{public}" PRId64 ","
-	" end = %{public}" PRId64 ", Execution Time(s): %{public}" PRId64, begin, end, (end - begin));
+    POWER_HILOGI(MODULE_SERVICE, "The callback execution is complete. ");
 }
 } // namespace PowerMgr
 } // namespace OHOS

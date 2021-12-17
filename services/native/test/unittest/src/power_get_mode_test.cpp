@@ -34,6 +34,7 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
+namespace {
 /**
  * @tc.name: GetDeviceModeTest001
  * @tc.desc: test GetDeviceMode in proxy
@@ -51,4 +52,5 @@ HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level0)
     }
 
     GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode end. mode == " << mode;
+}
 }

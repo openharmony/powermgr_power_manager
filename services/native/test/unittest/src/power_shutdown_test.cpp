@@ -45,6 +45,7 @@ void PowerShutdownTest::PowerShutdownTest2Callback::ShutdownCallback()
     POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest2Callback::ShutdownCallback.");
 }
 
+namespace {
 /**
  * @tc.name: PowerShutdownCallback001
  * @tc.desc: test ShutdownCallback
@@ -85,4 +86,5 @@ HWTEST_F (PowerShutdownTest, ShutDownDeviceTest001, TestSize.Level2)
     }
 
     GTEST_LOG_(INFO) << "ShutDownDeviceTest001: ShutDownDevice end.";
+}
 }

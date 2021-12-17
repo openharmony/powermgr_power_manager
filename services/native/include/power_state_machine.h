@@ -147,6 +147,9 @@ private:
         }
     };
     void InitStateMap();
+    void EmplaceAwake();
+    void EmplaceInactive();
+    void EmplaceSleep();
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);

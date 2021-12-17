@@ -45,6 +45,7 @@ void PowerDeviceModeTest::PowerModeTest2Callback::PowerModeCallback()
     POWER_HILOGD(MODULE_SERVICE, "PowerModeTest2Callback::PowerModeCallback.");
 }
 
+namespace {
 /**
  * @tc.name: PowerStateCallback001
  * @tc.desc: test PowerStateCallback
@@ -105,4 +106,5 @@ HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
     }
 
     GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode end. mode == " << mode;
+}
 }

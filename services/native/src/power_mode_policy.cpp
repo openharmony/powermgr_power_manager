@@ -14,6 +14,7 @@
  */
 
 #include "power_mode_policy.h"
+
 #include "power_save_mode.h"
 #include "singleton.h"
 #include "hilog_wrapper.h"
@@ -126,7 +127,7 @@ void PowerModePolicy::TriggerAction(uint32_t type)
 void PowerModePolicy::TriggerAllActions()
 {
     POWER_HILOGW(MODULE_SERVICE, "TriggerAllActions start");
-    for (auto iterator = actionMap.begin() ; iterator != actionMap.end(); iterator++) {
+    for (auto iterator = actionMap.begin(); iterator != actionMap.end(); iterator++) {
         POWER_HILOGW(MODULE_SERVICE, "TriggerAllActions: type=(%{public}d)", iterator->first);
         iterator->second();
     }

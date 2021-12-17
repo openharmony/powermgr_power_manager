@@ -24,12 +24,14 @@
 
 using namespace OHOS::PowerMgr;
 
-static const uint8_t ARG_0 = 0;
-static const uint8_t ARG_1 = 1;
-static const uint8_t ARG_2 = 2;
-static const uint8_t ARG_3 = 3;
-static const uint8_t REASON_STRING_MAX = 128;
-static const uint8_t LOCK_NAME_STRING_MAX = 128;
+namespace {
+const uint8_t ARG_0 = 0;
+const uint8_t ARG_1 = 1;
+const uint8_t ARG_2 = 2;
+const uint8_t ARG_3 = 3;
+const uint8_t REASON_STRING_MAX = 128;
+const uint8_t LOCK_NAME_STRING_MAX = 128;
+}
 
 napi_ref PowerManagerNapi::runningLockTypeConstructor_ = nullptr;
 napi_ref PowerManagerNapi::powerStateConstructor_ = nullptr;

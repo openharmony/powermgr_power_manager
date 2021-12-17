@@ -36,7 +36,7 @@ public:
     PowerNapiContext(napi_env env, napi_value* args, uint32_t argc,
         int32_t callbackArg, napi_value object = nullptr);
     virtual ~PowerNapiContext();
-    bool StartAsyncWork(const char* workName, ExecuteFunc exeFunc, FreeFunc freeFunc);
+    bool StartAsyncWork(const std::string workName, ExecuteFunc exeFunc, FreeFunc freeFunc);
     napi_value GetPromise()
     {
         return promise_;

@@ -14,7 +14,10 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 
 config("powermgr_private_config") {
-  include_dirs = [ "//utils/system/safwk/native/include" ]
+  include_dirs = [
+    "//utils/system/safwk/native/include",
+    "//base/sensors/sensor/interfaces/native/include",
+  ]
 }
 
 config("powermgr_public_config") {
@@ -33,7 +36,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mgr_service.cpp",
     "native/src/power_mode_module.cpp",
     "native/src/power_mode_policy.cpp",
-    "native/src/power_save_model.cpp",
+    "native/src/power_save_mode.cpp",
     "native/src/power_state_machine.cpp",
     "native/src/powerms_event_handler.cpp",
     "native/src/running_lock_inner.cpp",
@@ -71,6 +74,7 @@ ohos_shared_library("powermgrservice") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
+    "sensor:sensor_interface_native",
   ]
 
   part_name = "${powermgr_native_part_name}"
