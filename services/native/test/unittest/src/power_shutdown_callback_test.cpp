@@ -45,6 +45,7 @@ void PowerShutdownCallbackTest::PowerShutdownTest2Callback::ShutdownCallback()
     POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest2Callback::ShutdownCallback.");
 }
 
+namespace {
 /**
  * @tc.name: PowerShutdownCallback001
  * @tc.desc: test ShutdownCallback
@@ -58,4 +59,5 @@ HWTEST_F (PowerShutdownCallbackTest, PowerShutdownCallback001, TestSize.Level0)
     sleep(SLEEP_WAIT_TIME_S);
     powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
     POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 1.");
+}
 }

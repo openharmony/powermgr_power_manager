@@ -457,18 +457,18 @@ PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::CommonEventServiCesSys
     : CommonEventSubscriber(subscriberInfo)
 {}
 
-uint32_t i = 0;
-int judgeNum = 2;
+static uint32_t g_i = 0;
+static int g_judgeNum = 2;
 
 void PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::OnReceiveEvent(const CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
     if (action == CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED) {
         POWER_HILOGD(MODULE_SERVICE, "CommonEventServiCesSystemTest::OnReceiveEvent.");
-        i = judgeNum;
+        g_i = g_judgeNum;
     }
     uint32_t j = 2;
-    EXPECT_EQ(i, j) << "PowerSavemode_022 fail to PowerModeCallback";
+    EXPECT_EQ(g_i, j) << "PowerSavemode_022 fail to PowerModeCallback";
     POWER_HILOGD(MODULE_SERVICE, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
 }
 

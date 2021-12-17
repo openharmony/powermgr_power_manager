@@ -65,7 +65,7 @@ DisplayState DeviceStateAction::GetDisplayState()
     return ret;
 }
 
-uint32_t DeviceStateAction::SetDisplayState(DisplayState state)
+uint32_t DeviceStateAction::SetDisplayState(const DisplayState state)
 {
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
     switch (state) {
@@ -89,7 +89,8 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state)
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
-uint32_t DeviceStateAction::GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force)
+uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,
+    const std::function<void()> onWakeup, bool force)
 {
     SystemSuspendController::GetInstance().Suspend(onSuspend, onWakeup, force);
     return ActionResult::SUCCESS;

@@ -54,6 +54,7 @@ config("module_private_config") {
     "//base/notification/ces_standard/cesfwk/innerkits/include",
     "//base/notification/ces_standard/cesfwk/services/include",
     "//base/notification/ces_standard/common/log/include",
+    "//base/sensors/sensor/interfaces/native/include",
   ]
 }
 
@@ -67,6 +68,7 @@ deps_ex = [
   "hiviewdfx_hilog_native:libhilog",
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
+  "sensor:sensor_interface_native",
 ]
 
 ##############################sttest##########################################

@@ -249,8 +249,8 @@ int32_t PowerHdfService::SuspendBlock(struct HdfSBuf *data)
     if (data == nullptr) {
         return HDF_ERR_INVALID_PARAM;
     }
-    const char* name = HdfSbufReadString(data);
-    if (name == nullptr) {
+    const std::string name = HdfSbufReadString(data);
+    if (name.empty()) {
         return HDF_ERR_INVALID_PARAM;
     }
     UniqueFd fd(TEMP_FAILURE_RETRY(open(LOCK_PATH, O_RDWR | O_CLOEXEC)));
@@ -269,8 +269,8 @@ int32_t PowerHdfService::SuspendUnblock(struct HdfSBuf *data)
     if (data == nullptr) {
         return HDF_ERR_INVALID_PARAM;
     }
-    const char* name = HdfSbufReadString(data);
-    if (name == nullptr) {
+    const std::string name = HdfSbufReadString(data);
+    if (name.empty()) {
         return HDF_ERR_INVALID_PARAM;
     }
     UniqueFd fd(TEMP_FAILURE_RETRY(open(UNLOCK_PATH, O_RDWR | O_CLOEXEC)));
@@ -308,10 +308,9 @@ bool PowerHdfService::WriteWakeCount(const std::string& count)
     return ret;
 }
 
-
-static void loadSystemInfo(const char* const path, std::string& info)
+static void LoadSystemInfo(const std::string& path, std::string& info)
 {
-    UniqueFd fd(TEMP_FAILURE_RETRY(open(path, O_RDWR | O_CLOEXEC)));
+    UniqueFd fd(TEMP_FAILURE_RETRY(open(path.c_str(), O_RDWR | O_CLOEXEC)));
     std::string str;
     if (fd >= 0) {
         bool ret = LoadStringFromFd(fd, str);
@@ -329,10 +328,10 @@ int32_t PowerHdfService::Dump(struct HdfSBuf *reply)
 {
     HDF_LOGD("%{public}s enter", __func__);
     std::string dumpInfo("");
-    loadSystemInfo(SUSPEND_STATE_PATH, dumpInfo);
-    loadSystemInfo(WAKEUP_COUNT_PATH, dumpInfo);
-    loadSystemInfo(LOCK_PATH, dumpInfo);
-    loadSystemInfo(UNLOCK_PATH, dumpInfo);
+    LoadSystemInfo(SUSPEND_STATE_PATH, dumpInfo);
+    LoadSystemInfo(WAKEUP_COUNT_PATH, dumpInfo);
+    LoadSystemInfo(LOCK_PATH, dumpInfo);
+    LoadSystemInfo(UNLOCK_PATH, dumpInfo);
 
     HdfSbufWriteString(reply, dumpInfo.c_str());
     return HDF_SUCCESS;
