@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace Suspend {
-bool SuspendController::AutoSuspend::s_started = false;
+bool SuspendController::AutoSuspend::started_ = false;
 
 SuspendController::SuspendController()
 {
@@ -39,7 +39,7 @@ void SuspendController::AutoSuspend::AutoSuspendLoop()
     POWER_HILOGD(MODULE_SERVICE, "AutoSuspendLoop start");
     while (true) {
         std::this_thread::sleep_for(waitTime_);
-        if (!s_started) {
+        if (!started_) {
             POWER_HILOGW(MODULE_SERVICE, "AutoSuspend is stopped");
             break;
         }
@@ -66,7 +66,7 @@ void SuspendController::AutoSuspend::AutoSuspendLoop()
         }
         break;
     }
-    s_started = false;
+    started_ = false;
 
     POWER_HILOGD(MODULE_SERVICE, "AutoSuspendLoop end");
 }
@@ -76,22 +76,22 @@ void SuspendController::AutoSuspend::Start(SuspendCallback onSuspend, SuspendCal
     POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Start");
     onSuspend_ = onSuspend;
     onWakeup_ = onWakeup;
-    if (s_started) {
+    if (started_) {
         POWER_HILOGW(MODULE_SERVICE, "AutoSuspend is already started");
         return;
     }
     daemon_ = std::make_unique<std::thread>(&AutoSuspend::AutoSuspendLoop, this);
     daemon_->detach();
     POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Start detach");
-    s_started = true;
+    started_ = true;
 }
 
 void SuspendController::AutoSuspend::Stop()
 {
     POWER_HILOGD(MODULE_SERVICE, "AutoSuspend Stop");
-    if (s_started && daemon_.get() != nullptr) {
+    if (started_ && daemon_.get() != nullptr) {
         POWER_HILOGD(MODULE_SERVICE, "daemon join start");
-        s_started = false;
+        started_ = false;
         daemon_->join();
         POWER_HILOGD(MODULE_SERVICE, "daemon join end");
     }

@@ -54,7 +54,7 @@ private:
         bool SuspendEnter();
 
     private:
-        static bool s_started;
+        static bool started_;
         std::string WaitWakeupCount();
         bool WriteWakeupCount(std::string wakeupCount);
 
