@@ -950,7 +950,7 @@ RunningLockMgr::ProximityController::ProximityController()
         POWER_HILOGE(MODULE_SERVICE, "Can't get sensors");
         return;
     }
-    for (int i = 0; i < count; i++) {
+    for (int32_t i = 0; i < count; i++) {
         if (sensorInfo[i].sensorId == SENSOR_TYPE_ID_PROXIMITY) {
             POWER_HILOGD(MODULE_SERVICE, "ProximityController Support");
             support_ = true;
@@ -962,7 +962,10 @@ RunningLockMgr::ProximityController::ProximityController()
         free(sensorInfo);
         return;
     }
-    strcpy_s(user_.name, sizeof(user_.name), "RunningLock");
+    if (strcpy_s(user_.name, sizeof(user_.name), "RunningLock") != EOK) {
+        POWER_HILOGE(MODULE_SERVICE, "ProximityController strcpy_s err");
+        return;
+    }
     user_.userData = nullptr;
     user_.callback = &RecordSensorCallback;
     SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);

@@ -110,13 +110,13 @@ public:
         powerStateMachine_->SetSleepTime(time);
     }
 
-    void EnableMock(IDeviceStateAction* g_stateAction, IDevicePowerAction* g_powerAction,
-        IRunningLockAction* g_lockAction)
+    void EnableMock(IDeviceStateAction* stateAction, IDevicePowerAction* powerAction,
+        IRunningLockAction* lockAction)
     {
         POWER_HILOGE(MODULE_SERVICE, "Service EnableMock:%{public}d", mockCount_++);
-        runningLockMgr_->EnableMock(g_lockAction);
-        powerStateMachine_->EnableMock(g_stateAction);
-        shutdownService_.EnableMock(g_powerAction);
+        runningLockMgr_->EnableMock(lockAction);
+        powerStateMachine_->EnableMock(stateAction);
+        shutdownService_.EnableMock(powerAction);
     }
     void MockProximity(uint32_t status)
     {
