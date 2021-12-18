@@ -26,6 +26,7 @@
 #include "actions/irunning_lock_action.h"
 #include "running_lock_inner.h"
 #include "running_lock_token_stub.h"
+#include "sensor_agent.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -84,7 +85,7 @@ private:
 
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
-    void nitLocksTypeProximity();
+    void InitLocksTypeProximity();
 
     class SystemLock {
     public:
@@ -141,18 +142,28 @@ private:
         {
             return enabled_;
         }
+        bool IsSupported()
+        {
+            return support_;
+        }
         bool IsClose();
         void OnClose();
         void OnAway();
         uint32_t GetStatus()
         {
-            return status_ ;
+            return status_;
         }
         void Clear();
+        static void RecordSensorCallback(SensorEvent *event);
     private:
-        bool enabled_;
+        static const int PROXIMITY_CLOSE_SCALAR = 0;
+        static const int PROXIMITY_AWAY_SCALAR = 5;
+        static const uint32_t SAMPLING_RATE =  100000000;
+        bool support_ {false};
+        bool enabled_ {false};
         bool isClose {false};
-        uint32_t status_;
+        uint32_t status_ {0};
+        SensorUser user_;
     };
 
     class RunningLockDeathRecipient : public IRemoteObject::DeathRecipient {

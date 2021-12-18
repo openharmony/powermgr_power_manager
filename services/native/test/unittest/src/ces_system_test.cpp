@@ -36,10 +36,10 @@ using namespace OHOS::EventFwk;
 using namespace OHOS::PowerMgr;
 
 namespace {
-std::mutex mtx_;
+std::mutex g_mtx;
 
-const std::string CompareStr = "cesComparesStrForCase";
-const std::string CompareStrFalse = "cesComparesStrForCaseFalse";
+const std::string COMPARE_STR = "cesComparesStrForCase";
+const std::string COMPARE_STR_FALSE = "cesComparesStrForCaseFalse";
 }  // namespace
 
 CesSystemTest::CommonEventServiCesSystemTest::CommonEventServiCesSystemTest(

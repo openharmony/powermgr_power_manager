@@ -29,7 +29,7 @@ namespace OHOS {
 namespace PowerMgr {
 class SystemSuspendController : public DelayedRefSingleton<SystemSuspendController> {
 public:
-    void Suspend(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force);
+    void Suspend(const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force);
     void Wakeup();
     void AcquireRunningLock(const std::string& name);
     void ReleaseRunningLock(const std::string& name);
@@ -45,7 +45,7 @@ private:
         ~PowerHdfCallback() = default;
         void OnSuspend() override;
         void OnWakeup() override;
-        void SetListener(std::function<void()> suspend, std::function<void()> wakeup);
+        void SetListener(std::function<void()>& suspend, std::function<void()>& wakeup);
     private:
         std::function<void()> onSuspend_;
         std::function<void()> onWakeup_;

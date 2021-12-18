@@ -40,6 +40,7 @@ void PowerRegisterCallbackModeTest::PowerModeTest1Callback::PowerModeCallback()
     POWER_HILOGD(MODULE_SERVICE, "PowerModeTest1Callback::PowerModeCallback.");
 }
 
+namespace {
 /**
  * @tc.name: PowerStateCallback001
  * @tc.desc: test PowerModeCallback
@@ -54,4 +55,5 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     uint32_t mode = 601;
     powerMgrClient.SetDeviceMode(mode);
     POWER_HILOGD(MODULE_SERVICE, "PowerRegisterCallbackModeCallback001 1.");
+}
 }

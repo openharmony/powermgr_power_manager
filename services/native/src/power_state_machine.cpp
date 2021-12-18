@@ -45,9 +45,13 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
 
     // init lock map which will block state transit
     std::vector<RunningLockType> awakeBlocker {};
-    std::vector<RunningLockType> inactiveBlocker {RunningLockType::RUNNINGLOCK_SCREEN,
-        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL};
-    std::vector<RunningLockType> sleepBlocker {RunningLockType::RUNNINGLOCK_BACKGROUND};
+    std::vector<RunningLockType> inactiveBlocker {
+        RunningLockType::RUNNINGLOCK_SCREEN,
+        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL
+    };
+    std::vector<RunningLockType> sleepBlocker {
+        RunningLockType::RUNNINGLOCK_BACKGROUND
+    };
     lockMap_.emplace(PowerState::AWAKE,
         std::make_shared<std::vector<RunningLockType>>(awakeBlocker));
     lockMap_.emplace(PowerState::INACTIVE,
@@ -85,9 +89,8 @@ bool PowerStateMachine::Init()
     return true;
 }
 
-void PowerStateMachine::InitStateMap()
+void PowerStateMachine::EmplaceAwake()
 {
-    // init state controller map
     controllerMap_.emplace(PowerState::AWAKE,
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this] {
             mDeviceState_.screenState.lastOnTime = GetTickCount();
@@ -100,6 +103,9 @@ void PowerStateMachine::InitStateMap()
             return TransitResult::SUCCESS;
         })
     );
+}
+void PowerStateMachine::EmplaceInactive()
+{
     controllerMap_.emplace(PowerState::INACTIVE,
         std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this] {
             POWER_HILOGI(MODULE_SERVICE, "StateController_INACTIVE: func is Start.");
@@ -118,6 +124,9 @@ void PowerStateMachine::InitStateMap()
             return TransitResult::SUCCESS;
         })
     );
+}
+void PowerStateMachine::EmplaceSleep()
+{
     controllerMap_.emplace(PowerState::SLEEP,
         std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this] {
             DisplayState state = DisplayState::DISPLAY_OFF;
@@ -138,6 +147,12 @@ void PowerStateMachine::InitStateMap()
             return TransitResult::SUCCESS;
         })
     );
+}
+void PowerStateMachine::InitStateMap()
+{
+    EmplaceAwake();
+    EmplaceInactive();
+    EmplaceSleep();
 }
 
 void PowerStateMachine::onSuspend()
@@ -326,86 +341,86 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
         eraseNum);
 }
 
-static const char* GetReasonTypeString(StateChangeReason type)
+static const std::string GetReasonTypeString(StateChangeReason type)
 {
     switch (type) {
         case StateChangeReason::STATE_CHANGE_REASON_INIT:
-            return "INIT";
+            return std::string("INIT");
         case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT:
-            return "TIMEOUT";
+            return std::string("TIMEOUT");
         case StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK:
-            return "RUNNING_LOCK";
+            return std::string("RUNNING_LOCK");
         case StateChangeReason::STATE_CHANGE_REASON_BATTERY:
-            return "BATTERY";
+            return std::string("BATTERY");
         case StateChangeReason::STATE_CHANGE_REASON_THERMAL:
-            return "THERMAL";
+            return std::string("THERMAL");
         case StateChangeReason::STATE_CHANGE_REASON_WORK:
-            return "WORK";
+            return std::string("WORK");
         case StateChangeReason::STATE_CHANGE_REASON_SYSTEM:
-            return "SYSTEM";
+            return std::string("SYSTEM");
         case StateChangeReason::STATE_CHANGE_REASON_APPLICATION:
-            return "APPLICATION";
+            return std::string("APPLICATION");
         case StateChangeReason::STATE_CHANGE_REASON_SETTINGS:
-            return "SETTINGS";
+            return std::string("SETTINGS");
         case StateChangeReason::STATE_CHANGE_REASON_HARD_KEY:
-            return "HARD_KEY";
+            return std::string("HARD_KEY");
         case StateChangeReason::STATE_CHANGE_REASON_TOUCH:
-            return "TOUCH";
+            return std::string("TOUCH");
         case StateChangeReason::STATE_CHANGE_REASON_CABLE:
-            return "CABLE";
+            return std::string("CABLE");
         case StateChangeReason::STATE_CHANGE_REASON_SENSOR:
-            return "SENSOR";
+            return std::string("SENSOR");
         case StateChangeReason::STATE_CHANGE_REASON_LID:
-            return "LID";
+            return std::string("LID");
         case StateChangeReason::STATE_CHANGE_REASON_CAMERA:
-            return "CAMERA";
+            return std::string("CAMERA");
         case StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY:
-            return "ACCESSIBILITY";
+            return std::string("ACCESS");
         case StateChangeReason::STATE_CHANGE_REASON_REMOTE:
-            return "REMOTE";
+            return std::string("REMOTE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
-            return "UNKNOWN";
+            return std::string("UNKNOWN");
         default:
             break;
     }
 
-    return "UNKNOWN";
+    return std::string("UNKNOWN");
 }
 
-static const char* GetPowerStateString(PowerState state)
+static const std::string GetPowerStateString(PowerState state)
 {
     switch (state) {
         case PowerState::AWAKE:
-            return "AWAKE";
+            return std::string("AWAKE");
         case PowerState::INACTIVE:
-            return "INACTIVE";
+            return std::string("INACTIVE");
         case PowerState::SLEEP:
-            return "SLEEP";
+            return std::string("SLEEP");
         case PowerState::UNKNOWN:
-            return "UNKNOWN";
+            return std::string("UNKNOWN");
         default:
             break;
     }
 
-    return "UNKNOWN";
+    return std::string("UNKNOWN");
 }
 
-static const char* GetRunningLockTypeString(RunningLockType type)
+static const std::string GetRunningLockTypeString(RunningLockType type)
 {
     switch (type) {
         case RunningLockType::RUNNINGLOCK_SCREEN:
-            return "SCREEN";
+            return std::string("SCREEN");
         case RunningLockType::RUNNINGLOCK_BACKGROUND:
-            return "BACKGROUND";
+            return std::string("BACKGROUND");
         case RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL:
-            return "PROXIMITY_SCREEN_CONTROL";
+            return std::string("PROXIMITY_SCREEN_CONTROL");
         case RunningLockType::RUNNINGLOCK_BUTT:
-            return "BUTT";
+            return std::string("BUTT");
         default:
             break;
     }
 
-    return "UNKNOWN";
+    return std::string("UNKNOWN");
 }
 
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
@@ -683,9 +698,9 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
         if (count > 0) {
             POWER_HILOGE(MODULE_SERVICE,
                 "RunningLock %{public}s is locking (count=%{public}d), blocking %{public}s",
-                GetRunningLockTypeString(*iter),
+                GetRunningLockTypeString(*iter).c_str(),
                 count,
-                GetPowerStateString(state));
+                GetPowerStateString(state).c_str());
             return false;
         }
     }
@@ -886,7 +901,7 @@ void PowerStateMachine::DumpInfo(std::string& result)
         result.append("State: ")
             .append(GetPowerStateString(it->second->GetState()))
             .append("   Reason:")
-            .append(GetReasonTypeString(it->second->lastReason_))
+            .append(GetReasonTypeString(it->second->lastReason_).c_str())
             .append("   Time:")
             .append(ToString(it->second->lastTime_))
             .append("\n");
@@ -905,9 +920,9 @@ TransitResult PowerStateMachine::StateController::TransitTo(
     }
     POWER_HILOGI(MODULE_SERVICE,
         "Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
-        GetPowerStateString(owner->currentState_),
-        GetPowerStateString(this->state_),
-        GetReasonTypeString(reason),
+        GetPowerStateString(owner->currentState_).c_str(),
+        GetPowerStateString(this->state_).c_str(),
+        GetReasonTypeString(reason).c_str(),
         ignoreLock);
     TransitResult ret = TransitResult::OTHER_ERR;
     if (!CheckState()) {

@@ -23,29 +23,31 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
-    "//utils/system/safwk/native/include",
-    "//third_party/googletest/googletest/include",
     "//base/powermgr/display_manager/interfaces/innerkits/native/include/",
     "//base/powermgr/display_manager/service/native/include/",
     "//base/powermgr/display_manager/service/zidl/include/",
-    "//drivers/peripheral/display/interfaces/include/",
     "//base/powermgr/power_manager/services/native/test/unittest/include",
+    "//base/sensors/sensor/interfaces/native/include",
+    "//drivers/peripheral/display/interfaces/include/",
     "//foundation/graphic/standard/utils/include/",
+    "//third_party/googletest/googletest/include",
+    "//utils/system/safwk/native/include",
   ]
 }
 config("module_private_event_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//utils/native/base/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
     "//foundation/appexecfwk/standard/common/log/include",
     "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler/include",
     "//base/notification/ces_standard/cesfwk/innerkits/include",
-    "//base/notification/ces_standard/cesfwk/services/include",
     "//base/notification/ces_standard/cesfwk/kits/native/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+    "//base/notification/ces_standard/cesfwk/services/include",
     "//base/notification/ces_standard/common/log/include",
+    "//base/sensors/sensor/interfaces/native/include",
+    "//utils/native/base/include",
   ]
 }
 
@@ -59,6 +61,7 @@ deps_ex = [
   "hiviewdfx_hilog_native:libhilog",
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
+  "sensor:sensor_interface_native",
 ]
 
 ############################shutdown_callback_test#############################

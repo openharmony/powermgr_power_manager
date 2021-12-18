@@ -55,7 +55,9 @@ bool PowerStateMachineTest::IsTestSupported()
     return !SysParam::IsDeviceType(DeviceType::DEVICE_CAR) && !SysParam::IsDeviceType(DeviceType::DEVICE_TV);
 }
 
+
 #ifdef SHIELD
+namespace {
 /**
  * @tc.name: PowerStateMachine003
  * @tc.desc: test Suspend Device in proxy
@@ -217,6 +219,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level2)
 
     GTEST_LOG_(INFO) << "PowerStateMachine007: ForceSuspendDevice end.";
 }
+}
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
@@ -230,6 +233,7 @@ void PowerStateMachineTest::PowerStateTest2Callback::OnPowerStateChanged(PowerSt
         static_cast<uint32_t>(state));
 }
 
+namespace {
 /**
  * @tc.name: PowerStateCallback001
  * @tc.desc: test PowerStateCallback
@@ -289,6 +293,7 @@ HWTEST_F (PowerStateMachineTest, RebootDeviceTest001, TestSize.Level2)
 
     GTEST_LOG_(INFO) << "RebootDeviceTest001: RebootDevice end.";
 }
+}
 #endif
 
 void PowerStateMachineTest::WakeUpthread()
@@ -316,6 +321,7 @@ void PowerStateMachineTest::Shutdownthread()
 }
 
 #ifdef SHIELD
+namespace {
 /**
  * @tc.name: PowerStateMachine010
  * @tc.desc: test suspend during wakeup
@@ -384,8 +390,10 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine011, TestSize.Level0)
     POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine011::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine011: Suspend Device end.";
 }
+}
 #endif
 
+namespace {
 /**
  * @tc.name: RebootDeviceTest001
  * @tc.desc: test wakeup during shutdown
@@ -398,6 +406,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine012, TestSize.Level2)
     std::make_unique<std::thread>(&PowerStateMachineTest::Shutdownthread, this)->join();
     std::make_unique<std::thread>(&PowerStateMachineTest::WakeUpthread, this)->join();
     GTEST_LOG_(INFO) << "PowerStateMachine012: test wakeup during shutdown end.";
+}
 }
 
 void PowerStateMachineTest::PowerClientInit()
