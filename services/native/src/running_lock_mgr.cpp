@@ -19,6 +19,7 @@
 
 #include <datetime_ex.h>
 #include <hisysevent.h>
+#include <securec.h>
 #include <string_ex.h>
 
 #include "power_common.h"
@@ -71,7 +72,7 @@ bool RunningLockMgr::InitLocks()
 {
     InitLocksTypeScreen();
     InitLocksTypeBackground();
-    nitLocksTypeProximity();
+    InitLocksTypeProximity();
     return true;
 }
 
@@ -150,7 +151,7 @@ void RunningLockMgr::InitLocksTypeBackground()
     );
 }
 
-void RunningLockMgr::nitLocksTypeProximity()
+void RunningLockMgr::InitLocksTypeProximity()
 {
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
         std::make_shared<LockCounter>(
@@ -780,7 +781,7 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
     runningLockAction_ = mock;
 }
 
-static const char* GetRunningLockTypeString(RunningLockType type)
+static const std::string GetRunningLockTypeString(RunningLockType type)
 {
     switch (type) {
         case RunningLockType::RUNNINGLOCK_SCREEN:
@@ -912,23 +913,96 @@ void RunningLockMgr::LockCounter::Clear()
     counter_ = 0;
 }
 
-RunningLockMgr::ProximityController::ProximityController()
-    : enabled_(false), status_(0)
+void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *event)
 {
+    POWER_HILOGD(MODULE_SERVICE, "Sensor Callback come in");
+    if (event == nullptr) {
+        POWER_HILOGE(MODULE_SERVICE, "SensorEvent *event is nullptr");
+        return;
+    }
+    if (event->sensorTypeId != SENSOR_TYPE_ID_PROXIMITY) {
+        POWER_HILOGE(MODULE_SERVICE, "Sensor Callback is not PROXIMITY");
+        return;
+    }
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(MODULE_SERVICE, "PowerMgrService::GetInstance()");
+        return;
+    }
+    auto runningLock = pms->GetRunningLockMgr();
+    ProximityData* data = (ProximityData*)event->data;
+
+    POWER_HILOGD(MODULE_SERVICE, "Sensor Callback %{public}d", data->scalar);
+    if (data->scalar == PROXIMITY_CLOSE_SCALAR) {
+        runningLock->SetProximity(PROXIMITY_CLOSE);
+    } else if (data->scalar == PROXIMITY_AWAY_SCALAR) {
+        runningLock->SetProximity(PROXIMITY_AWAY);
+    }
+}
+
+RunningLockMgr::ProximityController::ProximityController()
+{
+    POWER_HILOGD(MODULE_SERVICE, "ProximityController Create");
+    SensorInfo* sensorInfo = nullptr;
+    int32_t count;
+    int ret = GetAllSensors(&sensorInfo, &count);
+    if (ret != 0 || sensorInfo == nullptr) {
+        POWER_HILOGE(MODULE_SERVICE, "Can't get sensors");
+        return;
+    }
+    for (int32_t i = 0; i < count; i++) {
+        if (sensorInfo[i].sensorId == SENSOR_TYPE_ID_PROXIMITY) {
+            POWER_HILOGD(MODULE_SERVICE, "ProximityController Support");
+            support_ = true;
+            break;
+        }
+    }
+    if (!support_) {
+        POWER_HILOGE(MODULE_SERVICE, "ProximityController not support");
+        free(sensorInfo);
+        return;
+    }
+    if (strcpy_s(user_.name, sizeof(user_.name), "RunningLock") != EOK) {
+        POWER_HILOGE(MODULE_SERVICE, "ProximityController strcpy_s err");
+        return;
+    }
+    user_.userData = nullptr;
+    user_.callback = &RecordSensorCallback;
+    SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    free(sensorInfo);
 }
 
 RunningLockMgr::ProximityController::~ProximityController()
 {
+    if (support_) {
+        UnsubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    }
 }
 
 void RunningLockMgr::ProximityController::Enable()
 {
+    POWER_HILOGD(MODULE_SERVICE, "ProximityController Enable");
     enabled_ = true;
+    if (!support_) {
+        POWER_HILOGE(MODULE_SERVICE, "ProximityController not support");
+        return;
+    }
+
+    SetBatch(SENSOR_TYPE_ID_PROXIMITY, &user_, SAMPLING_RATE, SAMPLING_RATE);
+    ActivateSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    SetMode(SENSOR_TYPE_ID_PROXIMITY, &user_, SENSOR_ON_CHANGE);
 }
 
 void RunningLockMgr::ProximityController::Disable()
 {
+    POWER_HILOGD(MODULE_SERVICE, "ProximityController Disable");
     enabled_ = false;
+    if (!support_) {
+        POWER_HILOGE(MODULE_SERVICE, "ProximityController not support");
+        return;
+    }
+
+    DeactivateSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
 }
 
 bool RunningLockMgr::ProximityController::IsClose()
@@ -939,7 +1013,7 @@ bool RunningLockMgr::ProximityController::IsClose()
 
 void RunningLockMgr::ProximityController::OnClose()
 {
-    if (!enabled_) {
+    if (!enabled_ || IsClose()) {
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -963,7 +1037,7 @@ void RunningLockMgr::ProximityController::OnClose()
 
 void RunningLockMgr::ProximityController::OnAway()
 {
-    if (!enabled_) {
+    if (!enabled_ || !IsClose()) {
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();

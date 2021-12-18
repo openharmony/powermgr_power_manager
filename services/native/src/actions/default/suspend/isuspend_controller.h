@@ -16,6 +16,8 @@
 #ifndef POWERMGR_ISUSPEND_CONTROLLER_H
 #define POWERMGR_ISUSPEND_CONTROLLER_H
 
+#include "isuspend_controller.h"
+
 namespace OHOS {
 namespace PowerMgr {
 namespace Suspend {

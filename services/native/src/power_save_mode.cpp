@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr auto TAG_ROOT_ = "switch_policy";
+const std::string TAG_ROOT = "switch_policy";
 constexpr uint32_t SLEEP_FILTER = SLEEP_FILTER_VALUE;
 
 PowerSaveMode::PowerSaveMode()
@@ -31,10 +31,10 @@ PowerSaveMode::PowerSaveMode()
     StartXMlParse("/system/etc/power_config/power_mode_config.xml");
 }
 
-bool IsNodeLegal(const xmlNodePtr nodePtr, const char* tagName)
+bool IsNodeLegal(const xmlNodePtr nodePtr, const std::string& tagName)
 {
     return nodePtr != nullptr && nodePtr->type != XML_COMMENT_NODE && nodePtr->name != nullptr &&
-    xmlStrEqual(nodePtr->name, BAD_CAST(tagName)) == 0;
+    xmlStrEqual(nodePtr->name, BAD_CAST(tagName.c_str())) == 0;
 }
 
 bool PowerSaveMode::StartXMlParse(std::string path)
@@ -47,7 +47,7 @@ bool PowerSaveMode::StartXMlParse(std::string path)
     }
 
     auto rootPtr = xmlDocGetRootElement(docPtr.get());
-    if (!IsNodeLegal(rootPtr, TAG_ROOT_)) {
+    if (!IsNodeLegal(rootPtr, TAG_ROOT)) {
         POWER_HILOGE(MODULE_SERVICE, "Parse failed, root node is illegal.");
         return false;
     }

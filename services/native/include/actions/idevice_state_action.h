@@ -39,7 +39,8 @@ public:
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, uint32_t flags) = 0;
     virtual DisplayState GetDisplayState() = 0;
     virtual uint32_t SetDisplayState(DisplayState state) = 0;
-    virtual uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) = 0;
+    virtual uint32_t GoToSleep(const std::function<void()> onSuspend,
+        const std::function<void()> onWakeup, bool force) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

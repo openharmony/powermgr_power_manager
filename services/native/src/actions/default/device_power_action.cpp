@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "device_power_action.h"
+
 #include <linux/reboot.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
@@ -21,15 +23,7 @@
 #include "securec.h"
 
 #include "hilog_wrapper.h"
-#include "device_power_action.h"
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 #include "init_reboot.h"
-#ifdef __cplusplus
-}
-#endif
 
 namespace OHOS {
 namespace PowerMgr {
