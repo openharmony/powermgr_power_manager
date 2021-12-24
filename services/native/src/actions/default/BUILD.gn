@@ -18,7 +18,6 @@ config("powermgr_actions_impl_public_config") {
   include_dirs = [
     ".",
     "${powermgr_hdi_path}/api/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
     "//base/startup/syspara_lite/adapter/native/syspara/include",
   ]
 }
@@ -38,15 +37,15 @@ ohos_source_set("${powermgr_actions_default_target}") {
   deps = [
     "${powermgr_hdi_path}/client:power_hdf_client",
     "../:powermgr_actions_common",
-    "//base/startup/init_lite/interfaces/innerkits/reboot:libreboot",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//utils/native/base:utils",
   ]
 
   external_deps = [
     "display_manager_native:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
+    "startup_l2:syspara",
   ]
 
   part_name = "${powermgr_native_part_name}"
