@@ -29,7 +29,6 @@ enum class DeviceType : int32_t {
     DEVICE_WATCH,
     DEVICE_CAR,
     DEVICE_EARPHONE,
-    DEVICE_PC,
     DEVICE_TABLET,
 };
 
