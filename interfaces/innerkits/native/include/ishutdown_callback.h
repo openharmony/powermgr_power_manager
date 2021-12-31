@@ -28,6 +28,11 @@ public:
     enum {
         POWER_SHUTDOWN_CHANGED = 0,
     };
+    enum class ShutdownPriority : uint32_t {
+        POWER_SHUTDOWN_PRIORITY_HIGH = 0,
+        POWER_SHUTDOWN_PRIORITY_DEFAULT,
+        POWER_SHUTDOWN_PRIORITY_LOW,
+    };
 
     virtual void ShutdownCallback() = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IShutdownCallback");

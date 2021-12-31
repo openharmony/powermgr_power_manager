@@ -17,6 +17,7 @@
 
 #include "hilog_wrapper.h"
 
+#include "display_power_mgr_client.h"
 #include "power_common.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
@@ -25,12 +26,11 @@
 
 #include "singleton.h"
 
+using namespace std;
+using namespace OHOS;
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
-
-using namespace std;
-
-using namespace OHOS;
+using namespace OHOS::DisplayPowerMgr;
 
 namespace OHOS {
 namespace PowerMgr {
@@ -42,6 +42,8 @@ PowerModeModule::PowerModeModule() : started_(false)
         std::bind(&PowerModeModule::SetDisplayOffTime, this));
     policy->AddAction(PowerModePolicy::ServiceType::sleepTime,
         std::bind(&PowerModeModule::SetSleepTime, this));
+    policy->AddAction(PowerModePolicy::ServiceType::autoAdjustBrightness,
+        std::bind(&PowerModeModule::SetAutoAdjustBrightness, this));
     policy->AddAction(PowerModePolicy::ServiceType::smartBacklight,
         std::bind(&PowerModeModule::SetLcdBrightness, this));
     policy->AddAction(PowerModePolicy::ServiceType::vibratorsState,
@@ -239,6 +241,19 @@ void PowerModeModule::SetSleepTime()
     pms->GetPowerStateMachine()->SetSleepTime(static_cast<int64_t>(time));
 }
 
+void PowerModeModule::SetAutoAdjustBrightness()
+{
+    POWER_HILOGI(MODULE_SERVICE, "PowerModeModule::SetAutoAdjustBrightness");
+    bool enable = false;
+    int32_t value = DelayedSingleton<PowerModePolicy>::GetInstance()
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::autoAdjustBrightness);
+    if (value != FLAG_FALSE) {
+        enable = true;
+    }
+    bool ret = DisplayPowerMgrClient::GetInstance().AutoAdjustBrightness(enable);
+    POWER_HILOGI(MODULE_SERVICE, "SetAutoAdjustBrightness: %{public}d, result=%{public}d", enable, ret);
+}
+
 void PowerModeModule::SetLcdBrightness()
 {
     POWER_HILOGD(MODULE_SERVICE, "set lcd brightness");
@@ -256,7 +271,9 @@ void PowerModeModule::SetLcdBrightness()
             recoverValue[PowerModePolicy::ServiceType::smartBacklight] = SETTINGS_PRIVIDER_VALUE_LCD_BRIGHTNESS;
         }
         // set lcd brightness
-        POWER_HILOGD(MODULE_SERVICE, "please set lcdBrightness");
+        uint32_t dispId = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
+        bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(static_cast<uint32_t>(lcdBrightness), dispId);
+        POWER_HILOGI(MODULE_SERVICE, "SetBrightness: %{public}d, result=%{public}d", lcdBrightness, ret);
     } else {
         lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
             ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::smartBacklight);

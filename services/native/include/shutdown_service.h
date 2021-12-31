@@ -33,7 +33,7 @@ public:
     ~ShutdownService() = default;
     void Reboot(const std::string& reason);
     void Shutdown(const std::string& reason);
-    void AddShutdownCallback(const sptr<IShutdownCallback>& callback);
+    void AddShutdownCallback(uint32_t priority, const sptr<IShutdownCallback>& callback);
     void DelShutdownCallback(const sptr<IShutdownCallback>& callback);
     bool IsShuttingDown();
     void EnableMock(IDevicePowerAction* mockAction)
@@ -59,7 +59,9 @@ private:
     void Prepare();
     void PublishShutdownEvent() const;
 
-    CallbackManager callbackMgr_;
+    sptr<CallbackManager> lowCallbackMgr_;
+    sptr<CallbackManager> mediumCallbackMgr_;
+    sptr<CallbackManager> highCallbackMgr_;
     std::atomic<bool> started_;
     std::unique_ptr<IDevicePowerAction> devicePowerAction_;
 };

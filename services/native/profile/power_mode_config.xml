@@ -10,6 +10,7 @@
     Action Definitions:
     DisplayOffTime = 101,
     SystemAutoSleepTime = 102,
+    AutoAdjustBrightness = 103,
     AutoWindownRoration = 107,
     SmartBacklight = 115,
     VibratorsState = 120,
@@ -18,6 +19,7 @@
 	<proxy id="600">
 		<switch id="101" value="-1" recover_flag="0"/>
 		<switch id="102" value="-1" recover_flag="0"/>
+		<switch id="103" value="1" recover_flag="0"/>
 	</proxy>
 	<proxy id="601">
 		<switch id="111" value="6" recover_flag="0"/>

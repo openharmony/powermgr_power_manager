@@ -38,7 +38,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
   deps = [
     "${powermgr_hdi_path}/client:power_hdf_client",
     "../:powermgr_actions_common",
-    "//base/startup/init_lite/interfaces/innerkits/reboot:libreboot",
+    "//base/startup/init_lite/interfaces/innerkits:libbegetutil",
     "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//utils/native/base:utils",
   ]

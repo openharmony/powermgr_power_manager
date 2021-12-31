@@ -32,6 +32,7 @@ public:
     public:
         static const uint32_t displayOffTime = 101;
         static const uint32_t sleepTime = 102;
+        static const uint32_t autoAdjustBrightness = 103;
         static const uint32_t autoWindownRoration = 107;
         static const uint32_t smartBacklight = 115;
         static const uint32_t vibratorsState = 120;

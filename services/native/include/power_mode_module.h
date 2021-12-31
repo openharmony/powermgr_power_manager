@@ -77,6 +77,7 @@ private:
     void RunAction();
     void SetDisplayOffTime();
     void SetSleepTime();
+    void SetAutoAdjustBrightness();
     void SetLcdBrightness();
     void SetVibration();
     void OnOffRotation();
