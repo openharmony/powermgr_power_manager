@@ -311,11 +311,13 @@ int32_t PowerMgrStub::UnRegisterPowerStateCallbackStub(MessageParcel& data)
 
 int32_t PowerMgrStub::RegisterShutdownCallbackStub(MessageParcel& data)
 {
+    uint32_t priority;
+    READ_PARCEL_WITH_RET(data, Uint32, priority, E_READ_PARCEL_ERROR);
     sptr<IRemoteObject> obj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
     sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    RegisterShutdownCallback(callback);
+    RegisterShutdownCallback(priority, callback);
     return ERR_OK;
 }
 

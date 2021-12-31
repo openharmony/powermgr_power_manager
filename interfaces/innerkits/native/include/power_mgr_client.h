@@ -113,7 +113,9 @@ public:
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
+    void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
+        IShutdownCallback::ShutdownPriority priority
+            = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT);
     void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
     void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);

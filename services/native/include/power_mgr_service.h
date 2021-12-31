@@ -69,7 +69,7 @@ public:
     virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
     virtual void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    virtual void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
+    virtual void RegisterShutdownCallback(uint32_t priority, const sptr<IShutdownCallback>& callback) override;
     virtual void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
     virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;

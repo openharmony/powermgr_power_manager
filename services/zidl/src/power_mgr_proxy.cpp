@@ -474,7 +474,7 @@ void PowerMgrProxy::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>
     }
 }
 
-void PowerMgrProxy::RegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
+void PowerMgrProxy::RegisterShutdownCallback(uint32_t priority, const sptr<IShutdownCallback>& callback)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF((remote == nullptr) || (callback == nullptr));
@@ -488,6 +488,7 @@ void PowerMgrProxy::RegisterShutdownCallback(const sptr<IShutdownCallback>& call
         return;
     }
 
+    WRITE_PARCEL_NO_RET(data, Uint32, priority);
     WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::REG_SHUTDOWN_CALLBACK), data, reply, option);
