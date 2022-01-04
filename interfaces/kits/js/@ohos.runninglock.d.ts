@@ -37,7 +37,7 @@ declare namespace runningLock {
          * released and the system hibernates if no other {@link RunningLock} is set.
          * @since 7
          */
-        function lock(timeout: number): void;
+        lock(timeout: number): void;
 
         /**
          * Checks whether a lock is held or in use.
@@ -45,14 +45,14 @@ declare namespace runningLock {
          * @return Returns true if the lock is held or in use; returns false if the lock has been released.
          * @since 7
          */
-        function isUsed(): boolean;
+        isUsed(): boolean;
 
         /**
          * Release the {@link RunningLock} that prevents the system from hibernating.
          *
          * @since 7
          */
-        function unlock(): void;
+        unlock(): void;
     }
 
     /**
