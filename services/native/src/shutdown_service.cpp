@@ -40,6 +40,9 @@ const time_t MAX_TIMEOUT_SEC = 30;
 ShutdownService::ShutdownService() : started_(false)
 {
     devicePowerAction_ = PowerMgrFactory::GetDevicePowerAction();
+    highCallbackMgr_ = new CallbackManager();
+    defaultCallbackMgr_ = new CallbackManager();
+    lowCallbackMgr_ = new CallbackManager();
 }
 
 void ShutdownService::Reboot(const std::string& reason)
@@ -52,14 +55,29 @@ void ShutdownService::Shutdown(const std::string& reason)
     RebootOrShutdown(reason, false);
 }
 
-void ShutdownService::AddShutdownCallback(const sptr<IShutdownCallback>& callback)
+void ShutdownService::AddShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+    const sptr<IShutdownCallback>& callback)
 {
-    callbackMgr_.AddCallback(callback);
+    switch (priority) {
+        case IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_HIGH:
+            highCallbackMgr_->AddCallback(callback);
+            break;
+        case IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT:
+            defaultCallbackMgr_->AddCallback(callback);
+            break;
+        case IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW:
+            lowCallbackMgr_->AddCallback(callback);
+            break;
+        default:
+            return;
+    }
 }
 
 void ShutdownService::DelShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
-    callbackMgr_.RemoveCallback(callback);
+    highCallbackMgr_->RemoveCallback(callback);
+    defaultCallbackMgr_->RemoveCallback(callback);
+    lowCallbackMgr_->RemoveCallback(callback);
 }
 
 bool ShutdownService::IsShuttingDown()
@@ -88,7 +106,9 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 void ShutdownService::Prepare()
 {
     PublishShutdownEvent();
-    callbackMgr_.WaitingCallback();
+    highCallbackMgr_->WaitingCallback();
+    defaultCallbackMgr_->WaitingCallback();
+    lowCallbackMgr_->WaitingCallback();
 }
 
 void ShutdownService::PublishShutdownEvent() const

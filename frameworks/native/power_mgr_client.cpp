@@ -207,11 +207,12 @@ void PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback
     proxy_->UnRegisterPowerStateCallback(callback);
 }
 
-void PowerMgrClient::RegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
+void PowerMgrClient::RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
+    IShutdownCallback::ShutdownPriority priority)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
-    proxy_->RegisterShutdownCallback(callback);
+    proxy_->RegisterShutdownCallback(priority, callback);
 }
 
 void PowerMgrClient::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
