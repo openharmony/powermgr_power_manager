@@ -82,7 +82,8 @@ public:
     virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
 
     // Used for callback registration upon shutdown.
-    virtual void RegisterShutdownCallback(uint32_t priority, const sptr<IShutdownCallback>& callback) = 0;
+    virtual void RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+        const sptr<IShutdownCallback>& callback) = 0;
     virtual void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) = 0;
 
     // Used for callback registration upon power mode.

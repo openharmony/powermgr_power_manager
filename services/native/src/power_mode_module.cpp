@@ -38,17 +38,17 @@ PowerModeModule::PowerModeModule() : started_(false)
 {
     POWER_HILOGI(MODULE_SERVICE, "PowerModeModule create");
     auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
-    policy->AddAction(PowerModePolicy::ServiceType::displayOffTime,
+    policy->AddAction(PowerModePolicy::ServiceType::DISPLAY_OFFTIME,
         std::bind(&PowerModeModule::SetDisplayOffTime, this));
-    policy->AddAction(PowerModePolicy::ServiceType::sleepTime,
+    policy->AddAction(PowerModePolicy::ServiceType::SLEEPTIME,
         std::bind(&PowerModeModule::SetSleepTime, this));
-    policy->AddAction(PowerModePolicy::ServiceType::autoAdjustBrightness,
+    policy->AddAction(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS,
         std::bind(&PowerModeModule::SetAutoAdjustBrightness, this));
-    policy->AddAction(PowerModePolicy::ServiceType::smartBacklight,
+    policy->AddAction(PowerModePolicy::ServiceType::SMART_BACKLIGHT,
         std::bind(&PowerModeModule::SetLcdBrightness, this));
-    policy->AddAction(PowerModePolicy::ServiceType::vibratorsState,
+    policy->AddAction(PowerModePolicy::ServiceType::VIBRATORS_STATE,
         std::bind(&PowerModeModule::SetVibration, this));
-    policy->AddAction(PowerModePolicy::ServiceType::autoWindownRoration,
+    policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION,
         std::bind(&PowerModeModule::OnOffRotation, this));
 }
 
@@ -219,7 +219,7 @@ void PowerModeModule::SetDisplayOffTime()
 {
     POWER_HILOGI(MODULE_SERVICE, "PowerModeModule::SetDisplayOffTime");
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::displayOffTime);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGI(MODULE_SERVICE, "No service instance");
@@ -232,7 +232,7 @@ void PowerModeModule::SetSleepTime()
 {
     POWER_HILOGI(MODULE_SERVICE, "PowerModeModule::SetSleepTime");
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::sleepTime);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SLEEPTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGI(MODULE_SERVICE, "No service instance");
@@ -246,7 +246,7 @@ void PowerModeModule::SetAutoAdjustBrightness()
     POWER_HILOGI(MODULE_SERVICE, "PowerModeModule::SetAutoAdjustBrightness");
     bool enable = false;
     int32_t value = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::autoAdjustBrightness);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
     if (value != FLAG_FALSE) {
         enable = true;
     }
@@ -258,17 +258,17 @@ void PowerModeModule::SetLcdBrightness()
 {
     POWER_HILOGD(MODULE_SERVICE, "set lcd brightness");
     int32_t lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::smartBacklight);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
     POWER_HILOGD(MODULE_SERVICE, "GetPowerModeValuePolicy lcdBrightness=%{public}d", lcdBrightness);
     if (lcdBrightness != FLAG_FALSE) {
         // set lastmode value to recoverValue
         if (lastMode_ == LAST_MODE_FLAG) {
             POWER_HILOGD(MODULE_SERVICE, "first set lcdBrightness=%{public}d", lcdBrightness);
-            recoverValue[PowerModePolicy::ServiceType::smartBacklight] = lcdBrightness;
+            recoverValue[PowerModePolicy::ServiceType::SMART_BACKLIGHT] = lcdBrightness;
         } else {
             // get value from setting privider value
             POWER_HILOGD(MODULE_SERVICE, "Setting lcdBrightness=%{public}d", SETTINGS_PRIVIDER_VALUE_LCD_BRIGHTNESS);
-            recoverValue[PowerModePolicy::ServiceType::smartBacklight] = SETTINGS_PRIVIDER_VALUE_LCD_BRIGHTNESS;
+            recoverValue[PowerModePolicy::ServiceType::SMART_BACKLIGHT] = SETTINGS_PRIVIDER_VALUE_LCD_BRIGHTNESS;
         }
         // set lcd brightness
         uint32_t dispId = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
@@ -276,12 +276,12 @@ void PowerModeModule::SetLcdBrightness()
         POWER_HILOGI(MODULE_SERVICE, "SetBrightness: %{public}d, result=%{public}d", lcdBrightness, ret);
     } else {
         lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
-            ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::smartBacklight);
+            ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
         POWER_HILOGD(MODULE_SERVICE, "GetPowerModeRecoverPolicy lcdBrightness=%{public}d", lcdBrightness);
         if (lcdBrightness != FLAG_FALSE) {
             // get recoverValue
             std::lock_guard<std::mutex> lock(mutex_);
-            recoverValueiter = recoverValue.find(PowerModePolicy::ServiceType::smartBacklight);
+            recoverValueiter = recoverValue.find(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
             if (recoverValueiter != recoverValue.end()) {
                 lcdBrightness = recoverValueiter->second;
                 POWER_HILOGD(MODULE_SERVICE, "Get recovervalue lcdBrightness=%{public}d", lcdBrightness);
@@ -298,28 +298,28 @@ void PowerModeModule::SetVibration()
 {
     POWER_HILOGD(MODULE_SERVICE, "set vibration");
     int32_t vibration = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::vibratorsState);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
     POWER_HILOGD(MODULE_SERVICE, "GetPowerModeValuePolicy    vibrate=%{public}d", vibration);
     if (vibration != FLAG_FALSE) {
         // set lastmode value to recoverValue
         if (lastMode_ == LAST_MODE_FLAG) {
             POWER_HILOGD(MODULE_SERVICE, "first set vibration=%{public}d", vibration);
-            recoverValue[PowerModePolicy::ServiceType::vibratorsState] = vibration;
+            recoverValue[PowerModePolicy::ServiceType::VIBRATORS_STATE] = vibration;
         } else {
             // get value from setting privider value
             POWER_HILOGD(MODULE_SERVICE, "Setting vibration=%{public}d", SETTINGS_PRIVIDER_VALUE_VIBRATION);
-            recoverValue[PowerModePolicy::ServiceType::vibratorsState] = SETTINGS_PRIVIDER_VALUE_VIBRATION;
+            recoverValue[PowerModePolicy::ServiceType::VIBRATORS_STATE] = SETTINGS_PRIVIDER_VALUE_VIBRATION;
         }
         // set  vibration
         POWER_HILOGD(MODULE_SERVICE, "please set vibration");
     } else {
         vibration = DelayedSingleton<PowerModePolicy>::GetInstance()
-            ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::vibratorsState);
+            ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
         POWER_HILOGD(MODULE_SERVICE, "GetPowerModeRecoverPolicy    vibration=%{public}d", vibration);
         if (vibration != FLAG_FALSE) {
             // get recoverValue
             std::lock_guard<std::mutex> lock(mutex_);
-            recoverValueiter = recoverValue.find(PowerModePolicy::ServiceType::vibratorsState);
+            recoverValueiter = recoverValue.find(PowerModePolicy::ServiceType::VIBRATORS_STATE);
             if (recoverValueiter != recoverValue.end()) {
                 vibration = recoverValueiter->second;
                 POWER_HILOGD(MODULE_SERVICE, "Get recovervalue vibration=%{public}d", vibration);
@@ -336,28 +336,28 @@ void PowerModeModule::OnOffRotation()
 {
     POWER_HILOGD(MODULE_SERVICE, "on or off rotation");
     int32_t rotation = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::autoWindownRoration);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
     POWER_HILOGD(MODULE_SERVICE, "GetPowerModeValuePolicy    rotation=%{public}d", rotation);
     if (rotation != FLAG_FALSE) {
         // set lastmode value to recoverValue
         if (lastMode_ == LAST_MODE_FLAG) {
             POWER_HILOGD(MODULE_SERVICE, "first set rotation=%{public}d", rotation);
-            recoverValue[PowerModePolicy::ServiceType::autoWindownRoration] = rotation;
+            recoverValue[PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION] = rotation;
         } else {
             // get value from setting privider value
             POWER_HILOGD(MODULE_SERVICE, "Setting rotation=%{public}d", SETTINGS_PRIVIDER_VALUE_ROTATION);
-            recoverValue[PowerModePolicy::ServiceType::autoWindownRoration] = SETTINGS_PRIVIDER_VALUE_ROTATION;
+            recoverValue[PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION] = SETTINGS_PRIVIDER_VALUE_ROTATION;
         }
         // set lcd vibrate
         POWER_HILOGD(MODULE_SERVICE, "please on or off rotation");
     } else {
         rotation = DelayedSingleton<PowerModePolicy>::GetInstance()
-            ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::autoWindownRoration);
+            ->GetPowerModeRecoverPolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
         POWER_HILOGD(MODULE_SERVICE, "GetPowerModeRecoverPolicy    rotation=%{public}d", rotation);
         if (rotation != FLAG_FALSE) {
             // get recoverValue
             std::lock_guard<std::mutex> lock(mutex_);
-            recoverValueiter = recoverValue.find(PowerModePolicy::ServiceType::vibratorsState);
+            recoverValueiter = recoverValue.find(PowerModePolicy::ServiceType::VIBRATORS_STATE);
             if (recoverValueiter != recoverValue.end()) {
                 rotation = recoverValueiter->second;
                 POWER_HILOGD(MODULE_SERVICE, "Get recovervalue rotation=%{public}d", rotation);

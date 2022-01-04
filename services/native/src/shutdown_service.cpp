@@ -41,7 +41,7 @@ ShutdownService::ShutdownService() : started_(false)
 {
     devicePowerAction_ = PowerMgrFactory::GetDevicePowerAction();
     highCallbackMgr_ = new CallbackManager();
-    mediumCallbackMgr_ = new CallbackManager();
+    defaultCallbackMgr_ = new CallbackManager();
     lowCallbackMgr_ = new CallbackManager();
 }
 
@@ -55,16 +55,17 @@ void ShutdownService::Shutdown(const std::string& reason)
     RebootOrShutdown(reason, false);
 }
 
-void ShutdownService::AddShutdownCallback(uint32_t priority, const sptr<IShutdownCallback>& callback)
+void ShutdownService::AddShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+    const sptr<IShutdownCallback>& callback)
 {
     switch (priority) {
-        case static_cast<uint32_t>(IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_HIGH):
+        case IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_HIGH:
             highCallbackMgr_->AddCallback(callback);
             break;
-        case static_cast<uint32_t>(IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT):
-            mediumCallbackMgr_->AddCallback(callback);
+        case IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT:
+            defaultCallbackMgr_->AddCallback(callback);
             break;
-        case static_cast<uint32_t>(IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW):
+        case IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW:
             lowCallbackMgr_->AddCallback(callback);
             break;
         default:
@@ -75,7 +76,7 @@ void ShutdownService::AddShutdownCallback(uint32_t priority, const sptr<IShutdow
 void ShutdownService::DelShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
     highCallbackMgr_->RemoveCallback(callback);
-    mediumCallbackMgr_->RemoveCallback(callback);
+    defaultCallbackMgr_->RemoveCallback(callback);
     lowCallbackMgr_->RemoveCallback(callback);
 }
 
@@ -106,7 +107,7 @@ void ShutdownService::Prepare()
 {
     PublishShutdownEvent();
     highCallbackMgr_->WaitingCallback();
-    mediumCallbackMgr_->WaitingCallback();
+    defaultCallbackMgr_->WaitingCallback();
     lowCallbackMgr_->WaitingCallback();
 }
 
