@@ -47,7 +47,7 @@ struct RunningLockEntity {
     std::shared_ptr<RunningLock> runningLock;
 };
 
-static napi_ref g_runningLockConstructor;
+static thread_local napi_ref g_runningLockConstructor;
 static PowerMgrClient &g_powerMgrClient = PowerMgrClient::GetInstance();
 
 static napi_value Unlock(napi_env env, napi_callback_info info)
