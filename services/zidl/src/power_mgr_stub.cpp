@@ -317,7 +317,7 @@ int32_t PowerMgrStub::RegisterShutdownCallbackStub(MessageParcel& data)
     RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
     sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    RegisterShutdownCallback(priority, callback);
+    RegisterShutdownCallback(static_cast<IShutdownCallback::ShutdownPriority>(priority), callback);
     return ERR_OK;
 }
 

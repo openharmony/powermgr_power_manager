@@ -472,7 +472,8 @@ void PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     powerStateMachine_->UnRegisterPowerStateCallback(callback);
 }
 
-void PowerMgrService::RegisterShutdownCallback(uint32_t priority, const sptr<IShutdownCallback>& callback)
+void PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+    const sptr<IShutdownCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();

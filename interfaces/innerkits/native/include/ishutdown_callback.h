@@ -29,9 +29,9 @@ public:
         POWER_SHUTDOWN_CHANGED = 0,
     };
     enum class ShutdownPriority : uint32_t {
-        POWER_SHUTDOWN_PRIORITY_HIGH = 0,
+        POWER_SHUTDOWN_PRIORITY_LOW = 0,
         POWER_SHUTDOWN_PRIORITY_DEFAULT,
-        POWER_SHUTDOWN_PRIORITY_LOW,
+        POWER_SHUTDOWN_PRIORITY_HIGH,
     };
 
     virtual void ShutdownCallback() = 0;
