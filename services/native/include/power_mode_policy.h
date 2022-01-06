@@ -30,12 +30,12 @@ class PowerModePolicy {
 public:
     class ServiceType {
     public:
-        static const uint32_t DISPLAY_OFFTIME = 101;
-        static const uint32_t SLEEPTIME = 102;
-        static const uint32_t AUTO_ADJUST_BRIGHTNESS = 103;
-        static const uint32_t AUTO_WINDOWN_RORATION = 107;
-        static const uint32_t SMART_BACKLIGHT = 115;
-        static const uint32_t VIBRATORS_STATE = 120;
+        static constexpr uint32_t DISPLAY_OFFTIME = 101;
+        static constexpr uint32_t SLEEPTIME = 102;
+        static constexpr uint32_t AUTO_ADJUST_BRIGHTNESS = 103;
+        static constexpr uint32_t AUTO_WINDOWN_RORATION = 107;
+        static constexpr uint32_t SMART_BACKLIGHT = 115;
+        static constexpr uint32_t VIBRATORS_STATE = 120;
     };
 
     ~PowerModePolicy() = default;
