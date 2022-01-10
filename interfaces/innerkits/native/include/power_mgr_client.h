@@ -97,6 +97,14 @@ public:
      */
     void SetDisplaySuspend(bool enable);
 
+    /**
+     * Enum for set/get device mode
+     */
+    enum {
+        NORMAL_MODE = 600,
+        POWER_SAVE_MODE = 601,
+        EXTREME_MODE = 602
+    };
      /* Set the device mode.
      *
      * @param set The mode the device.
@@ -119,6 +127,7 @@ public:
     void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
     void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    int Dump(int32_t fd, const std::vector<std::u16string>& args);
 
 private:
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {

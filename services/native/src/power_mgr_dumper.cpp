@@ -22,10 +22,11 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
+const std::string ARGS_ALL = "-a";
 const std::string ARGS_HELP = "-h";
-const std::string ARGS_RUNNINGLOCK = "-runninglock";
-const std::string ARGS_STATE = "-state";
-const std::string ARGS_HDF = "-hdf";
+const std::string ARGS_RUNNINGLOCK = "-r";
+const std::string ARGS_STATE = "-s";
+const std::string ARGS_HDF = "-d";
 }
 
 bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& result)
@@ -55,6 +56,20 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
             stateMachine->DumpInfo(result);
         } else if (*it == ARGS_HDF) {
             SystemSuspendController::GetInstance().Dump(result);
+        } else if (*it == ARGS_ALL) {
+            result.clear();
+            auto stateMachine = pms->GetPowerStateMachine();
+            if (stateMachine == nullptr) {
+                continue;
+            }
+            stateMachine->DumpInfo(result);
+            auto runningLockMgr = pms->GetRunningLockMgr();
+            if (runningLockMgr == nullptr) {
+                continue;
+            }
+            runningLockMgr->DumpInfo(result);
+            SystemSuspendController::GetInstance().Dump(result);
+            break;
         }
     }
     return true;
@@ -65,8 +80,11 @@ void PowerMgrDumper::ShowUsage(std::string& result)
     result.append("Power manager dump options:\n")
         .append("  [-h] [-runninglock]\n")
         .append("  description of the cmd option:\n")
+        .append("    -a: show dump info of all power modules.\n")
         .append("    -h: show this help.\n")
-        .append("    -runninglock: show the all information of runninglock.\n");
+        .append("    -r: show the information of runninglock.\n")
+        .append("    -s: show the information of power state machine.\n")
+        .append("    -d: show the information of power hdf.\n");
 }
 } // namespace PowerMgr
 } // namespace OHOS
