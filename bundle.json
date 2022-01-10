@@ -1,0 +1,60 @@
+{
+    "name": "@ohos/powermgr_power_manager",
+    "version": "",
+    "description": "系统电源状态管理、电源状态转换、休眠唤醒、亮灭屏、休眠运行锁管理",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "Apache V2",
+    "repository": "https://gitee.com/openharmony/powermgr_power_manager",
+    "domain": "os",
+    "language": "",
+    "publishAs": "code-segment",
+    "private": false,
+    "scripts": {},
+    "tags": [
+        "base"
+    ],
+    "keywords": [
+        "powermgr",
+        "power",
+        "manager"
+    ],
+    "envs": [],
+    "dirs": [],
+    "author": {
+        "name": "",
+        "email": "",
+        "url": ""
+    },
+    "contributors": [
+        {
+            "name": "",
+            "email": "",
+            "url": ""
+        }
+    ],
+    "segment": {
+        "destPath": "base/powermgr/power_manager"
+    },
+    "component": {
+        "name": "power_manager",
+        "subsystem": "powermgr",
+        "syscap": [
+            "SystemCapability.PowerMgr.PowerManager"
+        ],
+        "features": [],
+        "adapted_system_type": [
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [],
+            "third_party": []
+        },
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
