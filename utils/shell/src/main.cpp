@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#include <errno.h>
 #include <iostream>
 
 #include "power_shell_command.h"
 
 int main(int argc, char *argv[])
 {
-    extern int errno;
     OHOS::PowerMgr::PowerShellCommand cmd(argc, argv);
     std::cout << cmd.ExecCommand();
     return 0;

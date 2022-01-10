@@ -15,7 +15,7 @@
 
 #include "power_shell_command.h"
 
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <getopt.h>
 #include <iostream>
@@ -114,7 +114,6 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
 
 extern "C" void PrintDumpFileError(std::string& receiver, const char* path)
 {
-    extern int errno;
     receiver.append("Open Dump file (");
     receiver.append(path);
     receiver.append(") failed: ");
