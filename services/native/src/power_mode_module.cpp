@@ -180,9 +180,9 @@ void PowerModeModule::PublishPowerModeEvent()
     IntentWant setModeWant;
     CommonEventData event(setModeWant);
     switch (mode_) {
-        case PowerModeModule::EXTREAM_MODE:
+        case PowerModeModule::EXTREME_MODE:
             setModeWant.SetAction(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
-            event.SetCode(PowerModeModule::EXTREAM_MODE);
+            event.SetCode(PowerModeModule::EXTREME_MODE);
             break;
         case PowerModeModule::NORMAL_MODE:
             setModeWant.SetAction(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);

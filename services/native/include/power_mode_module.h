@@ -36,10 +36,9 @@ class PowerModeModule {
 public:
     enum {
         POWER_MODE_MIN = 600,
-        DEFAULT_MODE = POWER_MODE_MIN,
-        EXTREAM_MODE,
-        NORMAL_MODE,
+        NORMAL_MODE = POWER_MODE_MIN,
         SAVE_MODE,
+        EXTREME_MODE,
         LOWPOWER_MODE,
         POWER_MODE_MAX = LOWPOWER_MODE
     };

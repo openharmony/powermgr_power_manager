@@ -89,7 +89,7 @@ bool PowerMgrService::Init()
         POWER_HILOGE(MODULE_SERVICE, "power state machine init fail!");
     }
     if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-        powerModeModule_.SetModeItem(PowerModeModule::DEFAULT_MODE);
+        powerModeModule_.SetModeItem(PowerModeModule::NORMAL_MODE);
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
@@ -127,6 +127,7 @@ void PowerMgrService::OnStop()
 int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::lock_guard lock(mutex_);
+    POWER_HILOGI(MODULE_SERVICE, "Dump service");
     std::vector<std::string> argsInStr;
     std::transform(args.begin(), args.end(), std::back_inserter(argsInStr),
         [](const std::u16string &arg) {
