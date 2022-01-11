@@ -9,7 +9,8 @@
         "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
         "//base/powermgr/power_manager/services:powermgrservice",
         "//base/powermgr/power_manager/hdi:hdi_group",
-        "//base/powermgr/power_manager/services:power_service"
+        "//base/powermgr/power_manager/services:power_service",
+        "//base/powermgr/power_manager/utils:power-shell"
       ],
       "inner_kits": [
         {

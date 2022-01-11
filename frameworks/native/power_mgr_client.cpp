@@ -256,5 +256,13 @@ uint32_t PowerMgrClient::GetDeviceMode()
     POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
     return proxy_->GetDeviceMode();
 }
+
+int PowerMgrClient::Dump(int32_t fd, const std::vector<std::u16string>& args)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, ERR_NO_INIT);
+    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
+    auto serviceRemote = proxy_->AsObject();
+    return serviceRemote->Dump(fd, args);
+}
 } // namespace PowerMgr
 }  // namespace OHOS

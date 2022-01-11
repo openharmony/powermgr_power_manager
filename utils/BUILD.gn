@@ -34,3 +34,45 @@ ohos_source_set("powermgr_utils") {
 
   part_name = "${powermgr_native_part_name}"
 }
+
+ohos_executable("power-shell") {
+  include_dirs = [
+    "${powermgr_interfaces_path}/innerkits/native/include",
+    "${powermgr_utils_path}/shell/include",
+    "//foundation/aafwk/standard/services/common/include",
+    "//foundation/aafwk/standard/tools/aa/include",
+    "//utils/native/base/include",
+  ]
+
+  sources = [
+    "shell/src/main.cpp",
+    "shell/src/power_shell_command.cpp",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    "${powermgr_interfaces_path}/innerkits:powermgr_client",
+    "//foundation/aafwk/standard/tools/aa:tools_aa_source_set",
+    "//utils/native/base:utils",
+  ]
+
+  configs = [
+    "//foundation/aafwk/standard/tools/aa:ability_command_config",
+    "//foundation/aafwk/standard/services/common:common_config",
+  ]
+
+  external_deps = [
+    "aafwk_standard:base",
+    "aafwk_standard:want",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "samgr_standard:samgr_proxy",
+  ]
+
+  install_enable = true
+  part_name = "${powermgr_native_part_name}"
+}
