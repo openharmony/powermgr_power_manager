@@ -12,7 +12,7 @@ Power Manager provides the following functionalities:
 2.  Managing running locks
 3.  Obtaining the power status
 
-**Figure  1**  Power management subsystem architecture<a name="fig106301571239"></a>  
+**Figure  1**  Power manager service architecture<a name="fig106301571239"></a> 
 ![](figures/power-management-subsystem-architecture.png "power-management-subsystem-architecture")
 
 ## Directory Structure<a name="section19472752217"></a>
@@ -33,8 +33,16 @@ Power Manager provides the following functionalities:
 
 Power management subsystem
 
-powermgr_battery_manager
+[**powermgr_power_manager**](https://gitee.com/openharmony/powermgr_power_manager)
 
-**powermgr_power_manager**
+[powermgr_display_manager](https://gitee.com/openharmony/powermgr_display_manager)
 
-powermgr_display_manager
+[powermgr_battery_manager](https://gitee.com/openharmony/powermgr_battery_manager)
+
+[powermgr_thermal_manager](https://gitee.com/openharmony/powermgr_thermal_manager)
+
+[powermgr_battery_statistics](https://gitee.com/openharmony/powermgr_battery_statistics)
+
+[powermgr_battery_lite](https://gitee.com/openharmony/powermgr_battery_lite)
+
+[powermgr_powermgr_lite](https://gitee.com/openharmony/powermgr_powermgr_lite)
