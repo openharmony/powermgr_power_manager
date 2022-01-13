@@ -33,7 +33,7 @@ Power Manager provides the following functionalities:
 
 [Power management subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/power-management.md)
 
-[**powermgr_power_manager**](https://gitee.com/openharmony/powermgr_power_manager)
+**powermgr_power_manager**
 
 [powermgr_display_manager](https://gitee.com/openharmony/powermgr_display_manager)
 
