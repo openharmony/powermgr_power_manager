@@ -31,7 +31,7 @@ Power Manager provides the following functionalities:
 
 ## Repositories Involved<a name="section63151229062"></a>
 
-Power management subsystem
+[Power management subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/power-management.md)
 
 [**powermgr_power_manager**](https://gitee.com/openharmony/powermgr_power_manager)
 
