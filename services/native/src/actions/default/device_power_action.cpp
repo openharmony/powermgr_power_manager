@@ -25,28 +25,31 @@
 #include "hilog_wrapper.h"
 #include "init_reboot.h"
 
+namespace {
+const std::string UPDATER_CMD = "updater";
+const std::string REBOOT_CMD = "";
+const std::string SHUTDOWN_CMD = "shutdown";
+const std::string FLASH_CMD = "flash";
+}
+
 namespace OHOS {
 namespace PowerMgr {
 void DevicePowerAction::Reboot(const std::string& reason)
 {
-    int32_t propertyMaxSize = PROPERTY_MAX_SIZE;
-    char updateCmd[propertyMaxSize];
-    if (snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "reboot,%s", reason.c_str()) == 0) {
-        return;
-    }
+    std::string rebootReason = Updater(reason);
     POWER_HILOGI(MODULE_SERVICE, "Reboot executing.");
-    DoReboot(updateCmd);
+    DoReboot(rebootReason.c_str());
 }
 
 void DevicePowerAction::Shutdown(const std::string& reason)
 {
-    int32_t propertyMaxSize = PROPERTY_MAX_SIZE;
-    char updateCmd[propertyMaxSize];
-    if (snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "shutdown,%s", reason.c_str()) == 0) {
-        return;
-    }
     POWER_HILOGI(MODULE_SERVICE, "Shutdown executing.");
-    DoReboot(updateCmd);
+    DoReboot(SHUTDOWN_CMD.c_str());
+}
+
+std::string DevicePowerAction::Updater(const std::string& reason)
+{
+    return (reason.find(UPDATER_CMD) != std::string::npos) ? UPDATER_CMD : REBOOT_CMD;
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -27,6 +27,9 @@ public:
     int PROPERTY_MAX_SIZE = 92;
     void Reboot(const std::string& reason) override;
     void Shutdown(const std::string& reason) override;
+
+private:
+    std::string Updater(const std::string& reason);
 };
 } // namespace PowerMgr
 } // namespace OHOS
