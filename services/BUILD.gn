@@ -17,6 +17,7 @@ config("powermgr_private_config") {
   include_dirs = [
     "//utils/system/safwk/native/include",
     "//base/sensors/sensor/interfaces/native/include",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
   ]
 }
 
@@ -73,6 +74,7 @@ ohos_shared_library("powermgrservice") {
     "hisysevent_native:libhisysevent",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "multimodalinput_base:libmmi-client",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "sensor:sensor_interface_native",
