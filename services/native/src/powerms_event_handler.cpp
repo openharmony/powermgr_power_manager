@@ -55,6 +55,10 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
             powerStateMachine->HandleDelayTimer(event->GetInnerEventId());
             break;
         }
+        case POWER_KEY_TIMEOUT_MSG: {
+            pmsptr->HandlePowerKeyTimeout();
+            break;
+        }
         default:
             POWER_HILOGD(MODULE_SERVICE, "PowermsEventHandler::no event id matched.");
     }
