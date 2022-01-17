@@ -31,6 +31,7 @@ public:
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG = 3,
         CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG = 4,
         SYSTEM_WAKE_UP_MSG = 5,
+        POWER_KEY_TIMEOUT_MSG = 6,
     };
 
     PowermsEventHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,

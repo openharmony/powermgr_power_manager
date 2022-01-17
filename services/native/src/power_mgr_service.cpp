@@ -17,7 +17,9 @@
 
 #include <datetime_ex.h>
 #include <file_ex.h>
+#include <hisysevent.h>
 #include <if_system_ability_manager.h>
+#include "input_manager.h"
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <string_ex.h>
@@ -33,10 +35,13 @@ namespace PowerMgr {
 namespace {
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string TASK_RUNNINGLOCK_UNLOCK = "RunningLock_UnLock";
+const std::string REASON_POWER_KEY = "power_key";
 constexpr int APP_FIRST_UID = APP_FIRST_UID_VALUE;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 }
+
+using namespace MMI;
 
 PowerMgrService::PowerMgrService() : SystemAbility(POWER_MANAGER_SERVICE_ID, true) {}
 
@@ -93,6 +98,7 @@ bool PowerMgrService::Init()
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
+    KeyMonitorInit();
     POWER_HILOGI(MODULE_SERVICE, "Init success");
     return true;
 }
@@ -113,7 +119,115 @@ bool PowerMgrService::PowerStateMachineInit()
     return true;
 }
 
-void PowerMgrService::OnStop()
+void PowerMgrService::KeyMonitorInit()
+{
+    std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+    std::vector<int32_t> preKeys;
+
+    keyOption->SetPreKeys(preKeys);
+    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
+    keyOption->SetFinalKeyDown(true);
+    keyOption->SetFinalKeyDownDuration(LONG_PRESS_TIME);
+    int32_t id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            POWER_HILOGI(MODULE_SERVICE, "Receive long press powerkey");
+            this->ShutDownDevice(REASON_POWER_KEY);
+    });
+
+    keyOption.reset();
+    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+    keyOption->SetPreKeys(preKeys);
+    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
+    keyOption->SetFinalKeyDown(true);
+    keyOption->SetFinalKeyDownDuration(0);
+    id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            POWER_HILOGI(MODULE_SERVICE, "Receive short press powerkey");
+            powerkeyPressed_ = true;
+            handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_TIME);
+    });
+
+    keyOption.reset();
+    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+    keyOption->SetPreKeys(preKeys);
+    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
+    keyOption->SetFinalKeyDown(false);
+    id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            powerkeyPressed_ = false;
+            handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
+            this->HandlePowerKeyUp();
+    });
+
+    InputManager::GetInstance()->AddMonitor([this](std::shared_ptr<KeyEvent> event) {
+        this->HandleKeyEvent(event->GetKeyCode());
+    });
+
+    InputManager::GetInstance()->AddMonitor([this](std::shared_ptr<PointerEvent> event) {
+        this->HandlePointEvent();
+    });
+}
+
+void PowerMgrService::HandlePowerKeyUp()
+{
+    POWER_HILOGI(MODULE_SERVICE, "Receive release powerkey");
+
+    if (this->shutdownService_.IsShuttingDown()) {
+        POWER_HILOGI(MODULE_SERVICE, "System is shutting down");
+        return;
+    }
+    int64_t now = static_cast<int64_t>(time(0));
+    if (this->IsScreenOn()) {
+        this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
+    } else {
+        this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, REASON_POWER_KEY);
+    }
+}
+
+void PowerMgrService::HandleKeyEvent(int32_t keyCode)
+{
+    POWER_HILOGI(MODULE_SERVICE, "HandleKeyEvent: %{public}d", keyCode);
+    int64_t now = static_cast<int64_t>(time(0));
+    if (IsScreenOn()) {
+        this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    } else {
+        if (keyCode >= KeyEvent::KEYCODE_0
+            && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
+            POWER_HILOGI(MODULE_SERVICE, "wakeup by keyboard");
+            std::string reason = "keyboard:";
+            reason.append(std::to_string(keyCode));
+            this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, reason);
+        }
+    }
+}
+
+void PowerMgrService::HandlePointEvent()
+{
+    POWER_HILOGI(MODULE_SERVICE, "HandlePointEvent");
+    int64_t now = static_cast<int64_t>(time(0));
+    this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+}
+
+void PowerMgrService::HandlePowerKeyTimeout()
+{
+    POWER_HILOGI(MODULE_SERVICE, "HandlePowerKeyTimeout");
+    if (powerkeyPressed_) {
+        const int logLevel = 2;
+        const std::string tag = "TAG_POWER";
+        HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+            HiviewDFX::HiSysEvent::EventType::FAULT,
+            "LOG_LEVEL",
+            logLevel,
+            "TAG",
+            tag,
+            "MESSAGE",
+            "POWER KEY PRESS TIMEOUT");
+        POWER_HILOGI(MODULE_SERVICE, "PowerKey press Timeout");
+        powerkeyPressed_ = false;
+    }
+}
+
+void PowerMgrService::PowerMgrService::OnStop()
 {
     POWER_HILOGI(MODULE_SERVICE, "stop service");
     if (!ready_) {

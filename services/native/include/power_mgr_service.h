@@ -110,6 +110,7 @@ public:
     {
         powerStateMachine_->SetSleepTime(time);
     }
+    void HandlePowerKeyTimeout();
 
     void EnableMock(IDeviceStateAction* stateAction, IDevicePowerAction* powerAction,
         IRunningLockAction* lockAction)
@@ -130,8 +131,14 @@ public:
         PowerStateMachine::onWakeup();
     }
 private:
+    static constexpr int32_t LONG_PRESS_TIME = 3000;
+    static constexpr int32_t POWER_KEY_PRESS_TIME = 30000;
     bool Init();
     bool PowerStateMachineInit();
+    void KeyMonitorInit();
+    void HandlePowerKeyUp();
+    void HandleKeyEvent(int32_t keyCode);
+    void HandlePointEvent();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
     bool ready_ {false};
@@ -143,6 +150,7 @@ private:
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
     ShutdownService shutdownService_;
     PowerModeModule powerModeModule_;
+    bool powerkeyPressed_ {false};
     uint32_t mockCount_ {0};
 };
 } // namespace PowerMgr
