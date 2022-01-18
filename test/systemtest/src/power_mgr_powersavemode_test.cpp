@@ -26,7 +26,6 @@
 #include "power_state_machine.h"
 #include "sys_param.h"
 #include "power_state_machine_info.h"
-#include "display_info.h"
 #include "running_lock_info.h"
 #include "running_lock.h"
 #include "ipower_mode_callback.h"

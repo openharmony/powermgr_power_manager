@@ -123,7 +123,7 @@ private:
     class StateController {
     public:
         StateController(PowerState state, std::shared_ptr<PowerStateMachine> owner,
-            std::function<TransitResult()> action)
+            std::function<TransitResult(StateChangeReason)> action)
             : state_(state), owner_(owner), action_(action) {}
         ~StateController() = default;
         PowerState GetState()
@@ -137,7 +137,7 @@ private:
         bool CheckState();
         PowerState state_;
         std::weak_ptr<PowerStateMachine> owner_;
-        std::function<TransitResult()> action_;
+        std::function<TransitResult(StateChangeReason)> action_;
     };
 
     struct classcomp {

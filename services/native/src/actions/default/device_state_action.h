@@ -17,11 +17,14 @@
 #define POWERMGR_DEVICE_STATE_ACTION_H
 
 #include "actions/idevice_state_action.h"
+#include "display_power_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
 class DeviceStateAction : public IDeviceStateAction {
 public:
+    DeviceStateAction();
+    ~DeviceStateAction();
     void Suspend(int64_t callTimeMs, SuspendDeviceType type, uint32_t flags) override;
     void ForceSuspend() override;
     void Wakeup(int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
@@ -29,8 +32,16 @@ public:
     void RefreshActivity(const int64_t callTimeMs, UserActivityType type,
         const uint32_t flags) override {}
     DisplayState GetDisplayState() override;
-    uint32_t SetDisplayState(const DisplayState state) override;
+    uint32_t SetDisplayState(const DisplayState state,
+        StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
+
+private:
+    class DisplayPowerCallback : public DisplayPowerMgr::DisplayPowerCallbackStub {
+    public:
+        virtual void OnDisplayStateChanged(uint32_t displayId, DisplayPowerMgr::DisplayState state) override;
+    };
+    sptr<DisplayPowerMgr::IDisplayPowerCallback> dispCallback_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

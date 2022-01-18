@@ -119,6 +119,38 @@ bool PowerMgrService::PowerStateMachineInit()
     return true;
 }
 
+class InputCallback : public IInputEventConsumer {
+    virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
+    virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
+    virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
+};
+
+void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
+{
+    POWER_HILOGE(MODULE_SERVICE, "OnInputEvent keyEvent");
+    // Do noting. It's done by AddMonitor callback
+}
+
+void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
+{
+    POWER_HILOGE(MODULE_SERVICE, "OnInputEvent pointerEvent");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    pms->HandlePointEvent();
+}
+
+void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
+{
+    POWER_HILOGE(MODULE_SERVICE, "OnInputEvent axisEvent");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    pms->HandlePointEvent();
+}
+
 void PowerMgrService::KeyMonitorInit()
 {
     std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
@@ -163,9 +195,8 @@ void PowerMgrService::KeyMonitorInit()
         this->HandleKeyEvent(event->GetKeyCode());
     });
 
-    InputManager::GetInstance()->AddMonitor([this](std::shared_ptr<PointerEvent> event) {
-        this->HandlePointEvent();
-    });
+    std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
+    InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
 }
 
 void PowerMgrService::HandlePowerKeyUp()
