@@ -92,9 +92,10 @@ bool PowerStateMachine::Init()
 void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
-        std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this] {
+        std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(),
+        [this](StateChangeReason reason) {
             mDeviceState_.screenState.lastOnTime = GetTickCount();
-            uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON);
+            uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to AWAKE, Display Err");
                 return TransitResult::HDI_ERR;
@@ -107,7 +108,8 @@ void PowerStateMachine::EmplaceAwake()
 void PowerStateMachine::EmplaceInactive()
 {
     controllerMap_.emplace(PowerState::INACTIVE,
-        std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this] {
+        std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(),
+        [this](StateChangeReason reason) {
             POWER_HILOGI(MODULE_SERVICE, "StateController_INACTIVE: func is Start.");
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
@@ -115,7 +117,7 @@ void PowerStateMachine::EmplaceInactive()
                 POWER_HILOGI(MODULE_SERVICE, "display suspend enabled");
                 state = DisplayState::DISPLAY_SUSPEND;
             }
-            uint32_t ret = this->stateAction_->SetDisplayState(state);
+            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to INACTIVE, Display Err");
                 return TransitResult::HDI_ERR;
@@ -128,13 +130,14 @@ void PowerStateMachine::EmplaceInactive()
 void PowerStateMachine::EmplaceSleep()
 {
     controllerMap_.emplace(PowerState::SLEEP,
-        std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this] {
+        std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(),
+        [this](StateChangeReason reason) {
             DisplayState state = DisplayState::DISPLAY_OFF;
             if (enableDisplaySuspend_) {
                 POWER_HILOGI(MODULE_SERVICE, "display suspend enabled");
                 state = DisplayState::DISPLAY_SUSPEND;
             }
-            uint32_t ret = this->stateAction_->SetDisplayState(state);
+            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to SLEEP, Display Err");
                 return TransitResult::HDI_ERR;
@@ -248,7 +251,7 @@ void PowerStateMachine::RefreshActivityInner(pid_t pid,
             stateAction_->RefreshActivity(callTimeMs, type, needChangeBacklight ?
                 REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
-            stateAction_->SetDisplayState(DisplayState::DISPLAY_ON);
+            stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, GetReasonByUserActivity(type));
         }
         // reset timer
         ResetInactiveTimer();
@@ -608,7 +611,8 @@ void PowerStateMachine::HandleActivityTimeout()
         return;
     }
     if (dispState == DisplayState::DISPLAY_ON) {
-        stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM);
+        stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM,
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
         if (this->GetDisplayOffTime() < 0) {
             POWER_HILOGI(MODULE_SERVICE, "Display Auto OFF is disabled");
             return;
@@ -761,9 +765,11 @@ void PowerStateMachine::SetDisplaySuspend(bool enable)
     if (GetState() == PowerState::INACTIVE) {
         POWER_HILOGI(MODULE_SERVICE, "Change display state");
         if (enable) {
-            stateAction_->SetDisplayState(DisplayState::DISPLAY_SUSPEND);
+            stateAction_->SetDisplayState(DisplayState::DISPLAY_SUSPEND,
+                StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
         } else {
-            stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
+            stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF,
+                StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
         }
     }
 }
@@ -934,7 +940,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(
         POWER_HILOGE(MODULE_SERVICE, "TransitTo: running lock block");
         return TransitResult::LOCKING;
     }
-    ret = action_();
+    ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
         lastReason_ = reason;
         lastTime_ = GetTickCount();
