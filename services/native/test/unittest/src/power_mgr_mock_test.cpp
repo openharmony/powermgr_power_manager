@@ -129,7 +129,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest003, TestSize.Level2)
     }
 
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnittest003:Start mock.");
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -158,7 +158,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest004, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest004: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -186,7 +186,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest005, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest005: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -214,7 +214,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest006, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest006: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -242,7 +242,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest007, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest007: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -270,7 +270,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest008, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest008: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -298,7 +298,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest009, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest009: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -326,7 +326,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest010, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest010: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -354,7 +354,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest011, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest011: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -383,7 +383,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest012, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -413,7 +413,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest013, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -443,7 +443,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest014, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -473,7 +473,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest015, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -503,7 +503,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest016, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -533,7 +533,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest017, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -563,7 +563,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest018, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -593,7 +593,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest019, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -623,7 +623,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest020, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -653,7 +653,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest021, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -683,7 +683,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest022, TestSize.Level2)
     }
 
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN, std::string("test"));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -755,7 +755,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest024, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -920,7 +920,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest030, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
     sleep(SCREEN_DIM_WAIT_TIME_S + 1);
 
     pms->UnLock(token);
@@ -984,7 +984,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest032, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest032: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
@@ -993,7 +993,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest032, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
     sleep(SCREEN_DIM_WAIT_TIME_S + 1);
 
     EXPECT_CALL(*g_lockAction, Unlock(_, _)).Times(1);
@@ -1054,7 +1054,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest034, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1086,7 +1086,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest035, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1118,7 +1118,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest036, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1150,7 +1150,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest037, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1182,7 +1182,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest038, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1252,7 +1252,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest040, TestSize.Level2)
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
     EXPECT_CALL(*g_stateAction,
         RefreshActivity(0, _, _)).Times(0);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->RefreshActivity(0, abnormaltype, true);
@@ -1281,7 +1281,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest041, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(0);
     EXPECT_CALL(*g_stateAction,
         Wakeup(0, _,
@@ -1312,7 +1312,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest042, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(0);
     EXPECT_CALL(*g_stateAction,
         Wakeup(0, _,
@@ -1347,7 +1347,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest043, TestSize.Level2)
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);
@@ -1375,7 +1375,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest044, TestSize.Level2)
     }
 
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN, std::string("test"));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     ON_CALL(*g_stateAction, GetDisplayState())
@@ -1412,7 +1412,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest045, TestSize.Level2)
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3) /2);
@@ -1503,7 +1503,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest048, TestSize.Level2)
     }
 
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1541,7 +1541,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest049, TestSize.Level2)
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
     EXPECT_CALL(*g_stateAction,
         Suspend(0, _, false)).Times(0);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_)).Times(0);
     pms->SuspendDevice(0, abnormaltype, false);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
 
@@ -1570,7 +1570,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest050, TestSize.Level2)
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
     EXPECT_CALL(*g_stateAction,
         Suspend(0, _, false)).Times(0);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_)).Times(0);
     pms->SuspendDevice(0, abnormaltype, false);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
 
@@ -1596,7 +1596,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest051, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
@@ -1718,13 +1718,13 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest055, TestSize.Level2)
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_LID, std::string("test"));
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);
@@ -1750,7 +1750,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest056, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrUnittest056: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     pms->CreateRunningLock(token, info);
@@ -1758,7 +1758,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest056, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
@@ -1791,7 +1791,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest057, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     pms->CreateRunningLock(token, info);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->Lock(token, info, 0);
@@ -1822,10 +1822,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest058, TestSize.Level2)
     }
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SetDisplayOffTime(time);
@@ -1860,7 +1860,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest059, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
     sleep(SCREEN_DIM_WAIT_TIME_S + 1);
 
     pms->UnLock(token);
@@ -1893,10 +1893,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest060, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_)).Times(0);
     sleep(SLEEP_WAIT_TIME_S*10);
     
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_)).Times(0);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
     
 
@@ -1929,7 +1929,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest061, TestSize.Level2)
         pms->Lock(token, info, 0);
         EXPECT_EQ(pms->IsUsed(token), true);
 
-        EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM)).Times(0);
+        EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
         sleep(SCREEN_OFF_WAIT_TIME_S + 1);
 
         pms->UnLock(token);
@@ -1966,7 +1966,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest062, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
 
@@ -2169,7 +2169,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest067, TestSize.Level2)
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
     
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);
@@ -2210,7 +2210,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest068, TestSize.Level2)
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
     pms->CreateRunningLock(token, info);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
@@ -2261,12 +2261,12 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest069, TestSize.Level2)
         pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     sleep(SLEEP_WAIT_TIME_S + 1);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN, std::string("test"));
     sleep(SLEEP_WAIT_TIME_S + 1);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF)).Times(0);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_)).Times(0);
     EXPECT_CALL(*g_lockAction, Unlock(_, _)).Times(1);
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
@@ -2335,12 +2335,12 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest071, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(SCREEN_OFF_WAIT_TIME_S + 1);
@@ -2379,7 +2379,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest072, TestSize.Level2)
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_EQ(pms->ForceSuspendDevice(0), true);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(SCREEN_OFF_WAIT_TIME_S + 1);
@@ -2424,7 +2424,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest073, TestSize.Level2)
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);
@@ -2466,7 +2466,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest074, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     sleep(SCREEN_OFF_WAIT_TIME_S+1);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
@@ -2501,7 +2501,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest075, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S*10);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
@@ -2543,7 +2543,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest076, TestSize.Level2)
     }
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
@@ -2577,7 +2577,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest077, TestSize.Level2)
     EXPECT_CALL(*g_lockAction, Lock(_, _)).Times(1);
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, false))
@@ -2690,7 +2690,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest080, TestSize.Level2)
     sleep(((time/1000)*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(time/1000*1/3+1);
@@ -2730,7 +2730,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest081, TestSize.Level2)
     sleep(((time/1000)*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(((time/1000)*1/3)+1);
@@ -2769,7 +2769,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest082, TestSize.Level2)
     sleep(((time/1000)*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(time/1000*1/3+1);
@@ -2807,7 +2807,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest083, TestSize.Level2)
     sleep(((time/1000)*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(time/1000*1/3+1);
@@ -2845,7 +2845,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest084, TestSize.Level2)
     sleep(((time/1000)*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(time/1000*1/3+1);
@@ -2883,7 +2883,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest085, TestSize.Level2)
     sleep(((time/1000)*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(time/1000*1/3+1);
@@ -2920,10 +2920,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest086, TestSize.Level2)
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnittest086:DeviceStateAction::SetDisplayState.");
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnittest086:Start sleep.");
@@ -2957,10 +2957,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest087, TestSize.Level2)
     }
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SetDisplayOffTime(time);
@@ -2992,10 +2992,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest088, TestSize.Level2)
     }
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SetDisplayOffTime(time);
@@ -3026,10 +3026,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest089, TestSize.Level2)
     }
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SetDisplayOffTime(time);
@@ -3060,10 +3060,10 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest090, TestSize.Level2)
     }
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SetDisplayOffTime(time);
@@ -3106,7 +3106,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest091, TestSize.Level2)
     sleep((SCREEN_OFF_WAIT_TIME_S*2/3)+1);
     ON_CALL(*g_stateAction, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF))
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);

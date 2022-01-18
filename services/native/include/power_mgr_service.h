@@ -78,6 +78,8 @@ public:
     virtual void SetDeviceMode(const uint32_t& mode) override;
     virtual uint32_t GetDeviceMode() override;
 
+    void HandleKeyEvent(int32_t keyCode);
+    void HandlePointEvent();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -137,8 +139,6 @@ private:
     bool PowerStateMachineInit();
     void KeyMonitorInit();
     void HandlePowerKeyUp();
-    void HandleKeyEvent(int32_t keyCode);
-    void HandlePointEvent();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
     bool ready_ {false};
