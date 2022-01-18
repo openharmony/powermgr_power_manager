@@ -15,20 +15,36 @@
 
 #include "device_state_action.h"
 
+#include "display_manager.h"
 #include "display_power_mgr_client.h"
 #include "system_suspend_controller.h"
 #include "power_state_machine_info.h"
+#include "hilog_wrapper.h"
 
 using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
 using namespace DisplayPowerMgr;
+using namespace Rosen;
+
+DeviceStateAction::DeviceStateAction()
+{
+    dispCallback_ = new DisplayPowerCallback();
+    DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
+}
+
+DeviceStateAction::~DeviceStateAction()
+{
+    DisplayPowerMgrClient::GetInstance().RegisterCallback(nullptr);
+    dispCallback_ = nullptr;
+}
 
 void DeviceStateAction::Suspend(int64_t callTimeMs, SuspendDeviceType type, uint32_t flags)
 {
     // Display is controlled by PowerStateMachine
     // Don't suspend until GoToSleep is called
+    DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
 }
 
 void DeviceStateAction::ForceSuspend()
@@ -39,6 +55,7 @@ void DeviceStateAction::ForceSuspend()
 void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const string& details,
     const string& pkgName)
 {
+    DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     SystemSuspendController::GetInstance().Wakeup();
 }
 
@@ -65,7 +82,7 @@ DisplayState DeviceStateAction::GetDisplayState()
     return ret;
 }
 
-uint32_t DeviceStateAction::SetDisplayState(const DisplayState state)
+uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
 {
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
     switch (state) {
@@ -85,7 +102,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state)
             break;
     }
 
-    bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState);
+    bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState, reason);
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
@@ -94,6 +111,28 @@ uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,
 {
     SystemSuspendController::GetInstance().Suspend(onSuspend, onWakeup, force);
     return ActionResult::SUCCESS;
+}
+
+void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t displayId,
+    DisplayPowerMgr::DisplayState state)
+{
+    int32_t mainDisp = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
+    if (mainDisp < 0 || static_cast<uint32_t>(mainDisp) != displayId) {
+        POWER_HILOGI(MODULE_SERVICE, "It's not main display, skip!");
+        return;
+    }
+    switch (state)
+    {
+    case DisplayPowerMgr::DisplayState::DISPLAY_ON:
+        DisplayManager::GetInstance().WakeUpEnd();
+        break;
+    case DisplayPowerMgr::DisplayState::DISPLAY_OFF:
+        DisplayManager::GetInstance().SuspendEnd();
+        break;
+    default:
+        break;
+    }
+    return;
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -31,7 +31,7 @@ public:
         const std::string& details, const std::string& pkgName));
     MOCK_METHOD3(RefreshActivity, void(int64_t callTimeMs, UserActivityType type, uint32_t flags));
     MOCK_METHOD0(GetDisplayState, DisplayState());
-    MOCK_METHOD1(SetDisplayState, uint32_t(DisplayState state));
+    MOCK_METHOD2(SetDisplayState, uint32_t(DisplayState state, StateChangeReason reason));
     MOCK_METHOD3(GoToSleep, uint32_t(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force));
 };
 } // namespace PowerMgr

@@ -37,6 +37,8 @@ ohos_source_set("${powermgr_actions_default_target}") {
   deps = [
     "${powermgr_hdi_path}/client:power_hdf_client",
     "../:powermgr_actions_common",
+    "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
     "//utils/native/base:utils",
   ]
 
