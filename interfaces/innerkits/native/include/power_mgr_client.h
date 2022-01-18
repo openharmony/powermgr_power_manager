@@ -35,14 +35,14 @@ public:
     /**
      * Reboot the device.
      *
-     * @param reason The reason for rebooting the device.
+     * @param reason The reason for rebooting the device. e.g.updater
      */
     void RebootDevice(const std::string& reason);
 
     /**
      * Shut down the device.
      *
-     * @param reason The reason for shutting down the device. e.g.recovery.
+     * @param reason The reason for shutting down the device.
      *
      */
     void ShutDownDevice(const std::string& reason);

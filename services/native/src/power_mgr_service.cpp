@@ -265,8 +265,8 @@ void PowerMgrService::RebootDevice(const std::string& reason)
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (reason.find("recovery") != std::string::npos) {
-        if (!Permission::CheckCallingPermission("ohos.permission.REBOOT_RECOVERY")) {
+    if (reason.find("updater") != std::string::npos) {
+        if (!Permission::CheckCallingPermission("ohos.permission.REBOOT_UPDATER")) {
             POWER_HILOGE(MODULE_SERVICE,
                 "%{public}s Request failed, %{public}d permission check fail",
                 __func__, pid);
