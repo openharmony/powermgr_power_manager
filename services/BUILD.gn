@@ -15,9 +15,10 @@ import("//base/powermgr/power_manager/powermgr.gni")
 
 config("powermgr_private_config") {
   include_dirs = [
-    "//utils/system/safwk/native/include",
     "//base/sensors/sensor/interfaces/native/include",
+    "//drivers/peripheral/power/interfaces/hdi_service/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
+    "//utils/system/safwk/native/include",
   ]
 }
 
@@ -61,6 +62,9 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_utils_path}:powermgr_utils",
     "native/src/actions:powermgr_actions",
     "//drivers/peripheral/display/hal:hdi_display_device",
+    "//drivers/peripheral/power/interfaces/hdi/power/v1_0:libpower_proxy_1.0",
+    "//drivers/peripheral/power/interfaces/hdi_callback:libpower_callback",
+    "//drivers/peripheral/power/interfaces/hdi_service:libpower_interface_service_1.0",
     "//utils/native/base:utils",
   ]
 
