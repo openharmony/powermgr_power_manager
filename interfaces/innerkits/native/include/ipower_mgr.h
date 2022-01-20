@@ -17,6 +17,7 @@
 #define POWERMGR_IPOWER_MANAGER_H
 
 #include <string>
+#include <vector>
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
@@ -56,7 +57,8 @@ public:
         UNREG_POWER_MODE_CALLBACK,
         SET_DISPLAY_SUSPEND,
         SETMODE_DEVICE,
-        GETMODE_DEVICE
+        GETMODE_DEVICE,
+        SHELL_DUMP
     };
 
     virtual void CreateRunningLock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo) = 0;
@@ -93,6 +95,7 @@ public:
     virtual void SetDisplaySuspend(bool enable) = 0;
     virtual void SetDeviceMode(const uint32_t& mode) = 0;
     virtual uint32_t GetDeviceMode() = 0;
+    virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgr");
 };

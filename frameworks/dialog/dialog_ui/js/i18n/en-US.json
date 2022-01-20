@@ -1,0 +1,7 @@
+{
+  "message":{
+    "shutdownButton": "Power Off",
+    "rebootButton": "Restart",
+    "cancelButton": "Cancel"
+  }
+}
