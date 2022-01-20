@@ -364,11 +364,6 @@ group("unittest") {
   deps = [
     ":shutdown_callback_test",
     ":test_power_device_mode",
-    ":test_power_mgr_service",
     ":test_power_shutdown",
-    ":test_power_state_machine",
-    ":test_running_lock",
-
-    #":test_power_mgr_notify",
   ]
 }

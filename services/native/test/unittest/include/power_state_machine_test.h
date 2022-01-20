@@ -21,8 +21,6 @@
 
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
-#include "power_hdf_client.h"
-
 namespace OHOS {
 namespace PowerMgr {
 constexpr int NEXT_WAIT_TIME_S = 1;
@@ -59,7 +57,6 @@ public:
         virtual void OnPowerStateChanged(PowerState state) override;
     };
 private:
-    std::unique_ptr<PowerHdfClient> client_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
