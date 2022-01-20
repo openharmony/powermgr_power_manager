@@ -56,6 +56,7 @@ private:
     int32_t SetDisplaySuspendStub(MessageParcel& data);
     int32_t SetDeviceModeStub(MessageParcel& data);
     int32_t GetDeviceModeStub(MessageParcel& reply);
+    int32_t ShellDumpStub(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace PowerMgr
 } // namespace OHOS

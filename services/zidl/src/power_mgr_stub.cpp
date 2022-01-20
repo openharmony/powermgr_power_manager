@@ -114,6 +114,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         case static_cast<int>(IPowerMgr::GETMODE_DEVICE): {
             return GetDeviceModeStub(reply);
         }
+        case static_cast<int>(IPowerMgr::SHELL_DUMP): {
+            return ShellDumpStub(data, reply);
+        }
         default: {
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
@@ -374,6 +377,33 @@ int32_t PowerMgrStub::GetDeviceModeStub(MessageParcel& reply)
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::GetDeviceModeStub, cmd = %{public}u.", ret);
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
         POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: Get device mode Fail!");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t argc;
+    std::vector<std::string> args;
+
+    if (!data.ReadUint32(argc)) {
+        POWER_HILOGE(MODULE_INNERKIT, "Readback fail!");
+        return E_READ_PARCEL_ERROR;
+    }
+
+    for (uint32_t i = 0; i < argc; i++) {
+        std::string arg = data.ReadString();
+        if (!arg.empty()) {
+            args.push_back(arg);
+        } else {
+            POWER_HILOGE(MODULE_INNERKIT, "read value fail: %{public}d", i);
+        }
+    }
+
+    std::string ret = ShellDump(args, argc);
+    if (!reply.WriteString(ret)) {
+        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: Dump Writeback Fail!");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;

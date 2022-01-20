@@ -77,7 +77,9 @@ public:
     virtual void SetDisplaySuspend(bool enable) override;
     virtual void SetDeviceMode(const uint32_t& mode) override;
     virtual uint32_t GetDeviceMode() override;
+    virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
 
+    void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
     void HandlePointEvent();
     std::shared_ptr<PowermsEventHandler> GetHandler() const

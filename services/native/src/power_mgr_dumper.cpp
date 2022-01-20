@@ -26,7 +26,8 @@ const std::string ARGS_ALL = "-a";
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_RUNNINGLOCK = "-r";
 const std::string ARGS_STATE = "-s";
-const std::string ARGS_HDF = "-d";
+const std::string ARGS_HDF = "-f";
+const std::string ARGS_DIALOG = "-d";
 }
 
 bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& result)
@@ -39,6 +40,10 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
+        return true;
+    }
+    if (args[0] == ARGS_DIALOG) {
+        pms->HandleShutdownRequest();
         return true;
     }
     for (auto it = args.begin(); it != args.end(); it++) {
@@ -84,7 +89,8 @@ void PowerMgrDumper::ShowUsage(std::string& result)
         .append("    -h: show this help.\n")
         .append("    -r: show the information of runninglock.\n")
         .append("    -s: show the information of power state machine.\n")
-        .append("    -d: show the information of power hdf.\n");
+        .append("    -f: show the information of power hdf.\n")
+        .append("    -d: show power off dialog.\n");
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -127,7 +127,7 @@ public:
     void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
     void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
-    int Dump(int32_t fd, const std::vector<std::u16string>& args);
+    std::string Dump(const std::vector<std::string>& args);
 
 private:
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {

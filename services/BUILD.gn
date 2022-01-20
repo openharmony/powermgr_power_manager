@@ -15,9 +15,12 @@ import("//base/powermgr/power_manager/powermgr.gni")
 
 config("powermgr_private_config") {
   include_dirs = [
-    "//utils/system/safwk/native/include",
+    "//base/global/resmgr_standard/interfaces/innerkits/include/",
     "//base/sensors/sensor/interfaces/native/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
+    "//foundation/windowmanager/interfaces/innerkits/wm/",
+    "//third_party/flutter/skia/",
+    "//utils/system/safwk/native/include",
   ]
 }
 
@@ -57,10 +60,12 @@ ohos_shared_library("powermgrservice") {
   public_configs = [ ":powermgr_public_config" ]
 
   deps = [
+    "${powermgr_framework_path}/dialog/dialog_ui/js:dialog_js_files_etc",
     "${powermgr_native_innerkits_path}:powermgr_client",
     "${powermgr_utils_path}:powermgr_utils",
     "native/src/actions:powermgr_actions",
     "//drivers/peripheral/display/hal:hdi_display_device",
+    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
     "//utils/native/base:utils",
   ]
 
