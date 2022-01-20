@@ -29,6 +29,8 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
+#include "ui_service_mgr_client.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -163,7 +165,7 @@ void PowerMgrService::KeyMonitorInit()
     int32_t id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive long press powerkey");
-            this->ShutDownDevice(REASON_POWER_KEY);
+            handler_->RemoveEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
     });
 
     keyOption.reset();
@@ -197,6 +199,39 @@ void PowerMgrService::KeyMonitorInit()
 
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
     InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
+}
+
+void PowerMgrService::HandleShutdownRequest()
+{
+    POWER_HILOGI(MODULE_SERVICE, "HandleShutdown");
+    // show dialog
+    const std::string params = "{\"shutdownButton\":\"Power Off\", " \
+        "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
+    const int POSTION_X = 0;
+    const int POSTION_Y = 0;
+    const int WIDTH = 300;
+    const int HEIGHT = 300;
+    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
+        "power_dialog",
+        params,
+        OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
+        POSTION_X,
+        POSTION_Y,
+        WIDTH,
+        HEIGHT,
+        [this](int32_t id, const std::string& event, const std::string& params) {
+            POWER_HILOGI(MODULE_SERVICE, "Dialog callback: %{public}s, %{public}s",
+                event.c_str(), params.c_str());
+            if (event == "EVENT_SHUTDOWN") {
+                this->ShutDownDevice(REASON_POWER_KEY);
+            } else if (event == "EVENT_REBOOT") {
+                this->RebootDevice(REASON_POWER_KEY);
+            } else if (event == "EVENT_CANCEL") {
+                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
+            }
+        });
+
+    return;
 }
 
 void PowerMgrService::HandlePowerKeyUp()
@@ -692,6 +727,18 @@ uint32_t PowerMgrService::GetDeviceMode()
     pid_t pid = IPCSkeleton::GetCallingPid();
     POWER_HILOGI(MODULE_SERVICE, "PID: %{public}d Call %{public}s !", pid, __func__);
     return powerModeModule_.GetModeItem();
+}
+
+std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uint32_t argc)
+{
+    std::lock_guard lock(mutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    POWER_HILOGI(MODULE_SERVICE, "PID: %{public}d Call %{public}s !", pid, __func__);
+
+    std::string result;
+    bool ret = PowerMgrDumper::Dump(args, result);
+    POWER_HILOGI(MODULE_SERVICE, "PowerMgrDumper :%{public}d", ret);
+    return result;
 }
 } // namespace PowerMgr
 } // namespace OHOS

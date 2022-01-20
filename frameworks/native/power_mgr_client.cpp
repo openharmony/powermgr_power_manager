@@ -257,12 +257,12 @@ uint32_t PowerMgrClient::GetDeviceMode()
     return proxy_->GetDeviceMode();
 }
 
-int PowerMgrClient::Dump(int32_t fd, const std::vector<std::u16string>& args)
+std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, ERR_NO_INIT);
+    std::string error = "can't connect service";
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, error);
     POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
-    auto serviceRemote = proxy_->AsObject();
-    return serviceRemote->Dump(fd, args);
+    return proxy_->ShellDump(args, args.size());
 }
 } // namespace PowerMgr
 }  // namespace OHOS

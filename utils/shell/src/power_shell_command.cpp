@@ -118,33 +118,18 @@ extern "C" void PrintDumpFileError(std::string& receiver, const char* path)
     receiver.append(path);
     receiver.append(") failed: ");
     receiver.append(std::to_string(errno));
+    receiver.append("\n");
 }
 
 ErrCode PowerShellCommand::RunAsDumpCommand()
 {
     resultReceiver_.clear();
-    int fd = open(TEMP_DUMP_LOG_PATH,
-        O_RDWR | O_APPEND | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
-    if (fd < 0) {
-        PrintDumpFileError(resultReceiver_, TEMP_DUMP_LOG_PATH);
-        return ERR_OK;
-    }
-    std::vector<std::u16string> args;
-    for (int i = 2; i < argc_; i++) {
-        std::string str(argv_[i]);
-        args.push_back(Str8ToStr16(str));
-    }
+
     PowerMgrClient &client = PowerMgrClient::GetInstance();
-    int ret = client.Dump(fd, args);
-    resultReceiver_.append("Power Dump result: ");
-    resultReceiver_.append(std::to_string(ret));
-    resultReceiver_.append("\n");
-    char buff[DUMP_BUFF_SIZE];
-    while (read(fd, buff, sizeof(buff) - 1) > 0) {
-        resultReceiver_.append(buff);
-    }
-    close(fd);
-    remove(TEMP_DUMP_LOG_PATH);
+    std::string ret = client.Dump(argList_);
+    resultReceiver_.append("Power Dump result: \n");
+    resultReceiver_.append(ret);
+
     return ERR_OK;
 }
 }

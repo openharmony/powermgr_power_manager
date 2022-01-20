@@ -1,0 +1,7 @@
+{
+  "message": {
+    "shutdownButton": "关机",
+    "rebootButton": "重启",
+    "cancelButton": "取消"
+  }
+}

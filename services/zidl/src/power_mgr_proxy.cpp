@@ -641,5 +641,36 @@ uint32_t PowerMgrProxy::GetDeviceMode()
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::GetDeviceMode, cmd = %{public}u.", used);
     return used;
 }
+
+std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint32_t argc)
+{
+    sptr<IRemoteObject> remote = Remote();
+    std::string result = "remote error";
+    RETURN_IF_WITH_RET(remote == nullptr, result);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        return 0;
+    }
+
+    data.WriteUint32(argc);
+    for (uint32_t i = 0; i < argc; i++) {
+        data.WriteString(args[i]);
+    }
+    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SHELL_DUMP),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(MODULE_INNERKIT,
+            "PowerMgrProxy::%{public}s SendRequest is failed, error code: %{public}d", __func__, ret);
+        return result;
+    }
+    result = reply.ReadString();
+
+    return result;
+}
 } // namespace PowerMgr
 } // namespace OHOS
