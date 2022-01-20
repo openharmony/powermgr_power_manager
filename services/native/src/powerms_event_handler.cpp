@@ -59,6 +59,10 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
             pmsptr->HandlePowerKeyTimeout();
             break;
         }
+        case SHUTDOWN_REQUEST_MSG: {
+            pmsptr->HandleShutdownRequest();
+            break;
+        }
         default:
             POWER_HILOGD(MODULE_SERVICE, "PowermsEventHandler::no event id matched.");
     }

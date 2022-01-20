@@ -1,0 +1,11 @@
+<div class="container" onswipe="touchMove">
+    <button class="btn" onclick="onShutdown">
+        {{ shutdownButton }}
+    </button>
+    <button class="btn" onclick="onReboot">
+        {{ rebootButton }}
+    </button>
+    <button class="btn" onclick="onCancel">
+        {{ cancelButton }}
+    </button>
+</div>
