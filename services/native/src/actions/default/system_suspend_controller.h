@@ -21,8 +21,8 @@
 
 #include <singleton.h>
 
-#include "power_hdf_client.h"
 #include "suspend/irunning_lock_hub.h"
+#include "power_hdi_callback_service.h"
 #include "suspend/isuspend_controller.h"
 
 namespace OHOS {
@@ -39,12 +39,12 @@ private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static const std::string WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
-    class PowerHdfCallback : public IPowerHdfCallback {
+    class PowerHdfCallback : public hdi::power::v1_0::PowerHdiCallbackStub {
     public:
         PowerHdfCallback() = default;
         ~PowerHdfCallback() = default;
-        void OnSuspend() override;
-        void OnWakeup() override;
+        int32_t OnSuspend() override;
+        int32_t OnWakeup() override;
         void SetListener(std::function<void()>& suspend, std::function<void()>& wakeup);
     private:
         std::function<void()> onSuspend_;
@@ -52,8 +52,6 @@ private:
     };
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
-    std::unique_ptr<PowerHdfClient> client_;
-    sptr<PowerHdfCallback> callback_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
