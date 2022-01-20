@@ -38,7 +38,6 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "${powermgr_hdi_path}/client:power_hdf_client",
     "../:powermgr_actions_common",
     "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
     "//utils/native/base:utils",
   ]
 
@@ -47,7 +46,9 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
     "startup_l2:syspara",
+    "window_manager:libdm",
   ]
 
   part_name = "${powermgr_native_part_name}"
