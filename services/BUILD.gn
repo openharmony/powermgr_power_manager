@@ -17,6 +17,7 @@ config("powermgr_private_config") {
   include_dirs = [
     "//base/global/resmgr_standard/interfaces/innerkits/include/",
     "//base/sensors/sensor/interfaces/native/include",
+    "//drivers/peripheral/power/interfaces/hdi_service/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
     "//foundation/windowmanager/interfaces/innerkits/wm/",
     "//third_party/flutter/skia/",
@@ -65,6 +66,9 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_utils_path}:powermgr_utils",
     "native/src/actions:powermgr_actions",
     "//drivers/peripheral/display/hal:hdi_display_device",
+    "//drivers/peripheral/power/interfaces/hdi/power/v1_0:libpower_proxy_1.0",
+    "//drivers/peripheral/power/interfaces/hdi_callback:libpower_callback",
+    "//drivers/peripheral/power/interfaces/hdi_service:libpower_interface_service_1.0",
     "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
     "//utils/native/base:utils",
   ]
