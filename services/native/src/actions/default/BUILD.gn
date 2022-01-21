@@ -17,8 +17,9 @@ import("../actions.gni")
 config("powermgr_actions_impl_public_config") {
   include_dirs = [
     ".",
-    "${powermgr_hdi_path}/api/include",
     "//base/startup/syspara_lite/adapter/native/syspara/include",
+    "//drivers/peripheral/power/interfaces/include/",
+    "//drivers/peripheral/power/interfaces",
   ]
 }
 
@@ -35,8 +36,9 @@ ohos_source_set("${powermgr_actions_default_target}") {
   public_configs = [ ":powermgr_actions_impl_public_config" ]
 
   deps = [
-    "${powermgr_hdi_path}/client:power_hdf_client",
     "../:powermgr_actions_common",
+    "//drivers/peripheral/power/interfaces/hdi/power/v1_0:libpower_proxy_1.0",
+    "//drivers/peripheral/power/interfaces/hdi_callback:libpower_callback",
     "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
   ]

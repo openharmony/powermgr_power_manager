@@ -15,17 +15,22 @@
 
 #include "system_suspend_controller.h"
 
+#include "power_interface_proxy.h"
+
 #include "suspend/running_lock_hub.h"
 #include "suspend/suspend_controller.h"
 
+using namespace hdi::power::v1_0;
+
 namespace OHOS {
 namespace PowerMgr {
+sptr<IPowerInterface> powerInterface = nullptr;
 SystemSuspendController::SystemSuspendController()
 {
 #ifndef POWER_SUSPEND_NO_HDI
-    callback_ = new PowerHdfCallback();
-    client_ = std::make_unique<PowerHdfClient>();
-    client_->RegisterCallback(callback_);
+    sptr<IPowerHdiCallback> g_callback = new PowerHdiCallbackService();
+    powerInterface = IPowerInterface::Get();
+    powerInterface->RegisterCallback(g_callback);
 #else
     sc_ = std::make_shared<Suspend::SuspendController>();
 #endif
@@ -38,9 +43,9 @@ void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (force) {
-        client_->ForceSuspend();
+        powerInterface->ForceSuspend();
     } else {
-        client_->StartSuspend();
+        powerInterface->StartSuspend();
     }
 #else
     sc_->Suspend(onSuspend, onWakeup, force);
@@ -50,7 +55,7 @@ void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
 void SystemSuspendController::Wakeup()
 {
 #ifndef POWER_SUSPEND_NO_HDI
-    client_->StopSuspend();
+    powerInterface->StopSuspend();
 #else
     sc_->Wakeup();
 #endif
@@ -59,36 +64,38 @@ void SystemSuspendController::Wakeup()
 void SystemSuspendController::AcquireRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
-    client_->SuspendBlock(name);
+    powerInterface->SuspendBlock(name);
 #endif
 }
 
 void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
-    client_->SuspendUnblock(name);
+    powerInterface->SuspendUnblock(name);
 #endif
 }
 
 void SystemSuspendController::Dump(std::string& info)
 {
 #ifndef POWER_SUSPEND_NO_HDI
-    client_->Dump(info);
+    powerInterface->PowerDump(info);
 #endif
 }
 
-void SystemSuspendController::PowerHdfCallback::OnSuspend()
+int32_t SystemSuspendController::PowerHdfCallback::OnSuspend()
 {
     if (onSuspend_ != nullptr) {
         onSuspend_();
     }
+    return 0;
 }
 
-void SystemSuspendController::PowerHdfCallback::OnWakeup()
+int32_t SystemSuspendController::PowerHdfCallback::OnWakeup()
 {
     if (onWakeup_ != nullptr) {
         onWakeup_();
     }
+    return 0;
 }
 
 void SystemSuspendController::PowerHdfCallback::SetListener(
