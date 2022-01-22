@@ -26,6 +26,7 @@ class PowerMgrService;
 class PowermsEventHandler : public AppExecFwk::EventHandler {
 public:
     enum {
+        INIT_KEY_MONITOR_MSG = 0,
         CHECK_RUNNINGLOCK_OVERTIME_MSG = 1,
         CHECK_USER_ACTIVITY_TIMEOUT_MSG = 2,
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG = 3,
