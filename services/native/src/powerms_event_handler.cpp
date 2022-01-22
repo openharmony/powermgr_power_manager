@@ -36,6 +36,10 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
     POWER_HILOGI(MODULE_SERVICE, "PowermsEventHandler::%{public}s ,eventid = %d", __func__,
         event->GetInnerEventId());
     switch (event->GetInnerEventId()) {
+        case INIT_KEY_MONITOR_MSG: {
+            pmsptr->KeyMonitorInit();
+            break;
+        }
         case CHECK_RUNNINGLOCK_OVERTIME_MSG: {
             auto runningLockMgr = pmsptr->GetRunningLockMgr();
             if (runningLockMgr == nullptr) {

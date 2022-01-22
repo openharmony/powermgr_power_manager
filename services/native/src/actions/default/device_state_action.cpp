@@ -30,14 +30,11 @@ using namespace Rosen;
 
 DeviceStateAction::DeviceStateAction()
 {
-    dispCallback_ = new DisplayPowerCallback();
-    DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
+    dispCallback_ = nullptr;
 }
 
 DeviceStateAction::~DeviceStateAction()
 {
-    DisplayPowerMgrClient::GetInstance().RegisterCallback(nullptr);
-    dispCallback_ = nullptr;
 }
 
 void DeviceStateAction::Suspend(int64_t callTimeMs, SuspendDeviceType type, uint32_t flags)
@@ -55,7 +52,6 @@ void DeviceStateAction::ForceSuspend()
 void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const string& details,
     const string& pkgName)
 {
-    DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     SystemSuspendController::GetInstance().Wakeup();
 }
 
@@ -84,16 +80,32 @@ DisplayState DeviceStateAction::GetDisplayState()
 
 uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
 {
+    POWER_HILOGI(MODULE_SERVICE, "Action: SetDisplayState: %{public}d, %{public}d",
+        static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
+
+    if (state == GetDisplayState()) {
+        POWER_HILOGI(MODULE_SERVICE, "Already ins state: %{public}d", static_cast<uint32_t>(state));
+        return ActionResult::SUCCESS;
+    }
+
+    if (dispCallback_ == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "Register Callback");
+        dispCallback_ = new DisplayPowerCallback();
+        DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
+    }
+
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
     switch (state) {
         case DisplayState::DISPLAY_ON:
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
+            DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
             break;
         case DisplayState::DISPLAY_DIM:
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_DIM;
             break;
         case DisplayState::DISPLAY_OFF:
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
+            DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
             break;
         case DisplayState::DISPLAY_SUSPEND:
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND;
@@ -116,6 +128,7 @@ uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,
 void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t displayId,
     DisplayPowerMgr::DisplayState state)
 {
+    POWER_HILOGI(MODULE_SERVICE, "Callback: OnDisplayStateChanged");
     int32_t mainDisp = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
     if (mainDisp < 0 || static_cast<uint32_t>(mainDisp) != displayId) {
         POWER_HILOGI(MODULE_SERVICE, "It's not main display, skip!");
