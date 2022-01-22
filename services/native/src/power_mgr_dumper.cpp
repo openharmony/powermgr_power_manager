@@ -28,6 +28,7 @@ const std::string ARGS_RUNNINGLOCK = "-r";
 const std::string ARGS_STATE = "-s";
 const std::string ARGS_HDF = "-f";
 const std::string ARGS_DIALOG = "-d";
+const std::string ARGS_REG_KEY = "-k";
 }
 
 bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& result)
@@ -44,6 +45,10 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
     }
     if (args[0] == ARGS_DIALOG) {
         pms->HandleShutdownRequest();
+        return true;
+    }
+    if (args[0] == ARGS_REG_KEY) {
+        pms->KeyMonitorInit();
         return true;
     }
     for (auto it = args.begin(); it != args.end(); it++) {
