@@ -82,7 +82,6 @@ public:
     void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
     void HandlePointEvent();
-    void KeyMonitorInit();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -138,9 +137,9 @@ public:
 private:
     static constexpr int32_t LONG_PRESS_TIME = 3000;
     static constexpr int32_t POWER_KEY_PRESS_TIME = 30000;
-    static constexpr int32_t INIT_KEY_MONITOR_DELAY = 1000;
     bool Init();
     bool PowerStateMachineInit();
+    void KeyMonitorInit();
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);

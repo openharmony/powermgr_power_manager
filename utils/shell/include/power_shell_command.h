@@ -36,8 +36,6 @@ private:
     ErrCode RunAsHelpCommand();
     ErrCode RunAsDumpCommand();
     ErrCode RunAsSetModeCommand();
-    ErrCode RunAsWakeupCommand();
-    ErrCode RunAsSuspendCommand();
 };
 }  // namespace PowerMgr
 }  // namespace OHOS
