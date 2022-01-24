@@ -30,7 +30,6 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "ui_service_mgr_client.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace PowerMgr {
