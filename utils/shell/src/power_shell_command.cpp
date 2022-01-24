@@ -37,8 +37,6 @@ static const std::string HELP_MSG =
     "usage: power-shell\n"
     "command list:\n"
     "  setmode :    Set power mode. \n"
-    "  wakeup  :    Wakeup system and turn screen on. \n"
-    "  suspend :    Suspend system and turn screen off. \n"
     "  dump    :    Dump power info. \n"
     "  help    :    Show this help menu. \n";
 
@@ -57,8 +55,6 @@ ErrCode PowerShellCommand::CreateCommandMap()
     commandMap_ = {
         {"help", std::bind(&PowerShellCommand::RunAsHelpCommand, this)},
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
-        {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
-        {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
 
@@ -113,24 +109,6 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
         resultReceiver_.append(std::to_string(result));
     }
 
-    return ERR_OK;
-}
-
-ErrCode PowerShellCommand::RunAsWakeupCommand()
-{
-    PowerMgrClient &client = PowerMgrClient::GetInstance();
-    std::string detail = "shell";
-    client.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, detail);
-    resultReceiver_.append("WakeupDevice is called");
-    return ERR_OK;
-}
-
-ErrCode PowerShellCommand::RunAsSuspendCommand()
-{
-    PowerMgrClient &client = PowerMgrClient::GetInstance();
-    std::string detail = "shell";
-    client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON);
-    resultReceiver_.append("SuspendDevice is called");
     return ERR_OK;
 }
 

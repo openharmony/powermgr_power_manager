@@ -100,7 +100,7 @@ bool PowerMgrService::Init()
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
-    handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY);
+    KeyMonitorInit();
     POWER_HILOGI(MODULE_SERVICE, "Init success");
     return true;
 }
@@ -155,7 +155,6 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 
 void PowerMgrService::KeyMonitorInit()
 {
-    POWER_HILOGI(MODULE_SERVICE, "KeyMonitorInit");
     std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
     std::vector<int32_t> preKeys;
 
@@ -168,10 +167,6 @@ void PowerMgrService::KeyMonitorInit()
             POWER_HILOGI(MODULE_SERVICE, "Receive long press powerkey");
             handler_->RemoveEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
     });
-    if (id < 0) {
-        handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY);
-        return;
-    }
 
     keyOption.reset();
     keyOption = std::make_shared<OHOS::MMI::KeyOption>();
@@ -191,7 +186,6 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(false);
-    keyOption->SetFinalKeyDownDuration(0);
     id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             powerkeyPressed_ = false;
