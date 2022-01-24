@@ -13,22 +13,11 @@
 
 import("//base/powermgr/power_manager/powermgr.gni")
 
-config("powermgr_private_config") {
-  include_dirs = [
-    "//base/global/resmgr_standard/interfaces/innerkits/include/",
-    "//base/sensors/sensor/interfaces/native/include",
-    "//drivers/peripheral/power/interfaces/hdi_service/include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
-    "//foundation/windowmanager/interfaces/innerkits/wm/",
-    "//third_party/flutter/skia/",
-    "//utils/system/safwk/native/include",
-  ]
-}
-
 config("powermgr_public_config") {
   include_dirs = [
     "native/include",
     "zidl/include",
+    "//base/sensors/sensor/interfaces/native/include",
   ]
 }
 
@@ -53,10 +42,7 @@ ohos_shared_library("powermgrservice") {
     "zidl/src/power_state_callback_stub.cpp",
   ]
 
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":powermgr_private_config",
-  ]
+  configs = [ "${powermgr_utils_path}:utils_config" ]
 
   public_configs = [ ":powermgr_public_config" ]
 
@@ -65,10 +51,7 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_native_innerkits_path}:powermgr_client",
     "${powermgr_utils_path}:powermgr_utils",
     "native/src/actions:powermgr_actions",
-    "//drivers/peripheral/display/hal:hdi_display_device",
     "//drivers/peripheral/power/interfaces/hdi/power/v1_0:libpower_proxy_1.0",
-    "//drivers/peripheral/power/interfaces/hdi_callback:libpower_callback",
-    "//drivers/peripheral/power/interfaces/hdi_service:libpower_interface_service_1.0",
     "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
     "//utils/native/base:utils",
   ]
