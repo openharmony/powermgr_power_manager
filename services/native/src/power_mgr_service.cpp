@@ -130,7 +130,11 @@ class InputCallback : public IInputEventConsumer {
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
     POWER_HILOGE(MODULE_SERVICE, "OnInputEvent keyEvent");
-    // Do noting. It's done by AddMonitor callback
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    pms->HandleKeyEvent(keyEvent->GetKeyCode());
 }
 
 void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
@@ -140,7 +144,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (pms == nullptr) {
         return;
     }
-    pms->HandlePointEvent();
+    int32_t type = pointerEvent->GetSourceType();
+    pms->HandlePointEvent(type);
 }
 
 void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
@@ -150,7 +155,6 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
     if (pms == nullptr) {
         return;
     }
-    pms->HandlePointEvent();
 }
 
 void PowerMgrService::KeyMonitorInit()
@@ -166,9 +170,10 @@ void PowerMgrService::KeyMonitorInit()
     int32_t id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive long press powerkey");
-            handler_->RemoveEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
+            handler_->SendEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
     });
     if (id < 0) {
+        POWER_HILOGI(MODULE_SERVICE, "SubscribeKeyEvent failed: %{public}d", id);
         handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY);
         return;
     }
@@ -197,6 +202,18 @@ void PowerMgrService::KeyMonitorInit()
             powerkeyPressed_ = false;
             handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
             this->HandlePowerKeyUp();
+    });
+
+    keyOption.reset();
+    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+    keyOption->SetPreKeys(preKeys);
+    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_F1);
+    keyOption->SetFinalKeyDown(true);
+    keyOption->SetFinalKeyDownDuration(0);
+    id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            POWER_HILOGI(MODULE_SERVICE, "Receive double click");
+            this->HandleKeyEvent(keyEvent->GetKeyCode());
     });
 
     InputManager::GetInstance()->AddMonitor([this](std::shared_ptr<KeyEvent> event) {
@@ -263,21 +280,33 @@ void PowerMgrService::HandleKeyEvent(int32_t keyCode)
     if (IsScreenOn()) {
         this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     } else {
-        if (keyCode >= KeyEvent::KEYCODE_0
+        if (keyCode == KeyEvent::KEYCODE_F1) {
+            POWER_HILOGI(MODULE_SERVICE, "wakeup by double click");
+            std::string reason = "double click";
+            reason.append(std::to_string(keyCode));
+            this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK, reason);
+        } else if (keyCode >= KeyEvent::KEYCODE_0
             && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
             POWER_HILOGI(MODULE_SERVICE, "wakeup by keyboard");
             std::string reason = "keyboard:";
             reason.append(std::to_string(keyCode));
-            this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, reason);
+            this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD, reason);
         }
     }
 }
 
-void PowerMgrService::HandlePointEvent()
+void PowerMgrService::HandlePointEvent(int32_t type)
 {
-    POWER_HILOGI(MODULE_SERVICE, "HandlePointEvent");
+    POWER_HILOGI(MODULE_SERVICE, "HandlePointEvent: %{public}d", type);
     int64_t now = static_cast<int64_t>(time(0));
-    this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    if (this->IsScreenOn()) {
+        this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    } else {
+        if (type == PointerEvent::SOURCE_TYPE_MOUSE) {
+            std::string reason = "mouse click";
+            this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_MOUSE, reason);
+        }
+    }
 }
 
 void PowerMgrService::HandlePowerKeyTimeout()
