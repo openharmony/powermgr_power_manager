@@ -58,6 +58,8 @@ enum class TransitResult {
     ALREADY_IN_STATE = 1,
     LOCKING = 2,
     HDI_ERR = 3,
+    DISPLAY_ON_ERR = 4,
+    DISPLAY_OFF_ERR = 5,
     OTHER_ERR = 99
 };
 
@@ -131,8 +133,13 @@ private:
             return state_;
         }
         TransitResult TransitTo(StateChangeReason reason, bool ignoreLock = false);
+        void RecordFailure(PowerState from, StateChangeReason trigger, TransitResult failReason);
         StateChangeReason lastReason_;
         int64_t lastTime_;
+        PowerState failFrom_;
+        StateChangeReason failTrigger_;
+        std::string failReasion_;
+        int64_t failTime_;
     protected:
         bool CheckState();
         PowerState state_;
