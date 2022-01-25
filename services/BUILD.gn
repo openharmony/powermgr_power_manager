@@ -76,8 +76,8 @@ ohos_shared_library("powermgrservice") {
   external_deps = [
     "ability_runtime:base",
     "ability_runtime:want",
-    "appexecfwk_standard:appexecfwk_base",
     "appexecfwk_standard:libeventhandler",
+    "bundle_framework:appexecfwk_base",
     "ces_standard:cesfwk_innerkits",
     "display_manager_native:displaymgr",
     "hisysevent_native:libhisysevent",
