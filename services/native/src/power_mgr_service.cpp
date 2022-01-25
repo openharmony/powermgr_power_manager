@@ -91,14 +91,15 @@ bool PowerMgrService::Init()
         POWER_HILOGE(MODULE_SERVICE, "OnStart init fail");
         return false;
     }
-    if (!PowerStateMachineInit()) {
-        POWER_HILOGE(MODULE_SERVICE, "power state machine init fail!");
-    }
     if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
         powerModeModule_.SetModeItem(PowerModeModule::NORMAL_MODE);
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
+    if (!PowerStateMachineInit()) {
+        POWER_HILOGE(MODULE_SERVICE, "power state machine init fail!");
+    }
+
     handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY);
     POWER_HILOGI(MODULE_SERVICE, "Init success");
     return true;
