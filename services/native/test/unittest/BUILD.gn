@@ -55,7 +55,7 @@ deps_ex = [
   "ability_runtime:base",
   "ability_runtime:want",
   "bundle_framework:appexecfwk_base",
-  "appexecfwk_standard:libeventhandler",
+  "eventhandler:libeventhandler",
   "ces_standard:cesfwk_innerkits",
   "ipc:ipc_core",
   "hiviewdfx_hilog_native:libhilog",
