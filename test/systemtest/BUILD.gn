@@ -61,7 +61,7 @@ config("module_private_config") {
 deps_ex = [
   "ability_runtime:base",
   "ability_runtime:want",
-  "appexecfwk_standard:appexecfwk_base",
+  "bundle_framework:appexecfwk_base",
   "appexecfwk_standard:libeventhandler",
   "ces_standard:cesfwk_innerkits",
   "ipc:ipc_core",
@@ -146,8 +146,8 @@ ohos_systemtest("test_power_mgr_powersavemode") {
   external_deps = [
     "ability_runtime:base",
     "ability_runtime:want",
-    "appexecfwk_standard:appexecfwk_base",
     "appexecfwk_standard:libeventhandler",
+    "bundle_framework:appexecfwk_base",
     "ces_standard:cesfwk_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
