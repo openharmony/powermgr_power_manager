@@ -58,7 +58,6 @@ void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const 
 DisplayState DeviceStateAction::GetDisplayState()
 {
     DisplayPowerMgr::DisplayState state = DisplayPowerMgrClient::GetInstance().GetDisplayState();
-    POWER_HILOGI(MODULE_SERVICE, "GetDisplayState: %{public}d", state);
     DisplayState ret = DisplayState::DISPLAY_ON;
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON:
@@ -85,7 +84,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
 
     if (state == GetDisplayState()) {
-        POWER_HILOGI(MODULE_SERVICE, "Already in state: %{public}d", static_cast<uint32_t>(state));
+        POWER_HILOGI(MODULE_SERVICE, "Already ins state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
 
@@ -116,7 +115,6 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
     }
 
     bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState, reason);
-    POWER_HILOGI(MODULE_SERVICE, "SetDisplayState: %{public}d", ret);
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
