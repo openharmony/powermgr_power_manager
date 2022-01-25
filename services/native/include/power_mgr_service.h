@@ -81,7 +81,7 @@ public:
 
     void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
-    void HandlePointEvent();
+    void HandlePointEvent(int32_t type);
     void KeyMonitorInit();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
