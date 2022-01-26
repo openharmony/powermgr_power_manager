@@ -17,6 +17,7 @@
 
 #include "power_interface_proxy.h"
 
+#include "hilog_wrapper.h"
 #include "suspend/running_lock_hub.h"
 #include "suspend/suspend_controller.h"
 
@@ -30,6 +31,10 @@ SystemSuspendController::SystemSuspendController()
 #ifndef POWER_SUSPEND_NO_HDI
     sptr<IPowerHdiCallback> g_callback = new PowerHdiCallbackService();
     powerInterface = IPowerInterface::Get();
+    if (powerInterface == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        return;
+    }
     powerInterface->RegisterCallback(g_callback);
 #else
     sc_ = std::make_shared<Suspend::SuspendController>();
@@ -42,6 +47,10 @@ void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
     const std::function<void()>& onWakeup, bool force)
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    if (powerInterface == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        return;
+    }
     if (force) {
         powerInterface->ForceSuspend();
     } else {
@@ -55,6 +64,10 @@ void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
 void SystemSuspendController::Wakeup()
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    if (powerInterface == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        return;
+    }
     powerInterface->StopSuspend();
 #else
     sc_->Wakeup();
@@ -64,6 +77,10 @@ void SystemSuspendController::Wakeup()
 void SystemSuspendController::AcquireRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    if (powerInterface == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        return;
+    }
     powerInterface->SuspendBlock(name);
 #endif
 }
@@ -71,6 +88,10 @@ void SystemSuspendController::AcquireRunningLock(const std::string& name)
 void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    if (powerInterface == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        return;
+    }
     powerInterface->SuspendUnblock(name);
 #endif
 }
@@ -78,6 +99,10 @@ void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 void SystemSuspendController::Dump(std::string& info)
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    if (powerInterface == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        return;
+    }
     powerInterface->PowerDump(info);
 #endif
 }

@@ -17,8 +17,8 @@
 
 #include "display_manager.h"
 #include "display_power_mgr_client.h"
-#include "system_suspend_controller.h"
 #include "power_state_machine_info.h"
+#include "system_suspend_controller.h"
 #include "hilog_wrapper.h"
 
 using namespace std;
@@ -41,7 +41,6 @@ void DeviceStateAction::Suspend(int64_t callTimeMs, SuspendDeviceType type, uint
 {
     // Display is controlled by PowerStateMachine
     // Don't suspend until GoToSleep is called
-    DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
 }
 
 void DeviceStateAction::ForceSuspend()
@@ -58,6 +57,7 @@ void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const 
 DisplayState DeviceStateAction::GetDisplayState()
 {
     DisplayPowerMgr::DisplayState state = DisplayPowerMgrClient::GetInstance().GetDisplayState();
+    POWER_HILOGI(MODULE_SERVICE, "GetDisplayState: %{public}d", state);
     DisplayState ret = DisplayState::DISPLAY_ON;
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON:
@@ -84,7 +84,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
 
     if (state == GetDisplayState()) {
-        POWER_HILOGI(MODULE_SERVICE, "Already ins state: %{public}d", static_cast<uint32_t>(state));
+        POWER_HILOGI(MODULE_SERVICE, "Already in state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
 
@@ -113,8 +113,9 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
         default:
             break;
     }
-
+    dispCallback_->notify_ = actionCallback_;
     bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState, reason);
+    POWER_HILOGI(MODULE_SERVICE, "SetDisplayState: %{public}d", ret);
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
@@ -123,6 +124,11 @@ uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,
 {
     SystemSuspendController::GetInstance().Suspend(onSuspend, onWakeup, force);
     return ActionResult::SUCCESS;
+}
+
+void DeviceStateAction::RegisterCallback(std::function<void(uint32_t)> callback)
+{
+    actionCallback_ = callback;
 }
 
 void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t displayId,
@@ -134,18 +140,26 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
         POWER_HILOGI(MODULE_SERVICE, "It's not main display, skip!");
         return;
     }
-    switch (state)
-    {
-    case DisplayPowerMgr::DisplayState::DISPLAY_ON:
-        DisplayManager::GetInstance().WakeUpEnd();
-        break;
-    case DisplayPowerMgr::DisplayState::DISPLAY_OFF:
-        DisplayManager::GetInstance().SuspendEnd();
-        break;
-    default:
-        break;
+    switch (state) {
+        case DisplayPowerMgr::DisplayState::DISPLAY_ON:
+            DisplayManager::GetInstance().WakeUpEnd();
+            NotifyDisplayActionDone(DISPLAY_ON_DONE);
+            break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_OFF:
+            DisplayManager::GetInstance().SuspendEnd();
+            NotifyDisplayActionDone(DISPLAY_OFF_DONE);
+            break;
+        default:
+            break;
     }
     return;
+}
+
+void DeviceStateAction::DisplayPowerCallback::NotifyDisplayActionDone(uint32_t event)
+{
+    if (notify_ != nullptr) {
+        notify_(event);
+    }
 }
 } // namespace PowerMgr
 } // namespace OHOS
