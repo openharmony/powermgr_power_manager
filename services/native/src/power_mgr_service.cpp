@@ -199,7 +199,6 @@ void PowerMgrService::KeyMonitorInit()
     id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             powerkeyPressed_ = false;
-            handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
             this->HandlePowerKeyUp();
     });
 
@@ -215,10 +214,6 @@ void PowerMgrService::KeyMonitorInit()
             this->HandleKeyEvent(keyEvent->GetKeyCode());
     });
 
-    InputManager::GetInstance()->AddMonitor([this](std::shared_ptr<KeyEvent> event) {
-        this->HandleKeyEvent(event->GetKeyCode());
-    });
-
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
     InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
 }
@@ -229,10 +224,10 @@ void PowerMgrService::HandleShutdownRequest()
     // show dialog
     const std::string params = "{\"shutdownButton\":\"Power Off\", " \
         "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
-    const int POSTION_X = 0;
-    const int POSTION_Y = 0;
-    const int WIDTH = 300;
-    const int HEIGHT = 300;
+    const int POSTION_X = 200;
+    const int POSTION_Y = 200;
+    const int WIDTH = 400;
+    const int HEIGHT = 400;
     Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
         "power_dialog",
         params,
@@ -308,23 +303,32 @@ void PowerMgrService::HandlePointEvent(int32_t type)
     }
 }
 
+void PowerMgrService::NotifyDisplayActionDone(uint32_t event)
+{
+    POWER_HILOGI(MODULE_SERVICE, "NotifyDisplayActionDone: %{public}d", event);
+    handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
+}
+
 void PowerMgrService::HandlePowerKeyTimeout()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandlePowerKeyTimeout");
+    const int logLevel = 2;
+    const std::string tag = "TAG_POWER";
+    std::string message = "POWER KEY TIMEOUT ";
     if (powerkeyPressed_) {
-        const int logLevel = 2;
-        const std::string tag = "TAG_POWER";
-        HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
-            HiviewDFX::HiSysEvent::EventType::FAULT,
-            "LOG_LEVEL",
-            logLevel,
-            "TAG",
-            tag,
-            "MESSAGE",
-            "POWER KEY PRESS TIMEOUT");
-        POWER_HILOGI(MODULE_SERVICE, "PowerKey press Timeout");
-        powerkeyPressed_ = false;
+        message.append("WITHOUT KEY UP");
+    } else {
+        message.append("BUT DISPLAY NOT FINISHED");
     }
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "LOG_LEVEL",
+        logLevel,
+        "TAG",
+        tag,
+        "MESSAGE",
+        message.c_str());
+    POWER_HILOGI(MODULE_SERVICE, "PowerKey press Timeout");
 }
 
 void PowerMgrService::PowerMgrService::OnStop()

@@ -16,6 +16,7 @@
 #ifndef POWERMGR_IDEVICE_STATE_ACTION_H
 #define POWERMGR_IDEVICE_STATE_ACTION_H
 
+#include <functional>
 #include <string>
 
 #include "power_state_machine_info.h"
@@ -25,6 +26,10 @@ namespace PowerMgr {
 enum ActionResult {
     SUCCESS = 0,
     FAILED = 1,
+};
+enum ActionEvent {
+    DISPLAY_ON_DONE = 0,
+    DISPLAY_OFF_DONE,
 };
 
 class IDeviceStateAction {
@@ -42,6 +47,7 @@ public:
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) = 0;
     virtual uint32_t GoToSleep(const std::function<void()> onSuspend,
         const std::function<void()> onWakeup, bool force) = 0;
+    virtual void RegisterCallback(std::function<void(uint32_t)> callback) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS
