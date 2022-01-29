@@ -19,14 +19,21 @@ Power Manager provides the following functionalities:
 
 ```
 /base/powermgr/power_manager
-├── interfaces                   # APIs
-│   ├── innerkits                # Internal APIs
-│   └── kits                     # External APIs
-├── sa_profile                   # SA profile
-└── services                     # Services
-│   ├── native                   # Native services
-│   └── zidl                     # zidl APIs
-└── utils                        # Utilities and common code
+├── figures                  	# Architecture figures
+├── frameworks                  # FrameWork Layer
+│   ├── dialog                  # Dialog resource
+│   ├── include                 # Include file
+│   ├── napi                  	# NAPI
+│   └── native                  # Native code
+├── interfaces                  # APIs
+│   ├── innerkits               # Internal APIs
+│   └── kits                    # External APIs
+├── sa_profile                  # SA profile
+├── services                    # Services
+│   ├── native                  # Native services
+│   └── zidl                    # zidl APIs
+├── test                        # Test code
+└── utils                       # Utilities and common code
 ```
 
 ## Repositories Involved<a name="section63151229062"></a>
