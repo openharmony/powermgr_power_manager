@@ -19,7 +19,6 @@ import {AsyncCallback} from './basic';
  * Provides interfaces to manage power.
  *
  * @SysCap SystemCapability.PowerMgr.PowerManager
- * @devices phone, tablet, tv, wearable
  * @since 7
  */
 declare namespace power {
