@@ -25,7 +25,6 @@ import {AsyncCallback} from './basic.d.ts';
   * RunningLock} is set.
  *
  * @SysCap SystemCapability.PowerMgr.PowerManager
- * @devices phone, tablet, tv, wearable
  * @since 7
  */
 declare namespace runningLock {
