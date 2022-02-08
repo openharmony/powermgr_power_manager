@@ -137,14 +137,15 @@ public:
         PowerStateMachine::onWakeup();
     }
 private:
-    static constexpr int32_t LONG_PRESS_TIME = 3000;
-    static constexpr int32_t POWER_KEY_PRESS_TIME = 10000;
-    static constexpr int32_t INIT_KEY_MONITOR_DELAY = 1000;
+    static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
+    static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
+    static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
     bool Init();
     bool PowerStateMachineInit();
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
+    void GetDisplayPosition(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen);
     bool ready_ {false};
     std::mutex mutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_;

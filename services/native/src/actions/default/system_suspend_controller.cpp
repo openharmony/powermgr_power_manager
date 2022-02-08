@@ -32,7 +32,7 @@ SystemSuspendController::SystemSuspendController()
     sptr<IPowerHdiCallback> g_callback = new PowerHdiCallbackService();
     powerInterface = IPowerInterface::Get();
     if (powerInterface == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
         return;
     }
     powerInterface->RegisterCallback(g_callback);
@@ -48,7 +48,7 @@ void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
         return;
     }
     if (force) {
@@ -65,7 +65,7 @@ void SystemSuspendController::Wakeup()
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
         return;
     }
     powerInterface->StopSuspend();
@@ -78,7 +78,7 @@ void SystemSuspendController::AcquireRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
         return;
     }
     powerInterface->SuspendBlock(name);
@@ -89,7 +89,7 @@ void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
         return;
     }
     powerInterface->SuspendUnblock(name);
@@ -100,7 +100,7 @@ void SystemSuspendController::Dump(std::string& info)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
         return;
     }
     powerInterface->PowerDump(info);

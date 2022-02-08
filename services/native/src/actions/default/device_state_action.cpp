@@ -141,14 +141,16 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
         return;
     }
     switch (state) {
-        case DisplayPowerMgr::DisplayState::DISPLAY_ON:
+        case DisplayPowerMgr::DisplayState::DISPLAY_ON: {
             DisplayManager::GetInstance().WakeUpEnd();
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
             break;
-        case DisplayPowerMgr::DisplayState::DISPLAY_OFF:
+        }
+        case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
             DisplayManager::GetInstance().SuspendEnd();
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
             break;
+        }
         default:
             break;
     }

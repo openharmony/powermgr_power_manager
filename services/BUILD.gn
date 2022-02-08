@@ -53,6 +53,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/actions:powermgr_actions",
     "//drivers/peripheral/power/interfaces/hdi/power/v1_0:libpower_proxy_1.0",
     "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
   ]
 
@@ -66,10 +67,12 @@ ohos_shared_library("powermgrservice") {
     "hisysevent_native:libhisysevent",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
     "multimodalinput_base:libmmi-client",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "sensor:sensor_interface_native",
+    "window_manager:libdm",
   ]
 
   part_name = "${powermgr_native_part_name}"
