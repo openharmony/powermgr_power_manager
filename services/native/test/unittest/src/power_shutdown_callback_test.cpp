@@ -57,7 +57,9 @@ HWTEST_F (PowerShutdownCallbackTest, PowerShutdownCallback001, TestSize.Level0)
     sptr<IShutdownCallback> cb1 = new PowerShutdownTest1Callback();
     powerMgrClient.RegisterShutdownCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
+    if (false) {
+        powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
+    }
     POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 1.");
 }
 }
