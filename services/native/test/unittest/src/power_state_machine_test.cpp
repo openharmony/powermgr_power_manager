@@ -311,13 +311,17 @@ void PowerStateMachineTest::Suspendthread()
 void PowerStateMachineTest::Rebootthread()
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.RebootDevice(string("RebootDeviceTestThread"));
+    if (false) {
+        powerMgrClient.RebootDevice(string("RebootDeviceTestThread"));
+    }
 }
 
 void PowerStateMachineTest::Shutdownthread()
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.ShutDownDevice(string("ShutDownDeviceTestThread"));
+    if (false) {
+        powerMgrClient.ShutDownDevice(string("ShutDownDeviceTestThread"));
+    }
 }
 #endif
 
