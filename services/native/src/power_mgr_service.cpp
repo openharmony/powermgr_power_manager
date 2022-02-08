@@ -26,6 +26,7 @@
 #include <system_ability_definition.h>
 #include <unistd.h>
 
+#include "display_manager.h"
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
@@ -38,6 +39,13 @@ const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string TASK_RUNNINGLOCK_UNLOCK = "RunningLock_UnLock";
 const std::string REASON_POWER_KEY = "power_key";
 constexpr int APP_FIRST_UID = APP_FIRST_UID_VALUE;
+constexpr int UI_DIALOG_POWER_WIDTH_NARROW = 400;
+constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
+constexpr int UI_DEFAULT_WIDTH = 2560;
+constexpr int UI_DEFAULT_HEIGHT = 1600;
+constexpr int UI_DEFAULT_BUTTOM_CLIP = 50 * 2; // 48vp
+constexpr int UI_WIDTH_780DP = 780 * 2; // 780vp
+constexpr int UI_HALF = 2;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 }
@@ -99,7 +107,7 @@ bool PowerMgrService::Init()
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
-    handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY);
+    handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
     POWER_HILOGI(MODULE_SERVICE, "Init success");
     return true;
 }
@@ -165,7 +173,7 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
-    keyOption->SetFinalKeyDownDuration(LONG_PRESS_TIME);
+    keyOption->SetFinalKeyDownDuration(LONG_PRESS_DELAY_MS);
     int32_t id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive long press powerkey");
@@ -173,7 +181,7 @@ void PowerMgrService::KeyMonitorInit()
     });
     if (id < 0) {
         POWER_HILOGI(MODULE_SERVICE, "SubscribeKeyEvent failed: %{public}d", id);
-        handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY);
+        handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
         return;
     }
 
@@ -187,7 +195,7 @@ void PowerMgrService::KeyMonitorInit()
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive short press powerkey");
             powerkeyPressed_ = true;
-            handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_TIME);
+            handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
     });
 
     keyOption.reset();
@@ -222,20 +230,28 @@ void PowerMgrService::HandleShutdownRequest()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandleShutdown");
     // show dialog
-    const std::string params = "{\"shutdownButton\":\"Power Off\", " \
-        "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
-    const int POSTION_X = 200;
-    const int POSTION_Y = 200;
-    const int WIDTH = 400;
-    const int HEIGHT = 400;
+    std::string params;
+    int pos_x;
+    int pos_y;
+    int width;
+    int height;
+    bool wideScreen;
+    GetDisplayPosition(pos_x, pos_y, width, height, wideScreen);
+    if (wideScreen) {
+        params = "{\"shutdownButton\":\"Power Off\", " \
+            "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
+    } else {
+        params = "{\"deviceType\":\"phone\", \"shutdownButton\":\"Power Off\", " \
+            "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
+    }
     Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
         "power_dialog",
         params,
         OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-        POSTION_X,
-        POSTION_Y,
-        WIDTH,
-        HEIGHT,
+        pos_x,
+        pos_y,
+        width,
+        height,
         [this](int32_t id, const std::string& event, const std::string& params) {
             POWER_HILOGI(MODULE_SERVICE, "Dialog callback: %{public}s, %{public}s",
                 event.c_str(), params.c_str());
@@ -777,6 +793,32 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
     bool ret = PowerMgrDumper::Dump(args, result);
     POWER_HILOGI(MODULE_SERVICE, "PowerMgrDumper :%{public}d", ret);
     return result;
+}
+
+void PowerMgrService::GetDisplayPosition(
+    int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen)
+{
+    wideScreen = true;
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (display == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "dialog GetDefaultDisplay fail, try again.");
+        display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    }
+
+    if (display != nullptr) {
+        if (display->GetWidth() < UI_WIDTH_780DP) {
+            POWER_HILOGI(MODULE_SERVICE, "share dialog narrow.");
+            wideScreen = false;
+            width = UI_DIALOG_POWER_WIDTH_NARROW;
+            height = UI_DIALOG_POWER_HEIGHT_NARROW;
+        }
+        offsetX = (display->GetWidth() - width) / UI_HALF;
+        offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
+    } else {
+        POWER_HILOGI(MODULE_SERVICE, "dialog get display fail, use default wide.");
+        offsetX = (UI_DEFAULT_WIDTH - width) / UI_HALF;
+        offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
+    }
 }
 } // namespace PowerMgr
 } // namespace OHOS
