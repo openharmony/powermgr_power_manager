@@ -52,8 +52,8 @@ config("module_private_event_config") {
 }
 
 deps_ex = [
-  "ability_runtime:base",
-  "ability_runtime:want",
+  "ability_base:base",
+  "ability_base:want",
   "bundle_framework:appexecfwk_base",
   "eventhandler:libeventhandler",
   "ces_standard:cesfwk_innerkits",
