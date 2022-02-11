@@ -66,8 +66,8 @@ ohos_executable("power-shell") {
   ]
 
   external_deps = [
-    "ability_runtime:base",
-    "ability_runtime:want",
+    "ability_base:base",
+    "ability_base:want",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",
