@@ -22,7 +22,7 @@
         "ram": "2048KB",
         "deps": {
             "components": [
-                "ability_runtime",
+                "ability_base",
                 "appexecfwk_standard",
                 "ces_standard",
                 "display_manager_native",
