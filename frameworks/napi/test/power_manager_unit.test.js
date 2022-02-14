@@ -200,11 +200,15 @@ describe('appInfoTest', function () {
         })
     })
     it('power_reboot_device_test', 0, function () {
-        power.rebootDevice("power_js_test_reboot");
+        if (false) {
+            power.rebootDevice("power_js_test_reboot");
+        }
         console.info('power_reboot_device_test success');
     })
     it('power_shutdown_device_test', 0, function () {
-        power.shutdownDevice("power_js_test_shutdown");
+        if (false) {
+            power.shutdownDevice("power_js_test_shutdown");
+        }
         console.info('power_shutdown_device_test success');
     })
 })

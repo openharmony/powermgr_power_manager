@@ -85,8 +85,10 @@ HWTEST_F(CesSystemTest, CES_SubscriptionEvent_0100, Function | MediumTest | Leve
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "CES_SubscriptionEvent_0100: ShutDownDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
-    sleep(SLEEP_WAIT_TIME_S);
+    if (false) {
+        powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
+        sleep(SLEEP_WAIT_TIME_S);
+    }
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 }
 }
