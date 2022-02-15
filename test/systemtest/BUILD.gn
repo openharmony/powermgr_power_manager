@@ -36,7 +36,6 @@ config("module_private_config") {
     "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//base/powermgr/power_manager/services/zidl/include",
     "//base/powermgr/battery_manager/utils/native/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
@@ -61,7 +60,6 @@ config("module_private_config") {
 deps_ex = [
   "ability_base:base",
   "ability_base:want",
-  "bundle_framework:appexecfwk_base",
   "eventhandler:libeventhandler",
   "ces_standard:cesfwk_innerkits",
   "ipc:ipc_core",
@@ -146,7 +144,6 @@ ohos_systemtest("test_power_mgr_powersavemode") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
-    "bundle_framework:appexecfwk_base",
     "ces_standard:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
