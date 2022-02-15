@@ -40,7 +40,7 @@ HWTEST_F (PowerRebootTest, RebootDeviceTest001, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "RebootDeviceTest001: RebootDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    if (true) {
+    if (false) {
         powerMgrClient.RebootDevice(string("RebootDeviceTest001"));
     }
     GTEST_LOG_(INFO) << "RebootDeviceTest001: RebootDevice end.";
