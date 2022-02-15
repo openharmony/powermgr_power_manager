@@ -82,6 +82,12 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
         .WillOnce(::testing::Return(ActionResult::FAILED));
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
 
+    std::vector<std::string> args;
+    std::string str("-s");
+    args.push_back(str);
+    std::string dumpInfo = pms->ShellDump(args, args.size());
+    GTEST_LOG_(INFO) << dumpInfo;
+
     ResetMockAction();
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrFailCheck001:End.");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: end.";
@@ -108,6 +114,12 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::FAILED));
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
+
+    std::vector<std::string> args;
+    std::string str("-s");
+    args.push_back(str);
+    std::string dumpInfo = pms->ShellDump(args, args.size());
+    GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrFailCheck002:End.");
