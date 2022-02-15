@@ -20,7 +20,7 @@
 #include "suspend/running_lock_hub.h"
 #include "suspend/suspend_controller.h"
 
-using namespace hdi::power::v1_0;
+using namespace OHOS::HDI::Power::V1_0;
 
 namespace OHOS {
 namespace PowerMgr {
@@ -28,7 +28,7 @@ sptr<IPowerInterface> powerInterface = nullptr;
 SystemSuspendController::SystemSuspendController()
 {
 #ifndef POWER_SUSPEND_NO_HDI
-    sptr<IPowerHdiCallback> g_callback = new PowerHdiCallbackService();
+    sptr<IPowerHdiCallback> g_callback = new PowerHdiCallbackImpl();
     powerInterface = IPowerInterface::Get();
     powerInterface->RegisterCallback(g_callback);
 #else

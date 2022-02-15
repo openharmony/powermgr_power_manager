@@ -22,7 +22,7 @@
 #include <singleton.h>
 
 #include "suspend/irunning_lock_hub.h"
-#include "power_hdi_callback_service.h"
+#include "power_hdi_callback_impl.h"
 #include "suspend/isuspend_controller.h"
 
 namespace OHOS {
@@ -39,7 +39,7 @@ private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static const std::string WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
-    class PowerHdfCallback : public hdi::power::v1_0::PowerHdiCallbackStub {
+    class PowerHdfCallback : public OHOS::HDI::Power::V1_0::PowerHdiCallbackStub {
     public:
         PowerHdfCallback() = default;
         ~PowerHdfCallback() = default;

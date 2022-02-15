@@ -37,7 +37,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   deps = [
     "../:powermgr_actions_common",
-    "//drivers/peripheral/power/interfaces/hdi/power/v1_0:libpower_proxy_1.0",
+    "//drivers/interface/power/v1_0:libpower_proxy_1.0",
     "//drivers/peripheral/power/interfaces/hdi_callback:libpower_callback",
     "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
