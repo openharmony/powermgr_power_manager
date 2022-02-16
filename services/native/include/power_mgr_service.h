@@ -84,6 +84,7 @@ public:
     void HandlePointEvent(int32_t type);
     void NotifyDisplayActionDone(uint32_t event);
     void KeyMonitorInit();
+    void KeyMonitorCancel();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -157,6 +158,11 @@ private:
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
     uint32_t mockCount_ {0};
+    int32_t powerkeyLongPressId_ {0};
+    int32_t powerkeyShortPressId_ {0};
+    int32_t powerkeyReleaseId_ {0};
+    int32_t doubleClickId_ {0};
+    int32_t monitorId_ {0};
 };
 } // namespace PowerMgr
 } // namespace OHOS
