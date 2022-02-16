@@ -174,13 +174,13 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(LONG_PRESS_DELAY_MS);
-    int32_t id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+    powerkeyLongPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive long press powerkey");
             handler_->SendEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
     });
-    if (id < 0) {
-        POWER_HILOGI(MODULE_SERVICE, "SubscribeKeyEvent failed: %{public}d", id);
+    if (powerkeyLongPressId_ < 0) {
+        POWER_HILOGI(MODULE_SERVICE, "SubscribeKeyEvent failed: %{public}d", powerkeyLongPressId_);
         handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
         return;
     }
@@ -191,7 +191,7 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
-    id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+    powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive short press powerkey");
             powerkeyPressed_ = true;
@@ -204,7 +204,7 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(false);
     keyOption->SetFinalKeyDownDuration(0);
-    id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+    powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             powerkeyPressed_ = false;
             this->HandlePowerKeyUp();
@@ -216,14 +216,39 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_F1);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
-    id = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+    doubleClickId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive double click");
             this->HandleKeyEvent(keyEvent->GetKeyCode());
     });
 
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
-    InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
+    monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
+}
+
+void PowerMgrService::KeyMonitorCancel()
+{
+    POWER_HILOGI(MODULE_SERVICE, "KeyMonitorCancel");
+    InputManager* inputManager = InputManager::GetInstance();
+    if (inputManager == nullptr) {
+        POWER_HILOGI(MODULE_SERVICE, "inputManager is NULL");
+        return;
+    }
+    if (powerkeyLongPressId_ >= 0) {
+        inputManager->UnsubscribeKeyEvent(powerkeyLongPressId_);
+    }
+    if (powerkeyShortPressId_ >= 0) {
+        inputManager->UnsubscribeKeyEvent(powerkeyShortPressId_);
+    }
+    if (powerkeyReleaseId_ >= 0) {
+        inputManager->UnsubscribeKeyEvent(powerkeyReleaseId_);
+    }
+    if (doubleClickId_ >= 0) {
+        inputManager->UnsubscribeKeyEvent(doubleClickId_);
+    }
+    if (monitorId_ >= 0) {
+        inputManager->RemoveMonitor(monitorId_);
+    }
 }
 
 void PowerMgrService::HandleShutdownRequest()
@@ -353,6 +378,15 @@ void PowerMgrService::PowerMgrService::OnStop()
     if (!ready_) {
         return;
     }
+    powerStateMachine_->CancelDelayTimer(
+        PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(
+        PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(
+        PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
+
+    KeyMonitorCancel();
     eventRunner_.reset();
     handler_.reset();
     ready_ = false;
