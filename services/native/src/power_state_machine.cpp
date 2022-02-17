@@ -70,8 +70,9 @@ bool PowerStateMachine::Init()
     POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine:: Init start");
 
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
-    stateAction_->RegisterCallback(std::bind(&PowerStateMachine::ActionCallback,
-        this, std::placeholders::_1));
+    std::function<void(uint32_t)> callback = std::bind(&PowerStateMachine::ActionCallback,
+        this, std::placeholders::_1);
+    stateAction_->RegisterCallback(callback);
     InitStateMap();
 
     if (powerStateCBDeathRecipient_ == nullptr) {

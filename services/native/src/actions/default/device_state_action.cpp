@@ -126,7 +126,7 @@ uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,
     return ActionResult::SUCCESS;
 }
 
-void DeviceStateAction::RegisterCallback(std::function<void(uint32_t)> callback)
+void DeviceStateAction::RegisterCallback(std::function<void(uint32_t)>& callback)
 {
     actionCallback_ = callback;
 }
