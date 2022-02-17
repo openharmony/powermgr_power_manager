@@ -1274,7 +1274,8 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest040, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockTest, PowerMgrUnittest041, TestSize.Level2)
 {
-    WakeupDeviceType abnormaltype=WakeupDeviceType(10);
+    int wakeupReason = (static_cast<int>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrUnittest041:  start.";
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnittest041:Start.");
@@ -1368,7 +1369,8 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest043, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockTest, PowerMgrUnittest044, TestSize.Level2)
 {
-    WakeupDeviceType abnormaltype = WakeupDeviceType(10);
+    int wakeupReason = (static_cast<int>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrUnittest044: start.";
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnittest044:Start.");

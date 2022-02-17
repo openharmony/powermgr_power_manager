@@ -35,13 +35,19 @@ public:
     uint32_t SetDisplayState(const DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
+    void RegisterCallback(std::function<void(uint32_t)>& callback) override;
 
 private:
     class DisplayPowerCallback : public DisplayPowerMgr::DisplayPowerCallbackStub {
+        friend DeviceStateAction;
     public:
         virtual void OnDisplayStateChanged(uint32_t displayId, DisplayPowerMgr::DisplayState state) override;
+    private:
+        void NotifyDisplayActionDone(uint32_t event);
+        std::function<void(uint32_t)> notify_ {nullptr};
     };
-    sptr<DisplayPowerMgr::IDisplayPowerCallback> dispCallback_;
+    sptr<DisplayPowerCallback> dispCallback_;
+    std::function<void(uint32_t)> actionCallback_ {nullptr};
 };
 } // namespace PowerMgr
 } // namespace OHOS

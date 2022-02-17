@@ -82,7 +82,9 @@ public:
     void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
     void HandlePointEvent(int32_t type);
+    void NotifyDisplayActionDone(uint32_t event);
     void KeyMonitorInit();
+    void KeyMonitorCancel();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -136,14 +138,15 @@ public:
         PowerStateMachine::onWakeup();
     }
 private:
-    static constexpr int32_t LONG_PRESS_TIME = 3000;
-    static constexpr int32_t POWER_KEY_PRESS_TIME = 30000;
-    static constexpr int32_t INIT_KEY_MONITOR_DELAY = 1000;
+    static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
+    static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
+    static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
     bool Init();
     bool PowerStateMachineInit();
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
+    void GetDisplayPosition(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen);
     bool ready_ {false};
     std::mutex mutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_;
@@ -155,6 +158,11 @@ private:
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
     uint32_t mockCount_ {0};
+    int32_t powerkeyLongPressId_ {0};
+    int32_t powerkeyShortPressId_ {0};
+    int32_t powerkeyReleaseId_ {0};
+    int32_t doubleClickId_ {0};
+    int32_t monitorId_ {0};
 };
 } // namespace PowerMgr
 } // namespace OHOS
