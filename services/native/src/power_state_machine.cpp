@@ -19,6 +19,7 @@
 
 #include <datetime_ex.h>
 #include <file_ex.h>
+#include <hisysevent.h>
 #include <pubdef.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
@@ -69,6 +70,9 @@ bool PowerStateMachine::Init()
     POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine:: Init start");
 
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
+    std::function<void(uint32_t)> callback = std::bind(&PowerStateMachine::ActionCallback,
+        this, std::placeholders::_1);
+    stateAction_->RegisterCallback(callback);
     InitStateMap();
 
     if (powerStateCBDeathRecipient_ == nullptr) {
@@ -96,9 +100,11 @@ void PowerStateMachine::EmplaceAwake()
         [this](StateChangeReason reason) {
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
-            if (ret != ActionResult::SUCCESS) {
+            // Display power service maybe not ready when init
+            if (ret != ActionResult::SUCCESS
+                && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to AWAKE, Display Err");
-                return TransitResult::HDI_ERR;
+                return TransitResult::DISPLAY_ON_ERR;
             }
             ResetInactiveTimer();
             return TransitResult::SUCCESS;
@@ -118,9 +124,11 @@ void PowerStateMachine::EmplaceInactive()
                 state = DisplayState::DISPLAY_SUSPEND;
             }
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
-            if (ret != ActionResult::SUCCESS) {
+            // Display power service maybe not ready when init
+            if (ret != ActionResult::SUCCESS
+                && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to INACTIVE, Display Err");
-                return TransitResult::HDI_ERR;
+                return TransitResult::DISPLAY_OFF_ERR;
             }
             ResetSleepTimer();
             return TransitResult::SUCCESS;
@@ -137,12 +145,7 @@ void PowerStateMachine::EmplaceSleep()
                 POWER_HILOGI(MODULE_SERVICE, "display suspend enabled");
                 state = DisplayState::DISPLAY_SUSPEND;
             }
-            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
-            if (ret != ActionResult::SUCCESS) {
-                POWER_HILOGE(MODULE_SERVICE, "Failed to go to SLEEP, Display Err");
-                return TransitResult::HDI_ERR;
-            }
-            ret = this->stateAction_->GoToSleep(onSuspend, onWakeup, false);
+            uint32_t ret = this->stateAction_->GoToSleep(onSuspend, onWakeup, false);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to SLEEP, Sleep Err");
                 return TransitResult::HDI_ERR;
@@ -156,6 +159,15 @@ void PowerStateMachine::InitStateMap()
     EmplaceAwake();
     EmplaceInactive();
     EmplaceSleep();
+}
+
+void PowerStateMachine::ActionCallback(uint32_t event)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    pms->NotifyDisplayActionDone(event);
 }
 
 void PowerStateMachine::onSuspend()
@@ -276,7 +288,6 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 
 bool PowerStateMachine::IsScreenOn()
 {
-    POWER_HILOGI(MODULE_SERVICE, "IsScreenOn: fun is Start!");
     DisplayState state = stateAction_->GetDisplayState();
     if (state == DisplayState::DISPLAY_ON ||
         state == DisplayState::DISPLAY_DIM) {
@@ -379,6 +390,12 @@ static const std::string GetReasonTypeString(StateChangeReason type)
             return std::string("CAMERA");
         case StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY:
             return std::string("ACCESS");
+        case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
+            return std::string("POWER_KEY");
+        case StateChangeReason::STATE_CHANGE_REASON_KEYBOARD:
+            return std::string("KEYBOARD");
+        case StateChangeReason::STATE_CHANGE_REASON_MOUSE:
+            return std::string("MOUSE");
         case StateChangeReason::STATE_CHANGE_REASON_REMOTE:
             return std::string("REMOTE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
@@ -805,7 +822,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
     POWER_HILOGI(MODULE_SERVICE, "GetReasonByWakeType Start:%{public}d", type);
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     switch (type) {
-        case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON: // fall through
+        case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
+            ret =  StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_WAKE_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
             break;
@@ -827,6 +846,15 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_LID:
             ret = StateChangeReason::STATE_CHANGE_REASON_LID;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK:
+            ret =  StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD:
+            ret =  StateChangeReason::STATE_CHANGE_REASON_KEYBOARD;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_MOUSE:
+            ret =  StateChangeReason::STATE_CHANGE_REASON_MOUSE;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
         default:
@@ -910,7 +938,16 @@ void PowerStateMachine::DumpInfo(std::string& result)
             .append(GetReasonTypeString(it->second->lastReason_).c_str())
             .append("   Time:")
             .append(ToString(it->second->lastTime_))
-            .append("\n");
+            .append("\n")
+            .append("   Failure: ")
+            .append(GetReasonTypeString(it->second->failTrigger_).c_str())
+            .append("   Reason:")
+            .append(it->second->failReasion_)
+            .append("   From:")
+            .append(GetPowerStateString(it->second->failFrom_))
+            .append("   Time:")
+            .append(ToString(it->second->failTime_))
+            .append("\n\n");
     }
 }
 
@@ -934,10 +971,12 @@ TransitResult PowerStateMachine::StateController::TransitTo(
     if (!CheckState()) {
         POWER_HILOGE(MODULE_SERVICE, "TransitTo: already in %{public}d",
             owner->currentState_);
+        RecordFailure(owner->currentState_, reason, TransitResult::ALREADY_IN_STATE);
         return TransitResult::ALREADY_IN_STATE;
     }
     if (!ignoreLock && !owner->CheckRunningLock(GetState())) {
         POWER_HILOGE(MODULE_SERVICE, "TransitTo: running lock block");
+        RecordFailure(owner->currentState_, reason, TransitResult::LOCKING);
         return TransitResult::LOCKING;
     }
     ret = action_(reason);
@@ -946,6 +985,8 @@ TransitResult PowerStateMachine::StateController::TransitTo(
         lastTime_ = GetTickCount();
         owner->currentState_ = GetState();
         owner->NotifyPowerStateChanged(owner->currentState_);
+    } else {
+        RecordFailure(owner->currentState_, reason, ret);
     }
 
     POWER_HILOGI(MODULE_SERVICE, "Transit End, result=%{public}d", ret);
@@ -961,6 +1002,57 @@ bool PowerStateMachine::StateController::CheckState()
     }
     POWER_HILOGI(MODULE_SERVICE, "CheckState: fun is End!");
     return !(GetState() == owner->currentState_);
+}
+
+void PowerStateMachine::StateController::RecordFailure(PowerState from,
+    StateChangeReason trigger, TransitResult failReason)
+{
+    failFrom_ = from;
+    failTrigger_ = trigger;
+    failTime_ = GetTickCount();
+    switch (failReason) {
+        case TransitResult::ALREADY_IN_STATE:
+            failReasion_ = "Already in the state";
+            break;
+        case TransitResult::LOCKING:
+            failReasion_ = "Blocked by running lock";
+            break;
+        case TransitResult::HDI_ERR:
+            failReasion_ = "Power HDI error";
+            break;
+        case TransitResult::DISPLAY_ON_ERR:
+            failReasion_ = "SetDisplayState(ON) error";
+            break;
+        case TransitResult::DISPLAY_OFF_ERR:
+            failReasion_ = "SetDisplayState(OFF) error";
+            break;
+        case TransitResult::OTHER_ERR:
+        default:
+            failReasion_ = "Unknown Error";
+            break;
+    }
+    std::string message = "State Transit Failed from ";
+    message.append(GetPowerStateString(failFrom_))
+        .append(" to ")
+        .append(GetPowerStateString(GetState()))
+        .append(" by ")
+        .append(GetReasonTypeString(failTrigger_).c_str())
+        .append("   Reason:")
+        .append(failReasion_)
+        .append("   Time:")
+        .append(ToString(failTime_))
+        .append("\n");
+    const int logLevel = 2;
+    const std::string tag = "TAG_POWER";
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "LOG_LEVEL",
+        logLevel,
+        "TAG",
+        tag,
+        "MESSAGE",
+        message);
+    POWER_HILOGI(MODULE_SERVICE, "RecordFailure: %{public}s", message.c_str());
 }
 } // namespace PowerMgr
 } // namespace OHOS
