@@ -1269,7 +1269,8 @@ HWTEST_F (PowerMgrSTMockTest, PowerMgrMock040, TestSize.Level2)
  */
 HWTEST_F (PowerMgrSTMockTest, PowerMgrMock041, TestSize.Level2)
 {
-    WakeupDeviceType abnormaltype=WakeupDeviceType(10);
+    int wakeupReason = (static_cast<int>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock041:  start.";
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrMock041:Start.");
@@ -1363,7 +1364,8 @@ HWTEST_F (PowerMgrSTMockTest, PowerMgrMock043, TestSize.Level2)
  */
 HWTEST_F (PowerMgrSTMockTest, PowerMgrMock044, TestSize.Level2)
 {
-    WakeupDeviceType abnormaltype = WakeupDeviceType(10);
+    int wakeupReason = (static_cast<int>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock044: start.";
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrMock044:Start.");
@@ -1576,41 +1578,6 @@ HWTEST_F (PowerMgrSTMockTest, PowerMgrMock050, TestSize.Level2)
     ResetMockAction();
     POWER_HILOGD(MODULE_SERVICE, "PowerMgrMock050:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock050: end.";
-}
-
-/**
- * @tc.name: PowerMgrMock051
- * @tc.desc: test SuspendDevice by mock
- * @tc.type: FUNC
- */
-HWTEST_F (PowerMgrSTMockTest, PowerMgrMock051, TestSize.Level2)
-{
-    sleep(NEXT_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerMgrMock051: start.";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrMock051:Start.");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock051: Failed to get PowerMgrService";
-    }
-
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction,   SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
-        .Times(1)
-        .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction,
-        Suspend(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false));
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, false))
-        .Times(1)
-        .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
-    sleep(SLEEP_WAIT_TIME_S+1);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
-
-    ResetMockAction();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrMock051:End.");
-    GTEST_LOG_(INFO) << "PowerMgrMock051: end.";
 }
 
 /**

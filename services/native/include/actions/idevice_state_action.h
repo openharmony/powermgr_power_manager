@@ -47,7 +47,7 @@ public:
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) = 0;
     virtual uint32_t GoToSleep(const std::function<void()> onSuspend,
         const std::function<void()> onWakeup, bool force) = 0;
-    virtual void RegisterCallback(std::function<void(uint32_t)> callback) = 0;
+    virtual void RegisterCallback(std::function<void(uint32_t)>& callback) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS
