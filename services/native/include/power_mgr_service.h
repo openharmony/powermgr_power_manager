@@ -141,6 +141,7 @@ private:
     static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
+    static constexpr int32_t WATCH_DOG_DELAY_MS = 10000;
     bool Init();
     bool PowerStateMachineInit();
     void HandlePowerKeyUp();

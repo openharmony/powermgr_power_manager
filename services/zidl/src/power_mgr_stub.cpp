@@ -20,6 +20,7 @@
 
 #include "power_common.h"
 #include "power_mgr_proxy.h"
+#include "xcollie.h"
 
 using namespace OHOS::HiviewDFX;
 
@@ -37,91 +38,96 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             "PowerMgrStub::OnRemoteRequest failed, descriptor is not matched!");
         return E_GET_POWER_SERVICE_FAILED;
     }
+    const int DFX_DELAY_MS = 10000;
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerMgrStub", DFX_DELAY_MS, nullptr, nullptr,
+        HiviewDFX::XCOLLIE_FLAG_NOOP);
 
+    int ret = ERR_OK;
     switch (code) {
         case static_cast<int>(IPowerMgr::WAKEUP_DEVICE): {
-            return WakeupDeviceStub(data);
+            ret = WakeupDeviceStub(data);
         }
         case static_cast<int>(IPowerMgr::SUSPEND_DEVICE): {
-            return SuspendDeviceStub(data);
+            ret = SuspendDeviceStub(data);
         }
         case static_cast<int>(IPowerMgr::REFRESH_ACTIVITY): {
-            return RefreshActivityStub(data);
+            ret = RefreshActivityStub(data);
         }
         case static_cast<int>(IPowerMgr::REBOOT_DEVICE): {
-            return RebootDeviceStub(data);
+            ret = RebootDeviceStub(data);
         }
         case static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE): {
-            return ShutDownDeviceStub(data);
+            ret = ShutDownDeviceStub(data);
         }
         case static_cast<int>(IPowerMgr::GET_STATE): {
-            return GetStateStub(reply);
+            ret = GetStateStub(reply);
         }
         case static_cast<int>(IPowerMgr::IS_SCREEN_ON): {
-            return IsScreeOnStub(reply);
+            ret = IsScreeOnStub(reply);
         }
         case static_cast<int>(IPowerMgr::FORCE_DEVICE_SUSPEND): {
-            return ForceSuspendDeviceStub(data, reply);
+            ret = ForceSuspendDeviceStub(data, reply);
         }
         case static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK): {
-            return CreateRunningLockStub(data);
+            ret = CreateRunningLockStub(data);
         }
         case static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK): {
-            return ReleaseRunningLockStub(data);
+            ret = ReleaseRunningLockStub(data);
         }
         case static_cast<int>(IPowerMgr::IS_RUNNINGLOCK_TYPE_SUPPORTED): {
-            return IsRunningLockTypeSupportedStub(data);
+            ret = IsRunningLockTypeSupportedStub(data);
         }
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK): {
-            return LockStub(data);
+            ret = LockStub(data);
         }
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_UNLOCK): {
-            return UnLockStub(data);
+            ret = UnLockStub(data);
         }
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_SET_WORK_TRIGGER_LIST): {
-            return SetWorkTriggerListStub(data);
+            ret = SetWorkTriggerListStub(data);
         }
         case static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK): {
-            return ProxyRunningLockStub(data);
+            ret = ProxyRunningLockStub(data);
         }
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_ISUSED): {
-            return IsUsedStub(data, reply);
+            ret = IsUsedStub(data, reply);
         }
         case static_cast<int>(IPowerMgr::REG_POWER_STATE_CALLBACK): {
-            return RegisterPowerStateCallbackStub(data);
+            ret = RegisterPowerStateCallbackStub(data);
         }
         case static_cast<int>(IPowerMgr::UNREG_POWER_STATE_CALLBACK): {
-            return UnRegisterPowerStateCallbackStub(data);
+            ret = UnRegisterPowerStateCallbackStub(data);
         }
         case static_cast<int>(IPowerMgr::REG_SHUTDOWN_CALLBACK): {
-            return RegisterShutdownCallbackStub(data);
+            ret = RegisterShutdownCallbackStub(data);
         }
         case static_cast<int>(IPowerMgr::UNREG_SHUTDOWN_CALLBACK): {
-            return UnRegisterShutdownCallbackStub(data);
+            ret = UnRegisterShutdownCallbackStub(data);
         }
         case static_cast<int>(IPowerMgr::REG_POWER_MODE_CALLBACK): {
-            return RegisterPowerModeCallbackStub(data);
+            ret = RegisterPowerModeCallbackStub(data);
         }
         case static_cast<int>(IPowerMgr::UNREG_POWER_MODE_CALLBACK): {
-            return UnRegisterPowerModeCallbackStub(data);
+            ret = UnRegisterPowerModeCallbackStub(data);
         }
         case static_cast<int>(IPowerMgr::SET_DISPLAY_SUSPEND): {
-            return SetDisplaySuspendStub(data);
+            ret = SetDisplaySuspendStub(data);
         }
         case static_cast<int>(IPowerMgr::SETMODE_DEVICE): {
-            return SetDeviceModeStub(data);
+            ret = SetDeviceModeStub(data);
         }
         case static_cast<int>(IPowerMgr::GETMODE_DEVICE): {
-            return GetDeviceModeStub(reply);
+            ret = GetDeviceModeStub(reply);
         }
         case static_cast<int>(IPowerMgr::SHELL_DUMP): {
-            return ShellDumpStub(data, reply);
+            ret = ShellDumpStub(data, reply);
         }
         default: {
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+            ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
-    return ERR_OK;
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
+    return ret;
 }
 
 int32_t PowerMgrStub::CreateRunningLockStub(MessageParcel& data)

@@ -144,11 +144,15 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
         case DisplayPowerMgr::DisplayState::DISPLAY_ON: {
             DisplayManager::GetInstance().WakeUpEnd();
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
+            std::string name = LOCK_TAG_DISPLAY_POWER;
+            SystemSuspendController::GetInstance().AcquireRunningLock(name);
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
             DisplayManager::GetInstance().SuspendEnd();
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
+            std::string name = LOCK_TAG_DISPLAY_POWER;
+            SystemSuspendController::GetInstance().ReleaseRunningLock(name);
             break;
         }
         default:

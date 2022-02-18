@@ -17,6 +17,7 @@ config("powermgr_public_config") {
   include_dirs = [
     "native/include",
     "zidl/include",
+    "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie/",
     "//base/sensors/sensor/interfaces/native/include",
   ]
 }
@@ -63,6 +64,7 @@ ohos_shared_library("powermgrservice") {
     "ces_standard:cesfwk_innerkits",
     "display_manager_native:displaymgr",
     "eventhandler:libeventhandler",
+    "hicollie_native:libhicollie",
     "hisysevent_native:libhisysevent",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
