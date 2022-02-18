@@ -38,6 +38,7 @@ public:
     void RegisterCallback(std::function<void(uint32_t)>& callback) override;
 
 private:
+    static constexpr const char * const LOCK_TAG_DISPLAY_POWER = "display_power_lock";
     class DisplayPowerCallback : public DisplayPowerMgr::DisplayPowerCallbackStub {
         friend DeviceStateAction;
     public:
