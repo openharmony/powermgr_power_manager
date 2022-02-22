@@ -159,6 +159,7 @@ private:
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
     uint32_t mockCount_ {0};
+    int32_t dialogId_ {-1};
     int32_t powerkeyLongPressId_ {0};
     int32_t powerkeyShortPressId_ {0};
     int32_t powerkeyReleaseId_ {0};
