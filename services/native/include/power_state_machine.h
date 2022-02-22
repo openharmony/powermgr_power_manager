@@ -136,11 +136,11 @@ private:
         TransitResult TransitTo(StateChangeReason reason, bool ignoreLock = false);
         void RecordFailure(PowerState from, StateChangeReason trigger, TransitResult failReason);
         StateChangeReason lastReason_;
-        int64_t lastTime_;
+        int64_t lastTime_ {0};
         PowerState failFrom_;
         StateChangeReason failTrigger_;
         std::string failReasion_;
-        int64_t failTime_;
+        int64_t failTime_ {0};
     protected:
         bool CheckState();
         PowerState state_;
