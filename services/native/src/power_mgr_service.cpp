@@ -197,6 +197,11 @@ void PowerMgrService::KeyMonitorInit()
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive short press powerkey");
             powerkeyPressed_ = true;
+            if (dialogId_ >= 0) {
+                POWER_HILOGI(MODULE_SERVICE, "Cancel dialog when short press");
+                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
+                dialogId_ = -1;
+            }
             handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
     });
 
@@ -271,7 +276,7 @@ void PowerMgrService::HandleShutdownRequest()
         params = "{\"deviceType\":\"phone\", \"shutdownButton\":\"Power Off\", " \
             "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
     }
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
+    dialogId_ = Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
         "power_dialog",
         params,
         OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
@@ -288,9 +293,14 @@ void PowerMgrService::HandleShutdownRequest()
                 this->RebootDevice(REASON_POWER_KEY);
             } else if (event == "EVENT_CANCEL") {
                 Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
+                this->dialogId_ = -1;
             }
         });
-
+    if (!IsScreenOn()) {
+        POWER_HILOGI(MODULE_SERVICE, "wakeup when display off");
+        int64_t now = static_cast<int64_t>(time(0));
+        this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, REASON_POWER_KEY);
+    }
     return;
 }
 
@@ -298,7 +308,7 @@ void PowerMgrService::HandlePowerKeyUp()
 {
     POWER_HILOGI(MODULE_SERVICE, "Receive release powerkey");
 
-    if (this->shutdownService_.IsShuttingDown()) {
+    if (dialogId_ >= 0 || this->shutdownService_.IsShuttingDown()) {
         POWER_HILOGI(MODULE_SERVICE, "System is shutting down");
         return;
     }
