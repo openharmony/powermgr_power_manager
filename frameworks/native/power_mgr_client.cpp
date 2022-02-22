@@ -179,7 +179,7 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
 
     RETURN_IF_WITH_RET(Connect() != ERR_OK, nullptr);
 
-    int nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
+    uint32_t nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
     std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy_, name.substr(0, nameLen), type);
     if (runningLock == nullptr) {
         POWER_HILOGE(MODULE_INNERKIT, "%{public}s failed to create new RunningLock record", __func__);

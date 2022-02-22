@@ -23,37 +23,37 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int INVALID_PID = -1;
-constexpr int INVALID_UID = -1;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
 
 class WorkTrigger : public Parcelable {
 public:
     WorkTrigger() = default;
-    WorkTrigger(uint32_t uid, const std::string& name = "", uint32_t pid = 0)
+    WorkTrigger(int32_t uid, const std::string& name = "", int32_t pid = 0)
         : uid_(uid), name_(name), pid_(pid) {}
     ~WorkTrigger() = default;
 
-    void SetAbilityId(int abilityId)
+    void SetAbilityId(int32_t abilityId)
     {
         abilityId_ = abilityId;
     }
 
-    void SetPid(int pid)
+    void SetPid(int32_t pid)
     {
         pid_ = pid;
     }
 
-    int GetAbilityId() const
+    int32_t GetAbilityId() const
     {
         return abilityId_;
     }
 
-    int GetPid() const
+    int32_t GetPid() const
     {
         return pid_;
     }
 
-    int GetUid() const
+    int32_t GetUid() const
     {
         return uid_;
     }
@@ -74,10 +74,10 @@ public:
     static WorkTrigger* Unmarshalling(Parcel& parcel);
 
 private:
-    uint32_t uid_{INVALID_UID};
+    int32_t uid_{INVALID_UID};
     std::string name_;
-    uint32_t pid_{INVALID_PID};
-    uint32_t abilityId_ {0};
+    int32_t pid_{INVALID_PID};
+    int32_t abilityId_ {0};
 };
 } // namespace PowerMgr
 } // namespace OHOS
