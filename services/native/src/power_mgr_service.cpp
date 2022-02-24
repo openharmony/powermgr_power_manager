@@ -31,6 +31,7 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "ui_service_mgr_client.h"
+#include "watchdog.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -44,7 +45,6 @@ constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
 constexpr int UI_DEFAULT_WIDTH = 2560;
 constexpr int UI_DEFAULT_HEIGHT = 1600;
 constexpr int UI_DEFAULT_BUTTOM_CLIP = 50 * 2; // 48vp
-constexpr int UI_WIDTH_780DP = 780 * 2; // 780vp
 constexpr int UI_HALF = 2;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
@@ -90,6 +90,8 @@ bool PowerMgrService::Init()
 
     if (!handler_) {
         handler_ = std::make_shared<PowermsEventHandler>(eventRunner_, pms);
+        std::string handlerName("PowerMgrEventHandler");
+        HiviewDFX::Watchdog::GetInstance().AddThread(handlerName, handler_, WATCH_DOG_DELAY_MS);
     }
 
     if (!runningLockMgr_) {
@@ -195,6 +197,11 @@ void PowerMgrService::KeyMonitorInit()
         [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(MODULE_SERVICE, "Receive short press powerkey");
             powerkeyPressed_ = true;
+            if (dialogId_ >= 0) {
+                POWER_HILOGI(MODULE_SERVICE, "Cancel dialog when short press");
+                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
+                dialogId_ = -1;
+            }
             handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
     });
 
@@ -269,7 +276,7 @@ void PowerMgrService::HandleShutdownRequest()
         params = "{\"deviceType\":\"phone\", \"shutdownButton\":\"Power Off\", " \
             "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
     }
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
+    dialogId_ = Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
         "power_dialog",
         params,
         OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
@@ -286,9 +293,14 @@ void PowerMgrService::HandleShutdownRequest()
                 this->RebootDevice(REASON_POWER_KEY);
             } else if (event == "EVENT_CANCEL") {
                 Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
+                this->dialogId_ = -1;
             }
         });
-
+    if (!IsScreenOn()) {
+        POWER_HILOGI(MODULE_SERVICE, "wakeup when display off");
+        int64_t now = static_cast<int64_t>(time(0));
+        this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, REASON_POWER_KEY);
+    }
     return;
 }
 
@@ -296,7 +308,7 @@ void PowerMgrService::HandlePowerKeyUp()
 {
     POWER_HILOGI(MODULE_SERVICE, "Receive release powerkey");
 
-    if (this->shutdownService_.IsShuttingDown()) {
+    if (dialogId_ >= 0 || this->shutdownService_.IsShuttingDown()) {
         POWER_HILOGI(MODULE_SERVICE, "System is shutting down");
         return;
     }
@@ -840,19 +852,37 @@ void PowerMgrService::GetDisplayPosition(
     }
 
     if (display != nullptr) {
-        if (display->GetWidth() < UI_WIDTH_780DP) {
+        POWER_HILOGI(MODULE_SERVICE, "display size: %{public}d x %{public}d",
+            display->GetWidth(), display->GetHeight());
+        if (display->GetWidth() < display->GetHeight()) {
             POWER_HILOGI(MODULE_SERVICE, "share dialog narrow.");
+            const int NARROW_WIDTH_N = 3;
+            const int NARROW_WIDTH_D = 4;
+            const int NARROW_HEIGHT_RATE = 8;
             wideScreen = false;
-            width = UI_DIALOG_POWER_WIDTH_NARROW;
-            height = UI_DIALOG_POWER_HEIGHT_NARROW;
+            width = display->GetWidth() * NARROW_WIDTH_N / NARROW_WIDTH_D;
+            height = display->GetHeight() / NARROW_HEIGHT_RATE;
+        } else {
+            POWER_HILOGI(MODULE_SERVICE, "share dialog wide.");
+            const int NARROW_WIDTH_N = 1;
+            const int NARROW_WIDTH_D = 3;
+            const int NARROW_HEIGHT_RATE = 6;
+            wideScreen = true;
+            width = display->GetWidth() * NARROW_WIDTH_N / NARROW_WIDTH_D;
+            height = display->GetHeight() / NARROW_HEIGHT_RATE;
         }
         offsetX = (display->GetWidth() - width) / UI_HALF;
         offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
     } else {
         POWER_HILOGI(MODULE_SERVICE, "dialog get display fail, use default wide.");
+        wideScreen = false;
+        width = UI_DIALOG_POWER_WIDTH_NARROW;
+        height = UI_DIALOG_POWER_HEIGHT_NARROW;
         offsetX = (UI_DEFAULT_WIDTH - width) / UI_HALF;
         offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
     }
+    POWER_HILOGI(MODULE_SERVICE, "GetDisplayPosition: %{public}d, %{public}d (%{public}d x %{public}d)",
+        offsetX, offsetY, width, height);
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -19,13 +19,18 @@
 
 #include "power_common.h"
 #include "power_mode_callback_proxy.h"
+#include "xcollie.h"
 
 namespace OHOS {
 namespace PowerMgr {
 int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
     {
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::OnRemoteRequest, cmd = %d, flags= %d", code, option.GetFlags());
+    POWER_HILOGD(MODULE_SERVICE, "PowerModeCallbackStub::OnRemoteRequest, cmd = %d, flags= %d",
+        code, option.GetFlags());
+    const int DFX_DELAY_MS = 10000;
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerModeCallbackStub", DFX_DELAY_MS, nullptr, nullptr,
+        HiviewDFX::XCOLLIE_FLAG_NOOP);
     std::u16string descripter = PowerModeCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
@@ -33,14 +38,16 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         return E_GET_POWER_SERVICE_FAILED;
     }
 
+    int ret = ERR_OK;
     switch (code) {
         case static_cast<uint32_t>(IPowerModeCallback::POWER_MODE_CHANGED): {
-            return OnPowerModeCallbackStub();
+            ret = OnPowerModeCallbackStub();
         }
         default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+            ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return ERR_OK;
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
+    return ret;
 }
 
 int32_t PowerModeCallbackStub::OnPowerModeCallbackStub()
