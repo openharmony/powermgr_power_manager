@@ -141,6 +141,7 @@ private:
     static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
+    static constexpr int32_t WATCH_DOG_DELAY_MS = 10000;
     bool Init();
     bool PowerStateMachineInit();
     void HandlePowerKeyUp();
@@ -158,6 +159,7 @@ private:
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
     uint32_t mockCount_ {0};
+    int32_t dialogId_ {-1};
     int32_t powerkeyLongPressId_ {0};
     int32_t powerkeyShortPressId_ {0};
     int32_t powerkeyReleaseId_ {0};
