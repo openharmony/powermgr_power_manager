@@ -15,7 +15,7 @@
 
 #include "system_suspend_controller.h"
 
-#include "power_interface_proxy.h"
+#include "v1_0/power_interface_proxy.h"
 
 #include "hilog_wrapper.h"
 #include "suspend/running_lock_hub.h"
