@@ -83,7 +83,8 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
     POWER_HILOGI(MODULE_SERVICE, "Action: SetDisplayState: %{public}d, %{public}d",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
 
-    if (state == GetDisplayState()) {
+    DisplayState currentState = GetDisplayState();
+    if (state == currentState) {
         POWER_HILOGI(MODULE_SERVICE, "Already in state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
@@ -96,17 +97,24 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
 
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
     switch (state) {
-        case DisplayState::DISPLAY_ON:
+        case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-            DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
+            if (currentState == DisplayState::DISPLAY_OFF) {
+                DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
+            }
             break;
+        }
         case DisplayState::DISPLAY_DIM:
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_DIM;
             break;
-        case DisplayState::DISPLAY_OFF:
+        case DisplayState::DISPLAY_OFF: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-            DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
+            if (currentState == DisplayState::DISPLAY_ON
+                || currentState == DisplayState::DISPLAY_DIM) {
+                DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
+            }
             break;
+        }
         case DisplayState::DISPLAY_SUSPEND:
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND;
             break;
