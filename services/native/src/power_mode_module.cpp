@@ -34,7 +34,8 @@ using namespace OHOS::DisplayPowerMgr;
 
 namespace OHOS {
 namespace PowerMgr {
-PowerModeModule::PowerModeModule() : started_(false)
+PowerModeModule::PowerModeModule()
+    : mode_(NORMAL_MODE), lastMode_(LAST_MODE_FLAG), started_(false)
 {
     POWER_HILOGI(MODULE_SERVICE, "PowerModeModule create");
     auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
@@ -271,7 +272,7 @@ void PowerModeModule::SetLcdBrightness()
             recoverValue[PowerModePolicy::ServiceType::SMART_BACKLIGHT] = SETTINGS_PRIVIDER_VALUE_LCD_BRIGHTNESS;
         }
         // set lcd brightness
-        uint32_t dispId = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
+        int32_t dispId = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
         bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(static_cast<uint32_t>(lcdBrightness), dispId);
         POWER_HILOGI(MODULE_SERVICE, "SetBrightness: %{public}d, result=%{public}d", lcdBrightness, ret);
     } else {

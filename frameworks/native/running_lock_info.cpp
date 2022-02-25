@@ -94,9 +94,9 @@ bool RunningLockInfo::Marshalling(Parcel& parcel) const
 bool WorkTrigger::ReadFromParcel(Parcel& parcel)
 {
     READ_PARCEL_WITH_RET(parcel, String, name_, false);
-    READ_PARCEL_WITH_RET(parcel, Uint32, uid_, false);
-    READ_PARCEL_WITH_RET(parcel, Uint32, pid_, false);
-    READ_PARCEL_WITH_RET(parcel, Uint32, abilityId_, false);
+    READ_PARCEL_WITH_RET(parcel, Int32, uid_, false);
+    READ_PARCEL_WITH_RET(parcel, Int32, pid_, false);
+    READ_PARCEL_WITH_RET(parcel, Int32, abilityId_, false);
 
     POWER_HILOGD(MODULE_SERVICE, "WorkTrigger::%{public}s name_ = %s, uid_ = %d, pid_ = %d, abilityId_ = %d.", __func__,
         name_.c_str(), uid_, pid_, abilityId_);
@@ -120,9 +120,9 @@ WorkTrigger* WorkTrigger::Unmarshalling(Parcel& parcel)
 bool WorkTrigger::Marshalling(Parcel& parcel) const
 {
     WRITE_PARCEL_WITH_RET(parcel, String, name_, false);
-    WRITE_PARCEL_WITH_RET(parcel, Uint32, uid_, false);
-    WRITE_PARCEL_WITH_RET(parcel, Uint32, pid_, false);
-    WRITE_PARCEL_WITH_RET(parcel, Uint32, abilityId_, false);
+    WRITE_PARCEL_WITH_RET(parcel, Int32, uid_, false);
+    WRITE_PARCEL_WITH_RET(parcel, Int32, pid_, false);
+    WRITE_PARCEL_WITH_RET(parcel, Int32, abilityId_, false);
 
     POWER_HILOGD(MODULE_INNERKIT, "WorkTrigger::%{public}s name_ = %s, uid_ = %d, pid_ = %d, abilityId_ = %d.",
         __func__, name_.c_str(), uid_, pid_, abilityId_);

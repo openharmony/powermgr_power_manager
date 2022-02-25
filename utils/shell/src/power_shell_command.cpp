@@ -99,13 +99,13 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
         return ERR_OK;
     }
 
-    int mode = atoi(argList_[0].c_str());
+    uint32_t mode = static_cast<uint32_t>(atoi(argList_[0].c_str()));
     resultReceiver_.append("Set Mode: ");
     resultReceiver_.append(argList_[0]);
     resultReceiver_.append("\n");
     PowerMgrClient &client = PowerMgrClient::GetInstance();
     client.SetDeviceMode(mode);
-    int result = client.GetDeviceMode();
+    uint32_t result = client.GetDeviceMode();
     if (result == mode) {
         resultReceiver_.append("Set Mode Success!");
     } else {
