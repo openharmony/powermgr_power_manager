@@ -52,7 +52,7 @@ protected:
     virtual napi_value GetValue(); // default function is for Promise<void>
     virtual napi_value GetError();  // default function is always return undefined
 
-    uint32_t cbParamCount_;
+    uint32_t cbParamCount_ {0};
     napi_value object_;
     napi_deferred deferred_;
     napi_ref callbackRef_;
