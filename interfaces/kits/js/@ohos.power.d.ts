@@ -18,7 +18,7 @@ import {AsyncCallback} from './basic';
 /**
  * Provides interfaces to manage power.
  *
- * @sysCap SystemCapability.PowerManager.PowerManager.Core
+ * @syscap SystemCapability.PowerManager.PowerManager.Core
  * @since 7
  */
 declare namespace power {
