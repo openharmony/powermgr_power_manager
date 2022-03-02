@@ -24,7 +24,7 @@ import {AsyncCallback} from './basic.d.ts';
  * lock duration times out, the lock is automatically released and the system hibernates if no other {@link
   * RunningLock} is set.
  *
- * @sysCap SystemCapability.PowerManager.PowerManager.Core
+ * @syscap SystemCapability.PowerManager.PowerManager.Core
  * @since 7
  */
 declare namespace runningLock {
