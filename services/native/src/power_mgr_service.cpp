@@ -361,7 +361,7 @@ void PowerMgrService::HandlePowerKeyTimeout()
     } else {
         message.append("BUT DISPLAY NOT FINISHED");
     }
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_SCREEN",
         HiviewDFX::HiSysEvent::EventType::FAULT,
         "LOG_LEVEL",
         logLevel,
