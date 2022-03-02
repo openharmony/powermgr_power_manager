@@ -254,6 +254,10 @@ void PowerMgrService::KeyMonitorCancel()
 void PowerMgrService::HandleShutdownRequest()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandleShutdown");
+    if (dialogId_ >= 0) {
+        POWER_HILOGI(MODULE_SERVICE, "dialog is already showing");
+        return;
+    }
     // show dialog
     std::string params;
     int pos_x;
