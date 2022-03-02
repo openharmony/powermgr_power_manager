@@ -170,7 +170,7 @@ void PowerMgrService::KeyMonitorInit()
 {
     POWER_HILOGI(MODULE_SERVICE, "KeyMonitorInit");
     std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-    std::vector<int32_t> preKeys;
+    std::set<int32_t> preKeys;
 
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
