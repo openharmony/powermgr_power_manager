@@ -105,7 +105,7 @@ bool PowerMgrService::Init()
         POWER_HILOGE(MODULE_SERVICE, "power state machine init fail!");
     }
     if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-        powerModeModule_.SetModeItem(PowerModeModule::NORMAL_MODE);
+        powerModeModule_.EnableMode(powerModeModule_.GetModeItem());
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
