@@ -20,3 +20,12 @@ ohos_prebuilt_etc("power_mode_config") {
   part_name = "${powermgr_native_part_name}"
   subsystem_name = "powermgr"
 }
+
+## Install vendor power_mode_config.xml to /vendor/etc/power_config/power_mode_config.xml
+ohos_prebuilt_etc("power_mode_config_vendor") {
+  source = "//vendor/${product_company}/${product_name}/power_config/power_mode_config.xml"
+  relative_install_dir = "power_config"
+  install_images = [ chipset_base_dir ]
+  part_name = "${powermgr_native_part_name}"
+  subsystem_name = "powermgr"
+}
