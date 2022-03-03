@@ -79,6 +79,15 @@ ohos_shared_library("powermgrservice") {
   part_name = "${powermgr_native_part_name}"
 }
 
-group("power_service") {
+group("power_service_config") {
   deps = [ "native/profile:power_mode_config" ]
+
+  VENDOR_CONFIG_PATH = rebase_path(
+          "//vendor/${product_company}/${product_name}/power_config/power_mode_config.xml")
+  CMD = "if [ -f ${VENDOR_CONFIG_PATH} ]; then echo true; else echo false; fi"
+  vendor_config_exist =
+      exec_script("//build/lite/run_shell_cmd.py", [ CMD ], "value")
+  if (vendor_config_exist) {
+    deps += [ "native/profile:power_mode_config_vendor" ]
+  }
 }
