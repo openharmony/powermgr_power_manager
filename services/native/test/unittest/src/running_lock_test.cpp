@@ -35,7 +35,7 @@ void RunningLockTest::SetUpTestCase(void)
     ASSERT_TRUE(runningLockMgr_->Init());
 }
 
-#ifdef IPC_AVAILABLE
+
 /**
  * @tc.name: RunningLockInnerKit000
  * @tc.desc: Test RunningLockInnerKit function, connect PowerMgrService and call member function.
@@ -179,44 +179,6 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockInnerKit003
- * @tc.desc: Test RunningLockInnerKit function, timeout lock.
- * @tc.type: FUNC
- */
-HWTEST_F (RunningLockTest, RunningLockInnerKit003, TestSize.Level0)
-{
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock2", RunningLockType::RUNNINGLOCK_SCREEN);
-    ASSERT_TRUE(runningLock1 != nullptr);
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    // after 8ms unlock
-    runningLock1->Lock(30);
-    runningLock1->Lock(80);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 1.");
-    usleep(50000);
-    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    usleep(50000);
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    // no unlock
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 2.");
-    runningLock1->Lock(2);
-    runningLock1->Lock(3);
-    runningLock1->Lock();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 3.");
-    usleep(8000);
-    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    // after 3ms unlock
-    runningLock1->Lock(30);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 4.");
-    usleep(50000);
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    runningLock1->Lock(5);
-    runningLock1->UnLock();
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 5.");
-}
-
-/**
  * @tc.name: RunningLockInnerKit004
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
@@ -255,6 +217,45 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit005 5.");
     }
+}
+
+#ifdef IPC_AVAILABLE
+/**
+ * @tc.name: RunningLockInnerKit003
+ * @tc.desc: Test RunningLockInnerKit function, timeout lock.
+ * @tc.type: FUNC
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit003, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock2", RunningLockType::RUNNINGLOCK_SCREEN);
+    ASSERT_TRUE(runningLock1 != nullptr);
+    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
+    // after 8ms unlock
+    runningLock1->Lock(30);
+    runningLock1->Lock(80);
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 1.");
+    usleep(50000);
+    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
+    usleep(50000);
+    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
+    // no unlock
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 2.");
+    runningLock1->Lock(2);
+    runningLock1->Lock(3);
+    runningLock1->Lock();
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 3.");
+    usleep(8000);
+    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
+    // after 3ms unlock
+    runningLock1->Lock(30);
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 4.");
+    usleep(50000);
+    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
+    runningLock1->Lock(5);
+    runningLock1->UnLock();
+    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
+    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 5.");
 }
 
 /**
