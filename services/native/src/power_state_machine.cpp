@@ -106,7 +106,9 @@ void PowerStateMachine::EmplaceAwake()
                 POWER_HILOGE(MODULE_SERVICE, "Failed to go to AWAKE, Display Err");
                 return TransitResult::DISPLAY_ON_ERR;
             }
-            ResetInactiveTimer();
+            if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
+                ResetInactiveTimer();
+            }
             return TransitResult::SUCCESS;
         })
     );
