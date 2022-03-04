@@ -22,13 +22,20 @@
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
 const std::string TAG_ROOT = "switch_policy";
+const std::string VENDOR_CONFIG = "/vendor/etc/power_config/power_mode_config.xml";
+const std::string SYSTEM_CONFIG = "/system/etc/power_config/power_mode_config.xml";
 constexpr uint32_t SLEEP_FILTER = SLEEP_FILTER_VALUE;
+}
 
 PowerSaveMode::PowerSaveMode()
 {
-    POWER_HILOGD(MODULE_SERVICE, "Start powersave.xml parse");
-    StartXMlParse("/system/etc/power_config/power_mode_config.xml");
+    POWER_HILOGD(MODULE_SERVICE, "Start to parse power_mode_config.xml");
+    if (!StartXMlParse(VENDOR_CONFIG)) {
+        POWER_HILOGI(MODULE_SERVICE, "No vendor power_mode_config.xml, start to parse system config");
+        StartXMlParse(SYSTEM_CONFIG);
+    }
 }
 
 bool IsNodeLegal(const xmlNodePtr nodePtr, const std::string& tagName)
