@@ -40,9 +40,9 @@ int PowerShutdownCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
 
     int ret = ERR_OK;
     switch (code) {
-        case static_cast<uint32_t>(IShutdownCallback::POWER_SHUTDOWN_CHANGED): {
+        case static_cast<uint32_t>(IShutdownCallback::POWER_SHUTDOWN_CHANGED):
             ret = OnPowerShutdownCallbackStub();
-        }
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
