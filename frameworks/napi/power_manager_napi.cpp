@@ -33,9 +33,9 @@ const uint8_t REASON_STRING_MAX = 128;
 const uint8_t LOCK_NAME_STRING_MAX = 128;
 }
 
-napi_ref PowerManagerNapi::runningLockTypeConstructor_ = nullptr;
-napi_ref PowerManagerNapi::powerStateConstructor_ = nullptr;
-napi_ref PowerManagerNapi::powerModeConstructor_ = nullptr;
+thread_local static napi_ref g_runningLockTypeConstructor = nullptr;
+thread_local static napi_ref g_powerStateConstructor = nullptr;
+thread_local static napi_ref g_powerModeConstructor = nullptr;
 
 void ShutdownContext::Init(napi_value* args, uint32_t argc)
 {
@@ -297,7 +297,7 @@ napi_value PowerManagerNapi::InitRunningLockType(napi_env env, napi_value export
     napi_value result = nullptr;
     napi_define_class(env, "RunningLockType", NAPI_AUTO_LENGTH, EnumRunningLockTypeConstructor, nullptr,
         sizeof(desc) / sizeof(*desc), desc, &result);
-    napi_create_reference(env, result, refCount, &runningLockTypeConstructor_);
+    napi_create_reference(env, result, refCount, &g_runningLockTypeConstructor);
     napi_set_named_property(env, exports, "RunningLockType", result);
 
     return exports;
@@ -323,7 +323,7 @@ napi_value PowerManagerNapi::InitPowerState(napi_env env, napi_value exports)
     napi_value result = nullptr;
     napi_define_class(env, "PowerState", NAPI_AUTO_LENGTH, EnumPowerStateConstructor, nullptr,
         sizeof(desc) / sizeof(*desc), desc, &result);
-    napi_create_reference(env, result, refCount, &powerStateConstructor_);
+    napi_create_reference(env, result, refCount, &g_powerStateConstructor);
     napi_set_named_property(env, exports, "PowerState", result);
 
     return exports;
@@ -346,7 +346,7 @@ napi_value PowerManagerNapi::InitPowerMode(napi_env env, napi_value exports)
     napi_value result = nullptr;
     napi_define_class(env, "PowerMode", NAPI_AUTO_LENGTH, EnumPowerModeConstructor, nullptr,
         sizeof(desc) / sizeof(*desc), desc, &result);
-    napi_create_reference(env, result, refCount, &powerModeConstructor_);
+    napi_create_reference(env, result, refCount, &g_powerModeConstructor);
     napi_set_named_property(env, exports, "PowerMode", result);
 
     return exports;
