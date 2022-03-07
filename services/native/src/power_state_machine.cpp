@@ -1044,7 +1044,7 @@ void PowerStateMachine::StateController::RecordFailure(PowerState from,
         .append("\n");
     const int logLevel = 2;
     const std::string tag = "TAG_POWER";
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_SCREEN",
         HiviewDFX::HiSysEvent::EventType::FAULT,
         "LOG_LEVEL",
         logLevel,
