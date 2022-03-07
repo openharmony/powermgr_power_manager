@@ -50,10 +50,6 @@ private:
     static napi_value EnumRunningLockTypeConstructor(napi_env env, napi_callback_info info);
     static napi_value EnumPowerStateConstructor(napi_env env, napi_callback_info info);
     static napi_value EnumPowerModeConstructor(napi_env env, napi_callback_info info);
-
-    static napi_ref runningLockTypeConstructor_;
-    static napi_ref powerStateConstructor_;
-    static napi_ref powerModeConstructor_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
