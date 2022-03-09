@@ -108,6 +108,11 @@ void PowerStateMachine::EmplaceAwake()
             }
             if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
                 ResetInactiveTimer();
+            } else {
+                // If boot complete is not received, set this timer to ensure display off works
+                // This timer will be cancelled when boot complete received.
+                POWER_HILOGE(MODULE_SERVICE, "set timer to ensure display off");
+                InitInactiveTimer();
             }
             return TransitResult::SUCCESS;
         })
@@ -595,6 +600,27 @@ void PowerStateMachine::ResetSleepTimer()
             PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
     }
     POWER_HILOGD(MODULE_SERVICE, "ResetSleepTimer: fun is End!");
+}
+
+void PowerStateMachine::InitInactiveTimer()
+{
+    POWER_HILOGD(MODULE_SERVICE, "InitInactiveTimer: fun is Start!");
+    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    if (this->GetDisplayOffTime() < 0) {
+        POWER_HILOGI(MODULE_SERVICE, "Display Auto OFF is disabled");
+        return;
+    }
+
+    if (this->CheckRunningLock(PowerState::INACTIVE)) {
+        const uint32_t TWO = 2;
+        const uint32_t THREE = 3;
+        uint64_t offTime = this->GetDisplayOffTime() * TWO / THREE;
+        this->SetDelayTimer(this->initTime_ + offTime,
+            PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    }
+    POWER_HILOGD(MODULE_SERVICE, "ResetInactiveTimer: fun is End!");
 }
 
 void PowerStateMachine::HandleDelayTimer(int32_t event)
