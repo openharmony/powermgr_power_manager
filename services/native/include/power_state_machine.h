@@ -29,6 +29,7 @@
 
 #define DEFAULT_DISPLAY_OFF_TIME    30000
 #define DEFAULT_SLEEP_TIME          5000
+#define DEFAULT_INIT_TIME           120000
 
 namespace OHOS {
 namespace PowerMgr {
@@ -88,6 +89,7 @@ public:
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
     void CancelDelayTimer(int32_t event);
+    void InitInactiveTimer();
     void ResetInactiveTimer();
     void ResetSleepTimer();
     void HandleDelayTimer(int32_t event);
@@ -181,6 +183,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
     std::unique_ptr<IDeviceStateAction> stateAction_;
+    int64_t initTime_ {DEFAULT_INIT_TIME};
     int64_t displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
