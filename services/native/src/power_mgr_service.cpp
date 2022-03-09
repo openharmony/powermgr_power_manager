@@ -261,6 +261,10 @@ void PowerMgrService::KeyMonitorCancel()
 void PowerMgrService::HandleShutdownRequest()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandleShutdown");
+    if (dialogId_ >= 0) {
+        POWER_HILOGI(MODULE_SERVICE, "dialog is already showing");
+        return;
+    }
     // show dialog
     std::string params;
     int pos_x;
@@ -373,7 +377,7 @@ void PowerMgrService::HandlePowerKeyTimeout()
     } else {
         message.append("BUT DISPLAY NOT FINISHED");
     }
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_SCREEN",
         HiviewDFX::HiSysEvent::EventType::FAULT,
         "LOG_LEVEL",
         logLevel,

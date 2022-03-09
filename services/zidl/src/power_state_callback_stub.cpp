@@ -40,9 +40,9 @@ int PowerStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
     int ret = ERR_OK;
     switch (code) {
-        case static_cast<int>(IPowerStateCallback::POWER_STATE_CHANGED): {
+        case static_cast<int>(IPowerStateCallback::POWER_STATE_CHANGED):
             ret = OnPowerStateChangedStub(data);
-        }
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
