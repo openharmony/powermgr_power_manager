@@ -69,7 +69,7 @@ ohos_shared_library("powermgrservice") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
-    "multimodalinput_base:libmmi-client",
+    "input:libmmi-client",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "sensor:sensor_interface_native",
