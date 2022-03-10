@@ -25,7 +25,7 @@ declare namespace power {
   /**
    * Shuts down the system.
    *
-   * <p>This method requires the ohos.permission.SHUTDOWN permission.
+   * <p>This method requires the ohos.permission.REBOOT permission.
    *
    * @param reason Indicates the shutdown reason.
    * @systemapi
