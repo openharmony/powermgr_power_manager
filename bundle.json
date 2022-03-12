@@ -15,7 +15,10 @@
     "component": {
         "name": "power_manager_native",
         "subsystem": "powermgr",
-        "syscap": [ "SystemCapability.PowerManager.PowerManager.Core" ],
+        "syscap": [ 
+            "SystemCapability.PowerManager.PowerManager.Core",
+            "SystemCapability.PowerManager.PowerManager.Extension"
+        ],
         "features": [],
         "adapted_system_type": [ "standard" ],
         "rom": "1024KB",
