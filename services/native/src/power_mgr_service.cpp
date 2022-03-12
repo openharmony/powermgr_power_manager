@@ -369,22 +369,19 @@ void PowerMgrService::NotifyDisplayActionDone(uint32_t event)
 void PowerMgrService::HandlePowerKeyTimeout()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandlePowerKeyTimeout");
-    const int logLevel = 2;
-    const std::string tag = "TAG_POWER";
     std::string message = "POWER KEY TIMEOUT ";
     if (powerkeyPressed_) {
         message.append("WITHOUT KEY UP");
     } else {
         message.append("BUT DISPLAY NOT FINISHED");
     }
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_SCREEN",
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "SCREEN_ON_TIMEOUT",
         HiviewDFX::HiSysEvent::EventType::FAULT,
-        "LOG_LEVEL",
-        logLevel,
-        "TAG",
-        tag,
-        "MESSAGE",
-        message.c_str());
+        "PID", IPCSkeleton::GetCallingPid(),
+        "UID", IPCSkeleton::GetCallingUid(),
+        "PACKAGE_NAME", "",
+        "PROCESS_NAME", "",
+        "MSG", message.c_str());
     POWER_HILOGI(MODULE_SERVICE, "PowerKey press Timeout");
 }
 
