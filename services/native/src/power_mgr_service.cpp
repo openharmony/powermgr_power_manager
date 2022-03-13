@@ -104,7 +104,7 @@ bool PowerMgrService::Init()
         POWER_HILOGE(MODULE_SERVICE, "power state machine init fail!");
     }
     if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-        powerModeModule_.SetModeItem(PowerModeModule::NORMAL_MODE);
+        powerModeModule_.EnableMode(powerModeModule_.GetModeItem());
     } else {
         POWER_HILOGE(MODULE_SERVICE, "power mode init fail!");
     }
@@ -169,7 +169,7 @@ void PowerMgrService::KeyMonitorInit()
 {
     POWER_HILOGI(MODULE_SERVICE, "KeyMonitorInit");
     std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-    std::set<int32_t> preKeys;
+    std::vector<int32_t> preKeys;
 
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
@@ -260,6 +260,10 @@ void PowerMgrService::KeyMonitorCancel()
 void PowerMgrService::HandleShutdownRequest()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandleShutdown");
+    if (dialogId_ >= 0) {
+        POWER_HILOGI(MODULE_SERVICE, "dialog is already showing");
+        return;
+    }
     // show dialog
     std::string params;
     int pos_x;
@@ -364,22 +368,19 @@ void PowerMgrService::NotifyDisplayActionDone(uint32_t event)
 void PowerMgrService::HandlePowerKeyTimeout()
 {
     POWER_HILOGI(MODULE_SERVICE, "HandlePowerKeyTimeout");
-    const int logLevel = 2;
-    const std::string tag = "TAG_POWER";
     std::string message = "POWER KEY TIMEOUT ";
     if (powerkeyPressed_) {
         message.append("WITHOUT KEY UP");
     } else {
         message.append("BUT DISPLAY NOT FINISHED");
     }
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "Service",
+    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "SCREEN_ON_TIMEOUT",
         HiviewDFX::HiSysEvent::EventType::FAULT,
-        "LOG_LEVEL",
-        logLevel,
-        "TAG",
-        tag,
-        "MESSAGE",
-        message.c_str());
+        "PID", IPCSkeleton::GetCallingPid(),
+        "UID", IPCSkeleton::GetCallingUid(),
+        "PACKAGE_NAME", "",
+        "PROCESS_NAME", "",
+        "MSG", message.c_str());
     POWER_HILOGI(MODULE_SERVICE, "PowerKey press Timeout");
 }
 
@@ -824,7 +825,6 @@ void PowerMgrService::SetDeviceMode(const uint32_t& mode)
             __func__, uid);
         return;
     }
-    POWER_HILOGI(MODULE_SERVICE, "PID: %{public}d Call %{public}s !", pid, __func__);
     powerModeModule_.SetModeItem(mode);
 }
 

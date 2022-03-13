@@ -40,9 +40,9 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
 
     int ret = ERR_OK;
     switch (code) {
-        case static_cast<uint32_t>(IPowerModeCallback::POWER_MODE_CHANGED): {
+        case static_cast<uint32_t>(IPowerModeCallback::POWER_MODE_CHANGED):
             ret = OnPowerModeCallbackStub();
-        }
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }

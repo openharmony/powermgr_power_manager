@@ -45,7 +45,6 @@ ohos_shared_library("powermgr_client") {
 
   deps = [
     "${powermgr_utils_path}:powermgr_utils",
-    "//foundation/aafwk/standard/tools/aa:tools_aa_source_set",
     "//utils/native/base:utils",
   ]
 
