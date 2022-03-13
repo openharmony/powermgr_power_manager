@@ -15,7 +15,10 @@
     "component": {
         "name": "power_manager_native",
         "subsystem": "powermgr",
-        "syscap": [ "SystemCapability.PowerManager.PowerManager.Core" ],
+        "syscap": [ 
+            "SystemCapability.PowerManager.PowerManager.Core",
+            "SystemCapability.PowerManager.PowerManager.Extension"
+        ],
         "features": [],
         "adapted_system_type": [ "standard" ],
         "rom": "1024KB",
@@ -49,7 +52,7 @@
                 "//base/powermgr/power_manager/frameworks/napi/runninglock:runninglock",
                 "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
                 "//base/powermgr/power_manager/services:powermgrservice",
-                "//base/powermgr/power_manager/services:power_service",
+                "//base/powermgr/power_manager/services:power_service_config",
                 "//base/powermgr/power_manager/utils:power-shell"
             ],
             "inner_kits": [
