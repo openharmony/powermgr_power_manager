@@ -27,10 +27,6 @@
 
 namespace OHOS {
 namespace PowerMgr {
-namespace {
-constexpr int APP_FIRST_UID = APP_FIRST_UID_VALUE;
-}
-
 PowerMgrClient::PowerMgrClient() {}
 PowerMgrClient::~PowerMgrClient()
 {
@@ -171,12 +167,6 @@ PowerState PowerMgrClient::GetState()
 
 std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string& name, RunningLockType type)
 {
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID && !Permission::CheckSelfPermission("ohos.permission.RUNNING_LOCK")) {
-        POWER_HILOGE(MODULE_SERVICE, "%{public}s Request failed, %{public}d permission check failed", __func__, uid);
-        return nullptr;
-    }
-
     RETURN_IF_WITH_RET(Connect() != ERR_OK, nullptr);
 
     uint32_t nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
