@@ -23,8 +23,6 @@
 #include "power_state_machine_info.h"
 #include "running_lock.h"
 
-#define APP_FIRST_UID_VALUE 10000
-
 namespace OHOS {
 namespace PowerMgr {
 class PowerMgrClient final : public DelayedRefSingleton<PowerMgrClient> {
