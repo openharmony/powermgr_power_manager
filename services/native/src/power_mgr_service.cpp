@@ -818,6 +818,7 @@ void PowerMgrService::SetDeviceMode(const uint32_t& mode)
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(MODULE_SERVICE, "PID: %{public}d Call %{public}s !", pid, __func__);
     if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.POWER_OPTIMIZATION")) {
         POWER_HILOGE(MODULE_SERVICE,
