@@ -39,7 +39,6 @@ namespace {
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string TASK_RUNNINGLOCK_UNLOCK = "RunningLock_UnLock";
 const std::string REASON_POWER_KEY = "power_key";
-constexpr int APP_FIRST_UID = APP_FIRST_UID_VALUE;
 constexpr int UI_DIALOG_POWER_WIDTH_NARROW = 400;
 constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
 constexpr int UI_DEFAULT_WIDTH = 2560;
@@ -433,14 +432,14 @@ void PowerMgrService::RebootDevice(const std::string& reason)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (reason.find("updater") != std::string::npos) {
-        if (!Permission::CheckCallingPermission("ohos.permission.REBOOT_UPDATER")) {
+        if (!Permission::CheckCallingPermission("ohos.permission.REBOOT_RECOVERY")) {
             POWER_HILOGE(MODULE_SERVICE,
                 "%{public}s Request failed, %{public}d permission check fail",
                 __func__, pid);
             return;
         }
     } else {
-        if ((uid >= APP_FIRST_UID)
+        if (!Permission::CheckIsSystemAppByUid(uid)
             && !Permission::CheckCallingPermission("ohos.permission.REBOOT")) {
             POWER_HILOGE(MODULE_SERVICE,
                 "%{public}s Request failed, %{public}d permission check fail",
@@ -465,8 +464,8 @@ void PowerMgrService::ShutDownDevice(const std::string& reason)
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
-        && !Permission::CheckCallingPermission("ohos.permission.SHUTDOWN")) {
+    if (!Permission::CheckIsSystemAppByUid(uid)
+        && !Permission::CheckCallingPermission("ohos.permission.REBOOT")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
             __func__, pid);
@@ -490,7 +489,7 @@ void PowerMgrService::SuspendDevice(int64_t callTimeMs,
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, illegal calling uid %{public}d.",
             __func__, uid);
@@ -510,7 +509,7 @@ void PowerMgrService::WakeupDevice(int64_t callTimeMs,
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, illegal calling uid %{public}d.",
             __func__, uid);
@@ -526,8 +525,8 @@ void PowerMgrService::RefreshActivity(int64_t callTimeMs,
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
-        || !Permission::CheckCallingPermission("ohos.permission.REFRESH_USER_ACTION")) {
+    if (!Permission::CheckIsSystemAppByUid(uid)
+        && !Permission::CheckCallingPermission("ohos.permission.REFRESH_USER_ACTION")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, illegal calling uid %{public}d.",
             __func__, uid);
@@ -555,7 +554,7 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, illegal calling uid %{public}d.",
             __func__, uid);
@@ -580,7 +579,7 @@ void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& token,
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -600,7 +599,7 @@ void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& token)
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -627,7 +626,7 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& token,
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -651,7 +650,7 @@ void PowerMgrService::UnLock(const sptr<IRemoteObject>& token)
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -700,7 +699,7 @@ void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& token,
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -716,7 +715,7 @@ void PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
     std::lock_guard lock(mutex_);
     auto calllingUid = IPCSkeleton::GetCallingUid();
-    if (calllingUid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, illegal calling uid %{public}d.",
             __func__,
@@ -730,7 +729,7 @@ void PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -744,7 +743,7 @@ void PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
@@ -759,7 +758,7 @@ void PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriori
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE, "Register failed, %{public}d fail", uid);
         return;
     }
@@ -771,7 +770,7 @@ void PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& 
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE, "UnRegister failed, %{public}d fail", uid);
         return;
     }
@@ -783,7 +782,7 @@ void PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& 
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE, "Register failed, %{public}d fail", uid);
         return;
     }
@@ -795,7 +794,7 @@ void PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE, "UnRegister failed, %{public}d fail", uid);
         return;
     }
@@ -807,7 +806,7 @@ void PowerMgrService::SetDisplaySuspend(bool enable)
 {
     std::lock_guard lock(mutex_);
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid >= APP_FIRST_UID) {
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE, "SetDisplaySuspend failed, %{public}d fail", uid);
         return;
     }
@@ -820,11 +819,11 @@ void PowerMgrService::SetDeviceMode(const uint32_t& mode)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(MODULE_SERVICE, "PID: %{public}d Call %{public}s !", pid, __func__);
-    if ((uid >= APP_FIRST_UID)
+    if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.POWER_OPTIMIZATION")) {
         POWER_HILOGE(MODULE_SERVICE,
             "%{public}s Request failed, %{public}d permission check fail",
-            __func__, pid);
+            __func__, uid);
         return;
     }
     powerModeModule_.SetModeItem(mode);
