@@ -20,6 +20,8 @@
 #include <system_ability.h>
 
 #include "actions/idevice_power_action.h"
+#include "devicestatus_agent.h"
+#include "devicestatus_data_utils.h"
 #include "ipower_mgr.h"
 #include "powerms_event_handler.h"
 #include "power_mgr_notify.h"
@@ -85,6 +87,7 @@ public:
     void NotifyDisplayActionDone(uint32_t event);
     void KeyMonitorInit();
     void KeyMonitorCancel();
+    void DeviceStatusMonitorInit();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -155,6 +158,7 @@ private:
     std::shared_ptr<PowermsEventHandler> handler_;
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
+    std::shared_ptr<Msdp::DeviceStatusAgent> deviceStatusAgent_;
     ShutdownService shutdownService_;
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};

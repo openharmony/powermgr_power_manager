@@ -34,7 +34,6 @@ void PowerMgrNotify::RegisterPublishEvents()
     }
     publishInfo_ = new (std::nothrow)CommonEventPublishInfo();
     publishInfo_->SetOrdered(false);
-    publishInfo_->SetSticky(true);
     screenOffWant_ = new (std::nothrow)IntentWant();
     screenOffWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     screenOnWant_ = new (std::nothrow)IntentWant();
