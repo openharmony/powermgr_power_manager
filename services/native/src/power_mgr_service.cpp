@@ -51,6 +51,7 @@ const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefP
 }
 
 using namespace MMI;
+using namespace Msdp;
 
 PowerMgrService::PowerMgrService() : SystemAbility(POWER_MANAGER_SERVICE_ID, true) {}
 
@@ -256,6 +257,46 @@ void PowerMgrService::KeyMonitorCancel()
     if (monitorId_ >= 0) {
         inputManager->RemoveMonitor(monitorId_);
     }
+}
+
+class DeviceStatusCallback : public DeviceStatusAgent::DeviceStatusAgentEvent {
+public:
+    virtual ~DeviceStatusCallback() {};
+    bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+};
+
+bool DeviceStatusCallback::OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+{
+    POWER_HILOGI(MODULE_SERVICE, "DeviceStatusCallback OnEventResult");
+    if (devicestatusData.type != DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+        POWER_HILOGI(MODULE_SERVICE, "OnEventResult, wrong type: %{public}d", devicestatusData.type);
+        return false;
+    }
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return false;
+    }
+    int64_t now = static_cast<int64_t>(time(0));
+    if (devicestatusData.value == DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT) {
+        POWER_HILOGI(MODULE_SERVICE, "OnEventResult lid close");
+        pms->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, false);
+    } else if (devicestatusData.value == DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER) {
+        POWER_HILOGI(MODULE_SERVICE, "OnEventResult lid open");
+        std::string reason = "lid open";
+        pms->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
+    }
+    return true;
+}
+
+void PowerMgrService::DeviceStatusMonitorInit()
+{
+    POWER_HILOGI(MODULE_SERVICE, "DeviceStatusMonitorInit");
+    deviceStatusAgent_ = std::make_shared<DeviceStatusAgent>();
+    std::shared_ptr<DeviceStatusCallback> agentEvent = std::make_shared<DeviceStatusCallback>();
+    int32_t ret = deviceStatusAgent_->SubscribeAgentEvent(
+        DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN,
+        agentEvent);
+    POWER_HILOGI(MODULE_SERVICE, "SubscribeAgentEvent for device state: %{public}d", ret);
 }
 
 void PowerMgrService::HandleShutdownRequest()
