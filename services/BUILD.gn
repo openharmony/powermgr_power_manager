@@ -18,6 +18,8 @@ config("powermgr_public_config") {
     "native/include",
     "zidl/include",
     "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie/",
+    "//base/msdp/device_status/interfaces/innerkits/include",
+    "//base/msdp/device_status/services/native/include",
     "//base/sensors/sensor/interfaces/native/include",
   ]
 }
@@ -52,6 +54,7 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_native_innerkits_path}:powermgr_client",
     "${powermgr_utils_path}:powermgr_utils",
     "native/src/actions:powermgr_actions",
+    "//base/msdp/device_status/frameworks/native/src:deviceagent",
     "//drivers/interface/power/v1_0:libpower_proxy_1.0",
     "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
     "//foundation/windowmanager/utils:libwmutil",
