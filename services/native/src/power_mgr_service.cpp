@@ -279,7 +279,7 @@ void PowerMgrService::HandleShutdownRequest()
         params = "{\"deviceType\":\"phone\", \"shutdownButton\":\"Power Off\", " \
             "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
     }
-    dialogId_ = Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
+    int32_t errCode = Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
         "power_dialog",
         params,
         OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
@@ -298,7 +298,9 @@ void PowerMgrService::HandleShutdownRequest()
                 Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
                 this->dialogId_ = -1;
             }
-        });
+        },
+        &dialogId_);
+    POWER_HILOGI(MODULE_SERVICE, "show dialog is %{public}d, dialogId=%{public}d", errCode, dialogId_);
     if (!IsScreenOn()) {
         POWER_HILOGI(MODULE_SERVICE, "wakeup when display off");
         int64_t now = static_cast<int64_t>(time(0));
