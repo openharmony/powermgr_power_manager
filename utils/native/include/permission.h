@@ -22,8 +22,8 @@ namespace OHOS {
 namespace PowerMgr {
 class Permission {
 public:
-    static bool CheckSelfPermission(const std::string& perm);
     static bool CheckCallingPermission(const std::string& perm);
+    static bool CheckIsSystemAppByUid(int32_t uid);
 };
 } // namespace PowerMgr
 } // namespace OHOS
