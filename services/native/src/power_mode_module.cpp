@@ -38,6 +38,7 @@ PowerModeModule::PowerModeModule()
     : mode_(NORMAL_MODE), lastMode_(LAST_MODE_FLAG), started_(false)
 {
     POWER_HILOGI(MODULE_SERVICE, "PowerModeModule create");
+    callbackMgr_ = new CallbackManager();
     auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
     policy->AddAction(PowerModePolicy::ServiceType::DISPLAY_OFFTIME,
         std::bind(&PowerModeModule::SetDisplayOffTime, this));
@@ -110,18 +111,24 @@ void PowerModeModule::UpdateModepolicy()
 
 void PowerModeModule::AddPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
-    callbackMgr_.AddCallback(callback);
+    if (callbackMgr_) {
+        callbackMgr_->AddCallback(callback);
+    }
 }
 
 void PowerModeModule::DelPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
-    callbackMgr_.RemoveCallback(callback);
+    if (callbackMgr_) {
+        callbackMgr_->RemoveCallback(callback);
+    }
 }
 
 void PowerModeModule::Prepare()
 {
     PublishPowerModeEvent();
-    callbackMgr_.WaitingCallback();
+    if (callbackMgr_) {
+        callbackMgr_->WaitingCallback();
+    }
 }
 
 void PowerModeModule::CallbackManager::AddCallback(const sptr<IPowerModeCallback>& callback)

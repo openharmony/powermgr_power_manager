@@ -29,10 +29,6 @@ std::shared_ptr<RunningLockMgr> RunningLockTest::runningLockMgr_ = nullptr;
 
 void RunningLockTest::SetUpTestCase(void)
 {
-    pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    runningLockMgr_ = std::make_shared<RunningLockMgr>(pmsTest_);
-    ASSERT_TRUE(runningLockMgr_ != nullptr);
-    ASSERT_TRUE(runningLockMgr_->Init());
 }
 
 namespace {
