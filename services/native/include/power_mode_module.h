@@ -71,7 +71,7 @@ private:
     void Prepare();
     void PublishPowerModeEvent();
 
-    CallbackManager callbackMgr_;
+    sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
     void RunAction();
     void SetDisplayOffTime();
