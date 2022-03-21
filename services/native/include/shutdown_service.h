@@ -23,6 +23,7 @@
 #include <ohos/aafwk/content/want.h>
 
 #include "device_power_action.h"
+#include "device_state_action.h"
 #include "ishutdown_callback.h"
 
 namespace OHOS {
@@ -36,10 +37,12 @@ public:
     void AddShutdownCallback(IShutdownCallback::ShutdownPriority priority, const sptr<IShutdownCallback>& callback);
     void DelShutdownCallback(const sptr<IShutdownCallback>& callback);
     bool IsShuttingDown();
-    void EnableMock(IDevicePowerAction* mockAction)
+    void EnableMock(IDevicePowerAction* mockPowerAction, IDeviceStateAction* mockStateAction)
     {
-        std::unique_ptr<IDevicePowerAction> mock(mockAction);
-        devicePowerAction_ = std::move(mock);
+        std::unique_ptr<IDevicePowerAction> mockPower(mockPowerAction);
+        devicePowerAction_ = std::move(mockPower);
+        std::unique_ptr<IDeviceStateAction> mockState(mockStateAction);
+        deviceStateAction_ = std::move(mockState);
         started_ = false;
     }
 private:
@@ -57,6 +60,7 @@ private:
     };
     void RebootOrShutdown(const std::string& reason, bool isReboot);
     void Prepare();
+    void TurnOffScreen();
     void PublishShutdownEvent() const;
 
     sptr<CallbackManager> lowCallbackMgr_;
@@ -64,6 +68,7 @@ private:
     sptr<CallbackManager> highCallbackMgr_;
     std::atomic<bool> started_;
     std::unique_ptr<IDevicePowerAction> devicePowerAction_;
+    std::unique_ptr<IDeviceStateAction> deviceStateAction_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
