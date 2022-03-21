@@ -128,7 +128,7 @@ public:
         POWER_HILOGE(MODULE_SERVICE, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
         powerStateMachine_->EnableMock(stateAction);
-        shutdownService_.EnableMock(powerAction);
+        shutdownService_.EnableMock(powerAction, stateAction);
     }
     void MockProximity(uint32_t status)
     {

@@ -40,6 +40,7 @@ const time_t MAX_TIMEOUT_SEC = 30;
 ShutdownService::ShutdownService() : started_(false)
 {
     devicePowerAction_ = PowerMgrFactory::GetDevicePowerAction();
+    deviceStateAction_ = PowerMgrFactory::GetDeviceStateAction();
     highCallbackMgr_ = new CallbackManager();
     defaultCallbackMgr_ = new CallbackManager();
     lowCallbackMgr_ = new CallbackManager();
@@ -95,6 +96,7 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
     started_ = true;
     make_unique<thread>([=] {
         Prepare();
+        TurnOffScreen();
         POWER_HILOGD(MODULE_SERVICE, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
         if (devicePowerAction_ != nullptr) {
             isReboot ? devicePowerAction_->Reboot(reason) : devicePowerAction_->Shutdown(reason);
@@ -124,6 +126,12 @@ void ShutdownService::PublishShutdownEvent() const
         return;
     }
     POWER_HILOGD(MODULE_SERVICE, "End of publishing shutdown event");
+}
+
+void ShutdownService::TurnOffScreen()
+{
+    POWER_HILOGD(MODULE_SERVICE, "turn off screen before shutdown");
+    deviceStateAction_->SetDisplayState(DisplayState::DISPLAY_OFF, StateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
 void ShutdownService::CallbackManager::AddCallback(const sptr<IShutdownCallback>& callback)
