@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,7 +138,7 @@ class InputCallback : public IInputEventConsumer {
 
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
-    POWER_HILOGE(MODULE_SERVICE, "OnInputEvent keyEvent");
+    POWER_HILOGI(MODULE_SERVICE, "OnInputEvent keyEvent");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
@@ -148,7 +148,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 
 void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
 {
-    POWER_HILOGE(MODULE_SERVICE, "OnInputEvent pointerEvent");
+    POWER_HILOGI(MODULE_SERVICE, "OnInputEvent pointerEvent");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
@@ -159,7 +159,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
 
 void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 {
-    POWER_HILOGE(MODULE_SERVICE, "OnInputEvent axisEvent");
+    POWER_HILOGI(MODULE_SERVICE, "OnInputEvent axisEvent");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
