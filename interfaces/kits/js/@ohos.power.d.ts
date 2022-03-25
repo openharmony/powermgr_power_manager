@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@ declare namespace power {
    * <p>This method requires the ohos.permission.REBOOT permission.
    *
    * @param reason Indicates the shutdown reason.
+   * @permission ohos.permission.REBOOT
    * @systemapi
    * @since 7
    */
@@ -48,6 +49,7 @@ declare namespace power {
    * Checks whether the screen of a device is on or off.
    *
    * @return Returns true if the screen is on; returns false otherwise.
+   * @permission ohos.permission.REBOOT
    * @since 7
    */
   function isScreenOn(callback: AsyncCallback<boolean>): void;
