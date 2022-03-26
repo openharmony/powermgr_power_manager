@@ -37,12 +37,12 @@ using namespace std;
 
 void PowerDeviceModeTest::PowerModeTest1Callback::PowerModeCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerModeTest1Callback::PowerModeCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::PowerModeCallback.");
 }
 
 void PowerDeviceModeTest::PowerModeTest2Callback::PowerModeCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerModeTest2Callback::PowerModeCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerModeTest2Callback::PowerModeCallback.");
 }
 
 namespace {
@@ -56,18 +56,18 @@ HWTEST_F (PowerDeviceModeTest, PowerDeviceModeCallback001, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerDeviceModeCallback001 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 1.");
     {
         sptr<IPowerModeCallback> cb2 = new PowerModeTest2Callback();
         powerMgrClient.UnRegisterPowerModeCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerDeviceModeCallback001 2.");
+        POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 2.");
         powerMgrClient.RegisterPowerModeCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerDeviceModeCallback001 3.");
+        POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 3.");
         powerMgrClient.RegisterPowerModeCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerDeviceModeCallback001 4.");
+        POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 4.");
     }
     powerMgrClient.UnRegisterPowerModeCallback(cb1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerDeviceModeTest::PowerDeviceModeCallback001 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerDeviceModeTest::PowerDeviceModeCallback001 end.");
 }
 
 /**

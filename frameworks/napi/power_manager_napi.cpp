@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,9 @@
 
 #include "power_manager_napi.h"
 
-#include <cstdio>
-#include <cstdlib>
 #include <string>
-#include <cstring>
-#include "power_common.h"
+
+#include "power_log.h"
 #include "running_lock_napi.h"
 
 using namespace OHOS::PowerMgr;
@@ -71,7 +69,7 @@ napi_value PowerManagerNapi::Init(napi_env env, napi_value exports)
 
 napi_value PowerManagerNapi::IsRunningLockTypeSupported(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Check whether RunningLockType is supported");
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { 0 };
     napi_value jsthis;
@@ -99,13 +97,13 @@ napi_value PowerManagerNapi::IsRunningLockTypeSupported(napi_env env, napi_callb
         [](PowerNapiContext* object) { delete object; }
     );
 
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Check the end");
     return promise;
 }
 
 napi_value PowerManagerNapi::CreateRunningLock(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create runninglock begin");
     size_t argc = ARG_3;
     int argcnumber = 2;
     napi_value args[ARG_3] = { 0 };
@@ -139,13 +137,13 @@ napi_value PowerManagerNapi::CreateRunningLock(napi_env env, napi_callback_info 
         [](PowerNapiContext* object) { delete object; }
     );
 
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create runninglock end");
     return promise;
 }
 
 napi_value PowerManagerNapi::ShutdownDevice(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Call system shutdown");
     uint32_t argc = ARG_2;
     napi_value args[ARG_2] = { 0 };
     napi_value jsthis;
@@ -168,14 +166,12 @@ napi_value PowerManagerNapi::ShutdownDevice(napi_env env, napi_callback_info inf
         },
         [](PowerNapiContext* object) { delete object; }
     );
-
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
     return promise;
 }
 
 napi_value PowerManagerNapi::RebootDevice(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Call system reboot");
     uint32_t argc = ARG_2;
     napi_value args[ARG_2] = { 0 };
     napi_value jsthis;
@@ -198,14 +194,12 @@ napi_value PowerManagerNapi::RebootDevice(napi_env env, napi_callback_info info)
         },
         [](PowerNapiContext* object) { delete object; }
     );
-
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
     return promise;
 }
 
 napi_value PowerManagerNapi::IsScreenOn(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(COMP_FWK, "Get screen state");
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { 0 };
     napi_value jsthis;
@@ -225,14 +219,12 @@ napi_value PowerManagerNapi::IsScreenOn(napi_env env, napi_callback_info info)
         },
         [](PowerNapiContext* object) { delete object; }
     );
-
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
     return promise;
 }
 
 napi_value PowerManagerNapi::GetState(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(FEATURE_POWER_STATE, "Get power state");
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { 0 };
     napi_value jsthis;
@@ -247,19 +239,18 @@ napi_value PowerManagerNapi::GetState(napi_env env, napi_callback_info info)
     context->StartAsyncWork("Power::GetState",
         [context] {
             PowerState state = PowerMgrClient::GetInstance().GetState();
+            POWER_HILOGD(FEATURE_POWER_STATE, "power state: %{public}d", static_cast<uint32_t>(state));
             napi_create_uint32(context->env_, static_cast<uint32_t>(state), &context->outValue_);
             return true;
         },
         [](PowerNapiContext* object) { delete object; }
     );
-
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
     return promise;
 }
 
 napi_value PowerManagerNapi::GetMode(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(FEATURE_POWER_MODE, "Get power mode");
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { 0 };
     napi_value jsthis;
@@ -271,12 +262,12 @@ napi_value PowerManagerNapi::GetMode(napi_env env, napi_callback_info info)
     context->StartAsyncWork("Power::GetState",
         [context] {
             uint32_t mode = PowerMgrClient::GetInstance().GetDeviceMode();
+            POWER_HILOGD(FEATURE_POWER_MODE, "power mode: %{public}d", mode);
             napi_create_uint32(context->env_, mode, &context->outValue_);
             return true;
         },
         [context](PowerNapiContext* object) { delete context; }
     );
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
     return promise;
 }
 
@@ -388,11 +379,11 @@ EXTERN_C_START
  */
 static napi_value PowerInit(napi_env env, napi_value exports)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "enter");
+    POWER_HILOGD(COMP_FWK, "Initialize the PowerManagerNapi module");
 
     napi_value ret = PowerManagerNapi::Init(env, exports);
 
-    POWER_HILOGD(MODULE_JS_NAPI, "return");
+    POWER_HILOGD(COMP_FWK, "The initialization of the PowerManagerNapi module is complete");
 
     return ret;
 }

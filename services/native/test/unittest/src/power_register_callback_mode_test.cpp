@@ -37,7 +37,7 @@ using namespace std;
 
 void PowerRegisterCallbackModeTest::PowerModeTest1Callback::PowerModeCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerModeTest1Callback::PowerModeCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::PowerModeCallback.");
 }
 
 namespace {
@@ -54,6 +54,6 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     sleep(SLEEP_WAIT_TIME_S);
     uint32_t mode = 601;
     powerMgrClient.SetDeviceMode(mode);
-    POWER_HILOGD(MODULE_SERVICE, "PowerRegisterCallbackModeCallback001 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerRegisterCallbackModeCallback001 1.");
 }
 }

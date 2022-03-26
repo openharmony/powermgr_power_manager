@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,8 @@
 #include <datetime_ex.h>
 #include <hisysevent.h>
 #include <securec.h>
-#include <string_ex.h>
 
-#include "power_common.h"
+#include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
 
@@ -38,7 +37,7 @@ RunningLockMgr::~RunningLockMgr() {}
 
 bool RunningLockMgr::Init()
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::Init start");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Init start");
     std::lock_guard<std::mutex> lock(mutex_);
     if (runningLockDeathRecipient_ == nullptr) {
         runningLockDeathRecipient_ = new RunningLockDeathRecipient();
@@ -46,13 +45,13 @@ bool RunningLockMgr::Init()
     if (runningLockAction_ == nullptr) {
         runningLockAction_ = PowerMgrFactory::GetRunningLockAction();
         if (!runningLockAction_) {
-            POWER_HILOGE(MODULE_SERVICE,
-                "RunningLockMgr::Init create RunningLockMgr fail");
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "Get running lock action fail");
             return false;
         }
     }
     auto pmsptr = pms_.promote();
     if (pmsptr == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power manager service is null");
         return false;
     }
     handler_ = pmsptr->GetHandler();
@@ -64,7 +63,7 @@ bool RunningLockMgr::Init()
 
     bool ret = InitLocks();
 
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::Init success");
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Init success");
     return ret;
 }
 
@@ -81,7 +80,7 @@ void RunningLockMgr::InitLocksTypeScreen()
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_SCREEN,
         std::make_shared<LockCounter>(
         RunningLockType::RUNNINGLOCK_SCREEN, [this](bool active) {
-            POWER_HILOGI(MODULE_SERVICE, "RUNNINGLOCK_SCREEN action start!");
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN action start");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
@@ -91,7 +90,7 @@ void RunningLockMgr::InitLocksTypeScreen()
                 return;
             }
             if (active) {
-                POWER_HILOGI(MODULE_SERVICE, "RUNNINGLOCK_SCREEN active!");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN active");
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->CancelDelayTimer(
@@ -99,12 +98,11 @@ void RunningLockMgr::InitLocksTypeScreen()
                 stateMachine->CancelDelayTimer(
                     PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             } else {
-                POWER_HILOGI(MODULE_SERVICE, "RUNNINGLOCK_SCREEN inactive!");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {
                     stateMachine->ResetInactiveTimer();
                 } else {
-                    POWER_HILOGD(MODULE_SERVICE,
-                        "Screen On unlock in state: %{public}d",
+                    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Screen unlock in state: %{public}d",
                         stateMachine->GetState());
                 }
             }
@@ -117,7 +115,7 @@ void RunningLockMgr::InitLocksTypeBackground()
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_BACKGROUND,
         std::make_shared<LockCounter>(
         RunningLockType::RUNNINGLOCK_BACKGROUND, [this](bool active) {
-            POWER_HILOGI(MODULE_SERVICE, "RUNNINGLOCK_BACKGROUND action start!");
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND action start");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
@@ -132,17 +130,16 @@ void RunningLockMgr::InitLocksTypeBackground()
             }
             std::shared_ptr<SystemLock> pSysLock = iterator->second;
             if (active) {
-                POWER_HILOGI(MODULE_SERVICE, "RUNNINGLOCK_BACKGROUND active!");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND active");
                 stateMachine->CancelDelayTimer(
                     PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
                 pSysLock->Lock();
             } else {
-                POWER_HILOGI(MODULE_SERVICE, "RUNNINGLOCK_BACKGROUND inactive!");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND inactive");
                 if (stateMachine->GetState() == PowerState::INACTIVE) {
                     stateMachine->ResetSleepTimer();
                 } else {
-                    POWER_HILOGD(MODULE_SERVICE,
-                        "Background unlock in state: %{public}d",
+                    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Background unlock in state: %{public}d",
                         stateMachine->GetState());
                 }
                 pSysLock->Unlock();
@@ -156,8 +153,7 @@ void RunningLockMgr::InitLocksTypeProximity()
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
         std::make_shared<LockCounter>(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, [this](bool active) {
-            POWER_HILOGI(MODULE_SERVICE,
-                "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL action start!");
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL action start");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
@@ -172,15 +168,14 @@ void RunningLockMgr::InitLocksTypeProximity()
             }
             std::shared_ptr<SystemLock> pSysLock = iterator->second;
             if (active) {
-                POWER_HILOGI(MODULE_SERVICE,
-                    "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active!");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
                 proximityController_.Enable();
                 if (proximityController_.IsClose()) {
-                    POWER_HILOGI(MODULE_SERVICE, "INACTIVE when close");
+                    POWER_HILOGI(FEATURE_RUNNING_LOCK, "INACTIVE when proximity is closed");
                     stateMachine->SetState(PowerState::INACTIVE,
                         StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
                 } else {
-                    POWER_HILOGI(MODULE_SERVICE, "AWAKE when away");
+                    POWER_HILOGI(FEATURE_RUNNING_LOCK, "AWAKE when proximity is away");
                     stateMachine->SetState(PowerState::AWAKE,
                         StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
                 }
@@ -190,8 +185,7 @@ void RunningLockMgr::InitLocksTypeProximity()
                     PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
                 pSysLock->Lock();
             } else {
-                POWER_HILOGI(MODULE_SERVICE,
-                    "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive!");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->ResetInactiveTimer();
@@ -208,8 +202,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
     std::lock_guard<std::mutex> lock(mutex_);
     auto iterator = runningLocks_.find(token);
     if (iterator != runningLocks_.end()) {
-        POWER_HILOGD(MODULE_SERVICE, "RunningLockMgr::%{public}s :find by token.", __func__);
-        return  iterator->second;
+        return iterator->second;
     }
     return nullptr;
 }
@@ -223,11 +216,8 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGD(MODULE_SERVICE,
-        "RunningLockMgr::%{public}s : ok,name = %{public}s,type = %{public}d",
-        __func__,
-        runningLockInfo.name.c_str(),
-        runningLockInfo.type);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, token=%{public}p, name=%{public}s, type=%{public}d",
+        token.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
 
     mutex_.lock();
     runningLocks_.emplace(token, lockInner);
@@ -238,8 +228,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
 
 void RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> token)
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :token = %{public}p",
-        __func__, token.GetRefPtr());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p", token.GetRefPtr());
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
@@ -258,15 +247,12 @@ void RunningLockMgr::RemoveAndPostUnlockTask(
 {
     auto handler = handler_.lock();
     if (handler == nullptr) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Handler is nullptr");
         return;
     }
     const string& tokenStr = to_string(reinterpret_cast<uintptr_t>(token.GetRefPtr()));
-    POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockMgr::%{public}s :token = %p,tokenStr = %s,timeOutMS = %d",
-        __func__,
-        token.GetRefPtr(),
-        tokenStr.c_str(),
-        timeOutMS);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p, tokenStr=%{public}s, timeOutMS=%{public}d",
+        token.GetRefPtr(), tokenStr.c_str(), timeOutMS);
     handler->RemoveTask(tokenStr);
     if (timeOutMS != 0) {
         std::function<void()> unLockFunc = std::bind(&RunningLockMgr::UnLock, this,  token);
@@ -278,38 +264,29 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
     const RunningLockInfo& runningLockInfo,
     const UserIPCInfo& userIPCinfo, uint32_t timeOutMS)
 {
-    POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockMgr::%{public}s :token = %p,name = %s,type = %d",
-        __func__,
-        token.GetRefPtr(),
-        runningLockInfo.name.c_str(),
-        runningLockInfo.type);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p, name=%{public}s, type=%{public}d",
+        token.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
-        POWER_HILOGD(MODULE_SERVICE, "RunningLockMgr::Lock failed, can't find %{public}p",
-            token.GetRefPtr());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr, token=%{public}p", token.GetRefPtr());
         return;
     }
     if (!lockInner->GetDisabled()) {
-        POWER_HILOGD(MODULE_SERVICE, "RunningLockMgr::Lock, this lock(%s) is already on",
-            lockInner->GetRunningLockName().c_str());
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled, token=%{public}p", token.GetRefPtr());
         return;
     }
     lockInner->SetDisabled(false);
 
     auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "RunningLockMgr::Lock failed, unsupported type %{public}d",
-            lockInner->GetRunningLockType());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, token=%{public}p, type=%{public}d",
+            token.GetRefPtr(), lockInner->GetRunningLockType());
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     counter->Increase();
-    POWER_HILOGD(MODULE_SERVICE,
-        "LockCounter: %{public}d, %{public}d",
-        lockInner->GetRunningLockType(),
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
         counter->GetCount());
     if (timeOutMS > 0) {
         RemoveAndPostUnlockTask(token, timeOutMS);
@@ -318,17 +295,17 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
 
 void RunningLockMgr::UnLock(const sptr<IRemoteObject> token)
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :token = %p",
-        __func__, token.GetRefPtr());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p", token.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
     }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockInner token=%{public}p, name=%{public}s, type=%{public}d",
+        token.GetRefPtr(), lockInner->GetRunningLockName().c_str(), lockInner->GetRunningLockType());
     if (lockInner->GetDisabled()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "RunningLockMgr::Unlock, this lock(%{public}s) is already off",
-            lockInner->GetRunningLockName().c_str());
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already disabled, token=%{public}p, name=%{public}s",
+            token.GetRefPtr(), lockInner->GetRunningLockName().c_str());
         return;
     }
     lockInner->SetDisabled(true);
@@ -336,13 +313,14 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> token)
 
     auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "RunningLockMgr::Unlock failed, unsupported type %{public}d",
-            lockInner->GetRunningLockType());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, token=%{public}p, type=%{public}d",
+            token.GetRefPtr(), lockInner->GetRunningLockType());
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     counter->Decrease();
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
+        counter->GetCount());
 }
 
 bool RunningLockMgr::IsUsed(const sptr<IRemoteObject>& token)
@@ -370,8 +348,7 @@ uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type)
 {
     auto iterator = lockCounters_.find(type);
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "GetValidRunningLockNum failed, unsupported type %d", type);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "No specific lock, type=%{public}d", type);
         return 0;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
@@ -394,9 +371,7 @@ bool RunningLockMgr::ExistValidRunningLock()
 void RunningLockMgr::SetWorkTriggerList(const sptr<IRemoteObject>& token,
     const WorkTriggerList& workTriggerList)
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :token = %p",
-        __func__,
-        token.GetRefPtr());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "token=%{public}p", token.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
@@ -449,10 +424,7 @@ void RunningLockMgr::CheckOverTime()
     }
     int64_t curTime = GetTickCount();
     int64_t detectTime = curTime - CHECK_TIMEOUT_INTERVAL_MS;
-    POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockMgr::%{public}s :cur = %" PRId64 " detectTime=%" PRId64 "",
-        __func__,
-        curTime,
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "curTime=%{public}" PRId64 " detectTime=%{public}" PRId64 "", curTime,
         detectTime);
     if (detectTime < 0) {
         return;
@@ -483,9 +455,7 @@ void RunningLockMgr::SendCheckOverTimeMsg(int64_t delayTime)
     if (handler == nullptr) {
         return;
     }
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s ,delay = %" PRId64 "",
-        __func__,
-        delayTime);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "delayTime=%{public}" PRId64 "", delayTime);
     handler->SendEvent(PowermsEventHandler::CHECK_RUNNINGLOCK_OVERTIME_MSG, 0, delayTime);
 }
 
@@ -498,24 +468,24 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& token,
     const string& tokenStr = to_string(reinterpret_cast<uintptr_t>(token.GetRefPtr()));
     switch (changeType) {
         case NOTIFY_RUNNINGLOCK_ADD: {
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add token=%{public}s", tokenStr.c_str());
             NotifyHiViewRunningLockInfo(tokenStr, *lockInner, changeType);
             SendCheckOverTimeMsg(CHECK_TIMEOUT_INTERVAL_MS);
             break;
         }
         case NOTIFY_RUNNINGLOCK_REMOVE: {
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remove token=%{public}s", tokenStr.c_str());
             string str = "token=" + tokenStr;
             NotifyHiView(changeType, str);
             break;
         }
         case NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED: {
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTriggerChanged token=%{public}s", tokenStr.c_str());
             NotifyHiViewRunningLockInfo(tokenStr, *lockInner, changeType);
             break;
         }
         case NOTIFY_RUNNINGLOCK_OVERTIME: {
-            POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :%s token=%s",
-                __func__,
-                runninglockNotifyStr_.at(changeType).c_str(),
-                tokenStr.c_str());
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Overtime token=%{public}s", tokenStr.c_str());
             break;
         }
         default: {
@@ -526,39 +496,26 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& token,
 bool RunningLockMgr::MatchProxyMap(const UserIPCInfo& userIPCinfo)
 {
     if (proxyMap_.empty()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s ret false by proxyMap_.empty(), useripcinfo uid = %d pid = %d.",
-            __func__,
-            userIPCinfo.uid,
-            userIPCinfo.pid);
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "ProxyMap_ is empty, uid = %{public}d, pid = %{public}d",
+            userIPCinfo.uid, userIPCinfo.pid);
         return false;
     }
     auto it = proxyMap_.find(userIPCinfo.uid);
     // 1. Find pidset by uid.
     if (it == proxyMap_.end()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s not find uidmap, useripcinfo uid = %d pid = %d.",
-            __func__,
-            userIPCinfo.uid,
-            userIPCinfo.pid);
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Pid set not match, uid = %{public}d, pid = %{public}d",
+            userIPCinfo.uid, userIPCinfo.pid);
         return false;
     }
     auto& pidset = it->second;
     // 2. Count by owner pid.
     if (pidset.count(userIPCinfo.pid) > 0) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s find uidmap and count pid > 1, useripcinfo uid = %d pid = %d.",
-            __func__,
-            userIPCinfo.uid,
-            userIPCinfo.pid);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Pid set match and count > 0, uid = %{public}d, pid = %{public}d",
+            userIPCinfo.uid, userIPCinfo.pid);
         return true;
     }
-    POWER_HILOGD(MODULE_SERVICE,
-        "%{public}s find uidmap and count pid = 0,count(-1) = %d, useripcinfo uid = %d "
-        "pid = %d.", __func__,
-        static_cast<unsigned int>(pidset.count(INVALID_PID)),
-        userIPCinfo.uid,
-        userIPCinfo.pid);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Pid set match and count(-1) = %{public}d, uid = %{public}d, pid = %{public}d",
+        static_cast<unsigned int>(pidset.count(INVALID_PID)), userIPCinfo.uid, userIPCinfo.pid);
     // 3. Count by INVALID_PID, return true when proxy (uid, -1).
     return (pidset.count(INVALID_PID) > 0);
 }
@@ -574,8 +531,7 @@ void RunningLockMgr::SetRunningLockDisableFlag(
          * because we update the proxy map before, so we should refresh
          * all of the runninglock disable flag always.
          */
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s ret false by proxyMap_.empty() and forceRefresh = false", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Set lock enable, proxyMap_ is empty and forceRefresh is false");
         lockInner->SetDisabled(false);
         return;
     }
@@ -584,9 +540,8 @@ void RunningLockMgr::SetRunningLockDisableFlag(
     if (matched) {
         // Matched the lock owner useripcinfo, set disabled directly.
         lockInner->SetDisabled(true);
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s MatchProxyMap matched by useripcinfo uid = %d pid = %d.",
-            __func__, userIPCinfo.uid, userIPCinfo.pid);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock and ipc matched, uid = %{public}d, pid = %{public}d",
+            userIPCinfo.uid, userIPCinfo.pid);
         return;
     }
     const RunningLockInfo& runningLockInfo = lockInner->GetRunningLockInfo();
@@ -594,8 +549,7 @@ void RunningLockMgr::SetRunningLockDisableFlag(
     if (list.empty()) {
         // Not matched, and no trigger list.
         lockInner->SetDisabled(false);
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s useripcinfo not matched and list is empty().", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Work trigger list is empty");
         return;
     }
     bool triggerMatched = true;
@@ -605,40 +559,32 @@ void RunningLockMgr::SetRunningLockDisableFlag(
         UserIPCInfo triggerIPCInfo {workTrigger->GetUid(), workTrigger->GetPid()};
         if (!MatchProxyMap(triggerIPCInfo)) {
             triggerMatched = false;
-            POWER_HILOGD(MODULE_SERVICE,
-                "%{public}s workTrigger not matched uid = %d, pid = %d.",
-                __func__,
-                triggerIPCInfo.uid,
-                triggerIPCInfo.pid);
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTrigger not matched uid = %{public}d, pid = %{public}d",
+                triggerIPCInfo.uid, triggerIPCInfo.pid);
             break;
         }
     }
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "TriggerMatched = %{public}d, uid = %{public}d, pid = %{public}d",
+        userIPCinfo.uid, userIPCinfo.pid, triggerMatched);
     lockInner->SetDisabled(triggerMatched);
-    POWER_HILOGD(MODULE_SERVICE,
-        "%{public}s useripcinfo uid = %d pid = %d, triggerMatched = %d.",
-        __func__,
-        userIPCinfo.uid,
-        userIPCinfo.pid,
-        triggerMatched);
 }
 
 void RunningLockMgr::LockReally(const sptr<IRemoteObject>& token,
     std::shared_ptr<RunningLockInner>& lockInner)
 {
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Start");
     if (lockInner->GetReallyLocked()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s :return by lockInner->GetReallyLocked() == true.", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "lockInner->GetReallyLocked() is true, return");
         return;
     }
     if (lockInner->GetDisabled()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s :return by lockInner->GetDisabled() == true.", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "lockInner->GetDisabled() is true, return");
         return;
     }
     runningLockAction_->Acquire(lockInner->GetRunningLockType());
     lockInner->SetReallyLocked(true);
     NotifyRunningLockChanged(token, lockInner, NOTIFY_RUNNINGLOCK_ADD);
-    POWER_HILOGD(MODULE_SERVICE, "%{public}s :called end.", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Finish");
 }
 void RunningLockMgr::UnLockReally(const sptr<IRemoteObject>& token,
     std::shared_ptr<RunningLockInner>& lockInner)
@@ -652,21 +598,20 @@ void RunningLockMgr::UnLockReally(const sptr<IRemoteObject>& token,
      * and then PGManager Proxyed it,
      * At this time, lock should be unlocked to kernel because we have locked to kernel for it.
      */
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Start");
     if (!lockInner->GetReallyLocked()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s :return by lockInner->GetReallyLocked() == false.", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "lockInner->GetReallyLocked() is false, return");
         return;
     }
     // If disabled, unlock to the kernel.
     if (!lockInner->GetDisabled()) {
-        POWER_HILOGD(MODULE_SERVICE,
-            "%{public}s :return by lockInner->GetDisabled() == false.", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "lockInner->GetDisabled() is false, return");
         return;
     }
     runningLockAction_->Release(lockInner->GetRunningLockType());
     lockInner->SetReallyLocked(false);
     NotifyRunningLockChanged(token, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
-    POWER_HILOGD(MODULE_SERVICE, "%{public}s :called end.", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Finish");
 }
 
 void RunningLockMgr::ProxyRunningLockInner(bool proxyLock)
@@ -686,8 +631,7 @@ void RunningLockMgr::ProxyRunningLockInner(bool proxyLock)
 
 void RunningLockMgr::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
-    POWER_HILOGD(MODULE_SERVICE,
-        "%{public}s :proxyLock = %d, uid = %d, pid = %d", __func__,
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "proxyLock = %{public}d, uid = %{public}d, pid = %{public}d",
         proxyLock, uid, pid);
     auto it = proxyMap_.find(uid);
     if (proxyLock) {
@@ -695,48 +639,40 @@ void RunningLockMgr::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
         if (it == proxyMap_.end()) {
             unordered_set<pid_t> pidset({pid});
             proxyMap_.emplace(uid, pidset);
-            POWER_HILOGD(MODULE_SERVICE,
-                "%{public}s :proxyLock = true first emplace {uid = %d, pid = %d}",
-                __func__, uid, pid);
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Emplace first proxyMap_ {uid = %{public}d, pid = %{public}d}",
+                uid, pid);
         } else {
             if (pid == INVALID_PID) {
                 // Insert uid, pid = -1,remove other pid
                 proxyMap_.erase(uid);
                 unordered_set<pid_t> pidset({pid});
                 proxyMap_.emplace(uid, pidset);
+                POWER_HILOGD(FEATURE_RUNNING_LOCK, "Re-emplace proxyMap_ {uid = %{public}d, pid = %{public}d}",
+                    uid, pid);
             } else {
                 auto& pidset = it->second;
                 pidset.insert(pid);
+                POWER_HILOGD(FEATURE_RUNNING_LOCK, "Insert proxyMap_ {uid = %{public}d, pid = %{public}d}", uid, pid);
             }
-            POWER_HILOGD(MODULE_SERVICE,
-                "%{public}s :proxyLock = true uid = %d exist insert pid = %d",
-                __func__, uid, pid);
         }
         // 1. Set the matched runninglock inner disabled flag.
     } else {
         if (it == proxyMap_.end()) {
             // No insert proxy info, nothing to erase.
-            POWER_HILOGD(MODULE_SERVICE,
-                "%{public}s :proxyLock = false not find by uid = %d",
-                __func__, uid);
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "No uid in proxyMap_, uid = %{public}d", uid);
             return;
         }
         // 1. Clear the runninglock inner disabled flag 2.removed from proxyMap_
         if (pid == INVALID_PID) {
             proxyMap_.erase(uid);
-            POWER_HILOGD(MODULE_SERVICE,
-                "%{public}s :proxyLock = false pid = -1 rmv uid = %d map",
-                __func__, uid);
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "pid = -1, erase from proxyMap_, uid = %{public}d", uid);
         } else {
             auto& pidset = it->second;
             pidset.erase(pid);
-            POWER_HILOGD(MODULE_SERVICE,
-                "%{public}s :proxyLock = false uid = %d erase single pid = %d",
-                __func__, uid, pid);
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Erase from proxyMap_, uid = %{public}d, pid = %{public}d", uid, pid);
             if (pidset.size() == 0) {
                 proxyMap_.erase(uid);
-                POWER_HILOGD(MODULE_SERVICE,
-                    "%{public}s :pidset.size()=0 erase uid keymap", __func__);
+                POWER_HILOGD(FEATURE_RUNNING_LOCK, "Pidset is empty erase uid from proxyMap_, uid = %{public}d", uid);
             }
         }
     }
@@ -759,10 +695,7 @@ void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
         tag,
         "MESSAGE",
         msg);
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s: %s %s",
-        __func__,
-        tag.c_str(),
-        msg.c_str());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "tag=%{public}s, msg=%{public}s", tag.c_str(), msg.c_str());
 }
 
 void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
@@ -855,22 +788,22 @@ void RunningLockMgr::DumpInfo(std::string& result)
 void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (remote.promote() == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Remote is nullptr");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
     auto handler = pms->GetHandler();
     if (handler == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Handler is nullptr");
         return;
     }
     std::function<void()> forceUnLockFunc = std::bind(&PowerMgrService::ForceUnLock, pms,
         remote.promote());
-    POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockDeathRecipient::%{public}s :remote.promote() = %p",
-        __func__,
-        remote.promote().GetRefPtr());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remote.promote() = %{public}p", remote.promote().GetRefPtr());
     handler->PostTask(forceUnLockFunc, TASK_RUNNINGLOCK_FORCEUNLOCK);
 }
 
@@ -915,24 +848,24 @@ void RunningLockMgr::LockCounter::Clear()
 
 void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *event)
 {
-    POWER_HILOGD(MODULE_SERVICE, "Sensor Callback come in");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Sensor Callback come in");
     if (event == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "SensorEvent *event is nullptr");
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Sensor event is nullptr");
         return;
     }
     if (event->sensorTypeId != SENSOR_TYPE_ID_PROXIMITY) {
-        POWER_HILOGE(MODULE_SERVICE, "Sensor Callback is not PROXIMITY");
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Sensor type is not PROXIMITY");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrService::GetInstance()");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
     auto runningLock = pms->GetRunningLockMgr();
     ProximityData* data = (ProximityData*)event->data;
 
-    POWER_HILOGD(MODULE_SERVICE, "Sensor Callback %{public}d", data->scalar);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY data->scalar=%{public}d", data->scalar);
     if (data->scalar == PROXIMITY_CLOSE_SCALAR) {
         runningLock->SetProximity(PROXIMITY_CLOSE);
     } else if (data->scalar == PROXIMITY_AWAY_SCALAR) {
@@ -942,28 +875,28 @@ void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *even
 
 RunningLockMgr::ProximityController::ProximityController()
 {
-    POWER_HILOGD(MODULE_SERVICE, "ProximityController Create");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Instance enter");
     SensorInfo* sensorInfo = nullptr;
     int32_t count;
     int ret = GetAllSensors(&sensorInfo, &count);
     if (ret != 0 || sensorInfo == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "Can't get sensors");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Get sensors fail, ret=%{public}d", ret);
         return;
     }
     for (int32_t i = 0; i < count; i++) {
         if (sensorInfo[i].sensorId == SENSOR_TYPE_ID_PROXIMITY) {
-            POWER_HILOGD(MODULE_SERVICE, "ProximityController Support");
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Support PROXIMITY sensor");
             support_ = true;
             break;
         }
     }
     if (!support_) {
-        POWER_HILOGE(MODULE_SERVICE, "ProximityController not support");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "PROXIMITY sensor not support");
         free(sensorInfo);
         return;
     }
     if (strcpy_s(user_.name, sizeof(user_.name), "RunningLock") != EOK) {
-        POWER_HILOGE(MODULE_SERVICE, "ProximityController strcpy_s err");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "strcpy_s error");
         return;
     }
     user_.userData = nullptr;
@@ -981,10 +914,10 @@ RunningLockMgr::ProximityController::~ProximityController()
 
 void RunningLockMgr::ProximityController::Enable()
 {
-    POWER_HILOGD(MODULE_SERVICE, "ProximityController Enable");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Enter");
     enabled_ = true;
     if (!support_) {
-        POWER_HILOGE(MODULE_SERVICE, "ProximityController not support");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "PROXIMITY sensor not support");
         return;
     }
 
@@ -995,10 +928,10 @@ void RunningLockMgr::ProximityController::Enable()
 
 void RunningLockMgr::ProximityController::Disable()
 {
-    POWER_HILOGD(MODULE_SERVICE, "ProximityController Disable");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Enter");
     enabled_ = false;
     if (!support_) {
-        POWER_HILOGE(MODULE_SERVICE, "ProximityController not support");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "PROXIMITY sensor not support");
         return;
     }
 
@@ -1007,28 +940,32 @@ void RunningLockMgr::ProximityController::Disable()
 
 bool RunningLockMgr::ProximityController::IsClose()
 {
-    POWER_HILOGD(MODULE_SERVICE, "IsClose:%{public}d", isClose);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY IsClose: %{public}d", isClose);
     return isClose;
 }
 
 void RunningLockMgr::ProximityController::OnClose()
 {
     if (!enabled_ || IsClose()) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or closed already");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
     auto stateMachine = pms->GetPowerStateMachine();
     if (stateMachine == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
     isClose = true;
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is closed");
     auto runningLock = pms->GetRunningLockMgr();
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
-        POWER_HILOGD(MODULE_SERVICE, "Change to INACITVE when come close");
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
         stateMachine->SetState(PowerState::INACTIVE,
             StateChangeReason::STATE_CHANGE_REASON_SENSOR,
             true);
@@ -1038,21 +975,25 @@ void RunningLockMgr::ProximityController::OnClose()
 void RunningLockMgr::ProximityController::OnAway()
 {
     if (!enabled_ || !IsClose()) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or away already");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
     auto stateMachine = pms->GetPowerStateMachine();
     if (stateMachine == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
     isClose = false;
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is away");
     auto runningLock = pms->GetRunningLockMgr();
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
-        POWER_HILOGD(MODULE_SERVICE, "Change to AWAKE when go away");
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
         stateMachine->SetState(PowerState::AWAKE,
             StateChangeReason::STATE_CHANGE_REASON_SENSOR,
             true);

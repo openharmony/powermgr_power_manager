@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstdio>
-#include <cstdlib>
 #include <string>
-#include "hilog_wrapper.h"
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "power_log.h"
 #include "power_mgr_client.h"
 
 using namespace OHOS::PowerMgr;
@@ -40,31 +39,30 @@ static PowerMgrClient &g_powerMgrClient = PowerMgrClient::GetInstance();
 
 static napi_value RebootOrShutdown(napi_env env, napi_callback_info info, bool isReboot)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: enter, %{public}s", __func__, isReboot ? "reboot" : "shutdown");
     size_t argc = 1;
     napi_value args[1] = { 0 };
     napi_value jsthis;
     void *data = nullptr;
 
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
-    NAPI_ASSERT(env, (status == napi_ok) && (argc >= 1), "failed to get cb info");
+    NAPI_ASSERT(env, (status == napi_ok) && (argc >= 1), "Failed to get cb info");
     napi_valuetype type = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, args[0], &type));
-    NAPI_ASSERT(env, type == napi_string, "wrong argument type. string expected.");
+    NAPI_ASSERT(env, type == napi_string, "Wrong argument type. string expected.");
 
     char reason[REASON_MAX] = { 0 };
     size_t reasonLen = 0;
     status = napi_get_value_string_utf8(env, args[0], reason, REASON_MAX - 1, &reasonLen);
     if (status != napi_ok) {
-        POWER_HILOGE(MODULE_JS_NAPI, "%{public}s: get reason failed", __func__);
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Get shutdown reason failed");
         return nullptr;
     }
+    POWER_HILOGD(FEATURE_SHUTDOWN, "reboot: %{public}d, reason: %{public}s", isReboot, reason);
     if (isReboot) {
         g_powerMgrClient.RebootDevice(std::string(reason));
     } else {
         g_powerMgrClient.ShutDownDevice(std::string(reason));
     }
-    POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: reason %{public}s, exit", __func__, reason);
     return nullptr;
 }
 
@@ -89,8 +87,7 @@ static void IsScreenOnCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCallba
         [](napi_env env, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
             asyncCallbackInfo->screenOn = g_powerMgrClient.IsScreenOn();
-            POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: screen is %{public}s ", __func__,
-                asyncCallbackInfo->screenOn ? "on" : "off");
+            POWER_HILOGD(COMP_FWK, "Screen is %{public}s ", asyncCallbackInfo->screenOn ? "ON" : "OFF");
         },
         [](napi_env env, napi_status status, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
@@ -116,18 +113,17 @@ static void IsScreenOnCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCallba
 
 static napi_value IsScreenOn(napi_env env, napi_callback_info info)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: enter", __func__);
     size_t argc = 1;
     napi_value args[1] = { 0 };
     napi_value jsthis;
     void *data = nullptr;
 
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
-    NAPI_ASSERT(env, (status == napi_ok), "IsScreenOn: failed to get cb info");
+    NAPI_ASSERT(env, (status == napi_ok), "Failed to get cb info");
 
     auto asyncCallbackInfo = new PowerAsyncCallbackInfo();
     if (asyncCallbackInfo == nullptr) {
-        POWER_HILOGE(MODULE_JS_NAPI, "%{public}s: new asyncCallbackInfo failed", __func__);
+        POWER_HILOGE(COMP_FWK, "Failed to create asyncCallbackInfo");
         return nullptr;
     }
     asyncCallbackInfo->env = env;
@@ -136,7 +132,7 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
     if (argc == 1) {
         NAPI_CALL(env, napi_typeof(env, args[0], &type));
         if (type != napi_function) {
-            POWER_HILOGE(MODULE_JS_NAPI, "%{public}s: wrong argument type. napi_function expected", __func__);
+            POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
             delete asyncCallbackInfo;
             return nullptr;
         }
@@ -144,14 +140,13 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     if (asyncCallbackInfo->callbackRef == nullptr) {
-        POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: callbackRef is null", __func__);
+        POWER_HILOGD(COMP_FWK, "callbackRef is null");
         napi_create_promise(env, &asyncCallbackInfo->deferred, &result);
     } else {
-        POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: callbackRef is not null", __func__);
+        POWER_HILOGD(COMP_FWK, "callbackRef is not null");
         napi_get_undefined(env, &result);
     }
     IsScreenOnCallBack(env, asyncCallbackInfo);
-    POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: exit", __func__);
     return result;
 }
 
@@ -161,14 +156,14 @@ EXTERN_C_START
  */
 static napi_value PowerInit(napi_env env, napi_value exports)
 {
-    POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: enter", __func__);
+    POWER_HILOGD(COMP_FWK, "Initialize the Power module");
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("shutdownDevice", ShutdownDevice),
         DECLARE_NAPI_FUNCTION("rebootDevice", RebootDevice),
         DECLARE_NAPI_FUNCTION("isScreenOn", IsScreenOn),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: exit", __func__);
+    POWER_HILOGD(COMP_FWK, "The initialization of the Power module is complete");
 
     return exports;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 
 #include "display_manager.h"
 #include "display_power_mgr_client.h"
+#include "power_log.h"
 #include "power_state_machine_info.h"
 #include "system_suspend_controller.h"
-#include "hilog_wrapper.h"
 
 using namespace std;
 
@@ -57,7 +57,7 @@ void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const 
 DisplayState DeviceStateAction::GetDisplayState()
 {
     DisplayPowerMgr::DisplayState state = DisplayPowerMgrClient::GetInstance().GetDisplayState();
-    POWER_HILOGI(MODULE_SERVICE, "GetDisplayState: %{public}d", state);
+    POWER_HILOGI(FEATURE_POWER_STATE, "Get display state: %{public}d", state);
     DisplayState ret = DisplayState::DISPLAY_ON;
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON:
@@ -80,17 +80,17 @@ DisplayState DeviceStateAction::GetDisplayState()
 
 uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
 {
-    POWER_HILOGI(MODULE_SERVICE, "Action: SetDisplayState: %{public}d, %{public}d",
+    POWER_HILOGI(FEATURE_POWER_STATE, "Action: SetDisplayState: %{public}d, %{public}d",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
 
     DisplayState currentState = GetDisplayState();
     if (state == currentState) {
-        POWER_HILOGI(MODULE_SERVICE, "Already in state: %{public}d", static_cast<uint32_t>(state));
+        POWER_HILOGI(FEATURE_POWER_STATE, "Already ins state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
 
     if (dispCallback_ == nullptr) {
-        POWER_HILOGI(MODULE_SERVICE, "Register Callback");
+        POWER_HILOGI(FEATURE_POWER_STATE, "Register Callback");
         dispCallback_ = new DisplayPowerCallback();
         DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
     }
@@ -123,7 +123,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
     }
     dispCallback_->notify_ = actionCallback_;
     bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState, reason);
-    POWER_HILOGI(MODULE_SERVICE, "SetDisplayState: %{public}d", ret);
+    POWER_HILOGI(FEATURE_POWER_STATE, "Set display state: %{public}d", ret);
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
@@ -142,10 +142,10 @@ void DeviceStateAction::RegisterCallback(std::function<void(uint32_t)>& callback
 void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t displayId,
     DisplayPowerMgr::DisplayState state)
 {
-    POWER_HILOGI(MODULE_SERVICE, "Callback: OnDisplayStateChanged");
+    POWER_HILOGD(FEATURE_POWER_STATE, "Callback: OnDisplayStateChanged");
     int32_t mainDisp = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
     if (mainDisp < 0 || static_cast<uint32_t>(mainDisp) != displayId) {
-        POWER_HILOGI(MODULE_SERVICE, "It's not main display, skip!");
+        POWER_HILOGI(FEATURE_POWER_STATE, "It's not main display, skip!");
         return;
     }
     switch (state) {

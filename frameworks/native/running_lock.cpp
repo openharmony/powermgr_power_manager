@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ bool RunningLock::Init()
 {
     token_ = new (std::nothrow)RunningLockTokenStub();
     if (token_ == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :creating RunningLockTokenStub error.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create the RunningLockTokenStub");
         return false;
     }
     Create();
@@ -49,14 +49,14 @@ bool RunningLock::Init()
 
 ErrCode RunningLock::Lock(uint32_t timeOutMs)
 {
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s :timeOutMs = %u.", __func__, timeOutMs);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock timeOutMs: %{public}u", timeOutMs);
 
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :proxy nullptr.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return E_GET_POWER_SERVICE_FAILED;
     }
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s :service lock is called", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call");
     proxy->Lock(token_, runningLockInfo_, timeOutMs);
 
     return ERR_OK;
@@ -64,16 +64,15 @@ ErrCode RunningLock::Lock(uint32_t timeOutMs)
 
 ErrCode RunningLock::UnLock()
 {
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s.", __func__);
     if (!CheckUsedNoLock()) {
         return ERR_OK;
     }
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :proxy nullptr.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return E_GET_POWER_SERVICE_FAILED;
     }
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s :really called service UnLock.", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side UnLock call");
     proxy->UnLock(token_);
     return ERR_OK;
 }
@@ -82,18 +81,17 @@ bool RunningLock::CheckUsedNoLock()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :proxy nullptr.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return false;
     }
     bool ret = proxy->IsUsed(token_);
 
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s, ret = %d.", __func__, ret);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Is Used: %{public}d", ret);
     return ret;
 }
 
 bool RunningLock::IsUsed()
 {
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s.", __func__);
     return CheckUsedNoLock();
 }
 
@@ -113,10 +111,10 @@ ErrCode RunningLock::SetWorkTriggerList(const WorkTriggerList& workTriggerList)
 
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :proxy nullptr.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return E_GET_POWER_SERVICE_FAILED;
     }
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s :service SetWorkTriggerList is called.", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side SetWorkTriggerList call");
     proxy->SetWorkTriggerList(token_, runningLockInfo_.workTriggerlist);
     return ERR_OK;
 }
@@ -128,27 +126,23 @@ const WorkTriggerList& RunningLock::GetWorkTriggerList() const
 
 void RunningLock::Create()
 {
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s", __func__);
-
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :proxy nullptr.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return;
     }
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s :service lock is called", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side CreateRunningLock call");
     proxy->CreateRunningLock(token_, runningLockInfo_);
 }
 
 void RunningLock::Release()
 {
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s ", __func__);
-
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "RunningLock::%{public}s :proxy nullptr.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return;
     }
-    POWER_HILOGI(MODULE_INNERKIT, "RunningLock::%{public}s :service lock is called", __func__);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
     proxy->ReleaseRunningLock(token_);
 }
 } // namespace PowerMgr

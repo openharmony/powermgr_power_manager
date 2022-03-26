@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "actions/irunning_lock_action.h"
 
-#include "hilog_wrapper.h"
+#include "power_log.h"
 
 using namespace std;
 
@@ -28,7 +28,7 @@ const array<string, ToUnderlying(RunningLockType::RUNNINGLOCK_BUTT)> IRunningLoc
 void IRunningLockAction::Acquire(RunningLockType type)
 {
     if (!IsValidType(type)) {
-        POWER_HILOGE(MODULE_SERVICE, "Invalid runninglock type");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Invalid runninglock type");
         return;
     }
 
@@ -38,25 +38,27 @@ void IRunningLockAction::Acquire(RunningLockType type)
         Lock(type, GetLockTag(type));
     }
     desc.IncRef();
-    POWER_HILOGD(MODULE_SERVICE, "Acquire runninglock, type: %{public}u, refCnt: %{public}u", t, desc.GetRefCnt());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Acquire runninglock, type: %{public}u, refCnt: %{public}u", t,
+        desc.GetRefCnt());
 }
 
 void IRunningLockAction::Release(RunningLockType type)
 {
     if (!IsValidType(type)) {
-        POWER_HILOGE(MODULE_SERVICE, "Invalid runninglock type");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Invalid runninglock type");
         return;
     }
 
     auto t = ToUnderlying(type);
     RunningLockDesc& desc = lockDescs_[t];
     if (desc.IsRefNone()) {
-        POWER_HILOGE(MODULE_SERVICE, "Invalid refCnt of wakelock: %{public}u", t);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Invalid refCnt of wakelock: %{public}u", t);
         return;
     }
 
     desc.DecRef();
-    POWER_HILOGD(MODULE_SERVICE, "Release runninglock, type: %{public}u, refCnt: %{public}u", t, desc.GetRefCnt());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Release runninglock, type: %{public}u, refCnt: %{public}u", t,
+        desc.GetRefCnt());
     if (desc.IsRefNone()) {
         Unlock(type, GetLockTag(type));
     }
