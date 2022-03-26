@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,16 +125,16 @@ public:
     void EnableMock(IDeviceStateAction* stateAction, IDevicePowerAction* powerAction,
         IRunningLockAction* lockAction)
     {
-        POWER_HILOGE(MODULE_SERVICE, "Service EnableMock:%{public}d", mockCount_++);
+        POWER_HILOGE(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
         powerStateMachine_->EnableMock(stateAction);
         shutdownService_.EnableMock(powerAction, stateAction);
     }
     void MockProximity(uint32_t status)
     {
-        POWER_HILOGE(MODULE_SERVICE, "MockProximity: fun is start");
+        POWER_HILOGE(LABEL_TEST, "MockProximity: fun is start");
         runningLockMgr_->SetProximity(status);
-        POWER_HILOGE(MODULE_SERVICE, "MockProximity: fun is end");
+        POWER_HILOGE(LABEL_TEST, "MockProximity: fun is end");
     }
     void MockSystemWakeup()
     {

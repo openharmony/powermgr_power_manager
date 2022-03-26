@@ -97,7 +97,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
 
     runningLock1->Lock();
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrServiceTest::PowerMgrService003 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 end.");
 }
 
 /**
@@ -111,5 +111,5 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService004, TestSize.Level0)
         auto& powerMgrClient = PowerMgrClient::GetInstance();
         powerMgrClient.RebootDevice("test");
     }
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrServiceTest::PowerMgrService004 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 end.");
 }

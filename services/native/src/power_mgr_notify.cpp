@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,8 @@
 #include <common_event_data.h>
 #include <common_event_manager.h>
 #include <common_event_support.h>
-#include <unistd.h>
 
-#include "power_common.h"
+#include "power_log.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
@@ -43,25 +42,27 @@ void PowerMgrNotify::RegisterPublishEvents()
 void PowerMgrNotify::PublishEvents(int64_t eventTime, sptr<IntentWant> want)
 {
     if ((want == nullptr) || (publishInfo_ == nullptr)) {
-        POWER_HILOGE(MODULE_SERVICE, "Invalid parameter");
+        POWER_HILOGE(COMP_SVC, "Invalid parameter");
         return;
     }
-
-    POWER_HILOGI(MODULE_SERVICE, "Start to publish event %{public}s at %{public}lld",
-        want->GetAction().c_str(), static_cast<long long>(eventTime));
     CommonEventData event(*want);
     CommonEventManager::PublishCommonEvent(event, *publishInfo_, nullptr);
-    POWER_HILOGI(MODULE_SERVICE, "Publish event %{public}s done", want->GetAction().c_str());
 }
 
 void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
 {
+    POWER_HILOGI(FEATURE_SUSPEND, "Start to publish event %{public}s at %{public}lld",
+        screenOffWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, screenOffWant_);
+    POWER_HILOGI(FEATURE_SUSPEND, "Publish event %{public}s done", screenOffWant_->GetAction().c_str());
 }
 
 void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
 {
+    POWER_HILOGI(FEATURE_WAKEUP, "Start to publish event %{public}s at %{public}lld",
+        screenOnWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, screenOnWant_);
+    POWER_HILOGI(FEATURE_WAKEUP, "Publish event %{public}s done", screenOnWant_->GetAction().c_str());
 }
 } // namespace PowerMgr
 } // namespace OHOS

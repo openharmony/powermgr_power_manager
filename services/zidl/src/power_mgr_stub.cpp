@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,13 +29,11 @@ namespace PowerMgr {
 int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
-    POWER_HILOGD(MODULE_SERVICE,
-        "PowerMgrStub::OnRemoteRequest, cmd = %{public}u, flags= %{public}d", code, option.GetFlags());
+    POWER_HILOGD(COMP_FWK, "cmd = %{public}u, flags= %{public}d", code, option.GetFlags());
     std::u16string descripter = PowerMgrStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
-        POWER_HILOGE(MODULE_SERVICE,
-            "PowerMgrStub::OnRemoteRequest failed, descriptor is not matched!");
+        POWER_HILOGE(COMP_FWK, "Descriptor is not matched");
         return E_GET_POWER_SERVICE_FAILED;
     }
     const int DFX_DELAY_MS = 10000;
@@ -270,7 +268,7 @@ int32_t PowerMgrStub::ForceSuspendDeviceStub(MessageParcel& data, MessageParcel&
 
     ret = ForceSuspendDevice(time);
     if (!reply.WriteBool(ret)) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: ForceSuspendDevice Writeback Fail!");
+        POWER_HILOGE(FEATURE_SUSPEND, "WriteBool fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
@@ -280,7 +278,7 @@ int32_t PowerMgrStub::GetStateStub(MessageParcel& reply)
 {
     PowerState ret = GetState();
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: GetStateStub Writeback Fail!");
+        POWER_HILOGE(FEATURE_POWER_STATE, "WriteUint32 fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
@@ -291,7 +289,7 @@ int32_t PowerMgrStub::IsScreeOnStub(MessageParcel& reply)
     bool ret = false;
     ret = IsScreenOn();
     if (!reply.WriteBool(ret)) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: IsScreenOn Writeback Fail!");
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
@@ -379,9 +377,8 @@ int32_t PowerMgrStub::GetDeviceModeStub(MessageParcel& reply)
 {
     uint32_t ret = 0;
     ret = GetDeviceMode();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrStub::GetDeviceModeStub, cmd = %{public}u.", ret);
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: Get device mode Fail!");
+        POWER_HILOGE(FEATURE_POWER_MODE, "WriteUint32 fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
@@ -393,7 +390,7 @@ int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
     std::vector<std::string> args;
 
     if (!data.ReadUint32(argc)) {
-        POWER_HILOGE(MODULE_INNERKIT, "Readback fail!");
+        POWER_HILOGE(COMP_FWK, "ReadUint32 fail");
         return E_READ_PARCEL_ERROR;
     }
 
@@ -402,13 +399,13 @@ int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
         if (!arg.empty()) {
             args.push_back(arg);
         } else {
-            POWER_HILOGE(MODULE_INNERKIT, "read value fail: %{public}d", i);
+            POWER_HILOGE(COMP_FWK, "read args fail, arg index: %{public}d", i);
         }
     }
 
     std::string ret = ShellDump(args, argc);
     if (!reply.WriteString(ret)) {
-        POWER_HILOGE(MODULE_SERVICE, "PowerMgrStub:: Dump Writeback Fail!");
+        POWER_HILOGE(COMP_FWK, "WriteString fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;

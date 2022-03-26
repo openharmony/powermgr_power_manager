@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-#include "hilog_wrapper.h"
+#include "power_log.h"
 
 using namespace std;
 using namespace OHOS;
@@ -48,13 +48,13 @@ bool Permission::CheckCallingPermission(const string& perm)
     } else if (type == ATokenTypeEnum::TOKEN_HAP) {
         result = AccessTokenKit::VerifyAccessToken(tokenId, perm);
     } else {
-        POWER_HILOGW(MODULE_SERVICE,
+        POWER_HILOGW(COMP_SVC,
             "Access token type error, type=%{public}d, pid=%{public}d, uid=%{public}d, perm=%{public}s",
             type, pid, uid, perm.c_str());
         return false;
     }
     bool isPermissionGranted = (result == PermissionState::PERMISSION_GRANTED);
-    POWER_HILOGI(MODULE_SERVICE, "isPermissionGranted=%{public}d, pid=%{public}d, uid=%{public}d, perm=%{public}s",
+    POWER_HILOGI(COMP_SVC, "isPermissionGranted=%{public}d, pid=%{public}d, uid=%{public}d, perm=%{public}s",
         isPermissionGranted, pid, uid, perm.c_str());
     return isPermissionGranted;
 }
@@ -66,17 +66,17 @@ sptr<IBundleMgr> GetBundleMgr()
     }
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sam == nullptr) {
-        POWER_HILOGW(MODULE_SERVICE, "GetSystemAbilityManager return nullptr");
+        POWER_HILOGW(COMP_SVC, "GetSystemAbilityManager return nullptr");
         return nullptr;
     }
     auto bundleMgrSa = sam->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleMgrSa == nullptr) {
-        POWER_HILOGW(MODULE_SERVICE, "GetSystemAbility return nullptr");
+        POWER_HILOGW(COMP_SVC, "GetSystemAbility return nullptr");
         return nullptr;
     }
     auto bundleMgr = iface_cast<IBundleMgr>(bundleMgrSa);
     if (bundleMgr == nullptr) {
-        POWER_HILOGW(MODULE_SERVICE, "iface_cast return nullptr");
+        POWER_HILOGW(COMP_SVC, "iface_cast return nullptr");
     }
     g_bundleMgr = bundleMgr;
     return g_bundleMgr;
@@ -86,7 +86,7 @@ bool Permission::CheckIsSystemAppByUid(int32_t uid)
 {
     auto bundleMgr = GetBundleMgr();
     if (bundleMgr == nullptr) {
-        POWER_HILOGW(MODULE_SERVICE, "bundleMgr is nullptr, return false");
+        POWER_HILOGW(COMP_SVC, "BundleMgr is nullptr, return false");
         return false;
     }
     return bundleMgr->CheckIsSystemAppByUid(uid);

@@ -28,7 +28,7 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(MODULE_SERVICE, "ResetMockAction:Start.");
+    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start.");
     g_stateAction = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
@@ -70,7 +70,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: start.";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrFailCheck001:Start.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck001:Start.");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -89,7 +89,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
     GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrFailCheck001:End.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck001:End.");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: end.";
 }
 
@@ -102,7 +102,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002:  start.";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrFailCheck002:Start.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck002:Start.");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -122,7 +122,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
     GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrFailCheck002:End.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck002:End.");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002: end.";
 }
 }

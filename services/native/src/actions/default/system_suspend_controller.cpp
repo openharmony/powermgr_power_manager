@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,10 @@
 
 #include "system_suspend_controller.h"
 
-#include "v1_0/power_interface_proxy.h"
-
-#include "hilog_wrapper.h"
+#include "power_log.h"
 #include "suspend/running_lock_hub.h"
 #include "suspend/suspend_controller.h"
+#include "v1_0/power_interface_proxy.h"
 
 using namespace OHOS::HDI::Power::V1_0;
 
@@ -32,7 +31,7 @@ SystemSuspendController::SystemSuspendController()
     sptr<IPowerHdiCallback> g_callback = new PowerHdiCallbackImpl();
     powerInterface = IPowerInterface::Get();
     if (powerInterface == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface->RegisterCallback(g_callback);
@@ -48,7 +47,7 @@ void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     if (force) {
@@ -65,7 +64,7 @@ void SystemSuspendController::Wakeup()
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface->StopSuspend();
@@ -78,7 +77,7 @@ void SystemSuspendController::AcquireRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface->SuspendBlock(name);
@@ -89,7 +88,7 @@ void SystemSuspendController::ReleaseRunningLock(const std::string& name)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface->SuspendUnblock(name);
@@ -100,7 +99,7 @@ void SystemSuspendController::Dump(std::string& info)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "No hdf interface");
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface->PowerDump(info);

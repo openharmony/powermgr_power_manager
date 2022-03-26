@@ -61,7 +61,7 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit000, TestSize.Level0)
     runningLock1->SetWorkTriggerList(worklist);
     auto& list2 = runningLock1->GetWorkTriggerList();
     ASSERT_TRUE(list2.empty());
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit01 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit01 end.");
 }
 
 /**
@@ -79,18 +79,18 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit001, TestSize.Level0)
     std::shared_ptr<WorkTrigger> worker3 = std::make_shared<WorkTrigger>(3, "worker3", 30);
     std::shared_ptr<WorkTrigger> worker4 = std::make_shared<WorkTrigger>();
     WorkTriggerList worklist;
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit02, 1 usecount = %ld", worker1.use_count());
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit02, 1 usecount = %ld", worker1.use_count());
     runningLock->Lock();
 
     worklist.push_back(worker1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit02, 2 usecount = %ld", worker1.use_count());
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit02, 2 usecount = %ld", worker1.use_count());
     worklist.push_back(worker2);
     worklist.push_back(worker3);
     runningLock->SetWorkTriggerList(worklist);
     {
         auto& list = runningLock->GetWorkTriggerList();
         for (auto& worker : list) {
-            POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit02, 3 usecount = %ld, name = %s, "
+            POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit02, 3 usecount = %ld, name = %s, "
                 "uid = %d, pid = %d, abilityid = %d", worker.use_count(), worker->GetName().c_str(),
                 worker->GetUid(), worker->GetPid(), worker->GetAbilityId());
         }
@@ -102,7 +102,7 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit001, TestSize.Level0)
     {
         auto& list2 = runningLock->GetWorkTriggerList();
         for (auto& worker : list2) {
-            POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit02, 4 usecount = %ld, name = %s, "
+            POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit02, 4 usecount = %ld, name = %s, "
                 "uid = %d, pid = %d, abilityid = %d", worker.use_count(), worker->GetName().c_str(),
                 worker->GetUid(), worker->GetPid(), worker->GetAbilityId());
         }
@@ -112,13 +112,13 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit001, TestSize.Level0)
     {
         auto& list2 = runningLock->GetWorkTriggerList();
         for (auto& worker : list2) {
-            POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit02, 5 usecount = %ld, name = %s,"
+            POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit02, 5 usecount = %ld, name = %s,"
                 "uid = %d, pid = %d, abilityid = %d", worker.use_count(), worker->GetName().c_str(),
                 worker->GetUid(), worker->GetPid(), worker->GetAbilityId());
         }
     }
     runningLock->Lock();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit002 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit002 end.");
 }
 
 /**
@@ -136,14 +136,14 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     runningLock1->UnLock();
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit003 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 1.");
     // lock 50ms
     runningLock1->Lock(50);
     usleep(4000);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit003 2.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 2.");
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     usleep(1000);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit003 3.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 3.");
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     // wait 60ms
     usleep(60000);
@@ -171,7 +171,7 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
         ASSERT_TRUE((*it1)->GetAbilityId() == (*it2)->GetAbilityId()) << "it1->GetAbilityId() == it2->GetAbilityId()";
         ASSERT_TRUE((*it1)->GetName() == (*it2)->GetName()) << "it1->GetName() == it2->GetName()";
     }
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit003 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 end.");
 }
 
 /**
@@ -190,28 +190,28 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
         // after 8ms unlock
         runningLock1->Lock(30);
         runningLock1->Lock(80);
-        POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit005 1.");
+        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 1.");
         usleep(50000);
         ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
         usleep(50000);
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         // no unlock
-        POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit005 2.");
+        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 2.");
         runningLock1->Lock(2);
         runningLock1->Lock(3);
         runningLock1->Lock();
-        POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit005 3.");
+        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 3.");
         usleep(8000);
         ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
         // after 3ms unlock
         runningLock1->Lock(30);
-        POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit005 4.");
+        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 4.");
         usleep(50000);
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         runningLock1->Lock(5);
         runningLock1->UnLock();
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-        POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit005 5.");
+        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 5.");
     }
 }
 
@@ -230,28 +230,28 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit003, TestSize.Level0)
     // after 8ms unlock
     runningLock1->Lock(30);
     runningLock1->Lock(80);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 1.");
     usleep(50000);
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     usleep(50000);
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
     // no unlock
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 2.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 2.");
     runningLock1->Lock(2);
     runningLock1->Lock(3);
     runningLock1->Lock();
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 3.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 3.");
     usleep(8000);
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     // after 3ms unlock
     runningLock1->Lock(30);
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 4.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 4.");
     usleep(50000);
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
     runningLock1->Lock(5);
     runningLock1->UnLock();
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGD(MODULE_SERVICE, "PowerMgrUnitTest::RunningLockInnerKit004 5.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 5.");
 }
 
 /**
@@ -292,7 +292,7 @@ HWTEST_F (RunningLockTest, RunningLockMgr001, TestSize.Level0)
         ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
         ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND));
     }
-    POWER_HILOGD(MODULE_SERVICE, "RunningLockTest::RunningLockMgr001 end.");
+    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr001 end.");
 }
 
 /**
@@ -333,7 +333,7 @@ HWTEST_F (RunningLockTest, RunningLockMgr002, TestSize.Level0)
         ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
         ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND));
     }
-    POWER_HILOGD(MODULE_SERVICE, "RunningLockTest::RunningLockMgr002 end.");
+    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr002 end.");
 }
 
 
@@ -388,7 +388,7 @@ HWTEST_F (RunningLockTest, RunningLockMgr003, TestSize.Level0)
     }
     runningLockMgr_->UnLock(token1);
     runningLockMgr_->UnLock(token2);
-    POWER_HILOGD(MODULE_SERVICE, "RunningLockTest::RunningLockMgr003 end.");
+    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr003 end.");
 }
 
 /**
@@ -445,7 +445,7 @@ HWTEST_F (RunningLockTest, RunningLockMgr004, TestSize.Level0)
     }
     runningLockMgr_->UnLock(token3);
     runningLockMgr_->UnLock(token4);
-    POWER_HILOGD(MODULE_SERVICE, "RunningLockTest::RunningLockMgr004 end.");
+    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr004 end.");
 }
 
 /**
@@ -503,7 +503,7 @@ HWTEST_F (RunningLockTest, RunningLockMgr005, TestSize.Level0)
         ASSERT_TRUE(proxymap.empty());
     }
     runningLockMgr_->UnLock(token);
-    POWER_HILOGD(MODULE_SERVICE, "RunningLockTest::RunningLockMgr005 end.");
+    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr005 end.");
 }
 #endif // IPC_AVAILABLE
 }

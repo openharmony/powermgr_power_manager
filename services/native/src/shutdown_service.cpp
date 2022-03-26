@@ -24,8 +24,9 @@
 #include <common_event_manager.h>
 #include <common_event_publish_info.h>
 #include <common_event_support.h>
+#include <datetime_ex.h>
 
-#include "hilog_wrapper.h"
+#include "power_log.h"
 #include "power_mgr_factory.h"
 
 using namespace OHOS::AAFwk;
@@ -39,6 +40,7 @@ const time_t MAX_TIMEOUT_SEC = 30;
 }
 ShutdownService::ShutdownService() : started_(false)
 {
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Instance create");
     devicePowerAction_ = PowerMgrFactory::GetDevicePowerAction();
     deviceStateAction_ = PowerMgrFactory::GetDeviceStateAction();
     highCallbackMgr_ = new CallbackManager();
@@ -83,21 +85,21 @@ void ShutdownService::DelShutdownCallback(const sptr<IShutdownCallback>& callbac
 
 bool ShutdownService::IsShuttingDown()
 {
-    POWER_HILOGD(MODULE_SERVICE, "IsShuttingDown");
     return started_;
 }
 
 void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 {
     if (started_) {
-        POWER_HILOGE(MODULE_SERVICE, "Shutdown is already running.");
+        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown is already running");
         return;
     }
     started_ = true;
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
     make_unique<thread>([=] {
         Prepare();
         TurnOffScreen();
-        POWER_HILOGD(MODULE_SERVICE, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
+        POWER_HILOGD(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
         if (devicePowerAction_ != nullptr) {
             isReboot ? devicePowerAction_->Reboot(reason) : devicePowerAction_->Shutdown(reason);
         }
@@ -108,29 +110,32 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 void ShutdownService::Prepare()
 {
     PublishShutdownEvent();
+    POWER_HILOGD(FEATURE_SHUTDOWN, "High priority shutdown callback started");
     highCallbackMgr_->WaitingCallback();
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Default priority shutdown callback started");
     defaultCallbackMgr_->WaitingCallback();
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Low priority shutdown callback started");
     lowCallbackMgr_->WaitingCallback();
 }
 
 void ShutdownService::PublishShutdownEvent() const
 {
-    POWER_HILOGD(MODULE_SERVICE, "Start of publishing shutdown event");
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Start of publishing shutdown event");
     CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(false);
     IntentWant shutdownWant;
     shutdownWant.SetAction(CommonEventSupport::COMMON_EVENT_SHUTDOWN);
     CommonEventData event(shutdownWant);
     if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
-        POWER_HILOGE(MODULE_SERVICE, "Failed to publish the shutdown event!");
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Publish the shutdown event fail");
         return;
     }
-    POWER_HILOGD(MODULE_SERVICE, "End of publishing shutdown event");
+    POWER_HILOGD(FEATURE_SHUTDOWN, "End of publishing shutdown event");
 }
 
 void ShutdownService::TurnOffScreen()
 {
-    POWER_HILOGD(MODULE_SERVICE, "turn off screen before shutdown");
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Turn off screen before shutdown");
     deviceStateAction_->SetDisplayState(DisplayState::DISPLAY_OFF, StateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
@@ -143,9 +148,8 @@ void ShutdownService::CallbackManager::AddCallback(const sptr<IShutdownCallback>
     if (retIt.second) {
         object->AddDeathRecipient(this);
     }
-    POWER_HILOGI(MODULE_SERVICE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,"
-        " insertOk = %{public}d", object.GetRefPtr(),
-        callback.GetRefPtr(), callbacks_.size(), retIt.second);
+    POWER_HILOGD(FEATURE_SHUTDOWN, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,"
+        " insertOk = %{public}d", object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size(), retIt.second);
 }
 
 void ShutdownService::CallbackManager::RemoveCallback(const sptr<IShutdownCallback>& callback)
@@ -158,25 +162,29 @@ void ShutdownService::CallbackManager::RemoveCallback(const sptr<IShutdownCallba
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
-    POWER_HILOGI(MODULE_SERVICE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,",
+    POWER_HILOGD(FEATURE_SHUTDOWN, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,",
         object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size());
 }
 
 void ShutdownService::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
+    POWER_HILOGW(FEATURE_SHUTDOWN, "Enter, remote=%{public}p", remote.GetRefPtr());
     RETURN_IF(remote.promote() == nullptr);
     RemoveCallback(iface_cast<IShutdownCallback>(remote.promote()));
 }
 
 void ShutdownService::CallbackManager::WaitingCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "Shutdown callback started.");
     auto callbackStart = [&]() {
         unique_lock<mutex> lock(mutex_);
         for (auto &obj : callbacks_) {
             sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
             if (callback != nullptr) {
+                int64_t start = GetTickCount();
                 callback->ShutdownCallback();
+                int64_t cost = GetTickCount() - start;
+                POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, callback=%{public}p, cost=%{public}" PRId64 "",
+                    callback.GetRefPtr(), cost);
             }
         }
     };
@@ -185,12 +193,12 @@ void ShutdownService::CallbackManager::WaitingCallback()
     future<void> fut = callbackTask.get_future();
     make_unique<thread>(std::move(callbackTask))->detach();
 
-    POWER_HILOGI(MODULE_SERVICE, "Waiting for the callback execution is complete...");
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Waiting for the callback execution complete...");
     future_status status = fut.wait_for(std::chrono::seconds(MAX_TIMEOUT_SEC));
     if (status == future_status::timeout) {
-        POWER_HILOGW(MODULE_SERVICE, "Shutdown callback execution timedout!");
+        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown callback execution timeout");
     }
-    POWER_HILOGI(MODULE_SERVICE, "The callback execution is complete. ");
+    POWER_HILOGI(FEATURE_SHUTDOWN, "The callback execution is complete");
 }
 } // namespace PowerMgr
 } // namespace OHOS
