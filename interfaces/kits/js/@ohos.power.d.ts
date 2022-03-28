@@ -41,6 +41,7 @@ declare namespace power {
    *
    * @param reason Indicates the restart reason. For example, "updater" indicates entering the updater mode
    * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
+   * @permission ohos.permission.REBOOT
    * @since 7
    */
   function rebootDevice(reason: string): void;
@@ -49,7 +50,6 @@ declare namespace power {
    * Checks whether the screen of a device is on or off.
    *
    * @return Returns true if the screen is on; returns false otherwise.
-   * @permission ohos.permission.REBOOT
    * @since 7
    */
   function isScreenOn(callback: AsyncCallback<boolean>): void;
