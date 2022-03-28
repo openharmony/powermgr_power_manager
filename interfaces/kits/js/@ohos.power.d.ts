@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,10 @@ declare namespace power {
   /**
    * Shuts down the system.
    *
-   * <p>This method requires the ohos.permission.SHUTDOWN permission.
+   * <p>This method requires the ohos.permission.REBOOT permission.
    *
    * @param reason Indicates the shutdown reason.
+   * @permission ohos.permission.REBOOT
    * @systemapi
    * @since 7
    */
@@ -40,6 +41,7 @@ declare namespace power {
    *
    * @param reason Indicates the restart reason. For example, "updater" indicates entering the updater mode
    * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
+   * @permission ohos.permission.REBOOT
    * @since 7
    */
   function rebootDevice(reason: string): void;
