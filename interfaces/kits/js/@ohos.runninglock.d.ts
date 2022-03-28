@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +31,11 @@ declare namespace runningLock {
     class RunningLock {
         /**
          * Prevents the system from hibernating and sets the lock duration.
+         * This method requires the ohos.permission.RUNNING_LOCK permission.
          *
          * @param timeout Indicates the lock duration (ms). After the lock duration times out, the lock is automatically
          * released and the system hibernates if no other {@link RunningLock} is set.
+         * @permission ohos.permission.RUNNING_LOCK
          * @since 7
          */
         lock(timeout: number): void;
@@ -48,8 +50,10 @@ declare namespace runningLock {
 
         /**
          * Release the {@link RunningLock} that prevents the system from hibernating.
+         * This method requires the ohos.permission.RUNNING_LOCK permission.
          *
          * @since 7
+         * @permission ohos.permission.RUNNING_LOCK
          */
         unlock(): void;
     }
@@ -98,6 +102,7 @@ declare namespace runningLock {
      * a suffix.
      * @param type Indicates the {@link RunningLockType}.
      * @return Returns the {@link RunningLock} object.
+     * @permission ohos.permission.RUNNING_LOCK
      * @since 7
      */
     function createRunningLock(name: string, type: RunningLockType, callback: AsyncCallback<RunningLock>): void;
