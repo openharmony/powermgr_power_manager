@@ -752,7 +752,7 @@ void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
     const int logLevel = 2;
     const string &tag = runninglockNotifyStr_.at(changeType);
     HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_RUNNINGLOCK",
-        HiviewDFX::HiSysEvent::EventType::FAULT,
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "LOG_LEVEL",
         logLevel,
         "TAG",
