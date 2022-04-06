@@ -156,8 +156,8 @@ private:
         void Clear();
         static void RecordSensorCallback(SensorEvent *event);
     private:
-        static const int PROXIMITY_CLOSE_SCALAR = 0;
-        static const int PROXIMITY_AWAY_SCALAR = 5;
+        static const int32_t PROXIMITY_CLOSE_SCALAR = 0;
+        static const int32_t PROXIMITY_AWAY_SCALAR = 5;
         static const uint32_t SAMPLING_RATE =  100000000;
         bool support_ {false};
         bool enabled_ {false};
