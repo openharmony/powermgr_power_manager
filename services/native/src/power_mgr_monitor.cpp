@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,8 @@
 #include <common_event_support.h>
 #include <unistd.h>
 
-#include "power_common.h"
+#include "power_log.h"
 #include "power_mgr_service.h"
-#include "power_state_machine.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
@@ -52,7 +51,7 @@ void PowerMgrMonitor::InitEventHandles()
         return;
     }
     for (auto &eh : EVENT_HANDLES) {
-        POWER_HILOGI(MODULE_SERVICE, "Add event: %{public}s", eh.first.c_str());
+        POWER_HILOGI(COMP_SVC, "Add event: %{public}s", eh.first.c_str());
         eventHandles_.emplace(eh.first, bind(eh.second, this, placeholders::_1));
     }
 }
@@ -79,28 +78,28 @@ bool PowerMgrMonitor::RegisterSubscriber(const sptr<CesInfo>& info)
         if (succeed) {
             break;
         }
-        POWER_HILOGE(MODULE_SERVICE, "Sleep for a while and retry to register subscriber");
+        POWER_HILOGE(COMP_SVC, "Sleep for a while and retry to register subscriber");
         usleep(50000); // sleep 50ms
     }
     if (!succeed) {
-        POWER_HILOGE(MODULE_SERVICE, "Failed to register subscriber");
+        POWER_HILOGE(COMP_SVC, "Failed to register subscriber");
         return false;
     }
     subscriber_ = s;
-    POWER_HILOGI(MODULE_SERVICE, "Succeed to register subscriber");
+    POWER_HILOGI(COMP_SVC, "Succeed to register subscriber");
     return true;
 }
 
 void PowerMgrMonitor::HandleScreenStateChanged(const IntentWant& want) const
 {
     bool isScreenOn = want.GetAction() == CommonEventSupport::COMMON_EVENT_SCREEN_ON;
-    POWER_HILOGD(MODULE_SERVICE, "Screen is %{public}s", isScreenOn ? "on" : "off");
+    POWER_HILOGD(COMP_SVC, "Screen is %{public}s", isScreenOn ? "on" : "off");
     DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine()->ReceiveScreenEvent(isScreenOn);
 }
 
 void PowerMgrMonitor::HandleStartUpCompleted(const IntentWant& want __attribute__((__unused__))) const
 {
-    POWER_HILOGD(MODULE_SERVICE, "Start up completed");
+    POWER_HILOGD(COMP_SVC, "Start up completed");
 }
 
 void PowerMgrMonitor::EventSubscriber::HandleEvent(const IntentWant& want)
@@ -108,10 +107,10 @@ void PowerMgrMonitor::EventSubscriber::HandleEvent(const IntentWant& want)
     auto action = want.GetAction();
     auto it = eventHandles_.find(action);
     if (it == eventHandles_.end()) {
-        POWER_HILOGI(MODULE_SERVICE, "Ignore event: %{public}s", action.c_str());
+        POWER_HILOGI(COMP_SVC, "Ignore event: %{public}s", action.c_str());
         return;
     }
-    POWER_HILOGI(MODULE_SERVICE, "Handle event: %{public}s", action.c_str());
+    POWER_HILOGI(COMP_SVC, "Handle event: %{public}s", action.c_str());
     it->second(want);
 }
 } // namespace PowerMgr

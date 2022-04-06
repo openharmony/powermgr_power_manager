@@ -65,9 +65,9 @@ namespace {
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
 {
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine003::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is start!");
     if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine003::test is not supported, do nothing!");
+        POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::test is not supported, do nothing!");
         return;
     }
 
@@ -87,7 +87,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
     sleep(REFRESHACTIVITY_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine003: Suspend Device Fail, Screen is On";
 
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine003::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine003: Suspend Device end.";
 }
 
@@ -98,9 +98,9 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
 {
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine004::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is start!");
     if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine004::test is not supported, do nothing!");
+        POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::test is not supported, do nothing!");
         return;
     }
 
@@ -120,7 +120,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Wakeup Device Fail, Screen is Off";
 
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine004::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device end.";
 }
 
@@ -132,7 +132,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
 HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
 {
     if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine005::test is not supported, do nothing!");
+        POWER_HILOGI(LABEL_TEST, "PowerStateMachine005::test is not supported, do nothing!");
         return;
     }
 
@@ -165,7 +165,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
 HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
 {
     if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine006::test is not supported, do nothing!");
+        POWER_HILOGI(LABEL_TEST, "PowerStateMachine006::test is not supported, do nothing!");
         return;
     }
 
@@ -223,13 +223,13 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level2)
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
+    POWER_HILOGD(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
         static_cast<uint32_t>(state));
 }
 
 void PowerStateMachineTest::PowerStateTest2Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerStateTest2Callback::OnPowerStateChanged state = %u.",
+    POWER_HILOGD(LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %u.",
         static_cast<uint32_t>(state));
 }
 
@@ -244,18 +244,18 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> cb1 = new PowerStateTest1Callback();
     powerMgrClient.RegisterPowerStateCallback(cb1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerStateCallback001 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 1.");
     {
         sptr<IPowerStateCallback> cb2 = new PowerStateTest2Callback();
         powerMgrClient.UnRegisterPowerStateCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerStateCallback001 2.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 2.");
         powerMgrClient.RegisterPowerStateCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerStateCallback001 3.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 3.");
         powerMgrClient.RegisterPowerStateCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerStateCallback001 4.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 4.");
     }
     powerMgrClient.UnRegisterPowerStateCallback(cb1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerStateTestCallback::PowerStateCallback001 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
 }
 
 /**
@@ -334,9 +334,9 @@ namespace {
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine010, TestSize.Level0)
 {
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine010::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine010::fun is start!");
     if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine010::test is not supported, do nothing!");
+        POWER_HILOGI(LABEL_TEST, "PowerStateMachine010::test is not supported, do nothing!");
         return;
     }
 
@@ -358,7 +358,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine010, TestSize.Level0)
     sleep(NEXT_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine010: Wakeup Device Lock Fail, Screen is Off";
 
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine010::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine010::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine010: Suspend Device end.";
 }
 
@@ -369,9 +369,9 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine010, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine011, TestSize.Level0)
 {
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine011::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine011::fun is start!");
     if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine011::test is not supported, do nothing!");
+        POWER_HILOGI(LABEL_TEST, "PowerStateMachine011::test is not supported, do nothing!");
         return;
     }
 
@@ -392,7 +392,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine011, TestSize.Level0)
     sleep(NEXT_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine011: SuspendDevice Lock Fail, Screen is Off";
 
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine011::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine011::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine011: Suspend Device end.";
 }
 }

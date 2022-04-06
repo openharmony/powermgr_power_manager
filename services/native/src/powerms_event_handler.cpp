@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "powerms_event_handler.h"
 
-#include "power_common.h"
+#include "power_log.h"
 #include "power_mgr_service.h"
 
 namespace OHOS {
@@ -24,17 +24,17 @@ PowermsEventHandler::PowermsEventHandler(const std::shared_ptr<AppExecFwk::Event
     const wptr<PowerMgrService>& service)
     : AppExecFwk::EventHandler(runner), service_(service)
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowermsEventHandler::PowermsEventHandler instance created.");
+    POWER_HILOGD(COMP_SVC, "Instance created");
 }
 
 void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerEvent::Pointer& event)
 {
     auto pmsptr = service_.promote();
     if (pmsptr == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Power service is nullptr");
         return;
     }
-    POWER_HILOGI(MODULE_SERVICE, "PowermsEventHandler::%{public}s ,eventid = %d", __func__,
-        event->GetInnerEventId());
+    POWER_HILOGI(COMP_SVC, "Start to process, eventId: %{public}d", event->GetInnerEventId());
     switch (event->GetInnerEventId()) {
         case INIT_KEY_MONITOR_MSG: {
             pmsptr->KeyMonitorInit();
@@ -69,7 +69,7 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
             break;
         }
         default:
-            POWER_HILOGD(MODULE_SERVICE, "PowermsEventHandler::no event id matched.");
+            POWER_HILOGW(COMP_SVC, "No matched event id");
     }
 }
 } // namespace PowerMgr

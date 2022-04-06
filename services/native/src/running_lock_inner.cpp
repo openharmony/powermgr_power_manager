@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include <datetime_ex.h>
 
-#include "power_common.h"
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -36,11 +36,11 @@ std::shared_ptr<RunningLockInner> RunningLockInner::CreateRunningLockInner(const
     std::shared_ptr<RunningLockInner> runningLockInner = std::make_shared<RunningLockInner>(runningLockInfo,
         userIPCinfo);
     if (runningLockInner == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "failed to create new RunningLockInner record");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockInner is nullptr");
         return nullptr;
     }
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockInner::%{public}s : name = %s, type = %d", __func__,
-        runningLockInfo.name.c_str(), runningLockInfo.type);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d", runningLockInfo.name.c_str(),
+        runningLockInfo.type);
     return runningLockInner;
 }
 
@@ -54,13 +54,13 @@ void RunningLockInner::SetWorkTriggerList(const WorkTriggerList& workTriggerList
 void RunningLockInner::DumpInfo(const std::string& description)
 {
     // this statement used to debug, can't find isDebugEnabled() interface. will be replaced later.
-    POWER_HILOGD(MODULE_SERVICE, "RunningLockInner::%{public}s :description = %s, name = %s, type = %d,", __func__,
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "description: %{public}s, name: %{public}s, type: %{public}d,",
         description.c_str(), runningLockInfo_.name.c_str(), runningLockInfo_.type);
 
     auto& list = runningLockInfo_.workTriggerlist;
     for (auto& worker : list) {
-        POWER_HILOGD(MODULE_SERVICE, "usecount = %ld, name = %s, uid = %d,"
-            " pid = %d, abilityid = %d", worker.use_count(), worker->GetName().c_str(),
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "use_count: %{public}ld, name: %{public}s, uid: %{public}d,\
+            pid: %{public}d, abilityId: %{public}d", worker.use_count(), worker->GetName().c_str(),
             worker->GetUid(), worker->GetPid(), worker->GetAbilityId());
     }
 }

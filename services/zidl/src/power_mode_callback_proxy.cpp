@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,15 +33,14 @@ void PowerModeCallbackProxy::PowerModeCallback()
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerModeCallbackProxy::GetDescriptor())) {
-        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrProxy::%{public}s write descriptor failed!", __func__);
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
         return;
     }
 
     int ret = remote->SendRequest(static_cast<int>(IPowerModeCallback::POWER_MODE_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(MODULE_INNERKIT,
-            "PowerMgrProxy::%{public}s SendRequest is failed, error code: %{private}d", __func__, ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
     }
 }
 } // namespace PowerMgr

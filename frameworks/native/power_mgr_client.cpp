@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,8 @@
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
-#include <string_ex.h>
 #include <system_ability_definition.h>
 
-#include "permission.h"
 #include "power_common.h"
 
 namespace OHOS {
@@ -47,27 +45,27 @@ ErrCode PowerMgrClient::Connect()
 
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sam == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "%{public}s:Failed to get Registry!", __func__);
+        POWER_HILOGE(COMP_FWK, "Failed to obtain SystemAbilityMgr");
         return E_GET_SYSTEM_ABILITY_MANAGER_FAILED;
     }
     sptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
     if (remoteObject_ == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "GetSystemAbility failed!");
+        POWER_HILOGE(COMP_FWK, "Check SystemAbility failed");
         return E_GET_POWER_SERVICE_FAILED;
     }
 
     deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new PowerMgrDeathRecipient());
     if (deathRecipient_ == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "%{public}s :Failed to create PowerMgrDeathRecipient!", __func__);
+        POWER_HILOGE(COMP_FWK, "Failed to create PowerMgrDeathRecipient");
         return ERR_NO_MEMORY;
     }
     if ((remoteObject_->IsProxyObject()) && (!remoteObject_->AddDeathRecipient(deathRecipient_))) {
-        POWER_HILOGE(MODULE_INNERKIT, "%{public}s :Add death recipient to PowerMgr service failed.", __func__);
+        POWER_HILOGE(COMP_FWK, "Add death recipient to PowerMgr service failed");
         return E_ADD_DEATH_RECIPIENT_FAILED;
     }
 
     proxy_ = iface_cast<IPowerMgr>(remoteObject_);
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s :Connecting PowerMgrService success.", __func__);
+    POWER_HILOGI(COMP_FWK, "Connecting PowerMgrService success");
     return ERR_OK;
 }
 
@@ -86,25 +84,23 @@ void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
 void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (remote == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "PowerMgrDeathRecipient::OnRemoteDied failed, remote is nullptr.");
+        POWER_HILOGE(COMP_FWK, "OnRemoteDied failed, remote is nullptr");
         return;
     }
 
     PowerMgrClient::GetInstance().ResetProxy(remote);
-    POWER_HILOGI(MODULE_INNERKIT, "PowerMgrDeathRecipient::Recv death notice.");
+    POWER_HILOGW(COMP_FWK, "Recv death notice");
 }
 
 void PowerMgrClient::RebootDevice(const std::string& reason)
 {
     RETURN_IF(Connect() != ERR_OK);
-    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
     proxy_->RebootDevice(reason);
 }
 
 void PowerMgrClient::ShutDownDevice(const std::string& reason)
 {
     RETURN_IF(Connect() != ERR_OK);
-    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
     proxy_->ShutDownDevice(reason);
 }
 
@@ -112,29 +108,28 @@ void PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
 {
     RETURN_IF(Connect() != ERR_OK);
     proxy_->SuspendDevice(GetTickCount(), reason, suspendImmed);
-    POWER_HILOGI(MODULE_INNERKIT, " Calling SuspendDevice success.");
+    POWER_HILOGD(FEATURE_SUSPEND, " Calling SuspendDevice success");
 }
 
 void PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& detail)
 {
     RETURN_IF(Connect() != ERR_OK);
-
     proxy_->WakeupDevice(GetTickCount(), reason, detail);
-    POWER_HILOGI(MODULE_INNERKIT, " Calling WakeupDevice success.");
+    POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
 }
 
 void PowerMgrClient::RefreshActivity(UserActivityType type)
 {
-    RETURN_IF_WITH_LOG(type == UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, " is not supported!");
+    RETURN_IF_WITH_LOG(type == UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, "UserActivityType does not support");
     RETURN_IF(Connect() != ERR_OK);
-
     proxy_->RefreshActivity(GetTickCount(), type, true);
-    POWER_HILOGI(MODULE_INNERKIT, " Calling RefreshActivity Success!");
+    POWER_HILOGD(FEATURE_ACTIVITY, "Calling RefreshActivity Success");
 }
 
 bool PowerMgrClient::IsRunningLockTypeSupported(uint32_t type)
 {
     if (type >= static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT)) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunningLockType does not support, type: %{public}d", type);
         return false;
     }
 
@@ -146,7 +141,7 @@ bool PowerMgrClient::ForceSuspendDevice()
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
     bool ret = proxy_->ForceSuspendDevice(GetTickCount());
-    POWER_HILOGI(MODULE_INNERKIT, " Calling ForceSuspendDevice Success!");
+    POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDevice Success");
     return ret;
 }
 
@@ -155,7 +150,7 @@ bool PowerMgrClient::IsScreenOn()
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
     bool ret = false;
     ret = proxy_->IsScreenOn();
-    POWER_HILOGI(MODULE_INNERKIT, " Calling IsScreenOn Success!");
+    POWER_HILOGD(COMP_FWK, "Calling IsScreenOn Success");
     return ret;
 }
 
@@ -172,28 +167,26 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     uint32_t nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
     std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy_, name.substr(0, nameLen), type);
     if (runningLock == nullptr) {
-        POWER_HILOGE(MODULE_INNERKIT, "%{public}s failed to create new RunningLock record", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create RunningLock record");
         return nullptr;
     }
     if (!runningLock->Init()) {
-        POWER_HILOGE(MODULE_INNERKIT, "%{public}s runningLock->Init failed.", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLock init failed");
         return nullptr;
     }
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s :name %{public}s, type = %d", __func__, name.c_str(), type);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type = %{public}d", name.c_str(), type);
     return runningLock;
 }
 
 void PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->RegisterPowerStateCallback(callback);
 }
 
 void PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->UnRegisterPowerStateCallback(callback);
 }
 
@@ -201,49 +194,42 @@ void PowerMgrClient::RegisterShutdownCallback(const sptr<IShutdownCallback>& cal
     IShutdownCallback::ShutdownPriority priority)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->RegisterShutdownCallback(priority, callback);
 }
 
 void PowerMgrClient::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->UnRegisterShutdownCallback(callback);
 }
 
 void PowerMgrClient::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->RegisterPowerModeCallback(callback);
 }
 
 void PowerMgrClient::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->UnRegisterPowerModeCallback(callback);
 }
 
 void PowerMgrClient::SetDisplaySuspend(bool enable)
 {
     RETURN_IF(Connect() != ERR_OK);
-    POWER_HILOGI(MODULE_INNERKIT, "%{public}s.", __func__);
     proxy_->SetDisplaySuspend(enable);
 }
 
 void PowerMgrClient::SetDeviceMode(const uint32_t mode)
 {
     RETURN_IF(Connect() != ERR_OK);
-    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
     proxy_->SetDeviceMode(mode);
 }
 
 uint32_t PowerMgrClient::GetDeviceMode()
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, 0);
-    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
     return proxy_->GetDeviceMode();
 }
 
@@ -251,7 +237,6 @@ std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
 {
     std::string error = "can't connect service";
     RETURN_IF_WITH_RET(Connect() != ERR_OK, error);
-    POWER_HILOGE(MODULE_INNERKIT, "%{public}s called.", __func__);
     return proxy_->ShellDump(args, args.size());
 }
 } // namespace PowerMgr

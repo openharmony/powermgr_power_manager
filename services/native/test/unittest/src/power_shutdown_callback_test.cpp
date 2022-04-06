@@ -37,12 +37,12 @@ using namespace std;
 
 void PowerShutdownCallbackTest::PowerShutdownTest1Callback::ShutdownCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest1Callback::ShutdownCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownTest1Callback::ShutdownCallback.");
 }
 
 void PowerShutdownCallbackTest::PowerShutdownTest2Callback::ShutdownCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest2Callback::ShutdownCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownTest2Callback::ShutdownCallback.");
 }
 
 namespace {
@@ -60,6 +60,6 @@ HWTEST_F (PowerShutdownCallbackTest, PowerShutdownCallback001, TestSize.Level0)
     if (false) {
         powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
     }
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 1.");
 }
 }
