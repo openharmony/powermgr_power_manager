@@ -37,12 +37,12 @@ using namespace std;
 
 void PowerShutdownTest::PowerShutdownTest1Callback::ShutdownCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest1Callback::ShutdownCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownTest1Callback::ShutdownCallback.");
 }
 
 void PowerShutdownTest::PowerShutdownTest2Callback::ShutdownCallback()
 {
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest2Callback::ShutdownCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownTest2Callback::ShutdownCallback.");
 }
 
 namespace {
@@ -56,18 +56,18 @@ HWTEST_F (PowerShutdownTest, PowerShutdownCallback001, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IShutdownCallback> cb1 = new PowerShutdownTest1Callback();
     powerMgrClient.RegisterShutdownCallback(cb1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 1.");
     {
         sptr<IShutdownCallback> cb2 = new PowerShutdownTest2Callback();
         powerMgrClient.UnRegisterShutdownCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 2.");
+        POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 2.");
         powerMgrClient.RegisterShutdownCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 3.");
+        POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 3.");
         powerMgrClient.RegisterShutdownCallback(cb2);
-        POWER_HILOGD(MODULE_SERVICE, "PowerShutdownCallback001 4.");
+        POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 4.");
     }
     powerMgrClient.UnRegisterShutdownCallback(cb1);
-    POWER_HILOGD(MODULE_SERVICE, "PowerShutdownTest::PowerShutdownCallback001 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerShutdownTest::PowerShutdownCallback001 end.");
 }
 
 /**

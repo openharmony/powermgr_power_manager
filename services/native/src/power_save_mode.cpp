@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,10 @@
  */
 
 #include "power_save_mode.h"
+
 #include "libxml/parser.h"
 #include "libxml/tree.h"
-#include "hilog_wrapper.h"
-
-#include <refbase.h>
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -31,9 +30,9 @@ constexpr uint32_t SLEEP_FILTER = SLEEP_FILTER_VALUE;
 
 PowerSaveMode::PowerSaveMode()
 {
-    POWER_HILOGD(MODULE_SERVICE, "Start to parse power_mode_config.xml");
+    POWER_HILOGD(FEATURE_POWER_MODE, "Start to parse power_mode_config.xml");
     if (!StartXMlParse(VENDOR_CONFIG)) {
-        POWER_HILOGI(MODULE_SERVICE, "No vendor power_mode_config.xml, start to parse system config");
+        POWER_HILOGI(FEATURE_POWER_MODE, "No vendor power_mode_config.xml, start to parse system config");
         StartXMlParse(SYSTEM_CONFIG);
     }
 }
@@ -49,18 +48,19 @@ bool PowerSaveMode::StartXMlParse(std::string path)
     std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> docPtr(
         xmlReadFile(path.c_str(), nullptr, XML_PARSE_NOBLANKS), xmlFreeDoc);
     if (docPtr == nullptr) {
-        POWER_HILOGE(MODULE_SERVICE, "Parse failed, read file failed.");
+        POWER_HILOGE(FEATURE_POWER_MODE, "Parse failed, read file failed.");
         return false;
     }
 
     auto rootPtr = xmlDocGetRootElement(docPtr.get());
     if (!IsNodeLegal(rootPtr, TAG_ROOT)) {
-        POWER_HILOGE(MODULE_SERVICE, "Parse failed, root node is illegal.");
+        POWER_HILOGE(FEATURE_POWER_MODE, "Parse failed, root node is illegal.");
         return false;
     }
 
     for (auto nodePtr = rootPtr->xmlChildrenNode; nodePtr != nullptr; nodePtr = nodePtr->next) {
         int32_t policyId = atoi((char *)xmlGetProp(nodePtr, BAD_CAST("id")));
+        POWER_HILOGD(FEATURE_POWER_MODE, "policyId: %{public}d.", policyId);
         std::list<ModePolicy> listPolicy;
         for (auto policyNodePtr = nodePtr->xmlChildrenNode;
             policyNodePtr != nullptr; policyNodePtr = policyNodePtr->next) {
@@ -69,13 +69,11 @@ bool PowerSaveMode::StartXMlParse(std::string path)
             pmp.recover_flag = atoi((char *)xmlGetProp(policyNodePtr, BAD_CAST("recover_flag")));
             pmp.value = atoi((char *)xmlGetProp(policyNodePtr, BAD_CAST("value")));
             listPolicy.push_back(pmp);
-            POWER_HILOGE(MODULE_SERVICE, "id=%{public}d", pmp.id);
-            POWER_HILOGE(MODULE_SERVICE, "value=%{public}d", pmp.value);
-            POWER_HILOGE(MODULE_SERVICE, "recover_flag=%{public}d", pmp.recover_flag);
+            POWER_HILOGD(FEATURE_POWER_MODE, "id=%{public}d, value=%{public}d, recover_flag=%{public}d", pmp.id,
+                pmp.value, pmp.recover_flag);
         }
         std::pair<int32_t, std::list<ModePolicy>> policyPair(policyId, listPolicy);
         this->policyCache_.insert(policyPair);
-        POWER_HILOGI(MODULE_SERVICE, "policyId = %{public}d.", policyId);
     }
     return true;
 }

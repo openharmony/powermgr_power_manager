@@ -51,9 +51,9 @@ void CesSystemTest::CommonEventServiCesSystemTest::OnReceiveEvent(const CommonEv
 {
     std::string action = data.GetWant().GetAction();
     if (action == CommonEventSupport::COMMON_EVENT_SHUTDOWN) {
-        POWER_HILOGD(MODULE_SERVICE, "CommonEventServiCesSystemTest::OnReceiveEvent.");
+        POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
     }
-    POWER_HILOGD(MODULE_SERVICE, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
+    POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
 }
 
 void CesSystemTest::SetUpTestCase()

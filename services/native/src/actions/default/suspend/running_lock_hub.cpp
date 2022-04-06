@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,9 @@
 #include "suspend/running_lock_hub.h"
 
 #include <file_ex.h>
-#include <linux/capability.h>
 #include <sys/eventfd.h>
 
-#include "errors.h"
-#include "pubdef.h"
-
-#include "hilog_wrapper.h"
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -32,12 +28,12 @@ void RunningLockHub::Acquire(const std::string& name)
     {
         std::lock_guard lock(mutex_);
         if (!SaveLockFile(name, true)) {
-            POWER_HILOGE(MODULE_SERVICE, "Failed to write the lock state!");
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to write the lock state");
         }
         runningLockMap_[name]++;
     }
     NotifySuspendCounter(true);
-    POWER_HILOGI(MODULE_SERVICE, "Acquire runningLock, id: %{public}s", name.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Acquire runningLock, name: %{public}s", name.c_str());
 }
 
 void RunningLockHub::Release(const std::string& name)
@@ -46,7 +42,7 @@ void RunningLockHub::Release(const std::string& name)
         std::lock_guard lock(mutex_);
         if (InitFd()) {
             if (!SaveStringToFd(unlockFd_, name.c_str())) {
-                POWER_HILOGE(MODULE_SERVICE, "Failed to write the unlock state!");
+                POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to write the unlock state");
             }
         }
         if (runningLockMap_.find(name) == runningLockMap_.end()) {
@@ -58,7 +54,7 @@ void RunningLockHub::Release(const std::string& name)
         }
     }
     NotifySuspendCounter(false);
-    POWER_HILOGI(MODULE_SERVICE, "Release runningLock, id: %{public}s", name.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Release runningLock, name: %{public}s", name.c_str());
 }
 
 bool RunningLockHub::InitFd()
@@ -71,7 +67,7 @@ bool RunningLockHub::InitFd()
     unlockFd_ = UniqueFd(TEMP_FAILURE_RETRY(open(UNLOCK_PATH, O_RDWR | O_CLOEXEC)));
     inited = true;
     if (lockFd_ < 0 || unlockFd_ < 0) {
-        POWER_HILOGE(MODULE_SERVICE, "Running lock fd initialization failed!");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Running lock fd initialization failed");
         return false;
     }
     return inited;
