@@ -864,11 +864,12 @@ void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *even
     }
     auto runningLock = pms->GetRunningLockMgr();
     ProximityData* data = (ProximityData*)event->data;
+    int32_t distance = static_cast<int32_t>(data->distance);
 
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY data->scalar=%{public}d", data->scalar);
-    if (data->scalar == PROXIMITY_CLOSE_SCALAR) {
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Sensor Callback data->distance=%{public}d", distance);
+    if (distance == PROXIMITY_CLOSE_SCALAR) {
         runningLock->SetProximity(PROXIMITY_CLOSE);
-    } else if (data->scalar == PROXIMITY_AWAY_SCALAR) {
+    } else if (distance == PROXIMITY_AWAY_SCALAR) {
         runningLock->SetProximity(PROXIMITY_AWAY);
     }
 }
