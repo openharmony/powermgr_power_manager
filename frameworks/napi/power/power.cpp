@@ -170,7 +170,7 @@ static napi_value WakeupDevice(napi_env env, napi_callback_info info)
         POWER_HILOGE(FEATURE_WAKEUP, "Get wakeup reason failed");
         return nullptr;
     }
-    POWER_HILOGD(FEATURE_WAKEUP, "Wakeup type: APPLICATION,  reason: %{public}s", reason);
+    POWER_HILOGD(FEATURE_WAKEUP, "Wakeup type: APPLICATION, reason: %{public}s", reason);
     g_powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string(reason));
     return nullptr;
 }
