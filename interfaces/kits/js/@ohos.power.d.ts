@@ -54,6 +54,23 @@ declare namespace power {
    */
   function isScreenOn(callback: AsyncCallback<boolean>): void;
   function isScreenOn(): Promise<boolean>;
+
+  /**
+   * Try to wakeup the device and let screen on.
+   *
+   * @param detail Indicates the detail information who request wakeup.
+   * @systemapi
+   * @since 9
+   */
+   function wakeupDevice(detail: string): void;
+
+   /**
+    * Try to suspend the device and let screen off.
+    *
+    * @systemapi
+    * @since 9
+    */
+   function suspendDevice(): void;
 }
 export default power;
 
