@@ -26,28 +26,28 @@ describe('PowerMgrPowerUnitTest', function () {
         /*
          * @tc.setup: setup invoked before all test cases
          */
-        console.info('PowerMgrPowerUnitTest beforeAll called')
+        console.info('PowerMgrPowerUnitTest beforeAll called');
     })
 
     afterAll(function() {
         /*
          * @tc.teardown: teardown invoked after all test cases
          */
-        console.info('PowerMgrPowerUnitTest afterAll called')
+        console.info('PowerMgrPowerUnitTest afterAll called');
     })
 
     beforeEach(function() {
         /*
          * @tc.setup: setup invoked before each test case
          */
-        console.info('PowerMgrPowerUnitTest beforeEach called')
+        console.info('PowerMgrPowerUnitTest beforeEach called');
     })
 
     afterEach(function() {
         /*
          * @tc.teardown: teardown invoked after each test case
          */
-        console.info('PowerMgrPowerUnitTest afterEach called')
+        console.info('PowerMgrPowerUnitTest afterEach called');
     })
 
     /**
@@ -135,7 +135,7 @@ describe('PowerMgrPowerUnitTest', function () {
             console.info('power_wake_up_fail success');
         }).catch(error => {
             console.log('power_wake_up_fail error: ' + error);
-            expect(error == "Wrong argument type. string expected.").assertTrue();
+            expect(error === "Wrong argument type. string expected.").assertTrue();
         })
     })
 });
