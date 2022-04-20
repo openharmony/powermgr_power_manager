@@ -27,7 +27,7 @@
             "components": [
                 "ability_base",
                 "appexecfwk_standard",
-                "ces_standard",
+                "common_event_service",
                 "display_manager_native",
                 "hilog_native",
                 "hisysevent_native",
