@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//base/powermgr/power_manager/powermgr.gni")
-import("//foundation/ace/ace_engine/build/ace_gen_sa_dialog_js.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_sa_dialog_js.gni")
 
 gen_sa_dialog_js("dialog_js_files_etc") {
   project_path = "//base/powermgr/power_manager/frameworks/dialog/dialog_ui/js"
