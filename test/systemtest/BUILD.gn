@@ -31,7 +31,6 @@ config("module_private_config") {
     "//utils/native/base/include",
     "//foundation/distributedschedule/safwk/services/safwk/include",
     "//base/powermgr/power_manager/interfaces/innerkits/native/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler/include",
     "//base/notification/ces_standard/cesfwk/kits/native/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
