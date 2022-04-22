@@ -216,7 +216,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, token=%{public}p, name=%{public}s, type=%{public}d",
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, remoteObj=%{public}p, name=%{public}s, type=%{public}d",
         token.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
 
     mutex_.lock();
@@ -228,7 +228,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
 
 void RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> token)
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p", token.GetRefPtr());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p", token.GetRefPtr());
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
@@ -251,7 +251,7 @@ void RunningLockMgr::RemoveAndPostUnlockTask(
         return;
     }
     const string& tokenStr = to_string(reinterpret_cast<uintptr_t>(token.GetRefPtr()));
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p, tokenStr=%{public}s, timeOutMS=%{public}d",
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p, remoteObjStr=%{public}s, timeOutMS=%{public}d",
         token.GetRefPtr(), tokenStr.c_str(), timeOutMS);
     handler->RemoveTask(tokenStr);
     if (timeOutMS != 0) {
@@ -264,23 +264,23 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
     const RunningLockInfo& runningLockInfo,
     const UserIPCInfo& userIPCinfo, uint32_t timeOutMS)
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p, name=%{public}s, type=%{public}d",
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p, name=%{public}s, type=%{public}d",
         token.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr, token=%{public}p", token.GetRefPtr());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr, remoteObj=%{public}p", token.GetRefPtr());
         return;
     }
     if (!lockInner->GetDisabled()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled, token=%{public}p", token.GetRefPtr());
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled, remoteObj=%{public}p", token.GetRefPtr());
         return;
     }
     lockInner->SetDisabled(false);
 
     auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, token=%{public}p, type=%{public}d",
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, remoteObj=%{public}p, type=%{public}d",
             token.GetRefPtr(), lockInner->GetRunningLockType());
         return;
     }
@@ -295,16 +295,16 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
 
 void RunningLockMgr::UnLock(const sptr<IRemoteObject> token)
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "token=%{public}p", token.GetRefPtr());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p", token.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockInner token=%{public}p, name=%{public}s, type=%{public}d",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockInner remoteObj=%{public}p, name=%{public}s, type=%{public}d",
         token.GetRefPtr(), lockInner->GetRunningLockName().c_str(), lockInner->GetRunningLockType());
     if (lockInner->GetDisabled()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already disabled, token=%{public}p, name=%{public}s",
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already disabled, remoteObj=%{public}p, name=%{public}s",
             token.GetRefPtr(), lockInner->GetRunningLockName().c_str());
         return;
     }
@@ -313,7 +313,7 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> token)
 
     auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, token=%{public}p, type=%{public}d",
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, remoteObj=%{public}p, type=%{public}d",
             token.GetRefPtr(), lockInner->GetRunningLockType());
         return;
     }
@@ -371,7 +371,7 @@ bool RunningLockMgr::ExistValidRunningLock()
 void RunningLockMgr::SetWorkTriggerList(const sptr<IRemoteObject>& token,
     const WorkTriggerList& workTriggerList)
 {
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "token=%{public}p", token.GetRefPtr());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p", token.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
@@ -468,24 +468,24 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& token,
     const string& tokenStr = to_string(reinterpret_cast<uintptr_t>(token.GetRefPtr()));
     switch (changeType) {
         case NOTIFY_RUNNINGLOCK_ADD: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add token=%{public}s", tokenStr.c_str());
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add remoteObjStr=%{public}s", tokenStr.c_str());
             NotifyHiViewRunningLockInfo(tokenStr, *lockInner, changeType);
             SendCheckOverTimeMsg(CHECK_TIMEOUT_INTERVAL_MS);
             break;
         }
         case NOTIFY_RUNNINGLOCK_REMOVE: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remove token=%{public}s", tokenStr.c_str());
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remove remoteObjStr=%{public}s", tokenStr.c_str());
             string str = "token=" + tokenStr;
             NotifyHiView(changeType, str);
             break;
         }
         case NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTriggerChanged token=%{public}s", tokenStr.c_str());
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTriggerChanged remoteObjStr=%{public}s", tokenStr.c_str());
             NotifyHiViewRunningLockInfo(tokenStr, *lockInner, changeType);
             break;
         }
         case NOTIFY_RUNNINGLOCK_OVERTIME: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Overtime token=%{public}s", tokenStr.c_str());
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Overtime remoteObjStr=%{public}s", tokenStr.c_str());
             break;
         }
         default: {
