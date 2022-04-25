@@ -138,4 +138,69 @@ describe('PowerMgrPowerUnitTest', function () {
             expect(error === "Wrong argument type. string expected.").assertTrue();
         })
     })
+
+    /**
+     * @tc.number PowerMgrPowerUnitTest004
+     * @tc.name power_get_power_mode_promise
+     * @tc.desc Get The mode the device
+     */
+     it('power_get_power_mode_promise', 0, async function (done) {
+        power.getPowerMode()
+        .then(powerMode => {
+            console.info('power_get_power_mode_promise powerMode1 is ' + powerMode);
+        })
+        .catch(error => {
+            console.log('power_get_power_mode_promise error: ' + error);
+            expect().assertFail();
+            done();
+        })
+        power.setPowerMode(603)
+            .then(() => {
+                power.getPowerMode()
+                .then(powerMode => {
+                    console.info('power_get_power_mode_promise powerMode2 is ' + powerMode);
+                    expect(powerMode === 603).assertTrue();
+                    console.info('power_get_power_mode_promise success');
+                })
+                .catch(error => {
+                    console.log('power_get_power_mode_promise error: ' + error);
+                    expect().assertFail();
+                    done();
+                })
+            })
+        power.setPowerMode(600);
+        done();
+    })
+
+    /**
+     * @tc.number PowerMgrPowerUnitTest005
+     * @tc.name power_get_power_mode_callback
+     * @tc.desc Get The mode the device
+     */
+    it('power_get_power_mode_callback', 0, async function (done) {
+        power.getPowerMode((error, powerMode) => {
+            if (typeof error === "undefined") {
+                console.info('power_get_power_mode_callback powerMode1 is ' + powerMode);
+            } else {
+                console.log('power_get_power_mode_callback: ' + error);
+                expect().assertFail();
+                done();
+            }    
+        })
+        power.setPowerMode(603, () => {
+            power.getPowerMode((error, powerMode) => {
+                if (typeof error === "undefined") {
+                    console.info('power_get_power_mode_callback powerMode2 is ' + powerMode);
+                    expect(powerMode === 603).assertTrue();
+                    console.info('power_get_power_mode_callback success');
+                } else {
+                    console.log('power_get_power_mode_callback: ' + error);
+                    expect().assertFail();
+                    done();
+                }    
+            })
+        })
+        power.setPowerMode(600);
+        done();
+    })
 });
