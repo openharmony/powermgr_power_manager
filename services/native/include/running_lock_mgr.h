@@ -50,18 +50,18 @@ public:
     explicit RunningLockMgr(const wptr<PowerMgrService>& pms) : pms_(pms) {}
     ~RunningLockMgr();
 
-    void Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo,
+    void Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
         const UserIPCInfo &userIPCinfo, uint32_t timeOutMS = 0);
-    void UnLock(const sptr<IRemoteObject> token);
-    std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& token,
+    void UnLock(const sptr<IRemoteObject> remoteObj);
+    std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo);
-    void ReleaseLock(const sptr<IRemoteObject> token);
+    void ReleaseLock(const sptr<IRemoteObject> remoteObj);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
-    void SetWorkTriggerList(const sptr<IRemoteObject>& token, const WorkTriggerList& workTriggerList);
+    void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList);
     bool Init();
     bool ExistValidRunningLock();
-    std::shared_ptr<RunningLockInner> GetRunningLockInner(const sptr<IRemoteObject>& token);
+    std::shared_ptr<RunningLockInner> GetRunningLockInner(const sptr<IRemoteObject>& remoteObj);
     const RunningLockMap& GetRunningLockMap() const
     {
         return runningLocks_;
@@ -71,7 +71,7 @@ public:
         return proxyMap_;
     }
     void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid);
-    bool IsUsed(const sptr<IRemoteObject>& token);
+    bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     static constexpr uint32_t MAX_DUMP_NUM = 10;
     void CheckOverTime();
@@ -175,10 +175,10 @@ private:
     bool InitLocks();
     bool MatchProxyMap(const UserIPCInfo& userIPCinfo);
     void SetRunningLockDisableFlag(std::shared_ptr<RunningLockInner>& lockInner, bool forceRefresh = false);
-    void LockReally(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner);
-    void UnLockReally(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner);
+    void LockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
+    void UnLockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void ProxyRunningLockInner(bool proxyLock);
-    void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& token, uint32_t timeOutMS = 0);
+    void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, uint32_t timeOutMS = 0);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
     std::weak_ptr<PowermsEventHandler> handler_;
@@ -200,7 +200,7 @@ private:
         "DUBAI_TAG_RUNNINGLOCK_ADD", "DUBAI_TAG_RUNNINGLOCK_REMOVE",
         "DUBAI_TAG_RUNNINGLOCK_WORKTRIGGER_CHANGED", "DUBAI_TAG_RUNNINGLOCK_OVERTIME"
     };
-    void NotifyRunningLockChanged(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner,
+    void NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
         RunningLockChangedType changeType);
     void SendCheckOverTimeMsg(int64_t delayTime);
     void NotifyHiViewRunningLockInfo(const std::string& tokenstr, const RunningLockInner& lockInner,

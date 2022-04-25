@@ -610,7 +610,7 @@ inline void PowerMgrService::FillUserIPCInfo(UserIPCInfo &userIPCinfo)
     userIPCinfo.uid = IPCSkeleton::GetCallingUid();
 }
 
-void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& token,
+void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
 {
     std::lock_guard lock(mutex_);
@@ -627,10 +627,10 @@ void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& token,
 
     UserIPCInfo userIPCInfo;
     FillUserIPCInfo(userIPCInfo);
-    runningLockMgr_->CreateRunningLock(token, runningLockInfo, userIPCInfo);
+    runningLockMgr_->CreateRunningLock(remoteObj, runningLockInfo, userIPCInfo);
 }
 
-void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& token)
+void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
@@ -641,7 +641,7 @@ void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& token)
         return;
     }
 
-    runningLockMgr_->ReleaseLock(token);
+    runningLockMgr_->ReleaseLock(remoteObj);
 }
 
 bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
@@ -653,7 +653,7 @@ bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
     return true;
 }
 
-void PowerMgrService::Lock(const sptr<IRemoteObject>& token,
+void PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo,
     uint32_t timeOutMS)
 {
@@ -674,10 +674,10 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& token,
 
     UserIPCInfo userIPCInfo;
     FillUserIPCInfo(userIPCInfo);
-    runningLockMgr_->Lock(token, runningLockInfo, userIPCInfo, timeOutMS);
+    runningLockMgr_->Lock(remoteObj, runningLockInfo, userIPCInfo, timeOutMS);
 }
 
-void PowerMgrService::UnLock(const sptr<IRemoteObject>& token)
+void PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
@@ -687,20 +687,20 @@ void PowerMgrService::UnLock(const sptr<IRemoteObject>& token)
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Permission check fail, pid: %{public}d, uid: %{public}d", pid, uid);
         return;
     }
-    runningLockMgr_->UnLock(token);
+    runningLockMgr_->UnLock(remoteObj);
 }
 
-void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& token)
+void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(mutex_);
-    runningLockMgr_->UnLock(token);
-    runningLockMgr_->ReleaseLock(token);
+    runningLockMgr_->UnLock(remoteObj);
+    runningLockMgr_->ReleaseLock(remoteObj);
 }
 
-bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& token)
+bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(mutex_);
-    auto isUsed = runningLockMgr_->IsUsed(token);
+    auto isUsed = runningLockMgr_->IsUsed(remoteObj);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLock is Used: %{public}d", isUsed);
     return isUsed;
 }
@@ -720,7 +720,7 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
     }
 }
 
-void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& token,
+void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
     const WorkTriggerList& workTriggerList)
 {
     std::lock_guard lock(mutex_);
@@ -732,7 +732,7 @@ void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& token,
         return;
     }
 
-    runningLockMgr_->SetWorkTriggerList(token, workTriggerList);
+    runningLockMgr_->SetWorkTriggerList(remoteObj, workTriggerList);
 }
 
 void PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
