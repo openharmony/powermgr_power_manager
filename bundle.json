@@ -15,7 +15,7 @@
     "component": {
         "name": "power_manager_native",
         "subsystem": "powermgr",
-        "syscap": [ 
+        "syscap": [
             "SystemCapability.PowerManager.PowerManager.Core",
             "SystemCapability.PowerManager.PowerManager.Extension"
         ],
@@ -75,6 +75,7 @@
             ],
             "test": [
                 "//base/powermgr/power_manager/test:powermgr_js_test",
+                "//base/powermgr/power_manager/interfaces/kits/js/test:powermgr_js_interface_test",
                 "//base/powermgr/power_manager/services/native/test:powermgr_test",
                 "//base/powermgr/power_manager/test:systemtest"
             ]
