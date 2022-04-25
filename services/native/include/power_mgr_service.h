@@ -57,16 +57,16 @@ public:
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    virtual void CreateRunningLock(const sptr<IRemoteObject>& token,
+    virtual void CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo) override;
-    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& token) override;
+    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(uint32_t type) override;
-    virtual void Lock(const sptr<IRemoteObject>& token,
+    virtual void Lock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo, uint32_t timeOutMS) override;
-    virtual void UnLock(const sptr<IRemoteObject>& token) override;
-    virtual void ForceUnLock(const sptr<IRemoteObject>& token);
-    virtual bool IsUsed(const sptr<IRemoteObject>& token) override;
-    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& token,
+    virtual void UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
+    virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
+    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
         const WorkTriggerList& workTriggerList) override;
     virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
     virtual void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
