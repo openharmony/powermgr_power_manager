@@ -31,15 +31,17 @@ public:
     ~PowerMgrProxy() = default;
     DISALLOW_COPY_AND_MOVE(PowerMgrProxy);
 
-    virtual void CreateRunningLock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo) override;
-    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& token) override;
+    virtual void CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+        const RunningLockInfo& runningLockInfo) override;
+    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(uint32_t type) override;
-    virtual void Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo,
+    virtual void Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
         uint32_t timeOutMs) override;
-    virtual void UnLock(const sptr<IRemoteObject>& token) override;
-    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& token, const WorkTriggerList& workTriggerList) override;
+    virtual void UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
+        const WorkTriggerList& workTriggerList) override;
     virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
-    virtual bool IsUsed(const sptr<IRemoteObject>& token) override;
+    virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     // Use for PowerStateMachine
     virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;

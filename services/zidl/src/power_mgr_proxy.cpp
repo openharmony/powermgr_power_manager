@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-void PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo)
+void PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -37,7 +37,7 @@ void PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& token, const Ru
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+    WRITE_PARCEL_NO_RET(data, RemoteObject, remoteObj.GetRefPtr());
     WRITE_PARCEL_NO_RET(data, Parcelable, &runningLockInfo);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK),
@@ -48,7 +48,7 @@ void PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& token, const Ru
     }
 }
 
-void PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& token)
+void PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -62,7 +62,7 @@ void PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& token)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+    WRITE_PARCEL_NO_RET(data, RemoteObject, remoteObj.GetRefPtr());
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK),
         data, reply, option);
@@ -101,7 +101,8 @@ bool PowerMgrProxy::IsRunningLockTypeSupported(uint32_t type)
     return result;
 }
 
-void PowerMgrProxy::Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo, uint32_t timeOutMs)
+void PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
+    uint32_t timeOutMs)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -115,7 +116,7 @@ void PowerMgrProxy::Lock(const sptr<IRemoteObject>& token, const RunningLockInfo
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+    WRITE_PARCEL_NO_RET(data, RemoteObject, remoteObj.GetRefPtr());
     WRITE_PARCEL_NO_RET(data, Parcelable, &runningLockInfo);
     WRITE_PARCEL_NO_RET(data, Uint32, timeOutMs);
 
@@ -127,7 +128,7 @@ void PowerMgrProxy::Lock(const sptr<IRemoteObject>& token, const RunningLockInfo
     }
 }
 
-void PowerMgrProxy::UnLock(const sptr<IRemoteObject>& token)
+void PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -141,7 +142,7 @@ void PowerMgrProxy::UnLock(const sptr<IRemoteObject>& token)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+    WRITE_PARCEL_NO_RET(data, RemoteObject, remoteObj.GetRefPtr());
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_UNLOCK),
         data, reply, option);
@@ -151,7 +152,7 @@ void PowerMgrProxy::UnLock(const sptr<IRemoteObject>& token)
     }
 }
 
-bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& token)
+bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
@@ -165,7 +166,7 @@ bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& token)
         return false;
     }
 
-    WRITE_PARCEL_WITH_RET(data, RemoteObject, token.GetRefPtr(), false);
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_ISUSED),
         data, reply, option);
     if (ret != ERR_OK) {
@@ -177,7 +178,7 @@ bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& token)
     return used;
 }
 
-void PowerMgrProxy::SetWorkTriggerList(const sptr<IRemoteObject>& token, const WorkTriggerList& workTriggerList)
+void PowerMgrProxy::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -191,7 +192,7 @@ void PowerMgrProxy::SetWorkTriggerList(const sptr<IRemoteObject>& token, const W
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, RemoteObject, token.GetRefPtr());
+    WRITE_PARCEL_NO_RET(data, RemoteObject, remoteObj.GetRefPtr());
     RETURN_IF(!RunningLockInfo::MarshallingWorkTriggerList(data, workTriggerList));
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_SET_WORK_TRIGGER_LIST),
         data, reply, option);

@@ -61,14 +61,14 @@ public:
         SHELL_DUMP
     };
 
-    virtual void CreateRunningLock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo) = 0;
-    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& token) = 0;
+    virtual void CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) = 0;
+    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsRunningLockTypeSupported(uint32_t type) = 0;
-    virtual void Lock(const sptr<IRemoteObject>& token, const RunningLockInfo& runningLockInfo,
+    virtual void Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
         uint32_t timeOutMs) = 0;
-    virtual void UnLock(const sptr<IRemoteObject>& token) = 0;
-    virtual bool IsUsed(const sptr<IRemoteObject>& token) = 0;
-    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& token, const WorkTriggerList& workTriggerList) = 0;
+    virtual void UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList) = 0;
     virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) = 0;
 
     // Used for power state machine.
