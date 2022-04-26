@@ -147,7 +147,7 @@ describe('PowerMgrPowerUnitTest', function () {
      it('power_get_set_power_mode_promise', 0, async function (done) {
         power.getPowerMode()
         .then(powerMode => {
-            console.info('power_get_set_power_mode_promise powerMode1 is ' + powerMode);
+            console.info('power_get_set_power_mode_promise original power mode is ' + powerMode);
         })
         .catch(error => {
             console.log('power_get_set_power_mode_promise error: ' + error);
@@ -158,8 +158,8 @@ describe('PowerMgrPowerUnitTest', function () {
             .then(() => {
                 power.getPowerMode()
                 .then(powerMode => {
-                    console.info('power_get_set_power_mode_promise powerMode2 is ' + powerMode);
-                    expect(powerMode === 603).assertTrue();
+                    console.info('power_get_set_power_mode_promise changed power mode is ' + powerMode);
+                    expect(powerMode === power.DevicePowerMode.MODE_POWER_SAVE).assertTrue();
                     console.info('power_get_set_power_mode_promise success');
                 })
                 .catch(error => {
@@ -180,7 +180,7 @@ describe('PowerMgrPowerUnitTest', function () {
     it('power_get_set_power_mode_callback', 0, async function (done) {
         power.getPowerMode((error, powerMode) => {
             if (typeof error === "undefined") {
-                console.info('power_get_set_power_mode_callback powerMode1 is ' + powerMode);
+                console.info('power_get_set_power_mode_callback original power mode is ' + powerMode);
             } else {
                 console.log('power_get_set_power_mode_callback: ' + error);
                 expect().assertFail();
@@ -190,7 +190,7 @@ describe('PowerMgrPowerUnitTest', function () {
         power.setPowerMode(power.DevicePowerMode.MODE_POWER_SAVE, () => {
             power.getPowerMode((error, powerMode) => {
                 if (typeof error === "undefined") {
-                    console.info('power_get_set_power_mode_callback powerMode2 is ' + powerMode);
+                    console.info('power_get_set_power_mode_callback changed power mode is ' + powerMode);
                     expect(powerMode === power.DevicePowerMode.MODE_POWER_SAVE).assertTrue();
                     console.info('power_get_set_power_mode_callback success');
                 } else {
@@ -228,23 +228,23 @@ describe('PowerMgrPowerUnitTest', function () {
 
     /**
      * @tc.number PowerMgrPowerUnitTest008
-     * @tc.name power_device_power_mode_MODE_EXTREME_POWER_SAVE
-     * @tc.desc Get device power mode MODE_EXTREME_POWER_SAVE
-     */
-     it('power_device_power_mode_extreme_power_save', 0, function () {
-        let devicePowerMode = power.DevicePowerMode.MODE_EXTREME_POWER_SAVE;
-        console.info('MODE_EXTREME_POWER_SAVE = ' + devicePowerMode);
-        expect(devicePowerMode === 602).assertTrue();
-      })
-
-    /**
-     * @tc.number PowerMgrPowerUnitTest009
      * @tc.name power_device_power_mode_MODE_PERFORMANCE
      * @tc.desc Get device power mode MODE_PERFORMANCE
      */
      it('power_device_power_mode_performance', 0, function () {
         let devicePowerMode = power.DevicePowerMode.MODE_PERFORMANCE;
         console.info('MODE_PERFORMANCE = ' + devicePowerMode);
+        expect(devicePowerMode === 602).assertTrue();
+      })
+
+    /**
+     * @tc.number PowerMgrPowerUnitTest009
+     * @tc.name power_device_power_mode_MODE_EXTREME_POWER_SAVE
+     * @tc.desc Get device power mode MODE_EXTREME_POWER_SAVE
+     */
+     it('power_device_power_mode_extreme_power_save', 0, function () {
+        let devicePowerMode = power.DevicePowerMode.MODE_EXTREME_POWER_SAVE;
+        console.info('MODE_EXTREME_POWER_SAVE = ' + devicePowerMode);
         expect(devicePowerMode === 603).assertTrue();
       })
 });

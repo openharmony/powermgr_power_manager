@@ -101,8 +101,8 @@ public:
     enum {
         NORMAL_MODE = 600,
         POWER_SAVE_MODE = 601,
-        EXTREME_MODE = 602,
-        PERFORMANCE = 603
+        PERFORMANCE_MODE = 602,
+        EXTREME_POWER_SAVE_MODE = 603
     };
      /* Set the device mode.
      *

@@ -27,8 +27,8 @@ constexpr int REASON_MAX = 512;
 constexpr int RESULT_SIZE = 2;
 constexpr int ARGC_ONE = 1;
 constexpr int ARGC_TWO = 2;
-constexpr int INDEX_ONE = 0;
-constexpr int INDEX_TWO = 1;
+constexpr int INDEX_ZERO = 0;
+constexpr int INDEX_ONE = 1;
 }
 
 struct PowerAsyncCallbackInfo {
@@ -209,14 +209,14 @@ static void GetPowerModeCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCall
         [](napi_env env, napi_status status, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
             napi_value result[ARGC_TWO] = { 0 };
-            napi_create_uint32(env, asyncCallbackInfo->powerMode, &result[INDEX_TWO]);
+            napi_create_uint32(env, asyncCallbackInfo->powerMode, &result[INDEX_ONE]);
             if (asyncCallbackInfo->deferred) {
-                napi_resolve_deferred(env, asyncCallbackInfo->deferred, result[INDEX_TWO]);
+                napi_resolve_deferred(env, asyncCallbackInfo->deferred, result[INDEX_ONE]);
             } else {
                 napi_value tmp = nullptr;
                 napi_value callback = nullptr;
                 napi_get_reference_value(env, asyncCallbackInfo->callbackRef, &callback);
-                napi_get_undefined(env, &result[INDEX_ONE]);
+                napi_get_undefined(env, &result[INDEX_ZERO]);
                 napi_call_function(env, nullptr, callback, ARGC_TWO, result, &tmp);
                 napi_delete_reference(env, asyncCallbackInfo->callbackRef);
             }
@@ -246,13 +246,13 @@ static napi_value GetPowerMode(napi_env env, napi_callback_info info)
 
     napi_valuetype type;
     if (argc == ARGC_ONE) {
-        NAPI_CALL(env, napi_typeof(env, args[INDEX_ONE], &type));
+        NAPI_CALL(env, napi_typeof(env, args[INDEX_ZERO], &type));
         if (type != napi_function) {
             POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
             delete asyncCallbackInfo;
             return nullptr;
         }
-        napi_create_reference(env, args[INDEX_ONE], 1, &asyncCallbackInfo->callbackRef);
+        napi_create_reference(env, args[INDEX_ZERO], 1, &asyncCallbackInfo->callbackRef);
     }
     napi_value result = nullptr;
     if (asyncCallbackInfo->callbackRef == nullptr) {
@@ -314,7 +314,7 @@ static napi_value SetPowerMode(napi_env env, napi_callback_info info)
     }
     napi_valuetype type;
     if (argc == ARGC_TWO) {
-        napi_value callback = args[INDEX_TWO];
+        napi_value callback = args[INDEX_ONE];
         NAPI_CALL(env, napi_typeof(env, callback, &type));
         if (type != napi_function) {
             POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
@@ -324,7 +324,7 @@ static napi_value SetPowerMode(napi_env env, napi_callback_info info)
         napi_create_reference(env, callback, 1, &asyncCallbackInfo->callbackRef);
     }
 
-    napi_value mode = args[INDEX_ONE];
+    napi_value mode = args[INDEX_ZERO];
     napi_get_value_uint32(env, mode, &asyncCallbackInfo->powerMode);
 
     napi_value result = nullptr;
@@ -354,20 +354,20 @@ static napi_value EnumPowerModeClassConstructor(napi_env env, napi_callback_info
 
 static napi_value CreateDevicePowerMode(napi_env env, napi_value exports)
 {
-    napi_value performance = nullptr;
     napi_value normal = nullptr;
     napi_value powerSave = nullptr;
+    napi_value performance = nullptr;
     napi_value extremePowerSave = nullptr;
 
-    napi_create_int32(env, (int32_t)PowerMgrClient::PERFORMANCE, &performance);
     napi_create_int32(env, (int32_t)PowerMgrClient::NORMAL_MODE, &normal);
     napi_create_int32(env, (int32_t)PowerMgrClient::POWER_SAVE_MODE, &powerSave);
-    napi_create_int32(env, (int32_t)PowerMgrClient::EXTREME_MODE, &extremePowerSave);
+    napi_create_int32(env, (int32_t)PowerMgrClient::PERFORMANCE_MODE, &performance);
+    napi_create_int32(env, (int32_t)PowerMgrClient::EXTREME_POWER_SAVE_MODE, &extremePowerSave);
 
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("MODE_PERFORMANCE", performance),
         DECLARE_NAPI_STATIC_PROPERTY("MODE_NORMAL", normal),
         DECLARE_NAPI_STATIC_PROPERTY("MODE_POWER_SAVE", powerSave),
+        DECLARE_NAPI_STATIC_PROPERTY("MODE_PERFORMANCE", performance),
         DECLARE_NAPI_STATIC_PROPERTY("MODE_EXTREME_POWER_SAVE", extremePowerSave),
     };
     napi_value result = nullptr;
