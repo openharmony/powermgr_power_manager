@@ -129,19 +129,19 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t PowerMgrStub::CreateRunningLockStub(MessageParcel& data)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     std::unique_ptr<RunningLockInfo> runningLockInfo(data.ReadParcelable<RunningLockInfo>());
     RETURN_IF_WITH_RET((runningLockInfo == nullptr), E_READ_PARCEL_ERROR);
-    CreateRunningLock(token, *runningLockInfo);
+    CreateRunningLock(remoteObj, *runningLockInfo);
     return ERR_OK;
 }
 
 int32_t PowerMgrStub::ReleaseRunningLockStub(MessageParcel& data)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
-    ReleaseRunningLock(token);
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
+    ReleaseRunningLock(remoteObj);
     return ERR_OK;
 }
 
@@ -155,40 +155,40 @@ int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data)
 
 int32_t PowerMgrStub::LockStub(MessageParcel& data)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     std::unique_ptr<RunningLockInfo> runningLockInfo(data.ReadParcelable<RunningLockInfo>());
     RETURN_IF_WITH_RET((runningLockInfo == nullptr), E_READ_PARCEL_ERROR);
     uint32_t timeOutMs = 0;
     READ_PARCEL_WITH_RET(data, Uint32, timeOutMs, E_READ_PARCEL_ERROR);
-    Lock(token, *runningLockInfo, timeOutMs);
+    Lock(remoteObj, *runningLockInfo, timeOutMs);
     return ERR_OK;
 }
 
 int32_t PowerMgrStub::UnLockStub(MessageParcel& data)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
-    UnLock(token);
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
+    UnLock(remoteObj);
     return ERR_OK;
 }
 
 int32_t PowerMgrStub::IsUsedStub(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
-    bool ret = IsUsed(token);
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
+    bool ret = IsUsed(remoteObj);
     WRITE_PARCEL_WITH_RET(reply, Bool, ret, E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
 int32_t PowerMgrStub::SetWorkTriggerListStub(MessageParcel& data)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((token == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     WorkTriggerList workTriggerList;
     RunningLockInfo::ReadFromParcelWorkTriggerList(data, workTriggerList);
-    SetWorkTriggerList(token, workTriggerList);
+    SetWorkTriggerList(remoteObj, workTriggerList);
     return ERR_OK;
 }
 
