@@ -101,26 +101,26 @@ declare namespace power {
     */
    export enum DevicePowerMode {
    /**
-    * Performance power mode
-    * @since 9
-    */
-   MODE_PERFORMANCE,
-   /**
     * Normal power mode
     * @since 9
     */
-   MODE_NORMAL,
+    MODE_NORMAL = 600,
    /**
     * Power save mode
     * @since 9
     */
-   MODE_POWER_SAVE,
+    MODE_POWER_SAVE,
+   /**
+    * Performance power mode
+    * @since 9
+    */
+    MODE_PERFORMANCE,
    /**
     * Extreme power save mode
     * @since 9
     */
-   MODE_EXTREME_POWER_SAVE
-   }
+    MODE_EXTREME_POWER_SAVE
+    }
 }
 export default power;
 
