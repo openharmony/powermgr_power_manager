@@ -56,7 +56,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/actions:powermgr_actions",
     "//base/msdp/device_status/frameworks/native/src:deviceagent",
     "//drivers/interface/power/v1_0:libpower_proxy_1.0",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
   ]

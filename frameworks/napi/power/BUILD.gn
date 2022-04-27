@@ -15,8 +15,8 @@ import("//base/powermgr/power_manager/powermgr.gni")
 
 config("power_manager_napi_private_config") {
   include_dirs = [
-    "//foundation/ace/napi/native_engine",
-    "//foundation/ace/napi/interfaces/kits",
+    "//foundation/arkui/napi/native_engine",
+    "//foundation/arkui/napi/interfaces/kits",
     "//utils/system/safwk/native/include",
     "//third_party/node/src",
     "//base/powermgr/power_manager/interfaces/innerkits/native/include",
@@ -34,7 +34,7 @@ ohos_shared_library("power") {
   ]
   deps = [
     "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
-    "//foundation/ace/napi:ace_napi",
+    "//foundation/arkui/napi:ace_napi",
   ]
   if (!build_public_version) {
     external_deps = [ "hilog_native:libhilog" ]
