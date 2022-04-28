@@ -30,6 +30,7 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
+#include "system_suspend_controller.h"
 #include "ui_service_mgr_client.h"
 #include "watchdog.h"
 
@@ -68,6 +69,7 @@ void PowerMgrService::OnStart()
         POWER_HILOGE(COMP_SVC, "Call init fail");
         return;
     }
+    SystemSuspendController::GetInstance().RegisterHdiStatusListener(handler_);
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
         return;

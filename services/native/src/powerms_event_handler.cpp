@@ -17,6 +17,7 @@
 
 #include "power_log.h"
 #include "power_mgr_service.h"
+#include "system_suspend_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -66,6 +67,14 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
         }
         case SHUTDOWN_REQUEST_MSG: {
             pmsptr->HandleShutdownRequest();
+            break;
+        }
+        case RETRY_REGISTER_HDI_STATUS_LISTENER: {
+            SystemSuspendController::GetInstance().RegisterHdiStatusListener(pmsptr->GetHandler());
+            break;
+        }
+        case REGISTER_POWER_HDI_CALLBACK: {
+            SystemSuspendController::GetInstance().RegisterPowerHdiCallback();
             break;
         }
         default:

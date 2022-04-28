@@ -34,6 +34,8 @@ public:
         SYSTEM_WAKE_UP_MSG = 5,
         POWER_KEY_TIMEOUT_MSG = 6,
         SHUTDOWN_REQUEST_MSG = 7,
+        RETRY_REGISTER_HDI_STATUS_LISTENER = 8,
+        REGISTER_POWER_HDI_CALLBACK = 9
     };
 
     PowermsEventHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,

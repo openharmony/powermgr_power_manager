@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,12 @@
 
 #include <singleton.h>
 
-#include "suspend/irunning_lock_hub.h"
+#include "hdi_service_status_listener.h"
+#include "powerms_event_handler.h"
 #include "power_hdi_callback_impl.h"
+#include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
+#include "v1_0/power_interface_proxy.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -34,6 +37,8 @@ public:
     void AcquireRunningLock(const std::string& name);
     void ReleaseRunningLock(const std::string& name);
     void Dump(std::string& info);
+    void RegisterHdiStatusListener(const std::shared_ptr<PowermsEventHandler>& handler);
+    void RegisterPowerHdiCallback();
 
 private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
@@ -52,6 +57,9 @@ private:
     };
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
+    sptr<HDI::Power::V1_0::IPowerInterface> powerInterface_ { nullptr };
+    sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
+    sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
 };
 } // namespace PowerMgr
 } // namespace OHOS
