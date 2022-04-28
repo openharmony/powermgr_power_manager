@@ -181,29 +181,33 @@ void PowerModeModule::PublishPowerModeEvent()
     /* send event */
     CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(false);
-    IntentWant setModeWant;
-    CommonEventData event(setModeWant);
+    std::string action;
+    uint32_t code;
     switch (mode_) {
         case PowerModeModule::EXTREME_MODE:
-            setModeWant.SetAction(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
-            event.SetCode(PowerModeModule::EXTREME_MODE);
+            action = CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
+            code = static_cast<uint32_t>(PowerModeModule::EXTREME_MODE);
             break;
         case PowerModeModule::NORMAL_MODE:
-            setModeWant.SetAction(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
-            event.SetCode(PowerModeModule::NORMAL_MODE);
+            action = CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
+            code = static_cast<uint32_t>(PowerModeModule::NORMAL_MODE);
             break;
         case PowerModeModule::SAVE_MODE:
-            setModeWant.SetAction(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
-            event.SetCode(PowerModeModule::SAVE_MODE);
+            action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
+            code = static_cast<uint32_t>(PowerModeModule::SAVE_MODE);
             break;
         case PowerModeModule::LOWPOWER_MODE:
-            setModeWant.SetAction(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
-            event.SetCode(PowerModeModule::LOWPOWER_MODE);
+            action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
+            code = static_cast<uint32_t>(PowerModeModule::LOWPOWER_MODE);
             break;
         default:
             POWER_HILOGW(FEATURE_POWER_MODE, "Unknown mode");
             return;
     }
+    IntentWant setModeWant;
+    setModeWant.SetAction(action);
+    CommonEventData event(setModeWant);
+    event.SetCode(code);
     if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
         POWER_HILOGE(FEATURE_POWER_MODE, "Failed to publish the mode event");
         return;
