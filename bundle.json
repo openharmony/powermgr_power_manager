@@ -15,7 +15,7 @@
     "component": {
         "name": "power_manager_native",
         "subsystem": "powermgr",
-        "syscap": [ 
+        "syscap": [
             "SystemCapability.PowerManager.PowerManager.Core",
             "SystemCapability.PowerManager.PowerManager.Extension"
         ],
