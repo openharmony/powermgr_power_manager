@@ -40,10 +40,6 @@ config("module_private_event_config") {
   include_dirs = [
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
-    "//base/notification/common_event_service/cesfwk/innerkits/include",
-    "//base/notification/common_event_service/cesfwk/kits/native/include",
-    "//base/notification/common_event_service/cesfwk/services/include",
-    "//base/notification/common_event_service/common/log/include",
     "//base/sensors/sensor/interfaces/native/include",
     "//utils/native/base/include",
   ]
