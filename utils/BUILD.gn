@@ -60,11 +60,6 @@ ohos_executable("power-shell") {
     "shell/src/power_shell_command.cpp",
   ]
 
-  cflags = []
-  if (target_cpu == "arm") {
-    cflags += [ "-DBINDER_IPC_32BIT" ]
-  }
-
   deps = [
     "${powermgr_interfaces_path}/innerkits:powermgr_client",
     "//foundation/aafwk/standard/tools/aa:tools_aa_source_set",
