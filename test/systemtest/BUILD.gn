@@ -31,7 +31,6 @@ config("module_private_config") {
     "//utils/native/base/include",
     "//foundation/distributedschedule/safwk/services/safwk/include",
     "//base/powermgr/power_manager/interfaces/innerkits/native/include",
-    "//base/notification/common_event_service/cesfwk/kits/native/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
     "//base/powermgr/power_manager/services/zidl/include",
@@ -48,9 +47,6 @@ config("module_private_config") {
     "//base/powermgr/power_manager/services/native/test/unittest/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//foundation/aafwk/standard/interfaces/innerkits/intent/include",
-    "//base/notification/common_event_service/cesfwk/innerkits/include",
-    "//base/notification/common_event_service/cesfwk/services/include",
-    "//base/notification/common_event_service/common/log/include",
     "//base/sensors/sensor/interfaces/native/include",
   ]
 }
