@@ -26,7 +26,7 @@
 #include "power_hdi_callback_impl.h"
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
-#include "v1_0/power_interface_proxy.h"
+#include "v1_0/ipower_interface.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -44,7 +44,7 @@ private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static const std::string WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
-    class PowerHdfCallback : public OHOS::HDI::Power::V1_0::PowerHdiCallbackStub {
+    class PowerHdfCallback : public OHOS::HDI::Power::V1_0::IPowerHdiCallback {
     public:
         PowerHdfCallback() = default;
         ~PowerHdfCallback() = default;
@@ -57,7 +57,7 @@ private:
     };
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
-    sptr<HDI::Power::V1_0::IPowerInterface> powerInterface_ { nullptr };
+    sptr<OHOS::HDI::Power::V1_0::IPowerInterface> powerInterface_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
 };
