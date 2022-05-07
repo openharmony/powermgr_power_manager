@@ -155,6 +155,44 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value WakeupDevice(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value args[1] = { 0 };
+    napi_value jsthis;
+    void *data = nullptr;
+
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
+    NAPI_ASSERT(env, (status == napi_ok) && (argc >= 1), "Failed to get cb info");
+    napi_valuetype type = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, args[0], &type));
+    NAPI_ASSERT(env, type == napi_string, "Wrong argument type. string expected.");
+
+    char reason[REASON_MAX] = { 0 };
+    size_t reasonLen = 0;
+    status = napi_get_value_string_utf8(env, args[0], reason, REASON_MAX - 1, &reasonLen);
+    if (status != napi_ok) {
+        POWER_HILOGE(MODULE_JS_NAPI, "Get wakeup reason failed");
+        return nullptr;
+    }
+    POWER_HILOGD(MODULE_JS_NAPI, "Wakeup type: APPLICATION, reason: %{public}s", reason);
+    g_powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string(reason));
+    return nullptr;
+}
+
+static napi_value SuspendDevice(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void *data = nullptr;
+
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    NAPI_ASSERT(env, (status == napi_ok), "Failed to get cb info");
+
+    POWER_HILOGD(MODULE_JS_NAPI, "Suspend type: APPLICATION");
+    g_powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    return nullptr;
+}
+
 EXTERN_C_START
 /*
  * function for module exports
@@ -166,6 +204,8 @@ static napi_value PowerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("shutdownDevice", ShutdownDevice),
         DECLARE_NAPI_FUNCTION("rebootDevice", RebootDevice),
         DECLARE_NAPI_FUNCTION("isScreenOn", IsScreenOn),
+        DECLARE_NAPI_FUNCTION("wakeupDevice", WakeupDevice),
+        DECLARE_NAPI_FUNCTION("suspendDevice", SuspendDevice),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     POWER_HILOGD(MODULE_JS_NAPI, "%{public}s: exit", __func__);
