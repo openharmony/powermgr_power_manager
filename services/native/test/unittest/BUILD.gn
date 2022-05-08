@@ -29,7 +29,7 @@ config("module_private_config") {
     "//base/powermgr/power_manager/services/native/test/unittest/include",
     "//base/sensors/sensor/interfaces/native/include",
     "//drivers/peripheral/display/interfaces/include/",
-    "//foundation/graphic/standard/utils/include/",
+    "//foundation/graphic/graphic/utils/include/",
     "//third_party/googletest/googletest/include",
     "//utils/system/safwk/native/include",
   ]
