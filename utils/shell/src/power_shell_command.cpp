@@ -23,14 +23,26 @@
 #include <unistd.h>
 
 #include "power_mgr_client.h"
+#include "display_power_mgr_client.h"
 #include "iservice_registry.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
 
+extern char *optarg;
+
 namespace OHOS {
 namespace PowerMgr {
+using namespace OHOS::DisplayPowerMgr;
+
 static const struct option SET_MODE_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
+};
+
+static const struct option DISPLAY_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"restore", no_argument, nullptr, 'r'},
+    {"update", required_argument, nullptr, 'u'},
+    {"override", required_argument, nullptr, 'o'},
 };
 
 static const std::string HELP_MSG =
@@ -39,6 +51,7 @@ static const std::string HELP_MSG =
     "  setmode :    Set power mode. \n"
     "  wakeup  :    Wakeup system and turn screen on. \n"
     "  suspend :    Suspend system and turn screen off. \n"
+    "  display :    Update or Override display brightness. \n"
     "  dump    :    Dump power info. \n"
     "  help    :    Show this help menu. \n";
 
@@ -48,6 +61,12 @@ static const std::string SETMODE_HELP_MSG =
     "  600  :  normal mode\n"
     "  601  :  power save mode\n"
     "  602  :  extreme mode\n";
+
+static const std::string DISPLAY_HELP_MSG =
+    "usage: power-shell display [<options>] 100\n"
+    "display <options is as below> \n"
+    "  -u  :  update brightness\n"
+    "  -o  :  override brightness\n";
 
 PowerShellCommand::PowerShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "power-shell")
 {}
@@ -59,6 +78,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
+        {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
 
@@ -152,6 +172,53 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
     resultReceiver_.append("Power Dump result: \n");
     resultReceiver_.append(ret);
 
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommand()
+{
+    int ind = 0;
+    int option = getopt_long(argc_, argv_, "hru:o:", DISPLAY_OPTIONS, &ind);
+    resultReceiver_.clear();
+    if (option == 'h') {
+        resultReceiver_.append(DISPLAY_HELP_MSG);
+        return ERR_OK;
+    }
+    if (option == 'r') {
+        bool ret = DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+        resultReceiver_.append("Restore brightness");
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (!optarg) {
+        resultReceiver_.append("Error! please input your brightness value.\n");
+        resultReceiver_.append(DISPLAY_HELP_MSG);
+        return ERR_OK;
+    }
+    auto value = static_cast<uint32_t>(atoi(optarg));
+    if (option == 'u') {
+        bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(value);
+        resultReceiver_.append("Update brightness to ");
+        resultReceiver_.append(std::to_string(value));
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (option == 'o') {
+        bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(value);
+        resultReceiver_.append("Override brightness to ");
+        resultReceiver_.append(std::to_string(value));
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
     return ERR_OK;
 }
 }
