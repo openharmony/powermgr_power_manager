@@ -44,6 +44,8 @@ public:
         WAKEUP_DEVICE,
         SUSPEND_DEVICE,
         REFRESH_ACTIVITY,
+        OVERRIDE_DISPLAY_OFF_TIME,
+        RESTORE_DISPLAY_OFF_TIME,
         GET_STATE,
         IS_SCREEN_ON,
         FORCE_DEVICE_SUSPEND,
@@ -77,6 +79,8 @@ public:
     virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
+    virtual bool OverrideScreenOffTime(int64_t timeout) = 0;
+    virtual bool RestoreScreenOffTime() = 0;
     virtual PowerState GetState() = 0;
     virtual bool IsScreenOn() = 0;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) = 0;

@@ -77,6 +77,8 @@ public:
     void WakeupDeviceInner(pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
         const std::string& pkgName);
     void RefreshActivityInner(pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
+    bool OverrideScreenOffTimeInner(int64_t timeout);
+    bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
     PowerState GetState()
@@ -184,6 +186,8 @@ private:
     int64_t displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
+    bool isScreenOffTimeOverride_ { false };
+    int64_t beforeOverrideTime_ { -1 };
 };
 } // namespace PowerMgr
 } // namespace OHOS

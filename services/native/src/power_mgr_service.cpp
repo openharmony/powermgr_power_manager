@@ -573,6 +573,33 @@ void PowerMgrService::RefreshActivity(int64_t callTimeMs,
     powerStateMachine_->RefreshActivityInner(pid, callTimeMs, type, needChangeBacklight);
 }
 
+bool PowerMgrService::OverrideScreenOffTime(int64_t timeout)
+{
+    std::lock_guard lock(mutex_);
+    pid_t pid  = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
+        POWER_HILOGE(COMP_SVC, "Permission check fail, pid: %{public}d, uid: %{public}d", pid, uid);
+        return false;
+    }
+    POWER_HILOGD(COMP_SVC, "Try to override screen off time");
+    return powerStateMachine_->OverrideScreenOffTimeInner(timeout);
+}
+
+bool PowerMgrService::RestoreScreenOffTime()
+{
+    std::lock_guard lock(mutex_);
+    pid_t pid  = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::CheckIsSystemAppByUid(uid)) {
+        POWER_HILOGE(COMP_SVC, "Permission check fail, pid: %{public}d, uid: %{public}d", pid, uid);
+        return false;
+    }
+    POWER_HILOGD(COMP_SVC, "Try to restore screen off time");
+    return powerStateMachine_->RestoreScreenOffTimeInner();
+}
+
+
 PowerState PowerMgrService::GetState()
 {
     std::lock_guard lock(mutex_);
