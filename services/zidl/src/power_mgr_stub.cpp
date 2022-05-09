@@ -57,6 +57,12 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         case static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE):
             ret = ShutDownDeviceStub(data);
             break;
+        case static_cast<int>(IPowerMgr::OVERRIDE_DISPLAY_OFF_TIME):
+            ret = OverrideScreenOffTimeStub(data, reply);
+            break;
+        case static_cast<int>(IPowerMgr::RESTORE_DISPLAY_OFF_TIME):
+            ret = RestoreScreenOffTimeStub(reply);
+            break;
         case static_cast<int>(IPowerMgr::GET_STATE):
             ret = GetStateStub(reply);
             break;
@@ -256,6 +262,30 @@ int32_t PowerMgrStub::RefreshActivityStub(MessageParcel& data)
     READ_PARCEL_WITH_RET(data, Bool, needChangeBacklight, E_READ_PARCEL_ERROR);
 
     RefreshActivity(time, static_cast<UserActivityType>(type), needChangeBacklight);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::OverrideScreenOffTimeStub(MessageParcel& data, MessageParcel& reply)
+{
+    int64_t timeout = 0;
+
+    READ_PARCEL_WITH_RET(data, Int64, timeout, E_READ_PARCEL_ERROR);
+
+    bool ret = OverrideScreenOffTime(timeout);
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::RestoreScreenOffTimeStub(MessageParcel& reply)
+{
+    bool ret = RestoreScreenOffTime();
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
     return ERR_OK;
 }
 
