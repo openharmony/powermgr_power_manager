@@ -170,6 +170,28 @@ static void UnLock(const uint8_t* data)
     fuzzLock -> UnLock();
 }
 
+static void OverrideScreenOffTime(const uint8_t* data)
+{
+    int64_t type[1];
+    int32_t idSize = 4;
+    if ((memcpy_s(type, sizeof(type), data, idSize)) != EOK) {
+        return;
+    }
+
+    g_powerMgrClient.OverrideScreenOffTime(type[0]);
+}
+
+static void RestoreScreenOffTime(const uint8_t* data)
+{
+    int32_t type[1];
+    int32_t idSize = 4;
+    if ((memcpy_s(type, sizeof(type), data, idSize)) != EOK) {
+        return;
+    }
+
+    g_powerMgrClient.RestoreScreenOffTime();
+}
+
 static int32_t randNum()
 {
     std::random_device rd;
@@ -225,6 +247,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
                 break;
             case ApiNumber::NUM_SIXTEEN:
                 UnLock(data);
+                break;
+            case ApiNumber::NUM_SEVENTEEN:
+                OverrideScreenOffTime(data);
+                break;
+            case ApiNumber::NUM_EIGHTEEN:
+                RestoreScreenOffTime(data);
                 break;
             default:
                 break;
