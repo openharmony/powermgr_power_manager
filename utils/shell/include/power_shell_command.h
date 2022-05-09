@@ -39,6 +39,7 @@ private:
     ErrCode RunAsWakeupCommand();
     ErrCode RunAsSuspendCommand();
     ErrCode RunAsDisplayCommand();
+    ErrCode RunAsTimeOutCommand();
 };
 }  // namespace PowerMgr
 }  // namespace OHOS

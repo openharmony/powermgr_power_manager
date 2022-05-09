@@ -897,7 +897,7 @@ void PowerStateMachine::DumpInfo(std::string& result)
     result.append("POWER MANAGER DUMP (hidumper -PowerStateMachine):\n");
     result.append("Current State: ")
             .append(GetPowerStateString(GetState()))
-            .append("  Reasion: ")
+            .append("  Reason: ")
             .append(ToString(static_cast<uint32_t>(
                 controllerMap_.find(GetState())->second->lastReason_)))
             .append("  Time: ")
@@ -909,7 +909,7 @@ void PowerStateMachine::DumpInfo(std::string& result)
         result.append((ToString(beforeOverrideTime_)))
                 .append("ms  OverrideTimeout=")
                 .append((ToString(GetDisplayOffTime())))
-                .append("ms  IsScreenOffTimeOverride=TRUE\n");
+                .append("ms\n");
     } else {
         result.append((ToString(GetDisplayOffTime())))
                 .append("ms\n");
