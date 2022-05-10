@@ -34,6 +34,8 @@ private:
     int32_t WakeupDeviceStub(MessageParcel& data);
     int32_t SuspendDeviceStub(MessageParcel& data);
     int32_t RefreshActivityStub(MessageParcel& data);
+    int32_t OverrideScreenOffTimeStub(MessageParcel& data, MessageParcel& reply);
+    int32_t RestoreScreenOffTimeStub(MessageParcel& reply);
     int32_t GetStateStub(MessageParcel& reply);
     int32_t IsScreeOnStub(MessageParcel& reply);
     int32_t ForceSuspendDeviceStub(MessageParcel& data, MessageParcel& reply);

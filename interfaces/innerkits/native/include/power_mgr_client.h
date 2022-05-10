@@ -71,6 +71,17 @@ public:
     void RefreshActivity(UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER);
 
     /**
+     * Windows overwrite timeout
+     * @param timeout Specifies the timeout duration.
+     */
+    bool OverrideScreenOffTime(int64_t timeout);
+
+    /**
+     * Windows restores timeout
+     */
+    bool RestoreScreenOffTime();
+
+    /**
      * Check whether the device screen is on. The result may be true or false, depending on the system state.
      */
     bool IsScreenOn();

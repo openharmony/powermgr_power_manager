@@ -45,6 +45,12 @@ static const struct option DISPLAY_OPTIONS[] = {
     {"override", required_argument, nullptr, 'o'},
 };
 
+static const struct option TIME_OUT_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"restore", no_argument, nullptr, 'r'},
+    {"override", required_argument, nullptr, 'o'},
+};
+
 static const std::string HELP_MSG =
     "usage: power-shell\n"
     "command list:\n"
@@ -52,6 +58,7 @@ static const std::string HELP_MSG =
     "  wakeup  :    Wakeup system and turn screen on. \n"
     "  suspend :    Suspend system and turn screen off. \n"
     "  display :    Update or Override display brightness. \n"
+    "  timeout :    Override or Restore screen off time. \n"
     "  dump    :    Dump power info. \n"
     "  help    :    Show this help menu. \n";
 
@@ -68,6 +75,12 @@ static const std::string DISPLAY_HELP_MSG =
     "  -u  :  update brightness\n"
     "  -o  :  override brightness\n";
 
+static const std::string TIME_OUT_HELP_MSG =
+    "usage: power-shell timeout [<options>] 1000\n"
+    "timeout <options is as below> \n"
+    "  -o  :  override screen off time\n"
+    "  -r  :  restore screen off time\n";
+
 PowerShellCommand::PowerShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "power-shell")
 {}
 
@@ -79,6 +92,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
+        {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
 
@@ -213,6 +227,43 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
         bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(value);
         resultReceiver_.append("Override brightness to ");
         resultReceiver_.append(std::to_string(value));
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsTimeOutCommand()
+{
+    int ind = 0;
+    int option = getopt_long(argc_, argv_, "hro:", TIME_OUT_OPTIONS, &ind);
+    resultReceiver_.clear();
+    if (option == 'h') {
+        resultReceiver_.append(TIME_OUT_HELP_MSG);
+        return ERR_OK;
+    }
+    if (option == 'r') {
+        bool ret = PowerMgrClient::GetInstance().RestoreScreenOffTime();
+        resultReceiver_.append("Restore screen off time");
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (!optarg) {
+        resultReceiver_.append("Error! please input your screen off time.\n");
+        resultReceiver_.append(TIME_OUT_HELP_MSG);
+        return ERR_OK;
+    }
+    auto timeout = static_cast<int64_t>(atoi(optarg));
+    if (option == 'o') {
+        bool ret = PowerMgrClient::GetInstance().OverrideScreenOffTime(timeout);
+        resultReceiver_.append("Override screen off time to ");
+        resultReceiver_.append(std::to_string(timeout));
         if (!ret) {
             resultReceiver_.append(" failed");
         }

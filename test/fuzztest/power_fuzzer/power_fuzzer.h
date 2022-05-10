@@ -38,6 +38,8 @@ enum class ApiNumber {
     NUM_FOURTEEN,
     NUM_FIFTEEN,
     NUM_SIXTEEN,
+    NUM_SEVENTEEN,
+    NUM_EIGHTEEN,
 };
 
 #endif

@@ -46,6 +46,8 @@ public:
     virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
+    virtual bool OverrideScreenOffTime(int64_t timeout) override;
+    virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
