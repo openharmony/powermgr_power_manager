@@ -14,7 +14,7 @@
  */
 
 #include "power_state_machine.h"
-
+#include <cinttypes>
 #include <datetime_ex.h>
 #include <hisysevent.h>
 
@@ -263,6 +263,31 @@ void PowerStateMachine::RefreshActivityInner(pid_t pid,
     } else {
         POWER_HILOGE(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
     }
+}
+
+bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
+{
+    POWER_HILOGD(COMP_SVC, "Override screenOffTime, timeout=%{public}" PRId64 "", timeout);
+    if (!isScreenOffTimeOverride_) {
+        int64_t beforeOverrideTime = this->GetDisplayOffTime();
+        isScreenOffTimeOverride_ = true;
+        beforeOverrideTime_ = beforeOverrideTime;
+    }
+    this->SetDisplayOffTime(timeout);
+    POWER_HILOGD(COMP_SVC, "Override screenOffTime finish");
+    return true;
+}
+
+bool PowerStateMachine::RestoreScreenOffTimeInner()
+{
+    if (!isScreenOffTimeOverride_) {
+        POWER_HILOGD(COMP_SVC, "RestoreScreenOffTime is not override, no need to restore");
+        return false;
+    }
+    this->SetDisplayOffTime(beforeOverrideTime_);
+    isScreenOffTimeOverride_ = false;
+    POWER_HILOGD(COMP_SVC, "Restore screenOffTime finish");
+    return true;
 }
 
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
@@ -695,7 +720,10 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
 
 void PowerStateMachine::SetDisplayOffTime(int64_t time)
 {
-    displayOffTime_ = time;
+    {
+        std::lock_guard lock(mutex_);
+        displayOffTime_ = time;
+    }
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
     }
@@ -711,6 +739,7 @@ void PowerStateMachine::SetSleepTime(int64_t time)
 
 int64_t PowerStateMachine::GetDisplayOffTime()
 {
+    std::lock_guard lock(mutex_);
     return displayOffTime_;
 }
 
@@ -868,12 +897,23 @@ void PowerStateMachine::DumpInfo(std::string& result)
     result.append("POWER MANAGER DUMP (hidumper -PowerStateMachine):\n");
     result.append("Current State: ")
             .append(GetPowerStateString(GetState()))
-            .append("  Reasion: ")
+            .append("  Reason: ")
             .append(ToString(static_cast<uint32_t>(
                 controllerMap_.find(GetState())->second->lastReason_)))
             .append("  Time: ")
             .append(ToString(controllerMap_.find(GetState())->second->lastTime_))
             .append("\n");
+
+    result.append("ScreenOffTime: Timeout=");
+    if (isScreenOffTimeOverride_) {
+        result.append((ToString(beforeOverrideTime_)))
+                .append("ms  OverrideTimeout=")
+                .append((ToString(GetDisplayOffTime())))
+                .append("ms\n");
+    } else {
+        result.append((ToString(GetDisplayOffTime())))
+                .append("ms\n");
+    }
 
     result.append("DUMP DETAILS:\n");
     result.append("Last Screen On: ")

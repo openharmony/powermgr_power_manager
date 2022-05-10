@@ -14,7 +14,7 @@
  */
 
 #include "power_mgr_client.h"
-
+#include <cinttypes>
 #include <datetime_ex.h>
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
@@ -124,6 +124,27 @@ void PowerMgrClient::RefreshActivity(UserActivityType type)
     RETURN_IF(Connect() != ERR_OK);
     proxy_->RefreshActivity(GetTickCount(), type, true);
     POWER_HILOGD(FEATURE_ACTIVITY, "Calling RefreshActivity Success");
+}
+
+bool PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
+{
+    if (timeout <= 0) {
+        POWER_HILOGW(COMP_FWK, "Invalid timeout, timeout=%{public}" PRId64 "", timeout);
+        return false;
+    }
+    
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = proxy_->OverrideScreenOffTime(timeout);
+    POWER_HILOGD(COMP_FWK, "Calling OverrideScreenOffTime Success");
+    return ret;
+}
+
+bool PowerMgrClient::RestoreScreenOffTime()
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = proxy_->RestoreScreenOffTime();
+    POWER_HILOGD(COMP_FWK, "Calling RestoreScreenOffTime Success");
+    return ret;
 }
 
 bool PowerMgrClient::IsRunningLockTypeSupported(uint32_t type)
