@@ -43,6 +43,8 @@ static const struct option DISPLAY_OPTIONS[] = {
     {"restore", no_argument, nullptr, 'r'},
     {"update", required_argument, nullptr, 'u'},
     {"override", required_argument, nullptr, 'o'},
+    {"boost", required_argument, nullptr, 'b'},
+    {"cancel", no_argument, nullptr, 'c'},
 };
 
 static const struct option TIME_OUT_OPTIONS[] = {
@@ -73,7 +75,9 @@ static const std::string DISPLAY_HELP_MSG =
     "usage: power-shell display [<options>] 100\n"
     "display <options is as below> \n"
     "  -u  :  update brightness\n"
-    "  -o  :  override brightness\n";
+    "  -o  :  override brightness\n"
+    "  -b  :  timing maximum brightness\n"
+    "  -c  :  cancel the timing maximum brightness";
 
 static const std::string TIME_OUT_HELP_MSG =
     "usage: power-shell timeout [<options>] 1000\n"
@@ -192,7 +196,7 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
 ErrCode PowerShellCommand::RunAsDisplayCommand()
 {
     int ind = 0;
-    int option = getopt_long(argc_, argv_, "hru:o:", DISPLAY_OPTIONS, &ind);
+    int option = getopt_long(argc_, argv_, "hru:o:b:c", DISPLAY_OPTIONS, &ind);
     resultReceiver_.clear();
     if (option == 'h') {
         resultReceiver_.append(DISPLAY_HELP_MSG);
@@ -201,6 +205,15 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
     if (option == 'r') {
         bool ret = DisplayPowerMgrClient::GetInstance().RestoreBrightness();
         resultReceiver_.append("Restore brightness");
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (option == 'c') {
+        bool ret = DisplayPowerMgrClient::GetInstance().CancelBoostBrightness();
+        resultReceiver_.append("Cancel boost brightness");
         if (!ret) {
             resultReceiver_.append(" failed");
         }
@@ -227,6 +240,16 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
         bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(value);
         resultReceiver_.append("Override brightness to ");
         resultReceiver_.append(std::to_string(value));
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (option == 'b') {
+        bool ret = DisplayPowerMgrClient::GetInstance().BoostBrightness(value);
+        resultReceiver_.append("Boost brightness timeout ");
+        resultReceiver_.append(std::to_string(value)).append("(Ms)");
         if (!ret) {
             resultReceiver_.append(" failed");
         }
