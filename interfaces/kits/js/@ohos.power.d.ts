@@ -39,7 +39,7 @@ declare namespace power {
    *
    * <p>This method requires the ohos.permission.REBOOT permission.
    *
-   * @param reason Indicates the restart reason. For example, "updater" indicates entering the updater mode
+   * @param reason Indicates the restart reason. For example, "updater" means to enter the updater mode
    * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
    * @permission ohos.permission.REBOOT
    * @since 7
@@ -54,6 +54,23 @@ declare namespace power {
    */
   function isScreenOn(callback: AsyncCallback<boolean>): void;
   function isScreenOn(): Promise<boolean>;
+
+  /**
+   * Wakes up the device to turn on the screen.
+   *
+   * @param detail Indicates the detailed wakeup information.
+   * @systemapi
+   * @since 9
+   */
+  function wakeupDevice(detail: string): void;
+
+  /**
+   * Suspends the device to turn off the screen.
+   *
+   * @systemapi
+   * @since 9
+   */
+  function suspendDevice(): void;
 }
 export default power;
 
