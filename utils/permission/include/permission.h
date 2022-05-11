@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,11 @@ namespace OHOS {
 namespace PowerMgr {
 class Permission {
 public:
-    static bool CheckCallingPermission(const std::string& perm);
-    static bool CheckIsSystemAppByUid(int32_t uid);
+    static bool IsSystemCore();
+    static bool IsSystemBasic();
+    static bool IsSystem();
+    static bool IsPermissionGranted(const std::string& perm);
+    static bool IsSystemBasicPermGranted(const std::string& perm);
 };
 } // namespace PowerMgr
 } // namespace OHOS
