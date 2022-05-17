@@ -223,7 +223,7 @@ static napi_value CreateRunningLock(napi_env env, napi_callback_info info)
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
         if ((i == 0) && (valueType == napi_string)) {
-            napi_get_value_string_utf8(env, argv[i], asyncCallbackInfo->name, RUNNINGLOCK_NAME_MAX - 1,
+            napi_get_value_string_utf8(env, argv[i], asyncCallbackInfo->name, RUNNINGLOCK_NAME_MAX + 1,
                 &asyncCallbackInfo->nameLen);
         }
         if (i == 1) {
