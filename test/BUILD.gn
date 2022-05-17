@@ -18,8 +18,3 @@ group("systemtest") {
   testonly = true
   deps = [ "systemtest:systemtest_powermgr" ]
 }
-
-group("powermgr_js_test") {
-  testonly = true
-  deps = [ "unittest/common/napi:PowerMgrPowerJsTest" ]
-}
