@@ -22,7 +22,7 @@
 #include <string>
 
 #include <common_event_subscriber.h>
-#include <ohos/aafwk/content/want.h>
+#include "want.h"
 
 using IntentWant = OHOS::AAFwk::Want;
 using Ces = OHOS::EventFwk::CommonEventSubscriber;

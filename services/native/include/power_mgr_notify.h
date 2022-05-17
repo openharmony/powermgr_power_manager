@@ -19,9 +19,9 @@
 #include <mutex>
 
 #include <common_event_publish_info.h>
-#include <ohos/aafwk/content/want.h>
 
 #include "errors.h"
+#include "want.h"
 
 namespace OHOS {
 namespace PowerMgr {
