@@ -38,8 +38,6 @@ config("module_private_event_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
     "//base/sensors/sensor/interfaces/native/include",
     "//utils/native/base/include",
   ]

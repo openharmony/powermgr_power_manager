@@ -20,11 +20,10 @@
 #include <set>
 #include <string>
 
-#include <ohos/aafwk/content/want.h>
-
 #include "device_power_action.h"
 #include "device_state_action.h"
 #include "ishutdown_callback.h"
+#include "want.h"
 
 namespace OHOS {
 namespace PowerMgr {
