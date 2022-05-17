@@ -26,7 +26,6 @@
 #include <gtest/gtest.h>
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
-#include <ohos/aafwk/content/intent.h>
 #include <string_ex.h>
 
 #include "power_common.h"
