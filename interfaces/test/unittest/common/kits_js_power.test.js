@@ -23,6 +23,7 @@ function sleep(time){
 
 describe('PowerMgrPowerUnitTest', function () {
     beforeAll(function() {
+
         /*
          * @tc.setup: setup invoked before all test cases
          */
@@ -30,6 +31,7 @@ describe('PowerMgrPowerUnitTest', function () {
     })
 
     afterAll(function() {
+
         /*
          * @tc.teardown: teardown invoked after all test cases
          */
@@ -37,6 +39,7 @@ describe('PowerMgrPowerUnitTest', function () {
     })
 
     beforeEach(function() {
+
         /*
          * @tc.setup: setup invoked before each test case
          */
@@ -44,6 +47,7 @@ describe('PowerMgrPowerUnitTest', function () {
     })
 
     afterEach(function() {
+        
         /*
          * @tc.teardown: teardown invoked after each test case
          */
@@ -247,4 +251,46 @@ describe('PowerMgrPowerUnitTest', function () {
         console.info('MODE_EXTREME_POWER_SAVE = ' + devicePowerMode);
         expect(devicePowerMode === 603).assertTrue();
       })
+
+    /**
+     * @tc.number PowerMgrPowerUnitTest010
+     * @tc.name power_is_screen_on_promise_test
+     * @tc.desc isScreenOn
+     */
+     it('power_is_screen_on_promise_test', 0, async function (done) {
+        power.wakeupDevice("power_is_screen_on_promise_test");
+        power.isScreenOn()
+        .then(screenOn => {
+            console.info('power_is_screen_on_promise_test screenOn is ' + screenOn);
+            expect(screenOn).assertTrue();
+            console.info('power_is_screen_on_promise_test success');
+            done();
+        })
+        .catch(error => {
+            console.log('power_is_screen_on_promise_test error: ' + error);
+            expect().assertFail();
+            done();
+        })
+    })
+
+    /**
+     * @tc.number PowerMgrPowerUnitTest011
+     * @tc.name power_is_screen_on_callback_test
+     * @tc.desc isScreenOn
+     */
+    it('power_is_screen_on_callback_test', 0, async function (done) {
+        power.wakeupDevice("power_is_screen_on_callback_test");
+        power.isScreenOn((error, screenOn) => {
+            if (typeof error === "undefined") {
+                console.info('power_is_screen_on_callback_test screenOn is ' + screenOn);
+                expect(screenOn).assertTrue();
+                console.info('power_is_screen_on_callback_test success');
+                done();
+            } else {
+                console.log('power_is_screen_on_callback_test: ' + error);
+                expect().assertFail();
+                done();
+            }
+        })
+    })
 });

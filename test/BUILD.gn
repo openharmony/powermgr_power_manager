@@ -19,11 +19,6 @@ group("systemtest") {
   deps = [ "systemtest:systemtest_powermgr" ]
 }
 
-group("powermgr_js_test") {
-  testonly = true
-  deps = [ "unittest/common/napi:PowerMgrPowerJsTest" ]
-}
-
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest/power_fuzzer:fuzztest" ]
