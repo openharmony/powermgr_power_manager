@@ -1,6 +1,6 @@
 {
     "app": {
-      "bundleName": "com.ohos.PowerMgrInterfaceTest",
+      "bundleName": "com.ohos.PowerMgrKitsJsTest",
       "vendor": "ohos",
       "version": {
         "code": 1,
@@ -13,7 +13,7 @@
     },
     "deviceConfig": {},
     "module": {
-      "package": "com.ohos.PowerMgrInterfaceTest",
+      "package": "com.ohos.PowerMgrKitsJsTest",
       "name": ".MyApplication",
       "deviceType": [
         "phone"
@@ -36,7 +36,7 @@
               ]
             }
           ],
-          "name": "com.ohos.PowerMgrInterfaceTest.MainAbility",
+          "name": "com.ohos.PowerMgrKitsJsTest.MainAbility",
           "icon": "$media:icon",
           "description": "$string:mainability_description",
           "label": "MyApplication",
