@@ -16,7 +16,7 @@ import("//build/test.gni")
 
 module_output_path = "${powermgr_native_part_name}/powermgr_native"
 
-ohos_js_unittest("PowerMgrPowerJsTest") {
+ohos_js_unittest("powermgr_kits_js_test") {
   module_out_path = module_output_path
   hap_profile = "./config.json"
   certificate_profile = "//test/developertest/signature/openharmony_sx.p7b"
