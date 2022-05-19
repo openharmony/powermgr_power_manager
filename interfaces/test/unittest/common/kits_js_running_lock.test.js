@@ -13,17 +13,50 @@
  * limitations under the License.
  */
 
-import app from '@system.app'
-import Context from '@ohos.napi_context'
 import runningLock from '@ohos.runningLock';
 import power from '@ohos.power';
 import '@ohos.permission.RUNNING_LOCK'
 
 import {describe, beforeAll, beforeEach, afterEach, afterAll, it, expect} from 'deccjsunit/index'
 
-describe('PowerMgrInterfaceTest', function () {
-    console.log("*************Power Unit Test Begin*************");
-    // createRunningLock(name: string, type: RunningLockType): Promise<RunningLock>
+describe('PowerMgrRunningLockUnitTest', function () {
+    beforeAll(function() {
+
+        /*
+         * @tc.setup: setup invoked before all test cases
+         */
+        console.info('PowerMgrRunningLockUnitTest beforeAll called');
+    })
+
+    afterAll(function() {
+
+        /*
+         * @tc.teardown: teardown invoked after all test cases
+         */
+        console.info('PowerMgrRunningLockUnitTest afterAll called');
+    })
+
+    beforeEach(function() {
+
+        /*
+         * @tc.setup: setup invoked before each test case
+         */
+        console.info('PowerMgrRunningLockUnitTest beforeEach called');
+    })
+
+    afterEach(function() {
+        
+        /*
+         * @tc.teardown: teardown invoked after each test case
+         */
+        console.info('PowerMgrRunningLockUnitTest afterEach called');
+    })
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest001
+     * @tc.name create_running_lock_promise_test
+     * @tc.desc createRunningLock
+     */
     it('create_running_lock_promise_test', 0, async function (done) {
         runningLock.createRunningLock("running_lock_test_1", runningLock.RunningLockType.BACKGROUND)
         .then(runninglock => {
@@ -37,7 +70,12 @@ describe('PowerMgrInterfaceTest', function () {
             done();
         })
     })
-    // createRunningLock(name: string, type: RunningLockType, callback: AsyncCallback<RunningLock>)
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest002
+     * @tc.name create_running_lock_callback_test
+     * @tc.desc createRunningLock
+     */
     it('create_running_lock_callback_test', 0, async function (done) {
         runningLock.createRunningLock("running_lock_test_2", runningLock.RunningLockType.BACKGROUND,
 		(error, runninglock) => {
@@ -60,7 +98,12 @@ describe('PowerMgrInterfaceTest', function () {
             }
         })
     })
-    // lock(timeout: number)
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest003
+     * @tc.name running_lock_lock_test
+     * @tc.desc lock
+     */
     it('running_lock_lock_test', 0, async function (done) {
         runningLock.createRunningLock("running_lock_test_3", runningLock.RunningLockType.BACKGROUND)
         .then(runninglock => {
@@ -81,7 +124,12 @@ describe('PowerMgrInterfaceTest', function () {
             done();
         })
     })
-    // isUsed()
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest004
+     * @tc.name running_lock_isused_test
+     * @tc.desc isUsed
+     */
     it('running_lock_isused_test', 0, async function (done) {
         runningLock.createRunningLock("running_lock_test_4", runningLock.RunningLockType.BACKGROUND)
         .then(runninglock => {
@@ -98,7 +146,12 @@ describe('PowerMgrInterfaceTest', function () {
             done();
         })
     })
-    // unlock()
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest005
+     * @tc.name running_lock_unlock_test
+     * @tc.desc unlock
+     */
     it('running_lock_unlock_test', 0, async function (done) {
         runningLock.createRunningLock("running_lock_test_5", runningLock.RunningLockType.BACKGROUND)
         .then(runninglock => {
@@ -123,21 +176,36 @@ describe('PowerMgrInterfaceTest', function () {
             done();
         })
     })
-    // Runninglock type is BACKGROUND
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest006
+     * @tc.name enum_runningLock_type_background_test
+     * @tc.desc Runninglock type is BACKGROUND
+     */
     it('enum_runningLock_type_background_test', 0, function () {
         var runningLockType = runningLock.RunningLockType.BACKGROUND;
         console.info('runningLockType = ' + runningLockType);
         expect(runningLockType == 1).assertTrue();
         console.info('enum_runningLock_type_background_test success');
     })
-    // Runninglock type is PROXIMITY_SCREEN_CONTROL
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest007
+     * @tc.name enum_runningLock_type_proximityscreencontrol_test
+     * @tc.desc Runninglock type is PROXIMITY_SCREEN_CONTROL
+     */
     it('enum_runningLock_type_proximityscreencontrol_test', 0, function () {
         var runningLockType = runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL;
         console.info('runningLockType = ' + runningLockType);
         expect(runningLockType == 2).assertTrue();
         console.info('enum_runningLock_type_proximityscreencontrol_test success');
     })
-    // isRunningLockTypeSupported(type: RunningLockType): Promise<boolean>
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest008
+     * @tc.name is_runninglock_type_supported_promise_test_1
+     * @tc.desc isRunningLockTypeSupported
+     */
     it('is_runninglock_type_supported_promise_test_1', 0, async function (done) {
         runningLock.isRunningLockTypeSupported(runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL)
         .then(supported => {
@@ -152,7 +220,12 @@ describe('PowerMgrInterfaceTest', function () {
             done();
         })
     })
-    // isRunningLockTypeSupported(type: RunningLockType)
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest009
+     * @tc.name is_runninglock_type_supported_promise_test_2
+     * @tc.desc isRunningLockTypeSupported
+     */
     it('is_runninglock_type_supported_promise_test_2', 0, async function (done) {
         runningLock.isRunningLockTypeSupported(runningLock.RunningLockType.BACKGROUND)
         .then(supported => {
@@ -167,7 +240,12 @@ describe('PowerMgrInterfaceTest', function () {
             done();
         })
     })
-    // isRunningLockTypeSupported(type: RunningLockType, callback: AsyncCallback<boolean>)
+
+    /**
+     * @tc.number PowerMgrRunningLockUnitTest010
+     * @tc.name is_runninglock_type_supported_callback_test_3
+     * @tc.desc isRunningLockTypeSupported
+     */
     it('is_runninglock_type_supported_callback_test_3', 0, async function (done) {
         runningLock.isRunningLockTypeSupported(runningLock.RunningLockType.BACKGROUND, (error, supported) => {
             if (typeof error === "undefined") {
@@ -177,34 +255,6 @@ describe('PowerMgrInterfaceTest', function () {
                 done();
             } else {
                 console.log('is_runninglock_type_supported_callback_test_3: ' + error);
-                expect().assertFail();
-                done();
-            }
-        })
-    })
-    it('power_is_screen_on_promise_test', 0, async function (done) { //isScreenOn(): Promise<boolean>
-        power.isScreenOn()
-        .then(screenOn => {
-            console.info('power_is_screen_on_promise_test screenOn is ' + screenOn);
-            expect(screenOn).assertTrue();
-            console.info('power_is_screen_on_promise_test success');
-            done();
-        })
-        .catch(error => {
-            console.log('power_is_screen_on_promise_test error: ' + error);
-            expect().assertFail();
-            done();
-        })
-    })
-    it('power_is_screen_on_callback_test', 0, async function (done) { //isScreenOn(callback: AsyncCallback<boolean>)
-        power.isScreenOn((error, screenOn) => {
-            if (typeof error === "undefined") {
-                console.info('power_is_screen_on_callback_test screenOn is ' + screenOn);
-                expect(screenOn).assertTrue();
-                console.info('power_is_screen_on_callback_test success');
-                done();
-            } else {
-                console.log('power_is_screen_on_callback_test: ' + error);
                 expect().assertFail();
                 done();
             }
