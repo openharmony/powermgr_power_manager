@@ -43,7 +43,7 @@ config("module_private_config") {
     "//base/powermgr/power_manager/utils/native/include",
     "//base/powermgr/power_manager/services/native/test/unittest/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/intent/include",
+    "${aafwk_inner_api_path}/intent/include",
     "//base/sensors/sensor/interfaces/native/include",
   ]
 }
