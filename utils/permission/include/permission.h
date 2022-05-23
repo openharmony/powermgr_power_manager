@@ -24,9 +24,10 @@ class Permission {
 public:
     static bool IsSystemCore();
     static bool IsSystemBasic();
+    static bool IsSystemHap();
     static bool IsSystem();
     static bool IsPermissionGranted(const std::string& perm);
-    static bool IsSystemBasicPermGranted(const std::string& perm);
+    static bool IsSystemHapPermGranted(const std::string& perm);
 };
 } // namespace PowerMgr
 } // namespace OHOS

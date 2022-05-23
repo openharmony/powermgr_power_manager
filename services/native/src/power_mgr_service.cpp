@@ -497,7 +497,7 @@ void PowerMgrService::ShutDownDevice(const std::string& reason)
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemCore() && !Permission::IsSystemBasicPermGranted("ohos.permission.REBOOT")) {
+    if (!Permission::IsSystemCore() && !Permission::IsSystemHapPermGranted("ohos.permission.REBOOT")) {
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
@@ -828,7 +828,7 @@ void PowerMgrService::SetDeviceMode(const uint32_t& mode)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, mode: %{public}u", pid, uid, mode);
-    if (!Permission::IsSystemCore() && !Permission::IsSystemBasicPermGranted("ohos.permission.POWER_OPTIMIZATION")) {
+    if (!Permission::IsSystemCore() && !Permission::IsSystemHapPermGranted("ohos.permission.POWER_OPTIMIZATION")) {
         return;
     }
     powerModeModule_.SetModeItem(mode);
