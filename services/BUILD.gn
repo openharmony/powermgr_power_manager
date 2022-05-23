@@ -53,6 +53,7 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_framework_path}/dialog/dialog_ui/js:dialog_js_files_etc",
     "${powermgr_native_innerkits_path}:powermgr_client",
     "${powermgr_utils_path}:powermgr_utils",
+    "${powermgr_utils_path}/permission:power_permission",
     "native/src/actions:powermgr_actions",
     "//base/msdp/device_status/frameworks/native/src:deviceagent",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
@@ -63,6 +64,7 @@ ohos_shared_library("powermgrservice") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "common_event_service:cesfwk_innerkits",
     "device_driver_framework:libhdf_utils",

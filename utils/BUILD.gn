@@ -21,25 +21,14 @@ config("utils_config") {
 }
 
 ohos_source_set("powermgr_utils") {
-  sources = [
-    "native/src/permission.cpp",
-    "native/src/sys_param.cpp",
-  ]
+  sources = [ "native/src/sys_param.cpp" ]
 
   public_configs = [ ":utils_config" ]
 
   deps = [ "//utils/native/base:utils" ]
 
   external_deps = [
-    "ability_base:base",
-    "ability_base:want",
-    "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_single",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
     "startup_l2:syspara",
   ]
 
