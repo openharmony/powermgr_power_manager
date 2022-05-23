@@ -16,10 +16,19 @@
 #include "permission.h"
 
 #include "accesstoken_kit.h"
+#include "bundle_mgr_interface.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 #include "power_log.h"
 
+using namespace OHOS;
+using namespace OHOS::AppExecFwk;
 using namespace OHOS::Security::AccessToken;
+
+namespace {
+static sptr<IBundleMgr> g_bundleMgr = nullptr;
+}
 
 namespace OHOS {
 namespace PowerMgr {
@@ -51,9 +60,48 @@ bool Permission::IsSystemBasic()
     return IsTokenAplMatch(ATokenAplEnum::APL_SYSTEM_BASIC);
 }
 
+static sptr<IBundleMgr> GetBundleMgr()
+{
+    if (g_bundleMgr != nullptr) {
+        return g_bundleMgr;
+    }
+    auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sam == nullptr) {
+        POWER_HILOGW(COMP_SVC, "GetSystemAbilityManager return nullptr");
+        return nullptr;
+    }
+    auto bundleMgrSa = sam->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bundleMgrSa == nullptr) {
+        POWER_HILOGW(COMP_SVC, "GetSystemAbility return nullptr");
+        return nullptr;
+    }
+    auto bundleMgr = iface_cast<IBundleMgr>(bundleMgrSa);
+    if (bundleMgr == nullptr) {
+        POWER_HILOGW(COMP_SVC, "iface_cast return nullptr");
+    }
+    g_bundleMgr = bundleMgr;
+    return g_bundleMgr;
+}
+
+bool Permission::IsSystemHap()
+{
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    pid_t uid = IPCSkeleton::GetCallingUid();
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    POWER_HILOGD(COMP_UTILS, "checking system hap, type=%{public}d, pid=%{public}d, uid=%{public}d",
+        static_cast<int32_t>(type), pid, uid);
+    auto bundleMgr = GetBundleMgr();
+    if (bundleMgr == nullptr) {
+        POWER_HILOGW(COMP_SVC, "BundleMgr is nullptr, return false");
+        return false;
+    }
+    return bundleMgr->CheckIsSystemAppByUid(uid);
+}
+
 bool Permission::IsSystem()
 {
-    return IsSystemCore() || IsSystemBasic();
+    return IsSystemCore() || IsSystemBasic() || IsSystemHap();
 }
 
 bool Permission::IsPermissionGranted(const std::string& perm)
@@ -83,9 +131,9 @@ bool Permission::IsPermissionGranted(const std::string& perm)
     return true;
 }
 
-bool Permission::IsSystemBasicPermGranted(const std::string& perm)
+bool Permission::IsSystemHapPermGranted(const std::string& perm)
 {
-    return IsSystemBasic() && IsPermissionGranted(perm);
+    return IsSystemHap() && IsPermissionGranted(perm);
 }
 } // namespace PowerMgr
 } // namespace OHOS
