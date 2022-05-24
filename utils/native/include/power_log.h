@@ -61,6 +61,7 @@ enum PowerManagerLogLabel {
     COMP_SVC = 2,
     COMP_HDI = 3,
     COMP_DRV = 4,
+    COMP_UTILS = 5,
     // Feature labels, use to mark major features
     FEATURE_WAKEUP,
     FEATURE_SUSPEND,
@@ -82,6 +83,7 @@ enum PowerManagerLogDomain {
     DOMAIN_SERVICE, // 0xD002922
     DOMAIN_HDI, // 0xD002923
     DOMAIN_DRIVER, // 0xD002924
+    DOMAIN_UTILS, // 0xD002925
     DOMAIN_FEATURE_WAKEUP,
     DOMAIN_FEATURE_SUSPEND,
     DOMAIN_FEATURE_RUNNING_LOCK,
@@ -101,6 +103,7 @@ static constexpr OHOS::HiviewDFX::HiLogLabel POWER_LABEL[LABEL_END] = {
     {LOG_CORE, DOMAIN_SERVICE,              "PowerSvc"},
     {LOG_CORE, DOMAIN_HDI,                  "PowerHdi"},
     {LOG_CORE, DOMAIN_DRIVER,               "PowerDrv"},
+    {LOG_CORE, DOMAIN_UTILS,                "PowerUtils"},
     {LOG_CORE, DOMAIN_FEATURE_WAKEUP,       "PowerWakeup"},
     {LOG_CORE, DOMAIN_FEATURE_SUSPEND,      "PowerSuspend"},
     {LOG_CORE, DOMAIN_FEATURE_RUNNING_LOCK, "PowerRunningLock"},
