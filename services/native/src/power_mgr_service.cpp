@@ -183,53 +183,53 @@ void PowerMgrService::KeyMonitorInit()
             POWER_HILOGI(FEATURE_INPUT, "Receive long press powerkey");
             handler_->SendEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
     });
-    if (powerkeyLongPressId_ < 0) {
+    if (powerkeyLongPressId_ >= 0) {
+        keyOption.reset();
+        keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+        keyOption->SetPreKeys(preKeys);
+        keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
+        keyOption->SetFinalKeyDown(true);
+        keyOption->SetFinalKeyDownDuration(0);
+        powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+            [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                POWER_HILOGI(FEATURE_INPUT, "Receive short press powerkey");
+                powerkeyPressed_ = true;
+                if (dialogId_ >= 0) {
+                    POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel dialog when short press");
+                    Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
+                    dialogId_ = -1;
+                }
+                handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
+        });
+
+        keyOption.reset();
+        keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+        keyOption->SetPreKeys(preKeys);
+        keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
+        keyOption->SetFinalKeyDown(false);
+        keyOption->SetFinalKeyDownDuration(0);
+        powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+            [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                powerkeyPressed_ = false;
+                this->HandlePowerKeyUp();
+        });
+
+        keyOption.reset();
+        keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+        keyOption->SetPreKeys(preKeys);
+        keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_F1);
+        keyOption->SetFinalKeyDown(true);
+        keyOption->SetFinalKeyDownDuration(0);
+        doubleClickId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
+            [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                POWER_HILOGI(FEATURE_INPUT, "Receive double click");
+                this->HandleKeyEvent(keyEvent->GetKeyCode());
+        });
+    } else if (powerkeyLongPressId_ != ERROR_UNSUPPORT) {
         POWER_HILOGI(FEATURE_INPUT, "SubscribeKeyEvent failed: %{public}d", powerkeyLongPressId_);
         handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
         return;
     }
-
-    keyOption.reset();
-    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-    keyOption->SetPreKeys(preKeys);
-    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
-    keyOption->SetFinalKeyDown(true);
-    keyOption->SetFinalKeyDownDuration(0);
-    powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_INPUT, "Receive short press powerkey");
-            powerkeyPressed_ = true;
-            if (dialogId_ >= 0) {
-                POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel dialog when short press");
-                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
-                dialogId_ = -1;
-            }
-            handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
-    });
-
-    keyOption.reset();
-    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-    keyOption->SetPreKeys(preKeys);
-    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
-    keyOption->SetFinalKeyDown(false);
-    keyOption->SetFinalKeyDownDuration(0);
-    powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            powerkeyPressed_ = false;
-            this->HandlePowerKeyUp();
-    });
-
-    keyOption.reset();
-    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-    keyOption->SetPreKeys(preKeys);
-    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_F1);
-    keyOption->SetFinalKeyDown(true);
-    keyOption->SetFinalKeyDownDuration(0);
-    doubleClickId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_INPUT, "Receive double click");
-            this->HandleKeyEvent(keyEvent->GetKeyCode());
-    });
 
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
     monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
