@@ -38,7 +38,7 @@ config("module_private_config") {
     "//base/powermgr/display_manager/service/native/include",
     "//base/powermgr/display_manager/service/zidl/include",
     "//drivers/peripheral/display/interfaces/include",
-    "//foundation/graphic/graphic/utils/include",
+    "//foundation/graphic/graphic_2d/utils/include",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
     "//base/powermgr/power_manager/utils/native/include",
     "//base/powermgr/power_manager/services/native/test/unittest/include",
