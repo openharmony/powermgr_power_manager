@@ -35,7 +35,6 @@ public:
     ErrCode PutIntValue(const std::string& key, int32_t value);
     ErrCode PutLongValue(const std::string& key, int64_t value);
     ErrCode PutBoolValue(const std::string& key, bool value);
-    ErrCode DeleteKey(const std::string& key);
     sptr<PowerSettingObserver> CreateObserver(const std::string& key, PowerSettingObserver::UpdateFunc& func);
     ErrCode RegisterObserver(const sptr<PowerSettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<PowerSettingObserver>& observer);

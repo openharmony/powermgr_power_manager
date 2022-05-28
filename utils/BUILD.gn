@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//base/powermgr/power_manager/powermgr.gni")
+import("//build/test.gni")
 
 config("utils_config") {
   include_dirs = [
@@ -76,4 +77,9 @@ ohos_executable("power-shell") {
 
   install_enable = true
   part_name = "${powermgr_native_part_name}"
+}
+
+group("powerutils_test") {
+  testonly = true
+  deps = [ "setting/test/unittest:test_power_setting" ]
 }
