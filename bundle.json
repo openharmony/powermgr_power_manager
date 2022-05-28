@@ -79,7 +79,8 @@
                 "//base/powermgr/power_manager/interfaces/test/unittest/common:powermgr_kits_js_test",
                 "//base/powermgr/power_manager/services/native/test:powermgr_test",
                 "//base/powermgr/power_manager/test:fuzztest",
-                "//base/powermgr/power_manager/test:systemtest"
+                "//base/powermgr/power_manager/test:systemtest",
+                "//base/powermgr/power_manager/utils:powerutils_test"
             ]
         }
     }

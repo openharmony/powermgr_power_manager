@@ -91,28 +91,8 @@ ErrCode PowerSettingHelper::PutBoolValue(const std::string& key, bool value)
     return PutStringValue(key, std::to_string(value));
 }
 
-ErrCode PowerSettingHelper::DeleteKey(const std::string& key)
-{
-    auto dataAbilityHelper = AppExecFwk::DataAbilityHelper::Creator(remoteObj_);
-    if (dataAbilityHelper == nullptr) {
-        POWER_HILOGE(COMP_UTILS, "DataAbilityHelper::Creator return nullptr, remoteObj_=%{public}p",
-                     remoteObj_.GetRefPtr());
-        return ERR_NO_INIT;
-    }
-    POWER_HILOGD(COMP_UTILS, "delete key=%{public}s", key.c_str());
-    Uri uri(SETTING_URI);
-    NativeRdb::ValuesBucket bucket;
-    NativeRdb::DataAbilityPredicates predicates;
-    predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    int32_t count = dataAbilityHelper->Delete(uri, predicates);
-    dataAbilityHelper->Release();
-    if (count <= 0) {
-        POWER_HILOGD(COMP_UTILS, "no data to delete key=%{public}s", key.c_str());
-    }
-    return ERR_OK;
-}
-
-sptr<PowerSettingObserver> PowerSettingHelper::CreateObserver(const std::string& key, PowerSettingObserver::UpdateFunc& func)
+sptr<PowerSettingObserver> PowerSettingHelper::CreateObserver(const std::string& key,
+    PowerSettingObserver::UpdateFunc& func)
 {
     sptr<PowerSettingObserver> observer = new PowerSettingObserver();
     observer->SetKey(key);
@@ -177,7 +157,7 @@ ErrCode PowerSettingHelper::GetStringValue(const std::string& key, std::string& 
     Uri uri(SETTING_URI);
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     NativeRdb::DataAbilityPredicates predicates;
-    predicates.EqualTo("KEYWORD", key);
+    predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
     POWER_HILOGD(COMP_UTILS, "key=%{public}s", key.c_str());
     auto resultSet = dataAbilityHelper->Query(uri, columns, predicates);
     dataAbilityHelper->Release();
