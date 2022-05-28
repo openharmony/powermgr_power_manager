@@ -54,7 +54,8 @@
                 "//base/powermgr/power_manager/services:powermgrservice",
                 "//base/powermgr/power_manager/services:power_service_config",
                 "//base/powermgr/power_manager/utils:power-shell",
-                "//base/powermgr/power_manager/utils/permission:power_permission"
+                "//base/powermgr/power_manager/utils/permission:power_permission",
+                "//base/powermgr/power_manager/utils/setting:power_setting"
             ],
             "inner_kits": [
                 {
