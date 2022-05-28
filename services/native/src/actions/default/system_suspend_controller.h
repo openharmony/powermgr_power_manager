@@ -23,9 +23,9 @@
 
 #include "hdi_service_status_listener.h"
 #include "powerms_event_handler.h"
-#include "power_hdi_callback_impl.h"
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
+#include "power_hdi_callback.h"
 #include "v1_0/ipower_interface.h"
 
 namespace OHOS {

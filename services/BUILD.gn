@@ -26,6 +26,7 @@ config("powermgr_public_config") {
 
 ohos_shared_library("powermgrservice") {
   sources = [
+    "native/src/power_hdi_callback.cpp",
     "native/src/power_mgr_dumper.cpp",
     "native/src/power_mgr_factory.cpp",
     "native/src/power_mgr_monitor.cpp",

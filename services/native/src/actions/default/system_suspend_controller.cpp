@@ -77,7 +77,7 @@ void SystemSuspendController::RegisterPowerHdiCallback()
         powerInterface_ = IPowerInterface::Get();
         RETURN_IF_WITH_LOG(powerInterface_ == nullptr, "failed to get power hdi interface");
     }
-    sptr<IPowerHdiCallback> callback = new PowerHdiCallbackImpl();
+    sptr<IPowerHdiCallback> callback = new PowerHdiCallback();
     powerInterface_->RegisterCallback(callback);
     POWER_HILOGD(COMP_SVC, "register power hdi callback end");
 }
