@@ -54,7 +54,8 @@
                 "//base/powermgr/power_manager/services:powermgrservice",
                 "//base/powermgr/power_manager/services:power_service_config",
                 "//base/powermgr/power_manager/utils:power-shell",
-                "//base/powermgr/power_manager/utils/permission:power_permission"
+                "//base/powermgr/power_manager/utils/permission:power_permission",
+                "//base/powermgr/power_manager/utils/setting:power_setting"
             ],
             "inner_kits": [
                 {
@@ -78,7 +79,8 @@
                 "//base/powermgr/power_manager/interfaces/test/unittest/common:powermgr_kits_js_test",
                 "//base/powermgr/power_manager/services/native/test:powermgr_test",
                 "//base/powermgr/power_manager/test:fuzztest",
-                "//base/powermgr/power_manager/test:systemtest"
+                "//base/powermgr/power_manager/test:systemtest",
+                "//base/powermgr/power_manager/utils:powerutils_test"
             ]
         }
     }

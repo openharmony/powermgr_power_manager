@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,12 @@
 #include "power_shell_command.h"
 
 #include <cerrno>
-#include <fcntl.h>
 #include <getopt.h>
-#include <iostream>
 #include <string_ex.h>
-#include <unistd.h>
 
 #include "power_mgr_client.h"
 #include "display_power_mgr_client.h"
-#include "iservice_registry.h"
-#include "singleton.h"
+#include "power_setting_helper.h"
 #include "system_ability_definition.h"
 
 extern char *optarg;
@@ -53,6 +49,10 @@ static const struct option TIME_OUT_OPTIONS[] = {
     {"override", required_argument, nullptr, 'o'},
 };
 
+static const struct option SETTING_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+};
+
 static const std::string HELP_MSG =
     "usage: power-shell\n"
     "command list:\n"
@@ -61,6 +61,7 @@ static const std::string HELP_MSG =
     "  suspend :    Suspend system and turn screen off. \n"
     "  display :    Update or Override display brightness. \n"
     "  timeout :    Override or Restore screen off time. \n"
+    "  setting :    Query or Update setting values. \n"
     "  dump    :    Dump power info. \n"
     "  help    :    Show this help menu. \n";
 
@@ -69,11 +70,12 @@ static const std::string SETMODE_HELP_MSG =
     "setmode <power mode: (value is as below)> \n"
     "  600  :  normal mode\n"
     "  601  :  power save mode\n"
-    "  602  :  extreme mode\n";
+    "  602  :  performance mode\n"
+    "  603  :  extreme power save mode\n";
 
 static const std::string DISPLAY_HELP_MSG =
     "usage: power-shell display [<options>] 100\n"
-    "display <options is as below> \n"
+    "display <options are as below> \n"
     "  -u  :  update brightness\n"
     "  -o  :  override brightness\n"
     "  -b  :  timing maximum brightness\n"
@@ -81,9 +83,15 @@ static const std::string DISPLAY_HELP_MSG =
 
 static const std::string TIME_OUT_HELP_MSG =
     "usage: power-shell timeout [<options>] 1000\n"
-    "timeout <options is as below> \n"
+    "timeout <options are as below> \n"
     "  -o  :  override screen off time\n"
     "  -r  :  restore screen off time\n";
+
+static const std::string SETTING_HELP_MSG =
+    "usage: power-shell setting [query|put] key [value]\n"
+    "setting <operations are as below> \n"
+    "  query  :  query setting value by key\n"
+    "  put    :  put setting value to key\n";
 
 PowerShellCommand::PowerShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "power-shell")
 {}
@@ -97,6 +105,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
         {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
+        {"setting", std::bind(&PowerShellCommand::RunAsSettingCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
 
@@ -291,6 +300,64 @@ ErrCode PowerShellCommand::RunAsTimeOutCommand()
             resultReceiver_.append(" failed");
         }
         resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsSettingCommand()
+{
+    int ind = 0;
+    int option = getopt_long(argc_, argv_, "h", SETTING_OPTIONS, &ind);
+    resultReceiver_.clear();
+    if (option == 'h') {
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_OK;
+    }
+    if (argList_.empty()) {
+        resultReceiver_.append("Error! please input your operation of setting. \n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_OK;
+    }
+    const std::string QUERY("query");
+    const std::string PUT("put");
+    std::string operation = argList_[0];
+    if (QUERY != operation && PUT != operation) {
+        resultReceiver_.append("Error! please input the correct operation of setting. \n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_OK;
+    }
+    if (argList_.size() == 1) {
+        resultReceiver_.append("Error! please input the key of setting. \n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_OK;
+    }
+    if (QUERY == operation) {
+        std::string key = argList_[1];
+        std::string value;
+        ErrCode ret = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).GetStringValue(key, value);
+        if (ret != ERR_OK) {
+            resultReceiver_.append("Error! query setting return failed. ret=" + std::to_string(ret) + ". \n");
+            return ret;
+        }
+        resultReceiver_.append("Queried setting key=" + key + ", value=" + value + "\n");
+        return ERR_OK;
+    }
+
+    if (argList_.size() == 2) {
+        resultReceiver_.append("Error! please input the value of setting key. \n");
+        resultReceiver_.append(SETMODE_HELP_MSG);
+        return ERR_OK;
+    }
+    if (PUT == operation) {
+        std::string key = argList_[1];
+        std::string value = argList_[2];
+        ErrCode ret = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value);
+        if (ret != ERR_OK) {
+            resultReceiver_.append("Error! put setting return failed. ret=" + std::to_string(ret) + ". \n");
+            return ret;
+        }
+        resultReceiver_.append("Put setting key=" + key + ", value=" + value + "\n");
         return ERR_OK;
     }
     return ERR_OK;

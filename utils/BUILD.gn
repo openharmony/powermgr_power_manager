@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//base/powermgr/power_manager/powermgr.gni")
+import("//build/test.gni")
 
 config("utils_config") {
   include_dirs = [
@@ -51,6 +52,7 @@ ohos_executable("power-shell") {
 
   deps = [
     "${powermgr_interfaces_path}/innerkits:powermgr_client",
+    "${powermgr_utils_path}/setting:power_setting",
     "//foundation/aafwk/standard/tools/aa:tools_aa_source_set",
     "//utils/native/base:utils",
   ]
@@ -63,12 +65,21 @@ ohos_executable("power-shell") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "dataability:native_dataability",
     "display_manager_native:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "relational_store:native_rdb",
     "samgr_standard:samgr_proxy",
   ]
 
   install_enable = true
   part_name = "${powermgr_native_part_name}"
+}
+
+group("powerutils_test") {
+  testonly = true
+  deps = [ "setting/test/unittest:test_power_setting" ]
 }
