@@ -893,7 +893,6 @@ RunningLockMgr::ProximityController::ProximityController()
     }
     if (!support_) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "PROXIMITY sensor not support");
-        free(sensorInfo);
         return;
     }
     if (strcpy_s(user_.name, sizeof(user_.name), "RunningLock") != EOK) {
@@ -903,7 +902,6 @@ RunningLockMgr::ProximityController::ProximityController()
     user_.userData = nullptr;
     user_.callback = &RecordSensorCallback;
     SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
-    free(sensorInfo);
 }
 
 RunningLockMgr::ProximityController::~ProximityController()
