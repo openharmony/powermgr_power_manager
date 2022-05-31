@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <mutex>
 #include <condition_variable>
+#include "system_ability_definition.h"
 #include "power_setting_helper.h"
 #include "power_setting_observer.h"
 #include "power_log.h"
@@ -36,9 +37,7 @@ constexpr int64_t LONG_VALUE = 952795279527L;
 constexpr int64_t INVALID_LONG_VALUE = -1L;
 constexpr bool BOOL_VALUE = true;
 constexpr bool INVALID_BOOL_VALUE = false;
-
-constexpr int32_t POWER_SA_ID = 3301;
-PowerSettingHelper& g_settingHelper = PowerSettingHelper::GetInstance(POWER_SA_ID);
+PowerSettingHelper& g_settingHelper = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID);
 }
 
 class PowerSettingTest : public Test {
@@ -176,6 +175,7 @@ HWTEST_F(PowerSettingTest, PowerSettingTest007, TestSize.Level0)
     static std::condition_variable cv;
     PowerSettingObserver::UpdateFunc observerFunc = [&](const std::string& key) {
         POWER_HILOGI(LABEL_TEST, "observer callback enter, key=%{public}s", key.c_str());
+        EXPECT_EQ(key, TEST_KEY);
         std::string valueGet;
         ErrCode ret = g_settingHelper.GetStringValue(key, valueGet);
         EXPECT_EQ(ret, ERR_OK);
@@ -199,7 +199,6 @@ HWTEST_F(PowerSettingTest, PowerSettingTest007, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerSettingTest007 fun is end");
 }
 
-#ifdef SHIELD
 /**
  * @tc.name: PowerSettingTest008
  * @tc.desc: Test unregister power setting observer
@@ -228,5 +227,4 @@ HWTEST_F(PowerSettingTest, PowerSettingTest008, TestSize.Level0)
     cv.wait_for(lock, std::chrono::seconds(1)); // wait for observer callback with timeout
     POWER_HILOGI(LABEL_TEST, "PowerSettingTest008 fun is end");
 }
-#endif
 }

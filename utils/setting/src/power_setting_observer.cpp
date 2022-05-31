@@ -17,8 +17,8 @@
 
 namespace OHOS {
 namespace PowerMgr {
-PowerSettingObserver::PowerSettingObserver() {}
-PowerSettingObserver::~PowerSettingObserver() {}
+PowerSettingObserver::PowerSettingObserver() = default;
+PowerSettingObserver::~PowerSettingObserver() = default;
 
 void PowerSettingObserver::OnChange()
 {
