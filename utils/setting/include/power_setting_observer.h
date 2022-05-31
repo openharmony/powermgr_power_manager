@@ -23,7 +23,7 @@ namespace PowerMgr {
 class PowerSettingObserver : public AAFwk::DataAbilityObserverStub {
 public:
     PowerSettingObserver();
-    ~PowerSettingObserver();
+    ~PowerSettingObserver() override;
     void OnChange() override;
 
     void SetKey(const std::string& key);

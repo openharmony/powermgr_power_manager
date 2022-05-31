@@ -19,7 +19,7 @@
 #include "mutex"
 #include "uri.h"
 #include "errors.h"
-#include "ability_manager_client.h"
+#include "ability_scheduler_interface.h"
 #include "power_setting_observer.h"
 
 namespace OHOS {
@@ -39,16 +39,19 @@ public:
     ErrCode RegisterObserver(const sptr<PowerSettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<PowerSettingObserver>& observer);
 
+protected:
+    ~PowerSettingHelper() override;
+
 private:
-    const std::string SETTING_URI = "dataability:///com.ohos.settingsdata.DataAbility";
-    const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
-    const std::string SETTING_COLUMN_VALUE = "VALUE";
     static PowerSettingHelper* instance_;
     static std::mutex mutex_;
     static sptr<IRemoteObject> remoteObj_;
+    static Uri settingUri_;
 
     static void Initialize(int32_t systemAbilityId);
-    Uri AssembleUri(const std::string& key);
+    static sptr<AAFwk::IAbilityScheduler> AcquireDataAbility();
+    static bool ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility);
+    static Uri AssembleUri(const std::string& key);
 };
 } // OHOS
 } // PowerMgr
