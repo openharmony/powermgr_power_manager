@@ -105,7 +105,6 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
         {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
-        {"setting", std::bind(&PowerShellCommand::RunAsSettingCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
 
