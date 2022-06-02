@@ -37,7 +37,6 @@ ohos_unittest("test_power_setting") {
 
   deps = [
     "${powermgr_utils_path}/setting:power_setting",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager:dataobs_manager",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
