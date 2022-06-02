@@ -19,6 +19,7 @@
 
 #include <datetime_ex.h>
 #include <hisysevent.h>
+#include <ipc_skeleton.h>
 #include <securec.h>
 
 #include "power_log.h"
@@ -393,23 +394,8 @@ void RunningLockMgr::NotifyHiViewRunningLockInfo(const string& remoteObjStr,
 {
     string lockName = lockInner.GetRunningLockName().empty()
         ? "NULL" : lockInner.GetRunningLockName();
-    string msg = "token=" + remoteObjStr + " lockName=" + lockName + " type=" +
-        to_string(ToUnderlying(lockInner.GetRunningLockType()));
-    auto MakeNotifyInfo = [](int uid, int pid, const string& tag) {
-        return (" uid=" + to_string(uid) + " pid=" + to_string(pid) + " tag=" + tag);
-    };
-
-    auto& list = lockInner.GetRunningLockInfo().workTriggerlist;
-    if (list.empty()) {
-        const UserIPCInfo& ipcInfo = lockInner.GetUserIPCInfo();
-        msg += MakeNotifyInfo(ipcInfo.uid, ipcInfo.pid, lockName);
-    } else {
-        for (auto& worker : list) {
-            string workName = worker->GetName().empty() ? "NULL" : worker->GetName();
-            msg += MakeNotifyInfo(worker->GetUid(), worker->GetPid(), workName);
-        }
-    }
-    NotifyHiView(changeType, msg);
+    string msg = "token=" + remoteObjStr;
+    NotifyHiView(changeType, msg, lockInner);
 }
 
 void RunningLockMgr::CheckOverTime()
@@ -476,7 +462,7 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
         case NOTIFY_RUNNINGLOCK_REMOVE: {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remove remoteObjStr=%{public}s", remoteObjStr.c_str());
             string str = "token=" + remoteObjStr;
-            NotifyHiView(changeType, str);
+            NotifyHiView(changeType, str, *lockInner);
             break;
         }
         case NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED: {
@@ -680,22 +666,22 @@ void RunningLockMgr::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 }
 
 void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
-    const std::string& msg) const
+    const std::string& msg, const RunningLockInner& lockInner) const
 {
-    if (msg.empty()) {
-        return;
-    }
+    const UserIPCInfo& ipcInfo = lockInner.GetUserIPCInfo();
+    int32_t pid = ipcInfo.pid;
+    int32_t uid = ipcInfo.uid;
+    bool state = lockInner.GetDisabled();
+    int32_t type = static_cast <int32_t>(lockInner.GetRunningLockType());
+    string name = lockInner.GetRunningLockName();
     const int logLevel = 2;
     const string &tag = runninglockNotifyStr_.at(changeType);
     HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_RUNNINGLOCK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "LOG_LEVEL",
-        logLevel,
-        "TAG",
-        tag,
-        "MESSAGE",
-        msg);
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "tag=%{public}s, msg=%{public}s", tag.c_str(), msg.c_str());
+        "PID", pid, "UID", uid, "STATE", state, "TYPE", type, "NAME", name,
+        "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", msg);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s, msg=%{public}s",
+        pid, uid, tag.c_str(), msg.c_str());
 }
 
 void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
