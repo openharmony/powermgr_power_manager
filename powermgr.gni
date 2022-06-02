@@ -13,9 +13,10 @@
 
 import("//build/ohos.gni")
 
-aafwk_inner_api_path = "//foundation/aafwk/standard/interfaces/innerkits"
+aafwk_inner_api_path =
+    "//foundation/ability/ability_runtime/interfaces/innerkits"
 
-aafwk_services_path = "//foundation/aafwk/standard/services"
+aafwk_services_path = "//foundation/ability/ability_runtime/services"
 
 powermgr_native_part_name = "power_manager_native"
 
