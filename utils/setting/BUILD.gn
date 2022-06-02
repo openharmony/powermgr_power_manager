@@ -36,7 +36,7 @@ ohos_shared_library("power_setting") {
   public_configs = [ ":public_config" ]
 
   deps = [
-    "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager:dataobs_manager",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/dataobs_manager:dataobs_manager",
     "//utils/native/base:utils",
   ]
 
