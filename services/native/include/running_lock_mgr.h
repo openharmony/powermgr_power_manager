@@ -205,7 +205,8 @@ private:
     void SendCheckOverTimeMsg(int64_t delayTime);
     void NotifyHiViewRunningLockInfo(const std::string& tokenstr, const RunningLockInner& lockInner,
         RunningLockChangedType changeType) const;
-    void NotifyHiView(RunningLockChangedType changeType, const std::string& msg) const;
+    void NotifyHiView(RunningLockChangedType changeType, const std::string& msg,
+        const RunningLockInner& lockInner) const;
 };
 } // namespace PowerMgr
 } // namespace OHOS
