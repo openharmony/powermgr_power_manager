@@ -61,7 +61,7 @@ static const std::string HELP_MSG =
     "  suspend :    Suspend system and turn screen off. \n"
     "  display :    Update or Override display brightness. \n"
     "  timeout :    Override or Restore screen off time. \n"
-    "  setting :    Query or Update setting values. \n"
+    "  setting :    Query or Put setting values. \n"
     "  dump    :    Dump power info. \n"
     "  help    :    Show this help menu. \n";
 
@@ -79,7 +79,7 @@ static const std::string DISPLAY_HELP_MSG =
     "  -u  :  update brightness\n"
     "  -o  :  override brightness\n"
     "  -b  :  timing maximum brightness\n"
-    "  -c  :  cancel the timing maximum brightness";
+    "  -c  :  cancel the timing maximum brightness\n";
 
 static const std::string TIME_OUT_HELP_MSG =
     "usage: power-shell timeout [<options>] 1000\n"
@@ -105,6 +105,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
         {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
+        {"setting", std::bind(&PowerShellCommand::RunAsSettingCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
 
@@ -145,7 +146,7 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
         return ERR_OK;
     }
 
-    uint32_t mode = static_cast<uint32_t>(atoi(argList_[0].c_str()));
+    auto mode = static_cast<uint32_t>(strtol(argList_[0].c_str(), nullptr, 0));
     resultReceiver_.append("Set Mode: ");
     resultReceiver_.append(argList_[0]);
     resultReceiver_.append("\n");
@@ -153,10 +154,11 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
     client.SetDeviceMode(mode);
     uint32_t result = client.GetDeviceMode();
     if (result == mode) {
-        resultReceiver_.append("Set Mode Success!");
+        resultReceiver_.append("Set Mode Success!\n");
     } else {
         resultReceiver_.append("Set Mode Failed, current mode is: ");
         resultReceiver_.append(std::to_string(result));
+        resultReceiver_.append("\n");
     }
 
     return ERR_OK;
@@ -167,7 +169,7 @@ ErrCode PowerShellCommand::RunAsWakeupCommand()
     PowerMgrClient &client = PowerMgrClient::GetInstance();
     std::string detail = "shell";
     client.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, detail);
-    resultReceiver_.append("WakeupDevice is called");
+    resultReceiver_.append("WakeupDevice is called\n");
     return ERR_OK;
 }
 
@@ -176,7 +178,7 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
     PowerMgrClient &client = PowerMgrClient::GetInstance();
     std::string detail = "shell";
     client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON);
-    resultReceiver_.append("SuspendDevice is called");
+    resultReceiver_.append("SuspendDevice is called\n");
     return ERR_OK;
 }
 
@@ -257,7 +259,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
     if (option == 'b') {
         bool ret = DisplayPowerMgrClient::GetInstance().BoostBrightness(value);
         resultReceiver_.append("Boost brightness timeout ");
-        resultReceiver_.append(std::to_string(value)).append("(Ms)");
+        resultReceiver_.append(std::to_string(value)).append("ms");
         if (!ret) {
             resultReceiver_.append(" failed");
         }
@@ -314,7 +316,7 @@ ErrCode PowerShellCommand::RunAsSettingCommand()
         return ERR_OK;
     }
     if (argList_.empty()) {
-        resultReceiver_.append("Error! please input your operation of setting. \n");
+        resultReceiver_.append("Error! please input your operation of setting\n");
         resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_OK;
     }
@@ -322,12 +324,12 @@ ErrCode PowerShellCommand::RunAsSettingCommand()
     const std::string PUT("put");
     std::string operation = argList_[0];
     if (QUERY != operation && PUT != operation) {
-        resultReceiver_.append("Error! please input the correct operation of setting. \n");
+        resultReceiver_.append("Error! please input the correct operation of setting\n");
         resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_OK;
     }
     if (argList_.size() == 1) {
-        resultReceiver_.append("Error! please input the key of setting. \n");
+        resultReceiver_.append("Error! please input the key of setting\n");
         resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_OK;
     }
@@ -336,7 +338,7 @@ ErrCode PowerShellCommand::RunAsSettingCommand()
         std::string value;
         ErrCode ret = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).GetStringValue(key, value);
         if (ret != ERR_OK) {
-            resultReceiver_.append("Error! query setting return failed. ret=" + std::to_string(ret) + ". \n");
+            resultReceiver_.append("Error! query setting return failed. ret=" + std::to_string(ret) + "\n");
             return ret;
         }
         resultReceiver_.append("Queried setting key=" + key + ", value=" + value + "\n");
@@ -344,8 +346,8 @@ ErrCode PowerShellCommand::RunAsSettingCommand()
     }
 
     if (argList_.size() == 2) {
-        resultReceiver_.append("Error! please input the value of setting key. \n");
-        resultReceiver_.append(SETMODE_HELP_MSG);
+        resultReceiver_.append("Error! please input the value of setting key\n");
+        resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_OK;
     }
     if (PUT == operation) {
@@ -353,7 +355,7 @@ ErrCode PowerShellCommand::RunAsSettingCommand()
         std::string value = argList_[2];
         ErrCode ret = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value);
         if (ret != ERR_OK) {
-            resultReceiver_.append("Error! put setting return failed. ret=" + std::to_string(ret) + ". \n");
+            resultReceiver_.append("Error! put setting return failed. ret=" + std::to_string(ret) + "\n");
             return ret;
         }
         resultReceiver_.append("Put setting key=" + key + ", value=" + value + "\n");
@@ -361,5 +363,5 @@ ErrCode PowerShellCommand::RunAsSettingCommand()
     }
     return ERR_OK;
 }
-}
-}  // namespace OHOS
+} // namespace PowerMgr
+} // namespace OHOS
