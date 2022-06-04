@@ -41,7 +41,7 @@ ohos_executable("power-shell") {
     "${powermgr_interfaces_path}/innerkits/native/include",
     "${powermgr_utils_path}/shell/include",
     "${aafwk_services_path}/common/include",
-    "//foundation/aafwk/standard/tools/aa/include",
+    "//foundation/ability/ability_runtime/tools/aa/include",
     "//utils/native/base/include",
   ]
 
@@ -53,12 +53,12 @@ ohos_executable("power-shell") {
   deps = [
     "${powermgr_interfaces_path}/innerkits:powermgr_client",
     "${powermgr_utils_path}/setting:power_setting",
-    "//foundation/aafwk/standard/tools/aa:tools_aa_source_set",
+    "//foundation/ability/ability_runtime/tools/aa:tools_aa_source_set",
     "//utils/native/base:utils",
   ]
 
   configs = [
-    "//foundation/aafwk/standard/tools/aa:ability_command_config",
+    "//foundation/ability/ability_runtime/tools/aa:ability_command_config",
     "${aafwk_services_path}/common:common_config",
   ]
 
