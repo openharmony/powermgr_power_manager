@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 aafwk_inner_api_path =
-    "//foundation/ability/ability_runtime/interfaces/innerkits"
+    "//foundation/ability/ability_runtime/interfaces/inner_api"
 
 aafwk_services_path = "//foundation/ability/ability_runtime/services"
 
