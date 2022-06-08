@@ -636,6 +636,7 @@ void PowerStateMachine::HandleActivityTimeout()
         }
     } else {
         POWER_HILOGW(FEATURE_ACTIVITY, "Display is not on, ignore activity timeout, state = %{public}d", dispState);
+        HandleActivityOffTimeout();
     }
 }
 
