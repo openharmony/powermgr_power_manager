@@ -23,6 +23,9 @@
         "adapted_system_type": [ "standard" ],
         "rom": "1024KB",
         "ram": "2048KB",
+        "hisysevent_config": [
+            "//base/powermgr/power_manager/powermanager.yaml"
+        ],
         "deps": {
             "components": [
                 "ability_base",

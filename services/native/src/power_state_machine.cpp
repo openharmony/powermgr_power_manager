@@ -1046,14 +1046,8 @@ void PowerStateMachine::StateController::RecordFailure(PowerState from,
         .append("\n");
     const int logLevel = 2;
     const std::string tag = "TAG_POWER";
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "POWER_SCREEN",
-        HiviewDFX::HiSysEvent::EventType::FAULT,
-        "LOG_LEVEL",
-        logLevel,
-        "TAG",
-        tag,
-        "MESSAGE",
-        message);
+    HiviewDFX::HiSysEvent::Write("POWER", "POWER_SCREEN",
+        HiviewDFX::HiSysEvent::EventType::FAULT, "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
 }
 } // namespace PowerMgr
