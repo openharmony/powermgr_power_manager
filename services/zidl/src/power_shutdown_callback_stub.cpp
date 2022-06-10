@@ -46,7 +46,7 @@ int PowerShutdownCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     HiviewDFX::XCollie::GetInstance().CancelTimer(id);
-    return ERR_OK;
+    return ret;
 }
 
 int32_t PowerShutdownCallbackStub::OnPowerShutdownCallbackStub()

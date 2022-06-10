@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <string>
 
 #include "napi/native_api.h"
@@ -81,7 +82,7 @@ static napi_value RebootDevice(napi_env env, napi_callback_info info)
     return RebootOrShutdown(env, info, true);
 }
 
-static void IsScreenOnCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCallbackInfo)
+static void IsScreenOnCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackInfo>& asCallbackInfoPtr)
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "IsScreenOn", NAPI_AUTO_LENGTH, &resource);
@@ -111,9 +112,11 @@ static void IsScreenOnCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCallba
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
         },
-        (void *)asyncCallbackInfo,
-        &asyncCallbackInfo->asyncWork);
-    napi_queue_async_work(env, asyncCallbackInfo->asyncWork);
+        (void *)asCallbackInfoPtr.get(),
+        &asCallbackInfoPtr->asyncWork);
+    if (napi_ok == napi_queue_async_work(env, asCallbackInfoPtr->asyncWork)) {
+        asCallbackInfoPtr.release();
+    }
 }
 
 static napi_value IsScreenOn(napi_env env, napi_callback_info info)
@@ -133,12 +136,12 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
     }
     asyncCallbackInfo->env = env;
 
+    std::unique_ptr<PowerAsyncCallbackInfo> asCallbackInfoPtr(asyncCallbackInfo);
     napi_valuetype type;
     if (argc == 1) {
         NAPI_CALL(env, napi_typeof(env, args[0], &type));
         if (type != napi_function) {
             POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
-            delete asyncCallbackInfo;
             return nullptr;
         }
         napi_create_reference(env, args[0], 1, &asyncCallbackInfo->callbackRef);
@@ -151,7 +154,7 @@ static napi_value IsScreenOn(napi_env env, napi_callback_info info)
         POWER_HILOGD(COMP_FWK, "callbackRef is not null");
         napi_get_undefined(env, &result);
     }
-    IsScreenOnCallBack(env, asyncCallbackInfo);
+    IsScreenOnCallBack(env, asCallbackInfoPtr);
     return result;
 }
 
@@ -193,7 +196,7 @@ static napi_value SuspendDevice(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-static void GetPowerModeCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCallbackInfo)
+static void GetPowerModeCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackInfo>& asCallbackInfoPtr)
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "GetPowerMode", NAPI_AUTO_LENGTH, &resource);
@@ -223,9 +226,11 @@ static void GetPowerModeCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCall
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
         },
-        (void *)asyncCallbackInfo,
-        &asyncCallbackInfo->asyncWork);
-    napi_queue_async_work(env, asyncCallbackInfo->asyncWork);
+        (void *)asCallbackInfoPtr.get(),
+        &asCallbackInfoPtr->asyncWork);
+    if (napi_ok == napi_queue_async_work(env, asCallbackInfoPtr->asyncWork)) {
+        asCallbackInfoPtr.release();
+    }
 }
 
 static napi_value GetPowerMode(napi_env env, napi_callback_info info)
@@ -244,12 +249,12 @@ static napi_value GetPowerMode(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    std::unique_ptr<PowerAsyncCallbackInfo> asCallbackInfoPtr(asyncCallbackInfo);
     napi_valuetype type;
     if (argc == ARGC_ONE) {
         NAPI_CALL(env, napi_typeof(env, args[INDEX_ZERO], &type));
         if (type != napi_function) {
             POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
-            delete asyncCallbackInfo;
             return nullptr;
         }
         napi_create_reference(env, args[INDEX_ZERO], 1, &asyncCallbackInfo->callbackRef);
@@ -262,11 +267,11 @@ static napi_value GetPowerMode(napi_env env, napi_callback_info info)
         POWER_HILOGD(COMP_FWK, "callbackRef is not null");
         napi_get_undefined(env, &result);
     }
-    GetPowerModeCallBack(env, asyncCallbackInfo);
+    GetPowerModeCallBack(env, asCallbackInfoPtr);
     return result;
 }
 
-static void SetPowerModeCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCallbackInfo)
+static void SetPowerModeCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackInfo>& asCallbackInfoPtr)
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "SetDeviceMode", NAPI_AUTO_LENGTH, &resource);
@@ -292,9 +297,11 @@ static void SetPowerModeCallBack(napi_env env, PowerAsyncCallbackInfo *asyncCall
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
         },
-        (void *)asyncCallbackInfo,
-        &asyncCallbackInfo->asyncWork);
-    napi_queue_async_work(env, asyncCallbackInfo->asyncWork);
+        (void *)asCallbackInfoPtr.get(),
+        &asCallbackInfoPtr->asyncWork);
+    if (napi_ok == napi_queue_async_work(env, asCallbackInfoPtr->asyncWork)) {
+        asCallbackInfoPtr.release();
+    }
 }
 
 static napi_value SetPowerMode(napi_env env, napi_callback_info info)
@@ -312,13 +319,14 @@ static napi_value SetPowerMode(napi_env env, napi_callback_info info)
         POWER_HILOGE(COMP_FWK, "Failed to create asyncCallbackInfo");
         return nullptr;
     }
+
+    std::unique_ptr<PowerAsyncCallbackInfo> asCallbackInfoPtr(asyncCallbackInfo);
     napi_valuetype type;
     if (argc == ARGC_TWO) {
         napi_value callback = args[INDEX_ONE];
         NAPI_CALL(env, napi_typeof(env, callback, &type));
         if (type != napi_function) {
             POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
-            delete asyncCallbackInfo;
             return nullptr;
         }
         napi_create_reference(env, callback, 1, &asyncCallbackInfo->callbackRef);
@@ -335,7 +343,7 @@ static napi_value SetPowerMode(napi_env env, napi_callback_info info)
         POWER_HILOGD(COMP_FWK, "callbackRef is not null");
         napi_get_undefined(env, &result);
     }
-    SetPowerModeCallBack(env, asyncCallbackInfo);
+    SetPowerModeCallBack(env, asCallbackInfoPtr);
     return result;
 }
 
