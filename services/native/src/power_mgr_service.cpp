@@ -620,7 +620,7 @@ inline void PowerMgrService::FillUserIPCInfo(UserIPCInfo &userIPCinfo)
 void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return;
     }
@@ -635,7 +635,7 @@ void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
 
 void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return;
     }
@@ -645,7 +645,7 @@ void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 
 bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (type >= static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT)) {
         return false;
     }
@@ -656,7 +656,7 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo,
     uint32_t timeOutMS)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return;
     }
@@ -674,7 +674,7 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
 
 void PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return;
     }
@@ -683,14 +683,14 @@ void PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 
 void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     runningLockMgr_->UnLock(remoteObj);
     runningLockMgr_->ReleaseLock(remoteObj);
 }
 
 bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto isUsed = runningLockMgr_->IsUsed(remoteObj);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLock is Used: %{public}d", isUsed);
     return isUsed;
@@ -714,7 +714,7 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
 void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
     const WorkTriggerList& workTriggerList)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return;
     }
@@ -724,7 +724,7 @@ void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
 
 void PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem()) {
         return;
     }
