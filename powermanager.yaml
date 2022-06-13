@@ -1,0 +1,38 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+domain: POWER
+
+POWER_RUNNINGLOCK:
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: runninglock state}
+  PID: {type: INT32, desc: application pid}
+  UID: {type: INT32, desc: application uid}
+  STATE: {type: INT32, desc: runninglock state}
+  TYPE: {type: INT32, desc: runninglock type}
+  NAME: {type: STRING, desc: runninglock name}
+  LOG_LEVEL: {type: INT32, desc: runninglock log level}
+  TAG: {type: STRING, desc: runninglock tag}
+  MESSAGE: {type: STRING, desc: runninglock message}
+
+POWER_SCREEN:
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: screen state}
+  STATE: {type: INT32, desc: screen state}
+  BRIGHTNESS: {type: INT32, desc: brightness level}
+
+SCREEN_ON_TIMEOUT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: screen on timeout }
+  PID: {type: INT32, desc: session pid}
+  UID: {type: INT32, desc: session uid}
+  PACKAGE_NAME: {type: STRING, desc: package name}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  MSG: {type: STRING, desc: screen on timeout message}

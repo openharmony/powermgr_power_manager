@@ -420,13 +420,10 @@ void PowerMgrService::HandlePowerKeyTimeout()
     } else {
         message.append("BUT DISPLAY NOT FINISHED");
     }
-    HiviewDFX::HiSysEvent::Write(HiviewDFX::HiSysEvent::Domain::POWERMGR, "SCREEN_ON_TIMEOUT",
+    HiviewDFX::HiSysEvent::Write("POWER", "SCREEN_ON_TIMEOUT",
         HiviewDFX::HiSysEvent::EventType::FAULT,
-        "PID", IPCSkeleton::GetCallingPid(),
-        "UID", IPCSkeleton::GetCallingUid(),
-        "PACKAGE_NAME", "",
-        "PROCESS_NAME", "",
-        "MSG", message.c_str());
+        "PID", IPCSkeleton::GetCallingPid(), "UID", IPCSkeleton::GetCallingUid(),
+        "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", message.c_str());
     POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
 }
 
