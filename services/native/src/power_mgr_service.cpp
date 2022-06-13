@@ -42,10 +42,6 @@ const std::string TASK_RUNNINGLOCK_UNLOCK = "RunningLock_UnLock";
 const std::string REASON_POWER_KEY = "power_key";
 constexpr int UI_DIALOG_POWER_WIDTH_NARROW = 400;
 constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
-constexpr int UI_DEFAULT_WIDTH = 2560;
-constexpr int UI_DEFAULT_HEIGHT = 1600;
-constexpr int UI_DEFAULT_BUTTOM_CLIP = 50 * 2; // 48vp
-constexpr int UI_HALF = 2;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 }
@@ -308,26 +304,17 @@ void PowerMgrService::HandleShutdownRequest()
         return;
     }
     // show dialog
-    std::string params;
-    int pos_x;
-    int pos_y;
     int width;
     int height;
-    bool wideScreen;
-    GetDisplayPosition(pos_x, pos_y, width, height, wideScreen);
-    if (wideScreen) {
-        params = "{\"shutdownButton\":\"Power Off\", " \
-            "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
-    } else {
-        params = "{\"deviceType\":\"phone\", \"shutdownButton\":\"Power Off\", " \
-            "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
-    }
+    GetDisplayPosition(width, height);
+    std::string params = "{\"shutdownButton\":\"Power Off\", " \
+        "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
     int32_t errCode = Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
         "power_dialog",
         params,
         OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-        pos_x,
-        pos_y,
+        0,
+        0,
         width,
         height,
         [this](int32_t id, const std::string& event, const std::string& params) {
@@ -343,7 +330,7 @@ void PowerMgrService::HandleShutdownRequest()
             }
         },
         &dialogId_);
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Show dialog is %{public}d, dialogId=%{public}d", errCode, dialogId_);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Show dialog errCode %{public}d, dialogId=%{public}d", errCode, dialogId_);
     if (!IsScreenOn()) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Wakeup when display off");
         int64_t now = static_cast<int64_t>(time(0));
@@ -854,10 +841,8 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
     return result;
 }
 
-void PowerMgrService::GetDisplayPosition(
-    int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen)
+void PowerMgrService::GetDisplayPosition(int32_t& width, int32_t& height)
 {
-    wideScreen = true;
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Dialog GetDefaultDisplay fail, try again.");
@@ -867,35 +852,14 @@ void PowerMgrService::GetDisplayPosition(
     if (display != nullptr) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Display size: %{public}d x %{public}d",
             display->GetWidth(), display->GetHeight());
-        if (display->GetWidth() < display->GetHeight()) {
-            POWER_HILOGI(FEATURE_SHUTDOWN, "Share dialog narrow.");
-            const int NARROW_WIDTH_N = 3;
-            const int NARROW_WIDTH_D = 4;
-            const int NARROW_HEIGHT_RATE = 8;
-            wideScreen = false;
-            width = display->GetWidth() * NARROW_WIDTH_N / NARROW_WIDTH_D;
-            height = display->GetHeight() / NARROW_HEIGHT_RATE;
-        } else {
-            POWER_HILOGI(FEATURE_SHUTDOWN, "Share dialog wide.");
-            const int NARROW_WIDTH_N = 1;
-            const int NARROW_WIDTH_D = 3;
-            const int NARROW_HEIGHT_RATE = 6;
-            wideScreen = true;
-            width = display->GetWidth() * NARROW_WIDTH_N / NARROW_WIDTH_D;
-            height = display->GetHeight() / NARROW_HEIGHT_RATE;
-        }
-        offsetX = (display->GetWidth() - width) / UI_HALF;
-        offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
+        width = display->GetWidth();
+        height = display->GetHeight();
     } else {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Dialog get display fail, use default wide.");
-        wideScreen = false;
         width = UI_DIALOG_POWER_WIDTH_NARROW;
         height = UI_DIALOG_POWER_HEIGHT_NARROW;
-        offsetX = (UI_DEFAULT_WIDTH - width) / UI_HALF;
-        offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "GetDisplayPosition: x: %{public}d, y: %{public}d,\
-        width:%{public}d, height: %{public}d", offsetX, offsetY, width, height);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "GetDisplayPosition: width:%{public}d, height: %{public}d", width, height);
 }
 } // namespace PowerMgr
 } // namespace OHOS
