@@ -668,6 +668,7 @@ void PowerStateMachine::HandleActivityTimeout()
     } else {
         POWER_HILOGW(MODULE_SERVICE,
             "HandleActivityTimeout when display: %{public}d", dispState);
+        HandleActivityOffTimeout();
     }
     POWER_HILOGI(MODULE_SERVICE, "HandleActivityTimeout: fun is End!");
 }
