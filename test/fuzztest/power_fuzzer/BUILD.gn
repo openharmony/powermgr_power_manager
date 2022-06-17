@@ -13,7 +13,6 @@
 
 import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
-import("//drivers/adapter/uhdf2/uhdf.gni")
 
 module_output_path = "${powermgr_native_part_name}/powermgr_native"
 
