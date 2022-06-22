@@ -22,6 +22,7 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 
+#include "hitrace_meter.h"
 #include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
@@ -265,6 +266,7 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo,
     const UserIPCInfo& userIPCinfo, uint32_t timeOutMS)
 {
+    StartTrace(HITRACE_TAG_POWER, "RunningLock_Lock");
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p, name=%{public}s, type=%{public}d",
         remoteObj.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
 
@@ -292,10 +294,12 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
     if (timeOutMS > 0) {
         RemoveAndPostUnlockTask(remoteObj, timeOutMS);
     }
+    FinishTrace(HITRACE_TAG_POWER);
 }
 
 void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
 {
+    StartTrace(HITRACE_TAG_POWER, "RunningLock_Unlock");
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p", remoteObj.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(remoteObj);
@@ -322,6 +326,7 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     counter->Decrease();
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
         counter->GetCount());
+    FinishTrace(HITRACE_TAG_POWER);
 }
 
 bool RunningLockMgr::IsUsed(const sptr<IRemoteObject>& remoteObj)
