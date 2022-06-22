@@ -428,7 +428,7 @@ static napi_module g_module = {
     .nm_flags = 0,
     .nm_filename = "runningLock",
     .nm_register_func = RunningLockInit,
-    .nm_modname = "runningLock",
+    .nm_modname = "runninglock",
     .nm_priv = ((void *)0),
     .reserved = {0}
 };
