@@ -36,8 +36,8 @@ ohos_unittest("test_power_setting") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager",
     "${powermgr_utils_path}/setting:power_setting",
-    "//foundation/ability/ability_runtime/interfaces/inner_api/dataobs_manager:dataobs_manager",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
