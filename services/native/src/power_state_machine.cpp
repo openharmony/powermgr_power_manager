@@ -18,6 +18,7 @@
 #include <datetime_ex.h>
 #include <hisysevent.h>
 
+#include "hitrace_meter.h"
 #include "powerms_event_handler.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
@@ -191,6 +192,7 @@ void PowerStateMachine::SuspendDeviceInner(pid_t pid,
     bool suspendImmed,
     bool ignoreScreenState)
 {
+    StartTrace(HITRACE_TAG_POWER, "SuspendDevice");
     if (type > SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX) {
         POWER_HILOGW(FEATURE_SUSPEND, "Invalid type: %{public}d", type);
         return;
@@ -208,6 +210,7 @@ void PowerStateMachine::SuspendDeviceInner(pid_t pid,
     }
 
     SetState(PowerState::INACTIVE, GetReasionBySuspendType(type), true);
+    FinishTrace(HITRACE_TAG_POWER);
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
 }
 
@@ -217,6 +220,7 @@ void PowerStateMachine::WakeupDeviceInner(pid_t pid,
     const std::string& details,
     const std::string& pkgName)
 {
+    StartTrace(HITRACE_TAG_POWER, "WakeupDevice");
     if (type > WakeupDeviceType::WAKEUP_DEVICE_MAX) {
         POWER_HILOGW(FEATURE_WAKEUP, "Invalid type: %{public}d", type);
         return;
@@ -230,6 +234,7 @@ void PowerStateMachine::WakeupDeviceInner(pid_t pid,
     ResetInactiveTimer();
     SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
 
+    FinishTrace(HITRACE_TAG_POWER);
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup device finish");
 }
 
