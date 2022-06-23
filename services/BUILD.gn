@@ -74,6 +74,7 @@ ohos_shared_library("powermgrservice") {
     "hdf_core:libhdi",
     "hicollie_native:libhicollie",
     "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
