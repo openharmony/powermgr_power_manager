@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import app from '@system.app'
-import Context from '@ohos.napi_context'
-import runningLock from '@ohos.runningLock';
+import runningLock from '@ohos.runninglock';
 import power from '@ohos.power';
 import '@ohos.permission.RUNNING_LOCK'
 
