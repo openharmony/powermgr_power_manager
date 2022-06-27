@@ -15,7 +15,6 @@
 
 import runningLock from '@ohos.runninglock';
 import power from '@ohos.power';
-import '@ohos.permission.RUNNING_LOCK'
 
 import {describe, beforeAll, beforeEach, afterEach, afterAll, it, expect} from 'deccjsunit/index'
 
