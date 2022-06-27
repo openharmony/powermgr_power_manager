@@ -15,6 +15,7 @@
 
 #include "power_setting_helper.h"
 
+#include "ipc_skeleton.h"
 #include "ability_manager_client.h"
 #include "abs_shared_result_set.h"
 #include "data_ability_predicates.h"
@@ -112,36 +113,44 @@ sptr<PowerSettingObserver> PowerSettingHelper::CreateObserver(const std::string&
 
 ErrCode PowerSettingHelper::RegisterObserver(const sptr<PowerSettingObserver>& observer)
 {
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto dataAbility = AcquireDataAbility();
     if (dataAbility == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
     if (!dataAbility->ScheduleRegisterObserver(uri, observer)) {
         POWER_HILOGW(COMP_UTILS, "dataAbility->ScheduleRegisterObserver return false, uri=%{public}s",
             uri.ToString().c_str());
         ReleaseDataAbility(dataAbility);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
     ReleaseDataAbility(dataAbility);
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
     POWER_HILOGD(COMP_UTILS, "succeed to register observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
 }
 
 ErrCode PowerSettingHelper::UnregisterObserver(const sptr<PowerSettingObserver>& observer)
 {
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto dataAbility = AcquireDataAbility();
     if (dataAbility == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
     if (!dataAbility->ScheduleUnregisterObserver(uri, observer)) {
         POWER_HILOGW(COMP_UTILS, "dataAbility->ScheduleUnregisterObserver return false, uri=%{public}s",
             uri.ToString().c_str());
         ReleaseDataAbility(dataAbility);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
     ReleaseDataAbility(dataAbility);
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
     POWER_HILOGD(COMP_UTILS, "succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
 }
@@ -159,14 +168,14 @@ void PowerSettingHelper::Initialize(int32_t systemAbilityId)
         return;
     }
     remoteObj_ = remoteObj;
-
-    POWER_HILOGW(COMP_UTILS, "initialized remoteObj_=%{public}p", remoteObj_.GetRefPtr());
 }
 
 ErrCode PowerSettingHelper::GetStringValue(const std::string& key, std::string& value)
 {
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto dataAbility = AcquireDataAbility();
     if (dataAbility == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
@@ -177,12 +186,14 @@ ErrCode PowerSettingHelper::GetStringValue(const std::string& key, std::string& 
     ReleaseDataAbility(dataAbility);
     if (resultSet == nullptr) {
         POWER_HILOGE(COMP_UTILS, "dataAbility->Query return nullptr");
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
     int32_t count = 0;
     resultSet->GetRowCount(count);
     if (count == 0) {
         POWER_HILOGW(COMP_UTILS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NAME_NOT_FOUND;
     }
     const int32_t INDEX = 0;
@@ -190,16 +201,20 @@ ErrCode PowerSettingHelper::GetStringValue(const std::string& key, std::string& 
     int32_t ret = resultSet->GetString(INDEX, value);
     if (ret != NativeRdb::E_OK) {
         POWER_HILOGW(COMP_UTILS, "resultSet->GetString return not ok, ret=%{public}d", ret);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_VALUE;
     }
     resultSet->Close();
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
     return ERR_OK;
 }
 
 ErrCode PowerSettingHelper::PutStringValue(const std::string& key, const std::string& value)
 {
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto dataAbility = AcquireDataAbility();
     if (dataAbility == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
     POWER_HILOGD(COMP_UTILS, "key=%{public}s, value=%{public}s", key.c_str(), value.c_str());
@@ -214,6 +229,7 @@ ErrCode PowerSettingHelper::PutStringValue(const std::string& key, const std::st
     }
     dataAbility->ScheduleNotifyChange(AssembleUri(key));
     ReleaseDataAbility(dataAbility);
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
     return ERR_OK;
 }
 
