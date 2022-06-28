@@ -39,7 +39,8 @@ public:
     void Dump(std::string& info);
     void RegisterHdiStatusListener(const std::shared_ptr<PowermsEventHandler>& handler);
     void RegisterPowerHdiCallback();
-
+    void UnRegisterPowerHdiCallback();
+    
 private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
