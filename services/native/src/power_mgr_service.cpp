@@ -426,6 +426,7 @@ void PowerMgrService::PowerMgrService::OnStop()
         PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     powerStateMachine_->CancelDelayTimer(
         PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
     handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
 
     KeyMonitorCancel();
