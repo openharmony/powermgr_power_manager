@@ -17,10 +17,6 @@ import power from '@ohos.power';
 
 import {describe, beforeAll, beforeEach, afterEach, afterAll, it, expect} from 'deccjsunit/index'
 
-function sleep(time){
-    return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 describe('PowerMgrPowerUnitTest', function () {
     beforeAll(function() {
 
@@ -59,19 +55,20 @@ describe('PowerMgrPowerUnitTest', function () {
      * @tc.name Screen off
      * @tc.desc Screen off
      */
-    it('power_suspend', 0, async function () {
-        power.isScreenOn().then(screenOn => {
+    it('power_suspend', 0, async function (done) {
+        power.isScreenOn()
+        .then(screenOn => {
             console.info('power_suspend01: The current screenOn is ' + screenOn);
             if (!screenOn) { 
                 power.wakeupDevice("power_suspend");
             } 
-        }).catch(error => {
+        })
+        .catch(error => {
             console.log('power_suspend error: ' + error);
             expect().assertFail();
+            done();
         })
-        await sleep(1000);
         power.suspendDevice();
-        await sleep(1000);
         power.isScreenOn().then(screenOn => {
             console.info('power_suspend02: The current screenOn is ' + screenOn);
             expect(screenOn).assertFalse();
@@ -79,7 +76,9 @@ describe('PowerMgrPowerUnitTest', function () {
         }).catch(error => {
             console.log('power_suspend error: ' + error);
             expect().assertFail();
+            done();
         })
+        done();
     })
 
     /**
@@ -87,19 +86,20 @@ describe('PowerMgrPowerUnitTest', function () {
      * @tc.name Screen on
      * @tc.desc Screen on
      */
-    it('power_wake_up_success', 0, async function () {
-        power.isScreenOn().then(screenOn => {
+     it('power_wake_up_success', 0, async function (done) {
+        power.isScreenOn()
+        .then(screenOn => {
             console.info('The current screenOn is ' + screenOn);
             if (screenOn) {
                 power.suspendDevice();
             }
-        }).catch(error => {
+        })
+        .catch(error => {
             console.log('power_wake_up_success error: ' + error);
             expect().assertFail();
+            done();
         })
-        await sleep(1000);
         power.wakeupDevice("power_wake_up_success");
-        await sleep(1000);
         power.isScreenOn().then(screenOn => {
             console.info('The current screenOn is ' + screenOn);
             expect(screenOn).assertTrue();
@@ -107,7 +107,9 @@ describe('PowerMgrPowerUnitTest', function () {
         }).catch(error => {
             console.log('power_wake_up_success error: ' + error);
             expect().assertFail();
+            done();
         })
+        done();
     })
 
     /**
@@ -115,24 +117,24 @@ describe('PowerMgrPowerUnitTest', function () {
      * @tc.name Screen on
      * @tc.desc Screen on
      */
-    it('power_wake_up_fail', 0, async function () {
-        power.isScreenOn().then(screenOn => {
+     it('power_wake_up_fail', 0, async function (done) {
+        power.isScreenOn()
+        .then(screenOn => {
             console.info('power_wake_up_fail01: The current screenOn is ' + screenOn);
             if (screenOn) {
                 power.suspendDevice();
-            }  
+            }
         })
         .catch(error => {
             console.log('power_wake_up_fail error: ' + error);
             expect().assertFail();
+            done();
         })
-        await sleep(1000);
         try {
             power.wakeupDevice(1)
         } catch (error) {
             console.log('power_wake_up_fail wakeupDevice error: ' + error);
         }
-        await sleep(1000);
         power.isScreenOn().then(screenOn => {
             console.info('power_wake_up_fail02: The current screenOn is ' + screenOn);
             expect(screenOn).assertFalse();
@@ -140,7 +142,9 @@ describe('PowerMgrPowerUnitTest', function () {
         }).catch(error => {
             console.log('power_wake_up_fail error: ' + error);
             expect(error === "Wrong argument type. string expected.").assertTrue();
+            done();
         })
+        done();
     })
 
     /**
@@ -264,13 +268,13 @@ describe('PowerMgrPowerUnitTest', function () {
             console.info('power_is_screen_on_promise_test screenOn is ' + screenOn);
             expect(screenOn).assertTrue();
             console.info('power_is_screen_on_promise_test success');
-            done();
         })
         .catch(error => {
             console.log('power_is_screen_on_promise_test error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -285,12 +289,12 @@ describe('PowerMgrPowerUnitTest', function () {
                 console.info('power_is_screen_on_callback_test screenOn is ' + screenOn);
                 expect(screenOn).assertTrue();
                 console.info('power_is_screen_on_callback_test success');
-                done();
             } else {
                 console.log('power_is_screen_on_callback_test: ' + error);
                 expect().assertFail();
                 done();
             }
         })
+        done();
     })
 });
