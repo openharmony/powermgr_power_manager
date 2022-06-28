@@ -82,6 +82,18 @@ void SystemSuspendController::RegisterPowerHdiCallback()
     POWER_HILOGD(COMP_SVC, "register power hdi callback end");
 }
 
+void SystemSuspendController::UnRegisterPowerHdiCallback()
+{
+    POWER_HILOGD(COMP_SVC, "unregister power hdi callback");
+    if (powerInterface_ == nullptr) {
+        powerInterface_ = IPowerInterface::Get();
+        RETURN_IF_WITH_LOG(powerInterface_ == nullptr, "failed to get power hdi interface");
+    }
+    sptr<IPowerHdiCallback> callback = nullptr;
+    powerInterface_->RegisterCallback(callback);
+    POWER_HILOGD(COMP_SVC, "unregister power hdi callback end");
+}
+
 void SystemSuspendController::Suspend(const std::function<void()>& onSuspend,
     const std::function<void()>& onWakeup, bool force)
 {
