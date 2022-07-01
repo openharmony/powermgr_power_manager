@@ -36,7 +36,7 @@ ohos_shared_library("power_setting") {
   public_configs = [ ":public_config" ]
 
   deps = [
-    "//foundation/ability/ability_runtime/interfaces/inner_api/dataobs_manager:dataobs_manager",
+    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager",
     "//utils/native/base:utils",
   ]
 
