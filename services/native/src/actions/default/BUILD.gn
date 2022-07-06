@@ -17,7 +17,6 @@ import("../actions.gni")
 config("powermgr_actions_impl_public_config") {
   include_dirs = [
     ".",
-    "//base/startup/syspara_lite/adapter/native/syspara/include",
     "//drivers/peripheral/power/interfaces/include/",
     "//drivers/peripheral/power/interfaces",
   ]
@@ -51,7 +50,6 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
-    "startup_l2:syspara",
     "window_manager:libdm",
   ]
 
