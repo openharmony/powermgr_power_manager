@@ -17,13 +17,16 @@ import router from '@ohos.router'
 
 export default {
     data: {
-        message: router.getParams().message,
+        powerOptions: router.getParams().powerOptions,
         shutdownButton: router.getParams().shutdownButton,
         rebootButton: router.getParams().rebootButton,
         cancelButton: router.getParams().cancelButton,
     },
     onInit() {
-        console.info('getParams: ' + router.getParams());
+        this.powerOptions = this.$t("message.powerOptions")
+        this.shutdownButton = this.$t("message.shutdownButton")
+        this.rebootButton = this.$t("message.rebootButton")
+        this.cancelButton = this.$t("message.cancelButton")
     },
     onShutdown() {
         console.info('click shutdown');

@@ -152,7 +152,7 @@ private:
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
-    void GetDisplayPosition(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen);
+    void GetDisplayPosition(int32_t& width, int32_t& height);
     bool ready_ {false};
     std::mutex mutex_;
     std::mutex lockMutex_;
