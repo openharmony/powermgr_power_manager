@@ -27,12 +27,15 @@ Power Manager provides the following functionalities:
 │   └── native                  # Native code
 ├── interfaces                  # APIs
 │   ├── innerkits               # Internal APIs
-│   └── kits                    # External APIs
+│   ├── kits                    # External APIs
+│   └── test                    # Kits test
 ├── sa_profile                  # SA profile
 ├── services                    # Services
 │   ├── native                  # Native services
-│   └── zidl                    # zidl APIs
+│   └── zidl                    # Zidl APIs
 ├── test                        # Test code
+│   ├── fuzztest                # Fuzz testSS
+│   └── systemtest              # System test
 └── utils                       # Utilities and common code
 ```
 
