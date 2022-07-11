@@ -27,12 +27,15 @@
 │   └── native                  # Native层
 ├── interfaces                  # 接口层
 │   ├── innerkits               # 内部接口
-│   └── kits                    # 外置接口
+│   ├── kits                    # 外置接口
+│   └── test                    # Kits 测试
 ├── sa_profile                  # SA 配置文件
 ├── services                    # 服务层
 │   ├── native                  # Native 层
-│   └── zidl                    # zidl 接口层
+│   └── zidl                    # Zidl 接口层
 ├── test                        # 测试用例
+│   ├── fuzztest                # Fuzz 测试
+│   └── systemtest              # 系统测试
 └── utils                       # 工具和通用层
 ```
 
