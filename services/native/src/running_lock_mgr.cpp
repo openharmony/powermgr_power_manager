@@ -279,7 +279,6 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled, remoteObj=%{public}p", remoteObj.GetRefPtr());
         return;
     }
-    lockInner->SetDisabled(false);
 
     auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
     if (iterator == lockCounters_.end()) {
@@ -288,7 +287,8 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
-    counter->Increase();
+    counter->Increase(remoteObj, lockInner);
+    lockInner->SetDisabled(false);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
         counter->GetCount());
     if (timeOutMS > 0) {
@@ -313,7 +313,6 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
             remoteObj.GetRefPtr(), lockInner->GetRunningLockName().c_str());
         return;
     }
-    lockInner->SetDisabled(true);
     RemoveAndPostUnlockTask(remoteObj);
 
     auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
@@ -323,7 +322,8 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
-    counter->Decrease();
+    counter->Decrease(remoteObj, lockInner);
+    lockInner->SetDisabled(true);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
         counter->GetCount());
     FinishTrace(HITRACE_TAG_POWER);
@@ -814,21 +814,35 @@ void RunningLockMgr::SystemLock::Unlock()
     }
 }
 
-uint32_t RunningLockMgr::LockCounter::Increase()
+uint32_t RunningLockMgr::LockCounter::Increase(const sptr<IRemoteObject>& remoteObj,
+    std::shared_ptr<RunningLockInner>& lockInner)
 {
     ++counter_;
     if (counter_ == 1) {
         activate_(true);
     }
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "No power service instance");
+        return counter_;
+    }
+    pms->GetRunningLockMgr()->NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_ADD);
     return counter_;
 }
 
-uint32_t RunningLockMgr::LockCounter::Decrease()
+uint32_t RunningLockMgr::LockCounter::Decrease(const sptr<IRemoteObject> remoteObj,
+    std::shared_ptr<RunningLockInner>& lockInner)
 {
     --counter_;
     if (counter_ == 0) {
         activate_(false);
     }
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "No power service instance");
+        return counter_;
+    }
+    pms->GetRunningLockMgr()->NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
     return counter_;
 }
 

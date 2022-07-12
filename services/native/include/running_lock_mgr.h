@@ -114,8 +114,10 @@ private:
         LockCounter(RunningLockType type, std::function<void(bool)> activate)
             : type_(type), activate_(activate), counter_(0) {}
         ~LockCounter() = default;
-        uint32_t Increase();
-        uint32_t Decrease();
+        uint32_t Increase(const sptr<IRemoteObject>& remoteObj,
+            std::shared_ptr<RunningLockInner>& lockInner);
+        uint32_t Decrease(const sptr<IRemoteObject> remoteObj,
+            std::shared_ptr<RunningLockInner>& lockInner);
         void Clear();
         uint32_t GetCount()
         {
