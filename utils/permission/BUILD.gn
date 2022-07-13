@@ -17,7 +17,6 @@ config("private_config") {
   include_dirs = [
     "include",
     "../native/include",
-    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -44,5 +43,5 @@ ohos_shared_library("power_permission") {
     "samgr_standard:samgr_proxy",
   ]
 
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }

@@ -14,7 +14,7 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
 
-module_output_path = "${powermgr_native_part_name}/powermgr_native"
+module_output_path = "${powermgr_part_name}/powermgr_native"
 
 ###############################################################################
 config("module_private_config") {
@@ -23,7 +23,6 @@ config("module_private_config") {
   include_dirs = [
     "${powermgr_utils_path}/setting/include",
     "${powermgr_utils_path}/native/include",
-    "//commonlibrary/c_utils/base/include",
   ]
 }
 

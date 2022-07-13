@@ -16,5 +16,5 @@ import("//build/ohos/sa_profile/sa_profile.gni")
 
 ohos_sa_profile("powermgr_sa_profile") {
   sources = [ "3301.xml" ]
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }

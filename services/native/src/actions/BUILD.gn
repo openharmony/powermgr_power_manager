@@ -16,7 +16,7 @@ import("actions.gni")
 
 config("powermgr_actions_common_public_config") {
   include_dirs = [
-    "${powermgr_native_innerkits_path}/native/include",
+    "${powermgr_innerkits}/native/include",
     "${powermgr_service_path}/native/include",
   ]
 }
@@ -31,7 +31,7 @@ ohos_source_set("powermgr_actions_common") {
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }
 
 actions_target = powermgr_actions_target
