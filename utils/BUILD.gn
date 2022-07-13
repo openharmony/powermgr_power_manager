@@ -67,7 +67,7 @@ ohos_executable("power-shell") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
-    "display_manager_native:displaymgr",
+    "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "relational_store:native_dataability",
