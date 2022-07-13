@@ -14,7 +14,7 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
 
-module_output_path = "${powermgr_native_part_name}/powermgr_native"
+module_output_path = "${powermgr_part_name}/powermgr_native"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("PowerFuzzTest") {
@@ -32,7 +32,7 @@ ohos_fuzztest("PowerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "./power_fuzzer.cpp" ]
-  deps = [ "${powermgr_native_innerkits_path}:powermgr_client" ]
+  deps = [ "${powermgr_innerkits}:powermgr_client" ]
 
   external_deps = [
     "c_utils:utils",

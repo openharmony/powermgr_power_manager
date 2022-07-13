@@ -13,33 +13,26 @@
 
 import("//base/powermgr/power_manager/powermgr.gni")
 
-config("powermgr_private_config") {
-  include_dirs = [
-    "${powermgr_service_path}/zidl/include",
-    "//utils/system/safwk/native/include",
-  ]
-}
-
 config("powermgr_public_config") {
-  include_dirs = [ "native/include" ]
+  include_dirs = [
+    "native/include",
+    "${powermgr_service_zidl}/include",
+  ]
 }
 
 ohos_shared_library("powermgr_client") {
   sources = [
-    "${powermgr_framework_path}/native/power_mgr_client.cpp",
-    "${powermgr_framework_path}/native/running_lock.cpp",
-    "${powermgr_framework_path}/native/running_lock_info.cpp",
-    "${powermgr_framework_path}/native/running_lock_token_stub.cpp",
-    "${powermgr_service_path}/zidl/src/power_mgr_proxy.cpp",
-    "${powermgr_service_path}/zidl/src/power_mode_callback_proxy.cpp",
-    "${powermgr_service_path}/zidl/src/power_shutdown_callback_proxy.cpp",
-    "${powermgr_service_path}/zidl/src/power_state_callback_proxy.cpp",
+    "${powermgr_framework_native}/power_mgr_client.cpp",
+    "${powermgr_framework_native}/running_lock.cpp",
+    "${powermgr_framework_native}/running_lock_info.cpp",
+    "${powermgr_framework_native}/running_lock_token_stub.cpp",
+    "${powermgr_service_zidl}/src/power_mgr_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_mode_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_shutdown_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
   ]
 
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":powermgr_private_config",
-  ]
+  configs = [ "${powermgr_utils_path}:utils_config" ]
 
   public_configs = [ ":powermgr_public_config" ]
 
@@ -54,5 +47,5 @@ ohos_shared_library("powermgr_client") {
     "samgr_standard:samgr_proxy",
   ]
 
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }

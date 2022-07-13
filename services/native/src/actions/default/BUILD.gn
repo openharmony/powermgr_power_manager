@@ -15,11 +15,7 @@ import("//base/powermgr/power_manager/powermgr.gni")
 import("../actions.gni")
 
 config("powermgr_actions_impl_public_config") {
-  include_dirs = [
-    ".",
-    "//drivers/peripheral/power/interfaces/include/",
-    "//drivers/peripheral/power/interfaces",
-  ]
+  include_dirs = [ "." ]
 }
 
 ohos_source_set("${powermgr_actions_default_target}") {
@@ -53,5 +49,5 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "window_manager:libdm",
   ]
 
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }
