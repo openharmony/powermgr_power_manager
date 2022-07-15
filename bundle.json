@@ -13,7 +13,7 @@
         "destPath": "base/powermgr/power_manager"
     },
     "component": {
-        "name": "power_manager_native",
+        "name": "power_manager",
         "subsystem": "powermgr",
         "syscap": [
             "SystemCapability.PowerManager.PowerManager.Core",
