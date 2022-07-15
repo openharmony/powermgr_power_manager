@@ -68,7 +68,7 @@ ohos_shared_library("powermgrservice") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "common_event_service:cesfwk_innerkits",
-    "display_manager_native:displaymgr",
+    "display_manager:displaymgr",
     "drivers_interface_power:libpower_proxy_1.0",
     "eventhandler:libeventhandler",
     "hdf_core:libhdf_utils",

@@ -41,7 +41,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
   ]
 
   external_deps = [
-    "display_manager_native:displaymgr",
+    "display_manager:displaymgr",
     "drivers_interface_power:libpower_proxy_1.0",
     "eventhandler:libeventhandler",
     "hdf_core:libhdf_utils",
