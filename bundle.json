@@ -36,7 +36,7 @@
                 "bundle_framework",
                 "common_event_service",
                 "device_status",
-                "display_manager_native",
+                "display_manager",
                 "drivers_interface_power",
                 "eventhandler",
                 "hdf_core",
