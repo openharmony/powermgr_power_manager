@@ -52,12 +52,20 @@ static bool IsTokenAplMatch(ATokenAplEnum apl)
 
 bool Permission::IsSystemCore()
 {
-    return IsTokenAplMatch(ATokenAplEnum::APL_SYSTEM_CORE);
+    bool isMatch = IsTokenAplMatch(ATokenAplEnum::APL_SYSTEM_CORE);
+    if (!isMatch) {
+        POWER_HILOGW(COMP_UTILS, "access token denied");
+    }
+    return isMatch;
 }
 
 bool Permission::IsSystemBasic()
 {
-    return IsTokenAplMatch(ATokenAplEnum::APL_SYSTEM_BASIC);
+    bool isMatch = IsTokenAplMatch(ATokenAplEnum::APL_SYSTEM_BASIC);
+    if (!isMatch) {
+        POWER_HILOGW(COMP_UTILS, "access token denied");
+    }
+    return isMatch;
 }
 
 static sptr<IBundleMgr> GetBundleMgr()
@@ -118,7 +126,8 @@ bool Permission::IsPermissionGranted(const std::string& perm)
             result = AccessTokenKit::VerifyAccessToken(tokenId, perm);
             break;
         case ATokenTypeEnum::TOKEN_NATIVE:
-            result = AccessTokenKit::VerifyNativeToken(tokenId, perm);
+        case ATokenTypeEnum::TOKEN_SHELL:
+            result = PermissionState::PERMISSION_GRANTED;
             break;
         case ATokenTypeEnum::TOKEN_INVALID:
             break;
