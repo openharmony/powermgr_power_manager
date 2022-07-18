@@ -19,7 +19,7 @@ ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
 
 ability_runtime_services_path = "${ability_runtime_path}/services"
 
-powermgr_native_part_name = "power_manager_native"
+powermgr_native_part_name = "power_manager"
 
 powermgr_root_path = "//base/powermgr/power_manager"
 
