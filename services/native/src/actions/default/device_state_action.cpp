@@ -15,6 +15,7 @@
 
 #include "device_state_action.h"
 
+#include <ipc_skeleton.h>
 #include "display_manager.h"
 #include "display_power_mgr_client.h"
 #include "power_log.h"
@@ -100,7 +101,9 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
             if (currentState == DisplayState::DISPLAY_OFF) {
+                std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
+                IPCSkeleton::SetCallingIdentity(identity);
             }
             break;
         }
@@ -111,7 +114,9 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
             if (currentState == DisplayState::DISPLAY_ON
                 || currentState == DisplayState::DISPLAY_DIM) {
+                std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
+                IPCSkeleton::SetCallingIdentity(identity);
             }
             break;
         }
@@ -150,14 +155,18 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
     }
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON: {
+            std::string identity = IPCSkeleton::ResetCallingIdentity();
             DisplayManager::GetInstance().WakeUpEnd();
+            IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
             std::string name = LOCK_TAG_DISPLAY_POWER;
             SystemSuspendController::GetInstance().AcquireRunningLock(name);
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
+            std::string identity = IPCSkeleton::ResetCallingIdentity();
             DisplayManager::GetInstance().SuspendEnd();
+            IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
             std::string name = LOCK_TAG_DISPLAY_POWER;
             SystemSuspendController::GetInstance().ReleaseRunningLock(name);
