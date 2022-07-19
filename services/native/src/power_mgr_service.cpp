@@ -843,11 +843,13 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
 
 void PowerMgrService::GetDisplayPosition(int32_t& width, int32_t& height)
 {
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Dialog GetDefaultDisplay fail, try again.");
         display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
+    IPCSkeleton::SetCallingIdentity(identity);
 
     if (display != nullptr) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Display size: %{public}d x %{public}d",
