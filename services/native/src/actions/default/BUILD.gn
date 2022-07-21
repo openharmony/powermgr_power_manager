@@ -37,10 +37,10 @@ ohos_source_set("${powermgr_actions_default_target}") {
   deps = [
     "../:powermgr_actions_common",
     "//foundation/window/window_manager/utils:libwmutil",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "display_manager:displaymgr",
     "drivers_interface_power:libpower_proxy_1.0",
     "eventhandler:libeventhandler",

@@ -59,7 +59,6 @@ ohos_shared_library("powermgrservice") {
     "//base/msdp/device_status/frameworks/native/src:deviceagent",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/window/window_manager/utils:libwmutil",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -67,6 +66,7 @@ ohos_shared_library("powermgrservice") {
     "ability_base:want",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "display_manager:displaymgr",
     "drivers_interface_power:libpower_proxy_1.0",

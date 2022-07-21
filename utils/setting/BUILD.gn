@@ -17,7 +17,7 @@ config("private_config") {
   include_dirs = [
     "include",
     "../native/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -35,15 +35,13 @@ ohos_shared_library("power_setting") {
 
   public_configs = [ ":public_config" ]
 
-  deps = [
-    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
