@@ -16,6 +16,7 @@
 #ifndef POWERMGR_POWER_MANAGER_POWER_HDI_CALLBACK_H
 #define POWERMGR_POWER_MANAGER_POWER_HDI_CALLBACK_H
 
+#include <cstdint>
 #include "v1_0/ipower_hdi_callback.h"
 
 namespace OHOS {

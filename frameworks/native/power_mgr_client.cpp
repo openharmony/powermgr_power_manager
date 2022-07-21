@@ -14,14 +14,30 @@
  */
 
 #include "power_mgr_client.h"
+
+#include <cstdint>
 #include <cinttypes>
+#include <mutex>
+#include <iosfwd>
+#include <memory>
+#include <vector>
 #include <datetime_ex.h>
 #include <if_system_ability_manager.h>
-#include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-
+#include "new"
+#include "errors.h"
+#include "refbase.h"
+#include "ipower_mgr.h"
+#include "ipower_mode_callback.h"
+#include "ipower_state_callback.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
+#include "ishutdown_callback.h"
+#include "power_log.h"
 #include "power_common.h"
+#include "power_mgr_errors.h"
+#include "running_lock_info.h"
 
 namespace OHOS {
 namespace PowerMgr {

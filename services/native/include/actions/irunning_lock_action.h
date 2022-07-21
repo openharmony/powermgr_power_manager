@@ -16,6 +16,8 @@
 #ifndef POWERMGR_IRUNNING_LOCK_ACTION_H
 #define POWERMGR_IRUNNING_LOCK_ACTION_H
 
+#include <cstdint>
+#include <iosfwd>
 #include <array>
 #include <string>
 

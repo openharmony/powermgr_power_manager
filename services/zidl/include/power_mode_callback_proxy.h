@@ -16,8 +16,11 @@
 #ifndef POWERMGR_SERVICES_MODE_STATE_CALLBACK_PROXY_H
 #define POWERMGR_SERVICES_MODE_STATE_CALLBACK_PROXY_H
 
+#include <functional>
 #include <iremote_proxy.h>
-#include <nocopyable.h>
+#include "refbase.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
 
 #include "ipower_mode_callback.h"
 

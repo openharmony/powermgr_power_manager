@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
+#include <cstddef>
+#include <cstdint>
+#include <iosfwd>
 #include <memory>
 #include <string>
-
+#include "new"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "napi/native_api.h"
-#include "napi/native_node_api.h"
+#include "napi/native_common.h"
+#include "node_api_types.h"
+#include "power_state_machine_info.h"
 #include "power_log.h"
 #include "power_mgr_client.h"
 

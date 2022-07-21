@@ -15,6 +15,7 @@
 
 #include "device_power_action.h"
 
+#include <string>
 #include "init_reboot.h"
 #include "power_log.h"
 

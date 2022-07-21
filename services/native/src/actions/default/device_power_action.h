@@ -16,7 +16,7 @@
 #ifndef POWERMGR_DEVICE_POWER_ACTION_H
 #define POWERMGR_DEVICE_POWER_ACTION_H
 
-#include <string>
+#include <iosfwd>
 
 #include "actions/idevice_power_action.h"
 
