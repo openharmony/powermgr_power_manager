@@ -16,10 +16,21 @@
 #ifndef POWERMGR_SERVICES_IPOWER_MANAGER_PROXY_H
 #define POWERMGR_SERVICES_IPOWER_MANAGER_PROXY_H
 
+#include <cstdint>
+#include <sys/types.h>
+#include <functional>
+#include <iosfwd>
+#include <vector>
 #include <iremote_proxy.h>
 #include <nocopyable.h>
-
+#include "refbase.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
+#include "ishutdown_callback.h"
+#include "ipower_mode_callback.h"
+#include "ipower_state_callback.h"
 #include "ipower_mgr.h"
+#include "running_lock_info.h"
 #include "power_state_machine_info.h"
 
 namespace OHOS {

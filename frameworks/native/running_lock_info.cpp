@@ -15,6 +15,8 @@
 
 #include "running_lock_info.h"
 
+#include "new"
+#include "power_log.h"
 #include "power_common.h"
 
 namespace OHOS {

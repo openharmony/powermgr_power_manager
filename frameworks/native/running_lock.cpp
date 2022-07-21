@@ -15,7 +15,15 @@
 
 #include "running_lock.h"
 
-#include "power_common.h"
+#include <cstdint>
+#include <list>
+#include <iosfwd>
+#include <string>
+#include "errors.h"
+#include "new"
+#include "refbase.h"
+#include "power_log.h"
+#include "power_mgr_errors.h"
 #include "running_lock_token_stub.h"
 
 using std::lock_guard;
