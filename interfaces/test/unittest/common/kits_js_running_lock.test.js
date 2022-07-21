@@ -60,13 +60,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
         .then(runninglock => {
             expect(runninglock !== null).assertTrue();
             console.info('create_running_lock_promise_test success');
-            done();
         })
         .catch(error => {
             console.log('create_running_lock_promise_test error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -88,13 +88,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
                 console.info('after lock create_running_lock_callback_test is used: ' + used);
                 expect(used).assertTrue();
                 console.info('create_running_lock_callback_test success');
-                done();
             } else {
                 console.log('create_running_lock_callback_test: ' + error);
                 expect().assertFail();
                 done();
             }
         })
+        done();
     })
 
     /**
@@ -114,13 +114,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
             console.info('after lock running_lock_lock_test is used: ' + used);
             expect(used).assertTrue();
             console.info('running_lock_lock_test success');
-            done();
         })
         .catch(error => {
             console.log('running_lock_lock_test error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -136,13 +136,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
             console.info('running_lock_isused_test used: ' + used);
             expect(used).assertFalse();
             console.info('running_lock_isused_test success');
-            done();
         })
         .catch(error => {
             console.log('running_lock_isused_test error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -166,13 +166,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
             console.info('after unlock running_lock_unlock_test is used: ' + used);
             expect(used).assertFalse();
             console.info('running_lock_unlock_test success');
-            done();
         })
         .catch(error => {
             console.log('running_lock_unlock_test error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -210,13 +210,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
             console.info('is_runninglock_type_supported_test_1 PROXIMITY_SCREEN_CONTROL supported is ' + supported);
             expect(supported).assertTrue();
             console.info('is_runninglock_type_supported_test_1 success');
-            done();
         })
         .catch(error => {
             console.log('is_runninglock_type_supported_test_1 error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -230,13 +230,13 @@ describe('PowerMgrRunningLockUnitTest', function () {
             console.info('is_runninglock_type_supported_promise_test_2 BACKGROUND supported is ' + supported);
             expect(supported).assertTrue();
             console.info('is_runninglock_type_supported_promise_test_2 success');
-            done();
         })
         .catch(error => {
             console.log('is_runninglock_type_supported_promise_test_2 error: ' + error);
             expect().assertFail();
             done();
         })
+        done();
     })
 
     /**
@@ -250,12 +250,12 @@ describe('PowerMgrRunningLockUnitTest', function () {
                 console.info('is_runninglock_type_supported_callback_test_3 BACKGROUND supported is ' + supported);
                 expect(supported).assertTrue();
                 console.info('is_runninglock_type_supported_callback_test_3 success');
-                done();
             } else {
                 console.log('is_runninglock_type_supported_callback_test_3: ' + error);
                 expect().assertFail();
                 done();
             }
         })
+        done();
     })
 })
