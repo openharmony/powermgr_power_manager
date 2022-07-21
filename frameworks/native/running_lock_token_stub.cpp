@@ -14,5 +14,3 @@
  */
 
 #include "running_lock_token_stub.h"
-
-#include "power_common.h"

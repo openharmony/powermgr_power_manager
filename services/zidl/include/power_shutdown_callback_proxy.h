@@ -17,7 +17,9 @@
 #define POWERMGR_SERVICES_SHUTDOWN_STATE_CALLBACK_PROXY_H
 
 #include <iremote_proxy.h>
-#include <nocopyable.h>
+#include <functional>
+#include "iremote_broker.h"
+#include "refbase.h"
 
 #include "ishutdown_callback.h"
 

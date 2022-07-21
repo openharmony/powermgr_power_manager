@@ -16,10 +16,12 @@
 #include "power_mode_callback_stub.h"
 
 #include <message_parcel.h>
-
-#include "power_common.h"
-#include "power_mode_callback_proxy.h"
+#include "errors.h"
+#include "ipc_object_stub.h"
+#include "power_log.h"
+#include "power_mgr_errors.h"
 #include "xcollie.h"
+#include "xcollie_define.h"
 
 namespace OHOS {
 namespace PowerMgr {

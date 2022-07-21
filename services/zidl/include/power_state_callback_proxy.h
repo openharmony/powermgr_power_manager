@@ -18,6 +18,10 @@
 
 #include <iremote_proxy.h>
 #include <nocopyable.h>
+#include <functional>
+#include "refbase.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
 
 #include "ipower_state_callback.h"
 #include "power_state_machine_info.h"

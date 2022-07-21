@@ -14,9 +14,17 @@
  */
 
 #include <string>
-
+#include <cstddef>
+#include <cstdint>
+#include <iosfwd>
+#include <memory>
+#include "new"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
+#include "node_api_types.h"
+#include "napi/native_common.h"
 #include "napi/native_api.h"
-#include "napi/native_node_api.h"
+#include "running_lock.h"
 #include "power_log.h"
 #include "power_mgr_client.h"
 #include "running_lock_info.h"

@@ -16,8 +16,11 @@
 #ifndef POWERMGR_SERVICES_IPOWER_SHUTDOWN_CALLBACK_STUB_H
 #define POWERMGR_SERVICES_IPOWER_SHUTDOWN_CALLBACK_STUB_H
 
+#include <cstdint>
 #include <iremote_stub.h>
 #include <nocopyable.h>
+#include "refbase.h"
+#include "message_option.h"
 
 #include "ishutdown_callback.h"
 
