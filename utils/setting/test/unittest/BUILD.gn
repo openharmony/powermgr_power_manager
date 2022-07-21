@@ -23,7 +23,7 @@ config("module_private_config") {
   include_dirs = [
     "${powermgr_utils_path}/setting/include",
     "${powermgr_utils_path}/native/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -39,13 +39,13 @@ ohos_unittest("test_power_setting") {
     "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager",
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "relational_store:native_dataability",
     "relational_store:native_rdb",

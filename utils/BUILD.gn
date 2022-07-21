@@ -17,7 +17,7 @@ import("//build/test.gni")
 config("utils_config") {
   include_dirs = [
     "native/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -26,9 +26,8 @@ ohos_source_set("powermgr_utils") {
 
   public_configs = [ ":utils_config" ]
 
-  deps = [ "//utils/native/base:utils" ]
-
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
   ]
@@ -42,7 +41,7 @@ ohos_executable("power-shell") {
     "${powermgr_utils_path}/shell/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/tools/aa/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   sources = [
@@ -54,7 +53,6 @@ ohos_executable("power-shell") {
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${powermgr_interfaces_path}/innerkits:powermgr_client",
     "${powermgr_utils_path}/setting:power_setting",
-    "//utils/native/base:utils",
   ]
 
   configs = [
@@ -67,6 +65,7 @@ ohos_executable("power-shell") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
+    "c_utils:utils",
     "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

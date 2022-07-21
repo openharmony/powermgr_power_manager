@@ -43,12 +43,10 @@ ohos_shared_library("powermgr_client") {
 
   public_configs = [ ":powermgr_public_config" ]
 
-  deps = [
-    "${powermgr_utils_path}:powermgr_utils",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "${powermgr_utils_path}:powermgr_utils" ]
 
   external_deps = [
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

@@ -32,12 +32,12 @@ ohos_fuzztest("PowerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "./power_fuzzer.cpp" ]
-  deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "${powermgr_native_innerkits_path}:powermgr_client" ]
 
-  external_deps = [ "ipc:ipc_core" ]
+  external_deps = [
+    "c_utils:utils",
+    "ipc:ipc_core",
+  ]
 }
 
 ###############################################################################
