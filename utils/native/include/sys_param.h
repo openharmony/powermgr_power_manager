@@ -16,7 +16,7 @@
 #ifndef POWERMGR_SYS_PARAM_H
 #define POWERMGR_SYS_PARAM_H
 
-#include <string>
+#include <cstdint>
 
 namespace OHOS {
 namespace PowerMgr {

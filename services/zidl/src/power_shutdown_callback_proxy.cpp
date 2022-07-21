@@ -15,14 +15,13 @@
 
 #include "power_shutdown_callback_proxy.h"
 
-#include <ipc_types.h>
 #include <message_parcel.h>
 
 #include "errors.h"
 #include "iremote_object.h"
 #include "message_option.h"
 #include "power_common.h"
-#include "power_shutdown_callback_stub.h"
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {

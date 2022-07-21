@@ -15,9 +15,10 @@
 
 #include "power_state_callback_proxy.h"
 
-#include <ipc_types.h>
 #include <message_parcel.h>
-
+#include "errors.h"
+#include "message_option.h"
+#include "power_log.h"
 #include "power_common.h"
 
 namespace OHOS {
