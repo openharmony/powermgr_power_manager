@@ -30,6 +30,7 @@ namespace PowerMgr {
 constexpr int SLEEP_WAIT_TIME_S = 6;
 constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
 constexpr int SCREEN_OFF_WAIT_TIME_S = 15;
+constexpr int SET_DISPLAY_OFF_TIME_MS = 8000;
 
 class PowerMgrPowerSavemodeTest : public testing::Test {
 public:
