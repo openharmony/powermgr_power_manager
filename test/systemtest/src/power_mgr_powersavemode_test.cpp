@@ -45,6 +45,9 @@ void PowerMgrPowerSavemodeTest::PowerModeTest1Callback::PowerModeCallback()
 
 void PowerMgrPowerSavemodeTest::SetUpTestCase(void)
 {
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pms->OnStart();
+    SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 }
 
 void PowerMgrPowerSavemodeTest::TearDownTestCase(void)
@@ -67,15 +70,13 @@ namespace {
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_001, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_001: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     uint32_t mode = 601;
     uint32_t mode1 = 601;
     powerMgrClient.SetDeviceMode(mode);
-    sleep(6);
+    sleep(SLEEP_WAIT_TIME_S);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_001 fail to SetDeviceMode";
     GTEST_LOG_(INFO) << "PowerSavemode_001: SetDeviceMode end.";
@@ -89,15 +90,13 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_001, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_002, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     uint32_t mode = 602;
     uint32_t mode1 = 602;
     powerMgrClient.SetDeviceMode(mode);
-    sleep(3);
+    sleep(SLEEP_WAIT_TIME_S);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_002 fail to SetDeviceMode";
     GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode end." << mode;
@@ -110,8 +109,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_002, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_003, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_003: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -130,8 +127,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_003, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_028, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_028: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -150,8 +145,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_028, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_029, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_029: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -173,8 +166,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_029, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_004, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_004: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -193,8 +184,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_004, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_005, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_005: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -213,8 +202,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_005, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_006, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_006: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -233,8 +220,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_006, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_030, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
-
     GTEST_LOG_(INFO) << "PowerSavemode_030: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -252,7 +237,6 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_030, TestSize.Level2)
  */
 HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_031, TestSize.Level2)
 {
-    sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerSavemode_031: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
