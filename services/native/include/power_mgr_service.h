@@ -124,13 +124,13 @@ public:
     }
     void HandlePowerKeyTimeout();
 
-    void EnableMock(IDeviceStateAction* stateAction, IDevicePowerAction* powerAction,
-        IRunningLockAction* lockAction)
+    void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState,
+        IDevicePowerAction* powerAction, IRunningLockAction* lockAction)
     {
         POWER_HILOGE(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
-        powerStateMachine_->EnableMock(stateAction);
-        shutdownService_.EnableMock(powerAction, stateAction);
+        powerStateMachine_->EnableMock(powerState);
+        shutdownService_.EnableMock(powerAction, shutdownState);
     }
     void MockProximity(uint32_t status)
     {
