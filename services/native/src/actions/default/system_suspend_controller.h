@@ -44,7 +44,7 @@ public:
 private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
-    inline static const std::string WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
+    inline static constexpr const char* WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
     class PowerHdfCallback : public OHOS::HDI::Power::V1_0::IPowerHdiCallback {
     public:
         PowerHdfCallback() = default;

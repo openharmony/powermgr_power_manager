@@ -35,13 +35,6 @@ using namespace testing::ext;
 using namespace OHOS::EventFwk;
 using namespace OHOS::PowerMgr;
 
-namespace {
-std::mutex g_mtx;
-
-const std::string COMPARE_STR = "cesComparesStrForCase";
-const std::string COMPARE_STR_FALSE = "cesComparesStrForCaseFalse";
-}  // namespace
-
 CesSystemTest::CommonEventServiCesSystemTest::CommonEventServiCesSystemTest(
     const CommonEventSubscribeInfo &subscriberInfo)
     : CommonEventSubscriber(subscriberInfo)
