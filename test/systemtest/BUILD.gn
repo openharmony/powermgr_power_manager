@@ -28,7 +28,7 @@ config("module_private_config") {
     "//base/powermgr/power_manager/services/native/include",
     "//base/powermgr/power_manager/services/native/src",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/distributedschedule/safwk/services/safwk/include",
     "//base/powermgr/power_manager/interfaces/innerkits/native/include",
     "//base/powermgr/power_manager/services/zidl/include",
@@ -58,6 +58,7 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
   "sensor:sensor_interface_native",
+  "c_utils:utils",
 ]
 
 ##############################sttest##########################################
@@ -79,7 +80,6 @@ ohos_systemtest("test_power_st_mgr_mock") {
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -104,7 +104,6 @@ ohos_systemtest("test_power_mgr_mock_system") {
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -129,12 +128,12 @@ ohos_systemtest("test_power_mgr_powersavemode") {
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
