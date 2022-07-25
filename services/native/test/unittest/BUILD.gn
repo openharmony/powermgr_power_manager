@@ -39,7 +39,7 @@ config("module_private_event_config") {
 
   include_dirs = [
     "//base/sensors/sensor/interfaces/native/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -53,6 +53,7 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
   "sensor:sensor_interface_native",
+  "c_utils:utils",
 ]
 
 ############################shutdown_callback_test#############################
@@ -68,7 +69,6 @@ ohos_unittest("shutdown_callback_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
   external_deps = deps_ex
 }
@@ -86,7 +86,6 @@ ohos_unittest("shutdown_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
   external_deps = deps_ex
 }
@@ -104,7 +103,6 @@ ohos_unittest("reboot_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
   external_deps = deps_ex
 }
@@ -125,7 +123,6 @@ ohos_unittest("test_register_callback_mode") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -146,7 +143,6 @@ ohos_unittest("test_power_get_mode") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -167,7 +163,6 @@ ohos_unittest("test_power_set_mode") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -188,7 +183,6 @@ ohos_unittest("test_power_shutdown") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -209,7 +203,6 @@ ohos_unittest("test_power_device_mode") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -230,7 +223,6 @@ ohos_unittest("test_running_lock") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -251,7 +243,6 @@ ohos_unittest("test_power_mgr_service") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -274,7 +265,6 @@ ohos_unittest("ces_system") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -297,7 +287,6 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -320,7 +309,6 @@ ohos_unittest("test_power_mgr_mock") {
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -343,7 +331,6 @@ ohos_unittest("test_power_mgr_fail_check") {
     "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = deps_ex
@@ -366,7 +353,6 @@ if (false) {
       "${powermgr_service_path}/native/src/actions:powermgr_actions",
       "${powermgr_utils_path}:powermgr_utils",
       "//third_party/googletest:gtest_main",
-      "//utils/native/base:utils",
     ]
 
     external_deps = deps_ex

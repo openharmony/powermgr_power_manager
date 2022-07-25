@@ -35,6 +35,7 @@
                 "ace_engine",
                 "bundle_framework",
                 "common_event_service",
+		"c_utils",
                 "device_status",
                 "display_manager",
                 "drivers_interface_power",
@@ -53,7 +54,6 @@
                 "safwk",
                 "samgr_standard",
                 "sensor",
-                "utils_base",
                 "window_manager"
             ],
             "third_party": [

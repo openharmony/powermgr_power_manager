@@ -17,7 +17,7 @@ config("private_config") {
   include_dirs = [
     "include",
     "../native/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -32,13 +32,12 @@ ohos_shared_library("power_permission") {
 
   public_configs = [ ":public_config" ]
 
-  deps = [ "//utils/native/base:utils" ]
-
   external_deps = [
     "ability_base:want",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
