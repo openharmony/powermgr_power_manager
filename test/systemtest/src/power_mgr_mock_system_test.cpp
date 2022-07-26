@@ -22,17 +22,19 @@ using namespace std;
 using ::testing::_;
 
 static sptr<PowerMgrService> g_service;
-static MockStateAction* g_stateAction;
+static MockStateAction* g_shutdownState;
+static MockStateAction* g_powerState;
 static MockPowerAction* g_powerAction;
 static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
     POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start.");
-    g_stateAction = new MockStateAction();
+    g_powerState = new MockStateAction();
+    g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
-    g_service->EnableMock(g_stateAction, g_powerAction, g_lockAction);
+    g_service->EnableMock(g_powerState, g_shutdownState, g_powerAction, g_lockAction);
 }
 
 void PowerMgrMockSystemTest::SetUpTestCase(void)
@@ -40,20 +42,17 @@ void PowerMgrMockSystemTest::SetUpTestCase(void)
     // create singleton g_service object at the beginning
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
-    ResetMockAction();
 }
 
 void PowerMgrMockSystemTest::TearDownTestCase(void)
 {
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
-    delete g_stateAction;
-    delete g_powerAction;
-    delete g_lockAction;
 }
 
 void PowerMgrMockSystemTest::SetUp(void)
 {
+    ResetMockAction();
 }
 
 void PowerMgrMockSystemTest::TearDown(void)
@@ -68,7 +67,6 @@ namespace {
  */
 HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock102, TestSize.Level2)
 {
-    sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock102: start.";
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock102:Start.");
@@ -78,16 +76,15 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock102, TestSize.Level2)
     }
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock102:Start mock.");
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
+    EXPECT_CALL(*g_powerState, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction,
+    EXPECT_CALL(*g_powerState,
         Suspend(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false));
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock102:Start suspend.");
     pms->SetDisplaySuspend(true);
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
 
-    ResetMockAction();
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock102:end.");
     GTEST_LOG_(INFO) << "PowerMgrMock102: end.";
 }
@@ -99,7 +96,6 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock102, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock103, TestSize.Level2)
 {
-    sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock103: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock103:Start.");
 
@@ -109,16 +105,15 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock103, TestSize.Level2)
     }
 
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN, std::string("test"));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
+    EXPECT_CALL(*g_powerState, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction,
+    EXPECT_CALL(*g_powerState,
         Suspend(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false));
     pms->SetDisplaySuspend(true);
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     sleep(SLEEP_WAIT_TIME_S + 1);
 
-    ResetMockAction();
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock103:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock103: end.";
 }
@@ -130,7 +125,6 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock103, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock104, TestSize.Level2)
 {
-    sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock104: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock104:Start.");
 
@@ -138,20 +132,20 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock104, TestSize.Level2)
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock104: Failed to get PowerMgrService";
     }
-
+    pms->SetDisplayOffTime(SET_DISPLAY_OFF_TIME_MS);
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN, std::string("test"));
     pms->SetDisplaySuspend(true);
-    ON_CALL(*g_stateAction, GetDisplayState())
+    ON_CALL(*g_powerState, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
-    ON_CALL(*g_stateAction, GetDisplayState())
+    sleep((REFRESHACTIVITY_WAIT_TIME_S * 2 / 3) + 1);
+    ON_CALL(*g_powerState, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
+    EXPECT_CALL(*g_powerState, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);
+    sleep((REFRESHACTIVITY_WAIT_TIME_S * 1 / 3) + 1);
 
-    ResetMockAction();
+    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock104:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock104: end.";
 }
@@ -163,7 +157,7 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock104, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock105, TestSize.Level2)
 {
-    int64_t time =30000;
+    int64_t time =8000;
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock105: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock105:Start.");
@@ -175,18 +169,17 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock105, TestSize.Level2)
 
     pms->SetDisplayOffTime(time);
     pms->SetDisplaySuspend(true);
-    ON_CALL(*g_stateAction, GetDisplayState())
+    ON_CALL(*g_powerState, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
     sleep(((time/1000)*2/3)+1);
-    ON_CALL(*g_stateAction, GetDisplayState())
+    ON_CALL(*g_powerState, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
+    EXPECT_CALL(*g_powerState, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(((time/1000)*1/3)+1);
 
 
-    ResetMockAction();
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock105:End");
     pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
     GTEST_LOG_(INFO) << "PowerMgrMock105: end.";
@@ -199,7 +192,6 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock105, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
 {
-    sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock106: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:Start.");
 
@@ -216,14 +208,13 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     sleep(SLEEP_WAIT_TIME_S*10);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
+    EXPECT_CALL(*g_powerState, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
+    EXPECT_CALL(*g_powerState, GoToSleep(_, _, _)).Times(0);
     pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
     EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
 
-    ResetMockAction();
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock106: end.";
 }
@@ -235,7 +226,6 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
  */
 HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock107, TestSize.Level2)
 {
-    sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrMock107: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock107:Start.");
 
@@ -243,26 +233,26 @@ HWTEST_F (PowerMgrMockSystemTest, PowerMgrMock107, TestSize.Level2)
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock068: Failed to get PowerMgrService";
     }
-
+    pms->SetDisplayOffTime(SET_DISPLAY_OFF_TIME_MS);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    ON_CALL(*g_stateAction, GetDisplayState())
+    ON_CALL(*g_powerState, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    sleep((SCREEN_OFF_WAIT_TIME_S*2/3) + 1);
-    ON_CALL(*g_stateAction, GetDisplayState())
+    sleep((REFRESHACTIVITY_WAIT_TIME_S * 2 / 3) + 1);
+    ON_CALL(*g_powerState, GetDisplayState())
         .WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
     pms->SetDisplaySuspend(true);
     pms->CreateRunningLock(token, info);
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
+    EXPECT_CALL(*g_powerState, SetDisplayState(DisplayState::DISPLAY_SUSPEND, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
+    EXPECT_CALL(*g_powerState, GoToSleep(_, _, _)).Times(0);
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    sleep((SCREEN_OFF_WAIT_TIME_S*1/3) + 1);
+    sleep((REFRESHACTIVITY_WAIT_TIME_S * 1 / 3) + 1);
     pms->UnLock(token);
 
-    ResetMockAction();
+    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock107:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock107: end.";
 }
