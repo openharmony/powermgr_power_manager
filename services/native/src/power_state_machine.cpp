@@ -726,10 +726,7 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
 
 void PowerStateMachine::SetDisplayOffTime(int64_t time)
 {
-    {
-        std::lock_guard lock(mutex_);
-        displayOffTime_ = time;
-    }
+    displayOffTime_ = time;
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
     }
@@ -745,7 +742,6 @@ void PowerStateMachine::SetSleepTime(int64_t time)
 
 int64_t PowerStateMachine::GetDisplayOffTime()
 {
-    std::lock_guard lock(mutex_);
     return displayOffTime_;
 }
 
