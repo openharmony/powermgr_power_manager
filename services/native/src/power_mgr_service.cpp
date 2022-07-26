@@ -89,7 +89,7 @@ bool PowerMgrService::Init()
     if (!handler_) {
         handler_ = std::make_shared<PowermsEventHandler>(eventRunner_, pms);
         std::string handlerName("PowerMgrEventHandler");
-        HiviewDFX::Watchdog::GetInstance().AddThread(handlerName, handler_, WATCH_DOG_DELAY_S);
+        HiviewDFX::Watchdog::GetInstance().AddThread(handlerName, handler_);
     }
 
     if (!runningLockMgr_) {
