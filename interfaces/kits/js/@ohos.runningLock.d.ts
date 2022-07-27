@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AsyncCallback} from './basic.d.ts';
+import {AsyncCallback} from './basic';
 
 /**
  * Provides a mechanism to prevent the system from hibernating so that the applications can run in the background or
