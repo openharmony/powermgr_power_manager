@@ -20,8 +20,6 @@
 #include <system_ability.h>
 
 #include "actions/idevice_power_action.h"
-#include "devicestatus_agent.h"
-#include "devicestatus_data_utils.h"
 #include "ipower_mgr.h"
 #include "powerms_event_handler.h"
 #include "power_mgr_notify.h"
@@ -32,8 +30,6 @@
 #include "sp_singleton.h"
 #include "power_mode_module.h"
 #include "power_save_mode.h"
-
-#define APP_FIRST_UID_VALUE 10000
 
 namespace OHOS {
 namespace PowerMgr {
@@ -89,7 +85,8 @@ public:
     void NotifyDisplayActionDone(uint32_t event);
     void KeyMonitorInit();
     void KeyMonitorCancel();
-    void DeviceStatusMonitorInit();
+    void HallSensorSubscriberInit();
+    void HallSensorSubscriberCancel();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -152,6 +149,8 @@ private:
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
     void GetDisplayPosition(int32_t& width, int32_t& height);
+    static void HallSensorCallback(SensorEvent* event);
+    bool IsSupportSensor(SensorTypeId);
     bool ready_ {false};
     std::mutex mutex_;
     std::mutex lockMutex_;
@@ -160,7 +159,6 @@ private:
     std::shared_ptr<PowermsEventHandler> handler_;
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
-    std::shared_ptr<Msdp::DeviceStatusAgent> deviceStatusAgent_;
     ShutdownService shutdownService_;
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
@@ -171,6 +169,7 @@ private:
     int32_t powerkeyReleaseId_ {0};
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
+    SensorUser sensorUser_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
