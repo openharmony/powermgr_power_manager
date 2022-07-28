@@ -52,7 +52,7 @@
                 "napi",
                 "relational_store",
                 "safwk",
-                "samgr_standard",
+                "samgr",
                 "sensor",
                 "window_manager"
             ],
