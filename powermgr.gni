@@ -19,19 +19,20 @@ ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
 
 ability_runtime_services_path = "${ability_runtime_path}/services"
 
-powermgr_native_part_name = "power_manager"
+powermgr_part_name = "power_manager"
 
 powermgr_root_path = "//base/powermgr/power_manager"
 
 powermgr_service_path = "${powermgr_root_path}/services"
 
-powermgr_framework_path = "${powermgr_root_path}/frameworks"
+powermgr_service_zidl = "${powermgr_service_path}/zidl"
 
-powermgr_interfaces_path = "${powermgr_root_path}/interfaces"
+powermgr_framework = "${powermgr_root_path}/frameworks"
+powermgr_framework_native = "${powermgr_framework}/native"
 
-powermgr_native_innerkits_path = "${powermgr_interfaces_path}/innerkits"
+powermgr_innerkits = "${powermgr_root_path}/interfaces/innerkits"
 
-powermgr_kits_path = "${powermgr_interfaces_path}/kits"
+powermgr_kits = "${powermgr_root_path}/interfaces/kits"
 
 powermgr_utils_path = "${powermgr_root_path}/utils"
 

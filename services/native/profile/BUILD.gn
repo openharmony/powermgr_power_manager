@@ -17,7 +17,7 @@ import("//build/ohos.gni")
 ohos_prebuilt_etc("power_mode_config") {
   source = "power_mode_config.xml"
   relative_install_dir = "power_config"
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
   subsystem_name = "powermgr"
 }
 
@@ -26,6 +26,19 @@ ohos_prebuilt_etc("power_mode_config_vendor") {
   source = "//vendor/${product_company}/${product_name}/power_config/power_mode_config.xml"
   relative_install_dir = "power_config"
   install_images = [ chipset_base_dir ]
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
   subsystem_name = "powermgr"
+}
+
+group("power_service_config") {
+  deps = [ ":power_mode_config" ]
+
+  VENDOR_CONFIG_PATH = rebase_path(
+          "//vendor/${product_company}/${product_name}/power_config/power_mode_config.xml")
+  CMD = "if [ -f ${VENDOR_CONFIG_PATH} ]; then echo true; else echo false; fi"
+  vendor_config_exist =
+      exec_script("//build/lite/run_shell_cmd.py", [ CMD ], "value")
+  if (vendor_config_exist) {
+    deps += [ ":power_mode_config_vendor" ]
+  }
 }

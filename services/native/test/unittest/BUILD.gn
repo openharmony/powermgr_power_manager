@@ -14,7 +14,7 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
 
-module_output_path = "${powermgr_native_part_name}/powermgr_native"
+module_output_path = "${powermgr_part_name}/powermgr_native"
 
 ###############################################################################
 config("module_private_config") {
@@ -23,23 +23,6 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
-    "//base/powermgr/display_manager/interfaces/innerkits/native/include/",
-    "//base/powermgr/display_manager/service/native/include/",
-    "//base/powermgr/display_manager/service/zidl/include/",
-    "//base/powermgr/power_manager/services/native/test/unittest/include",
-    "//base/sensors/sensor/interfaces/native/include",
-    "//drivers/peripheral/display/interfaces/include/",
-    "//foundation/graphic/graphic_2d/utils/include/",
-    "//third_party/googletest/googletest/include",
-    "//utils/system/safwk/native/include",
-  ]
-}
-config("module_private_event_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [
-    "//base/sensors/sensor/interfaces/native/include",
-    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -54,6 +37,8 @@ deps_ex = [
   "samgr_standard:samgr_proxy",
   "sensor:sensor_interface_native",
   "c_utils:utils",
+  "device_status:devicestatus_client",
+  "display_manager:displaymgr",
 ]
 
 ############################shutdown_callback_test#############################
@@ -65,7 +50,8 @@ ohos_unittest("shutdown_callback_test") {
     ":module_private_config",
   ]
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -82,7 +68,8 @@ ohos_unittest("shutdown_test") {
     ":module_private_config",
   ]
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -99,7 +86,8 @@ ohos_unittest("reboot_test") {
     ":module_private_config",
   ]
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -119,7 +107,8 @@ ohos_unittest("test_register_callback_mode") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -139,7 +128,8 @@ ohos_unittest("test_power_get_mode") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -159,7 +149,8 @@ ohos_unittest("test_power_set_mode") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -179,7 +170,8 @@ ohos_unittest("test_power_shutdown") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -199,7 +191,8 @@ ohos_unittest("test_power_device_mode") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -219,7 +212,8 @@ ohos_unittest("test_running_lock") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -239,7 +233,8 @@ ohos_unittest("test_power_mgr_service") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gtest_main",
@@ -256,11 +251,11 @@ ohos_unittest("ces_system") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
-    ":module_private_event_config",
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -281,7 +276,8 @@ ohos_unittest("test_power_state_machine") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -303,7 +299,8 @@ ohos_unittest("test_power_mgr_mock") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -325,7 +322,8 @@ ohos_unittest("test_power_mgr_fail_check") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -348,7 +346,7 @@ if (false) {
     ]
 
     deps = [
-      "${powermgr_native_innerkits_path}:powermgr_client",
+      "${powermgr_innerkits}:powermgr_client",
       "${powermgr_service_path}:powermgrservice",
       "${powermgr_service_path}/native/src/actions:powermgr_actions",
       "${powermgr_utils_path}:powermgr_utils",

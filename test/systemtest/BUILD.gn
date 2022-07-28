@@ -14,7 +14,7 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
 
-module_output_path = "${powermgr_native_part_name}/powermgr_native"
+module_output_path = "${powermgr_part_name}/powermgr_native"
 
 ###############################################################################
 config("module_private_config") {
@@ -23,28 +23,6 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
-    "//utils/system/safwk/native/include",
-    "//third_party/googletest/googletest/include",
-    "//base/powermgr/power_manager/services/native/include",
-    "//base/powermgr/power_manager/services/native/src",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/distributedschedule/safwk/services/safwk/include",
-    "//base/powermgr/power_manager/interfaces/innerkits/native/include",
-    "//base/powermgr/power_manager/services/zidl/include",
-    "//base/powermgr/battery_manager/utils/native/include",
-    "//base/powermgr/power_manager/services/native/src/actions/default",
-    "//base/powermgr/display_manager/interfaces/innerkits/native/include",
-    "//base/powermgr/display_manager/service/native/include",
-    "//base/powermgr/display_manager/service/zidl/include",
-    "//drivers/peripheral/display/interfaces/include",
-    "//foundation/graphic/graphic_2d/utils/include",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//base/powermgr/power_manager/utils/native/include",
-    "//base/powermgr/power_manager/services/native/test/unittest/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "${ability_runtime_inner_api_path}/intent/include",
-    "//base/sensors/sensor/interfaces/native/include",
   ]
 }
 
@@ -59,6 +37,8 @@ deps_ex = [
   "samgr_standard:samgr_proxy",
   "sensor:sensor_interface_native",
   "c_utils:utils",
+  "device_status:devicestatus_client",
+  "display_manager:displaymgr",
 ]
 
 ##############################sttest##########################################
@@ -74,7 +54,8 @@ ohos_systemtest("test_power_st_mgr_mock") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -98,7 +79,8 @@ ohos_systemtest("test_power_mgr_mock_system") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -122,7 +104,8 @@ ohos_systemtest("test_power_mgr_powersavemode") {
   ]
 
   deps = [
-    "${powermgr_native_innerkits_path}:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}:powermgr_utils",
@@ -130,17 +113,7 @@ ohos_systemtest("test_power_mgr_powersavemode") {
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = [
-    "ability_base:base",
-    "ability_base:want",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
-  ]
+  external_deps = deps_ex
 }
 
 group("systemtest_powermgr") {
