@@ -13,37 +13,23 @@
 
 import("//base/powermgr/power_manager/powermgr.gni")
 
-config("power_manager_napi_private_config") {
-  include_dirs = [
-    "//foundation/arkui/napi/native_engine",
-    "//foundation/arkui/napi/interfaces/kits",
-    "//utils/system/safwk/native/include",
-    "//third_party/node/src",
-    "//base/powermgr/power_manager/interfaces/innerkits/native/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//foundation/distributedschedule/samgr/adapter/interfaces/innerkits/include",
-  ]
-}
-
 ohos_shared_library("runninglock") {
   sources = [ "runninglock.cpp" ]
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":power_manager_napi_private_config",
-  ]
-  deps = [
-    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
-    "//foundation/arkui/napi:ace_napi",
-  ]
+  configs = [ "${powermgr_utils_path}:utils_config" ]
+  deps =
+      [ "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client" ]
   if (!build_public_version) {
     external_deps = [ "hilog_native:libhilog" ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [
+      "hilog_native:libhilog",
+      "ipc:ipc_core",
+      "napi:ace_napi",
+    ]
   }
 
   relative_install_dir = "module"
 
   subsystem_name = "powermgr"
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }

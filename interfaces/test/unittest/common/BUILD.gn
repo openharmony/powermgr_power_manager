@@ -14,7 +14,7 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
 
-module_output_path = "${powermgr_native_part_name}/powermgr_native"
+module_output_path = "${powermgr_part_name}/powermgr_native"
 
 ohos_js_unittest("powermgr_kits_js_test") {
   module_out_path = module_output_path

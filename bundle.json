@@ -63,17 +63,21 @@
             ]
         },
         "build": {
-            "sub_component": [
-                "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
-                "//base/powermgr/power_manager/frameworks/napi/power:power",
-                "//base/powermgr/power_manager/frameworks/napi/runninglock:runninglock",
-                "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
-                "//base/powermgr/power_manager/services:powermgrservice",
-                "//base/powermgr/power_manager/services:power_service_config",
-                "//base/powermgr/power_manager/utils:power-shell",
-                "//base/powermgr/power_manager/utils/permission:power_permission",
-                "//base/powermgr/power_manager/utils/setting:power_setting"
-            ],
+            "group_type": {
+                "base_group": [
+                    "//base/powermgr/power_manager/utils:power-shell",
+                    "//base/powermgr/power_manager/utils/permission:power_permission",
+                    "//base/powermgr/power_manager/utils/setting:power_setting"
+                ],
+                "fwk_group": [
+                    "//base/powermgr/power_manager/frameworks:power_napi",
+                    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client"
+                ],
+                "service_group": [
+                    "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
+                    "//base/powermgr/power_manager/services:service"
+                ]
+            },
             "inner_kits": [
                 {
                     "name": "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",

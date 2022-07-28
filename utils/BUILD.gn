@@ -32,16 +32,15 @@ ohos_source_set("powermgr_utils") {
     "init:libbegetutil",
   ]
 
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }
 
 ohos_executable("power-shell") {
   include_dirs = [
-    "${powermgr_interfaces_path}/innerkits/native/include",
+    "${powermgr_innerkits}/native/include",
     "${powermgr_utils_path}/shell/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/tools/aa/include",
-    "//commonlibrary/c_utils/base/include",
   ]
 
   sources = [
@@ -51,7 +50,7 @@ ohos_executable("power-shell") {
 
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "${powermgr_interfaces_path}/innerkits:powermgr_client",
+    "${powermgr_innerkits}:powermgr_client",
     "${powermgr_utils_path}/setting:power_setting",
   ]
 
@@ -75,7 +74,7 @@ ohos_executable("power-shell") {
   ]
 
   install_enable = true
-  part_name = "${powermgr_native_part_name}"
+  part_name = "${powermgr_part_name}"
 }
 
 group("powerutils_test") {
