@@ -70,7 +70,7 @@ ohos_executable("power-shell") {
     "ipc:ipc_core",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   install_enable = true
