@@ -153,6 +153,7 @@ private:
     void GetDisplayPosition(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen);
     bool ready_ {false};
     std::mutex mutex_;
+    std::mutex lockMutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_;
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner_;
     std::shared_ptr<PowermsEventHandler> handler_;
