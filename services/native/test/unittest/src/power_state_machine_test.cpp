@@ -55,8 +55,6 @@ bool PowerStateMachineTest::IsTestSupported()
     return !SysParam::IsDeviceType(DeviceType::DEVICE_CAR) && !SysParam::IsDeviceType(DeviceType::DEVICE_TV);
 }
 
-
-#ifdef SHIELD
 namespace {
 /**
  * @tc.name: PowerStateMachine003
@@ -323,77 +321,3 @@ void PowerStateMachineTest::Shutdownthread()
         powerMgrClient.ShutDownDevice(string("ShutDownDeviceTestThread"));
     }
 }
-#endif
-
-#ifdef SHIELD
-namespace {
-/**
- * @tc.name: PowerStateMachine010
- * @tc.desc: test suspend during wakeup
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine010, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine010::fun is start!");
-    if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(LABEL_TEST, "PowerStateMachine010::test is not supported, do nothing!");
-        return;
-    }
-
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerStateMachine010: Suspend Device start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    // Wakeup Device before test
-    GTEST_LOG_(INFO) << "PowerStateMachine010: Wakeup Device before test.";
-    powerMgrClient.WakeupDevice();
-    sleep(SLEEP_WAIT_TIME_S);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine010: Prepare Fail, Screen is OFF.";
-    GTEST_LOG_(INFO) << "PowerStateMachine010: Screen is On, Begin to Suspend Device!";
-
-    powerMgrClient.SuspendDevice();
-    GTEST_LOG_(INFO) << "PowerStateMachine010: Start to check suspend during wakeup.";
-    std::make_unique<std::thread>(&PowerStateMachineTest::WakeUpthread, this)->detach();
-    std::make_unique<std::thread>(&PowerStateMachineTest::Suspendthread, this)->join();
-    sleep(NEXT_WAIT_TIME_S);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine010: Wakeup Device Lock Fail, Screen is Off";
-
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine010::fun is end!");
-    GTEST_LOG_(INFO) << "PowerStateMachine010: Suspend Device end.";
-}
-
-/**
- * @tc.name: PowerStateMachine011
- * @tc.desc: test wakeup during suspend
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine011, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine011::fun is start!");
-    if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(LABEL_TEST, "PowerStateMachine011::test is not supported, do nothing!");
-        return;
-    }
-
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerStateMachine011: Suspend Device start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    // Wakeup Device before test
-    GTEST_LOG_(INFO) << "PowerStateMachine011: Wakeup Device before test.";
-    powerMgrClient.WakeupDevice();
-    sleep(SLEEP_WAIT_TIME_S);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine011: Prepare Fail, Screen is OFF.";
-    GTEST_LOG_(INFO) << "PowerStateMachine011: Screen is On, Begin to Suspend Device!";
-
-    GTEST_LOG_(INFO) << "PowerStateMachine011: Start to check wakeup during suspend.";
-    std::make_unique<std::thread>(&PowerStateMachineTest::Suspendthread, this)->detach();
-    std::make_unique<std::thread>(&PowerStateMachineTest::WakeUpthread, this)->join();
-    sleep(NEXT_WAIT_TIME_S);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine011: SuspendDevice Lock Fail, Screen is Off";
-
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine011::fun is end!");
-    GTEST_LOG_(INFO) << "PowerStateMachine011: Suspend Device end.";
-}
-}
-#endif
