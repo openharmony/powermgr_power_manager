@@ -183,7 +183,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
     std::unique_ptr<IDeviceStateAction> stateAction_;
-    int64_t displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
+    std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ { false };
