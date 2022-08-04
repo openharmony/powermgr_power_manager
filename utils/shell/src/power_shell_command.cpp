@@ -37,10 +37,11 @@ static const struct option SET_MODE_OPTIONS[] = {
 static const struct option DISPLAY_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"restore", no_argument, nullptr, 'r'},
-    {"update", required_argument, nullptr, 'u'},
+    {"set", required_argument, nullptr, 's'},
     {"override", required_argument, nullptr, 'o'},
     {"boost", required_argument, nullptr, 'b'},
     {"cancel", no_argument, nullptr, 'c'},
+    {"discount", required_argument, nullptr, 'd'},
 };
 
 static const struct option TIME_OUT_OPTIONS[] = {
@@ -76,10 +77,13 @@ static const std::string SETMODE_HELP_MSG =
 static const std::string DISPLAY_HELP_MSG =
     "usage: power-shell display [<options>] 100\n"
     "display <options are as below> \n"
-    "  -u  :  update brightness\n"
+    "  -h  :  display help\n"
+    "  -r  :  retore brightness\n"
+    "  -s  :  set brightness\n"
     "  -o  :  override brightness\n"
     "  -b  :  timing maximum brightness\n"
-    "  -c  :  cancel the timing maximum brightness\n";
+    "  -c  :  cancel the timing maximum brightness\n"
+    "  -d  :  discount brightness\n";
 
 static const std::string TIME_OUT_HELP_MSG =
     "usage: power-shell timeout [<options>] 1000\n"
@@ -206,7 +210,7 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
 ErrCode PowerShellCommand::RunAsDisplayCommand()
 {
     int ind = 0;
-    int option = getopt_long(argc_, argv_, "hru:o:b:c", DISPLAY_OPTIONS, &ind);
+    int option = getopt_long(argc_, argv_, "hrcs:o:b:d:", DISPLAY_OPTIONS, &ind);
     resultReceiver_.clear();
     if (option == 'h') {
         resultReceiver_.append(DISPLAY_HELP_MSG);
@@ -235,10 +239,10 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
         resultReceiver_.append(DISPLAY_HELP_MSG);
         return ERR_OK;
     }
-    auto value = static_cast<uint32_t>(atoi(optarg));
-    if (option == 'u') {
+    if (option == 's') {
+        auto value = static_cast<uint32_t>(atoi(optarg));
         bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(value);
-        resultReceiver_.append("Update brightness to ");
+        resultReceiver_.append("Set brightness to ");
         resultReceiver_.append(std::to_string(value));
         if (!ret) {
             resultReceiver_.append(" failed");
@@ -247,6 +251,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
         return ERR_OK;
     }
     if (option == 'o') {
+        auto value = static_cast<uint32_t>(atoi(optarg));
         bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(value);
         resultReceiver_.append("Override brightness to ");
         resultReceiver_.append(std::to_string(value));
@@ -257,9 +262,21 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
         return ERR_OK;
     }
     if (option == 'b') {
+        auto value = static_cast<uint32_t>(atoi(optarg));
         bool ret = DisplayPowerMgrClient::GetInstance().BoostBrightness(value);
         resultReceiver_.append("Boost brightness timeout ");
         resultReceiver_.append(std::to_string(value)).append("ms");
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (option == 'd') {
+        auto discount = static_cast<double>(atof(optarg));
+        bool ret = DisplayPowerMgrClient::GetInstance().DiscountBrightness(discount);
+        resultReceiver_.append("Set brightness discount to ");
+        resultReceiver_.append(std::to_string(discount));
         if (!ret) {
             resultReceiver_.append(" failed");
         }
