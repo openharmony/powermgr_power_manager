@@ -67,7 +67,7 @@ ohos_executable("power-shell") {
     "c_utils:utils",
     "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "samgr_standard:samgr_proxy",
