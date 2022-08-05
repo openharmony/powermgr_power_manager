@@ -620,7 +620,7 @@ inline void PowerMgrService::FillUserIPCInfo(UserIPCInfo &userIPCinfo)
 void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& token,
     const RunningLockInfo& runningLockInfo)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
@@ -640,7 +640,7 @@ void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& token,
 
 void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& token)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
@@ -656,7 +656,7 @@ void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& token)
 
 bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     if (type >= static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT)) {
         return false;
     }
@@ -667,7 +667,7 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& token,
     const RunningLockInfo& runningLockInfo,
     uint32_t timeOutMS)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
@@ -691,7 +691,7 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& token,
 
 void PowerMgrService::UnLock(const sptr<IRemoteObject>& token)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
@@ -707,7 +707,7 @@ void PowerMgrService::UnLock(const sptr<IRemoteObject>& token)
 
 void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& token)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     POWER_HILOGI(MODULE_SERVICE, "%{public}s called.", __func__);
     runningLockMgr_->UnLock(token);
     runningLockMgr_->ReleaseLock(token);
@@ -715,7 +715,7 @@ void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& token)
 
 bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& token)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     POWER_HILOGI(MODULE_SERVICE, "%{public}s called.", __func__);
     return runningLockMgr_->IsUsed(token);
 }
@@ -740,7 +740,7 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
 void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& token,
     const WorkTriggerList& workTriggerList)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::CheckIsSystemAppByUid(uid)
         && !Permission::CheckCallingPermission("ohos.permission.RUNNING_LOCK")) {
@@ -756,7 +756,7 @@ void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& token,
 
 void PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
-    std::lock_guard lock(mutex_);
+    std::lock_guard lock(lockMutex_);
     auto calllingUid = IPCSkeleton::GetCallingUid();
     if (!Permission::CheckIsSystemAppByUid(uid)) {
         POWER_HILOGE(MODULE_SERVICE,
