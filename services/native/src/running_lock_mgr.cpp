@@ -890,7 +890,7 @@ RunningLockMgr::ProximityController::ProximityController()
         return;
     }
     for (int32_t i = 0; i < count; i++) {
-        if (sensorInfo[i].sensorId == SENSOR_TYPE_ID_PROXIMITY) {
+        if (sensorInfo[i].sensorTypeId == SENSOR_TYPE_ID_PROXIMITY) {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "Support PROXIMITY sensor");
             support_ = true;
             break;
