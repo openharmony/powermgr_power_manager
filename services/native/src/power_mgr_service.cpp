@@ -22,6 +22,7 @@
 #include <input_manager.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
+#include <securec.h>
 #include <string_ex.h>
 #include <system_ability_definition.h>
 #include <unistd.h>
@@ -47,7 +48,6 @@ const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefP
 }
 
 using namespace MMI;
-using namespace Msdp;
 
 PowerMgrService::PowerMgrService() : SystemAbility(POWER_MANAGER_SERVICE_ID, true) {}
 
@@ -256,44 +256,65 @@ void PowerMgrService::KeyMonitorCancel()
     }
 }
 
-class DeviceStatusCallback : public DeviceStatusAgent::DeviceStatusAgentEvent {
-public:
-    virtual ~DeviceStatusCallback() {};
-    bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
-};
-
-bool DeviceStatusCallback::OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+void PowerMgrService::HallSensorSubscriberInit()
 {
-    POWER_HILOGI(FEATURE_INPUT, "DeviceStatusCallback OnEventResult");
-    if (devicestatusData.type != DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        POWER_HILOGI(FEATURE_INPUT, "OnEventResult, wrong type: %{public}d", devicestatusData.type);
-        return false;
+    if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
+        POWER_HILOGW(FEATURE_INPUT, "SENSOR_TYPE_ID_HALL sensor not support");
+        return;
     }
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return false;
+    if (strcpy_s(sensorUser_.name, sizeof(sensorUser_.name), "PowerManager") != EOK) {
+        POWER_HILOGW(FEATURE_INPUT, "strcpy_s error");
+        return;
     }
-    int64_t now = static_cast<int64_t>(time(0));
-    if (devicestatusData.value == DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT) {
-        POWER_HILOGI(FEATURE_INPUT, "OnEventResult lid close");
+    sensorUser_.userData = nullptr;
+    sensorUser_.callback = &HallSensorCallback;
+    SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+}
+
+bool PowerMgrService::IsSupportSensor(SensorTypeId typeId)
+{
+    bool isSupport = false;
+    SensorInfo* sensorInfo = nullptr;
+    int32_t count;
+    int32_t ret = GetAllSensors(&sensorInfo, &count);
+    if (ret != 0 || sensorInfo == nullptr) {
+        POWER_HILOGW(FEATURE_INPUT, "Get sensors fail, ret=%{public}d", ret);
+        return isSupport;
+    }
+    for (int32_t i = 0; i < count; i++) {
+        if (sensorInfo[i].sensorTypeId == typeId) {
+            isSupport = true;
+            break;
+        }
+    }
+    return isSupport;
+}
+
+void PowerMgrService::HallSensorCallback(SensorEvent* event)
+{
+    if (event == nullptr || event->sensorTypeId != SENSOR_TYPE_ID_HALL || event->data == nullptr) {
+        POWER_HILOGW(FEATURE_INPUT, "Hall sensor event is invalid");
+        return;
+    }
+    const int32_t LID_CLOSED_HALL_FLAG = 0x1;
+    auto now = static_cast<int64_t>(time(nullptr));
+    auto data = (HallData*)event->data;
+    auto status = static_cast<int32_t>(data->status);
+    if (status & LID_CLOSED_HALL_FLAG) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
         pms->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, false);
-    } else if (devicestatusData.value == DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER) {
-        POWER_HILOGI(FEATURE_INPUT, "OnEventResult lid open");
+    } else {
+        POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
         std::string reason = "lid open";
         pms->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
     }
-    return true;
 }
 
-void PowerMgrService::DeviceStatusMonitorInit()
+void PowerMgrService::HallSensorSubscriberCancel()
 {
-    POWER_HILOGI(FEATURE_INPUT, "DeviceStatusMonitorInit");
-    deviceStatusAgent_ = std::make_shared<DeviceStatusAgent>();
-    std::shared_ptr<DeviceStatusCallback> agentEvent = std::make_shared<DeviceStatusCallback>();
-    int32_t ret = deviceStatusAgent_->SubscribeAgentEvent(
-        DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN,
-        agentEvent);
-    POWER_HILOGI(FEATURE_INPUT, "SubscribeAgentEvent for device state: %{public}d", ret);
+    if (IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
+        UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    }
 }
 
 void PowerMgrService::HandleShutdownRequest()
@@ -430,6 +451,7 @@ void PowerMgrService::PowerMgrService::OnStop()
     handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
 
     KeyMonitorCancel();
+    HallSensorSubscriberCancel();
     eventRunner_.reset();
     handler_.reset();
     ready_ = false;
