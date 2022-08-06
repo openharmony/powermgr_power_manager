@@ -36,7 +36,7 @@ deps_ex = [
   "ipc:ipc_core",
   "hiviewdfx_hilog_native:libhilog",
   "safwk:system_ability_fwk",
-  "samgr_standard:samgr_proxy",
+  "samgr:samgr_proxy",
   "sensor:sensor_interface_native",
   "c_utils:utils",
   "device_status:devicestatus_client",
