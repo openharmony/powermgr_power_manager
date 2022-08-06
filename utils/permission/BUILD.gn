@@ -40,7 +40,7 @@ ohos_shared_library("power_permission") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   part_name = "${powermgr_part_name}"
