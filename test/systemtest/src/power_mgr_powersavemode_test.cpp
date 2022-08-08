@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
+#include <bundle_mgr_proxy.h>
 #include <string_ex.h>
 
 #include "power_common.h"
