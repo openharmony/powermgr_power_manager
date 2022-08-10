@@ -122,7 +122,7 @@ public:
     {
         powerStateMachine_->SetSleepTime(time);
     }
-    void HandlePowerKeyTimeout();
+    void HandleScreenOnTimeout();
 
     void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState,
         IDevicePowerAction* powerAction, IRunningLockAction* lockAction)
