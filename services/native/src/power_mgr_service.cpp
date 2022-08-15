@@ -195,7 +195,9 @@ void PowerMgrService::KeyMonitorInit()
                     Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
                     dialogId_ = -1;
                 }
-                handler_->SendEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
+                if (!IsScreenOn()) {
+                    handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
+                }
         });
 
         keyOption.reset();
@@ -395,10 +397,10 @@ void PowerMgrService::HandlePointEvent(int32_t type)
 void PowerMgrService::NotifyDisplayActionDone(uint32_t event)
 {
     POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone: %{public}d", event);
-    handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
+    handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
 }
 
-void PowerMgrService::HandlePowerKeyTimeout()
+void PowerMgrService::HandleScreenOnTimeout()
 {
     POWER_HILOGD(FEATURE_INPUT, "PowerKey press timeout");
     std::string message = "POWER KEY TIMEOUT ";
@@ -427,7 +429,7 @@ void PowerMgrService::PowerMgrService::OnStop()
     powerStateMachine_->CancelDelayTimer(
         PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
     SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
-    handler_->RemoveEvent(PowermsEventHandler::POWER_KEY_TIMEOUT_MSG);
+    handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
 
     KeyMonitorCancel();
     eventRunner_.reset();
