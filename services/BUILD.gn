@@ -72,7 +72,7 @@ ohos_shared_library("powermgrservice") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -106,7 +106,7 @@ ohos_shared_library("powermgr_stub") {
     "c_utils:utils",
     "hicollie_native:libhicollie",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
