@@ -298,10 +298,10 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
         POWER_HILOGW(FEATURE_INPUT, "Hall sensor event is invalid");
         return;
     }
-    const int32_t LID_CLOSED_HALL_FLAG = 0x1;
+    const uint32_t LID_CLOSED_HALL_FLAG = 0x1;
     auto now = static_cast<int64_t>(time(nullptr));
     auto data = (HallData*)event->data;
-    auto status = static_cast<int32_t>(data->status);
+    auto status = static_cast<uint32_t>(data->status);
     if (status & LID_CLOSED_HALL_FLAG) {
         POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
         pms->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, false);
