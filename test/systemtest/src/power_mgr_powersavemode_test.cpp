@@ -25,7 +25,6 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
-#include "sys_param.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 #include "running_lock.h"
