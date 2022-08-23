@@ -29,7 +29,6 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
-#include "sys_param.h"
 
 using namespace testing::ext;
 using namespace OHOS::EventFwk;
