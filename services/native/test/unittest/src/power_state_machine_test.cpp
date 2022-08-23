@@ -27,7 +27,6 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
-#include "sys_param.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -50,11 +49,6 @@ void PowerStateMachineTest::TearDown(void)
 {
 }
 
-bool PowerStateMachineTest::IsTestSupported()
-{
-    return !SysParam::IsDeviceType(DeviceType::DEVICE_CAR) && !SysParam::IsDeviceType(DeviceType::DEVICE_TV);
-}
-
 namespace {
 /**
  * @tc.name: PowerStateMachine003
@@ -64,11 +58,6 @@ namespace {
 HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is start!");
-    if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::test is not supported, do nothing!");
-        return;
-    }
-
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine003: Suspend Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -97,11 +86,6 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
 HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is start!");
-    if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::test is not supported, do nothing!");
-        return;
-    }
-
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -129,11 +113,6 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
 {
-    if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(LABEL_TEST, "PowerStateMachine005::test is not supported, do nothing!");
-        return;
-    }
-
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine005: IsScreenOn start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -162,11 +141,6 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
 {
-    if (!PowerStateMachineTest::IsTestSupported()) {
-        POWER_HILOGI(LABEL_TEST, "PowerStateMachine006::test is not supported, do nothing!");
-        return;
-    }
-
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
