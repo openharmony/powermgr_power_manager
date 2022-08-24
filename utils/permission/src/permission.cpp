@@ -131,6 +131,8 @@ bool Permission::IsPermissionGranted(const std::string& perm)
             break;
         case ATokenTypeEnum::TOKEN_INVALID:
             break;
+        case ATokenTypeEnum::TOKEN_TYPE_BUTT:
+            break;
     }
     if (result == PermissionState::PERMISSION_DENIED) {
         POWER_HILOGW(COMP_UTILS, "permission denied, perm=%{public}s type=%{public}d, pid=%{public}d, uid=%{public}d",
