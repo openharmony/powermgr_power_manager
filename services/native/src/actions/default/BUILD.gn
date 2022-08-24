@@ -44,7 +44,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "hdf_core:libhdi",
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
-    "ipc:ipc_single",
+    "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "window_manager:libdm",
   ]
