@@ -33,7 +33,7 @@ deps_ex = [
   "ability_base:want",
   "eventhandler:libeventhandler",
   "common_event_service:cesfwk_innerkits",
-  "ipc:ipc_single",
+  "ipc:ipc_core",
   "hiviewdfx_hilog_native:libhilog",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
