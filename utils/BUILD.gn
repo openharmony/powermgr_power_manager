@@ -48,7 +48,7 @@ ohos_executable("power-shell") {
     "c_utils:utils",
     "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_single",
+    "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
 
