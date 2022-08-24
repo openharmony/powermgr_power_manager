@@ -51,7 +51,6 @@ ohos_executable("power-shell") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${powermgr_innerkits}:powermgr_client",
-    "${powermgr_utils_path}/setting:power_setting",
   ]
 
   configs = [
@@ -60,24 +59,13 @@ ohos_executable("power-shell") {
   ]
 
   external_deps = [
-    "ability_base:base",
-    "ability_base:want",
-    "ability_base:zuri",
-    "ability_runtime:ability_manager",
     "c_utils:utils",
     "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
-    "relational_store:native_dataability",
-    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
   install_enable = true
   part_name = "${powermgr_part_name}"
-}
-
-group("powerutils_test") {
-  testonly = true
-  deps = [ "setting/test/unittest:test_power_setting" ]
 }
