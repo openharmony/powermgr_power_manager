@@ -40,7 +40,6 @@ private:
     ErrCode RunAsSuspendCommand();
     ErrCode RunAsDisplayCommand();
     ErrCode RunAsTimeOutCommand();
-    ErrCode RunAsSettingCommand();
 };
 }  // namespace PowerMgr
 }  // namespace OHOS
