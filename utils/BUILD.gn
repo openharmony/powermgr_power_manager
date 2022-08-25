@@ -21,20 +21,6 @@ config("utils_config") {
   ]
 }
 
-ohos_source_set("powermgr_utils") {
-  sources = [ "native/src/sys_param.cpp" ]
-
-  public_configs = [ ":utils_config" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "init:libbegetutil",
-  ]
-
-  part_name = "${powermgr_part_name}"
-}
-
 ohos_executable("power-shell") {
   include_dirs = [
     "${powermgr_innerkits}/native/include",

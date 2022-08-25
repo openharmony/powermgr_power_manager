@@ -48,7 +48,6 @@ ohos_shared_library("powermgrservice") {
     ":powermgr_stub",
     "${powermgr_framework}:power_dialog",
     "${powermgr_innerkits}:powermgr_client",
-    "${powermgr_utils_path}:powermgr_utils",
     "${powermgr_utils_path}/permission:power_permission",
     "native/src/actions:powermgr_actions",
     "//base/msdp/device_status/frameworks/native/src:deviceagent",
@@ -95,10 +94,7 @@ ohos_shared_library("powermgr_stub") {
 
   public_configs = [ ":powermgr_public_config" ]
 
-  deps = [
-    "${powermgr_innerkits}:powermgr_client",
-    "${powermgr_utils_path}:powermgr_utils",
-  ]
+  deps = [ "${powermgr_innerkits}:powermgr_client" ]
 
   external_deps = [
     "ability_base:base",
