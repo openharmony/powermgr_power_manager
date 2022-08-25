@@ -34,7 +34,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    bool IsTestSupported();
     void PowerClientInit();
     void CheckSuspendBlock();
     void CheckSuspendUnblock();

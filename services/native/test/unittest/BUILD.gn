@@ -255,7 +255,6 @@ ohos_unittest("ces_system") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -276,7 +275,6 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_innerkits}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -299,7 +297,6 @@ ohos_unittest("test_power_mgr_mock") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -322,7 +319,6 @@ ohos_unittest("test_power_mgr_fail_check") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "${powermgr_utils_path}:powermgr_utils",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -345,7 +341,6 @@ if (false) {
       "${powermgr_innerkits}:powermgr_client",
       "${powermgr_service_path}:powermgrservice",
       "${powermgr_service_path}/native/src/actions:powermgr_actions",
-      "${powermgr_utils_path}:powermgr_utils",
       "//third_party/googletest:gtest_main",
     ]
 
