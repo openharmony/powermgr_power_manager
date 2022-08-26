@@ -111,6 +111,8 @@ bool PowerMgrService::Init()
             auto& powerModeModule = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerModeModule();
             powerModeModule.EnableMode(powerModeModule.GetModeItem(), true);
         }
+        auto powerStateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
+        powerStateMachine->RegisterDisplayOffTimeObserver();
     });
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
@@ -453,6 +455,7 @@ void PowerMgrService::PowerMgrService::OnStop()
         PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     powerStateMachine_->CancelDelayTimer(
         PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    powerStateMachine_->UnregisterDisplayOffTimeObserver();
     SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
     handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
 
