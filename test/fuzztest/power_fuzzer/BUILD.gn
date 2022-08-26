@@ -36,7 +36,7 @@ ohos_fuzztest("PowerFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
-    "ipc:ipc_single",
+    "ipc:ipc_core",
   ]
 }
 
