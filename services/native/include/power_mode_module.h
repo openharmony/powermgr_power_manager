@@ -73,34 +73,13 @@ private:
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
     void RunAction(bool isBoot);
-    void SetDisplayOffTime(bool isBoot);
-    void SetSleepTime([[maybe_unused]] bool isBoot);
-    void SetAutoAdjustBrightness(bool isBoot);
-    void SetLcdBrightness(bool isBoot);
-    void SetVibration(bool isBoot);
-    void SetWindowRotation(bool isBoot);
+    static void SetDisplayOffTime(bool isBoot);
+    static void SetSleepTime([[maybe_unused]] bool isBoot);
+    static void SetAutoAdjustBrightness(bool isBoot);
+    static void SetLcdBrightness(bool isBoot);
+    static void SetVibration(bool isBoot);
+    static void SetWindowRotation(bool isBoot);
 
-    enum class SwitchStatus : int32_t {
-        INVALID = -1,
-        DISABLE = 0,
-        ENABLE = 1,
-    };
-    bool IsDisplayOffTimeSettingValid();
-    void SetSettingDisplayOffTime(int32_t time);
-    bool IsAutoAdjustBrightnessSettingValid();
-    void SetSettingAutoAdjustBrightness(SwitchStatus);
-    bool IsBrightnessSettingValid();
-    void SetSettingBrightness(int32_t brightness);
-    bool IsVibrationSettingValid();
-    void SetSettingVibration(SwitchStatus);
-    bool IsWindowRotationSettingValid();
-    void SetSettingWindowRotation(SwitchStatus);
-
-    const std::string SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
-    const std::string SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
-    const std::string SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
-    const std::string SETTING_VIBRATION_KEY {"settings.display.screen_brightness_status"};
-    const std::string SETTING_WINDOW_ROTATION_KEY {"settings.display.default_screen_rotation"};
     std::atomic<bool> started_;
     std::map<uint32_t, int32_t> recoverValue;
     std::map<uint32_t, int32_t>::iterator recoverValueiter;
