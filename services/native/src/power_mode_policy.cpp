@@ -107,28 +107,17 @@ void PowerModePolicy::CompareModeItem(uint32_t mode, uint32_t lastMode)
     recoverPolicy.clear();
 }
 
-void PowerModePolicy::AddAction(uint32_t type, std::function<void()> action)
+void PowerModePolicy::AddAction(uint32_t type, ModeAction& action)
 {
     POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", type);
     actionMap.emplace(type, action);
 }
 
-void PowerModePolicy::TriggerAction(uint32_t type)
-{
-    auto iterator = actionMap.find(type);
-    if (iterator == actionMap.end()) {
-        POWER_HILOGD(FEATURE_POWER_MODE, "No such type=(%{public}d)", type);
-        return;
-    }
-    POWER_HILOGI(FEATURE_POWER_MODE, "type=%{public}d", type);
-    iterator->second();
-}
-
-void PowerModePolicy::TriggerAllActions()
+void PowerModePolicy::TriggerAllActions(bool isBoot)
 {
     for (auto iterator = actionMap.begin(); iterator != actionMap.end(); iterator++) {
         POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", iterator->first);
-        iterator->second();
+        iterator->second(isBoot);
     }
 }
 

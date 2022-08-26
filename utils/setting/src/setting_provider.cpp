@@ -102,6 +102,13 @@ ErrCode SettingProvider::PutBoolValue(const std::string& key, bool value, bool n
     return PutStringValue(key, std::to_string(value), needNotify);
 }
 
+bool SettingProvider::IsValidKey(const std::string& key)
+{
+    std::string value;
+    ErrCode ret = GetStringValue(key, value);
+    return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
+}
+
 sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func)
 {
     sptr<SettingObserver> observer = new SettingObserver();

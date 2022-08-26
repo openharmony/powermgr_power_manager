@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 #ifndef POWER_MODE_THREAD_H
 #define POWER_MODE_THREAD_H
@@ -46,7 +45,7 @@ public:
     ~PowerModeModule() = default;
     void SetModeItem(uint32_t mode);
     uint32_t GetModeItem();
-    void EnableMode(uint32_t mode);
+    void EnableMode(uint32_t mode, bool isBoot = false);
     void AddPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void DelPowerModeCallback(const sptr<IPowerModeCallback>& callback);
 
@@ -73,14 +72,35 @@ private:
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
-    void RunAction();
-    void SetDisplayOffTime();
-    void SetSleepTime();
-    void SetAutoAdjustBrightness();
-    void SetLcdBrightness();
-    void SetVibration();
-    void OnOffRotation();
+    void RunAction(bool isBoot);
+    void SetDisplayOffTime(bool isBoot);
+    void SetSleepTime([[maybe_unused]] bool isBoot);
+    void SetAutoAdjustBrightness(bool isBoot);
+    void SetLcdBrightness(bool isBoot);
+    void SetVibration(bool isBoot);
+    void SetWindowRotation(bool isBoot);
 
+    enum class SwitchStatus : int32_t {
+        INVALID = -1,
+        DISABLE = 0,
+        ENABLE = 1,
+    };
+    bool IsDisplayOffTimeSettingValid();
+    void SetSettingDisplayOffTime(int32_t time);
+    bool IsAutoAdjustBrightnessSettingValid();
+    void SetSettingAutoAdjustBrightness(SwitchStatus);
+    bool IsBrightnessSettingValid();
+    void SetSettingBrightness(int32_t brightness);
+    bool IsVibrationSettingValid();
+    void SetSettingVibration(SwitchStatus);
+    bool IsWindowRotationSettingValid();
+    void SetSettingWindowRotation(SwitchStatus);
+
+    const std::string SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
+    const std::string SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
+    const std::string SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
+    const std::string SETTING_VIBRATION_KEY {"settings.display.screen_brightness_status"};
+    const std::string SETTING_WINDOW_ROTATION_KEY {"settings.display.default_screen_rotation"};
     std::atomic<bool> started_;
     std::map<uint32_t, int32_t> recoverValue;
     std::map<uint32_t, int32_t>::iterator recoverValueiter;
