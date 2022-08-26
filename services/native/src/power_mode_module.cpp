@@ -19,8 +19,7 @@
 #include "power_log.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
-#include "power_setting_helper.h"
-#include "system_ability_definition.h"
+#include "setting_helper.h"
 
 #include "singleton.h"
 
@@ -226,16 +225,14 @@ void PowerModeModule::RunAction(bool isBoot)
 
 void PowerModeModule::SetDisplayOffTime(bool isBoot)
 {
-    if (isBoot && IsDisplayOffTimeSettingValid()) {
+    if (isBoot && SettingHelper::IsDisplayOffTimeSettingValid()) {
         return;
     }
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set display off timeout: %{public}d", time);
-    // TODO subscribe setting
     pms->GetPowerStateMachine()->SetDisplayOffTime(static_cast<int64_t>(time));
-    SetSettingDisplayOffTime(time);
 }
 
 void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
@@ -249,122 +246,47 @@ void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
 
 void PowerModeModule::SetAutoAdjustBrightness(bool isBoot)
 {
-    if (isBoot && IsAutoAdjustBrightnessSettingValid()) {
+    if (isBoot && SettingHelper::IsAutoAdjustBrightnessSettingValid()) {
         return;
     }
     int32_t value = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
-    auto status = static_cast<SwitchStatus>(value);
+    auto status = static_cast<SettingHelper::SwitchStatus>(value);
     POWER_HILOGI(FEATURE_POWER_MODE, "status: %{public}d", status);
-    SetSettingAutoAdjustBrightness(status);
+    SettingHelper::SetSettingAutoAdjustBrightness(status);
 }
 
 void PowerModeModule::SetLcdBrightness(bool isBoot)
 {
-    if (isBoot && IsBrightnessSettingValid()) {
+    if (isBoot && SettingHelper::IsBrightnessSettingValid()) {
         return;
     }
     int32_t lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
     POWER_HILOGD(FEATURE_POWER_MODE, "lcdBrightness: %{public}d", lcdBrightness);
-    SetSettingBrightness(lcdBrightness);
+    SettingHelper::SetSettingBrightness(lcdBrightness);
 }
 
 void PowerModeModule::SetVibration(bool isBoot)
 {
-    if (isBoot && IsVibrationSettingValid()) {
+    if (isBoot && SettingHelper::IsVibrationSettingValid()) {
         return;
     }
     int32_t vibration = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
     POWER_HILOGD(FEATURE_POWER_MODE, "GetPowerModeValuePolicy vibrate=%{public}d", vibration);
-    SetSettingVibration(static_cast<SwitchStatus>(vibration));
+    SettingHelper::SetSettingVibration(static_cast<SettingHelper::SwitchStatus>(vibration));
 }
 
 void PowerModeModule::SetWindowRotation(bool isBoot)
 {
-    if (isBoot && IsWindowRotationSettingValid()) {
+    if (isBoot && SettingHelper::IsWindowRotationSettingValid()) {
         return;
     }
     int32_t rotation = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
     POWER_HILOGD(FEATURE_POWER_MODE, "GetPowerModeValuePolicy rotation=%{public}d", rotation);
-    SetSettingWindowRotation(static_cast<SwitchStatus>(rotation));
-}
-
-bool PowerModeModule::IsBrightnessSettingValid()
-{
-    return PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_VIBRATION_KEY);
-}
-
-void PowerModeModule::SetSettingBrightness(int32_t brightness)
-{
-    PowerSettingHelper& helper = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = helper.PutIntValue(SETTING_BRIGHTNESS_KEY, brightness);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(FEATURE_POWER_MODE, "set setting brightness failed, brightness=%{public}d, ret=%{public}d",
-                     brightness, ret);
-    }
-}
-
-bool PowerModeModule::IsDisplayOffTimeSettingValid()
-{
-    return PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_DISPLAY_OFF_TIME_KEY);
-}
-
-void PowerModeModule::SetSettingDisplayOffTime(int32_t time)
-{
-    PowerSettingHelper& helper = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = helper.PutIntValue(SETTING_DISPLAY_OFF_TIME_KEY, time);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(FEATURE_POWER_MODE, "set setting display off time failed, time=%{public}d, ret=%{public}d",
-                     time, ret);
-    }
-}
-
-bool PowerModeModule::IsAutoAdjustBrightnessSettingValid()
-{
-    return PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY);
-}
-
-void PowerModeModule::SetSettingAutoAdjustBrightness(SwitchStatus status)
-{
-    PowerSettingHelper& helper = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = helper.PutIntValue(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY, static_cast<int32_t>(status));
-    if (ret != ERR_OK) {
-        POWER_HILOGW(FEATURE_POWER_MODE, "set setting auto adjust brightness failed, " \
-                    "status=%{public}d, ret=%{public}d", status, ret);
-    }
-}
-
-bool PowerModeModule::IsVibrationSettingValid()
-{
-    return PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_VIBRATION_KEY);
-}
-
-void PowerModeModule::SetSettingVibration(SwitchStatus status)
-{
-    PowerSettingHelper& helper = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = helper.PutIntValue(SETTING_VIBRATION_KEY, static_cast<int32_t>(status));
-    if (ret != ERR_OK) {
-        POWER_HILOGW(FEATURE_POWER_MODE, "set setting vibration failed, status=%{public}d, ret=%{public}d",
-                     status, ret);
-    }
-}
-
-bool PowerModeModule::IsWindowRotationSettingValid()
-{
-    return PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_WINDOW_ROTATION_KEY);
-}
-
-void PowerModeModule::SetSettingWindowRotation(SwitchStatus status)
-{
-    PowerSettingHelper& helper = PowerSettingHelper::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = helper.PutIntValue(SETTING_WINDOW_ROTATION_KEY, static_cast<int32_t>(status));
-    if (ret != ERR_OK) {
-        POWER_HILOGW(FEATURE_POWER_MODE, "set setting window rotation failed, status=%{public}d, ret=%{public}d",
-                     status, ret);
-    }
+    SettingHelper::SetSettingWindowRotation(static_cast<SettingHelper::SwitchStatus>(rotation));
 }
 } // namespace PowerMgr
 } // namespace OHOS

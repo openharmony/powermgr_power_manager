@@ -22,6 +22,10 @@ config("powermgr_public_config") {
   ]
 }
 
+config("powermgr_private_config") {
+  include_dirs = [ "native/src/setting" ]
+}
+
 ohos_shared_library("powermgrservice") {
   sources = [
     "native/src/power_hdi_callback.cpp",
@@ -37,10 +41,14 @@ ohos_shared_library("powermgrservice") {
     "native/src/powerms_event_handler.cpp",
     "native/src/running_lock_inner.cpp",
     "native/src/running_lock_mgr.cpp",
+    "native/src/setting/setting_helper.cpp",
     "native/src/shutdown_service.cpp",
   ]
 
-  configs = [ "${powermgr_utils_path}:utils_config" ]
+  configs = [
+    ":powermgr_private_config",
+    "${powermgr_utils_path}:utils_config",
+  ]
 
   public_configs = [ ":powermgr_public_config" ]
 
