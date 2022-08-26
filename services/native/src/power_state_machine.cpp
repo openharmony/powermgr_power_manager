@@ -22,9 +22,13 @@
 #include "powerms_event_handler.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
+#include "setting_helper.h"
 
 namespace OHOS {
 namespace PowerMgr {
+namespace{
+sptr<PowerSettingObserver> g_displayOffTimeObserver;
+}
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
     : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -278,7 +282,7 @@ bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
         isScreenOffTimeOverride_ = true;
         beforeOverrideTime_ = beforeOverrideTime;
     }
-    this->SetDisplayOffTime(timeout);
+    this->SetDisplayOffTime(timeout, false);
     POWER_HILOGD(COMP_SVC, "Override screenOffTime finish");
     return true;
 }
@@ -289,7 +293,7 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
         POWER_HILOGD(COMP_SVC, "RestoreScreenOffTime is not override, no need to restore");
         return false;
     }
-    this->SetDisplayOffTime(beforeOverrideTime_);
+    this->SetDisplayOffTime(beforeOverrideTime_, false);
     isScreenOffTimeOverride_ = false;
     POWER_HILOGD(COMP_SVC, "Restore screenOffTime finish");
     return true;
@@ -724,12 +728,52 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
     return true;
 }
 
-void PowerStateMachine::SetDisplayOffTime(int64_t time)
+void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
 {
+    if (time == displayOffTime_) {
+        return;
+    }
+    POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
+                 displayOffTime_.load(), time);
     displayOffTime_ = time;
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
     }
+    if (needUpdateSetting) {
+        SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
+    }
+}
+
+static void DisplayOffTimeUpdateFunc()
+{
+    auto settingTime = SettingHelper::GetSettingDisplayOffTime();
+    auto stateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
+    auto systemTime = stateMachine->GetDisplayOffTime();
+    if (settingTime == systemTime) {
+        return;
+    }
+    POWER_HILOGD(FEATURE_POWER_STATE, "setting update display off time %{public}" PRId64 " -> %{public}" PRId64 "",
+                 systemTime, settingTime);
+    stateMachine->SetDisplayOffTime(settingTime, false);
+}
+
+void PowerStateMachine::RegisterDisplayOffTimeObserver()
+{
+    if (g_displayOffTimeObserver) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "setting display off time observer is already registered");
+        return;
+    }
+    PowerSettingObserver::UpdateFunc updateFunc = [&](const std::string&) { DisplayOffTimeUpdateFunc(); };
+    g_displayOffTimeObserver = SettingHelper::RegisterSettingDisplayOffTimeObserver(updateFunc);
+}
+
+void PowerStateMachine::UnregisterDisplayOffTimeObserver()
+{
+    if (g_displayOffTimeObserver == nullptr) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "g_displayOffTimeObserver is nullptr, no need to unregister");
+        return;
+    }
+    SettingHelper::UnregisterSettingDisplayOffTimeObserver(g_displayOffTimeObserver);
 }
 
 void PowerStateMachine::SetSleepTime(int64_t time)
