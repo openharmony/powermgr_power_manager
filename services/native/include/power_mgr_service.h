@@ -151,6 +151,12 @@ private:
     void GetDisplayPosition(int32_t& width, int32_t& height);
     static void HallSensorCallback(SensorEvent* event);
     bool IsSupportSensor(SensorTypeId);
+
+    inline PowerModeModule& GetPowerModeModule()
+    {
+        return powerModeModule_;
+    }
+
     bool ready_ {false};
     std::mutex mutex_;
     std::mutex lockMutex_;

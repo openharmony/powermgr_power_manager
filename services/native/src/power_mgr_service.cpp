@@ -33,6 +33,7 @@
 #include "power_mgr_dumper.h"
 #include "system_suspend_controller.h"
 #include "ui_service_mgr_client.h"
+#include "sysparam.h"
 #include "watchdog.h"
 
 namespace OHOS {
@@ -102,12 +103,15 @@ bool PowerMgrService::Init()
     if (!PowerStateMachineInit()) {
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
-    if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-        powerModeModule_.EnableMode(powerModeModule_.GetModeItem());
-    } else {
-        POWER_HILOGE(COMP_SVC, "Power mode init fail");
-    }
     handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
+
+    SysParam::GetInstance().RegisterBootCompletedCallback([](){
+        POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
+        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
+            auto& powerModeModule = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerModeModule();
+            powerModeModule.EnableMode(powerModeModule.GetModeItem(), true);
+        }
+    });
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
 }
