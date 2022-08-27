@@ -109,7 +109,7 @@ bool Permission::IsSystemHap()
 
 bool Permission::IsSystem()
 {
-    return IsSystemCore() || IsSystemBasic() || IsSystemHap();
+    return IsSystemBasic() || IsSystemCore() || IsSystemHap();
 }
 
 bool Permission::IsPermissionGranted(const std::string& perm)
