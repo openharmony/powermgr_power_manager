@@ -47,10 +47,10 @@ private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
-    static constexpr const char* SETTING_VIBRATION_KEY {"settings.display.screen_brightness_status"};
+    static constexpr const char* SETTING_VIBRATION_KEY {"settings.sound.vibrate_status"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.display.default_screen_rotation"};
 };
 } // OHOS
 } // PowerMgr
 
-#endif //POWERMGR_POWER_MANAGER_SETTING_HELPER_H
+#endif // POWERMGR_POWER_MANAGER_SETTING_HELPER_H

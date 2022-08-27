@@ -26,7 +26,7 @@ namespace PowerMgr {
 class SysParam : public DelayedRefSingleton<SysParam> {
 DECLARE_DELAYED_REF_SINGLETON(SysParam);
 public:
-    typedef void (*BootCompletedCallback)();
+    typedef void (* BootCompletedCallback)();
     void RegisterBootCompletedCallback(BootCompletedCallback);
     int32_t GetIntValue(const std::string& key, int32_t def);
 
@@ -36,4 +36,4 @@ private:
 };
 } // namespace PowerMgr
 } // namespace OHOS
-#endif //POWERMGR_POWER_MANAGER_SYSPARAM_H
+#endif // POWERMGR_POWER_MANAGER_SYSPARAM_H

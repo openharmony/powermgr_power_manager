@@ -26,7 +26,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-namespace{
+namespace {
 sptr<PowerSettingObserver> g_displayOffTimeObserver;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
