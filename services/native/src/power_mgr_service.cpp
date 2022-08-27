@@ -105,7 +105,7 @@ bool PowerMgrService::Init()
     }
     handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
 
-    SysParam::GetInstance().RegisterBootCompletedCallback([](){
+    SysParam::GetInstance().RegisterBootCompletedCallback([]() {
         POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
             auto& powerModeModule = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerModeModule();

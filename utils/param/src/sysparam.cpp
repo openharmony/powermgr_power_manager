@@ -45,6 +45,5 @@ int32_t SysParam::GetIntValue(const std::string& key, int32_t def)
     }
     return atoi(value);
 }
-
 } // namespace PowerMgr
 } // namespace OHOS
