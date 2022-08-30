@@ -13,48 +13,48 @@
  * limitations under the License.
  */
 
-#include "power_setting_helper.h"
+#include "setting_provider.h"
 
-#include "ipc_skeleton.h"
 #include "ability_manager_client.h"
 #include "abs_shared_result_set.h"
 #include "data_ability_predicates.h"
+#include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "power_log.h"
+#include "rdb_errno.h"
 #include "result_set.h"
 #include "values_bucket.h"
-#include "rdb_errno.h"
-#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
-PowerSettingHelper* PowerSettingHelper::instance_;
-std::mutex PowerSettingHelper::mutex_;
-sptr<IRemoteObject> PowerSettingHelper::remoteObj_;
-Uri PowerSettingHelper::settingUri_("dataability:///com.ohos.settingsdata.DataAbility");
+SettingProvider* SettingProvider::instance_;
+std::mutex SettingProvider::mutex_;
+sptr<IRemoteObject> SettingProvider::remoteObj_;
+Uri SettingProvider::settingUri_("dataability:///com.ohos.settingsdata.DataAbility");
 namespace {
 static const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 static const std::string SETTING_COLUMN_VALUE = "VALUE";
 }
 
-PowerSettingHelper::~PowerSettingHelper()
+SettingProvider::~SettingProvider()
 {
     instance_ = nullptr;
     remoteObj_ = nullptr;
 }
 
-PowerSettingHelper& PowerSettingHelper::GetInstance(int32_t systemAbilityId)
+SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
 {
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (instance_ == nullptr) {
-            instance_ = new PowerSettingHelper();
+            instance_ = new SettingProvider();
             Initialize(systemAbilityId);
         }
     }
     return *instance_;
 }
 
-ErrCode PowerSettingHelper::GetIntValue(const std::string& key, int32_t& value)
+ErrCode SettingProvider::GetIntValue(const std::string& key, int32_t& value)
 {
     int64_t valueLong;
     ErrCode ret = GetLongValue(key, valueLong);
@@ -65,7 +65,7 @@ ErrCode PowerSettingHelper::GetIntValue(const std::string& key, int32_t& value)
     return ERR_OK;
 }
 
-ErrCode PowerSettingHelper::GetLongValue(const std::string& key, int64_t& value)
+ErrCode SettingProvider::GetLongValue(const std::string& key, int64_t& value)
 {
     std::string valueStr;
     ErrCode ret = GetStringValue(key, valueStr);
@@ -76,7 +76,7 @@ ErrCode PowerSettingHelper::GetLongValue(const std::string& key, int64_t& value)
     return ERR_OK;
 }
 
-ErrCode PowerSettingHelper::GetBoolValue(const std::string& key, bool& value)
+ErrCode SettingProvider::GetBoolValue(const std::string& key, bool& value)
 {
     int32_t valueInt;
     ErrCode ret = GetIntValue(key, valueInt);
@@ -87,31 +87,31 @@ ErrCode PowerSettingHelper::GetBoolValue(const std::string& key, bool& value)
     return ERR_OK;
 }
 
-ErrCode PowerSettingHelper::PutIntValue(const std::string& key, int32_t value)
+ErrCode SettingProvider::PutIntValue(const std::string& key, int32_t value)
 {
     return PutStringValue(key, std::to_string(value));
 }
 
-ErrCode PowerSettingHelper::PutLongValue(const std::string& key, int64_t value)
+ErrCode SettingProvider::PutLongValue(const std::string& key, int64_t value)
 {
     return PutStringValue(key, std::to_string(value));
 }
 
-ErrCode PowerSettingHelper::PutBoolValue(const std::string& key, bool value)
+ErrCode SettingProvider::PutBoolValue(const std::string& key, bool value)
 {
     return PutStringValue(key, std::to_string(value));
 }
 
-sptr<PowerSettingObserver> PowerSettingHelper::CreateObserver(const std::string& key,
-    PowerSettingObserver::UpdateFunc& func)
+sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key,
+    SettingObserver::UpdateFunc& func)
 {
-    sptr<PowerSettingObserver> observer = new PowerSettingObserver();
+    sptr<SettingObserver> observer = new SettingObserver();
     observer->SetKey(key);
     observer->SetUpdateFunc(func);
     return observer;
 }
 
-ErrCode PowerSettingHelper::RegisterObserver(const sptr<PowerSettingObserver>& observer)
+ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
@@ -133,7 +133,7 @@ ErrCode PowerSettingHelper::RegisterObserver(const sptr<PowerSettingObserver>& o
     return ERR_OK;
 }
 
-ErrCode PowerSettingHelper::UnregisterObserver(const sptr<PowerSettingObserver>& observer)
+ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observer)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
@@ -155,7 +155,7 @@ ErrCode PowerSettingHelper::UnregisterObserver(const sptr<PowerSettingObserver>&
     return ERR_OK;
 }
 
-void PowerSettingHelper::Initialize(int32_t systemAbilityId)
+void SettingProvider::Initialize(int32_t systemAbilityId)
 {
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sam == nullptr) {
@@ -170,7 +170,7 @@ void PowerSettingHelper::Initialize(int32_t systemAbilityId)
     remoteObj_ = remoteObj;
 }
 
-ErrCode PowerSettingHelper::GetStringValue(const std::string& key, std::string& value)
+ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& value)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto dataAbility = AcquireDataAbility();
@@ -209,7 +209,7 @@ ErrCode PowerSettingHelper::GetStringValue(const std::string& key, std::string& 
     return ERR_OK;
 }
 
-ErrCode PowerSettingHelper::PutStringValue(const std::string& key, const std::string& value)
+ErrCode SettingProvider::PutStringValue(const std::string& key, const std::string& value)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto dataAbility = AcquireDataAbility();
@@ -233,7 +233,7 @@ ErrCode PowerSettingHelper::PutStringValue(const std::string& key, const std::st
     return ERR_OK;
 }
 
-sptr<AAFwk::IAbilityScheduler> PowerSettingHelper::AcquireDataAbility()
+sptr<AAFwk::IAbilityScheduler> SettingProvider::AcquireDataAbility()
 {
     auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
     auto dataAbility = abilityManagerClient->AcquireDataAbility(settingUri_, false, remoteObj_);
@@ -245,7 +245,7 @@ sptr<AAFwk::IAbilityScheduler> PowerSettingHelper::AcquireDataAbility()
     return dataAbility;
 }
 
-bool PowerSettingHelper::ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility)
+bool SettingProvider::ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility)
 {
     auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityManagerClient->ReleaseDataAbility(dataAbility, remoteObj_) != ERR_OK) {
@@ -255,7 +255,7 @@ bool PowerSettingHelper::ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& data
     return true;
 }
 
-Uri PowerSettingHelper::AssembleUri(const std::string& key)
+Uri SettingProvider::AssembleUri(const std::string& key)
 {
     Uri uri(settingUri_.ToString() + "/" + key);
     return uri;
