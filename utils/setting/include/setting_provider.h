@@ -31,10 +31,10 @@ public:
     ErrCode GetIntValue(const std::string& key, int32_t& value);
     ErrCode GetLongValue(const std::string& key, int64_t& value);
     ErrCode GetBoolValue(const std::string& key, bool& value);
-    ErrCode PutStringValue(const std::string& key, const std::string& value);
-    ErrCode PutIntValue(const std::string& key, int32_t value);
-    ErrCode PutLongValue(const std::string& key, int64_t value);
-    ErrCode PutBoolValue(const std::string& key, bool value);
+    ErrCode PutStringValue(const std::string& key, const std::string& value, bool needNotify = true);
+    ErrCode PutIntValue(const std::string& key, int32_t value, bool needNotify = true);
+    ErrCode PutLongValue(const std::string& key, int64_t value, bool needNotify = true);
+    ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
     sptr<SettingObserver> CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func);
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);
@@ -53,6 +53,6 @@ private:
     static bool ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility);
     static Uri AssembleUri(const std::string& key);
 };
-} // OHOS
-} // PowerMgr
+} // namespace PowerMgr
+} // namespace OHOS
 #endif // POWERMGR_POWER_MANAGER_POWER_SETTING_HELPER_H

@@ -32,9 +32,9 @@ std::mutex SettingProvider::mutex_;
 sptr<IRemoteObject> SettingProvider::remoteObj_;
 Uri SettingProvider::settingUri_("dataability:///com.ohos.settingsdata.DataAbility");
 namespace {
-static const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
-static const std::string SETTING_COLUMN_VALUE = "VALUE";
-}
+const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
+const std::string SETTING_COLUMN_VALUE = "VALUE";
+} // namespace
 
 SettingProvider::~SettingProvider()
 {
@@ -87,23 +87,22 @@ ErrCode SettingProvider::GetBoolValue(const std::string& key, bool& value)
     return ERR_OK;
 }
 
-ErrCode SettingProvider::PutIntValue(const std::string& key, int32_t value)
+ErrCode SettingProvider::PutIntValue(const std::string& key, int32_t value, bool needNotify)
 {
-    return PutStringValue(key, std::to_string(value));
+    return PutStringValue(key, std::to_string(value), needNotify);
 }
 
-ErrCode SettingProvider::PutLongValue(const std::string& key, int64_t value)
+ErrCode SettingProvider::PutLongValue(const std::string& key, int64_t value, bool needNotify)
 {
-    return PutStringValue(key, std::to_string(value));
+    return PutStringValue(key, std::to_string(value), needNotify);
 }
 
-ErrCode SettingProvider::PutBoolValue(const std::string& key, bool value)
+ErrCode SettingProvider::PutBoolValue(const std::string& key, bool value, bool needNotify)
 {
-    return PutStringValue(key, std::to_string(value));
+    return PutStringValue(key, std::to_string(value), needNotify);
 }
 
-sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key,
-    SettingObserver::UpdateFunc& func)
+sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func)
 {
     sptr<SettingObserver> observer = new SettingObserver();
     observer->SetKey(key);
@@ -121,8 +120,8 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
         return ERR_NO_INIT;
     }
     if (!dataAbility->ScheduleRegisterObserver(uri, observer)) {
-        POWER_HILOGW(COMP_UTILS, "dataAbility->ScheduleRegisterObserver return false, uri=%{public}s",
-            uri.ToString().c_str());
+        POWER_HILOGW(
+            COMP_UTILS, "dataAbility->ScheduleRegisterObserver return false, uri=%{public}s", uri.ToString().c_str());
         ReleaseDataAbility(dataAbility);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
@@ -143,8 +142,8 @@ ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observe
         return ERR_NO_INIT;
     }
     if (!dataAbility->ScheduleUnregisterObserver(uri, observer)) {
-        POWER_HILOGW(COMP_UTILS, "dataAbility->ScheduleUnregisterObserver return false, uri=%{public}s",
-            uri.ToString().c_str());
+        POWER_HILOGW(
+            COMP_UTILS, "dataAbility->ScheduleUnregisterObserver return false, uri=%{public}s", uri.ToString().c_str());
         ReleaseDataAbility(dataAbility);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
@@ -209,7 +208,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     return ERR_OK;
 }
 
-ErrCode SettingProvider::PutStringValue(const std::string& key, const std::string& value)
+ErrCode SettingProvider::PutStringValue(const std::string& key, const std::string& value, bool needNotify)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto dataAbility = AcquireDataAbility();
@@ -227,7 +226,9 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
         POWER_HILOGD(COMP_UTILS, "no data exist, insert one row");
         dataAbility->Insert(settingUri_, bucket);
     }
-    dataAbility->ScheduleNotifyChange(AssembleUri(key));
+    if (needNotify) {
+        dataAbility->ScheduleNotifyChange(AssembleUri(key));
+    }
     ReleaseDataAbility(dataAbility);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
     return ERR_OK;
@@ -260,5 +261,5 @@ Uri SettingProvider::AssembleUri(const std::string& key)
     Uri uri(settingUri_.ToString() + "/" + key);
     return uri;
 }
-} // OHOS
-} // PowerMgr
+} // namespace PowerMgr
+} // namespace OHOS
