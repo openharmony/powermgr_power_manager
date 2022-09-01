@@ -53,6 +53,7 @@ ohos_shared_library("powermgrservice") {
     "//base/msdp/device_status/frameworks/native/src:deviceagent",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/window/window_manager/utils:libwmutil",
+    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
