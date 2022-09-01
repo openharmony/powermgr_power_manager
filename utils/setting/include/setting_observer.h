@@ -13,33 +13,29 @@
  * limitations under the License.
  */
 
-#include "power_setting_observer.h"
+#ifndef POWERMGR_POWER_MANAGER_POWER_SETTING_OBSERVER_H
+#define POWERMGR_POWER_MANAGER_POWER_SETTING_OBSERVER_H
+
+#include "data_ability_observer_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
-PowerSettingObserver::PowerSettingObserver() = default;
-PowerSettingObserver::~PowerSettingObserver() = default;
+class SettingObserver : public AAFwk::DataAbilityObserverStub {
+public:
+    SettingObserver();
+    ~SettingObserver() override;
+    void OnChange() override;
 
-void PowerSettingObserver::OnChange()
-{
-    if (update_) {
-        update_(key_);
-    }
-}
+    void SetKey(const std::string& key);
+    const std::string& GetKey();
 
-void PowerSettingObserver::SetKey(const std::string& key)
-{
-    key_ = key;
-}
-
-const std::string& PowerSettingObserver::GetKey()
-{
-    return key_;
-}
-
-void PowerSettingObserver::SetUpdateFunc(UpdateFunc& func)
-{
-    update_ = func;
-}
+    using UpdateFunc = std::function<void(const std::string&)>;
+    void SetUpdateFunc(UpdateFunc& func);
+private:
+    std::string key_ {};
+    UpdateFunc update_ = nullptr;
+};
 } // OHOS
 } // PowerMgr
+
+#endif // POWERMGR_POWER_MANAGER_POWER_SETTING_OBSERVER_H
