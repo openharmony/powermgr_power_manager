@@ -16,22 +16,21 @@
 #ifndef POWERMGR_POWER_MANAGER_SYSPARAM_H
 #define POWERMGR_POWER_MANAGER_SYSPARAM_H
 
-
 #include <cstdint>
-#include <singleton.h>
 #include <cstring>
+#include <functional>
+#include <singleton.h>
 
 namespace OHOS {
 namespace PowerMgr {
-class SysParam : public DelayedRefSingleton<SysParam> {
-DECLARE_DELAYED_REF_SINGLETON(SysParam);
+class SysParam {
 public:
     typedef void (* BootCompletedCallback)();
-    void RegisterBootCompletedCallback(BootCompletedCallback);
-    int32_t GetIntValue(const std::string& key, int32_t def);
+    static void RegisterBootCompletedCallback(BootCompletedCallback&);
+    static int32_t GetIntValue(const std::string& key, int32_t def);
 
 private:
-    const std::string KEY_BOOT_COMPLETED = "bootevent.boot.completed";
+    static constexpr const char* KEY_BOOT_COMPLETED {"bootevent.boot.completed"};
     static constexpr int32_t VALUE_MAX_LEN = 32;
 };
 } // namespace PowerMgr

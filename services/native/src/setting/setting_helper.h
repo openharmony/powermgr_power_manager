@@ -18,7 +18,8 @@
 
 #include <cstdint>
 #include <string>
-#include "power_setting_helper.h"
+
+#include "setting_provider.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -32,8 +33,8 @@ public:
     static bool IsDisplayOffTimeSettingValid();
     static int64_t GetSettingDisplayOffTime();
     static void SetSettingDisplayOffTime(int64_t time);
-    static sptr<PowerSettingObserver> RegisterSettingDisplayOffTimeObserver(PowerSettingObserver::UpdateFunc);
-    static void UnregisterSettingDisplayOffTimeObserver(sptr<PowerSettingObserver>&);
+    static sptr<SettingObserver> RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc&);
+    static void UnregisterSettingDisplayOffTimeObserver(sptr<SettingObserver>&);
     static bool IsAutoAdjustBrightnessSettingValid();
     static void SetSettingAutoAdjustBrightness(SwitchStatus);
     static bool IsBrightnessSettingValid();
@@ -50,7 +51,7 @@ private:
     static constexpr const char* SETTING_VIBRATION_KEY {"settings.sound.vibrate_status"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.display.default_screen_rotation"};
 };
-} // OHOS
-} // PowerMgr
+} // namespace PowerMgr
+} // namespace OHOS
 
 #endif // POWERMGR_POWER_MANAGER_SETTING_HELPER_H

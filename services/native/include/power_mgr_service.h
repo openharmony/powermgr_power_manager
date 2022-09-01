@@ -149,8 +149,9 @@ private:
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
     void GetDisplayPosition(int32_t& width, int32_t& height);
-    static void HallSensorCallback(SensorEvent* event);
     bool IsSupportSensor(SensorTypeId);
+    static void HallSensorCallback(SensorEvent* event);
+    static void RegisterBootCompletedCallback();
 
     inline PowerModeModule& GetPowerModeModule()
     {
