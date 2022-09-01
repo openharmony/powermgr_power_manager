@@ -78,12 +78,12 @@ ErrCode SettingProvider::GetLongValue(const std::string& key, int64_t& value)
 
 ErrCode SettingProvider::GetBoolValue(const std::string& key, bool& value)
 {
-    int32_t valueInt;
-    ErrCode ret = GetIntValue(key, valueInt);
+    std::string valueStr;
+    ErrCode ret = GetStringValue(key, valueStr);
     if (ret != ERR_OK) {
         return ret;
     }
-    value = static_cast<bool>(valueInt);
+    value = (valueStr == "true");
     return ERR_OK;
 }
 
@@ -99,7 +99,8 @@ ErrCode SettingProvider::PutLongValue(const std::string& key, int64_t value, boo
 
 ErrCode SettingProvider::PutBoolValue(const std::string& key, bool value, bool needNotify)
 {
-    return PutStringValue(key, std::to_string(value), needNotify);
+    std::string valueStr = value ? "true" : "false";
+    return PutStringValue(key, valueStr, needNotify);
 }
 
 bool SettingProvider::IsValidKey(const std::string& key)
