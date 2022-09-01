@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-sptr<PowerSettingObserver> g_displayOffTimeObserver;
+sptr<SettingObserver> g_displayOffTimeObserver;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
     : pms_(pms), currentState_(PowerState::UNKNOWN)
@@ -730,9 +730,6 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
 
 void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
 {
-    if (time == displayOffTime_) {
-        return;
-    }
     POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
                  displayOffTime_.load(), time);
     displayOffTime_ = time;
@@ -763,7 +760,7 @@ void PowerStateMachine::RegisterDisplayOffTimeObserver()
         POWER_HILOGI(FEATURE_POWER_STATE, "setting display off time observer is already registered");
         return;
     }
-    PowerSettingObserver::UpdateFunc updateFunc = [&](const std::string&) { DisplayOffTimeUpdateFunc(); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) { DisplayOffTimeUpdateFunc(); };
     g_displayOffTimeObserver = SettingHelper::RegisterSettingDisplayOffTimeObserver(updateFunc);
 }
 
@@ -774,6 +771,7 @@ void PowerStateMachine::UnregisterDisplayOffTimeObserver()
         return;
     }
     SettingHelper::UnregisterSettingDisplayOffTimeObserver(g_displayOffTimeObserver);
+    g_displayOffTimeObserver = nullptr;
 }
 
 void PowerStateMachine::SetSleepTime(int64_t time)

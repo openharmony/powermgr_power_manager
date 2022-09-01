@@ -46,6 +46,7 @@ constexpr int UI_DIALOG_POWER_WIDTH_NARROW = 400;
 constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
+SysParam::BootCompletedCallback g_bootCompletedCallback;
 }
 
 using namespace MMI;
@@ -105,7 +106,13 @@ bool PowerMgrService::Init()
     }
     handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
 
-    SysParam::GetInstance().RegisterBootCompletedCallback([]() {
+    RegisterBootCompletedCallback();
+    POWER_HILOGI(COMP_SVC, "Init success");
+    return true;
+}
+void PowerMgrService::RegisterBootCompletedCallback()
+{
+    g_bootCompletedCallback = []() {
         POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
             auto& powerModeModule = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerModeModule();
@@ -113,9 +120,8 @@ bool PowerMgrService::Init()
         }
         auto powerStateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
-    });
-    POWER_HILOGI(COMP_SVC, "Init success");
-    return true;
+    };
+    SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
 
 bool PowerMgrService::PowerStateMachineInit()

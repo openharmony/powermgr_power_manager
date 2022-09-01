@@ -15,21 +15,22 @@
 
 #include "sysparam.h"
 
-#include "syspara/parameter.h"
 #include "power_log.h"
+#include "syspara/parameter.h"
 
 namespace OHOS {
 namespace PowerMgr {
-SysParam::SysParam() = default;
-SysParam::~SysParam() = default;
-
-void SysParam::RegisterBootCompletedCallback(BootCompletedCallback callback)
+namespace {
+ParameterChgPtr g_parameterChgPrt;
+}
+void SysParam::RegisterBootCompletedCallback(BootCompletedCallback& callback)
 {
-    int32_t ret = WatchParameter(KEY_BOOT_COMPLETED.c_str(), [](const char* key, const char* value, void* context) {
+    g_parameterChgPrt = [](const char* key, const char* value, void* context) {
         if (strcmp(value, "true") == 0) {
-            ((BootCompletedCallback) context)();
+            ((BootCompletedCallback)context)();
         }
-    }, (void*) callback);
+    };
+    int32_t ret = WatchParameter(KEY_BOOT_COMPLETED, g_parameterChgPrt, (void*)callback);
     if (ret < 0) {
         POWER_HILOGW(COMP_UTILS, "RegisterBootCompletedCallback failed, ret=%{public}d", ret);
     }
