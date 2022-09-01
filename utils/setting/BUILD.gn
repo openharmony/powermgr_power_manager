@@ -26,8 +26,8 @@ config("public_config") {
 
 ohos_shared_library("power_setting") {
   sources = [
-    "src/power_setting_helper.cpp",
-    "src/power_setting_observer.cpp",
+    "src/setting_observer.cpp",
+    "src/setting_provider.cpp",
   ]
 
   configs = [ ":private_config" ]

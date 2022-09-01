@@ -16,34 +16,34 @@
 #ifndef POWERMGR_POWER_MANAGER_POWER_SETTING_HELPER_H
 #define POWERMGR_POWER_MANAGER_POWER_SETTING_HELPER_H
 
-#include "mutex"
-#include "uri.h"
-#include "errors.h"
 #include "ability_scheduler_interface.h"
-#include "power_setting_observer.h"
+#include "errors.h"
+#include "mutex"
+#include "setting_observer.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerSettingHelper : public NoCopyable {
+class SettingProvider : public NoCopyable {
 public:
-    static PowerSettingHelper& GetInstance(int32_t systemAbilityId);
+    static SettingProvider& GetInstance(int32_t systemAbilityId);
     ErrCode GetStringValue(const std::string& key, std::string& value);
     ErrCode GetIntValue(const std::string& key, int32_t& value);
     ErrCode GetLongValue(const std::string& key, int64_t& value);
     ErrCode GetBoolValue(const std::string& key, bool& value);
-    ErrCode PutStringValue(const std::string& key, const std::string& value);
-    ErrCode PutIntValue(const std::string& key, int32_t value);
-    ErrCode PutLongValue(const std::string& key, int64_t value);
-    ErrCode PutBoolValue(const std::string& key, bool value);
-    sptr<PowerSettingObserver> CreateObserver(const std::string& key, PowerSettingObserver::UpdateFunc& func);
-    ErrCode RegisterObserver(const sptr<PowerSettingObserver>& observer);
-    ErrCode UnregisterObserver(const sptr<PowerSettingObserver>& observer);
+    ErrCode PutStringValue(const std::string& key, const std::string& value, bool needNotify = true);
+    ErrCode PutIntValue(const std::string& key, int32_t value, bool needNotify = true);
+    ErrCode PutLongValue(const std::string& key, int64_t value, bool needNotify = true);
+    ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
+    sptr<SettingObserver> CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func);
+    ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
+    ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);
 
 protected:
-    ~PowerSettingHelper() override;
+    ~SettingProvider() override;
 
 private:
-    static PowerSettingHelper* instance_;
+    static SettingProvider* instance_;
     static std::mutex mutex_;
     static sptr<IRemoteObject> remoteObj_;
     static Uri settingUri_;
@@ -53,6 +53,6 @@ private:
     static bool ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility);
     static Uri AssembleUri(const std::string& key);
 };
-} // OHOS
-} // PowerMgr
+} // namespace PowerMgr
+} // namespace OHOS
 #endif // POWERMGR_POWER_MANAGER_POWER_SETTING_HELPER_H
