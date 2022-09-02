@@ -35,6 +35,7 @@ public:
     ErrCode PutIntValue(const std::string& key, int32_t value, bool needNotify = true);
     ErrCode PutLongValue(const std::string& key, int64_t value, bool needNotify = true);
     ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
+    bool IsValidKey(const std::string& key);
     sptr<SettingObserver> CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func);
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);

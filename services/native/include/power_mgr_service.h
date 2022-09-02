@@ -149,8 +149,15 @@ private:
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
     void GetDisplayPosition(int32_t& width, int32_t& height);
-    static void HallSensorCallback(SensorEvent* event);
     bool IsSupportSensor(SensorTypeId);
+    static void HallSensorCallback(SensorEvent* event);
+    static void RegisterBootCompletedCallback();
+
+    inline PowerModeModule& GetPowerModeModule()
+    {
+        return powerModeModule_;
+    }
+
     bool ready_ {false};
     std::mutex mutex_;
     std::mutex lockMutex_;

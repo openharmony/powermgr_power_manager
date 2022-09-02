@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 #ifndef POWER_MODE_THREAD_H
 #define POWER_MODE_THREAD_H
@@ -46,7 +45,7 @@ public:
     ~PowerModeModule() = default;
     void SetModeItem(uint32_t mode);
     uint32_t GetModeItem();
-    void EnableMode(uint32_t mode);
+    void EnableMode(uint32_t mode, bool isBoot = false);
     void AddPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void DelPowerModeCallback(const sptr<IPowerModeCallback>& callback);
 
@@ -73,13 +72,13 @@ private:
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
-    void RunAction();
-    void SetDisplayOffTime();
-    void SetSleepTime();
-    void SetAutoAdjustBrightness();
-    void SetLcdBrightness();
-    void SetVibration();
-    void OnOffRotation();
+    void RunAction(bool isBoot);
+    static void SetDisplayOffTime(bool isBoot);
+    static void SetSleepTime([[maybe_unused]] bool isBoot);
+    static void SetAutoAdjustBrightness(bool isBoot);
+    static void SetLcdBrightness(bool isBoot);
+    static void SetVibration(bool isBoot);
+    static void SetWindowRotation(bool isBoot);
 
     std::atomic<bool> started_;
     std::map<uint32_t, int32_t> recoverValue;
