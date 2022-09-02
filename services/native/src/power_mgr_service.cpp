@@ -33,6 +33,7 @@
 #include "power_mgr_dumper.h"
 #include "system_suspend_controller.h"
 #include "ui_service_mgr_client.h"
+#include "sysparam.h"
 #include "watchdog.h"
 
 namespace OHOS {
@@ -45,6 +46,7 @@ constexpr int UI_DIALOG_POWER_WIDTH_NARROW = 400;
 constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
+SysParam::BootCompletedCallback g_bootCompletedCallback;
 }
 
 using namespace MMI;
@@ -102,14 +104,24 @@ bool PowerMgrService::Init()
     if (!PowerStateMachineInit()) {
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
-    if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-        powerModeModule_.EnableMode(powerModeModule_.GetModeItem());
-    } else {
-        POWER_HILOGE(COMP_SVC, "Power mode init fail");
-    }
     handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
+
+    RegisterBootCompletedCallback();
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
+}
+void PowerMgrService::RegisterBootCompletedCallback()
+{
+    g_bootCompletedCallback = []() {
+        POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
+        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
+            auto& powerModeModule = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerModeModule();
+            powerModeModule.EnableMode(powerModeModule.GetModeItem(), true);
+        }
+        auto powerStateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
+        powerStateMachine->RegisterDisplayOffTimeObserver();
+    };
+    SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
 
 bool PowerMgrService::PowerStateMachineInit()
@@ -449,6 +461,7 @@ void PowerMgrService::PowerMgrService::OnStop()
         PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     powerStateMachine_->CancelDelayTimer(
         PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    powerStateMachine_->UnregisterDisplayOffTimeObserver();
     SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
     handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,10 @@ public:
     };
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
-    void SetDisplayOffTime(int64_t time);
+    int64_t GetDisplayOffTime();
+    void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
+    static void RegisterDisplayOffTimeObserver();
+    static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
 private:
     class StateController {
@@ -163,7 +166,6 @@ private:
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
-    int64_t GetDisplayOffTime();
     int64_t GetSleepTime();
     void HandleActivityTimeout();
     void HandleActivityOffTimeout();

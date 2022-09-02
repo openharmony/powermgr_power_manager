@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,10 +42,9 @@ public:
     int32_t GetPowerModeValuePolicy(uint32_t type);
     int32_t GetPowerModeRecoverPolicy(uint32_t type);
     void SetPowerModePolicy(uint32_t mode, uint32_t lastMode);
-    void ListenSetting();
-    void AddAction(uint32_t type, std::function<void()> action);
-    void TriggerAction(uint32_t type);
-    void TriggerAllActions();
+    typedef std::function<void(bool)> ModeAction;
+    void AddAction(uint32_t type, ModeAction& action);
+    void TriggerAllActions(bool isBoot);
     bool IsValidType(uint32_t type);
 
 private:
@@ -53,7 +52,7 @@ private:
     std::list<ModePolicy> closePolicy;
     std::list<ModePolicy> recoverPolicy;
 
-    std::map<uint32_t, std::function<void()>> actionMap;
+    std::map<uint32_t, ModeAction> actionMap;
     std::map<uint32_t, int32_t> valueModePolicy;
     std::map<uint32_t, int32_t> recoverModePolicy;
     std::map<uint32_t, int32_t>::iterator valueiter;
