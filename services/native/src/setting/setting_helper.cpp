@@ -78,10 +78,8 @@ void SettingHelper::SetSettingAutoAdjustBrightness(SwitchStatus status)
     SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     ErrCode ret = provider.PutIntValue(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY, static_cast<int32_t>(status));
     if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS,
-            "set setting auto adjust brightness failed, "
-            "status=%{public}d, ret=%{public}d",
-            status, ret);
+        POWER_HILOGW(
+            COMP_UTILS, "set setting auto adjust brightness failed, status=%{public}d, ret=%{public}d", status, ret);
     }
 }
 
