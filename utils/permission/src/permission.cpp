@@ -68,6 +68,11 @@ bool Permission::IsSystemBasic()
     return isMatch;
 }
 
+bool Permission::IsSystemApl()
+{
+    return IsSystemBasic() || IsSystemCore();
+}
+
 static sptr<IBundleMgr> GetBundleMgr()
 {
     if (g_bundleMgr != nullptr) {
@@ -109,7 +114,7 @@ bool Permission::IsSystemHap()
 
 bool Permission::IsSystem()
 {
-    return IsSystemBasic() || IsSystemCore() || IsSystemHap();
+    return IsSystemApl() || IsSystemHap();
 }
 
 bool Permission::IsPermissionGranted(const std::string& perm)
@@ -130,7 +135,6 @@ bool Permission::IsPermissionGranted(const std::string& perm)
             result = PermissionState::PERMISSION_GRANTED;
             break;
         case ATokenTypeEnum::TOKEN_INVALID:
-            break;
         case ATokenTypeEnum::TOKEN_TYPE_BUTT:
             break;
     }
