@@ -301,6 +301,8 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
 
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
+    SetState(PowerState::INACTIVE,
+        GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
     if (stateAction_ != nullptr) {
         currentState_ = PowerState::SLEEP;
         stateAction_->GoToSleep(onSuspend, onWakeup, true);
