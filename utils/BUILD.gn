@@ -49,7 +49,6 @@ ohos_executable("power-shell") {
     "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "samgr:samgr_proxy",
   ]
 
   install_enable = true
