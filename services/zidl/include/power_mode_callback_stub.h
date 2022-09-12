@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,11 +28,11 @@ public:
     DISALLOW_COPY_AND_MOVE(PowerModeCallbackStub);
     PowerModeCallbackStub() = default;
     virtual ~PowerModeCallbackStub() = default;
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void PowerModeCallback() override {};
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    void OnPowerModeChanged(PowerMode mode) override {};
 
 private:
-    int32_t OnPowerModeCallbackStub();
+    int32_t OnPowerModeCallbackStub(MessageParcel& data);
 };
 } // namespace PowerMgr
 } // namespace OHOS

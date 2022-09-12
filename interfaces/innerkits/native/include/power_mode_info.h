@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_REGISTER_CALLBACK_MODE_TEST_H
-#define POWERMGR_REGISTER_CALLBACK_MODE_TEST_H
+#ifndef POWER_MODE_INFO_H
+#define POWER_MODE_INFO_H
 
-#include <gtest/gtest.h>
-
-#include "power_mgr_service.h"
-#include "power_mode_callback_stub.h"
+#include <string>
+#include <parcel.h>
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int SLEEP_WAIT_TIME_S = 6;
-class PowerRegisterCallbackModeTest : public testing::Test {
-public:
-    
-    class PowerModeTest1Callback : public PowerModeCallbackStub {
-    public:
-        PowerModeTest1Callback() {};
-        virtual ~PowerModeTest1Callback() {};
-        virtual void OnPowerModeChanged(PowerMode mode) override;
-    };
+enum class PowerMode : uint32_t {
+    POWER_MODE_MIN = 600,
+    NORMAL_MODE = POWER_MODE_MIN,
+    POWER_SAVE_MODE,
+    PERFORMANCE_MODE,
+    EXTREME_POWER_SAVE_MODE,
+    POWER_MODE_MAX = EXTREME_POWER_SAVE_MODE
 };
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_REGISTER_CALLBACK_MODE_TEST_H
+#endif // POWER_MODE_INFO_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,9 +34,9 @@ using namespace OHOS;
 using namespace std;
 
 
-void PowerRegisterCallbackModeTest::PowerModeTest1Callback::PowerModeCallback()
+void PowerRegisterCallbackModeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::PowerModeCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
 }
 
 namespace {
@@ -51,7 +51,7 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
+    PowerMode mode = PowerMode::SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     POWER_HILOGD(LABEL_TEST, "PowerRegisterCallbackModeCallback001 1.");
 }
