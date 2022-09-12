@@ -18,6 +18,7 @@
 #include <message_parcel.h>
 #include "errors.h"
 #include "ipc_object_stub.h"
+#include "power_common.h"
 #include "power_log.h"
 #include "power_mgr_errors.h"
 #include "xcollie.h"
@@ -25,8 +26,8 @@
 
 namespace OHOS {
 namespace PowerMgr {
-int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
     {
     POWER_HILOGD(COMP_SVC, "cmd = %{public}d, flags= %{public}d", code, option.GetFlags());
     const int DFX_DELAY_MS = 10000;
@@ -42,7 +43,7 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
     int ret = ERR_OK;
     switch (code) {
         case static_cast<uint32_t>(IPowerModeCallback::POWER_MODE_CHANGED):
-            ret = OnPowerModeCallbackStub();
+            ret = OnPowerModeCallbackStub(data);
             break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -51,9 +52,11 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
     return ret;
 }
 
-int32_t PowerModeCallbackStub::OnPowerModeCallbackStub()
+int32_t PowerModeCallbackStub::OnPowerModeCallbackStub(MessageParcel& data)
 {
-    PowerModeCallback();
+    uint32_t mode;
+    READ_PARCEL_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
+    OnPowerModeChanged(static_cast<PowerMode>(mode));
     return ERR_OK;
 }
 } // namespace PowerMgr

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <iremote_proxy.h>
 #include <iremote_stub.h>
 #include <iremote_object.h>
+#include "power_mode_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -29,7 +30,7 @@ public:
         POWER_MODE_CHANGED = 0,
     };
 
-    virtual void PowerModeCallback() = 0;
+    virtual void OnPowerModeChanged(PowerMode mode) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerModeCallback");
 };

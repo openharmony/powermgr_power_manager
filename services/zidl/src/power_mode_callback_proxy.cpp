@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-void PowerModeCallbackProxy::PowerModeCallback()
+void PowerModeCallbackProxy::OnPowerModeChanged(PowerMode mode)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -36,6 +36,8 @@ void PowerModeCallbackProxy::PowerModeCallback()
         POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
         return;
     }
+
+    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
 
     int ret = remote->SendRequest(static_cast<int>(IPowerModeCallback::POWER_MODE_CHANGED),
         data, reply, option);

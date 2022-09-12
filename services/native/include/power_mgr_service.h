@@ -75,8 +75,8 @@ public:
     virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void SetDisplaySuspend(bool enable) override;
-    virtual void SetDeviceMode(const uint32_t& mode) override;
-    virtual uint32_t GetDeviceMode() override;
+    virtual void SetDeviceMode(const PowerMode& mode) override;
+    virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
 
     void HandleShutdownRequest();

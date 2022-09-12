@@ -33,19 +33,11 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerModeModule {
 public:
-    enum {
-        POWER_MODE_MIN = 600,
-        NORMAL_MODE = POWER_MODE_MIN,
-        SAVE_MODE,
-        EXTREME_MODE,
-        LOWPOWER_MODE,
-        POWER_MODE_MAX = LOWPOWER_MODE
-    };
     PowerModeModule();
     ~PowerModeModule() = default;
-    void SetModeItem(uint32_t mode);
-    uint32_t GetModeItem();
-    void EnableMode(uint32_t mode, bool isBoot = false);
+    void SetModeItem(PowerMode mode);
+    PowerMode GetModeItem();
+    void EnableMode(PowerMode mode, bool isBoot = false);
     void AddPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void DelPowerModeCallback(const sptr<IPowerModeCallback>& callback);
 
@@ -64,7 +56,7 @@ private:
         std::set<sptr<IRemoteObject>> callbacks_;
     };
 
-    uint32_t mode_;
+    PowerMode mode_;
     uint32_t lastMode_;
 
     void Prepare();

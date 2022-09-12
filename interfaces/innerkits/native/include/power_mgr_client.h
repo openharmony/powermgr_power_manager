@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,27 +106,18 @@ public:
      */
     void SetDisplaySuspend(bool enable);
 
-    /**
-     * Enum for set/get device mode
-     */
-    enum {
-        NORMAL_MODE = 600,
-        POWER_SAVE_MODE = 601,
-        PERFORMANCE_MODE = 602,
-        EXTREME_POWER_SAVE_MODE = 603
-    };
      /* Set the device mode.
      *
      * @param set The mode the device.
      */
-    void SetDeviceMode(const uint32_t mode);
+    void SetDeviceMode(const PowerMode mode);
 
     /**
      * Get the device mode.
      *
      * @param Get The mode the device.
      */
-    uint32_t GetDeviceMode();
+    PowerMode GetDeviceMode();
 
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
