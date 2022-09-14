@@ -19,6 +19,7 @@
 #include <string_ex.h>
 
 #include "power_common.h"
+#include "power_errors.h"
 #include "power_mgr_proxy.h"
 #include "xcollie.h"
 
@@ -43,19 +44,19 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     int ret = ERR_OK;
     switch (code) {
         case static_cast<int>(IPowerMgr::WAKEUP_DEVICE):
-            ret = WakeupDeviceStub(data);
+            ret = WakeupDeviceStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::SUSPEND_DEVICE):
-            ret = SuspendDeviceStub(data);
+            ret = SuspendDeviceStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::REFRESH_ACTIVITY):
             ret = RefreshActivityStub(data);
             break;
         case static_cast<int>(IPowerMgr::REBOOT_DEVICE):
-            ret = RebootDeviceStub(data);
+            ret = RebootDeviceStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE):
-            ret = ShutDownDeviceStub(data);
+            ret = ShutDownDeviceStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::OVERRIDE_DISPLAY_OFF_TIME):
             ret = OverrideScreenOffTimeStub(data, reply);
@@ -118,7 +119,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             ret = SetDisplaySuspendStub(data);
             break;
         case static_cast<int>(IPowerMgr::SETMODE_DEVICE):
-            ret = SetDeviceModeStub(data);
+            ret = SetDeviceModeStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::GETMODE_DEVICE):
             ret = GetDeviceModeStub(reply);
@@ -210,21 +211,23 @@ int32_t PowerMgrStub::ProxyRunningLockStub(MessageParcel& data)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::RebootDeviceStub(MessageParcel& data)
+int32_t PowerMgrStub::RebootDeviceStub(MessageParcel& data, MessageParcel& reply)
 {
     std::string reason = Str16ToStr8(data.ReadString16());
-    RebootDevice(reason);
+    PowerErrors error = RebootDevice(reason);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::ShutDownDeviceStub(MessageParcel& data)
+int32_t PowerMgrStub::ShutDownDeviceStub(MessageParcel& data, MessageParcel& reply)
 {
     std::string reason = Str16ToStr8(data.ReadString16());
-    ShutDownDevice(reason);
+    PowerErrors error = ShutDownDevice(reason);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::WakeupDeviceStub(MessageParcel& data)
+int32_t PowerMgrStub::WakeupDeviceStub(MessageParcel& data, MessageParcel& reply)
 {
     int64_t time = 0;
     uint32_t reason = 0;
@@ -233,11 +236,12 @@ int32_t PowerMgrStub::WakeupDeviceStub(MessageParcel& data)
     READ_PARCEL_WITH_RET(data, Uint32, reason, E_READ_PARCEL_ERROR);
     std::string details = Str16ToStr8(data.ReadString16());
 
-    WakeupDevice(time, static_cast<WakeupDeviceType>(reason), details);
+    PowerErrors error = WakeupDevice(time, static_cast<WakeupDeviceType>(reason), details);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::SuspendDeviceStub(MessageParcel& data)
+int32_t PowerMgrStub::SuspendDeviceStub(MessageParcel& data, MessageParcel& reply)
 {
     int64_t time = 0;
     uint32_t reason = 0;
@@ -247,7 +251,8 @@ int32_t PowerMgrStub::SuspendDeviceStub(MessageParcel& data)
     READ_PARCEL_WITH_RET(data, Uint32, reason, E_READ_PARCEL_ERROR);
     READ_PARCEL_WITH_RET(data, Bool, suspendImmed, E_READ_PARCEL_ERROR);
 
-    SuspendDevice(time, static_cast<SuspendDeviceType>(reason), suspendImmed);
+    PowerErrors error = SuspendDevice(time, static_cast<SuspendDeviceType>(reason), suspendImmed);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
@@ -395,11 +400,12 @@ int32_t PowerMgrStub::SetDisplaySuspendStub(MessageParcel& data)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::SetDeviceModeStub(MessageParcel& data)
+int32_t PowerMgrStub::SetDeviceModeStub(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t mode = 0;
     READ_PARCEL_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
-    SetDeviceMode(static_cast<PowerMode>(mode));
+    PowerErrors error = SetDeviceMode(static_cast<PowerMode>(mode));
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
