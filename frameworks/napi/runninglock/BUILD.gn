@@ -14,10 +14,17 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 
 ohos_shared_library("runninglock") {
-  sources = [ "runninglock.cpp" ]
+  include_dirs = [ "../utils" ]
+  sources = [
+    "../utils/async_callback_info.cpp",
+    "../utils/napi_errors.cpp",
+    "../utils/napi_utils.cpp",
+    "runninglock_interface.cpp",
+    "runninglock_module.cpp",
+    "runninglock_napi.cpp",
+  ]
   configs = [ "${powermgr_utils_path}:utils_config" ]
-  deps =
-      [ "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client" ]
+  deps = [ "${powermgr_innerkits}:powermgr_client" ]
   if (!build_public_version) {
     external_deps = [ "hilog_native:libhilog" ]
   } else {

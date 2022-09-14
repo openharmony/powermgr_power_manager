@@ -31,8 +31,8 @@ public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    int32_t WakeupDeviceStub(MessageParcel& data);
-    int32_t SuspendDeviceStub(MessageParcel& data);
+    int32_t WakeupDeviceStub(MessageParcel& data, MessageParcel& reply);
+    int32_t SuspendDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RefreshActivityStub(MessageParcel& data);
     int32_t OverrideScreenOffTimeStub(MessageParcel& data, MessageParcel& reply);
     int32_t RestoreScreenOffTimeStub(MessageParcel& reply);
@@ -47,8 +47,8 @@ private:
     int32_t UnLockStub(MessageParcel& data);
     int32_t SetWorkTriggerListStub(MessageParcel& data);
     int32_t IsUsedStub(MessageParcel& data, MessageParcel& reply);
-    int32_t RebootDeviceStub(MessageParcel& data);
-    int32_t ShutDownDeviceStub(MessageParcel& data);
+    int32_t RebootDeviceStub(MessageParcel& data, MessageParcel& reply);
+    int32_t ShutDownDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterPowerStateCallbackStub(MessageParcel& data);
     int32_t UnRegisterPowerStateCallbackStub(MessageParcel& data);
     int32_t RegisterShutdownCallbackStub(MessageParcel& data);
@@ -56,7 +56,7 @@ private:
     int32_t RegisterPowerModeCallbackStub(MessageParcel& data);
     int32_t UnRegisterPowerModeCallbackStub(MessageParcel& data);
     int32_t SetDisplaySuspendStub(MessageParcel& data);
-    int32_t SetDeviceModeStub(MessageParcel& data);
+    int32_t SetDeviceModeStub(MessageParcel& data, MessageParcel& reply);
     int32_t GetDeviceModeStub(MessageParcel& reply);
     int32_t ShellDumpStub(MessageParcel& data, MessageParcel& reply);
 };

@@ -87,6 +87,7 @@
                         "ipower_mgr.h",
                         "ipower_state_callback.h",
                         "ishutdown_callback.h",
+                        "power_errors.h",
                         "power_mgr_client.h",
                         "power_state_machine_info.h",
                         "running_lock.h",
