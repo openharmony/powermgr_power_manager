@@ -251,13 +251,6 @@ void PowerStateMachine::RefreshActivityInner(pid_t pid,
         POWER_HILOGW(FEATURE_ACTIVITY, "Invalid type: %{public}d", type);
         return;
     }
-    // The minimum refreshactivity interval is 100ms!!
-    int64_t now = GetTickCount();
-    if ((mDeviceState_.lastRefreshActivityTime + MIN_TIME_MS_BETWEEN_USERACTIVITIES) > now) {
-        POWER_HILOGD(FEATURE_ACTIVITY, "Refresh activity too fast");
-        return;
-    }
-    mDeviceState_.lastRefreshActivityTime = now;
     // Check the screen state
     if (IsScreenOn()) {
         if (stateAction_ != nullptr) {
@@ -272,6 +265,18 @@ void PowerStateMachine::RefreshActivityInner(pid_t pid,
     } else {
         POWER_HILOGE(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
     }
+}
+
+bool PowerStateMachine::CheckRefreshTime()
+{
+    // The minimum refreshactivity interval is 100ms!!
+    int64_t now = GetTickCount();
+    if ((mDeviceState_.lastRefreshActivityTime + MIN_TIME_MS_BETWEEN_USERACTIVITIES) > now) {
+        POWER_HILOGD(FEATURE_ACTIVITY, "Refresh activity too fast");
+        return true;
+    }
+    mDeviceState_.lastRefreshActivityTime = now;
+    return false;
 }
 
 bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
