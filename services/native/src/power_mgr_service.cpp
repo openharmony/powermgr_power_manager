@@ -570,6 +570,9 @@ void PowerMgrService::RefreshActivity(int64_t callTimeMs,
     bool needChangeBacklight)
 {
     std::lock_guard lock(mutex_);
+    if (powerStateMachine_->CheckRefreshTime()) {
+        return;
+    }
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {

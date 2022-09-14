@@ -77,6 +77,7 @@ public:
     void WakeupDeviceInner(pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
         const std::string& pkgName);
     void RefreshActivityInner(pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
+    bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
