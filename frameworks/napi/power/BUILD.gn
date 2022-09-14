@@ -14,10 +14,17 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 
 ohos_shared_library("power") {
-  sources = [ "power.cpp" ]
+  include_dirs = [ "../utils" ]
+  sources = [
+    "../utils/async_callback_info.cpp",
+    "../utils/napi_errors.cpp",
+    "../utils/napi_utils.cpp",
+    "power.cpp",
+    "power_module.cpp",
+    "power_napi.cpp",
+  ]
   configs = [ "${powermgr_utils_path}:utils_config" ]
-  deps =
-      [ "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client" ]
+  deps = [ "${powermgr_innerkits}:powermgr_client" ]
   if (!build_public_version) {
     external_deps = [ "hilog_native:libhilog" ]
   } else {
