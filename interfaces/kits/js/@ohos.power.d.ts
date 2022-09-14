@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AsyncCallback} from './basic';
+import {AsyncCallback, BusinessError} from './basic';
 
 /**
  * Provides interfaces to manage power.
@@ -22,105 +22,167 @@ import {AsyncCallback} from './basic';
  * @since 7
  */
 declare namespace power {
-  /**
-   * Shuts down the system.
-   *
-   * <p>This method requires the ohos.permission.REBOOT permission.
-   *
-   * @param reason Indicates the shutdown reason.
-   * @permission ohos.permission.REBOOT
-   * @systemapi
-   * @since 7
-   */
-  function shutdownDevice(reason: string): void;
+    /**
+     * Shuts down the system.
+     *
+     * <p>This method requires the ohos.permission.REBOOT permission.
+     *
+     * @param reason Indicates the shutdown reason.
+     * @permission ohos.permission.REBOOT
+     * @systemapi
+     * @since 7
+     */
+    function shutdownDevice(reason: string): void;
 
-  /**
-   * Restarts the system.
-   *
-   * <p>This method requires the ohos.permission.REBOOT permission.
-   *
-   * @param reason Indicates the restart reason. For example, "updater" indicates entering the updater mode
-   * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
-   * @permission ohos.permission.REBOOT
-   * @since 7
-   */
-  function rebootDevice(reason: string): void;
+    /**
+     * Shuts down the system.
+     *
+     * <p>This method requires the ohos.permission.REBOOT permission.
+     *
+     * @permission ohos.permission.REBOOT
+     * @param {string} reason Indicates the shutdown reason.
+     * @throws {BusinessError} If connecting to the service failed.
+     * @systemapi
+     * @since 7
+     */
+    function shutdown(reason: string): void;
 
-  /**
-   * Checks whether the screen of a device is on or off.
-   *
-   * @return Returns true if the screen is on; returns false otherwise.
-   * @since 7
-   */
-  function isScreenOn(callback: AsyncCallback<boolean>): void;
-  function isScreenOn(): Promise<boolean>;
+    /**
+     * Restarts the system.
+     *
+     * <p>This method requires the ohos.permission.REBOOT permission.
+     *
+     * @param reason Indicates the restart reason. For example, "updater" indicates entering the updater mode
+     * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
+     * @permission ohos.permission.REBOOT
+     * @since 7
+     * @deprecated since 9
+     */
+    function rebootDevice(reason: string): void;
 
-  /**
-   * Try to wakeup the device and let screen on.
-   *
-   * @param detail Indicates the detail information who request wakeup.
-   * @systemapi
-   * @since 9
-   */
-   function wakeupDevice(detail: string): void;
+    /**
+     * Restarts the system.
+     *
+     * <p>This method requires the ohos.permission.REBOOT permission.
+     *
+     * @permission ohos.permission.REBOOT
+     * @param {string} reason Indicates the restart reason. For example, "updater" indicates entering the updater mode
+     * after the restart. If the parameter is not specified, the system enters the normal mode after the restart.
+     * @throws {BusinessError} If connecting to the service failed.
+     * @systemapi
+     * @since 9
+     */
+    function reboot(reason: string): void;
 
-   /**
-    * Try to suspend the device and let screen off.
-    *
-    * @systemapi
-    * @since 9
-    */
-   function suspendDevice(): void;
+    /**
+     * Checks whether the screen of a device is on or off.
+     *
+     * @return Returns true if the screen is on; returns false otherwise.
+     * @since 7
+     * @deprecated since 9
+     * @useinstead {@link isScreenOn}
+     */
+    function isScreenOn(callback: AsyncCallback<boolean>): void;
+    function isScreenOn(): Promise<boolean>;
 
-  /**
-   * Get the power mode of the device.
-   *
-   * @return Returns the power mode {@link DevicePowerMode} of current device .
-   * @permission ohos.permission.POWER_OPTIMIZATION
-   * @since 9
-   */
-   function getPowerMode(callback: AsyncCallback<DevicePowerMode>): void;
-   function getPowerMode(): Promise<DevicePowerMode>;
- 
-   /**
-    * To set the power mode of current device.
-    *
-    * @param mode Indicates power mode {@link DevicePowerMode} to set.
-    * @permission ohos.permission.POWER_OPTIMIZATION
-    * @systemapi
-    * @since 9
-    */
-   function setPowerMode(mode: DevicePowerMode, callback: AsyncCallback<void>): void;
-   function setPowerMode(mode: DevicePowerMode): Promise<void>;
- 
-   /**
-    * Indicates the power mode of a device.
-    *
-    * @syscap SystemCapability.PowerManager.PowerManager.Core
-    * @since 9
-    */
-   export enum DevicePowerMode {
-   /**
-    * Normal power mode
-    * @since 9
-    */
-    MODE_NORMAL = 600,
-   /**
-    * Power save mode
-    * @since 9
-    */
-    MODE_POWER_SAVE,
-   /**
-    * Performance power mode
-    * @since 9
-    */
-    MODE_PERFORMANCE,
-   /**
-    * Extreme power save mode
-    * @since 9
-    */
-    MODE_EXTREME_POWER_SAVE
+    /**
+     * Checks whether the screen of a device is on or off.
+     *
+     * @return Returns true if the screen is on; returns false otherwise.
+     * @throws {BusinessError} If connecting to the service failed.
+     * @since 9
+     */
+    function isScreenOn(): boolean;
+
+    /**
+     * Wakes up the device to turn on the screen.
+     *
+     * @param {string} detail Indicates the detail information who request wakeup.
+     * @throws {BusinessError} If connecting to the service failed.
+     * @systemapi
+     * @since 9
+     */
+    function wakeup(detail: string): void;
+
+    /**
+     * Suspends the device to turn off the screen.
+     *
+     * @throws {BusinessError} If connecting to the service failed.
+     * @systemapi
+     * @since 9
+     */
+    function suspend(): void;
+
+    /**
+     * Get the power mode of the device.
+     *
+     * @return Returns the power mode {@link DevicePowerMode} of current device .
+     * @permission ohos.permission.POWER_OPTIMIZATION
+     * @since 9
+     */
+    function getPowerMode(callback: AsyncCallback<DevicePowerMode>): void;
+    function getPowerMode(): Promise<DevicePowerMode>;
+
+    /**
+     * Obtains the power mode of the current device. For details, see {@link DevicePowerMode}.
+     *
+     * @permission ohos.permission.POWER_OPTIMIZATION
+     * @return The power mode {@link DevicePowerMode} of current device .
+     * @throws {BusinessError} If connecting to the service failed.
+     * @since 9
+     */
+    function getPowerMode(): DevicePowerMode;
+
+    /**
+     * Obtains the power mode of the current device. For details, see {@link DevicePowerMode}.
+     *
+     * @permission ohos.permission.POWER_OPTIMIZATION
+     * @param {DevicePowerMode} mode Indicates power mode {@link DevicePowerMode} to set.
+     * @param {AsyncCallback<void>} callback Indicates the callback of setting the power mode.
+     * @throws {BusinessError} If mode or callback is not valid.
+     * @systemapi
+     * @since 9
+     */
+    function setPowerMode(mode: DevicePowerMode, callback: AsyncCallback<void>): void;
+
+    /**
+     * Sets the power mode of current device. For details, see {@link DevicePowerMode}.
+     *
+     * @permission ohos.permission.POWER_OPTIMIZATION
+     * @param {DevicePowerMode} mode Indicates power mode {@link DevicePowerMode} to set.
+     * @throws {BusinessError} If mode is not valid.
+     * @systemapi
+     * @since 9
+     */
+    function setPowerMode(mode: DevicePowerMode): Promise<void>;
+
+    /**
+     * Power mode of a device.
+     *
+     * @syscap SystemCapability.PowerManager.PowerManager.Core
+     * @since 9
+     */
+    export enum DevicePowerMode {
+        /**
+         * Normal power mode
+         * @since 9
+         */
+        MODE_NORMAL = 600,
+        /**
+         * Power save mode
+         * @since 9
+         */
+        MODE_POWER_SAVE,
+        /**
+         * Performance power mode
+         * @since 9
+         */
+        MODE_PERFORMANCE,
+        /**
+         * Extreme power save mode
+         * @since 9
+         */
+        MODE_EXTREME_POWER_SAVE
     }
 }
 export default power;
-

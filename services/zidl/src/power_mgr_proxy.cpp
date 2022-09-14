@@ -228,10 +228,10 @@ void PowerMgrProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
     }
 }
 
-void PowerMgrProxy::RebootDevice(const std::string& reason)
+PowerErrors PowerMgrProxy::RebootDevice(const std::string& reason)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF(remote == nullptr);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -239,21 +239,25 @@ void PowerMgrProxy::RebootDevice(const std::string& reason)
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    WRITE_PARCEL_NO_RET(data, String16, Str8ToStr16(reason));
+    WRITE_PARCEL_WITH_RET(data, String16, Str8ToStr16(reason), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::REBOOT_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-void PowerMgrProxy::ShutDownDevice(const std::string& reason)
+PowerErrors PowerMgrProxy::ShutDownDevice(const std::string& reason)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF(remote == nullptr);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -261,21 +265,25 @@ void PowerMgrProxy::ShutDownDevice(const std::string& reason)
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    WRITE_PARCEL_NO_RET(data, String16, Str8ToStr16(reason));
+    WRITE_PARCEL_WITH_RET(data, String16, Str8ToStr16(reason), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-void PowerMgrProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
+PowerErrors PowerMgrProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF(remote == nullptr);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -283,23 +291,27 @@ void PowerMgrProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, 
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    WRITE_PARCEL_NO_RET(data, Int64, callTimeMs);
-    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(reason));
-    WRITE_PARCEL_NO_RET(data, Bool, suspendImmed);
+    WRITE_PARCEL_WITH_RET(data, Int64, callTimeMs, PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Uint32, static_cast<uint32_t>(reason), PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Bool, suspendImmed, PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SUSPEND_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-void PowerMgrProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
+PowerErrors PowerMgrProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF(remote == nullptr);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -307,18 +319,21 @@ void PowerMgrProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, co
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_WAKEUP, "Write descriptor failed");
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    WRITE_PARCEL_NO_RET(data, Int64, callTimeMs);
-    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(reason));
-    WRITE_PARCEL_NO_RET(data, String16, Str8ToStr16(details));
+    WRITE_PARCEL_WITH_RET(data, Int64, callTimeMs, PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Uint32, static_cast<uint32_t>(reason), PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, String16, Str8ToStr16(details), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::WAKEUP_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "SendRequest is failed, ret: %{public}d", ret);
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
 void PowerMgrProxy::RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
@@ -648,10 +663,10 @@ void PowerMgrProxy::SetDisplaySuspend(bool enable)
     }
 }
 
-void PowerMgrProxy::SetDeviceMode(const PowerMode& mode)
+PowerErrors PowerMgrProxy::SetDeviceMode(const PowerMode& mode)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF(remote == nullptr);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -659,15 +674,19 @@ void PowerMgrProxy::SetDeviceMode(const PowerMode& mode)
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
+    WRITE_PARCEL_WITH_RET(data, Uint32, static_cast<uint32_t>(mode), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SETMODE_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
 PowerMode PowerMgrProxy::GetDeviceMode()
