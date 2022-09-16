@@ -24,6 +24,7 @@ class Permission {
 public:
     static bool IsSystemCore();
     static bool IsSystemBasic();
+    static bool IsSystemApl();
     static bool IsSystemHap();
     static bool IsSystem();
     static bool IsPermissionGranted(const std::string& perm);
