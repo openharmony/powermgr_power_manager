@@ -23,7 +23,6 @@ ohos_shared_library("power") {
   } else {
     external_deps = [
       "hilog_native:libhilog",
-      "ipc:ipc_core",
       "napi:ace_napi",
     ]
   }
