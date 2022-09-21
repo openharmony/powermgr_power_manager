@@ -45,10 +45,10 @@ struct PowerAsyncCallbackInfo {
     napi_ref callbackRef = nullptr;
     napi_deferred deferred = nullptr;
     bool screenOn = false;
-    uint32_t powerMode = PowerMgrClient::NORMAL_MODE;
+    uint32_t powerMode = static_cast<uint32_t>(PowerMode::NORMAL_MODE);
 };
 
-static PowerMgrClient &g_powerMgrClient = PowerMgrClient::GetInstance();
+static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 
 static napi_value RebootOrShutdown(napi_env env, napi_callback_info info, bool isReboot)
 {
@@ -213,13 +213,13 @@ static void GetPowerModeCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbac
         resource,
         [](napi_env env, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
-            asyncCallbackInfo->powerMode = g_powerMgrClient.GetDeviceMode();
+            asyncCallbackInfo->powerMode = static_cast<uint32_t>(g_powerMgrClient.GetDeviceMode());
             POWER_HILOGD(COMP_FWK, "powerMode is %{public}u ", asyncCallbackInfo->powerMode);
         },
         [](napi_env env, napi_status status, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
             napi_value result[ARGC_TWO] = { 0 };
-            napi_create_uint32(env, asyncCallbackInfo->powerMode, &result[INDEX_ONE]);
+            napi_create_uint32(env, static_cast<uint32_t>(asyncCallbackInfo->powerMode), &result[INDEX_ONE]);
             if (asyncCallbackInfo->deferred) {
                 napi_resolve_deferred(env, asyncCallbackInfo->deferred, result[INDEX_ONE]);
             } else {
@@ -288,7 +288,7 @@ static void SetPowerModeCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbac
         resource,
         [](napi_env env, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
-            g_powerMgrClient.SetDeviceMode(asyncCallbackInfo->powerMode);
+            g_powerMgrClient.SetDeviceMode(static_cast<PowerMode>(asyncCallbackInfo->powerMode));
         },
         [](napi_env env, napi_status status, void *data) {
             PowerAsyncCallbackInfo *asyncCallbackInfo = (PowerAsyncCallbackInfo *)data;
@@ -374,10 +374,10 @@ static napi_value CreateDevicePowerMode(napi_env env, napi_value exports)
     napi_value performance = nullptr;
     napi_value extremePowerSave = nullptr;
 
-    napi_create_int32(env, (int32_t)PowerMgrClient::NORMAL_MODE, &normal);
-    napi_create_int32(env, (int32_t)PowerMgrClient::POWER_SAVE_MODE, &powerSave);
-    napi_create_int32(env, (int32_t)PowerMgrClient::PERFORMANCE_MODE, &performance);
-    napi_create_int32(env, (int32_t)PowerMgrClient::EXTREME_POWER_SAVE_MODE, &extremePowerSave);
+    napi_create_int32(env, (int32_t)PowerMode::NORMAL_MODE, &normal);
+    napi_create_int32(env, (int32_t)PowerMode::POWER_SAVE_MODE, &powerSave);
+    napi_create_int32(env, (int32_t)PowerMode::PERFORMANCE_MODE, &performance);
+    napi_create_int32(env, (int32_t)PowerMode::EXTREME_POWER_SAVE_MODE, &extremePowerSave);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("MODE_NORMAL", normal),

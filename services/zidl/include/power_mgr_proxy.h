@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,8 +72,8 @@ public:
     virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void SetDisplaySuspend(bool enable) override;
-    virtual void SetDeviceMode(const uint32_t& mode) override;
-    virtual uint32_t GetDeviceMode() override;
+    virtual void SetDeviceMode(const PowerMode& mode) override;
+    virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
 private:
     static inline BrokerDelegator<PowerMgrProxy> delegator_;

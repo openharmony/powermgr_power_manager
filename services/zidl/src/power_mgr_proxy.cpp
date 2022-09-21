@@ -648,7 +648,7 @@ void PowerMgrProxy::SetDisplaySuspend(bool enable)
     }
 }
 
-void PowerMgrProxy::SetDeviceMode(const uint32_t& mode)
+void PowerMgrProxy::SetDeviceMode(const PowerMode& mode)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -662,7 +662,7 @@ void PowerMgrProxy::SetDeviceMode(const uint32_t& mode)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, Uint32, mode);
+    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::SETMODE_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
@@ -670,10 +670,10 @@ void PowerMgrProxy::SetDeviceMode(const uint32_t& mode)
     }
 }
 
-uint32_t PowerMgrProxy::GetDeviceMode()
+PowerMode PowerMgrProxy::GetDeviceMode()
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, static_cast<PowerMode>(false));
 
     MessageParcel data;
     MessageParcel reply;
@@ -681,21 +681,21 @@ uint32_t PowerMgrProxy::GetDeviceMode()
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
-        return 0;
+        return PowerMode::NORMAL_MODE;
     }
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::GETMODE_DEVICE),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
-        return 0;
+        return PowerMode::NORMAL_MODE;
     }
 
-    uint32_t used = 0;
+    uint32_t used = static_cast<uint32_t>(PowerMode::NORMAL_MODE);
     if (!reply.ReadUint32(used)) {
         POWER_HILOGE(FEATURE_POWER_MODE, "ReadUint32 fail");
     }
-    return used;
+    return static_cast<PowerMode>(used);
 }
 
 std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint32_t argc)

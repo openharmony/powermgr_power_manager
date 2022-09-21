@@ -399,14 +399,14 @@ int32_t PowerMgrStub::SetDeviceModeStub(MessageParcel& data)
 {
     uint32_t mode = 0;
     READ_PARCEL_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
-    SetDeviceMode(mode);
+    SetDeviceMode(static_cast<PowerMode>(mode));
     return ERR_OK;
 }
 
 int32_t PowerMgrStub::GetDeviceModeStub(MessageParcel& reply)
 {
     uint32_t ret = 0;
-    ret = GetDeviceMode();
+    ret = static_cast<uint32_t>(GetDeviceMode());
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
         POWER_HILOGE(FEATURE_POWER_MODE, "WriteUint32 fail");
         return E_WRITE_PARCEL_ERROR;

@@ -32,7 +32,7 @@ using namespace OHOS::DisplayPowerMgr;
 namespace OHOS {
 namespace PowerMgr {
 PowerModeModule::PowerModeModule()
-    : mode_(NORMAL_MODE), lastMode_(LAST_MODE_FLAG), started_(false)
+    : mode_(PowerMode::NORMAL_MODE), lastMode_(LAST_MODE_FLAG), started_(false)
 {
     POWER_HILOGI(FEATURE_POWER_MODE, "Instance create");
     callbackMgr_ = new CallbackManager();
@@ -51,7 +51,7 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION, onOffRotationAction);
 }
 
-void PowerModeModule::SetModeItem(uint32_t mode)
+void PowerModeModule::SetModeItem(PowerMode mode)
 {
     POWER_HILOGI(FEATURE_POWER_MODE, "mode_: %{public}u, mode: %{public}u", mode_, mode);
 
@@ -61,7 +61,7 @@ void PowerModeModule::SetModeItem(uint32_t mode)
     }
 
     /* If it's a valid mode */
-    if (mode < POWER_MODE_MIN || mode > POWER_MODE_MAX) {
+    if (mode < PowerMode::POWER_MODE_MIN || mode > PowerMode::POWER_MODE_MAX) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid mode %{public}d", mode);
         return;
     }
@@ -70,14 +70,14 @@ void PowerModeModule::SetModeItem(uint32_t mode)
     EnableMode(mode);
 }
 
-uint32_t PowerModeModule::GetModeItem()
+PowerMode PowerModeModule::GetModeItem()
 {
     POWER_HILOGD(FEATURE_POWER_MODE, "mode_: %{public}u", mode_);
     /* get power mode */
     return mode_;
 }
 
-void PowerModeModule::EnableMode(uint32_t mode, bool isBoot)
+void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 {
     if (started_) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Power Mode is already running");
@@ -96,14 +96,15 @@ void PowerModeModule::EnableMode(uint32_t mode, bool isBoot)
     /* Set action */
     RunAction(isBoot);
 
-    this->lastMode_ = mode;
+    this->lastMode_ = static_cast<uint32_t>(mode);
     started_ = false;
 }
 
 void PowerModeModule::UpdateModepolicy()
 {
     /* update policy */
-    DelayedSingleton<PowerModePolicy>::GetInstance()->SetPowerModePolicy(this->mode_, this->lastMode_);
+    DelayedSingleton<PowerModePolicy>::GetInstance()->SetPowerModePolicy(static_cast<uint32_t>(this->mode_),
+        this->lastMode_);
 }
 
 void PowerModeModule::AddPowerModeCallback(const sptr<IPowerModeCallback>& callback)
@@ -171,7 +172,8 @@ void PowerModeModule::CallbackManager::WaitingCallback()
         sptr<IPowerModeCallback> callback = iface_cast<IPowerModeCallback>(obj);
         if (callback != nullptr) {
             POWER_HILOGD(FEATURE_POWER_MODE, "Call IPowerModeCallback: %{public}p", callback.GetRefPtr());
-            callback->PowerModeCallback();
+            PowerMode mode = PowerMode::NORMAL_MODE;
+            callback->OnPowerModeChanged(mode);
         }
     }
 }
@@ -185,21 +187,21 @@ void PowerModeModule::PublishPowerModeEvent()
     std::string action;
     uint32_t code;
     switch (mode_) {
-        case PowerModeModule::EXTREME_MODE:
+        case PowerMode::PERFORMANCE_MODE:
             action = CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
-            code = static_cast<uint32_t>(PowerModeModule::EXTREME_MODE);
+            code = static_cast<uint32_t>(PowerMode::PERFORMANCE_MODE);
             break;
-        case PowerModeModule::NORMAL_MODE:
+        case PowerMode::NORMAL_MODE:
             action = CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
-            code = static_cast<uint32_t>(PowerModeModule::NORMAL_MODE);
+            code = static_cast<uint32_t>(PowerMode::NORMAL_MODE);
             break;
-        case PowerModeModule::SAVE_MODE:
+        case PowerMode::POWER_SAVE_MODE:
             action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
-            code = static_cast<uint32_t>(PowerModeModule::SAVE_MODE);
+            code = static_cast<uint32_t>(PowerMode::POWER_SAVE_MODE);
             break;
-        case PowerModeModule::LOWPOWER_MODE:
+        case PowerMode::EXTREME_POWER_SAVE_MODE:
             action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
-            code = static_cast<uint32_t>(PowerModeModule::LOWPOWER_MODE);
+            code = static_cast<uint32_t>(PowerMode::EXTREME_POWER_SAVE_MODE);
             break;
         default:
             POWER_HILOGW(FEATURE_POWER_MODE, "Unknown mode");
