@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,9 +38,9 @@ using namespace OHOS::EventFwk;
 using namespace OHOS;
 using namespace std;
 
-void PowerMgrPowerSavemodeTest::PowerModeTest1Callback::PowerModeCallback()
+void PowerMgrPowerSavemodeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::PowerModeCallback.");
+    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
 }
 
 void PowerMgrPowerSavemodeTest::SetUpTestCase(void)
@@ -73,8 +73,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_001, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_001: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     sleep(SLEEP_WAIT_TIME_S);
     mode = powerMgrClient.GetDeviceMode();
@@ -93,13 +93,12 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_002, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 602;
-    uint32_t mode1 = 602;
+    PowerMode mode = PowerMode::PERFORMANCE_MODE;
+    PowerMode mode1 = PowerMode::PERFORMANCE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     sleep(SLEEP_WAIT_TIME_S);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_002 fail to SetDeviceMode";
-    GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode end." << mode;
 }
 
 /**
@@ -112,8 +111,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_003, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_003: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 603;
-    uint32_t mode1 = 603;
+    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::EXTREME_POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_003 fail to SetDeviceMode";
@@ -130,8 +129,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_028, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_028: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 1;
-    uint32_t mode1 = 1;
+    PowerMode mode = static_cast<PowerMode>(1);
+    PowerMode mode1 = static_cast<PowerMode>(1);
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_NE(mode, mode1) << "PowerSavemode_028 fail to SetDeviceMode abnormal";
@@ -148,8 +147,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_029, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_029: SetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 603;
-    uint32_t mode1 = 603;
+    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::EXTREME_POWER_SAVE_MODE;
     for (int i=0; i<100; i++)
     {
         powerMgrClient.SetDeviceMode(mode);
@@ -169,12 +168,11 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_004, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_004: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_004 fail to GetDeviceMode";
-    GTEST_LOG_(INFO) << "PowerSavemode_004: GetDeviceMode end. mode == " << mode;
 }
 
 /**
@@ -187,12 +185,11 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_005, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_005: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 602;
-    uint32_t mode1 = 602;
+    PowerMode mode = PowerMode::PERFORMANCE_MODE;
+    PowerMode mode1 = PowerMode::PERFORMANCE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_005 fail to GetDeviceMode";
-    GTEST_LOG_(INFO) << "PowerSavemode_005: GetDeviceMode end. mode == " << mode;
 }
 
 /**
@@ -205,12 +202,11 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_006, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_006: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 603;
-    uint32_t mode1 = 603;
+    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::EXTREME_POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_006 fail to GetDeviceMode";
-    GTEST_LOG_(INFO) << "PowerSavemode_006: GetDeviceMode end. mode == " << mode;
 }
 
 /**
@@ -223,11 +219,10 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_030, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_030: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 0;
-    uint32_t mode1 = 601;
+    PowerMode mode = static_cast<PowerMode>(0);
+    PowerMode mode1 = PowerMode::NORMAL_MODE;
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_NE(mode, mode1) << "PowerSavemode_030 fail to GetDeviceMode";
-    GTEST_LOG_(INFO) << "PowerSavemode_030: GetDeviceMode end. mode == " << mode;
 }
 
 /**
@@ -240,15 +235,14 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_031, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_031: GetDeviceMode start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     for (int i=0; i<100; i++)
     {
         mode = powerMgrClient.GetDeviceMode();
     }
     EXPECT_EQ(mode, mode1) << "PowerSavemode_031 fail to GetDeviceMode";
-    GTEST_LOG_(INFO) << "PowerSavemode_031: GetDeviceMode end. mode == " << mode;
 }
 
 /**
@@ -264,8 +258,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_032, TestSize.Level0)
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_032 fail to PowerModeCallback";
@@ -287,8 +281,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_033, TestSize.Level0)
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 1;
-    uint32_t mode1 = 1;
+    PowerMode mode = static_cast<PowerMode>(1);
+    PowerMode mode1 = static_cast<PowerMode>(1);
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_NE(mode, mode1) << "PowerSavemode_033 fail to PowerModeCallback";
@@ -309,8 +303,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_034, TestSize.Level0)
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_034 fail to PowerModeCallback";
@@ -334,8 +328,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_035, TestSize.Level0)
         powerMgrClient.RegisterPowerModeCallback(cb1);
     }
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_035 fail to PowerModeCallback";
@@ -356,8 +350,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_036, TestSize.Level0)
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.UnRegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_036 fail to PowerModeCallback";
@@ -378,8 +372,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_037, TestSize.Level0)
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.UnRegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 1;
-    uint32_t mode1 = 1;
+    PowerMode mode = static_cast<PowerMode>(1);
+    PowerMode mode1 = static_cast<PowerMode>(1);
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_NE(mode, mode1) << "PowerSavemode_036 fail to PowerModeCallback";
@@ -400,8 +394,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_038, TestSize.Level0)
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.UnRegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_036 fail to PowerModeCallback";
@@ -425,8 +419,8 @@ HWTEST_F (PowerMgrPowerSavemodeTest, PowerSavemode_039, TestSize.Level0)
         powerMgrClient.UnRegisterPowerModeCallback(cb1);
     }
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode = 601;
-    uint32_t mode1 = 601;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_036 fail to PowerModeCallback";
@@ -474,7 +468,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_022, TestSize.Level0)
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "PowerSavemode_022: ShutDownDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 602;
+    PowerMode mode = PowerMode::PERFORMANCE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     sleep(SLEEP_WAIT_TIME_S);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
@@ -500,7 +494,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_023, TestSize.Level0)
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "PowerSavemode_023: ShutDownDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 603;
+    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     sleep(SLEEP_WAIT_TIME_S);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
@@ -526,7 +520,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_024, TestSize.Level0)
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "PowerSavemode_024: ShutDownDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 602;
+    PowerMode mode = PowerMode::PERFORMANCE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     sleep(SLEEP_WAIT_TIME_S);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
@@ -552,7 +546,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_025, TestSize.Level0)
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "PowerSavemode_025: ShutDownDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    uint32_t mode = 603;
+    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     sleep(SLEEP_WAIT_TIME_S);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,17 +45,17 @@ HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
     GTEST_LOG_(INFO) << "SetModeTest001: SetMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
-    uint32_t mode1 = 601;
+    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     if (true) {
         powerMgrClient.SetDeviceMode(mode1);
     }
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode2 = 602;
+    PowerMode mode2 = PowerMode::PERFORMANCE_MODE;
     if (true) {
         powerMgrClient.SetDeviceMode(mode2);
     }
     sleep(SLEEP_WAIT_TIME_S);
-    uint32_t mode3 = 603;
+    PowerMode mode3 = PowerMode::EXTREME_POWER_SAVE_MODE;
     if (true) {
         powerMgrClient.SetDeviceMode(mode3);
     }

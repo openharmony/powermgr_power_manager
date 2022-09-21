@@ -141,9 +141,9 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
     resultReceiver_.append("Set Mode: ");
     resultReceiver_.append(argList_[0]);
     resultReceiver_.append("\n");
-    PowerMgrClient &client = PowerMgrClient::GetInstance();
-    client.SetDeviceMode(mode);
-    uint32_t result = client.GetDeviceMode();
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
+    client.SetDeviceMode(static_cast<PowerMode>(mode));
+    uint32_t result = static_cast<uint32_t>(client.GetDeviceMode());
     if (result == mode) {
         resultReceiver_.append("Set Mode Success!\n");
     } else {
@@ -157,7 +157,7 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
 
 ErrCode PowerShellCommand::RunAsWakeupCommand()
 {
-    PowerMgrClient &client = PowerMgrClient::GetInstance();
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
     std::string detail = "shell";
     client.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, detail);
     resultReceiver_.append("WakeupDevice is called\n");
@@ -166,7 +166,7 @@ ErrCode PowerShellCommand::RunAsWakeupCommand()
 
 ErrCode PowerShellCommand::RunAsSuspendCommand()
 {
-    PowerMgrClient &client = PowerMgrClient::GetInstance();
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
     std::string detail = "shell";
     client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON);
     resultReceiver_.append("SuspendDevice is called\n");
@@ -186,7 +186,7 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
 {
     resultReceiver_.clear();
 
-    PowerMgrClient &client = PowerMgrClient::GetInstance();
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
     std::string ret = client.Dump(argList_);
     resultReceiver_.append("Power Dump result: \n");
     resultReceiver_.append(ret);

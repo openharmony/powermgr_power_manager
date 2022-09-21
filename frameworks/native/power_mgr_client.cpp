@@ -258,16 +258,16 @@ void PowerMgrClient::SetDisplaySuspend(bool enable)
     proxy_->SetDisplaySuspend(enable);
 }
 
-void PowerMgrClient::SetDeviceMode(const uint32_t mode)
+void PowerMgrClient::SetDeviceMode(const PowerMode mode)
 {
     RETURN_IF(Connect() != ERR_OK);
     proxy_->SetDeviceMode(mode);
 }
 
-uint32_t PowerMgrClient::GetDeviceMode()
+PowerMode PowerMgrClient::GetDeviceMode()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, 0);
-    return proxy_->GetDeviceMode();
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, static_cast<PowerMode>(0));
+    return static_cast<PowerMode>(proxy_->GetDeviceMode());
 }
 
 std::string PowerMgrClient::Dump(const std::vector<std::string>& args)

@@ -846,7 +846,7 @@ void PowerMgrService::SetDisplaySuspend(bool enable)
     powerStateMachine_->SetDisplaySuspend(enable);
 }
 
-void PowerMgrService::SetDeviceMode(const uint32_t& mode)
+void PowerMgrService::SetDeviceMode(const PowerMode& mode)
 {
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -858,7 +858,7 @@ void PowerMgrService::SetDeviceMode(const uint32_t& mode)
     powerModeModule_.SetModeItem(mode);
 }
 
-uint32_t PowerMgrService::GetDeviceMode()
+PowerMode PowerMgrService::GetDeviceMode()
 {
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();

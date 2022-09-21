@@ -98,7 +98,7 @@ static void SetDeviceMode(const uint8_t* data)
         return;
     }
 
-    g_powerMgrClient.SetDeviceMode(type[0]);
+    g_powerMgrClient.SetDeviceMode(static_cast<PowerMode>(type[0]));
 }
 
 static void GetDeviceMode(const uint8_t* data)
