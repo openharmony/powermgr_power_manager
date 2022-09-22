@@ -33,7 +33,6 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
-
 void PowerRegisterCallbackModeTest::PowerModeTest1Callback::PowerModeCallback()
 {
     POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::PowerModeCallback.");
