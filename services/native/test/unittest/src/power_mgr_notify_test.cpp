@@ -132,6 +132,7 @@ void PowerMgrNotifyTest::TearDown(void)
 {
 }
 
+namespace {
 /**
  * @tc.name: PowerMgrNotifyTest001
  * @tc.desc: test powermgr notify for screen Off
@@ -194,4 +195,5 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level0)
     EXPECT_EQ(ERR_OK, err);
 
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest002: Test ScreenOn Notification end.";
+}
 }

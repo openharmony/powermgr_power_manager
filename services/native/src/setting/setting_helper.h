@@ -33,16 +33,16 @@ public:
     static bool IsDisplayOffTimeSettingValid();
     static int64_t GetSettingDisplayOffTime();
     static void SetSettingDisplayOffTime(int64_t time);
-    static sptr<SettingObserver> RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc&);
-    static void UnregisterSettingDisplayOffTimeObserver(sptr<SettingObserver>&);
+    static sptr<SettingObserver> RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingDisplayOffTimeObserver(sptr<SettingObserver>& observer);
     static bool IsAutoAdjustBrightnessSettingValid();
-    static void SetSettingAutoAdjustBrightness(SwitchStatus);
+    static void SetSettingAutoAdjustBrightness(SwitchStatus status);
     static bool IsBrightnessSettingValid();
     static void SetSettingBrightness(int32_t brightness);
     static bool IsVibrationSettingValid();
-    static void SetSettingVibration(SwitchStatus);
+    static void SetSettingVibration(SwitchStatus status);
     static bool IsWindowRotationSettingValid();
-    static void SetSettingWindowRotation(SwitchStatus);
+    static void SetSettingWindowRotation(SwitchStatus status);
 
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};

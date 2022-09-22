@@ -49,6 +49,7 @@ void PowerMgrServiceTest::TearDown(void)
 {
 }
 
+namespace {
 /**
  * @tc.name: PowerMgrService01
  * @tc.desc: Test PowerMgrService service ready.
@@ -312,4 +313,5 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService016, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService016: Prepare Fail, Screen is OFF.";
     
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 end.");
+}
 }
