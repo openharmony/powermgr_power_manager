@@ -32,7 +32,7 @@ namespace Suspend {
 class RunningLockHub : public IRunningLockHub {
 public:
     explicit RunningLockHub(const std::shared_ptr<ISuspendController>& sc) : sc_(sc) {};
-    ~RunningLockHub() = default;
+    ~RunningLockHub() override {};
 
     void Acquire(const std::string& name) override;
     void Release(const std::string& name) override;
