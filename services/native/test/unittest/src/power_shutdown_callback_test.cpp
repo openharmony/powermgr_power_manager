@@ -33,7 +33,6 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
-
 void PowerShutdownCallbackTest::PowerShutdownTest1Callback::ShutdownCallback()
 {
     POWER_HILOGD(LABEL_TEST, "PowerShutdownTest1Callback::ShutdownCallback.");
