@@ -34,7 +34,7 @@ using namespace std::chrono_literals;
 class SuspendController : public ISuspendController {
 public:
     SuspendController();
-    ~SuspendController() = default;
+    ~SuspendController() override {};
 
     void Suspend(SuspendCallback onSuspend, SuspendCallback onWakeup, bool force) override;
     void Wakeup() override;
