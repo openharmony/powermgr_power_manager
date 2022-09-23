@@ -77,6 +77,7 @@ enum class DisplayState : uint32_t {
     DISPLAY_DIM = 1,
     DISPLAY_ON = 2,
     DISPLAY_SUSPEND = 3,
+    DISPLAY_UNKNOWN = 4,
 };
 
 // UserActivityType list, must sync with A_PMS
