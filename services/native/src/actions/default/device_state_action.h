@@ -42,7 +42,7 @@ private:
     class DisplayPowerCallback : public DisplayPowerMgr::DisplayPowerCallbackStub {
         friend DeviceStateAction;
     public:
-        virtual void OnDisplayStateChanged(uint32_t displayId, DisplayPowerMgr::DisplayState state) override;
+        void OnDisplayStateChanged(uint32_t displayId, DisplayPowerMgr::DisplayState state) override;
     private:
         void NotifyDisplayActionDone(uint32_t event);
         std::function<void(uint32_t)> notify_ {nullptr};
