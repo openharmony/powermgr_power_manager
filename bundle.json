@@ -48,7 +48,7 @@
                 "init",
                 "input",
                 "ipc",
-                "multimedia_image_standard",
+                "multimedia_image_framework",
                 "napi",
                 "relational_store",
                 "safwk",
