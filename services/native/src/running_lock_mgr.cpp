@@ -397,8 +397,6 @@ void RunningLockMgr::NotifyHiViewRunningLockInfo(const string& remoteObjStr,
     const RunningLockInner& lockInner,
     RunningLockChangedType changeType) const
 {
-    string lockName = lockInner.GetRunningLockName().empty()
-        ? "NULL" : lockInner.GetRunningLockName();
     string msg = "token=" + remoteObjStr;
     NotifyHiView(changeType, msg, lockInner);
 }
