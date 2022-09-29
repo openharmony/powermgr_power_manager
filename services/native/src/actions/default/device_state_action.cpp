@@ -31,7 +31,6 @@ using namespace Rosen;
 
 DeviceStateAction::DeviceStateAction()
 {
-    dispCallback_ = nullptr;
 }
 
 DeviceStateAction::~DeviceStateAction()
