@@ -78,7 +78,7 @@ ohos_shared_library("powermgrservice") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "sensor:sensor_interface_native",
     "window_manager:libdm",
