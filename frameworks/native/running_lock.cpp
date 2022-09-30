@@ -107,11 +107,10 @@ ErrCode RunningLock::SetWorkTriggerList(const WorkTriggerList& workTriggerList)
 {
     auto& list = runningLockInfo_.workTriggerlist;
     list.clear();
-    for (auto& w : workTriggerList) {
-        if (w != nullptr) {
-            list.push_back(w);
-        }
-    }
+    std::copy_if(workTriggerList.begin(), workTriggerList.end(), std::back_inserter(list), [](auto& work) {
+        return work != nullptr;
+    });
+
     if (!CheckUsedNoLock()) {
         // no need to notify service when the lock is not used.
         return ERR_OK;

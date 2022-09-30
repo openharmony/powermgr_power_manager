@@ -1020,7 +1020,6 @@ TransitResult PowerStateMachine::StateController::TransitTo(
         GetPowerStateString(this->state_).c_str(),
         GetReasonTypeString(reason).c_str(),
         ignoreLock);
-    TransitResult ret = TransitResult::OTHER_ERR;
     if (!CheckState()) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", owner->currentState_);
         RecordFailure(owner->currentState_, reason, TransitResult::ALREADY_IN_STATE);
@@ -1031,7 +1030,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(
         RecordFailure(owner->currentState_, reason, TransitResult::LOCKING);
         return TransitResult::LOCKING;
     }
-    ret = action_(reason);
+    TransitResult ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
         lastReason_ = reason;
         lastTime_ = GetTickCount();

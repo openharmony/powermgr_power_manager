@@ -95,9 +95,7 @@ bool PowerSaveMode::GetFilterPolicy(std::list<ModePolicy> &policyList, int32_t m
     if (this->policyCache_.size() == 0) {
         return false;
     }
-    for (ModePolicy modePolicy :this->policyCache_[mode]) {
-        policyList.push_back(modePolicy);
-    }
+    policyList = policyCache_[mode];
     if (ValueProp::recover == value) {
         policyList.remove_if([&](ModePolicy mp) {return mp.recover_flag != ValueProp::recover;});
     }
@@ -109,13 +107,12 @@ int32_t PowerSaveMode::GetSleepTime(int32_t mode)
     if (this->policyCache_.size() == 0) {
         return RETURN_FLAG_FALSE;
     }
-    std::list<ModePolicy> modePolicyList = this->policyCache_[mode];
-    for (auto modePolicy:modePolicyList) {
-        if (modePolicy.id == SLEEP_FILTER) {
-            return modePolicy.value;
-        }
-    }
-    return RETURN_FLAG_FALSE;
+    std::list<ModePolicy>& modePolicyList = this->policyCache_[mode];
+    const auto& itemPolicy = std::find_if(modePolicyList.begin(), modePolicyList.end(), [](auto& modePolicy) {
+        return modePolicy.id == SLEEP_FILTER;
+    });
+
+    return (itemPolicy != modePolicyList.end()) ? itemPolicy->value : RETURN_FLAG_FALSE;
 }
 } // namespace PowerMgr
 } // namespace OHOS
