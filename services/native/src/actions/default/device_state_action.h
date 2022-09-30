@@ -47,7 +47,7 @@ private:
         void NotifyDisplayActionDone(uint32_t event);
         std::function<void(uint32_t)> notify_ {nullptr};
     };
-    sptr<DisplayPowerCallback> dispCallback_;
+    sptr<DisplayPowerCallback> dispCallback_ {nullptr};
     std::function<void(uint32_t)> actionCallback_ {nullptr};
 };
 } // namespace PowerMgr
