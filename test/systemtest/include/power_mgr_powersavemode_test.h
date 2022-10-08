@@ -35,9 +35,6 @@ constexpr int SET_DISPLAY_OFF_TIME_MS = 8000;
 class PowerMgrPowerSavemodeTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
     class PowerModeTest1Callback : public PowerModeCallbackStub {
     public:
         PowerModeTest1Callback() {};
