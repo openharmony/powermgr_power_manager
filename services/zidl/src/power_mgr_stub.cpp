@@ -79,7 +79,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             ret = ReleaseRunningLockStub(data);
             break;
         case static_cast<int>(IPowerMgr::IS_RUNNINGLOCK_TYPE_SUPPORTED):
-            ret = IsRunningLockTypeSupportedStub(data);
+            ret = IsRunningLockTypeSupportedStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK):
             ret = LockStub(data);
@@ -151,11 +151,16 @@ int32_t PowerMgrStub::ReleaseRunningLockStub(MessageParcel& data)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data)
+int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t type = 0;
+    bool ret = false;
     READ_PARCEL_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
-    IsRunningLockTypeSupported(type);
+    ret = IsRunningLockTypeSupported(type);
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "WriteBool fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
     return ERR_OK;
 }
 
