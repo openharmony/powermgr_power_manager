@@ -27,7 +27,7 @@
 #include <system_ability_definition.h>
 #include <unistd.h>
 
-#include "display_manager.h"
+#include "ability_manager_client.h"
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
@@ -36,14 +36,15 @@
 #include "sysparam.h"
 #include "watchdog.h"
 
+using namespace OHOS::AppExecFwk;
+using namespace OHOS::AAFwk;
+
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string TASK_RUNNINGLOCK_UNLOCK = "RunningLock_UnLock";
 const std::string REASON_POWER_KEY = "power_key";
-constexpr int UI_DIALOG_POWER_WIDTH_NARROW = 400;
-constexpr int UI_DIALOG_POWER_HEIGHT_NARROW = 240;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -202,11 +203,6 @@ void PowerMgrService::KeyMonitorInit()
             [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
                 POWER_HILOGI(FEATURE_INPUT, "Receive short press powerkey");
                 powerkeyPressed_ = true;
-                if (dialogId_ >= 0) {
-                    POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel dialog when short press");
-                    Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
-                    dialogId_ = -1;
-                }
                 if (!IsScreenOn()) {
                     handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
                 }
@@ -331,41 +327,29 @@ void PowerMgrService::HallSensorSubscriberCancel()
     }
 }
 
+bool PowerMgrService::ShowPowerDialog()
+{
+    POWER_HILOGD(COMP_SVC, "PowerMgrService::ShowPowerDialog start.");
+    auto client = AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        return false;
+    }
+    AAFwk::Want want;
+    want.SetElementName("com.ohos.powerdialog", "PowerServiceExtAbility");
+    int32_t result = client->StartAbility(want);
+    if (result != 0) {
+        POWER_HILOGE(COMP_SVC, "ShowPowerDialog failed, result = %{public}d", result);
+        return false;
+    }
+    isDialogstatus_ = true;
+    POWER_HILOGD(COMP_SVC, "ShowPowerDialog success.");
+    return true;
+}
+
 void PowerMgrService::HandleShutdownRequest()
 {
-    POWER_HILOGI(FEATURE_SHUTDOWN, "HandleShutdown");
-    if (dialogId_ >= 0) {
-        POWER_HILOGI(FEATURE_SHUTDOWN, "dialog is already showing");
-        return;
-    }
-    // show dialog
-    int width;
-    int height;
-    GetDisplayPosition(width, height);
-    std::string params = "{\"shutdownButton\":\"Power Off\", " \
-        "\"rebootButton\":\"Restart\", \"cancelButton\":\"Cancel\"}";
-    int32_t errCode = Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
-        "power_dialog",
-        params,
-        OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-        0,
-        0,
-        width,
-        height,
-        [this](int32_t id, const std::string& event, const std::string& params) {
-            POWER_HILOGI(FEATURE_SHUTDOWN, "Shutdown dialog callback: %{public}s, %{public}s",
-                event.c_str(), params.c_str());
-            if (event == "EVENT_SHUTDOWN") {
-                this->ShutDownDevice(REASON_POWER_KEY);
-            } else if (event == "EVENT_REBOOT") {
-                this->RebootDevice(REASON_POWER_KEY);
-            } else if (event == "EVENT_CANCEL") {
-                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-                this->dialogId_ = -1;
-            }
-        },
-        &dialogId_);
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Show dialog errCode %{public}d, dialogId=%{public}d", errCode, dialogId_);
+    POWER_HILOGD(FEATURE_SHUTDOWN, "HandleShutdown");
+    ShowPowerDialog();
     if (!IsScreenOn()) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Wakeup when display off");
         int64_t now = static_cast<int64_t>(time(0));
@@ -378,8 +362,9 @@ void PowerMgrService::HandlePowerKeyUp()
 {
     POWER_HILOGI(FEATURE_INPUT, "Receive release powerkey");
 
-    if (dialogId_ >= 0 || this->shutdownService_.IsShuttingDown()) {
+    if (isDialogstatus_ || this->shutdownService_.IsShuttingDown()) {
         POWER_HILOGW(FEATURE_INPUT, "System is shutting down");
+        isDialogstatus_ = false;
         return;
     }
     int64_t now = static_cast<int64_t>(time(0));
@@ -879,29 +864,6 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
     bool ret = PowerMgrDumper::Dump(args, result);
     POWER_HILOGI(COMP_SVC, "ret :%{public}d", ret);
     return result;
-}
-
-void PowerMgrService::GetDisplayPosition(int32_t& width, int32_t& height)
-{
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (display == nullptr) {
-        POWER_HILOGI(FEATURE_SHUTDOWN, "Dialog GetDefaultDisplay fail, try again.");
-        display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    }
-    IPCSkeleton::SetCallingIdentity(identity);
-
-    if (display != nullptr) {
-        POWER_HILOGI(FEATURE_SHUTDOWN, "Display size: %{public}d x %{public}d",
-            display->GetWidth(), display->GetHeight());
-        width = display->GetWidth();
-        height = display->GetHeight();
-    } else {
-        POWER_HILOGI(FEATURE_SHUTDOWN, "Dialog get display fail, use default wide.");
-        width = UI_DIALOG_POWER_WIDTH_NARROW;
-        height = UI_DIALOG_POWER_HEIGHT_NARROW;
-    }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "GetDisplayPosition: width:%{public}d, height: %{public}d", width, height);
 }
 } // namespace PowerMgr
 } // namespace OHOS
