@@ -54,7 +54,6 @@ ohos_shared_library("powermgrservice") {
 
   deps = [
     ":powermgr_stub",
-    "${powermgr_framework}:power_dialog",
     "${powermgr_innerkits}:powermgr_client",
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/permission:power_permission",
