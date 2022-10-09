@@ -87,6 +87,7 @@ public:
     void KeyMonitorCancel();
     void HallSensorSubscriberInit();
     void HallSensorSubscriberCancel();
+    bool ShowPowerDialog();
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -148,7 +149,6 @@ private:
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
-    void GetDisplayPosition(int32_t& width, int32_t& height);
     bool IsSupportSensor(SensorTypeId);
     static void HallSensorCallback(SensorEvent* event);
     static void RegisterBootCompletedCallback();
@@ -170,7 +170,7 @@ private:
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
     uint32_t mockCount_ {0};
-    int32_t dialogId_ {-1};
+    bool isDialogstatus_ {false};
     int32_t powerkeyLongPressId_ {0};
     int32_t powerkeyShortPressId_ {0};
     int32_t powerkeyReleaseId_ {0};
