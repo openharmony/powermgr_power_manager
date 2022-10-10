@@ -18,6 +18,7 @@
 #include "new"
 #include "power_log.h"
 #include "power_common.h"
+#include "string_ex.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -43,7 +44,9 @@ bool RunningLockInfo::ReadFromParcelWorkTriggerList(Parcel& parcel, WorkTriggerL
 bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
 {
     uint32_t readType;
-    READ_PARCEL_WITH_RET(parcel, String, name, false);
+    std::u16string u16Name;
+    READ_PARCEL_WITH_RET(parcel, String16, u16Name, false);
+    name = Str16ToStr8(u16Name);
     READ_PARCEL_WITH_RET(parcel, Uint32, readType, false);
     type = static_cast<RunningLockType>(readType);
     return ReadFromParcelWorkTriggerList(parcel, workTriggerlist);
@@ -85,7 +88,7 @@ bool RunningLockInfo::MarshallingWorkTriggerList(Parcel& parcel, const WorkTrigg
 
 bool RunningLockInfo::Marshalling(Parcel& parcel) const
 {
-    WRITE_PARCEL_WITH_RET(parcel, String, name, false);
+    WRITE_PARCEL_WITH_RET(parcel, String16, Str8ToStr16(name), false);
     WRITE_PARCEL_WITH_RET(parcel, Uint32, static_cast<uint32_t>(type), false);
 
     return MarshallingWorkTriggerList(parcel, workTriggerlist);
