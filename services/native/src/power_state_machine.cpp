@@ -945,7 +945,7 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
 
 void PowerStateMachine::DumpInfo(std::string& result)
 {
-    result.append("POWER MANAGER DUMP (hidumper -PowerStateMachine):\n");
+    result.append("POWER STATE DUMP:\n");
     result.append("Current State: ")
             .append(GetPowerStateString(GetState()))
             .append("  Reason: ")
@@ -987,18 +987,18 @@ void PowerStateMachine::DumpInfo(std::string& result)
     for (auto it = controllerMap_.begin(); it != controllerMap_.end(); it++) {
         result.append("State: ")
             .append(GetPowerStateString(it->second->GetState()))
-            .append("   Reason:")
+            .append("   Reason: ")
             .append(GetReasonTypeString(it->second->lastReason_).c_str())
-            .append("   Time:")
+            .append("   Time: ")
             .append(ToString(it->second->lastTime_))
             .append("\n")
             .append("   Failure: ")
             .append(GetReasonTypeString(it->second->failTrigger_).c_str())
-            .append("   Reason:")
+            .append("   Reason: ")
             .append(it->second->failReasion_)
-            .append("   From:")
+            .append("   From: ")
             .append(GetPowerStateString(it->second->failFrom_))
-            .append("   Time:")
+            .append("   Time: ")
             .append(ToString(it->second->failTime_))
             .append("\n\n");
     }
