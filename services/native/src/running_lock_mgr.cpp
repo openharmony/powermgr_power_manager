@@ -726,12 +726,13 @@ void RunningLockMgr::DumpInfo(std::string& result)
     auto validSize = GetValidRunningLockNum();
     std::lock_guard<std::mutex> lock(mutex_);
 
-    result.append("POWER MANAGER DUMP (hidumper -runninglock):\n");
+    result.append("RUNNING LOCK DUMP:\n");
     result.append("  totalSize=").append(ToString(runningLocks_.size()))
             .append(" validSize=").append(ToString(validSize)).append("\n");
     result.append("Summary By Type: \n");
     for (auto it = lockCounters_.begin(); it != lockCounters_.end(); it++) {
-        result.append(GetRunningLockTypeString(it->first))
+        result.append("  ")
+            .append(GetRunningLockTypeString(it->first))
             .append(": ")
             .append(ToString(it->second->GetCount()))
             .append("\n");
@@ -766,10 +767,10 @@ void RunningLockMgr::DumpInfo(std::string& result)
     }
 
     result.append("Peripherals Info: \n")
-            .append("Proximity: ")
-            .append("Enabled: ")
+            .append("  Proximity: ")
+            .append("Enabled=")
             .append(ToString(proximityController_.IsEnabled()))
-            .append("Status: ")
+            .append(" Status=")
             .append(ToString(proximityController_.GetStatus()))
             .append("\n");
 }
