@@ -11,17 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
-import("//foundation/arkui/ace_engine/build/ace_gen_sa_dialog_js.gni")
-
-gen_sa_dialog_js("dialog_js_files_etc") {
-  project_path = "//base/powermgr/power_manager/frameworks/dialog/dialog_ui/js"
-  i18n_files = [
-    "i18n/en-US.json",
-    "i18n/zh-CN.json",
-  ]
-  common_files = []
-  dialog_name = "power_dialog"
-  part_name = "${powermgr_part_name}"
-  subsystem_name = "powermgr"
+import("//build/ohos.gni")
+ohos_prebuilt_etc("power_dialog_hap") {
+  module_install_dir = "app/com.ohos.powerdialog"
+  source = "power_dialog.hap"
+  part_name = "prebuilt_hap"
+  subsystem_name = "applications"
+}
+group("dialog_hap") {
+  deps = [ ":power_dialog_hap" ]
 }

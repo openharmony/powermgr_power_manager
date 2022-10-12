@@ -13,10 +13,6 @@
 
 import("//base/powermgr/power_manager/powermgr.gni")
 
-group("power_dialog") {
-  deps = [ "dialog/dialog_ui/js:dialog_js_files_etc" ]
-}
-
 group("power_napi") {
   deps = [
     "napi/power:power",
