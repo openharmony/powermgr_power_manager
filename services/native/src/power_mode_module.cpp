@@ -186,22 +186,27 @@ void PowerModeModule::PublishPowerModeEvent()
     publishInfo.SetOrdered(false);
     std::string action;
     uint32_t code;
+    std::string data;
     switch (mode_) {
         case PowerMode::PERFORMANCE_MODE:
-            action = CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
+            action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
             code = static_cast<uint32_t>(PowerMode::PERFORMANCE_MODE);
+            data = ToString(static_cast<uint32_t>(PowerMode::PERFORMANCE_MODE));
             break;
         case PowerMode::NORMAL_MODE:
-            action = CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
+            action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
             code = static_cast<uint32_t>(PowerMode::NORMAL_MODE);
+            data = ToString(static_cast<uint32_t>(PowerMode::NORMAL_MODE));
             break;
         case PowerMode::POWER_SAVE_MODE:
             action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
             code = static_cast<uint32_t>(PowerMode::POWER_SAVE_MODE);
+            data = ToString(static_cast<uint32_t>(PowerMode::POWER_SAVE_MODE));
             break;
         case PowerMode::EXTREME_POWER_SAVE_MODE:
             action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
             code = static_cast<uint32_t>(PowerMode::EXTREME_POWER_SAVE_MODE);
+            data = ToString(static_cast<uint32_t>(PowerMode::EXTREME_POWER_SAVE_MODE));
             break;
         default:
             POWER_HILOGW(FEATURE_POWER_MODE, "Unknown mode");
@@ -211,6 +216,7 @@ void PowerModeModule::PublishPowerModeEvent()
     setModeWant.SetAction(action);
     CommonEventData event(setModeWant);
     event.SetCode(code);
+    event.SetData(data);
     if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
         POWER_HILOGE(FEATURE_POWER_MODE, "Failed to publish the mode event");
         return;
