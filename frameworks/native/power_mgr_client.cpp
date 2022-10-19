@@ -108,29 +108,29 @@ void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObje
     POWER_HILOGW(COMP_FWK, "Recv death notice");
 }
 
-void PowerMgrClient::RebootDevice(const std::string& reason)
+PowerErrors PowerMgrClient::RebootDevice(const std::string& reason)
 {
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->RebootDevice(reason);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->RebootDevice(reason);
 }
 
-void PowerMgrClient::ShutDownDevice(const std::string& reason)
+PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)
 {
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->ShutDownDevice(reason);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->ShutDownDevice(reason);
 }
 
-void PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
+PowerErrors PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
 {
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->SuspendDevice(GetTickCount(), reason, suspendImmed);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->SuspendDevice(GetTickCount(), reason, suspendImmed);
     POWER_HILOGD(FEATURE_SUSPEND, " Calling SuspendDevice success");
 }
 
-void PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& detail)
+PowerErrors PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& detail)
 {
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->WakeupDevice(GetTickCount(), reason, detail);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->WakeupDevice(GetTickCount(), reason, detail);
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
 }
 
@@ -258,10 +258,10 @@ void PowerMgrClient::SetDisplaySuspend(bool enable)
     proxy_->SetDisplaySuspend(enable);
 }
 
-void PowerMgrClient::SetDeviceMode(const PowerMode mode)
+PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)
 {
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->SetDeviceMode(mode);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->SetDeviceMode(mode);
 }
 
 PowerMode PowerMgrClient::GetDeviceMode()

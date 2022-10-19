@@ -22,9 +22,10 @@
 #include <iremote_broker.h>
 #include <iremote_object.h>
 
+#include "ipower_mode_callback.h"
 #include "ipower_state_callback.h"
 #include "ishutdown_callback.h"
-#include "ipower_mode_callback.h"
+#include "power_errors.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 
@@ -74,10 +75,10 @@ public:
     virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) = 0;
 
     // Used for power state machine.
-    virtual void RebootDevice(const std::string& reason) = 0;
-    virtual void ShutDownDevice(const std::string& reason) = 0;
-    virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
-    virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
+    virtual PowerErrors RebootDevice(const std::string& reason) = 0;
+    virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
+    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
+    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
     virtual bool OverrideScreenOffTime(int64_t timeout) = 0;
     virtual bool RestoreScreenOffTime() = 0;
@@ -97,7 +98,7 @@ public:
     virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
 
     virtual void SetDisplaySuspend(bool enable) = 0;
-    virtual void SetDeviceMode(const PowerMode& mode) = 0;
+    virtual PowerErrors SetDeviceMode(const PowerMode& mode) = 0;
     virtual PowerMode GetDeviceMode() = 0;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
 
