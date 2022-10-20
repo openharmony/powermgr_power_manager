@@ -440,7 +440,7 @@ static int g_judgeNum = 2;
 void PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::OnReceiveEvent(const CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    if (action == CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED) {
+    if (action == CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED) {
         POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
         g_i = g_judgeNum;
     }
@@ -461,7 +461,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_022, TestSize.Level0)
 
     bool result = false;
     MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
     result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
@@ -487,7 +487,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_023, TestSize.Level0)
 
     bool result = false;
     MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
     result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
@@ -513,7 +513,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_024, TestSize.Level0)
 
     bool result = false;
     MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
     result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
@@ -539,7 +539,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_025, TestSize.Level0)
 
     bool result = false;
     MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
     result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
@@ -553,4 +553,60 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_025, TestSize.Level0)
 
     POWER_HILOGD(LABEL_TEST, "PowerSavemode_025 1.");
 }
+
+/**
+ * @tc.name: PowerSavemode_026
+ * @tc.desc: ReceiveEvent
+ * @tc.type: FUNC
+ * @tc.require: issueI5ON1U
+ */
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_026, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSavemode_026: UnRegisterPowerModeCallback start.";
+
+    bool result = false;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
+    result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "PowerSavemode_026: ShutDownDevice start.";
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    PowerMode mode = PowerMode::NORMAL_MODE;
+    powerMgrClient.SetDeviceMode(mode);
+    sleep(SLEEP_WAIT_TIME_S);
+    CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
+
+    POWER_HILOGD(LABEL_TEST, "PowerSavemode_026");
+}
+
+/**
+ * @tc.name: PowerSavemode_027
+ * @tc.desc: ReceiveEvent
+ * @tc.type: FUNC
+ * @tc.require: issueI5ON1U
+ */
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_027, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSavemode_027: UnRegisterPowerModeCallback start.";
+
+    bool result = false;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
+    result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "PowerSavemode_027: ShutDownDevice start.";
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(mode);
+    sleep(SLEEP_WAIT_TIME_S);
+    CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
+
+    POWER_HILOGD(LABEL_TEST, "PowerSavemode_027");
+}
+
+
 }
