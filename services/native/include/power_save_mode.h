@@ -48,7 +48,11 @@ public:
     bool GetFilterPolicy(std::list<ModePolicy> &policy, int32_t mode, int32_t value);
     int32_t GetSleepTime(int32_t mode);
     std::list<ModePolicy> GetLastMode();
-    std::list<ModePolicy> SetLastMode(std::list<ModePolicy> &policy);
+    std::list<ModePolicy> SetLastMode(std::list<ModePolicy>& policy);
+    std::map<int32_t, std::list<ModePolicy>> GetPolicyCache()
+    {
+        return policyCache_;
+    }
 
 private:
     std::map<int32_t, std::list<ModePolicy>> policyCache_;
