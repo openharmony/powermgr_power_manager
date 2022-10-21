@@ -32,6 +32,7 @@
 #include "ipower_mgr.h"
 #include "running_lock_info.h"
 #include "power_state_machine_info.h"
+#include "power_errors.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -54,16 +55,16 @@ public:
     virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     // Use for PowerStateMachine
-    virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
-    virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
+    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
+    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
     virtual bool OverrideScreenOffTime(int64_t timeout) override;
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    virtual void RebootDevice(const std::string& reason) override;
-    virtual void ShutDownDevice(const std::string& reason) override;
+    virtual PowerErrors RebootDevice(const std::string& reason) override;
+    virtual PowerErrors ShutDownDevice(const std::string& reason) override;
     virtual void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual void RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
@@ -72,7 +73,7 @@ public:
     virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void SetDisplaySuspend(bool enable) override;
-    virtual void SetDeviceMode(const PowerMode& mode) override;
+    virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
 private:

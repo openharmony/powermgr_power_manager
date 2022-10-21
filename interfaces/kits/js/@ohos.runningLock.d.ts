@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-import {AsyncCallback} from './basic';
+import {AsyncCallback, BusinessError} from './basic';
 
 /**
  * Provides a mechanism to prevent the system from hibernating so that the applications can run in the background or
  * when the screen is off.
  *
- * <p>{@link createRunningLock} can be called to obtain a {@link RunningLock}.
- * <p>{@link lock} can be called to set the lock duration, during which the system will not hibernate. After the
- * lock duration times out, the lock is automatically released and the system hibernates if no other {@link
-  * RunningLock} is set.
+ * <p>{@link create} can be called to obtain a {@link RunningLock}.
+ * <p>{@link hold} can be called to set the lock duration, during which the system will not hibernate. After the
+ * lock duration times out, the lock is automatically released and the system hibernates if no other
+ * {@link RunningLock} is set.
  *
  * @syscap SystemCapability.PowerManager.PowerManager.Core
  * @since 7
@@ -33,29 +33,66 @@ declare namespace runningLock {
          * Prevents the system from hibernating and sets the lock duration.
          * This method requires the ohos.permission.RUNNING_LOCK permission.
          *
+         * @permission ohos.permission.RUNNING_LOCK
          * @param timeout Indicates the lock duration (ms). After the lock duration times out, the lock is automatically
          * released and the system hibernates if no other {@link RunningLock} is set.
-         * @permission ohos.permission.RUNNING_LOCK
          * @since 7
+         * @deprecated since 9
+         * @useinstead {@link hold}
          */
         lock(timeout: number): void;
+
+        /**
+         * Prevents the system from hibernating and sets the lock duration.
+         * This method requires the ohos.permission.RUNNING_LOCK permission.
+         *
+         * @permission ohos.permission.RUNNING_LOCK
+         * @param {number} timeout Indicates the lock duration (ms). After the lock duration times out,
+         * the lock is automatically released and the system hibernates if no other {@link RunningLock} is set.
+         * @throws {BusinessError} If connecting to the service failed.
+         * @since 9
+         */
+        hold(timeout: number): void;
 
         /**
          * Checks whether a lock is held or in use.
          *
          * @return Returns true if the lock is held or in use; returns false if the lock has been released.
          * @since 7
+         * @deprecated since 9
+         * @useinstead {@link isHolding}
          */
         isUsed(): boolean;
+
+        /**
+         * Checks whether a lock is held or in use.
+         *
+         * @return Returns true if the lock is held or in use; returns false if the lock has been released.
+         * @throws {BusinessError} If connecting to the service failed.
+         * @since 9
+         */
+        isHolding(): boolean;
 
         /**
          * Release the {@link RunningLock} that prevents the system from hibernating.
          * This method requires the ohos.permission.RUNNING_LOCK permission.
          *
-         * @since 7
          * @permission ohos.permission.RUNNING_LOCK
+         * @since 7
+         * @deprecated since 9
+         * @useinstead {@link unhold}
          */
         unlock(): void;
+
+        /**
+         * Release the {@link RunningLock} that prevents the system from hibernating.
+         * This method requires the ohos.permission.RUNNING_LOCK permission.
+         *
+         * @permission ohos.permission.RUNNING_LOCK
+         * @throws {BusinessError} If connecting to the service failed.
+         * @since 9
+         */
+        unhold(): void;
     }
 
     /**
@@ -88,9 +125,33 @@ declare namespace runningLock {
      * @return Returns true if the specified {@link RunningLockType} is supported;
      * returns false otherwise.
      * @since 7
+     * @deprecated since 9
+     * @useinstead {@link iSupported}
      */
     function isRunningLockTypeSupported(type: RunningLockType, callback: AsyncCallback<boolean>): void;
     function isRunningLockTypeSupported(type: RunningLockType): Promise<boolean>;
+
+    /**
+     * Checks whether the specified {@link RunningLockType} is supported.
+     *
+     * @param {RunningLockType} type Indicates the specified {@link RunningLockType}.
+     * @param {AsyncCallback} callback Indicates the callback of whether the specified {@link RunningLockType}
+     * is supported.
+     * @throws {BusinessError} If the type or callback is not valid.
+     * @since 9
+     */
+    function iSupported(type: RunningLockType, callback: AsyncCallback<boolean>): void;
+
+    /**
+     * Checks whether the specified {@link RunningLockType} is supported.
+     *
+     * @param {RunningLockType} type Indicates the specified {@link RunningLockType}.
+     * @return {Promise<boolean>} Whether the specified {@link RunningLockType} is supported.
+     * @throws {BusinessError} If the type is not valid.
+     * @since 9
+     */
+    function isSupported(type: RunningLockType): Promise<boolean>;
+
     /**
      * Creates a {@link RunningLock} object.
      *
@@ -104,8 +165,44 @@ declare namespace runningLock {
      * @return Returns the {@link RunningLock} object.
      * @permission ohos.permission.RUNNING_LOCK
      * @since 7
+     * @deprecated since 9
+     * @useinstead {@link create}
      */
     function createRunningLock(name: string, type: RunningLockType, callback: AsyncCallback<RunningLock>): void;
     function createRunningLock(name: string, type: RunningLockType): Promise<RunningLock>;
+
+    /**
+     * Creates a {@link RunningLock} object.
+     *
+     * <p>This method requires the ohos.permission.RUNNING_LOCK permission.
+     *
+     * <p>The {@link RunningLock} object can be used to perform a lock operation to prevent the system from hibernating.
+     *
+     * @permission ohos.permission.RUNNING_LOCK
+     * @param {string} name Indicates the {@link RunningLock} name. A recommended name consists of the package or
+     * class name and a suffix.
+     * @param {RunningLockType} type Indicates the {@link RunningLockType}.
+     * @param {AsyncCallback<RunningLock>)} callback Indicates the callback of {@link RunningLock} object.
+     * @throws {BusinessError} If the name, type or callback is not valid.
+     * @since 9
+     */
+    function create(name: string, type: RunningLockType, callback: AsyncCallback<RunningLock>): void;
+
+    /**
+     * Creates a {@link RunningLock} object.
+     *
+     * <p>This method requires the ohos.permission.RUNNING_LOCK permission.
+     *
+     * <p>The {@link RunningLock} object can be used to perform a lock operation to prevent the system from hibernating.
+     *
+     * @permission ohos.permission.RUNNING_LOCK
+     * @param {string} name Indicates the {@link RunningLock} name. A recommended name consists of the package or
+     * class name and a suffix.
+     * @param {RunningLockType} type Indicates the {@link RunningLockType}.
+     * @return {Promise<RunningLock>} The {@link RunningLock} object.
+     * @throws {BusinessError} If the name or type is not valid.
+     * @since 9
+     */
+    function create(name: string, type: RunningLockType): Promise<RunningLock>;
 }
 export default runningLock;
