@@ -35,7 +35,7 @@ public:
      *
      * @param reason The reason for rebooting the device. e.g.updater
      */
-    void RebootDevice(const std::string& reason);
+    PowerErrors RebootDevice(const std::string& reason);
 
     /**
      * Shut down the device.
@@ -43,14 +43,14 @@ public:
      * @param reason The reason for shutting down the device.
      *
      */
-    void ShutDownDevice(const std::string& reason);
+    PowerErrors ShutDownDevice(const std::string& reason);
 
     /**
      * Suspend device and set screen off.
      *
      * @param reason The reason why will you suspend the device, such as timeout/powerkey/forcesuspend and so on.
      */
-    void SuspendDevice(SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+    PowerErrors SuspendDevice(SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
         bool suspendImmed = false);
 
     /**
@@ -58,7 +58,7 @@ public:
      *
      * @param reason The reason for waking up the device, such as powerkey/plugin/application.
      */
-    void WakeupDevice(WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
+    PowerErrors WakeupDevice(WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
         const std::string& detail = std::string("app call"));
 
     /**
@@ -106,11 +106,11 @@ public:
      */
     void SetDisplaySuspend(bool enable);
 
-     /* Set the device mode.
+    /* Set the device mode.
      *
      * @param set The mode the device.
      */
-    void SetDeviceMode(const PowerMode mode);
+    PowerErrors SetDeviceMode(const PowerMode mode);
 
     /**
      * Get the device mode.
@@ -136,6 +136,7 @@ private:
         PowerMgrDeathRecipient() = default;
         ~PowerMgrDeathRecipient() = default;
         void OnRemoteDied(const wptr<IRemoteObject>& remote);
+
     private:
         DISALLOW_COPY_AND_MOVE(PowerMgrDeathRecipient);
     };

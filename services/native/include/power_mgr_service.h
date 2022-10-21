@@ -42,11 +42,11 @@ public:
     virtual void OnStart() override;
     virtual void OnStop() override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
-    virtual void RebootDevice(const std::string& reason) override;
-    virtual void ShutDownDevice(const std::string& reason) override;
-    virtual void SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,
+    virtual PowerErrors RebootDevice(const std::string& reason) override;
+    virtual PowerErrors ShutDownDevice(const std::string& reason) override;
+    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,
         bool suspendImmed) override;
-    virtual void WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
+    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
         const std::string& details) override;
     virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type,
         bool needChangeBacklight) override;
@@ -75,7 +75,7 @@ public:
     virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual void SetDisplaySuspend(bool enable) override;
-    virtual void SetDeviceMode(const PowerMode& mode) override;
+    virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
 

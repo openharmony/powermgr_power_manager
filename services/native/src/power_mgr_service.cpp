@@ -478,13 +478,13 @@ int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& arg
     return ERR_OK;
 }
 
-void PowerMgrService::RebootDevice(const std::string& reason)
+PowerErrors PowerMgrService::RebootDevice(const std::string& reason)
 {
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
-        return;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
     powerStateMachine_->CancelDelayTimer(
@@ -496,15 +496,16 @@ void PowerMgrService::RebootDevice(const std::string& reason)
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownService_.Reboot(reason);
+    return PowerErrors::ERR_OK;
 }
 
-void PowerMgrService::ShutDownDevice(const std::string& reason)
+PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystemApl() && !Permission::IsSystemHapPermGranted("ohos.permission.REBOOT")) {
-        return;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
     powerStateMachine_->CancelDelayTimer(
@@ -516,9 +517,10 @@ void PowerMgrService::ShutDownDevice(const std::string& reason)
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownService_.Shutdown(reason);
+    return PowerErrors::ERR_OK;
 }
 
-void PowerMgrService::SuspendDevice(int64_t callTimeMs,
+PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs,
     SuspendDeviceType reason,
     bool suspendImmed)
 {
@@ -526,17 +528,18 @@ void PowerMgrService::SuspendDevice(int64_t callTimeMs,
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     if (shutdownService_.IsShuttingDown()) {
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
-        return;
+        return PowerErrors::ERR_OK;
     }
     POWER_HILOGI(FEATURE_SUSPEND, "Try to suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->SuspendDeviceInner(pid, callTimeMs, reason, suspendImmed);
+    return PowerErrors::ERR_OK;
 }
 
-void PowerMgrService::WakeupDevice(int64_t callTimeMs,
+PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs,
     WakeupDeviceType reason,
     const std::string& details)
 {
@@ -544,10 +547,11 @@ void PowerMgrService::WakeupDevice(int64_t callTimeMs,
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
+    return PowerErrors::ERR_OK;
 }
 
 void PowerMgrService::RefreshActivity(int64_t callTimeMs,
@@ -831,16 +835,17 @@ void PowerMgrService::SetDisplaySuspend(bool enable)
     powerStateMachine_->SetDisplaySuspend(enable);
 }
 
-void PowerMgrService::SetDeviceMode(const PowerMode& mode)
+PowerErrors PowerMgrService::SetDeviceMode(const PowerMode& mode)
 {
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, mode: %{public}u", pid, uid, mode);
     if (!Permission::IsSystemApl() && !Permission::IsSystemHapPermGranted("ohos.permission.POWER_OPTIMIZATION")) {
-        return;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     powerModeModule_.SetModeItem(mode);
+    return PowerErrors::ERR_OK;
 }
 
 PowerMode PowerMgrService::GetDeviceMode()
