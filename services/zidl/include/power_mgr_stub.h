@@ -42,7 +42,7 @@ private:
     int32_t ProxyRunningLockStub(MessageParcel& data);
     int32_t CreateRunningLockStub(MessageParcel& data);
     int32_t ReleaseRunningLockStub(MessageParcel& data);
-    int32_t IsRunningLockTypeSupportedStub(MessageParcel& data);
+    int32_t IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply);
     int32_t LockStub(MessageParcel& data);
     int32_t UnLockStub(MessageParcel& data);
     int32_t SetWorkTriggerListStub(MessageParcel& data);
