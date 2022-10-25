@@ -36,7 +36,6 @@
                 "bundle_framework",
                 "common_event_service",
                 "c_utils",
-                "device_status",
                 "display_manager",
                 "drivers_interface_power",
                 "eventhandler",
