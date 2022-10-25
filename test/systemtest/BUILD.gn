@@ -33,7 +33,6 @@ deps_ex = [
   "bundle_framework:appexecfwk_core",
   "common_event_service:cesfwk_innerkits",
   "c_utils:utils",
-  "device_status:devicestatus_client",
   "display_manager:displaymgr",
   "eventhandler:libeventhandler",
   "hiviewdfx_hilog_native:libhilog",

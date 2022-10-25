@@ -39,7 +39,6 @@ deps_ex = [
   "samgr:samgr_proxy",
   "sensor:sensor_interface_native",
   "c_utils:utils",
-  "device_status:devicestatus_client",
   "display_manager:displaymgr",
 ]
 
