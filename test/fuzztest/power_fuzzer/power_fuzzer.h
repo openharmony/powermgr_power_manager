@@ -40,6 +40,10 @@ enum class ApiNumber {
     NUM_SIXTEEN,
     NUM_SEVENTEEN,
     NUM_EIGHTEEN,
+    NUM_NINETEEN,
+    NUM_TWENTY,
+    NUM_TWENTY_ONE,
+    NUM_END
 };
 
 #endif
