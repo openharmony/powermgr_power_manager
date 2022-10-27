@@ -127,7 +127,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
     }
     dispCallback_->notify_ = actionCallback_;
     bool ret = DisplayPowerMgrClient::GetInstance().SetDisplayState(dispState, reason);
-    POWER_HILOGI(FEATURE_POWER_STATE, "Set display state: %{public}d", ret);
+    POWER_HILOGI(FEATURE_POWER_STATE, "Set display state finished, ret: %{public}d", ret);
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
