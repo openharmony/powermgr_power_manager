@@ -58,7 +58,7 @@ DisplayState DeviceStateAction::GetDisplayState()
 {
     DisplayPowerMgr::DisplayState state = DisplayPowerMgrClient::GetInstance().GetDisplayState();
     POWER_HILOGI(FEATURE_POWER_STATE, "Get display state: %{public}d", state);
-    DisplayState ret = DisplayState::DISPLAY_ON;
+    DisplayState ret = DisplayState::DISPLAY_UNKNOWN;
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON:
             ret = DisplayState::DISPLAY_ON;
@@ -71,6 +71,9 @@ DisplayState DeviceStateAction::GetDisplayState()
             break;
         case DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND:
             ret = DisplayState::DISPLAY_SUSPEND;
+            break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_UNKNOWN:
+            ret = DisplayState::DISPLAY_UNKNOWN;
             break;
         default:
             break;
