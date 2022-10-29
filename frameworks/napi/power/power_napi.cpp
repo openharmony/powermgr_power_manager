@@ -155,13 +155,13 @@ napi_value PowerNapi::SetPowerModeCallback(
     AsyncWork(
         env, asyncInfo, "SetPowerModeCallback",
         [](napi_env env, void* data) {
-            AsyncCallbackInfo* asyncInfo = (AsyncCallbackInfo*)data;
+            AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
             PowerErrors error = g_powerMgrClient.SetDeviceMode(asyncInfo->GetData().GetMode());
             asyncInfo->GetError().Error(error);
         },
         [](napi_env env, napi_status status, void* data) {
-            AsyncCallbackInfo* asyncInfo = (AsyncCallbackInfo*)data;
+            AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
             asyncInfo->CallFunction(env, nullptr);
             asyncInfo->Release(env);
@@ -186,13 +186,13 @@ napi_value PowerNapi::SetPowerModePromise(
     AsyncWork(
         env, asyncInfo, "SetPowerModePromise",
         [](napi_env env, void* data) {
-            AsyncCallbackInfo* asyncInfo = (AsyncCallbackInfo*)data;
+            AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
             PowerErrors error = g_powerMgrClient.SetDeviceMode(asyncInfo->GetData().GetMode());
             asyncInfo->GetError().Error(error);
         },
         [](napi_env env, napi_status status, void* data) {
-            AsyncCallbackInfo* asyncInfo = (AsyncCallbackInfo*)data;
+            AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
             if (asyncInfo->GetError().IsError()) {
                 napi_resolve_deferred(env, asyncInfo->GetDeferred(), asyncInfo->GetError().GetNapiError(env));
@@ -207,13 +207,13 @@ napi_value PowerNapi::SetPowerModePromise(
     return promise;
 }
 
-void PowerNapi::AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asyncInfo, const std::string resourceName,
+void PowerNapi::AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asyncInfo, const std::string& resourceName,
     napi_async_execute_callback execute, napi_async_complete_callback complete)
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, resourceName.c_str(), NAPI_AUTO_LENGTH, &resource);
     napi_create_async_work(
-        env, nullptr, resource, execute, complete, (void*)asyncInfo.get(), &(asyncInfo->GetAsyncWork()));
+        env, nullptr, resource, execute, complete, reinterpret_cast<void*>(asyncInfo.get()), &(asyncInfo->GetAsyncWork()));
     NAPI_CALL_RETURN_VOID(env, napi_queue_async_work(env, asyncInfo->GetAsyncWork()));
     asyncInfo.release();
 }
