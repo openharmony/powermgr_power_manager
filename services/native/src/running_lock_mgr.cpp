@@ -746,7 +746,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
     result.append("Dump Lock List: \n");
     auto curTick = GetTickCount();
     int index = 0;
-    for (auto& it : runningLocks_) {
+    for (const auto& it : runningLocks_) {
         if (index++ == MAX_DUMP_NUM) {
             break;
         }
@@ -867,7 +867,7 @@ void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *even
         return;
     }
     auto runningLock = pms->GetRunningLockMgr();
-    ProximityData* data = (ProximityData*)event->data;
+    ProximityData* data = reinterpret_cast<ProximityData*>(event->data);
     int32_t distance = static_cast<int32_t>(data->distance);
 
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Sensor Callback data->distance=%{public}d", distance);

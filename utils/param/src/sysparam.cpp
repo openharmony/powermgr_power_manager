@@ -29,7 +29,7 @@ void SysParam::RegisterBootCompletedCallback(BootCompletedCallback& callback)
                 ((BootCompletedCallback)context)();
             }
         },
-        (void*)callback);
+        reinterpret_cast<void*>(callback));
     if (ret < 0) {
         POWER_HILOGW(COMP_UTILS, "RegisterBootCompletedCallback failed, ret=%{public}d", ret);
     }

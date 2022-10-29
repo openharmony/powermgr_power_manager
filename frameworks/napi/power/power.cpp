@@ -80,12 +80,12 @@ void Power::IsScreenOnCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackI
     napi_create_async_work(
         env, nullptr, resource,
         [](napi_env env, void* data) {
-            PowerAsyncCallbackInfo* asyncCallbackInfo = (PowerAsyncCallbackInfo*)data;
+            PowerAsyncCallbackInfo* asyncCallbackInfo = reinterpret_cast<PowerAsyncCallbackInfo*>(data);
             asyncCallbackInfo->screenOn = g_powerMgrClient.IsScreenOn();
             POWER_HILOGD(COMP_FWK, "Screen is %{public}s ", asyncCallbackInfo->screenOn ? "ON" : "OFF");
         },
         [](napi_env env, napi_status status, void* data) {
-            PowerAsyncCallbackInfo* asyncCallbackInfo = (PowerAsyncCallbackInfo*)data;
+            PowerAsyncCallbackInfo* asyncCallbackInfo = reinterpret_cast<PowerAsyncCallbackInfo*>(data);
             napi_value result[RESULT_SIZE] = {0};
             napi_get_boolean(env, asyncCallbackInfo->screenOn, &result[1]);
             if (asyncCallbackInfo->deferred) {
@@ -101,7 +101,7 @@ void Power::IsScreenOnCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackI
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
         },
-        (void*)asCallbackInfoPtr.get(), &asCallbackInfoPtr->asyncWork);
+        reinterpret_cast<void*>(asCallbackInfoPtr.get()), &asCallbackInfoPtr->asyncWork);
     if (napi_ok == napi_queue_async_work(env, asCallbackInfoPtr->asyncWork)) {
         asCallbackInfoPtr.release();
     }

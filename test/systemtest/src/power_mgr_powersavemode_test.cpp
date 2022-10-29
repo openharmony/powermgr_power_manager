@@ -607,6 +607,4 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_027, TestSize.Level0)
 
     POWER_HILOGD(LABEL_TEST, "PowerSavemode_027");
 }
-
-
 }
