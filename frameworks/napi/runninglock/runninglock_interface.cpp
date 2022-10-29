@@ -236,11 +236,11 @@ void RunningLockInterface::CreateRunningLockCallBack(napi_env env, RunningLockAs
     napi_create_async_work(
         env, nullptr, resource,
         [](napi_env env, void* data) {
-            RunningLockAsyncInfo* asyncInfo = (RunningLockAsyncInfo*)data;
+            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
             asyncInfo->runningLock = g_powerMgrClient.CreateRunningLock(std::string(asyncInfo->name), asyncInfo->type);
         },
         [](napi_env env, napi_status status, void* data) {
-            RunningLockAsyncInfo* asyncInfo = (RunningLockAsyncInfo*)data;
+            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
             napi_value result[RESULT_SIZE] = {0};
             result[1] = CreateInstanceForRunningLock(env, asyncInfo);
             if (result[1] == nullptr) {
@@ -265,7 +265,7 @@ void RunningLockInterface::CreateRunningLockCallBack(napi_env env, RunningLockAs
             napi_delete_async_work(env, asyncInfo->asyncWork);
             delete asyncInfo;
         },
-        (void*)asyncInfo, &asyncInfo->asyncWork);
+        reinterpret_cast<void*>(asyncInfo), &asyncInfo->asyncWork);
     napi_queue_async_work(env, asyncInfo->asyncWork);
 }
 
@@ -276,7 +276,7 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
     napi_create_async_work(
         env, nullptr, resource,
         [](napi_env env, void* data) {
-            RunningLockAsyncInfo* asyncInfo = (RunningLockAsyncInfo*)data;
+            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
             if (asyncInfo->type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
                 asyncInfo->type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
                 asyncInfo->isSupported = true;
@@ -287,7 +287,7 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
                 asyncInfo->isSupported ? "true" : "false");
         },
         [](napi_env env, napi_status status, void* data) {
-            RunningLockAsyncInfo* asyncInfo = (RunningLockAsyncInfo*)data;
+            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
             napi_value result[RESULT_SIZE] = {0};
             napi_get_boolean(env, asyncInfo->isSupported, &result[1]);
             if (asyncInfo->deferred) {
@@ -303,7 +303,7 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
             napi_delete_async_work(env, asyncInfo->asyncWork);
             delete asyncInfo;
         },
-        (void*)asyncInfo, &asyncInfo->asyncWork);
+        reinterpret_cast<void*>(asyncInfo), &asyncInfo->asyncWork);
     napi_queue_async_work(env, asyncInfo->asyncWork);
 }
 } // namespace PowerMgr

@@ -42,7 +42,7 @@ static napi_value RunningLockConstructor(napi_env env, napi_callback_info info)
         env, thisVar, runningLockEntity.get(),
         [](napi_env env, void* data, void* hint) {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "Destructor");
-            auto entity = (RunningLockEntity*)data;
+            auto entity = reinterpret_cast<RunningLockEntity*>(data);
             delete entity;
         },
         nullptr, nullptr);

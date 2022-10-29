@@ -59,15 +59,15 @@ bool PowerSaveMode::StartXMlParse(std::string path)
     }
 
     for (auto nodePtr = rootPtr->xmlChildrenNode; nodePtr != nullptr; nodePtr = nodePtr->next) {
-        int32_t policyId = atoi((char *)xmlGetProp(nodePtr, BAD_CAST("id")));
+        int32_t policyId = atoi(reinterpret_cast<char*>(xmlGetProp(nodePtr, BAD_CAST("id"))));
         POWER_HILOGD(FEATURE_POWER_MODE, "policyId: %{public}d.", policyId);
         std::list<ModePolicy> listPolicy;
         for (auto policyNodePtr = nodePtr->xmlChildrenNode;
             policyNodePtr != nullptr; policyNodePtr = policyNodePtr->next) {
             ModePolicy pmp;
-            pmp.id = atoi((char *)xmlGetProp(policyNodePtr, BAD_CAST("id")));
-            pmp.recover_flag = atoi((char *)xmlGetProp(policyNodePtr, BAD_CAST("recover_flag")));
-            pmp.value = atoi((char *)xmlGetProp(policyNodePtr, BAD_CAST("value")));
+            pmp.id = atoi(reinterpret_cast<char*>(xmlGetProp(policyNodePtr, BAD_CAST("id"))));
+            pmp.recover_flag = atoi(reinterpret_cast<char*>(xmlGetProp(policyNodePtr, BAD_CAST("recover_flag"))));
+            pmp.value = atoi(reinterpret_cast<char*>(xmlGetProp(policyNodePtr, BAD_CAST("value"))));
             listPolicy.push_back(pmp);
             POWER_HILOGD(FEATURE_POWER_MODE, "id=%{public}d, value=%{public}d, recover_flag=%{public}d", pmp.id,
                 pmp.value, pmp.recover_flag);
@@ -108,7 +108,7 @@ int32_t PowerSaveMode::GetSleepTime(int32_t mode)
         return RETURN_FLAG_FALSE;
     }
     std::list<ModePolicy>& modePolicyList = this->policyCache_[mode];
-    const auto& itemPolicy = std::find_if(modePolicyList.begin(), modePolicyList.end(), [](auto& modePolicy) {
+    const auto& itemPolicy = std::find_if(modePolicyList.begin(), modePolicyList.end(), [](const auto& modePolicy) {
         return modePolicy.id == SLEEP_FILTER;
     });
 

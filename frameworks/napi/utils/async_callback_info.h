@@ -47,7 +47,7 @@ public:
     }
     class AsyncData {
     public:
-        void SetMode(napi_env& env, napi_value& type);
+        void SetMode(napi_env& env, napi_value& mode);
         inline PowerMode GetMode() const
         {
             return powerMode_;
@@ -57,7 +57,7 @@ public:
         void SetName(napi_env& env, napi_value& name);
         void CreateRunningLock();
         napi_value CreateInstanceForRunningLock(napi_env& env);
-        inline void SetRunningLockInstance(napi_ref& instance)
+        inline void SetRunningLockInstance(const napi_ref& instance)
         {
             napiRunningLockIns_ = instance;
         }

@@ -40,7 +40,7 @@ private:
         napi_env& env, napi_value argv[], std::unique_ptr<AsyncCallbackInfo>& asyncInfo);
     static napi_value CreatePromise(napi_env& env, napi_value argv[], std::unique_ptr<AsyncCallbackInfo>& asyncInfo);
 
-    static void AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asyncInfo, const std::string resourceName,
+    static void AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asyncInfo, const std::string& resourceName,
         napi_async_execute_callback execute, napi_async_complete_callback complete);
     static std::shared_ptr<RunningLock> UnwrapRunningLock(napi_env& env, napi_value& thisArg);
 };
