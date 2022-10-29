@@ -308,7 +308,7 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     }
     const uint32_t LID_CLOSED_HALL_FLAG = 0x1;
     auto now = static_cast<int64_t>(time(nullptr));
-    auto data = (HallData*)event->data;
+    auto data = reinterpret_cast<HallData*>(event->data);
     auto status = static_cast<uint32_t>(data->status);
     if (status & LID_CLOSED_HALL_FLAG) {
         POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");

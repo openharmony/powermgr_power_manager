@@ -107,7 +107,7 @@ ErrCode RunningLock::SetWorkTriggerList(const WorkTriggerList& workTriggerList)
 {
     auto& list = runningLockInfo_.workTriggerlist;
     list.clear();
-    std::copy_if(workTriggerList.begin(), workTriggerList.end(), std::back_inserter(list), [](auto& work) {
+    std::copy_if(workTriggerList.begin(), workTriggerList.end(), std::back_inserter(list), [](const auto& work) {
         return work != nullptr;
     });
 

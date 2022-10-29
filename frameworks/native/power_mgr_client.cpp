@@ -123,15 +123,15 @@ PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)
 PowerErrors PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->SuspendDevice(GetTickCount(), reason, suspendImmed);
     POWER_HILOGD(FEATURE_SUSPEND, " Calling SuspendDevice success");
+    return proxy_->SuspendDevice(GetTickCount(), reason, suspendImmed);
 }
 
 PowerErrors PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& detail)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->WakeupDevice(GetTickCount(), reason, detail);
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
+    return proxy_->WakeupDevice(GetTickCount(), reason, detail);
 }
 
 void PowerMgrClient::RefreshActivity(UserActivityType type)
