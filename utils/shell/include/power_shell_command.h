@@ -28,8 +28,6 @@ public:
     ~PowerShellCommand() override {};
 
 private:
-    static constexpr const char * const TEMP_DUMP_LOG_PATH = "/data/test/power_dump.log";
-    static constexpr int DUMP_BUFF_SIZE = 100;
     ErrCode CreateCommandMap() override;
     ErrCode CreateMessageMap() override;
     ErrCode init() override;
@@ -38,7 +36,9 @@ private:
     ErrCode RunAsSetModeCommand();
     ErrCode RunAsWakeupCommand();
     ErrCode RunAsSuspendCommand();
+#ifdef HAS_DISPLAY_MANAGER_PART
     ErrCode RunAsDisplayCommand();
+#endif
     ErrCode RunAsTimeOutCommand();
 };
 }  // namespace PowerMgr
