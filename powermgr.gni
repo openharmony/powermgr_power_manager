@@ -13,6 +13,13 @@
 
 import("//build/ohos.gni")
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.powermgr_display_manager)) {
+  has_display_manager_part = true
+} else {
+  has_display_manager_part = false
+}
+
 ability_runtime_path = "//foundation/ability/ability_runtime"
 
 ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
