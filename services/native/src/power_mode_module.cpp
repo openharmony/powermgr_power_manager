@@ -15,7 +15,6 @@
 
 #include "power_mode_module.h"
 
-#include "display_power_mgr_client.h"
 #include "power_log.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
@@ -27,7 +26,6 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
-using namespace OHOS::DisplayPowerMgr;
 
 namespace OHOS {
 namespace PowerMgr {
