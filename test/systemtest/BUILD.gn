@@ -38,7 +38,6 @@ deps_ex = [
   "sensor:sensor_interface_native",
   "c_utils:utils",
   "device_status:devicestatus_client",
-  "display_manager:displaymgr",
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
 ]
