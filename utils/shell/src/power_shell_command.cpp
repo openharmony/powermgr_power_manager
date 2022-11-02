@@ -20,19 +20,20 @@
 #include <string_ex.h>
 
 #include "power_mgr_client.h"
+#ifdef HAS_DISPLAY_MANAGER_PART
 #include "display_power_mgr_client.h"
-#include "system_ability_definition.h"
+#endif
 
 extern char *optarg;
 
 namespace OHOS {
 namespace PowerMgr {
-using namespace OHOS::DisplayPowerMgr;
 
 static const struct option SET_MODE_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
 };
 
+#ifdef HAS_DISPLAY_MANAGER_PART
 static const struct option DISPLAY_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"restore", no_argument, nullptr, 'r'},
@@ -42,6 +43,7 @@ static const struct option DISPLAY_OPTIONS[] = {
     {"cancel", no_argument, nullptr, 'c'},
     {"discount", required_argument, nullptr, 'd'},
 };
+#endif
 
 static const struct option TIME_OUT_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -95,7 +97,9 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
+#ifdef HAS_DISPLAY_MANAGER_PART
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
+#endif
         {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
@@ -193,6 +197,8 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
     return ERR_OK;
 }
 
+#ifdef HAS_DISPLAY_MANAGER_PART
+using namespace OHOS::DisplayPowerMgr;
 ErrCode PowerShellCommand::RunAsDisplayCommand()
 {
     int ind = 0;
@@ -271,6 +277,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
     }
     return ERR_OK;
 }
+#endif
 
 ErrCode PowerShellCommand::RunAsTimeOutCommand()
 {
