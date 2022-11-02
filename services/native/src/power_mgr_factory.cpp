@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,11 @@
 #include "power_mgr_factory.h"
 
 #include "device_power_action.h"
-#include "device_state_action.h"
+#ifdef HAS_DISPLAY_MANAGER_PART
+#include "display/device_state_action.h"
+#else
+#include "display/default_device_state_action.h"
+#endif
 #include "running_lock_action.h"
 
 using namespace std;
@@ -30,7 +34,11 @@ unique_ptr<IDevicePowerAction> PowerMgrFactory::GetDevicePowerAction()
 
 unique_ptr<IDeviceStateAction> PowerMgrFactory::GetDeviceStateAction()
 {
+#ifdef HAS_DISPLAY_MANAGER_PART
     return make_unique<DeviceStateAction>();
+#else
+    return make_unique<DefaultDeviceStateAction>();
+#endif
 }
 
 unique_ptr<IRunningLockAction> PowerMgrFactory::GetRunningLockAction()

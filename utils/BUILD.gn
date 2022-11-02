@@ -46,11 +46,14 @@ ohos_executable("power-shell") {
 
   external_deps = [
     "c_utils:utils",
-    "display_manager:displaymgr",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+
+  if (has_display_manager_part) {
+    external_deps += [ "display_manager:displaymgr" ]
+  }
 
   install_enable = true
   part_name = "${powermgr_part_name}"
