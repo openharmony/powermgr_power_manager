@@ -22,8 +22,9 @@
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
 #include <string_ex.h>
-
+#ifdef HAS_DISPLAY_MANAGER_PART
 #include "display_power_mgr_client.h"
+#endif
 #include "running_lock_token_stub.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
@@ -219,6 +220,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient007, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient007::fun is end!");
 }
 
+#ifdef HAS_DISPLAY_MANAGER_PART
 /**
  * @tc.name: PowerMgrClient008
  * @tc.desc: test DISPLAY_DIM
@@ -243,6 +245,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient008, TestSize.Level2)
     powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient008::fun is end!");
 }
+#endif
 
 /**
  * @tc.name: PowerMgrClient009
@@ -292,6 +295,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient010, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient010::fun is end!");
 }
 
+#ifdef HAS_DISPLAY_MANAGER_PART
 /**
  * @tc.name: PowerMgrClient011
  * @tc.desc: test  auto suspend
@@ -322,6 +326,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
     powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient011::fun is end!");
 }
+#endif
 
 /**
  * @tc.name: PowerMgrClient012
