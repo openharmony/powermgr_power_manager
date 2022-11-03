@@ -140,6 +140,9 @@ ohos_unittest("test_register_callback_mode") {
     "//third_party/googletest:gtest_main",
   ]
 
+  if (has_display_manager_part) {
+    deps_ex += [ "display_manager:displaymgr" ]
+  }
   external_deps = deps_ex
 }
 
