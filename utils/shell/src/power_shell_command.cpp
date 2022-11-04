@@ -57,7 +57,9 @@ static const std::string HELP_MSG =
     "  setmode :    Set power mode. \n"
     "  wakeup  :    Wakeup system and turn screen on. \n"
     "  suspend :    Suspend system and turn screen off. \n"
+#ifdef HAS_DISPLAY_MANAGER_PART
     "  display :    Update or Override display brightness. \n"
+#endif
     "  timeout :    Override or Restore screen off time. \n"
     "  dump    :    Dump power info. \n"
     "  help    :    Show this help menu. \n";
@@ -70,6 +72,7 @@ static const std::string SETMODE_HELP_MSG =
     "  602  :  performance mode\n"
     "  603  :  extreme power save mode\n";
 
+#ifdef HAS_DISPLAY_MANAGER_PART
 static const std::string DISPLAY_HELP_MSG =
     "usage: power-shell display [<options>] 100\n"
     "display <options are as below> \n"
@@ -80,6 +83,7 @@ static const std::string DISPLAY_HELP_MSG =
     "  -b  :  timing maximum brightness\n"
     "  -c  :  cancel the timing maximum brightness\n"
     "  -d  :  discount brightness\n";
+#endif
 
 static const std::string TIME_OUT_HELP_MSG =
     "usage: power-shell timeout [<options>] 1000\n"
