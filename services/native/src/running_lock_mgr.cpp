@@ -228,12 +228,13 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
     return lockInner;
 }
 
-void RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
+bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{public}p", remoteObj.GetRefPtr());
+    bool result = false;
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        return;
+        return result;
     }
     if (!lockInner->GetDisabled()) {
         UnLock(remoteObj);
@@ -241,7 +242,8 @@ void RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     mutex_.lock();
     runningLocks_.erase(remoteObj);
     mutex_.unlock();
-    remoteObj->RemoveDeathRecipient(runningLockDeathRecipient_);
+    result = remoteObj->RemoveDeathRecipient(runningLockDeathRecipient_);
+    return result;
 }
 
 void RunningLockMgr::RemoveAndPostUnlockTask(

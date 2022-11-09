@@ -64,40 +64,40 @@ public:
         SHELL_DUMP
     };
 
-    virtual void CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) = 0;
-    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual bool CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) = 0;
+    virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsRunningLockTypeSupported(uint32_t type) = 0;
-    virtual void Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
         uint32_t timeOutMs) = 0;
-    virtual void UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
-    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList) = 0;
-    virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) = 0;
+    virtual bool SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList) = 0;
+    virtual bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) = 0;
 
     // Used for power state machine.
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
-    virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
+    virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
     virtual bool OverrideScreenOffTime(int64_t timeout) = 0;
     virtual bool RestoreScreenOffTime() = 0;
     virtual PowerState GetState() = 0;
     virtual bool IsScreenOn() = 0;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) = 0;
-    virtual void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
-    virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
+    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
+    virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
 
     // Used for callback registration upon shutdown.
-    virtual void RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+    virtual bool RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
         const sptr<IShutdownCallback>& callback) = 0;
-    virtual void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) = 0;
+    virtual bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) = 0;
 
     // Used for callback registration upon power mode.
-    virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
-    virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
+    virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
+    virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
 
-    virtual void SetDisplaySuspend(bool enable) = 0;
+    virtual bool SetDisplaySuspend(bool enable) = 0;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) = 0;
     virtual PowerMode GetDeviceMode() = 0;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
