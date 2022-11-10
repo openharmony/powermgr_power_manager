@@ -14,11 +14,13 @@
  */
 
 #include <bundle_mgr_proxy.h>
+#include <condition_variable>
 #include <datetime_ex.h>
 #include <gtest/gtest.h>
 #include <if_system_ability_manager.h>
 #include <iostream>
 #include <ipc_skeleton.h>
+#include <mutex>
 #include <string_ex.h>
 
 #include "common_event_manager.h"
@@ -38,6 +40,13 @@ using namespace OHOS::EventFwk;
 using namespace OHOS;
 using namespace std;
 
+namespace {
+std::condition_variable g_cv;
+std::mutex g_mtx;
+std::string g_action = "";
+constexpr int64_t TIME_OUT = 1;
+} // namespace
+
 void PowerMgrPowerSavemodeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
     POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
@@ -48,18 +57,6 @@ void PowerMgrPowerSavemodeTest::SetUpTestCase(void)
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pms->OnStart();
     SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
-}
-
-void PowerMgrPowerSavemodeTest::TearDownTestCase(void)
-{
-}
-
-void PowerMgrPowerSavemodeTest::SetUp(void)
-{
-}
-
-void PowerMgrPowerSavemodeTest::TearDown(void)
-{
 }
 
 namespace {
@@ -232,6 +229,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_033, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerSavemode_033 Start.");
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
+
     PowerMode mode = static_cast<PowerMode>(1);
     PowerMode mode1 = static_cast<PowerMode>(1);
     powerMgrClient.SetDeviceMode(mode);
@@ -324,7 +322,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_039, TestSize.Level0)
     for (int i = 0; i < 100; i++) {
         powerMgrClient.UnRegisterPowerModeCallback(cb1);
     }
-    sleep(SLEEP_WAIT_TIME_S);
+
     PowerMode mode = PowerMode::POWER_SAVE_MODE;
     PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
@@ -336,7 +334,8 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_039, TestSize.Level0)
 } // namespace
 
 PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::CommonEventServiCesSystemTest(
-    const CommonEventSubscribeInfo& subscriberInfo) : CommonEventSubscriber(subscriberInfo)
+    const CommonEventSubscribeInfo& subscriberInfo) :
+    CommonEventSubscriber(subscriberInfo)
 {
     POWER_HILOGD(LABEL_TEST, "subscribe.");
 }
@@ -354,6 +353,43 @@ void PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::OnReceiveEvent(co
     uint32_t j = 2;
     EXPECT_EQ(g_i, j) << "PowerSavemode_022 fail to PowerModeCallback";
     POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
+}
+
+class CommonEventSaveModeTest : public EventFwk::CommonEventSubscriber {
+public:
+    CommonEventSaveModeTest() = default;
+    explicit CommonEventSaveModeTest(const EventFwk::CommonEventSubscribeInfo& subscriberInfo);
+    virtual ~CommonEventSaveModeTest() {};
+    virtual void OnReceiveEvent(const EventFwk::CommonEventData& data);
+    static shared_ptr<CommonEventSaveModeTest> RegisterEvent();
+};
+
+CommonEventSaveModeTest::CommonEventSaveModeTest(const CommonEventSubscribeInfo& subscriberInfo)
+    : CommonEventSubscriber(subscriberInfo)
+{
+}
+
+void CommonEventSaveModeTest::OnReceiveEvent(const CommonEventData& data)
+{
+    g_action = data.GetWant().GetAction();
+    g_cv.notify_one();
+}
+
+shared_ptr<CommonEventSaveModeTest> CommonEventSaveModeTest::RegisterEvent()
+{
+    int32_t retryTimes = 2;
+    bool succeed = false;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto subscriberPtr = std::make_shared<CommonEventSaveModeTest>(subscribeInfo);
+    for (int32_t tryTimes = 0; tryTimes < retryTimes; tryTimes++) {
+        succeed = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+    }
+    if (!succeed) {
+        return nullptr;
+    }
+    return subscriberPtr;
 }
 
 namespace {
@@ -404,6 +440,25 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_023, TestSize.Level0)
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_023 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerSavemode_023");
+}
+
+/**
+ * @tc.name: PowerSavemode_024
+ * @tc.desc: ReceiveEvent
+ * @tc.type: FUNC
+ * @tc.require: issueI5HUVS
+ */
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_40, TestSize.Level0)
+{
+    shared_ptr<CommonEventSaveModeTest> subscriber = CommonEventSaveModeTest::RegisterEvent();
+    system("power-shell setmode 601");
+    std::unique_lock<std::mutex> lck(g_mtx);
+    if (g_cv.wait_for(lck, std::chrono::seconds(TIME_OUT)) == std::cv_status::timeout) {
+        g_cv.notify_one();
+    }
+    CommonEventManager::UnSubscribeCommonEvent(subscriber);
+    EXPECT_EQ(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED, g_action);
+    POWER_HILOGD(LABEL_TEST, "PowerSavemode_024");
 }
 } // namespace
