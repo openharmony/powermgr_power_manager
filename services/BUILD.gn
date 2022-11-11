@@ -90,7 +90,6 @@ ohos_shared_library("powermgrservice") {
   ]
 
   if (has_display_manager_part) {
-    cflags_cc = [ "-DHAS_DISPLAY_MANAGER_PART" ]
     external_deps += [
       "display_manager:displaymgr",
       "window_manager:libdm",
