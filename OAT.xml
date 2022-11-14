@@ -18,8 +18,8 @@
     <oatconfig>
         <filefilterlist>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
-			    <filteritem type="filename" name="*.png" desc="The framework image"/>
-                            <filteritem type="filename" name="power_dialog.hap" desc="The system dialog extension hap"/>
+                <filteritem type="filename" name="*.png" desc="The framework image"/>
+                <filteritem type="filename" name="openharmony_sx.p7b" desc="The power dialog compiles the signature file"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
