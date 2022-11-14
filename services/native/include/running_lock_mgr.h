@@ -55,7 +55,7 @@ public:
     void UnLock(const sptr<IRemoteObject> remoteObj);
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo);
-    void ReleaseLock(const sptr<IRemoteObject> remoteObj);
+    bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList);
