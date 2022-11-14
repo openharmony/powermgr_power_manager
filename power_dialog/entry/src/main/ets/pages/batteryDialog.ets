@@ -16,7 +16,7 @@
 import Constants from '../common/constant';
 
 @Extend(Button) function customizeButton() {
-  .backgroundColor($r('app.color.button_background_color'))
+  .backgroundColor(Color.Transparent)
   .fontColor($r('app.color.button_text_color'))
   .fontSize(Constants.BUTTON_TEXT_FONT_SIZE)
   .fontWeight(Constants.BUTTON_TEXT_FONT_WEIGHT)
