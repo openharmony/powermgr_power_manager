@@ -13,16 +13,12 @@
       "value": "#0D81F2"
     },
     {
-      "name": "button_background_color",
-      "value": "#00FFFFFF"
-    },
-    {
       "name": "default_background_color",
-      "value": "#00FFFFFF"
+      "value": "#D9FFFFFF"
     },
     {
       "name": "split_color",
-      "value": "#1AFFFFFF"
+      "value": "#40E4E7ED"
     }
   ]
 }
