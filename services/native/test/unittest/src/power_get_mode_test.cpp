@@ -41,7 +41,7 @@ namespace {
  */
 HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level0)
 {
-    uint32_t mode = 0;
+    PowerMode mode;
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -49,7 +49,5 @@ HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level0)
     if (true) {
         mode = powerMgrClient.GetDeviceMode();
     }
-
-    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode end. mode == " << mode;
 }
 }

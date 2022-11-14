@@ -68,7 +68,7 @@ public:
      * @param needChangeBacklight Whether to change the backlight state, for example, from DIM to BRIGHT.
      *                            Set it to false if you don't want to change the backlight state.
      */
-    void RefreshActivity(UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER);
+    bool RefreshActivity(UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER);
 
     /**
      * Windows overwrite timeout
@@ -104,7 +104,7 @@ public:
     /**
      * Enable/disable display suspend state
      */
-    void SetDisplaySuspend(bool enable);
+    bool SetDisplaySuspend(bool enable);
 
     /* Set the device mode.
      *
@@ -120,14 +120,14 @@ public:
     PowerMode GetDeviceMode();
 
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
-    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    void RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
+    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    bool RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
         IShutdownCallback::ShutdownPriority priority
             = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT);
-    void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
-    void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
-    void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
+    bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     std::string Dump(const std::vector<std::string>& args);
 
 private:

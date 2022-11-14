@@ -554,21 +554,22 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs,
     return PowerErrors::ERR_OK;
 }
 
-void PowerMgrService::RefreshActivity(int64_t callTimeMs,
+bool PowerMgrService::RefreshActivity(int64_t callTimeMs,
     UserActivityType type,
     bool needChangeBacklight)
 {
     std::lock_guard lock(mutex_);
     if (powerStateMachine_->CheckRefreshTime()) {
-        return;
+        return false;
     }
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {
-        return;
+        return false;
     }
     POWER_HILOGD(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->RefreshActivityInner(pid, callTimeMs, type, needChangeBacklight);
+    return true;
 }
 
 bool PowerMgrService::OverrideScreenOffTime(int64_t timeout)
@@ -630,12 +631,12 @@ inline void PowerMgrService::FillUserIPCInfo(UserIPCInfo &userIPCinfo)
     userIPCinfo.uid = IPCSkeleton::GetCallingUid();
 }
 
-void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+bool PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return;
+        return false;
     }
 
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d",
@@ -643,17 +644,20 @@ void PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
 
     UserIPCInfo userIPCInfo;
     FillUserIPCInfo(userIPCInfo);
-    runningLockMgr_->CreateRunningLock(remoteObj, runningLockInfo, userIPCInfo);
+    RETURN_IF_WITH_RET(!runningLockMgr_->CreateRunningLock(remoteObj, runningLockInfo, userIPCInfo), false);
+    return true;
 }
 
-void PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(lockMutex_);
+    bool result = false;
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return;
+        return result;
     }
 
-    runningLockMgr_->ReleaseLock(remoteObj);
+    result = runningLockMgr_->ReleaseLock(remoteObj);
+    return result;
 }
 
 bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
@@ -665,13 +669,13 @@ bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
     return true;
 }
 
-void PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
+bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo,
     uint32_t timeOutMS)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return;
+        return false;
     }
 
     POWER_HILOGI(FEATURE_RUNNING_LOCK,
@@ -683,15 +687,17 @@ void PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
     UserIPCInfo userIPCInfo;
     FillUserIPCInfo(userIPCInfo);
     runningLockMgr_->Lock(remoteObj, runningLockInfo, userIPCInfo, timeOutMS);
+    return true;
 }
 
-void PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return;
+        return false;
     }
     runningLockMgr_->UnLock(remoteObj);
+    return true;
 }
 
 void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
@@ -724,115 +730,124 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
     }
 }
 
-void PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
+bool PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
     const WorkTriggerList& workTriggerList)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return;
+        return false;
     }
 
     runningLockMgr_->SetWorkTriggerList(remoteObj, workTriggerList);
+    return true;
 }
 
-void PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
+bool PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem()) {
-        return;
+        return false;
     }
     runningLockMgr_->ProxyRunningLock(proxyLock, uid, pid);
+    return true;
 }
 
-void PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
-        return;
+        return false;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
         callback.GetRefPtr());
     powerStateMachine_->RegisterPowerStateCallback(callback);
+    return true;
 }
 
-void PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
-        return;
+        return false;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
         callback.GetRefPtr());
     powerStateMachine_->UnRegisterPowerStateCallback(callback);
+    return true;
 }
 
-void PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+bool PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
     const sptr<IShutdownCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return false;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d, callback: %{public}p",
         pid, uid, priority, callback.GetRefPtr());
     shutdownService_.AddShutdownCallback(priority, callback);
+    return true;
 }
 
-void PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
+bool PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return false;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
         callback.GetRefPtr());
     shutdownService_.DelShutdownCallback(callback);
+    return true;
 }
 
-void PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return false; 
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
         callback.GetRefPtr());
     powerModeModule_.AddPowerModeCallback(callback);
+    return true;
 }
 
-void PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return false;
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
         callback.GetRefPtr());
     powerModeModule_.DelPowerModeCallback(callback);
+    return true;
 }
 
-void PowerMgrService::SetDisplaySuspend(bool enable)
+bool PowerMgrService::SetDisplaySuspend(bool enable)
 {
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return;
+        return false;
     }
     POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, enable: %{public}d", pid, uid, enable);
     powerStateMachine_->SetDisplaySuspend(enable);
+    return true;
 }
 
 PowerErrors PowerMgrService::SetDeviceMode(const PowerMode& mode)

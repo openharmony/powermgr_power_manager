@@ -50,7 +50,7 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
     sleep(SLEEP_WAIT_TIME_S);
-    PowerMode mode = PowerMode::SAVE_MODE;
+    PowerMode mode = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     POWER_HILOGD(LABEL_TEST, "PowerRegisterCallbackModeCallback001 1.");
 }
