@@ -105,7 +105,6 @@ bool PowerMgrService::Init()
     if (!PowerStateMachineInit()) {
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
-    handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
 
     RegisterBootCompletedCallback();
     POWER_HILOGI(COMP_SVC, "Init success");
@@ -115,12 +114,15 @@ void PowerMgrService::RegisterBootCompletedCallback()
 {
     g_bootCompletedCallback = []() {
         POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
+        auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            auto& powerModeModule = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerModeModule();
+            auto& powerModeModule = power->GetPowerModeModule();
             powerModeModule.EnableMode(powerModeModule.GetModeItem(), true);
         }
-        auto powerStateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
+        auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
+        auto powerHandler = power->GetHandler();
+        powerHandler->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
     };
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
