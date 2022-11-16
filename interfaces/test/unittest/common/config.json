@@ -16,7 +16,8 @@
       "package": "com.ohos.PowerMgrKitsJsTest",
       "name": ".MyApplication",
       "deviceType": [
-        "phone"
+        "default",
+        "tablet"
       ],
       "distro": {
         "deliveryWithInstall": true,
