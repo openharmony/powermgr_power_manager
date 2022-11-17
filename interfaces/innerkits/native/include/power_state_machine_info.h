@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,9 @@ constexpr int MAX_STRING_LENGTH = 128;
 
 // Throttling interval for user activity calls.
 constexpr int64_t MIN_TIME_MS_BETWEEN_USERACTIVITIES = 100; // 100ms
+
+// the reason for shut down device fast
+constexpr const char* const SHUTDOWN_FAST_REASON = "STR";
 
 /**
  * PowerState of Device.
@@ -121,7 +124,8 @@ enum class SuspendDeviceType : uint32_t {
     SUSPEND_DEVICE_REASON_SLEEP_BUTTON = 6,
     SUSPEND_DEVICE_REASON_ACCESSIBILITY = 7,
     SUSPEND_DEVICE_REASON_FORCE_SUSPEND = 8,
-    SUSPEND_DEVICE_REASON_MAX = SUSPEND_DEVICE_REASON_FORCE_SUSPEND,
+    SUSPEND_DEVICE_REASON_STR = 9,
+    SUSPEND_DEVICE_REASON_MAX = SUSPEND_DEVICE_REASON_STR,
 };
 
 enum class StateChangeReason : uint32_t {

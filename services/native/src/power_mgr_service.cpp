@@ -45,6 +45,7 @@ namespace {
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string TASK_RUNNINGLOCK_UNLOCK = "RunningLock_UnLock";
 const std::string REASON_POWER_KEY = "power_key";
+static std::string g_wakeupReason = "";
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -503,12 +504,19 @@ PowerErrors PowerMgrService::RebootDevice(const std::string& reason)
 
 PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
 {
+    auto now = static_cast<int64_t>(time(nullptr));
+    if (!Permission::IsSystemCore() && !Permission::IsSystemHapPermGranted("ohos.permission.REBOOT")) {
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    if (reason == SHUTDOWN_FAST_REASON) {
+        g_wakeupReason = reason;
+        POWER_HILOGD(FEATURE_SHUTDOWN, "Calling Fast ShutDownDevice success");
+        return SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_STR, true);
+    }
+    g_wakeupReason = "";
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsSystemHapPermGranted("ohos.permission.REBOOT")) {
-        return PowerErrors::ERR_PERMISSION_DENIED;
-    }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
     powerStateMachine_->CancelDelayTimer(
         PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);

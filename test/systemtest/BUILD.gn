@@ -140,6 +140,30 @@ ohos_systemtest("test_power_mgr_system") {
   external_deps = deps_ex
 }
 
+################################fastshutdown################################
+
+ohos_systemtest("test_power_mgr_shutdown_fast") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_shutdown_fast_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 ################################powermgrdialog################################
 
 ohos_systemtest("test_power_mgr_powerdialog") {
@@ -224,6 +248,7 @@ group("systemtest_powermgr") {
     ":test_power_mgr_mock_system",
     ":test_power_mgr_powerdialog",
     ":test_power_mgr_powersavemode",
+    ":test_power_mgr_shutdown_fast",
     ":test_power_mgr_system",
     ":test_power_st_mgr_mock",
   ]

@@ -85,4 +85,17 @@ HWTEST_F (PowerShutdownTest, ShutDownDeviceTest001, TestSize.Level2)
 
     GTEST_LOG_(INFO) << "ShutDownDeviceTest001: ShutDownDevice end.";
 }
+
+/**
+ * @tc.name: FastShutDownDeviceTest001
+ * @tc.desc: test FastShutDownDevice in proxy
+ * @tc.type: FUNC
+ * @tc.require: issueI5I9EI
+ */
+HWTEST_F (PowerShutdownTest, FastShutDownDeviceTest001, TestSize.Level2)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.ShutDownDevice(SHUTDOWN_FAST_REASON);
+    EXPECT_EQ(PowerState::INACTIVE, powerMgrClient.GetState());
+}
 }
