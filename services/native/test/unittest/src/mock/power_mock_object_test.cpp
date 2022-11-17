@@ -72,7 +72,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_FALSE(sptrProxy->SetWorkTriggerList(token, worklist));
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info));
+    EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     state = sptrProxy->GetState();
     EXPECT_EQ(state, PowerState::UNKNOWN);
