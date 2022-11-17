@@ -145,7 +145,8 @@ napi_value RunningLockNapi::CreateAsyncCallback(
         [](napi_env env, void* data) {
             AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
-            asyncInfo->GetData().CreateRunningLock();
+            auto error = asyncInfo->GetData().CreateRunningLock();
+            asyncInfo->GetError().Error(error);
         },
         [](napi_env env, napi_status status, void* data) {
             AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
@@ -179,13 +180,14 @@ napi_value RunningLockNapi::CreatePromise(
         [](napi_env env, void* data) {
             AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
-            asyncInfo->GetData().CreateRunningLock();
+            auto error = asyncInfo->GetData().CreateRunningLock();
+            asyncInfo->GetError().Error(error);
         },
         [](napi_env env, napi_status status, void* data) {
             AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
             if (asyncInfo->GetError().IsError()) {
-                napi_resolve_deferred(env, asyncInfo->GetDeferred(), asyncInfo->GetError().GetNapiError(env));
+                napi_reject_deferred(env, asyncInfo->GetDeferred(), asyncInfo->GetError().GetNapiError(env));
             } else {
                 napi_value result = asyncInfo->GetData().CreateInstanceForRunningLock(env);
                 napi_resolve_deferred(env, asyncInfo->GetDeferred(), result);

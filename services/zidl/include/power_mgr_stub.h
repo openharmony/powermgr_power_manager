@@ -40,7 +40,7 @@ private:
     int32_t IsScreeOnStub(MessageParcel& reply);
     int32_t ForceSuspendDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t ProxyRunningLockStub(MessageParcel& data);
-    int32_t CreateRunningLockStub(MessageParcel& data);
+    int32_t CreateRunningLockStub(MessageParcel& data, MessageParcel& reply);
     int32_t ReleaseRunningLockStub(MessageParcel& data);
     int32_t IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply);
     int32_t LockStub(MessageParcel& data);

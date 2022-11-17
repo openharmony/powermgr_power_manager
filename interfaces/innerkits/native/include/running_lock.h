@@ -32,7 +32,7 @@ public:
     ~RunningLock();
     DISALLOW_COPY_AND_MOVE(RunningLock);
 
-    bool Init();
+    PowerErrors Init();
     bool IsUsed();
 
     /**
@@ -61,7 +61,7 @@ public:
     static constexpr uint32_t CREATE_WITH_SCREEN_ON = 0x10000000;
 
 private:
-    void Create();
+    PowerErrors Create();
     void Release();
     std::mutex mutex_;
     RunningLockInfo runningLockInfo_;
