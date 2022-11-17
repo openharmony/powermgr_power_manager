@@ -195,7 +195,7 @@ napi_value PowerNapi::SetPowerModePromise(
             AsyncCallbackInfo* asyncInfo = reinterpret_cast<AsyncCallbackInfo*>(data);
             RETURN_IF(asyncInfo == nullptr);
             if (asyncInfo->GetError().IsError()) {
-                napi_resolve_deferred(env, asyncInfo->GetDeferred(), asyncInfo->GetError().GetNapiError(env));
+                napi_reject_deferred(env, asyncInfo->GetDeferred(), asyncInfo->GetError().GetNapiError(env));
             } else {
                 napi_value undefined;
                 napi_get_undefined(env, &undefined);

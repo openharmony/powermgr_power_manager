@@ -206,8 +206,10 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create RunningLock record");
         return nullptr;
     }
-    if (!runningLock->Init()) {
+    auto error = runningLock->Init();
+    if (error != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLock init failed");
+        error_ = error;
         return nullptr;
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type = %{public}d", name.c_str(), type);
@@ -281,6 +283,13 @@ std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
     std::string error = "can't connect service";
     RETURN_IF_WITH_RET(Connect() != ERR_OK, error);
     return proxy_->ShellDump(args, args.size());
+}
+
+PowerErrors PowerMgrClient::GetError()
+{
+    auto temp = error_;
+    error_ = PowerErrors::ERR_OK;
+    return temp;
 }
 } // namespace PowerMgr
 } // namespace OHOS

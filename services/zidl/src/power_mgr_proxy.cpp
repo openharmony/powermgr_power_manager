@@ -24,10 +24,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
-bool PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo)
+PowerErrors PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+    const RunningLockInfo& runningLockInfo)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -35,19 +36,21 @@ bool PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj, cons
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
-    WRITE_PARCEL_WITH_RET(data, Parcelable, &runningLockInfo, false);
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Parcelable, &runningLockInfo, PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    return true;
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
 bool PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)

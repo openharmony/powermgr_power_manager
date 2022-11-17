@@ -74,7 +74,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             ret = ForceSuspendDeviceStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK):
-            ret = CreateRunningLockStub(data);
+            ret = CreateRunningLockStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK):
             ret = ReleaseRunningLockStub(data);
@@ -134,13 +134,14 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return ret;
 }
 
-int32_t PowerMgrStub::CreateRunningLockStub(MessageParcel& data)
+int32_t PowerMgrStub::CreateRunningLockStub(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     std::unique_ptr<RunningLockInfo> runningLockInfo(data.ReadParcelable<RunningLockInfo>());
     RETURN_IF_WITH_RET((runningLockInfo == nullptr), E_READ_PARCEL_ERROR);
-    CreateRunningLock(remoteObj, *runningLockInfo);
+    PowerErrors error = CreateRunningLock(remoteObj, *runningLockInfo);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
