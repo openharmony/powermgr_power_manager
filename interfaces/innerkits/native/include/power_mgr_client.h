@@ -129,6 +129,7 @@ public:
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     std::string Dump(const std::vector<std::string>& args);
+    PowerErrors GetError();
 
 private:
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -146,6 +147,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
     void ResetProxy(const wptr<IRemoteObject>& remote);
     std::mutex mutex_;
+    PowerErrors error_ = PowerErrors::ERR_OK;
 };
 } // namespace PowerMgr
 } // namespace OHOS

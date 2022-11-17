@@ -65,7 +65,7 @@ HWTEST_F(MockPeerTest, MockPeerTest001, TestSize.Level2)
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info));
+    EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(type));

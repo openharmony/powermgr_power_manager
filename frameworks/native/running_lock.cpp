@@ -44,15 +44,14 @@ RunningLock::~RunningLock()
     }
 }
 
-bool RunningLock::Init()
+PowerErrors RunningLock::Init()
 {
     token_ = new (std::nothrow)RunningLockTokenStub();
     if (token_ == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create the RunningLockTokenStub");
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    Create();
-    return true;
+    return Create();
 }
 
 ErrCode RunningLock::Lock(uint32_t timeOutMs)
@@ -131,15 +130,15 @@ const WorkTriggerList& RunningLock::GetWorkTriggerList() const
     return runningLockInfo_.workTriggerlist;
 }
 
-void RunningLock::Create()
+PowerErrors RunningLock::Create()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
-        return;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side CreateRunningLock call");
-    proxy->CreateRunningLock(token_, runningLockInfo_);
+    return proxy->CreateRunningLock(token_, runningLockInfo_);
 }
 
 void RunningLock::Release()

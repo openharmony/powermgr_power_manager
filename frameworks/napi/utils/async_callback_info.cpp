@@ -77,9 +77,10 @@ void AsyncCallbackInfo::AsyncData::SetName(napi_env& env, napi_value& name)
     name_ = NapiUtils::GetStringFromNapi(env, name);
 }
 
-void AsyncCallbackInfo::AsyncData::CreateRunningLock()
+PowerErrors AsyncCallbackInfo::AsyncData::CreateRunningLock()
 {
     runningLock_ = PowerMgrClient::GetInstance().CreateRunningLock(name_, type_);
+    return PowerMgrClient::GetInstance().GetError();
 }
 
 napi_value AsyncCallbackInfo::AsyncData::CreateInstanceForRunningLock(napi_env& env)
