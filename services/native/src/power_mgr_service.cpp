@@ -122,6 +122,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         }
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
+        powerStateMachine->InitState();
         auto powerHandler = power->GetHandler();
         powerHandler->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
     };
