@@ -765,8 +765,8 @@ HWTEST_F (PowerMgrMockTest, PowerMgrUnittest024, TestSize.Level2)
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_CALL(*g_stateAction,
-        RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, _)).Times(1);
-    pms->RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
+        RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, _)).Times(1);
+    pms->RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, true);
 
     sleep(SCREEN_OFF_WAIT_TIME_S + SLEEP_WAIT_TIME_S + 1);
     ResetMockAction();
