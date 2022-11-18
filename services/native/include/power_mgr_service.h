@@ -48,33 +48,33 @@ public:
         bool suspendImmed) override;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
         const std::string& details) override;
-    virtual void RefreshActivity(int64_t callTimeMs, UserActivityType type,
+    virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type,
         bool needChangeBacklight) override;
     virtual bool OverrideScreenOffTime(int64_t timeout) override;
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    virtual void CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+    virtual bool CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo) override;
-    virtual void ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(uint32_t type) override;
-    virtual void Lock(const sptr<IRemoteObject>& remoteObj,
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo, uint32_t timeOutMS) override;
-    virtual void UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
-    virtual void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
+    virtual bool SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
         const WorkTriggerList& workTriggerList) override;
-    virtual void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
-    virtual void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    virtual void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    virtual void RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
+    virtual bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
+    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual bool RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
         const sptr<IShutdownCallback>& callback) override;
-    virtual void UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
-    virtual void RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
-    virtual void UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
-    virtual void SetDisplaySuspend(bool enable) override;
+    virtual bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
+    virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual bool SetDisplaySuspend(bool enable) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
