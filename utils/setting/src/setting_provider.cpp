@@ -222,7 +222,7 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
     Uri uri(AssembleUri(key));
-    if (helper->Update(uri, predicates, bucket) > 0) { // avoid update bug
+    if (helper->Update(uri, predicates, bucket) <= 0) {
         POWER_HILOGD(COMP_UTILS, "no data exist, insert one row");
         helper->Insert(uri, bucket);
     }
