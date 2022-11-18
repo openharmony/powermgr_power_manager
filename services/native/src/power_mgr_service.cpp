@@ -351,13 +351,16 @@ bool PowerMgrService::ShowPowerDialog()
 void PowerMgrService::HandleShutdownRequest()
 {
     POWER_HILOGD(FEATURE_SHUTDOWN, "HandleShutdown");
-    ShowPowerDialog();
+    bool showSuccess = ShowPowerDialog();
+    if (!showSuccess) {
+        return;
+    }
+    int64_t now = static_cast<int64_t>(time(0));
+    this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
     if (!IsScreenOn()) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "Wakeup when display off");
-        int64_t now = static_cast<int64_t>(time(0));
         this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, REASON_POWER_KEY);
     }
-    return;
 }
 
 void PowerMgrService::HandlePowerKeyUp()
@@ -404,7 +407,7 @@ void PowerMgrService::HandlePointEvent(int32_t type)
     POWER_HILOGD(FEATURE_INPUT, "type: %{public}d", type);
     int64_t now = static_cast<int64_t>(time(0));
     if (this->IsScreenOn()) {
-        this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+        this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
     } else {
         if (type == PointerEvent::SOURCE_TYPE_MOUSE) {
             std::string reason = "mouse click";
