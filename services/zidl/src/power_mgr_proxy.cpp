@@ -222,9 +222,9 @@ bool PowerMgrProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
         return false;
     }
 
-    READ_PARCEL_WITH_RET(data, Bool, proxyLock, false);
-    READ_PARCEL_WITH_RET(data, Int32, uid, false);
-    READ_PARCEL_WITH_RET(data, Int32, pid, false);
+    WRITE_PARCEL_WITH_RET(data, Bool, proxyLock, false);
+    WRITE_PARCEL_WITH_RET(data, Int32, uid, false);
+    WRITE_PARCEL_WITH_RET(data, Int32, pid, false);
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
