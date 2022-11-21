@@ -134,12 +134,12 @@ PowerErrors PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::str
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
 }
 
-void PowerMgrClient::RefreshActivity(UserActivityType type)
+bool PowerMgrClient::RefreshActivity(UserActivityType type)
 {
-    RETURN_IF_WITH_LOG(type == UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, "UserActivityType does not support");
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->RefreshActivity(GetTickCount(), type, true);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = proxy_->RefreshActivity(GetTickCount(), type, true);
     POWER_HILOGD(FEATURE_ACTIVITY, "Calling RefreshActivity Success");
+    return ret;
 }
 
 bool PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
@@ -148,7 +148,6 @@ bool PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
         POWER_HILOGW(COMP_FWK, "Invalid timeout, timeout=%{public}" PRId64 "", timeout);
         return false;
     }
-    
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
     bool ret = proxy_->OverrideScreenOffTime(timeout);
     POWER_HILOGD(COMP_FWK, "Calling OverrideScreenOffTime Success");
@@ -215,47 +214,54 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     return runningLock;
 }
 
-void PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
-    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    proxy_->RegisterPowerStateCallback(callback);
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->RegisterPowerStateCallback(callback);
+    return ret;
 }
 
-void PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
-    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    proxy_->UnRegisterPowerStateCallback(callback);
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->UnRegisterPowerStateCallback(callback);
+    return ret;
 }
 
-void PowerMgrClient::RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
-    IShutdownCallback::ShutdownPriority priority)
+bool PowerMgrClient::RegisterShutdownCallback(
+    const sptr<IShutdownCallback>& callback, IShutdownCallback::ShutdownPriority priority)
 {
-    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    proxy_->RegisterShutdownCallback(priority, callback);
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->RegisterShutdownCallback(priority, callback);
+    return ret;
 }
 
-void PowerMgrClient::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
+bool PowerMgrClient::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
-    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    proxy_->UnRegisterShutdownCallback(callback);
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->UnRegisterShutdownCallback(callback);
+    return ret;
 }
 
-void PowerMgrClient::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+bool PowerMgrClient::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
-    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    proxy_->RegisterPowerModeCallback(callback);
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->RegisterPowerModeCallback(callback);
+    return ret;
 }
 
-void PowerMgrClient::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+bool PowerMgrClient::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
-    RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    proxy_->UnRegisterPowerModeCallback(callback);
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->UnRegisterPowerModeCallback(callback);
+    return ret;
 }
 
-void PowerMgrClient::SetDisplaySuspend(bool enable)
+bool PowerMgrClient::SetDisplaySuspend(bool enable)
 {
-    RETURN_IF(Connect() != ERR_OK);
-    proxy_->SetDisplaySuspend(enable);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = proxy_->SetDisplaySuspend(enable);
+    return ret;
 }
 
 PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)
@@ -277,4 +283,4 @@ std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
     return proxy_->ShellDump(args, args.size());
 }
 } // namespace PowerMgr
-}  // namespace OHOS
+} // namespace OHOS
