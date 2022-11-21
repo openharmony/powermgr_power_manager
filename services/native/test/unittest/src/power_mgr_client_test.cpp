@@ -535,6 +535,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient019, TestSize.Level2)
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
     powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.RestoreScreenOffTime();
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient019:End.");
 }
 
