@@ -22,6 +22,7 @@ using namespace std;
 using ::testing::_;
 
 static sptr<PowerMgrService> service;
+static MockStateAction* g_powerState;
 static MockStateAction* g_stateAction;
 static MockPowerAction* g_powerAction;
 static MockLockAction* g_lockAction;
@@ -32,7 +33,7 @@ static void ResetMockAction()
     g_stateAction = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
-    service->EnableMock(g_stateAction, g_powerAction, g_lockAction);
+    service->EnableMock(g_powerState, g_stateAction, g_powerAction, g_lockAction);
 }
 
 void PowerMgrMockTest::SetUpTestCase(void)
@@ -47,6 +48,7 @@ void PowerMgrMockTest::TearDownTestCase(void)
 {
     service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
+    delete g_powerState;
     delete g_stateAction;
     delete g_powerAction;
     delete g_lockAction;
