@@ -72,6 +72,7 @@ public:
     static void  onWakeup();
 
     bool Init();
+    void InitState();
     void SuspendDeviceInner(pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed,
         bool ignoreScreenState = false);
     void WakeupDeviceInner(pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details,

@@ -81,14 +81,18 @@ bool PowerStateMachine::Init()
         POWER_HILOGE(FEATURE_POWER_STATE, "Failed to start monitor");
         return false;
     }
+    POWER_HILOGD(FEATURE_POWER_STATE, "Init success");
+    return true;
+}
 
+void PowerStateMachine::InitState()
+{
+    POWER_HILOGD(FEATURE_POWER_STATE, "Init power state");
     if (IsScreenOn()) {
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
     } else {
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "Init success");
-    return true;
 }
 
 void PowerStateMachine::EmplaceAwake()
