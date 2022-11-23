@@ -64,7 +64,8 @@ public:
         SHELL_DUMP
     };
 
-    virtual bool CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) = 0;
+    virtual PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+        const RunningLockInfo& runningLockInfo) = 0;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsRunningLockTypeSupported(uint32_t type) = 0;
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,

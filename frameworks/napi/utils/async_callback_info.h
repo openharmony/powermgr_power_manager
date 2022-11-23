@@ -55,7 +55,7 @@ public:
         // runninglock
         void SetType(napi_env& env, napi_value& type);
         void SetName(napi_env& env, napi_value& name);
-        void CreateRunningLock();
+        PowerErrors CreateRunningLock();
         napi_value CreateInstanceForRunningLock(napi_env& env);
         inline void SetRunningLockInstance(const napi_ref& instance)
         {
