@@ -602,23 +602,6 @@ const std::string Parcel::ReadString8WithLength(int32_t& readLength)
     return std::string();
 }
 
-void* DefaultAllocator::Alloc(size_t size)
-{
-    return malloc(size);
-}
-
-void DefaultAllocator::Dealloc(void* data)
-{
-    if (data != nullptr) {
-        free(data);
-    }
-}
-
-void* DefaultAllocator::Realloc(void* data, size_t newSize)
-{
-    return realloc(data, newSize);
-}
-
 template <typename T1, typename T2>
 bool Parcel::WriteVector(const std::vector<T1>& val, bool (Parcel::*Write)(T2))
 {
