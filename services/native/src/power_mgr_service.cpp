@@ -637,12 +637,12 @@ inline void PowerMgrService::FillUserIPCInfo(UserIPCInfo &userIPCinfo)
     userIPCinfo.uid = IPCSkeleton::GetCallingUid();
 }
 
-bool PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+PowerErrors PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return false;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
 
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d",
@@ -650,8 +650,8 @@ bool PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
 
     UserIPCInfo userIPCInfo;
     FillUserIPCInfo(userIPCInfo);
-    RETURN_IF_WITH_RET(!runningLockMgr_->CreateRunningLock(remoteObj, runningLockInfo, userIPCInfo), false);
-    return true;
+    runningLockMgr_->CreateRunningLock(remoteObj, runningLockInfo, userIPCInfo);
+    return PowerErrors::ERR_OK;
 }
 
 bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
