@@ -43,7 +43,7 @@ public:
     ~PowerMgrProxy() = default;
     DISALLOW_COPY_AND_MOVE(PowerMgrProxy);
 
-    virtual bool CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+    virtual PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(uint32_t type) override;
