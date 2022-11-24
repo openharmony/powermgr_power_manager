@@ -164,35 +164,4 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
     auto resList = runningLock->GetWorkTriggerList();
     EXPECT_EQ(*(resList.begin()), nullptr);
 }
-
-/**
- * @tc.name: PowerMockObjectTest005
- * @tc.desc: Test Power Client when the PowerRemoteObject is mock
- * @tc.type: FUNC
- * @tc.require: issueI5IUHE
- */
-HWTEST_F(PowerMockObjectTest, PowerMockObjectTest005, TestSize.Level2)
-{
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    auto type1 = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    auto type2 = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(type1));
-    EXPECT_TRUE(powerMgrClient.IsRunningLockTypeSupported(type2));
-    EXPECT_TRUE(powerMgrClient.SetDisplaySuspend(true));
-    powerMgrClient.WakeupDevice();
-    EXPECT_TRUE(powerMgrClient.RefreshActivity());
-    powerMgrClient.GetState();
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    auto error = powerMgrClient.SetDeviceMode(mode1);
-    EXPECT_FALSE(error == PowerErrors::ERR_CONNECTION_FAIL);
-    PowerMode mode2 = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode1, mode2);
-    EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(nullptr));
-}
-
 } // namespace
