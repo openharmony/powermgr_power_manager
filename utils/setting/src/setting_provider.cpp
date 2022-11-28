@@ -15,25 +15,25 @@
 
 #include "setting_provider.h"
 
-#include "datashare_predicates.h"
-#include "datashare_result_set.h"
-#include "datashare_values_bucket.h"
+#include "ability_manager_client.h"
+#include "abs_shared_result_set.h"
+#include "data_ability_predicates.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "power_log.h"
 #include "rdb_errno.h"
 #include "result_set.h"
-#include "uri.h"
+#include "values_bucket.h"
 
 namespace OHOS {
 namespace PowerMgr {
 SettingProvider* SettingProvider::instance_;
 std::mutex SettingProvider::mutex_;
 sptr<IRemoteObject> SettingProvider::remoteObj_;
+Uri SettingProvider::settingUri_("dataability:///com.ohos.settingsdata.DataAbility");
 namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
-const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 } // namespace
 
 SettingProvider::~SettingProvider()
@@ -122,13 +122,19 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
-    auto helper = CreateDataShareHelper();
-    if (helper == nullptr) {
+    auto dataAbility = AcquireDataAbility();
+    if (dataAbility == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
-    helper->RegisterObserver(uri, observer);
-    ReleaseDataShareHelper(helper);
+    if (!dataAbility->ScheduleRegisterObserver(uri, observer)) {
+        POWER_HILOGW(
+            COMP_UTILS, "dataAbility->ScheduleRegisterObserver return false, uri=%{public}s", uri.ToString().c_str());
+        ReleaseDataAbility(dataAbility);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_INVALID_OPERATION;
+    }
+    ReleaseDataAbility(dataAbility);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
     POWER_HILOGD(COMP_UTILS, "succeed to register observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
@@ -138,13 +144,19 @@ ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observe
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
-    auto helper = CreateDataShareHelper();
-    if (helper == nullptr) {
+    auto dataAbility = AcquireDataAbility();
+    if (dataAbility == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
-    helper->UnregisterObserver(uri, observer);
-    ReleaseDataShareHelper(helper);
+    if (!dataAbility->ScheduleUnregisterObserver(uri, observer)) {
+        POWER_HILOGW(
+            COMP_UTILS, "dataAbility->ScheduleUnregisterObserver return false, uri=%{public}s", uri.ToString().c_str());
+        ReleaseDataAbility(dataAbility);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_INVALID_OPERATION;
+    }
+    ReleaseDataAbility(dataAbility);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
     POWER_HILOGD(COMP_UTILS, "succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
@@ -168,24 +180,23 @@ void SettingProvider::Initialize(int32_t systemAbilityId)
 ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& value)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
-    auto helper = CreateDataShareHelper();
-    if (helper == nullptr) {
+    auto dataAbility = AcquireDataAbility();
+    if (dataAbility == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
-    DataShare::DataSharePredicates predicates;
+    NativeRdb::DataAbilityPredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
     POWER_HILOGD(COMP_UTILS, "key=%{public}s", key.c_str());
-    Uri uri(AssembleUri(key));
-    auto resultSet = helper->Query(uri, predicates, columns);
-    ReleaseDataShareHelper(helper);
+    auto resultSet = dataAbility->Query(settingUri_, columns, predicates);
+    ReleaseDataAbility(dataAbility);
     if (resultSet == nullptr) {
-        POWER_HILOGE(COMP_UTILS, "helper->Query return nullptr");
+        POWER_HILOGE(COMP_UTILS, "dataAbility->Query return nullptr");
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
-    int32_t count;
+    int32_t count = 0;
     resultSet->GetRowCount(count);
     if (count == 0) {
         POWER_HILOGW(COMP_UTILS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
@@ -208,47 +219,46 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
 ErrCode SettingProvider::PutStringValue(const std::string& key, const std::string& value, bool needNotify)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
-    auto helper = CreateDataShareHelper();
-    if (helper == nullptr) {
+    auto dataAbility = AcquireDataAbility();
+    if (dataAbility == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
     POWER_HILOGD(COMP_UTILS, "key=%{public}s, value=%{public}s", key.c_str(), value.c_str());
-    DataShare::DataShareValueObject keyObj(key);
-    DataShare::DataShareValueObject valueObj(value);
-    DataShare::DataShareValuesBucket bucket;
-    bucket.Put(SETTING_COLUMN_KEYWORD, keyObj);
-    bucket.Put(SETTING_COLUMN_VALUE, valueObj);
-    DataShare::DataSharePredicates predicates;
+    NativeRdb::ValuesBucket bucket;
+    bucket.PutString(SETTING_COLUMN_KEYWORD, key);
+    bucket.PutString(SETTING_COLUMN_VALUE, value);
+    NativeRdb::DataAbilityPredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(AssembleUri(key));
-    if (helper->Update(uri, predicates, bucket) <= 0) {
+    if (dataAbility->Update(settingUri_, bucket, predicates) <= 0) {
         POWER_HILOGD(COMP_UTILS, "no data exist, insert one row");
-        helper->Insert(uri, bucket);
+        dataAbility->Insert(settingUri_, bucket);
     }
     if (needNotify) {
-        helper->NotifyChange(AssembleUri(key));
+        dataAbility->ScheduleNotifyChange(AssembleUri(key));
     }
-    ReleaseDataShareHelper(helper);
+    ReleaseDataAbility(dataAbility);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
     return ERR_OK;
 }
 
-std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelper()
+sptr<AAFwk::IAbilityScheduler> SettingProvider::AcquireDataAbility()
 {
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY);
-    if (helper == nullptr) {
-        POWER_HILOGW(COMP_UTILS, "helper is nullptr, uri=%{public}s, remoteObj_=%{public}p", SETTING_URI_PROXY.c_str(),
-            remoteObj_.GetRefPtr());
+    auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
+    auto dataAbility = abilityManagerClient->AcquireDataAbility(settingUri_, false, remoteObj_);
+    if (dataAbility == nullptr) {
+        POWER_HILOGW(COMP_UTILS, "dataAbility is nullptr, uri=%{public}s, remoteObj_=%{public}p",
+            settingUri_.ToString().c_str(), remoteObj_.GetRefPtr());
         return nullptr;
     }
-    return helper;
+    return dataAbility;
 }
 
-bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper)
+bool SettingProvider::ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility)
 {
-    if (!helper->Release()) {
-        POWER_HILOGW(COMP_UTILS, "release helper fail, remoteObj_=%{public}p", remoteObj_.GetRefPtr());
+    auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityManagerClient->ReleaseDataAbility(dataAbility, remoteObj_) != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "release dataAbility fail, remoteObj_=%{public}p", remoteObj_.GetRefPtr());
         return false;
     }
     return true;
@@ -256,7 +266,7 @@ bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShar
 
 Uri SettingProvider::AssembleUri(const std::string& key)
 {
-    Uri uri(SETTING_URI_PROXY + "&key=" + key);
+    Uri uri(settingUri_.ToString() + "/" + key);
     return uri;
 }
 } // namespace PowerMgr
