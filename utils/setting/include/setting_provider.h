@@ -16,10 +16,11 @@
 #ifndef POWERMGR_POWER_MANAGER_POWER_SETTING_HELPER_H
 #define POWERMGR_POWER_MANAGER_POWER_SETTING_HELPER_H
 
-#include "datashare_helper.h"
+#include "ability_scheduler_interface.h"
 #include "errors.h"
 #include "mutex"
 #include "setting_observer.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -46,10 +47,11 @@ private:
     static SettingProvider* instance_;
     static std::mutex mutex_;
     static sptr<IRemoteObject> remoteObj_;
+    static Uri settingUri_;
 
     static void Initialize(int32_t systemAbilityId);
-    static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-    static bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper);
+    static sptr<AAFwk::IAbilityScheduler> AcquireDataAbility();
+    static bool ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler>& dataAbility);
     static Uri AssembleUri(const std::string& key);
 };
 } // namespace PowerMgr
