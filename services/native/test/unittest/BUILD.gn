@@ -399,10 +399,7 @@ ohos_unittest("test_power_mgr_util") {
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = [
-    "ability_runtime:ability_manager",
-    "data_share:datashare_consumer",
-  ]
+  external_deps = [ "ability_runtime:ability_manager" ]
   external_deps += deps_ex
 }
 
