@@ -175,6 +175,24 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RunningLockInnerKit005
+ * @tc.desc: Test RunningLock proxy function.
+ * @tc.type: FUNC
+ * @tc.require: issue I63PN9
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level0)
+{
+    std::shared_ptr<WorkTrigger> worker = std::make_shared<WorkTrigger>(1, "worker");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit05, 1 usecount = %ld", worker.use_count());
+
+    worker->SetPid(1);
+    EXPECT_EQ(worker->GetUid(), 1);
+    worker->SetAbilityId(1);
+    EXPECT_EQ(worker->GetAbilityId(), 1);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 end.");
+}
+
+/**
  * @tc.name: RunningLockInnerKit004
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
