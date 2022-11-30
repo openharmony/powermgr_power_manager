@@ -1081,4 +1081,18 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient021, TestSize.Level2)
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient021:End.");
 }
+
+/**
+ * @tc.name: PowerMgrClient023
+ * @tc.desc: Test GetError
+ * @tc.type: FUNC
+ * @tc.require: issue I5YZQR
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient044, TestSize.Level2)
+{
+    POWER_HILOGD(LABEL_TEST, "fun is start");
+    PowerErrors error = PowerMgrClient::GetInstance().GetError();
+    POWER_HILOGD(LABEL_TEST, "get error %{public}d", static_cast<int32_t>(error));
+    POWER_HILOGD(error == PowerErrors::ERR_OK);
+}
 }
