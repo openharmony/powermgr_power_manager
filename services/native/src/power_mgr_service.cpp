@@ -282,6 +282,8 @@ void PowerMgrService::HallSensorSubscriberInit()
     sensorUser_.userData = nullptr;
     sensorUser_.callback = &HallSensorCallback;
     SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
+    ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
 }
 
 bool PowerMgrService::IsSupportSensor(SensorTypeId typeId)
@@ -326,6 +328,7 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
 void PowerMgrService::HallSensorSubscriberCancel()
 {
     if (IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
+        DeactivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
         UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
     }
 }
