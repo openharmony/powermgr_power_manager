@@ -282,8 +282,8 @@ void PowerMgrService::HallSensorSubscriberInit()
     }
     sensorUser_.userData = nullptr;
     sensorUser_.callback = &HallSensorCallback;
-    SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
     SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
     ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
 }
 
