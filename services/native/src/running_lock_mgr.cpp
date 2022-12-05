@@ -681,7 +681,7 @@ void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
     string name = lockInner.GetRunningLockName();
     const int logLevel = 2;
     const string &tag = runninglockNotifyStr_.at(changeType);
-    HiviewDFX::HiSysEvent::Write("POWER", "POWER_RUNNINGLOCK",
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "POWER_RUNNINGLOCK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "PID", pid, "UID", uid, "STATE", state, "TYPE", type, "NAME", name,
         "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", msg);
