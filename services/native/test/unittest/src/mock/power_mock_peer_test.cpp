@@ -52,6 +52,48 @@ void MockPeerTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 
 namespace {
 /**
+ * @tc.name: PowerClientMockPeerTest001
+ * @tc.desc: Test Power client by mock peer, callback is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueI650CX
+ */
+HWTEST_F(MockPeerTest, PowerClientMockPeerTest001, TestSize.Level2)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<IPowerStateCallback> stateCallback = nullptr;
+    sptr<IShutdownCallback> shutdownCallback = nullptr;
+    sptr<IPowerModeCallback> modeCallback= nullptr;
+
+    EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(stateCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(stateCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(shutdownCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(shutdownCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(modeCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
+}
+
+/**
+ * @tc.name: PowerClientMockPeerTest002
+ * @tc.desc: Test Power client by mock peer, callback is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueI5IUHE
+ */
+HWTEST_F(MockPeerTest, PowerClientMockPeerTest002, TestSize.Level2)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
+    sptr<IShutdownCallback> shutdownCallback = new PowerShutdownTestCallback();
+    sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
+
+    EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(stateCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(stateCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(shutdownCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(shutdownCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(modeCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
+}
+
+/**
  * @tc.name: MockPeerTest001
  * @tc.desc: Test proxy when the PeerHolder is nullptr
  * @tc.type: FUNC
