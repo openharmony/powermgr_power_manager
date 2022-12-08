@@ -314,4 +314,20 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService016, TestSize.Level0)
     
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 end.");
 }
+
+/**
+ * @tc.name: PowerMgrService017
+ * @tc.desc: Test Dump
+ * @tc.type: FUNC
+ * @tc.require: issueI650CX
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::vector<std::string> dumpArgs {};
+    std::string expectedDebugInfo = "Power manager dump options";
+    std::string actualDebugInfo = powerMgrClient.Dump(dumpArgs);
+    auto index = actualDebugInfo.find(expectedDebugInfo);
+    EXPECT_TRUE(index != string::npos);
+}
 }

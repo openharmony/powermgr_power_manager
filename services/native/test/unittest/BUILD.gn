@@ -272,6 +272,30 @@ ohos_unittest("test_power_mgr_service") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_power_mgr_service_death") {
+  module_out_path = module_output_path
+
+  sources = [
+    "mock/mock_power_remote_object.cpp",
+    "src/power_mgr_service_death_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  defines = [ "POWERMGR_SERVICE_DEATH_UT" ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 ohos_unittest("ces_system") {
   module_out_path = module_output_path
 
@@ -451,6 +475,7 @@ ohos_unittest("test_mock_parcel") {
     "${powermgr_innerkits}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/permission:power_permission",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -523,6 +548,7 @@ group("unittest") {
     ":test_power_device_mode",
     ":test_power_mgr_client",
     ":test_power_mgr_service",
+    ":test_power_mgr_service_death",
     ":test_power_mgr_util",
     ":test_power_mock_object",
     ":test_power_shutdown",
