@@ -131,7 +131,9 @@ public:
     std::string Dump(const std::vector<std::string>& args);
     PowerErrors GetError();
 
+#ifndef POWERMGR_SERVICE_DEATH_UT
 private:
+#endif
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         PowerMgrDeathRecipient() = default;
