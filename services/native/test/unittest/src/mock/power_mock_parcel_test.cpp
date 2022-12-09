@@ -19,6 +19,7 @@
 
 #include "mock_power_remote_object.h"
 #include "parcel.h"
+#include "permission.h"
 #include "power_log.h"
 #include "power_mgr_client.h"
 #include "power_mgr_proxy.h"
@@ -91,16 +92,16 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest002, TestSize.Level2)
     PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode1);
     powerMgrClient.GetDeviceMode();
-    sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
-    sptr<IShutdownCallback> cb2 = new PowerShutdownTestCallback();
-    sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
+    sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
+    sptr<IShutdownCallback> shutdownCallback = new PowerShutdownTestCallback();
+    sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
 
-    powerMgrClient.RegisterPowerStateCallback(cb1);
-    powerMgrClient.UnRegisterPowerStateCallback(cb1);
-    powerMgrClient.RegisterShutdownCallback(cb2);
-    powerMgrClient.UnRegisterShutdownCallback(cb2);
-    powerMgrClient.RegisterPowerModeCallback(cb3);
-    powerMgrClient.UnRegisterPowerModeCallback(cb3);
+    EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(stateCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(stateCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(shutdownCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(shutdownCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(modeCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
     std::string errCode = "can't connect service";
@@ -218,5 +219,22 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     std::string errCode = "remote error";
     std::string actualDebugInfo = sptrProxy->ShellDump(dumpArgs, dumpArgs.size());
     EXPECT_EQ(actualDebugInfo, errCode);
+}
+
+/**
+ * @tc.name: PowerUtilMockParcelTest001
+ * @tc.desc: test Permission function
+ * @tc.type: FUNC
+ * @tc.require: issueI650CX
+ */
+HWTEST_F (MockParcelTest, PowerUtilMockParcelTest001, TestSize.Level2)
+{
+    EXPECT_FALSE(Permission::IsSystemCore());
+    EXPECT_FALSE(Permission::IsSystemBasic());
+    EXPECT_FALSE(Permission::IsSystemApl());
+    EXPECT_FALSE(Permission::IsSystemHap());
+    EXPECT_FALSE(Permission::IsSystem());
+    EXPECT_TRUE(Permission::IsPermissionGranted(""));
+    EXPECT_FALSE(Permission::IsSystemHapPermGranted(""));
 }
 } // namespace
