@@ -96,6 +96,6 @@ HWTEST_F (PowerShutdownTest, FastShutDownDeviceTest001, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.ShutDownDevice(SHUTDOWN_FAST_REASON);
-    EXPECT_EQ(PowerState::INACTIVE, powerMgrClient.GetState());
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 }
 }
