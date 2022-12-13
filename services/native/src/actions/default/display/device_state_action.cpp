@@ -31,10 +31,12 @@ using namespace Rosen;
 
 DeviceStateAction::DeviceStateAction()
 {
+    dispCallback_ = new DisplayPowerCallback();
 }
 
 DeviceStateAction::~DeviceStateAction()
 {
+    dispCallback_ = nullptr;
 }
 
 void DeviceStateAction::Suspend(int64_t callTimeMs, SuspendDeviceType type, uint32_t flags)
@@ -92,10 +94,9 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
         return ActionResult::SUCCESS;
     }
 
-    if (dispCallback_ == nullptr) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "Register Callback");
-        dispCallback_ = new DisplayPowerCallback();
-        DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
+    if (!isRegister_) {
+        isRegister_ = DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
+        POWER_HILOGI(FEATURE_POWER_STATE, "Register Callback is %{public}d", isRegister_);
     }
 
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
