@@ -47,6 +47,7 @@ private:
         void NotifyDisplayActionDone(uint32_t event);
         std::function<void(uint32_t)> notify_ {nullptr};
     };
+    bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};
     std::function<void(uint32_t)> actionCallback_ {nullptr};
 };
