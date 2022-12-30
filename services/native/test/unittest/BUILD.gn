@@ -23,6 +23,7 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
+    "${powermgr_service_path}/native/src/",
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
   ]
@@ -49,7 +50,10 @@ deps_ex = [
   "samgr:samgr_proxy",
   "sensor:sensor_interface_native",
   "c_utils:utils",
+  "input:libmmi-client",
 ]
+
+defs = [ "POWER_GTEST" ]
 
 ############################shutdown_callback_test#############################
 ohos_unittest("shutdown_callback_test") {
@@ -538,9 +542,74 @@ ohos_unittest("test_mock_proxy") {
   external_deps = deps_ex
 }
 
+ohos_unittest("power_state_machine_native_test") {
+  module_out_path = module_output_path
+  defines = defs
+
+  sources = [ "src/native_power_state_machine_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_running_lock_native") {
+  module_out_path = module_output_path
+  defines = defs
+
+  sources = [ "src/running_lock_native_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_power_mgr_service_native") {
+  module_out_path = module_output_path
+  defines = defs
+
+  sources = [ "src/power_mgr_service_native_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":power_state_machine_native_test",
     ":shutdown_callback_test",
     ":test_mock_parcel",
     ":test_mock_peer",
@@ -549,10 +618,12 @@ group("unittest") {
     ":test_power_mgr_client",
     ":test_power_mgr_service",
     ":test_power_mgr_service_death",
+    ":test_power_mgr_service_native",
     ":test_power_mgr_util",
     ":test_power_mock_object",
     ":test_power_shutdown",
     ":test_power_state_machine",
     ":test_running_lock",
+    ":test_running_lock_native",
   ]
 }
