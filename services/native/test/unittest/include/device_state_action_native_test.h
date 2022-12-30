@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NATIVE_POWERMGR_STATE_MACHINE_TEST_H
-#define NATIVE_POWERMGR_STATE_MACHINE_TEST_H
+#ifndef DEVICE_STATE_ACTION_NATIVE_TEST_H
+#define DEVICE_STATE_ACTION_NATIVE_TEST_H
 
 #ifdef POWER_GTEST
 #define private    public
@@ -30,37 +30,21 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
+#include "display/device_state_action.h"
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr uint32_t THREE = 3;
-constexpr int64_t TIME = -3;
-constexpr int64_t CALLTIMEMS = 1;
-constexpr pid_t PID = 1;
-constexpr uint32_t MAXTYPE = 77;
-constexpr int64_t TIMEOUT = 7;
+constexpr uint32_t DISPLAYID = 3;
+constexpr uint32_t DISPLAYID_A = 0;
+constexpr uint32_t UNDISPLAYSTATE = 7;
 
-class NativePowerStateMachineTest : public testing::Test {
+class DeviceStateActionNativeTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
 };
-
-class PowerStateTest1Callback : public PowerStateCallbackStub {
-public:
-    PowerStateTest1Callback() {};
-    virtual ~PowerStateTest1Callback() {};
-    virtual void OnPowerStateChanged(PowerState state) override;
-};
-
-class PowerStateTest2Callback : public PowerStateCallbackStub {
-public:
-    PowerStateTest2Callback() {};
-    virtual ~PowerStateTest2Callback() {};
-    virtual void OnPowerStateChanged(PowerState state) override;
-};
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // NATIVE_POWERMGR_STATE_MACHINE_TEST_H
+#endif // DEVICE_STATE_ACTION_NATIVE_TEST_H
