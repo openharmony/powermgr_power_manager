@@ -301,7 +301,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient010, TestSize.Level0)
 HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient011::fun is start!");
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto& displayMgrClient = OHOS::DisplayPowerMgr::DisplayPowerMgrClient::GetInstance();
 
@@ -333,7 +333,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
 HWTEST_F(PowerMgrClientTest, PowerMgrClient012, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient012:Start.");
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
@@ -358,7 +358,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient013, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient013:Start.");
 
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
@@ -384,7 +384,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient014, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient014:Start.");
 
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
@@ -411,7 +411,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient015, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient015:Start.");
 
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
 
@@ -439,7 +439,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient016, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient016:Start.");
 
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
 
@@ -469,7 +469,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient017, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient017:Start.");
 
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_BACKGROUND);
 
@@ -521,7 +521,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient019, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient019:Start.");
 
-    int32_t time = SLEEP_WAIT_TIME_MS;
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_BACKGROUND);
 
