@@ -62,7 +62,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Leve
     EXPECT_FALSE(stateMachine->CheckRefreshTime());
     EXPECT_TRUE(stateMachine->CheckRefreshTime());
     EXPECT_FALSE(stateMachine->RestoreScreenOffTimeInner());
-    EXPECT_TRUE(stateMachine->OverrideScreenOffTimeInner(7));
+    EXPECT_TRUE(stateMachine->OverrideScreenOffTimeInner(TIMEOUT));
+    EXPECT_TRUE(stateMachine->OverrideScreenOffTimeInner(TIMEOUT));
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true));
     stateMachine->SetDisplayOffTime(TIME, true);
     stateMachine->ResetInactiveTimer();
@@ -193,11 +194,21 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Leve
     stateMachine->HandleDelayTimer(powermsEvent);
     powermsEvent = PowermsEventHandler::SYSTEM_WAKE_UP_MSG;
     stateMachine->HandleDelayTimer(powermsEvent);
-
     bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SETTINGS, true);
     EXPECT_TRUE(ret);
     stateMachine->InitState();
     stateMachine->HandleDelayTimer(powermsEvent);
+
+    uint32_t retSet = stateMachine->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON,
+                                                                  StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    EXPECT_TRUE(retSet == ActionResult::SUCCESS);
+    powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
+    stateMachine->HandleDelayTimer(powermsEvent);
+    stateMachine->SetDisplayOffTime(TIMEOUT, false);
+    stateMachine->HandleDelayTimer(powermsEvent);
+    stateMachine->ActionCallback(TIMEOUT);
+
+    EXPECT_TRUE(stateMachine->CheckRunningLock(PowerState::UNKNOWN));
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device end.";
@@ -287,7 +298,40 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Leve
     EXPECT_TRUE(stateMachineController->TransitTo(trigger, false) == TransitResult::ALREADY_IN_STATE);
     stateMachine->SetDisplayOffTime(TIME, false);
 
+    auto stateMachineController2 = std::make_shared<PowerStateMachine::StateController>(PowerState::INACTIVE,
+                                    nullptr, TransitResultToStateChangeReason);
+    EXPECT_TRUE(stateMachineController2->TransitTo(trigger, false) == TransitResult::OTHER_ERR);
+    EXPECT_FALSE(stateMachineController2->CheckState());
+
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine006: Suspend Device end.";
+}
+
+/**
+ * @tc.name: NativePowerStateMachine007
+ * @tc.desc: test recordFailure in powerStateMachine
+ * @tc.type: FUNC
+ */
+HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007::fun is start!");
+    auto stateMachine = std::make_shared<PowerStateMachine>(nullptr);
+    EXPECT_TRUE(stateMachine->Init());
+    EXPECT_FALSE(stateMachine->CheckRunningLock(PowerState::INACTIVE));
+
+    auto stateMachineController = std::make_shared<PowerStateMachine::StateController>(PowerState::INACTIVE,
+                                    stateMachine, TransitResultToStateChangeReason);
+    StateChangeReason trigger = StateChangeReason::STATE_CHANGE_REASON_BATTERY;
+    EXPECT_TRUE(stateMachineController->TransitTo(trigger, false) == TransitResult::LOCKING);
+    stateMachine->currentState_ = PowerState::INACTIVE;
+    stateMachine->SetDisplaySuspend(false);
+    stateMachine->SetSleepTime(TIME);
+    stateMachine->stateAction_ = nullptr;
+    EXPECT_TRUE(stateMachine->ForceSuspendDeviceInner(PID, CALLTIMEMS));
+    SuspendDeviceType suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION;
+    stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007::fun is end!");
+    GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device end.";
 }
 }

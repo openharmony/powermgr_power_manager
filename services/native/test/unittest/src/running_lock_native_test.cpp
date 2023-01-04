@@ -300,4 +300,23 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
     POWER_HILOGI(LABEL_TEST, "RunningLockNative006 end.");
 }
+
+/**
+ * @tc.name: RunningLockNative007
+ * @tc.desc: test CheckOverTime in runningLockMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F (RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
+{
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    std::weak_ptr<PowermsEventHandler> powermsEventHandler;
+    runningLockMgr->handler_ = powermsEventHandler;
+    runningLockMgr->CheckOverTime();
+    runningLockMgr->RemoveAndPostUnlockTask(remoteObj);
+    runningLockMgr->SendCheckOverTimeMsg(CALLTIMEMS);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative007 end.");
+}
 }
