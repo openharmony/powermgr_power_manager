@@ -16,5 +16,8 @@ import("//build/test.gni")
 
 group("powermgr_test") {
   testonly = true
-  deps = [ "unittest:unittest" ]
+  deps = [
+    "unittest:unittest",
+    "unittest/src/servicetest:unittest",
+  ]
 }
