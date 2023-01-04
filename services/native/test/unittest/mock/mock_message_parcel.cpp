@@ -20,6 +20,10 @@
 
 #include "iremote_object.h"
 
+namespace {
+static std::u16string g_interfaceTokenName {};
+}// namespace
+
 namespace OHOS {
 MessageParcel::MessageParcel() :
     Parcel(), writeRawDataFd_(-1), readRawDataFd_(-1),
@@ -102,16 +106,22 @@ bool MessageParcel::ContainFileDescriptors() const
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
 {
-    #ifdef MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE
+#ifdef MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE
+    g_interfaceTokenName = name;
     return true;
-    #else
+#else
+    (void)name;
     return false;
-    #endif
+#endif
 }
 
 std::u16string MessageParcel::ReadInterfaceToken()
 {
+#ifdef MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE
+    return g_interfaceTokenName;
+#else
     return ReadString16();
+#endif
 }
 
 bool MessageParcel::WriteRawData(const void* data, size_t size)
