@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NATIVE_POWERMGR_STATE_MACHINE_TEST_H
-#define NATIVE_POWERMGR_STATE_MACHINE_TEST_H
+#ifndef POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
+#define POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
 
 #ifdef POWER_GTEST
 #define private    public
@@ -29,38 +29,21 @@
 
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
-#include "power_state_callback_stub.h"
+#include "running_lock_hub.h"
+#include "suspend_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr uint32_t THREE = 3;
-constexpr int64_t TIME = -3;
-constexpr int64_t CALLTIMEMS = 1;
-constexpr pid_t PID = 1;
-constexpr uint32_t MAXTYPE = 77;
-constexpr int64_t TIMEOUT = 7;
+constexpr int32_t UNFD = -1;
+constexpr int32_t FD = 1;
 
-class NativePowerStateMachineTest : public testing::Test {
+class RunningLockHubNativeTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
 };
-
-class PowerStateTest1Callback : public PowerStateCallbackStub {
-public:
-    PowerStateTest1Callback() {};
-    virtual ~PowerStateTest1Callback() {};
-    virtual void OnPowerStateChanged(PowerState state) override;
-};
-
-class PowerStateTest2Callback : public PowerStateCallbackStub {
-public:
-    PowerStateTest2Callback() {};
-    virtual ~PowerStateTest2Callback() {};
-    virtual void OnPowerStateChanged(PowerState state) override;
-};
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // NATIVE_POWERMGR_STATE_MACHINE_TEST_H
+#endif // POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
