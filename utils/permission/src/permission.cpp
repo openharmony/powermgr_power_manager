@@ -19,8 +19,8 @@
 #include "bundle_mgr_interface.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "system_ability_definition.h"
 #include "power_log.h"
+#include "system_ability_definition.h"
 
 using namespace OHOS;
 using namespace OHOS::AppExecFwk;
@@ -48,6 +48,12 @@ static bool IsTokenAplMatch(ATokenAplEnum apl)
     POWER_HILOGW(COMP_UTILS, "apl not match, info.apl=%{public}d, type=%{public}d, pid=%{public}d, uid=%{public}d",
         static_cast<int32_t>(info.apl), static_cast<int32_t>(type), pid, uid);
     return false;
+}
+
+static ATokenTypeEnum GetTokenType()
+{
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    return AccessTokenKit::GetTokenTypeFlag(tokenId);
 }
 
 bool Permission::IsSystemCore()
@@ -98,10 +104,9 @@ static sptr<IBundleMgr> GetBundleMgr()
 
 bool Permission::IsSystemHap()
 {
-    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     pid_t pid = IPCSkeleton::GetCallingPid();
     pid_t uid = IPCSkeleton::GetCallingUid();
-    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    ATokenTypeEnum type = GetTokenType();
     POWER_HILOGD(COMP_UTILS, "checking system hap, type=%{public}d, pid=%{public}d, uid=%{public}d",
         static_cast<int32_t>(type), pid, uid);
     auto bundleMgr = GetBundleMgr();
@@ -109,36 +114,26 @@ bool Permission::IsSystemHap()
         POWER_HILOGW(COMP_SVC, "BundleMgr is nullptr, return false");
         return false;
     }
-    return bundleMgr->CheckIsSystemAppByUid(uid);
-}
-
-bool Permission::IsSystem()
-{
-    return IsSystemApl() || IsSystemHap();
+    bool isSystemHap = bundleMgr->CheckIsSystemAppByUid(uid);
+    if (!isSystemHap) {
+        POWER_HILOGW(COMP_UTILS, "permission denied, not system hap, type=%{public}d, pid=%{public}d, uid=%{public}d",
+            static_cast<int32_t>(type), pid, uid);
+    }
+    return isSystemHap;
 }
 
 bool Permission::IsPermissionGranted(const std::string& perm)
 {
-    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     pid_t pid = IPCSkeleton::GetCallingPid();
     pid_t uid = IPCSkeleton::GetCallingUid();
-    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    ATokenTypeEnum type = GetTokenType();
     POWER_HILOGD(COMP_UTILS, "checking permission, perm=%{public}s type=%{public}d, pid=%{public}d, uid=%{public}d",
         perm.c_str(), static_cast<int32_t>(type), pid, uid);
-    int32_t result = PermissionState::PERMISSION_DENIED;
-    switch (type) {
-        case ATokenTypeEnum::TOKEN_HAP:
-            result = AccessTokenKit::VerifyAccessToken(tokenId, perm);
-            break;
-        case ATokenTypeEnum::TOKEN_NATIVE:
-        case ATokenTypeEnum::TOKEN_SHELL:
-            result = PermissionState::PERMISSION_GRANTED;
-            break;
-        case ATokenTypeEnum::TOKEN_INVALID:
-        case ATokenTypeEnum::TOKEN_TYPE_BUTT:
-            break;
-    }
-    if (result == PermissionState::PERMISSION_DENIED) {
+
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    bool isGranted = IsHap() &&
+        (PermissionState::PERMISSION_GRANTED == AccessTokenKit::VerifyAccessToken(tokenId, perm));
+    if (!isGranted) {
         POWER_HILOGW(COMP_UTILS, "permission denied, perm=%{public}s type=%{public}d, pid=%{public}d, uid=%{public}d",
             perm.c_str(), static_cast<int32_t>(type), pid, uid);
         return false;
@@ -146,9 +141,19 @@ bool Permission::IsPermissionGranted(const std::string& perm)
     return true;
 }
 
-bool Permission::IsSystemHapPermGranted(const std::string& perm)
+bool Permission::IsHap()
 {
-    return IsSystemHap() && IsPermissionGranted(perm);
+    return ATokenTypeEnum::TOKEN_HAP == GetTokenType();
+}
+
+bool Permission::IsNative()
+{
+    return ATokenTypeEnum::TOKEN_NATIVE == GetTokenType();
+}
+
+bool Permission::IsShell()
+{
+    return ATokenTypeEnum::TOKEN_SHELL == GetTokenType();
 }
 } // namespace PowerMgr
 } // namespace OHOS
