@@ -233,8 +233,9 @@ HWTEST_F (MockParcelTest, PowerUtilMockParcelTest001, TestSize.Level2)
     EXPECT_FALSE(Permission::IsSystemBasic());
     EXPECT_FALSE(Permission::IsSystemApl());
     EXPECT_FALSE(Permission::IsSystemHap());
-    EXPECT_FALSE(Permission::IsSystem());
-    EXPECT_TRUE(Permission::IsPermissionGranted(""));
-    EXPECT_FALSE(Permission::IsSystemHapPermGranted(""));
+    EXPECT_FALSE(Permission::IsPermissionGranted(""));
+    EXPECT_FALSE(Permission::IsHap());
+    EXPECT_FALSE(Permission::IsNative());
+    EXPECT_TRUE(Permission::IsShell());
 }
 } // namespace
