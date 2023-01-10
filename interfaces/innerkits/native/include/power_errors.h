@@ -21,6 +21,7 @@ namespace PowerMgr {
 enum class PowerErrors : int32_t {
     ERR_OK = 0,
     ERR_PERMISSION_DENIED = 201,
+    ERR_SYSTEM_API_DENIED = 202,
     ERR_PARAM_INVALID = 401,
     ERR_CONNECTION_FAIL = 4900101
 };
