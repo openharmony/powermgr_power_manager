@@ -21,6 +21,7 @@ namespace PowerMgr {
 std::map<PowerErrors, std::string> NapiErrors::errorTable_ = {
     {PowerErrors::ERR_CONNECTION_FAIL,   "Connecting to the service failed."},
     {PowerErrors::ERR_PERMISSION_DENIED, "Permission is denied"             },
+    {PowerErrors::ERR_SYSTEM_API_DENIED, "System api permission is denied"  },
     {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         }
 };
 
