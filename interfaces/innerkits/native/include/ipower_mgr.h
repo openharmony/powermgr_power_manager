@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@ public:
         IS_SCREEN_ON,
         FORCE_DEVICE_SUSPEND,
         REBOOT_DEVICE,
+        REBOOT_DEVICE_FOR_DEPRECATED,
         SHUTDOWN_DEVICE,
         REG_POWER_STATE_CALLBACK,
         UNREG_POWER_STATE_CALLBACK,
@@ -77,6 +78,7 @@ public:
 
     // Used for power state machine.
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
+    virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) = 0;
     virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
