@@ -489,10 +489,18 @@ int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& arg
 
 PowerErrors PowerMgrService::RebootDevice(const std::string& reason)
 {
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    return RebootDeviceForDeprecated(reason);
+}
+
+PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason)
+{
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystem() && !Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
+    if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
