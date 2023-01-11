@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,12 @@ PowerErrors PowerMgrClient::RebootDevice(const std::string& reason)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
     return proxy_->RebootDevice(reason);
+}
+
+PowerErrors PowerMgrClient::RebootDeviceForDeprecated(const std::string& reason)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->RebootDeviceForDeprecated(reason);
 }
 
 PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)

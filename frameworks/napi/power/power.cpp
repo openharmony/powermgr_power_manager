@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ napi_value Power::RebootOrShutdown(napi_env env, napi_callback_info info, bool i
     }
     POWER_HILOGD(FEATURE_SHUTDOWN, "reboot: %{public}d, reason: %{public}s", isReboot, reason);
     if (isReboot) {
-        g_powerMgrClient.RebootDevice(std::string(reason));
+        g_powerMgrClient.RebootDeviceForDeprecated(std::string(reason));
     } else {
         g_powerMgrClient.ShutDownDevice(std::string(reason));
     }
