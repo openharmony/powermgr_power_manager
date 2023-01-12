@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_POWERMGR_UTIL_TEST_H
-#define POWERMGR_POWERMGR_UTIL_TEST_H
+#ifndef POWERMGR_MOCK_ACCESSTOKEN_KIT_H
+#define POWERMGR_MOCK_ACCESSTOKEN_KIT_H
 
-#include <gtest/gtest.h>
+#include "accesstoken_kit.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerMgrUtilTest : public testing::Test {
+class MockAccesstokenKit {
+public:
+    static void MockSetTokenTypeFlag(OHOS::Security::AccessToken::ATokenTypeEnum mockRet);
+    static void MockSetPermissionState(OHOS::Security::AccessToken::PermissionState mockState);
+    static void MockSetSystemApp(bool isSystemApp);
 };
 } // namespace PowerMgr
 } // namespace OHOS
-
-#endif // POWERMGR_POWERMGR_UTIL_TEST_H
+#endif // POWERMGR_MOCK_ACCESSTOKEN_KIT_H
