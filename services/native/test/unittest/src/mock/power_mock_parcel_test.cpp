@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,13 +229,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
  */
 HWTEST_F (MockParcelTest, PowerUtilMockParcelTest001, TestSize.Level2)
 {
-    EXPECT_FALSE(Permission::IsSystemCore());
-    EXPECT_FALSE(Permission::IsSystemBasic());
-    EXPECT_FALSE(Permission::IsSystemApl());
-    EXPECT_FALSE(Permission::IsSystemHap());
-    EXPECT_FALSE(Permission::IsPermissionGranted(""));
-    EXPECT_FALSE(Permission::IsHap());
-    EXPECT_FALSE(Permission::IsNative());
-    EXPECT_TRUE(Permission::IsShell());
+    EXPECT_TRUE(Permission::IsSystem());
+    EXPECT_TRUE(Permission::IsPermissionGranted(""));
 }
 } // namespace

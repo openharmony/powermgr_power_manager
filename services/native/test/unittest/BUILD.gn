@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -415,7 +415,16 @@ if (false) {
 ohos_unittest("test_power_mgr_util") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_mgr_util_test.cpp" ]
+  include_dirs = [
+    "${powermgr_utils_path}/permission/include",
+    "src/mock",
+  ]
+
+  sources = [
+    "${powermgr_utils_path}/permission/src/permission.cpp",
+    "src/mock/mock_accesstoken_kit.cpp",
+    "src/power_mgr_util_test.cpp",
+  ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -423,15 +432,13 @@ ohos_unittest("test_power_mgr_util") {
   ]
 
   deps = [
-    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager",
-    "${powermgr_utils_path}/param:power_sysparam",
-    "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "data_share:datashare_consumer",
   ]
   external_deps += deps_ex
