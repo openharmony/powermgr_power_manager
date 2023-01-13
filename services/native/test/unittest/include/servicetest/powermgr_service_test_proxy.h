@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@ public:
     bool IsScreenOn();
     bool ForceSuspendDevice(int64_t callTimeMs);
     PowerErrors RebootDevice(const std::string& reason);
+    PowerErrors RebootDeviceForDeprecated(const std::string& reason);
     PowerErrors ShutDownDevice(const std::string& reason);
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
