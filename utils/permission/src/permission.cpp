@@ -34,11 +34,10 @@ bool Permission::IsSystem()
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
     POWER_HILOGD(COMP_UTILS, "checking system permission, type=%{public}d, pid=%{public}d, uid=%{public}d",
         static_cast<int32_t>(type), pid, uid);
-    FullTokenID fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     bool result = false;
     switch (type) {
         case ATokenTypeEnum::TOKEN_HAP:
-            result = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+            result = TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID());
             break;
         case ATokenTypeEnum::TOKEN_NATIVE:
         case ATokenTypeEnum::TOKEN_SHELL:
