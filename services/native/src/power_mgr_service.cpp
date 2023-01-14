@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -493,13 +493,10 @@ PowerErrors PowerMgrService::RebootDevice(const std::string& reason)
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (Permission::IsHap()) {
-        if (!Permission::IsSystemHap()) {
-            return PowerErrors::ERR_SYSTEM_API_DENIED;
-        } else if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
-            return PowerErrors::ERR_PERMISSION_DENIED;
-        }
-    } else if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
@@ -518,13 +515,10 @@ PowerErrors PowerMgrService::RebootDevice(const std::string& reason)
 PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
 {
     auto now = static_cast<int64_t>(time(nullptr));
-    if (Permission::IsHap()) {
-        if (!Permission::IsSystemHap()) {
-            return PowerErrors::ERR_SYSTEM_API_DENIED;
-        } else if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
-            return PowerErrors::ERR_PERMISSION_DENIED;
-        }
-    } else if (!Permission::IsSystemCore() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     if (reason == SHUTDOWN_FAST_REASON) {
@@ -556,12 +550,8 @@ PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs,
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (Permission::IsHap()) {
-        if (!Permission::IsSystemHap()) {
-            return PowerErrors::ERR_SYSTEM_API_DENIED;
-        }
-    } else if (!Permission::IsSystemApl() && !Permission::IsShell()) {
-        return PowerErrors::ERR_PERMISSION_DENIED;
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     if (shutdownService_.IsShuttingDown()) {
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
@@ -579,12 +569,8 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs,
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (Permission::IsHap()) {
-        if (!Permission::IsSystemHap()) {
-            return PowerErrors::ERR_SYSTEM_API_DENIED;
-        }
-    } else if (!Permission::IsSystemApl() && !Permission::IsShell()) {
-        return PowerErrors::ERR_PERMISSION_DENIED;
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
@@ -601,8 +587,7 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs,
     }
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {
         return false;
     }
     POWER_HILOGD(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
@@ -613,7 +598,7 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs,
 bool PowerMgrService::OverrideScreenOffTime(int64_t timeout)
 {
     std::lock_guard lock(mutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     POWER_HILOGD(COMP_SVC, "Try to override screen off time");
@@ -623,7 +608,7 @@ bool PowerMgrService::OverrideScreenOffTime(int64_t timeout)
 bool PowerMgrService::RestoreScreenOffTime()
 {
     std::lock_guard lock(mutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     POWER_HILOGD(COMP_SVC, "Try to restore screen off time");
@@ -652,7 +637,7 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     if (shutdownService_.IsShuttingDown()) {
@@ -673,8 +658,7 @@ PowerErrors PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remote
     const RunningLockInfo& runningLockInfo)
 {
     std::lock_guard lock(lockMutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
 
@@ -691,8 +675,7 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(lockMutex_);
     bool result = false;
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return result;
     }
 
@@ -714,8 +697,7 @@ bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
     uint32_t timeOutMS)
 {
     std::lock_guard lock(lockMutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
 
@@ -734,8 +716,7 @@ bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
 bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(lockMutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
     runningLockMgr_->UnLock(remoteObj);
@@ -776,8 +757,7 @@ bool PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
     const WorkTriggerList& workTriggerList)
 {
     std::lock_guard lock(lockMutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
 
@@ -788,7 +768,7 @@ bool PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
 bool PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
     std::lock_guard lock(lockMutex_);
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     runningLockMgr_->ProxyRunningLock(proxyLock, uid, pid);
@@ -800,8 +780,7 @@ bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
@@ -815,8 +794,7 @@ bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER") &&
-        !Permission::IsShell()) {
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
@@ -831,7 +809,7 @@ bool PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriori
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d, callback: %{public}p",
@@ -845,7 +823,7 @@ bool PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& 
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
@@ -859,7 +837,7 @@ bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& 
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false; 
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
@@ -873,7 +851,7 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, callback: %{public}p", pid, uid,
@@ -887,7 +865,7 @@ bool PowerMgrService::SetDisplaySuspend(bool enable)
     std::lock_guard lock(mutex_);
     pid_t pid  = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
         return false;
     }
     POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, enable: %{public}d", pid, uid, enable);
@@ -901,13 +879,10 @@ PowerErrors PowerMgrService::SetDeviceMode(const PowerMode& mode)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, mode: %{public}u", pid, uid, mode);
-    if (Permission::IsHap()) {
-        if (!Permission::IsSystemHap()) {
-            return PowerErrors::ERR_SYSTEM_API_DENIED;
-        } else if (!Permission::IsPermissionGranted("ohos.permission.POWER_OPTIMIZATION")) {
-            return PowerErrors::ERR_PERMISSION_DENIED;
-        }
-    } else if (!Permission::IsSystemApl() && !Permission::IsShell()) {
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_OPTIMIZATION")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     powerModeModule_.SetModeItem(mode);
