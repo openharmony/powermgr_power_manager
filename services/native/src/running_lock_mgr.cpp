@@ -907,7 +907,6 @@ RunningLockMgr::ProximityController::ProximityController()
     }
     user_.userData = nullptr;
     user_.callback = &RecordSensorCallback;
-    SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
 }
 
 RunningLockMgr::ProximityController::~ProximityController()
@@ -926,8 +925,17 @@ void RunningLockMgr::ProximityController::Enable()
         return;
     }
 
+    int32_t errorCode = SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    if (errorCode != ERR_OK) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "SubscribeSensor PROXIMITY failed, errorCode=%{public}d", errorCode);
+        return;
+    }
     SetBatch(SENSOR_TYPE_ID_PROXIMITY, &user_, SAMPLING_RATE, SAMPLING_RATE);
-    ActivateSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    errorCode = ActivateSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    if (errorCode != ERR_OK) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "ActivateSensor PROXIMITY failed, errorCode=%{public}d", errorCode);
+        return;
+    }
     SetMode(SENSOR_TYPE_ID_PROXIMITY, &user_, SENSOR_ON_CHANGE);
 }
 
@@ -941,6 +949,10 @@ void RunningLockMgr::ProximityController::Disable()
     }
 
     DeactivateSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    int32_t errorCode = UnsubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
+    if (errorCode != ERR_OK) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UnsubscribeSensor PROXIMITY failed, errorCode=%{public}d", errorCode);
+    }
 }
 
 bool RunningLockMgr::ProximityController::IsClose()
