@@ -27,6 +27,9 @@ using namespace OHOS::HiviewDFX;
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+constexpr uint32_t PARAM_MAX_NUM = 10;
+}
 int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -436,13 +439,18 @@ int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
         return E_READ_PARCEL_ERROR;
     }
 
+    if (argc >= PARAM_MAX_NUM) {
+        POWER_HILOGW(COMP_FWK, "params exceed limit, argc=%{public}d", argc);
+        return E_EXCEED_PARAM_LIMIT;
+    }
+
     for (uint32_t i = 0; i < argc; i++) {
         std::string arg = data.ReadString();
-        if (!arg.empty()) {
-            args.push_back(arg);
-        } else {
-            POWER_HILOGE(COMP_FWK, "read args fail, arg index: %{public}d", i);
+        if (arg.empty()) {
+            POWER_HILOGW(COMP_FWK, "read args fail, arg index=%{public}d", i);
+            return E_READ_PARCEL_ERROR;
         }
+        args.push_back(arg);
     }
 
     std::string ret = ShellDump(args, argc);
