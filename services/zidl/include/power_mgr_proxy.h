@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ public:
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
+    virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;

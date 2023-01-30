@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ public:
      * @param reason The reason for rebooting the device. e.g.updater
      */
     PowerErrors RebootDevice(const std::string& reason);
+    PowerErrors RebootDeviceForDeprecated(const std::string& reason);
 
     /**
      * Shut down the device.
