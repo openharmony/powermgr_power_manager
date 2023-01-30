@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,6 +139,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(nullptr));
     sptrProxy->RebootDevice(" ");
+    sptrProxy->RebootDeviceForDeprecated(" ");
     sptrProxy->ShutDownDevice(" ");
     EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0));
 }
