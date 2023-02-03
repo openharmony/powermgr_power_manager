@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             break;
         case static_cast<int>(IPowerMgr::REBOOT_DEVICE):
             ret = RebootDeviceStub(data, reply);
+            break;
+        case static_cast<int>(IPowerMgr::REBOOT_DEVICE_FOR_DEPRECATED):
+            ret = RebootDeviceForDeprecatedStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE):
             ret = ShutDownDeviceStub(data, reply);
@@ -224,6 +227,14 @@ int32_t PowerMgrStub::RebootDeviceStub(MessageParcel& data, MessageParcel& reply
 {
     std::string reason = Str16ToStr8(data.ReadString16());
     PowerErrors error = RebootDevice(reason);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::RebootDeviceForDeprecatedStub(MessageParcel& data, MessageParcel& reply)
+{
+    std::string reason = Str16ToStr8(data.ReadString16());
+    PowerErrors error = RebootDeviceForDeprecated(reason);
     WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
