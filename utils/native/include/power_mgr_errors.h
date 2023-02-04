@@ -40,7 +40,8 @@ enum {
     E_GET_SYSTEM_ABILITY_MANAGER_FAILED,
     E_GET_POWER_SERVICE_FAILED,
     E_ADD_DEATH_RECIPIENT_FAILED,
-    E_INNER_ERR
+    E_INNER_ERR,
+    E_EXCEED_PARAM_LIMIT
 };
 } // namespace PowerMgr
 } // namespace OHOS
