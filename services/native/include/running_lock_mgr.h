@@ -73,7 +73,6 @@ public:
     void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid);
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
-    static constexpr uint32_t MAX_DUMP_NUM = 10;
     void CheckOverTime();
     void SetProximity(uint32_t status);
     void DumpInfo(std::string& result);
