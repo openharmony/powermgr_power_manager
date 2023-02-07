@@ -749,9 +749,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
     auto curTick = GetTickCount();
     int index = 0;
     for (const auto& it : runningLocks_) {
-        if (index++ == MAX_DUMP_NUM) {
-            break;
-        }
+        index++;
         auto lockInner = it.second;
         if (lockInner == nullptr) {
             return;
