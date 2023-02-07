@@ -77,6 +77,9 @@ HWTEST_F (DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Leve
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_UNKNOWN);
     deviceStateAction->dispCallback_->notify_ = nullptr;
     deviceStateAction->dispCallback_->NotifyDisplayActionDone(DISPLAYID);
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice();
+    powerMgrClient.WakeupDevice();
 
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is end!");
     GTEST_LOG_(INFO) << "DeviceStateActionNative001: Suspend Device end.";
