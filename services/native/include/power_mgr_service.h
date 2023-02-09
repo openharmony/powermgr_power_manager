@@ -149,6 +149,8 @@ private:
     static constexpr uint32_t HALL_SAMPLING_RATE =  100000000;
     bool Init();
     bool PowerStateMachineInit();
+    bool CheckDialogAndShuttingDown();
+    void HandlePowerKeyDown();
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
@@ -172,8 +174,9 @@ private:
     ShutdownService shutdownService_;
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
+    bool isPowerKeyDown_ {false};
     uint32_t mockCount_ {0};
-    bool isDialogstatus_ {false};
+    bool isDialogShown_ {false};
     int32_t powerkeyLongPressId_ {0};
     int32_t powerkeyShortPressId_ {0};
     int32_t powerkeyReleaseId_ {0};
