@@ -137,7 +137,7 @@ void PowerModeModule::CallbackManager::AddCallback(const sptr<IPowerModeCallback
         object->AddDeathRecipient(this);
     }
     POWER_HILOGD(FEATURE_POWER_MODE,
-                 "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu, insertOk = %{public}d",
+                 "object = %{private}p, callback = %{private}p, callbacks.size = %{public}zu, insertOk = %{public}d",
                  object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size(), retIt.second);
 }
 
@@ -151,7 +151,7 @@ void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallb
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
-    POWER_HILOGD(FEATURE_POWER_MODE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,",
+    POWER_HILOGD(FEATURE_POWER_MODE, "object = %{private}p, callback = %{private}p, callbacks.size = %{public}zu,",
                  object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size());
 }
 
@@ -169,7 +169,7 @@ void PowerModeModule::CallbackManager::WaitingCallback()
     for (auto& obj: callbacks_) {
         sptr<IPowerModeCallback> callback = iface_cast<IPowerModeCallback>(obj);
         if (callback != nullptr) {
-            POWER_HILOGD(FEATURE_POWER_MODE, "Call IPowerModeCallback: %{public}p", callback.GetRefPtr());
+            POWER_HILOGD(FEATURE_POWER_MODE, "Call IPowerModeCallback: %{private}p", callback.GetRefPtr());
             PowerMode mode = PowerMode::NORMAL_MODE;
             callback->OnPowerModeChanged(mode);
         }

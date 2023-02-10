@@ -148,7 +148,7 @@ void ShutdownService::CallbackManager::AddCallback(const sptr<IShutdownCallback>
     if (retIt.second) {
         object->AddDeathRecipient(this);
     }
-    POWER_HILOGD(FEATURE_SHUTDOWN, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,"
+    POWER_HILOGD(FEATURE_SHUTDOWN, "object = %{private}p, callback = %{private}p, callbacks.size = %{public}zu,"
         " insertOk = %{public}d", object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size(), retIt.second);
 }
 
@@ -162,13 +162,13 @@ void ShutdownService::CallbackManager::RemoveCallback(const sptr<IShutdownCallba
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
-    POWER_HILOGD(FEATURE_SHUTDOWN, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,",
+    POWER_HILOGD(FEATURE_SHUTDOWN, "object = %{private}p, callback = %{private}p, callbacks.size = %{public}zu,",
         object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size());
 }
 
 void ShutdownService::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    POWER_HILOGW(FEATURE_SHUTDOWN, "Enter, remote=%{public}p", remote.GetRefPtr());
+    POWER_HILOGW(FEATURE_SHUTDOWN, "Enter, remote=%{private}p", remote.GetRefPtr());
     RETURN_IF(remote.promote() == nullptr);
     RemoveCallback(iface_cast<IShutdownCallback>(remote.promote()));
 }
@@ -183,7 +183,7 @@ void ShutdownService::CallbackManager::WaitingCallback()
                 int64_t start = GetTickCount();
                 callback->ShutdownCallback();
                 int64_t cost = GetTickCount() - start;
-                POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, callback=%{public}p, cost=%{public}" PRId64 "",
+                POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, callback=%{private}p, cost=%{public}" PRId64 "",
                     callback.GetRefPtr(), cost);
             }
         }
