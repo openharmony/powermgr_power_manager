@@ -207,9 +207,7 @@ void PowerMgrService::KeyMonitorInit()
             [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
                 POWER_HILOGI(FEATURE_INPUT, "Receive short press powerkey");
                 powerkeyPressed_ = true;
-                if (!IsScreenOn()) {
-                    handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
-                }
+                this->HandlePowerKeyDown();
         });
 
         keyOption.reset();
@@ -348,7 +346,7 @@ bool PowerMgrService::ShowPowerDialog()
         POWER_HILOGE(COMP_SVC, "ShowPowerDialog failed, result = %{public}d", result);
         return false;
     }
-    isDialogstatus_ = true;
+    isDialogShown_ = true;
     POWER_HILOGD(COMP_SVC, "ShowPowerDialog success.");
     return true;
 }
@@ -360,29 +358,48 @@ void PowerMgrService::HandleShutdownRequest()
     if (!showSuccess) {
         return;
     }
+}
+
+bool PowerMgrService::CheckDialogAndShuttingDown()
+{
+    bool isShuttingDown = this->shutdownService_.IsShuttingDown();
+    if (isDialogShown_ || isShuttingDown) {
+        POWER_HILOGW(FEATURE_INPUT, "isDialogShown: %{public}d, isShuttingDown: %{public}d",
+            isDialogShown_, isShuttingDown);
+        isDialogShown_ = false;
+        return true;
+    }
+    return false;
+}
+
+void PowerMgrService::HandlePowerKeyDown()
+{
+    POWER_HILOGD(FEATURE_INPUT, "Receive press powerkey");
     int64_t now = static_cast<int64_t>(time(0));
-    this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
+    RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    if (CheckDialogAndShuttingDown()) {
+        return;
+    }
     if (!IsScreenOn()) {
-        POWER_HILOGI(FEATURE_SHUTDOWN, "Wakeup when display off");
+        isPowerKeyDown_ = true;
+        handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, POWER_KEY_PRESS_DELAY_MS);
         this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, REASON_POWER_KEY);
     }
 }
 
 void PowerMgrService::HandlePowerKeyUp()
 {
-    POWER_HILOGI(FEATURE_INPUT, "Receive release powerkey");
-
-    if (isDialogstatus_ || this->shutdownService_.IsShuttingDown()) {
-        POWER_HILOGW(FEATURE_INPUT, "System is shutting down");
-        isDialogstatus_ = false;
+    POWER_HILOGD(FEATURE_INPUT, "Receive release powerkey");
+    int64_t now = static_cast<int64_t>(time(0));
+    RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    if (CheckDialogAndShuttingDown()) {
+        isPowerKeyDown_ = false;
         return;
     }
-    int64_t now = static_cast<int64_t>(time(0));
-    if (this->IsScreenOn()) {
+    if (this->IsScreenOn() && !isPowerKeyDown_) {
         this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
-    } else {
-        this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, REASON_POWER_KEY);
     }
+    isPowerKeyDown_ = false;
 }
 
 void PowerMgrService::HandleKeyEvent(int32_t keyCode)
