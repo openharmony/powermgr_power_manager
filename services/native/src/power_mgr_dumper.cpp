@@ -26,7 +26,6 @@ const std::string ARGS_ALL = "-a";
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_RUNNINGLOCK = "-r";
 const std::string ARGS_STATE = "-s";
-const std::string ARGS_HDF = "-f";
 const std::string ARGS_DIALOG = "-d";
 const std::string ARGS_REG_KEY = "-k";
 }
@@ -64,8 +63,6 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
                 continue;
             }
             stateMachine->DumpInfo(result);
-        } else if (*it == ARGS_HDF) {
-            SystemSuspendController::GetInstance().Dump(result);
         } else if (*it == ARGS_ALL) {
             result.clear();
             auto stateMachine = pms->GetPowerStateMachine();
@@ -78,7 +75,6 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
                 continue;
             }
             runningLockMgr->DumpInfo(result);
-            SystemSuspendController::GetInstance().Dump(result);
             break;
         }
     }
@@ -94,7 +90,6 @@ void PowerMgrDumper::ShowUsage(std::string& result)
         .append("    -h: show this help.\n")
         .append("    -r: show the information of runninglock.\n")
         .append("    -s: show the information of power state machine.\n")
-        .append("    -f: show the information of power hdf.\n")
         .append("    -d: show power off dialog.\n");
 }
 } // namespace PowerMgr
