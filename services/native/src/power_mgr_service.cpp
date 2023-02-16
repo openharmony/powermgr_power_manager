@@ -449,7 +449,6 @@ void PowerMgrService::PowerMgrService::OnStop()
 
 int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
-    std::lock_guard lock(mutex_);
     POWER_HILOGI(MODULE_SERVICE, "Dump service");
     std::vector<std::string> argsInStr;
     std::transform(args.begin(), args.end(), std::back_inserter(argsInStr),
