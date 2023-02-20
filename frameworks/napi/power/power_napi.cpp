@@ -212,8 +212,8 @@ void PowerNapi::AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asy
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, resourceName.c_str(), NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        env, nullptr, resource, execute, complete, reinterpret_cast<void*>(asyncInfo.get()), &(asyncInfo->GetAsyncWork()));
+    napi_create_async_work(env, nullptr, resource, execute, complete,
+        reinterpret_cast<void*>(asyncInfo.get()), &(asyncInfo->GetAsyncWork()));
     NAPI_CALL_RETURN_VOID(env, napi_queue_async_work(env, asyncInfo->GetAsyncWork()));
     asyncInfo.release();
 }
