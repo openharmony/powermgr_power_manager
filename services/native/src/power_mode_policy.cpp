@@ -38,8 +38,8 @@ int32_t PowerModePolicy::GetPolicyFromMap(uint32_t type)
     int32_t ret = INIT_VALUE_FALSE;
     valueiter = valueModePolicy.find(type);
     if (valueiter != valueModePolicy.end()) {
-        ret = valueiter->second; 
-    } 
+        ret = valueiter->second;
+    }
     return ret;
 }
 
