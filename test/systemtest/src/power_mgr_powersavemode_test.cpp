@@ -334,8 +334,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_039, TestSize.Level0)
 } // namespace
 
 PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::CommonEventServiCesSystemTest(
-    const CommonEventSubscribeInfo& subscriberInfo) :
-    CommonEventSubscriber(subscriberInfo)
+    const CommonEventSubscribeInfo& subscriberInfo) : CommonEventSubscriber(subscriberInfo)
 {
     POWER_HILOGD(LABEL_TEST, "subscribe.");
 }
