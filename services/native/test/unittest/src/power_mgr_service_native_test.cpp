@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,10 +142,8 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo runningLockInfo1 {"runninglockNativeTest2", RunningLockType::RUNNINGLOCK_BACKGROUND};
     EXPECT_TRUE(g_pmsTest->CreateRunningLock(token, runningLockInfo1) == PowerErrors::ERR_OK);
-    int32_t type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_TRUE(g_pmsTest->IsRunningLockTypeSupported(type));
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    EXPECT_FALSE(g_pmsTest->IsRunningLockTypeSupported(type));
+    EXPECT_TRUE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN));
+    EXPECT_FALSE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     EXPECT_TRUE(g_pmsTest->Lock(token, runningLockInfo1, SUSCALLTIMEMS));
     WorkTriggerList worklist;
     EXPECT_TRUE(g_pmsTest->SetWorkTriggerList(token, worklist));

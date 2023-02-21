@@ -22,6 +22,7 @@ namespace OHOS {
 namespace PowerMgr {
 class Permission {
 public:
+    static bool IsHap();
     static bool IsSystem();
     static bool IsPermissionGranted(const std::string& perm);
 };

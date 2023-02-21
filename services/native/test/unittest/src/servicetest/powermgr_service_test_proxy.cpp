@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,7 @@ bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& rem
     return true;
 }
 
-bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(uint32_t type)
+bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(RunningLockType type)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 

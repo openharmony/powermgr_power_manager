@@ -46,7 +46,7 @@ public:
     virtual PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
-    virtual bool IsRunningLockTypeSupported(uint32_t type) override;
+    virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
         uint32_t timeOutMs) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
