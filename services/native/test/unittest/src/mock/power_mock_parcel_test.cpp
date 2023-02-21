@@ -60,10 +60,8 @@ namespace {
 HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    auto type1 = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    auto type2 = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(type1));
-    EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(type2));
+    EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
+    EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN));
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
     powerMgrClient.SetDisplaySuspend(true);
     powerMgrClient.WakeupDevice();
@@ -152,8 +150,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
     worklist.push_back(nullptr);
     sptrProxy->SetWorkTriggerList(token, worklist);
     sptrProxy->ProxyRunningLock(true, uid, pid);
-    auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(type));
+    EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     sptrProxy->Lock(token, info, 0);
     sptrProxy->UnLock(token);
     EXPECT_FALSE(sptrProxy->IsUsed(token));

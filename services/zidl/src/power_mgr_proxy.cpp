@@ -78,7 +78,7 @@ bool PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
     return true;
 }
 
-bool PowerMgrProxy::IsRunningLockTypeSupported(uint32_t type)
+bool PowerMgrProxy::IsRunningLockTypeSupported(RunningLockType type)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);

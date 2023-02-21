@@ -26,6 +26,26 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace PowerMgr {
+bool Permission::IsHap()
+{
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    pid_t uid = IPCSkeleton::GetCallingUid();
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    POWER_HILOGD(COMP_UTILS, "checking is hap calling, type=%{public}d, pid=%{public}d, uid=%{public}d",
+        static_cast<int32_t>(type), pid, uid);
+    switch (type) {
+        case ATokenTypeEnum::TOKEN_HAP:
+            return true;
+        case ATokenTypeEnum::TOKEN_NATIVE:
+        case ATokenTypeEnum::TOKEN_SHELL:
+        case ATokenTypeEnum::TOKEN_INVALID:
+        case ATokenTypeEnum::TOKEN_TYPE_BUTT:
+            return false;
+    }
+    return false;
+}
+
 bool Permission::IsSystem()
 {
     AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();

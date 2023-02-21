@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Huawei Device Co., Ltd.
+ * Copyright (c) 2016-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -839,17 +839,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest037, TestSize.Level
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest038, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest038:Start");
-    auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    auto ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(type);
+    auto ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_EQ(ret, false);
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_SCREEN);
-    ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(type);
+    ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN);
     EXPECT_EQ(ret, true);
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BACKGROUND);
-    ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(type);
+    ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND);
     EXPECT_EQ(ret, true);
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(type);
+    ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_EQ(ret, true);
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
