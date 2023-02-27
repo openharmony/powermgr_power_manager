@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1041,23 +1041,19 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient043, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrClientTest, PowerMgrClient021, TestSize.Level2)
+HWTEST_F(PowerMgrClientTest, PowerMgrClient021, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient021:Start.");
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
-    auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    auto ret = powerMgrClient.IsRunningLockTypeSupported(type);
+    auto ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_EQ(ret, false);
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_SCREEN);
-    ret = powerMgrClient.IsRunningLockTypeSupported(type);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN);
     EXPECT_EQ(ret, true);
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BACKGROUND);
-    ret = powerMgrClient.IsRunningLockTypeSupported(type);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND);
     EXPECT_EQ(ret, true);
-    type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    ret = powerMgrClient.IsRunningLockTypeSupported(type);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_EQ(ret, true);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
@@ -1068,16 +1064,43 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient021, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrClient023
+ * @tc.name: PowerMgrClient044
  * @tc.desc: Test GetError
  * @tc.type: FUNC
  * @tc.require: issue I5YZQR
  */
-HWTEST_F(PowerMgrClientTest, PowerMgrClient044, TestSize.Level2)
+HWTEST_F(PowerMgrClientTest, PowerMgrClient044, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "fun is start");
     PowerErrors error = PowerMgrClient::GetInstance().GetError();
     POWER_HILOGD(LABEL_TEST, "get error %{public}d", static_cast<int32_t>(error));
     POWER_HILOGD(error == PowerErrors::ERR_OK);
+}
+
+/**
+ * @tc.name: PowerMgrClient045
+ * @tc.desc: test IsRunningLockTypeSupported for BACKGROUND lock types
+ * @tc.type: FUNC
+ * @tc.require: issueI6FMHX
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient045:Start.");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    EXPECT_EQ(ret, true);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    EXPECT_EQ(ret, true);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    EXPECT_EQ(ret, true);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    EXPECT_EQ(ret, true);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    EXPECT_EQ(ret, true);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    EXPECT_EQ(ret, true);
+    ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT);
+    EXPECT_EQ(ret, false);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient045:End.");
 }
 }

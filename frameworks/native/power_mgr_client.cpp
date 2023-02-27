@@ -168,13 +168,9 @@ bool PowerMgrClient::RestoreScreenOffTime()
     return ret;
 }
 
-bool PowerMgrClient::IsRunningLockTypeSupported(uint32_t type)
+bool PowerMgrClient::IsRunningLockTypeSupported(RunningLockType type)
 {
-    if (type >= static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT)) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunningLockType does not support, type: %{public}d", type);
-        return false;
-    }
-
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLockType=%{public}u", type);
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
     return proxy_->IsRunningLockTypeSupported(type);
 }

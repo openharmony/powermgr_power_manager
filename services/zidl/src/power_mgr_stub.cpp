@@ -161,10 +161,10 @@ int32_t PowerMgrStub::ReleaseRunningLockStub(MessageParcel& data)
 
 int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t type = 0;
+    auto type = static_cast<uint32_t >(RunningLockType::RUNNINGLOCK_BUTT);
     bool ret = false;
     READ_PARCEL_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
-    ret = IsRunningLockTypeSupported(type);
+    ret = IsRunningLockTypeSupported(static_cast<RunningLockType>(type));
     if (!reply.WriteBool(ret)) {
         POWER_HILOGE(FEATURE_SUSPEND, "WriteBool fail");
         return E_WRITE_PARCEL_ERROR;
