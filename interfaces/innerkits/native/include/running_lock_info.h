@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,16 +32,42 @@ enum class RunningLockType : uint32_t {
     /**
      * RunningLock type: used to keep screen on.
      */
-    RUNNINGLOCK_SCREEN,
+    RUNNINGLOCK_SCREEN = 0,
     /**
      * RunningLock type: used to keep cpu running.
      */
-    RUNNINGLOCK_BACKGROUND,
+    RUNNINGLOCK_BACKGROUND = 1,
     /**
      * RunningLock type: used to keep the screen on/off when the proximity sensor is active.
      */
-    RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
-
+    RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL = 2,
+    /**
+     * Background runningLock type, keeping phone background task active.
+     */
+    RUNNINGLOCK_BACKGROUND_PHONE = RUNNINGLOCK_BACKGROUND | 1 << 1,  // 0b00000011
+    /**
+     * Background runningLock type, keeping notification background task active.
+     */
+    RUNNINGLOCK_BACKGROUND_NOTIFICATION =  RUNNINGLOCK_BACKGROUND | 1 << 2, // 0b00000101
+    /**
+     * Background runningLock type, keeping audio background task active.
+     */
+    RUNNINGLOCK_BACKGROUND_AUDIO =   RUNNINGLOCK_BACKGROUND | 1 << 3, // 0b00001001
+    /**
+     * Background runningLock type, keeping sport background task active.
+     */
+    RUNNINGLOCK_BACKGROUND_SPORT =  RUNNINGLOCK_BACKGROUND | 1 << 4, // 0b00010001
+    /**
+     * Background runningLock type, keeping navigation background task active.
+     */
+    RUNNINGLOCK_BACKGROUND_NAVIGATION =  RUNNINGLOCK_BACKGROUND | 1 << 5, // 0b00100001
+    /**
+     * Background runningLock type, keeping common background task active.
+     */
+    RUNNINGLOCK_BACKGROUND_TASK =  RUNNINGLOCK_BACKGROUND | 1 << 6, // 0b01000001
+    /**
+     * RunningLock reserved type.
+     */
     RUNNINGLOCK_BUTT
 };
 

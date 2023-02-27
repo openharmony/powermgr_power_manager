@@ -705,13 +705,21 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
     return result;
 }
 
-bool PowerMgrService::IsRunningLockTypeSupported(uint32_t type)
+bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 {
-    std::lock_guard lock(lockMutex_);
-    if (type >= static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT)) {
-        return false;
+    if (!Permission::IsHap()) {
+        return type == RunningLockType::RUNNINGLOCK_SCREEN ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
+            type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION ||
+            type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
     }
-    return true;
+    return type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
+        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
 }
 
 bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,

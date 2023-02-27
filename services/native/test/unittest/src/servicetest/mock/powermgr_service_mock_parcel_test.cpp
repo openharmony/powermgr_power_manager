@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,8 +86,7 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
     uint32_t timeOutMs = 0;
     EXPECT_FALSE(g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo) == PowerErrors::ERR_OK);
     EXPECT_FALSE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
-    auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-    EXPECT_FALSE(g_powerMgrServiceProxy->IsRunningLockTypeSupported(type));
+    EXPECT_FALSE(g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     EXPECT_FALSE(g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnLock(token));
     EXPECT_FALSE(g_powerMgrServiceProxy->IsUsed(token));

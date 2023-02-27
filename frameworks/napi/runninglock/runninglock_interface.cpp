@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,18 +276,13 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
     napi_create_async_work(
         env, nullptr, resource,
         [](napi_env env, void* data) {
-            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
-            if (asyncInfo->type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
-                asyncInfo->type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
-                asyncInfo->isSupported = true;
-            } else {
-                asyncInfo->isSupported = false;
-            }
+            auto* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
+            asyncInfo->isSupported = g_powerMgrClient.IsRunningLockTypeSupported(asyncInfo->type);
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "runningLock: %{public}d, isSupported: %{public}s", asyncInfo->type,
                 asyncInfo->isSupported ? "true" : "false");
         },
         [](napi_env env, napi_status status, void* data) {
-            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
+            auto* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
             napi_value result[RESULT_SIZE] = {0};
             napi_get_boolean(env, asyncInfo->isSupported, &result[1]);
             if (asyncInfo->deferred) {
