@@ -771,6 +771,7 @@ void PowerStateMachine::RegisterDisplayOffTimeObserver()
         POWER_HILOGI(FEATURE_POWER_STATE, "setting display off time observer is already registered");
         return;
     }
+    DisplayOffTimeUpdateFunc();
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) { DisplayOffTimeUpdateFunc(); };
     g_displayOffTimeObserver = SettingHelper::RegisterSettingDisplayOffTimeObserver(updateFunc);
 }
