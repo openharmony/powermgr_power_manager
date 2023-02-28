@@ -36,7 +36,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   external_deps = [
     "c_utils:utils",
-    "drivers_interface_power:libpower_proxy_1.0",
+    "drivers_interface_power:libpower_proxy_1.1",
     "eventhandler:libeventhandler",
     "hdf_core:libhdf_utils",
     "hdf_core:libhdi",
