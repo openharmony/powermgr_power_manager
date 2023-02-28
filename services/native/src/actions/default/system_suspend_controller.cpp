@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "suspend/running_lock_hub.h"
 #include "suspend/suspend_controller.h"
 
-using namespace OHOS::HDI::Power::V1_0;
+using namespace OHOS::HDI::Power::V1_1;
 
 namespace {
 const std::string HDI_SERVICE_NAME = "power_interface_service";

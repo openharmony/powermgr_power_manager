@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
-#include "v1_0/ipower_interface.h"
+#include "v1_1/ipower_interface.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -45,7 +45,7 @@ private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static constexpr const char* WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
-    class PowerHdfCallback : public OHOS::HDI::Power::V1_0::IPowerHdiCallback {
+    class PowerHdfCallback : public OHOS::HDI::Power::V1_1::IPowerHdiCallback {
     public:
         PowerHdfCallback() = default;
         ~PowerHdfCallback() = default;
@@ -58,7 +58,7 @@ private:
     };
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
-    sptr<OHOS::HDI::Power::V1_0::IPowerInterface> powerInterface_ { nullptr };
+    sptr<OHOS::HDI::Power::V1_1::IPowerInterface> powerInterface_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
 };
