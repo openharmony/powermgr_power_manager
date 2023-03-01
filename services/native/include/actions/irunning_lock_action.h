@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,8 @@ public:
     virtual void Acquire(RunningLockType type);
     virtual void Release(RunningLockType type);
 
-    virtual void Lock(RunningLockType type, const std::string& tag) = 0;
-    virtual void Unlock(RunningLockType type, const std::string& tag) = 0;
+    virtual void Lock(RunningLockType type, const std::string& name) = 0;
+    virtual void Unlock(RunningLockType type, const std::string& name) = 0;
 
 private:
     class RunningLockDesc {
