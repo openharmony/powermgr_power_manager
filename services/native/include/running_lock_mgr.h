@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,11 +37,6 @@ using RunningLockMap = std::map<const sptr<IRemoteObject>, std::shared_ptr<Runni
 
 class RunningLockMgr {
 public:
-    enum class SystemLockType : uint32_t {
-        SYSTEM_LOCK_APP = 0,
-        SYSTEM_LOCK_DISPLAY = 1,
-        SYSTEM_LOCK_OTHER
-    };
     enum {
         PROXIMITY_AWAY = 0,
         PROXIMITY_CLOSE
@@ -78,9 +73,7 @@ public:
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
 private:
-    static constexpr const char * const LOCK_TAG_APP = "lock_app";
-    static constexpr const char * const LOCK_TAG_DISPLAY = "lock_display";
-    static constexpr const char * const LOCK_TAG_OTHER = "lock_other";
+    static constexpr const char * const RUNNINGLOCK_TAG_BACKGROUND = "OHOS.RunningLock.Background";
 
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
@@ -88,8 +81,8 @@ private:
 
     class SystemLock {
     public:
-        SystemLock(std::shared_ptr<IRunningLockAction> action, const char * const tag)
-            : action_(action), tag_(tag), locking_(false) {};
+        SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type, const std::string& name)
+            : action_(action), name_(name), type_(type), locking_(false) {};
         ~SystemLock() = default;
         void Lock();
         void Unlock();
@@ -104,7 +97,8 @@ private:
         }
     private:
         std::shared_ptr<IRunningLockAction> action_;
-        const std::string tag_;
+        const std::string name_;
+        const RunningLockType type_;
         bool locking_;
     };
 
@@ -180,16 +174,17 @@ private:
     void UnLockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void ProxyRunningLockInner(bool proxyLock);
     void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, uint32_t timeOutMS = 0);
+    RunningLockType ConvertTypeForLockCounters(RunningLockType type);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
     std::weak_ptr<PowermsEventHandler> handler_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
-    std::map<SystemLockType, std::shared_ptr<SystemLock>> systemLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
     RunningLockProxyMap proxyMap_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;
+    std::shared_ptr<SystemLock> backgroundLock_ = nullptr;
     enum RunningLockChangedType {
         NOTIFY_RUNNINGLOCK_ADD,
         NOTIFY_RUNNINGLOCK_REMOVE,

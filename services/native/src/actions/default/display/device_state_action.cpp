@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,8 +162,6 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
             DisplayManager::GetInstance().WakeUpEnd();
             IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
-            std::string name = LOCK_TAG_DISPLAY_POWER;
-            SystemSuspendController::GetInstance().AcquireRunningLock(name);
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
@@ -171,8 +169,6 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
             DisplayManager::GetInstance().SuspendEnd();
             IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
-            std::string name = LOCK_TAG_DISPLAY_POWER;
-            SystemSuspendController::GetInstance().ReleaseRunningLock(name);
             break;
         }
         default:

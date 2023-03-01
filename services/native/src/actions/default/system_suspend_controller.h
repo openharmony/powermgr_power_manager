@@ -26,6 +26,7 @@
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
+#include "running_lock_info.h"
 #include "v1_1/ipower_interface.h"
 
 namespace OHOS {
@@ -34,8 +35,8 @@ class SystemSuspendController : public DelayedRefSingleton<SystemSuspendControll
 public:
     void Suspend(const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force);
     void Wakeup();
-    void AcquireRunningLock(const std::string& name);
-    void ReleaseRunningLock(const std::string& name);
+    void AcquireRunningLock(OHOS::PowerMgr::RunningLockType type, const std::string& name);
+    void ReleaseRunningLock(OHOS::PowerMgr::RunningLockType type, const std::string& name);
     void Dump(std::string& info);
     void RegisterHdiStatusListener(const std::shared_ptr<PowermsEventHandler>& handler);
     void RegisterPowerHdiCallback();
@@ -56,6 +57,8 @@ private:
         std::function<void()> onSuspend_;
         std::function<void()> onWakeup_;
     };
+    OHOS::HDI::Power::V1_1::RunningLockInfo FillRunningLockInfo(OHOS::PowerMgr::RunningLockType type,
+        const std::string& name);
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
     sptr<OHOS::HDI::Power::V1_1::IPowerInterface> powerInterface_ { nullptr };

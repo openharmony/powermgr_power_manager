@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,11 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
-
+namespace {
+constexpr int32_t US_PER_MS = 1000;
+} // namespace
 sptr<PowerMgrService> RunningLockTest::pmsTest_ = nullptr;
 std::shared_ptr<RunningLockMgr> RunningLockTest::runningLockMgr_ = nullptr;
-
 void RunningLockTest::SetUpTestCase(void)
 {
 }
@@ -175,24 +176,6 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockInnerKit005
- * @tc.desc: Test RunningLock proxy function.
- * @tc.type: FUNC
- * @tc.require: issue I5YZQR
- */
-HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level0)
-{
-    std::shared_ptr<WorkTrigger> worker = std::make_shared<WorkTrigger>(1, "worker");
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit05, 1 usecount = %ld", worker.use_count());
-
-    worker->SetPid(1);
-    EXPECT_EQ(worker->GetUid(), 1);
-    worker->SetAbilityId(1);
-    EXPECT_EQ(worker->GetAbilityId(), 1);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 end.");
-}
-
-/**
  * @tc.name: RunningLockInnerKit004
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
@@ -231,6 +214,210 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 5.");
     }
+}
+
+/**
+ * @tc.name: RunningLockInnerKit005
+ * @tc.desc: Test RunningLock proxy function.
+ * @tc.type: FUNC
+ * @tc.require: issueI5YZQR
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level0)
+{
+    std::shared_ptr<WorkTrigger> worker = std::make_shared<WorkTrigger>(1, "worker");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit05, 1 usecount = %ld", worker.use_count());
+
+    worker->SetPid(1);
+    EXPECT_EQ(worker->GetUid(), 1);
+    worker->SetAbilityId(1);
+    EXPECT_EQ(worker->GetAbilityId(), 1);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 end.");
+}
+
+/**
+ * @tc.name: RunningLockInnerKit006
+ * @tc.desc: Test RunningLock function, running lock type is phone
+ * @tc.type: FUNC
+ * @tc.require: issueI6IU1G
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit006, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string runningLockName = "running.lock.phone";
+    uint32_t timeOutMs = 30;
+    uint32_t waitTimeOutMs = timeOutMs + 10;
+    auto runningLock = powerMgrClient.CreateRunningLock
+        (runningLockName, RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    ASSERT_TRUE(runningLock != nullptr);
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock(timeOutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    usleep(waitTimeOutMs * US_PER_MS);
+
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockInnerKit007
+ * @tc.desc: Test RunningLock function, running lock type is notification
+ * @tc.type: FUNC
+ * @tc.require: issueI6IU1G
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit007, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string runningLockName = "running.lock.notification";
+    uint32_t timeOutMs = 30;
+    uint32_t waitTimeOutMs = timeOutMs + 10;
+    auto runningLock = powerMgrClient.CreateRunningLock
+        (runningLockName, RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    ASSERT_TRUE(runningLock != nullptr);
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock(timeOutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    usleep(waitTimeOutMs * US_PER_MS);
+
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockInnerKit008
+ * @tc.desc: Test RunningLock function, running lock type is audio
+ * @tc.type: FUNC
+ * @tc.require: issueI6IU1G
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit008, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string runningLockName = "running.lock.audio";
+    uint32_t timeOutMs = 30;
+    uint32_t waitTimeOutMs = timeOutMs + 10;
+    auto runningLock = powerMgrClient.CreateRunningLock
+        (runningLockName, RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    ASSERT_TRUE(runningLock != nullptr);
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock(timeOutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    usleep(waitTimeOutMs * US_PER_MS);
+
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockInnerKit009
+ * @tc.desc: Test RunningLock function, running lock type is sport
+ * @tc.type: FUNC
+ * @tc.require: issueI6IU1G
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit009, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string runningLockName = "running.lock.sport";
+    uint32_t timeOutMs = 30;
+    uint32_t waitTimeOutMs = timeOutMs + 10;
+    auto runningLock = powerMgrClient.CreateRunningLock
+        (runningLockName, RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    ASSERT_TRUE(runningLock != nullptr);
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock(timeOutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    usleep(waitTimeOutMs * US_PER_MS);
+
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockInnerKit010
+ * @tc.desc: Test RunningLock function, running lock type is navigation
+ * @tc.type: FUNC
+ * @tc.require: issueI6IU1G
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit010, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string runningLockName = "running.lock.navigation";
+    uint32_t timeOutMs = 30;
+    uint32_t waitTimeOutMs = timeOutMs + 10;
+    auto runningLock = powerMgrClient.CreateRunningLock
+        (runningLockName, RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    ASSERT_TRUE(runningLock != nullptr);
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock(timeOutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    usleep(waitTimeOutMs * US_PER_MS);
+
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockInnerKit011
+ * @tc.desc: Test RunningLock function, running lock type is navigation
+ * @tc.type: FUNC
+ * @tc.require: issueI6IU1G
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit011, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string runningLockName = "running.lock.task";
+    uint32_t timeOutMs = 30;
+    uint32_t waitTimeOutMs = timeOutMs + 10;
+    auto runningLock = powerMgrClient.CreateRunningLock
+        (runningLockName, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    ASSERT_TRUE(runningLock != nullptr);
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    runningLock->Lock(timeOutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    usleep(waitTimeOutMs * US_PER_MS);
+
+    EXPECT_FALSE(runningLock->IsUsed());
 }
 
 #ifdef IPC_AVAILABLE
