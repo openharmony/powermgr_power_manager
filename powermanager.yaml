@@ -14,7 +14,7 @@
 domain: POWER
 
 POWER_RUNNINGLOCK:
-  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: runninglock state}
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: runninglock information}
   PID: {type: INT32, desc: application pid}
   UID: {type: INT32, desc: application uid}
   STATE: {type: INT32, desc: runninglock state}
@@ -30,9 +30,9 @@ POWER_SCREEN:
   BRIGHTNESS: {type: INT32, desc: brightness level}
 
 SCREEN_ON_TIMEOUT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: screen on timeout }
+  __BASE: {type: FAULT, level: CRITICAL, desc: timeout screen on information}
   PID: {type: INT32, desc: session pid}
   UID: {type: INT32, desc: session uid}
-  PACKAGE_NAME: {type: STRING, desc: package name}
-  PROCESS_NAME: {type: STRING, desc: process name}
+  PACKAGE_NAME: {type: STRING, desc: call package name}
+  PROCESS_NAME: {type: STRING, desc: call process name}
   MSG: {type: STRING, desc: screen on timeout message}
