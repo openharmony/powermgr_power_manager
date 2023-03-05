@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,19 +44,35 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
 
     // init lock map which will block state transit
     std::vector<RunningLockType> awakeBlocker {};
+    std::vector<RunningLockType> freezeBlocker {};
     std::vector<RunningLockType> inactiveBlocker {
         RunningLockType::RUNNINGLOCK_SCREEN,
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL
     };
+    std::vector<RunningLockType> standByBlocker {};
+    std::vector<RunningLockType> dozeBlocker {};
     std::vector<RunningLockType> sleepBlocker {
         RunningLockType::RUNNINGLOCK_BACKGROUND
     };
+    std::vector<RunningLockType> hibernateBlocker {};
+    std::vector<RunningLockType> shutdownBlocker {};
+
     lockMap_.emplace(PowerState::AWAKE,
         std::make_shared<std::vector<RunningLockType>>(awakeBlocker));
+    lockMap_.emplace(PowerState::FREEZE,
+        std::make_shared<std::vector<RunningLockType>>(freezeBlocker));
     lockMap_.emplace(PowerState::INACTIVE,
         std::make_shared<std::vector<RunningLockType>>(inactiveBlocker));
+    lockMap_.emplace(PowerState::STAND_BY,
+        std::make_shared<std::vector<RunningLockType>>(standByBlocker));
+    lockMap_.emplace(PowerState::DOZE,
+        std::make_shared<std::vector<RunningLockType>>(dozeBlocker));
     lockMap_.emplace(PowerState::SLEEP,
         std::make_shared<std::vector<RunningLockType>>(sleepBlocker));
+    lockMap_.emplace(PowerState::HIBERNATE,
+        std::make_shared<std::vector<RunningLockType>>(hibernateBlocker));
+    lockMap_.emplace(PowerState::SHUTDOWN,
+        std::make_shared<std::vector<RunningLockType>>(shutdownBlocker));
 
     POWER_HILOGD(FEATURE_POWER_STATE, "Instance end");
 }
@@ -114,6 +130,19 @@ void PowerStateMachine::EmplaceAwake()
         })
     );
 }
+
+void PowerStateMachine::EmplaceFreeze()
+{
+    controllerMap_.emplace(PowerState::FREEZE,
+        std::make_shared<StateController>(PowerState::FREEZE, shared_from_this(),
+        [this](StateChangeReason reason) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_FREEZE lambda start");
+            //Subsequent added functions
+            return TransitResult::SUCCESS;
+        })
+    );
+}
+
 void PowerStateMachine::EmplaceInactive()
 {
     controllerMap_.emplace(PowerState::INACTIVE,
@@ -138,6 +167,33 @@ void PowerStateMachine::EmplaceInactive()
         })
     );
 }
+
+void PowerStateMachine::EmplaceStandBy()
+{
+    controllerMap_.emplace(PowerState::STAND_BY,
+        std::make_shared<StateController>(PowerState::STAND_BY, shared_from_this(),
+        [this](StateChangeReason reason) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_STAND_BY lambda start");
+            mDeviceState_.screenState.lastOffTime = GetTickCount();
+            //Subsequent added functions
+            return TransitResult::SUCCESS;
+        })
+    );
+}
+
+void PowerStateMachine::EmplaceDoze()
+{
+    controllerMap_.emplace(PowerState::DOZE,
+        std::make_shared<StateController>(PowerState::DOZE, shared_from_this(),
+        [this](StateChangeReason reason) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_DOZE lambda start");
+            mDeviceState_.screenState.lastOffTime = GetTickCount();
+            //Subsequent added functions
+            return TransitResult::SUCCESS;
+        })
+    );
+}
+
 void PowerStateMachine::EmplaceSleep()
 {
     controllerMap_.emplace(PowerState::SLEEP,
@@ -158,11 +214,41 @@ void PowerStateMachine::EmplaceSleep()
         })
     );
 }
+
+void PowerStateMachine::EmplaceHibernate()
+{
+    controllerMap_.emplace(PowerState::HIBERNATE,
+        std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(),
+        [this](StateChangeReason reason) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_HIBERNATE lambda start");
+            //Subsequent added functions
+            return TransitResult::SUCCESS;
+        })
+    );
+}
+
+void PowerStateMachine::EmplaceShutdown()
+{
+    controllerMap_.emplace(PowerState::SHUTDOWN,
+        std::make_shared<StateController>(PowerState::SHUTDOWN, shared_from_this(),
+        [this](StateChangeReason reason) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SHUTDOWN lambda start");
+            //Subsequent added functions
+            return TransitResult::SUCCESS;
+        })
+    );
+}
+
 void PowerStateMachine::InitStateMap()
 {
     EmplaceAwake();
+    EmplaceFreeze();
     EmplaceInactive();
+    EmplaceStandBy();
+    EmplaceDoze();
     EmplaceSleep();
+    EmplaceHibernate();
+    EmplaceShutdown();
 }
 
 void PowerStateMachine::ActionCallback(uint32_t event)

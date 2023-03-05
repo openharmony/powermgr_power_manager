@@ -57,14 +57,39 @@ enum class PowerState : uint32_t {
     AWAKE = 0,
 
     /**
+     * Power State: screen on or off and some background user processes are frozen.
+     */
+    FREEZE,
+
+    /**
      * Power State: screen off and cpu on.
      */
     INACTIVE,
 
     /**
-     * Power State: screen off and cpu off.
+     * Power State: screen off and cpu on and some user processes are frozen.
+     */
+    STAND_BY,
+
+    /**
+     * Power State: screen off and cpu on and most user processes are frozen.
+     */
+    DOZE,
+
+    /**
+     * Power State: screen off and cpu off and suspend to the rom.
      */
     SLEEP,
+
+    /**
+     * Power State: screen off and cpu off and suspend to the disk.
+     */
+    HIBERNATE,
+
+    /**
+     * Power State: shutdown.
+     */
+    SHUTDOWN,
 
     /**
      * Power State: unknown.
