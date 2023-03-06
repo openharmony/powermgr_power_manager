@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,14 +57,39 @@ enum class PowerState : uint32_t {
     AWAKE = 0,
 
     /**
+     * Power State: screen on or off and some background user processes are frozen.
+     */
+    FREEZE,
+
+    /**
      * Power State: screen off and cpu on.
      */
     INACTIVE,
 
     /**
-     * Power State: screen off and cpu off.
+     * Power State: screen off and cpu on and some user processes are frozen.
+     */
+    STAND_BY,
+
+    /**
+     * Power State: screen off and cpu on and most user processes are frozen.
+     */
+    DOZE,
+
+    /**
+     * Power State: screen off and cpu off and suspend to the rom.
      */
     SLEEP,
+
+    /**
+     * Power State: screen off and cpu off and suspend to the disk.
+     */
+    HIBERNATE,
+
+    /**
+     * Power State: shutdown.
+     */
+    SHUTDOWN,
 
     /**
      * Power State: unknown.
