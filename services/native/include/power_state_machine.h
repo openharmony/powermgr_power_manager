@@ -163,8 +163,13 @@ private:
     };
     void InitStateMap();
     void EmplaceAwake();
+    void EmplaceFreeze();
     void EmplaceInactive();
+    void EmplaceStandBy();
+    void EmplaceDoze();
     void EmplaceSleep();
+    void EmplaceHibernate();
+    void EmplaceShutdown();
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
