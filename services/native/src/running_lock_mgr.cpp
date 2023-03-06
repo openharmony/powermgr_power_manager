@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
+constexpr uint32_t RUNNINGLOCK_TYPE_BACKGROUND_MASK = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BACKGROUND);
 }
 
 RunningLockMgr::~RunningLockMgr() {}
@@ -58,10 +59,10 @@ bool RunningLockMgr::Init()
     }
     handler_ = pmsptr->GetHandler();
 
-    systemLocks_.emplace(SystemLockType::SYSTEM_LOCK_APP,
-        std::make_shared<SystemLock>(runningLockAction_, LOCK_TAG_APP));
-    systemLocks_.emplace(SystemLockType::SYSTEM_LOCK_DISPLAY,
-        std::make_shared<SystemLock>(runningLockAction_, LOCK_TAG_DISPLAY));
+    if (backgroundLock_ == nullptr) {
+        backgroundLock_ = std::make_shared<SystemLock>(
+            runningLockAction_, RunningLockType::RUNNINGLOCK_BACKGROUND, RUNNINGLOCK_TAG_BACKGROUND);
+    }
 
     bool ret = InitLocks();
 
@@ -126,16 +127,11 @@ void RunningLockMgr::InitLocksTypeBackground()
             if (stateMachine == nullptr) {
                 return;
             }
-            auto iterator = systemLocks_.find(SystemLockType::SYSTEM_LOCK_APP);
-            if (iterator == systemLocks_.end()) {
-                return;
-            }
-            std::shared_ptr<SystemLock> pSysLock = iterator->second;
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND active");
                 stateMachine->CancelDelayTimer(
                     PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
-                pSysLock->Lock();
+                backgroundLock_->Lock();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND inactive");
                 if (stateMachine->GetState() == PowerState::INACTIVE) {
@@ -144,7 +140,7 @@ void RunningLockMgr::InitLocksTypeBackground()
                     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Background unlock in state: %{public}d",
                         stateMachine->GetState());
                 }
-                pSysLock->Unlock();
+                backgroundLock_->Unlock();
             }
         })
     );
@@ -164,11 +160,6 @@ void RunningLockMgr::InitLocksTypeProximity()
             if (stateMachine == nullptr) {
                 return;
             }
-            auto iterator = systemLocks_.find(SystemLockType::SYSTEM_LOCK_APP);
-            if (iterator == systemLocks_.end()) {
-                return;
-            }
-            std::shared_ptr<SystemLock> pSysLock = iterator->second;
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
                 proximityController_.Enable();
@@ -185,13 +176,13 @@ void RunningLockMgr::InitLocksTypeProximity()
                     PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
                 stateMachine->CancelDelayTimer(
                     PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-                pSysLock->Lock();
+                backgroundLock_->Lock();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->ResetInactiveTimer();
-                pSysLock->Unlock();
+                backgroundLock_->Unlock();
                 proximityController_.Disable();
             }
         })
@@ -264,6 +255,15 @@ void RunningLockMgr::RemoveAndPostUnlockTask(
     }
 }
 
+RunningLockType RunningLockMgr::ConvertTypeForLockCounters(RunningLockType type)
+{
+    if ((static_cast<uint32_t>(type) & RUNNINGLOCK_TYPE_BACKGROUND_MASK)
+        == RUNNINGLOCK_TYPE_BACKGROUND_MASK) {
+        return RunningLockType::RUNNINGLOCK_BACKGROUND;
+    }
+    return type;
+}
+
 void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo,
     const UserIPCInfo& userIPCinfo, uint32_t timeOutMS)
@@ -282,7 +282,8 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
         return;
     }
 
-    auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
+    RunningLockType lockType = ConvertTypeForLockCounters(lockInner->GetRunningLockType());
+    auto iterator = lockCounters_.find(lockType);
     if (iterator == lockCounters_.end()) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, remoteObj=%{private}p, type=%{public}d",
             remoteObj.GetRefPtr(), lockInner->GetRunningLockType());
@@ -317,7 +318,8 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     }
     RemoveAndPostUnlockTask(remoteObj);
 
-    auto iterator = lockCounters_.find(lockInner->GetRunningLockType());
+    RunningLockType lockType = ConvertTypeForLockCounters(lockInner->GetRunningLockType());
+    auto iterator = lockCounters_.find(lockType);
     if (iterator == lockCounters_.end()) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, remoteObj=%{private}p, type=%{public}d",
             remoteObj.GetRefPtr(), lockInner->GetRunningLockType());
@@ -354,13 +356,13 @@ uint32_t RunningLockMgr::GetRunningLockNum(RunningLockType type)
 
 uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type)
 {
-    auto iterator = lockCounters_.find(type);
+    RunningLockType lockType = ConvertTypeForLockCounters(type);
+    auto iterator = lockCounters_.find(lockType);
     if (iterator == lockCounters_.end()) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "No specific lock, type=%{public}d", type);
         return 0;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
-
     return counter->GetCount();
 }
 
@@ -697,11 +699,8 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
         it->second->Clear();
     }
     proximityController_.Clear();
-
     std::shared_ptr<IRunningLockAction> mock(mockAction);
-    for (auto it = systemLocks_.begin(); it != systemLocks_.end(); it++) {
-        it->second->EnableMock(mock);
-    }
+    backgroundLock_->EnableMock(mock);
     runningLockAction_ = mock;
 }
 
@@ -800,7 +799,7 @@ void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteO
 void RunningLockMgr::SystemLock::Lock()
 {
     if (!locking_) {
-        action_->Lock(RunningLockType::RUNNINGLOCK_BUTT, tag_.c_str());
+        action_->Lock(type_, name_.c_str());
         locking_ = true;
     }
 }
@@ -808,7 +807,7 @@ void RunningLockMgr::SystemLock::Lock()
 void RunningLockMgr::SystemLock::Unlock()
 {
     if (locking_) {
-        action_->Unlock(RunningLockType::RUNNINGLOCK_BUTT, tag_.c_str());
+        action_->Unlock(type_, name_.c_str());
         locking_ = false;
     }
 }

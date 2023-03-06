@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,14 +21,14 @@ using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
-void RunningLockAction::Lock(RunningLockType type, const string& tag)
+void RunningLockAction::Lock(RunningLockType type, const string& name)
 {
-    SystemSuspendController::GetInstance().AcquireRunningLock(tag);
+    SystemSuspendController::GetInstance().AcquireRunningLock(type, name);
 }
 
-void RunningLockAction::Unlock(RunningLockType type, const string& tag)
+void RunningLockAction::Unlock(RunningLockType type, const string& name)
 {
-    SystemSuspendController::GetInstance().ReleaseRunningLock(tag);
+    SystemSuspendController::GetInstance().ReleaseRunningLock(type, name);
 }
 } // namespace PowerMgr
 } // namespace OHOS
