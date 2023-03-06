@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "power_common.h"
 #include "power_log.h"
 #include "runninglock_entity.h"
+#include "xpower_event_js.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -99,7 +100,7 @@ napi_value RunningLockNapi::Hold(napi_env env, napi_callback_info info)
     auto runningLock = UnwrapRunningLock(env, thisArg);
     RETURN_IF_WITH_RET(runningLock == nullptr, nullptr);
     runningLock->Lock(timeOut);
-
+    OHOS::HiviewDFX::ReportXPowerJsStackSysEvent(env, "RunningLockNapi::Hold");
     return nullptr;
 }
 

@@ -30,6 +30,7 @@ ohos_shared_library("runninglock") {
   } else {
     external_deps = [
       "hilog_native:libhilog",
+      "hiview:libxpower_event_js",
       "napi:ace_napi",
     ]
   }
