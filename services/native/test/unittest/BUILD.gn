@@ -324,6 +324,25 @@ ohos_unittest("ces_system") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_power_state_level_framework") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_state_level_framework_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_power_state_machine") {
   module_out_path = module_output_path
 
@@ -757,6 +776,7 @@ group("unittest") {
     ":test_power_mgr_util",
     ":test_power_mock_object",
     ":test_power_shutdown",
+    ":test_power_state_level_framework",
     ":test_power_state_machine",
     ":test_running_lock",
     ":test_running_lock_hub_native",
