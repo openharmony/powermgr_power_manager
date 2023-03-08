@@ -1142,9 +1142,43 @@ bool PowerStateMachine::StateController::CheckState()
         POWER_HILOGW(FEATURE_POWER_STATE, "Owner is nullptr");
         return false;
     }
+    MatchStatus(owner->currentState_, owner->stateAction_->GetDisplayState());
     auto state = GetState();
     POWER_HILOGD(FEATURE_POWER_STATE, "state: %{public}u, currentState_: %{public}u", state, owner->currentState_);
     return state != owner->currentState_;
+}
+
+void PowerStateMachine::StateController::CorrectionState(PowerState& currentState, PowerState correctState)
+{
+    if (currentState != correctState) {
+        std::string msg = "Correct power state errors ";
+        msg.append(GetPowerStateString(currentState)).append(" to ").append(GetPowerStateString(correctState));
+        POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "ERROR_STATE", static_cast<uint32_t>(currentState),
+            "CORRECTION_STATE", static_cast<uint32_t>(correctState), "MSG", msg);
+        currentState = correctState;
+    }
+}
+
+void PowerStateMachine::StateController::MatchStatus(PowerState& currentState, DisplayState state)
+{
+    if (GetState() == PowerState::SLEEP || currentState == PowerState::SLEEP) {
+        return;
+    }
+    // Keep the state of display consistent with the state of power
+    switch (state)
+    {
+    case DisplayState::DISPLAY_DIM:
+    case DisplayState::DISPLAY_ON:
+        CorrectionState(currentState, PowerState::AWAKE);
+        break;
+    case DisplayState::DISPLAY_OFF:
+        CorrectionState(currentState, PowerState::INACTIVE);
+        break;
+    default:
+        break;
+    }
 }
 
 void PowerStateMachine::StateController::RecordFailure(PowerState from,
