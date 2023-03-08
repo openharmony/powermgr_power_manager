@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -219,7 +219,11 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock032, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock032: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
+        .Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
@@ -227,8 +231,11 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock032, TestSize.Level2)
     EXPECT_CALL(*g_lockAction, Lock(_, _)).Times(1);
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
+        .Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(SCREEN_DIM_WAIT_TIME_S + ONE_SECOND);
 
     EXPECT_CALL(*g_lockAction, Unlock(_, _)).Times(1);
@@ -285,6 +292,9 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock048, TestSize.Level2)
     }
 
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
@@ -350,6 +360,9 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock062, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
@@ -501,13 +514,17 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock071, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
+     EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(1)
+        .Times(2)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
     pms->Lock(token, info, 0);
@@ -544,8 +561,10 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
     pms->CreateRunningLock(token, info);
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, true)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_EQ(pms->ForceSuspendDevice(0), true);
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(1)
+        .Times(2)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
@@ -630,6 +649,8 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock074, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     sleep(ASYNC_WAIT_TIME_S + ONE_SECOND);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
@@ -663,6 +684,8 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock075, TestSize.Level2)
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
@@ -704,6 +727,8 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock076, TestSize.Level2)
     }
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
@@ -738,6 +763,9 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock077, TestSize.Level2)
     EXPECT_CALL(*g_lockAction, Lock(_, _)).Times(1);
     pms->Lock(token, info, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
@@ -839,20 +867,88 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock080, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock080: Failed to get PowerMgrService";
     }
 
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM))
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     pms->SetDisplayOffTime(time);
     ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
     sleep(((time / TRANSFER_MS_TO_S) * DOUBLE_TIMES / TEST_RATE) + ONE_SECOND);
     ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
-        .Times(::testing::AtLeast(1))
-        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(time / TRANSFER_MS_TO_S / TEST_RATE + ONE_SECOND);
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, false)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
-    ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, false)).WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
+    EXPECT_TRUE(pms->GetState() == PowerState::INACTIVE || pms->GetState() == PowerState::SLEEP);
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock080:End.");
     pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
     GTEST_LOG_(INFO) << "PowerMgrMock080: end.";
+}
+
+/**
+ * @tc.name: PowerMgrMock081
+ * @tc.desc: test The display status and power status are inconsistent SuspendDevice
+ * @tc.type: FUNC
+ * @tc.require: issueI66HYP
+ */
+HWTEST_F(PowerMgrSTMockTest, PowerMgrMock081, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerMgrMock081: start.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock081:Start.");
+
+    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pms != nullptr);
+
+    // Set the power status to INACTIVE
+    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_TRUE(pms->GetState() == PowerState::INACTIVE || pms->GetState() == PowerState::SLEEP);
+
+    // Analog display return DISPLAY_ON
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
+        .Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
+    // The status is changed to display status ON, and the screen is off again
+    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_TRUE(pms->GetState() == PowerState::INACTIVE || pms->GetState() == PowerState::SLEEP);
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock081:End.");
+    GTEST_LOG_(INFO) << "PowerMgrMock081: end.";
+}
+
+/**
+ * @tc.name: PowerMgrMock082
+ * @tc.desc: test The display status and power status are inconsistent WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: issueI66HYP
+ */
+HWTEST_F(PowerMgrSTMockTest, PowerMgrMock082, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerMgrMock082: start.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock082:Start.");
+
+    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pms != nullptr);
+
+    // Set the power status to AWAKE
+    pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("PowerMgrMock082"));
+    EXPECT_TRUE(pms->GetState() == PowerState::AWAKE);
+
+    // Analog display return DISPLAY_OFF
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
+        .Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
+    // The status is changed to display status OFF, and the screen is off again
+    pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("PowerMgrMock082_Again"));
+    EXPECT_TRUE(pms->GetState() == PowerState::AWAKE);
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock082:End.");
+    GTEST_LOG_(INFO) << "PowerMgrMock082: end.";
 }
 }
