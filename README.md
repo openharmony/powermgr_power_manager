@@ -1,47 +1,48 @@
-# power\_manager<a name="EN-US_TOPIC_0000001115047353"></a>
+# Power Manager<a name="EN-US_TOPIC_0000001115047353"></a>
 
-- [Introduction](#section11660541593)
-- [Directory Structure](#section19472752217)
-- [Repositories Involved](#section63151229062)
+-   [Introduction](#section11660541593)
+-   [Directory Structure](#section19472752217)
+-   [Repositories Involved](#section63151229062)
 
 ## Introduction<a name="section11660541593"></a>
 
-Power Manager provides the following functionalities:
+The Power Manager module provides the following functions:
 
 1.  Rebooting the device
 2.  Managing running locks
 3.  Obtaining the power status
 
-**Figure  1**  Power manager service architecture<a name="fig106301571239"></a> 
-![](figures/power-management-subsystem-architecture.png "power-management-subsystem-architecture")
+**Figure 1** Architecture of the Power Manager module<a name="fig106301571239"></a>
+
+![](figures/power-management-subsystem-architecture.png "Architecture of the power management subsystem")
 
 ## Directory Structure<a name="section19472752217"></a>
 
 ```
 /base/powermgr/power_manager
-├── figures                  	# Architecture figures
-├── frameworks                  # FrameWork Layer
-│   ├── dialog                  # Dialog resource
-│   ├── include                 # Include file
-│   ├── napi                  	# NAPI
-│   └── native                  # Native code
-├── interfaces                  # APIs
-│   ├── innerkits               # Internal APIs
-│   ├── kits                    # External APIs
-│   └── test                    # Kits test
+├── figures                  	# Architecture
+├── frameworks                  # Framework layer
+│   ├── napi                  	# NAPI layer
+│   └── native                  # Native layer
+├── interfaces                  # API layer
+│   └── inner_api               # Internal APIs
 ├── sa_profile                  # SA profile
-├── services                    # Services
-│   ├── native                  # Native services
-│   └── zidl                    # Zidl APIs
-├── test                        # Test code
-│   ├── fuzztest                # Fuzz testSS
-│   └── systemtest              # System test
-└── utils                       # Utilities and common code
+└── services                    # Service layer
+│   ├── native                  # Native layer
+│   └── zidl                    # Zidl API layer
+├── test                        # Test cases
+│   ├── fuzztest                # Fuzz test
+│   ├── unittest                # Unit test
+│   ├── systemtest              # System test
+│   └── utils                   # Test tools
+└── utils                       # Utilities
 ```
+
+
 
 ## Repositories Involved<a name="section63151229062"></a>
 
-[Power management subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/power-management.md)
+[Power Management Subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/power-management.md)
 
 **powermgr_power_manager**
 
