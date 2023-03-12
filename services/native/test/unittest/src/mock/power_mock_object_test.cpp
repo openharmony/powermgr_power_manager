@@ -57,10 +57,6 @@ namespace {
  */
 HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
 {
-    WorkTriggerList worklist;
-    worklist.push_back(nullptr);
-    worklist.push_back(nullptr);
-    worklist.push_back(nullptr);
     PowerMode mode = PowerMode::NORMAL_MODE;
     sptr<MockPowerRemoteObject> remote = new MockPowerRemoteObject();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
@@ -70,7 +66,6 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     PowerState state = PowerState::AWAKE;
     stateCallbackProxy->OnPowerStateChanged(state);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
-    EXPECT_FALSE(sptrProxy->SetWorkTriggerList(token, worklist));
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
@@ -142,27 +137,5 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     sptrProxy->RebootDeviceForDeprecated(" ");
     sptrProxy->ShutDownDevice(" ");
     EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0));
-}
-
-/**
- * @tc.name: PowerMockObjectTest004
- * @tc.desc: Test running lock when the PowerRemoteObject is mock
- * @tc.type: FUNC
- * @tc.require: issueI5IUHE
- */
-HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
-{
-    std::shared_ptr<RunningLock> runningLock =
-        std::make_shared<RunningLock>(nullptr, "runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_FALSE(ERR_OK == runningLock->Lock(10));
-    EXPECT_FALSE(runningLock->IsUsed());
-    runningLock->UnLock();
-    WorkTriggerList workList;
-    workList.push_back(nullptr);
-    workList.push_back(nullptr);
-    workList.push_back(nullptr);
-    EXPECT_EQ(ERR_OK, runningLock->SetWorkTriggerList(workList));
-    auto resList = runningLock->GetWorkTriggerList();
-    EXPECT_EQ(*(resList.begin()), nullptr);
 }
 } // namespace

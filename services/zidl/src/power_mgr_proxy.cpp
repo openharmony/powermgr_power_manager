@@ -186,31 +186,6 @@ bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
     return used;
 }
 
-bool PowerMgrProxy::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList)
-{
-    sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return false;
-    }
-
-    WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
-    RETURN_IF_WITH_RET(!RunningLockInfo::MarshallingWorkTriggerList(data, workTriggerList), false);
-    int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_SET_WORK_TRIGGER_LIST),
-        data, reply, option);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
-        return false;
-    }
-    return true;
-}
-
 bool PowerMgrProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
     sptr<IRemoteObject> remote = Remote();

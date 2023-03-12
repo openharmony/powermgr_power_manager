@@ -21,8 +21,6 @@
 
 #include <parcel.h>
 
-#include "work_trigger.h"
-
 namespace OHOS {
 namespace PowerMgr {
 /**
@@ -71,8 +69,6 @@ enum class RunningLockType : uint32_t {
     RUNNINGLOCK_BUTT
 };
 
-using WorkTriggerList = std::list<std::shared_ptr<WorkTrigger>>;
-
 /**
  * Maintain runninglock information.
  */
@@ -88,19 +84,11 @@ struct RunningLockInfo : public Parcelable {
      * RunningLock type: used to identify the type of RunningLock.
      */
     RunningLockType type;
-
-    /**
-     * WorkTriggerList: generally used to manintain the information about the application,
-     * which attempts to acquire the RunningLock.
-     */
-    WorkTriggerList workTriggerlist;
     RunningLockInfo() = default;
     RunningLockInfo(const std::string& namestr, RunningLockType locktype) : name(namestr), type(locktype) {}
     bool ReadFromParcel(Parcel& parcel);
     bool Marshalling(Parcel& parcel) const override;
     static RunningLockInfo* Unmarshalling(Parcel& parcel);
-    static bool MarshallingWorkTriggerList(Parcel& parcel, const WorkTriggerList& list);
-    static bool ReadFromParcelWorkTriggerList(Parcel& parcel, WorkTriggerList& list);
 };
 } // namespace PowerMgr
 } // namespace OHOS

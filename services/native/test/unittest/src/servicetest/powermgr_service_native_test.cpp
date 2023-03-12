@@ -25,7 +25,6 @@
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "powermgr_service_test_proxy.h"
-#include "work_trigger.h"
 
 using namespace OHOS;
 using namespace OHOS::PowerMgr;
@@ -277,14 +276,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     runningLockInfo.name = "runninglock";
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_SCREEN;
     uint32_t timeOutMs = 0;
-    WorkTriggerList workList;
-    workList.push_back(nullptr);
-    workList.push_back(nullptr);
     pid_t uid = 0;
     pid_t pid = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
-    EXPECT_TRUE(g_powerMgrServiceProxy->SetWorkTriggerList(token, workList));
     EXPECT_TRUE(g_powerMgrServiceProxy->ProxyRunningLock(true, uid, pid));
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
     g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs);

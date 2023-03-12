@@ -22,25 +22,6 @@
 
 namespace OHOS {
 namespace PowerMgr {
-bool RunningLockInfo::ReadFromParcelWorkTriggerList(Parcel& parcel, WorkTriggerList& list)
-{
-    uint32_t listSize = 0;
-    if (!parcel.ReadUint32(listSize)) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "WriteUint32 is failed");
-        return false;
-    }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTigger size: %{public}u", listSize);
-    while (listSize > 0) {
-        std::shared_ptr<WorkTrigger> workTrigger(parcel.ReadParcelable<WorkTrigger>());
-        if (workTrigger == nullptr) {
-            return false;
-        }
-        list.emplace_back(workTrigger);
-        listSize--;
-    }
-    return true;
-}
-
 bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
 {
     uint32_t readType;
@@ -49,7 +30,7 @@ bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
     name = Str16ToStr8(u16Name);
     READ_PARCEL_WITH_RET(parcel, Uint32, readType, false);
     type = static_cast<RunningLockType>(readType);
-    return ReadFromParcelWorkTriggerList(parcel, workTriggerlist);
+    return true;
 }
 
 RunningLockInfo* RunningLockInfo::Unmarshalling(Parcel& parcel)
@@ -65,69 +46,10 @@ RunningLockInfo* RunningLockInfo::Unmarshalling(Parcel& parcel)
     return info;
 }
 
-bool RunningLockInfo::MarshallingWorkTriggerList(Parcel& parcel, const WorkTriggerList& list)
-{
-    uint32_t listSize = static_cast<uint32_t>(list.size());
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTigger size: %{public}u", listSize);
-    if (!parcel.WriteUint32(listSize)) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "WriteUint32 is failed");
-        return false;
-    }
-
-    for (const auto& templateVal : list) {
-        if (templateVal == nullptr) {
-            continue;
-        }
-        if (!parcel.WriteParcelable(templateVal.get())) {
-            POWER_HILOGE(FEATURE_RUNNING_LOCK, "templateVal Marshalling failed");
-            return false;
-        }
-    }
-    return true;
-}
-
 bool RunningLockInfo::Marshalling(Parcel& parcel) const
 {
     WRITE_PARCEL_WITH_RET(parcel, String16, Str8ToStr16(name), false);
     WRITE_PARCEL_WITH_RET(parcel, Uint32, static_cast<uint32_t>(type), false);
-
-    return MarshallingWorkTriggerList(parcel, workTriggerlist);
-}
-
-bool WorkTrigger::ReadFromParcel(Parcel& parcel)
-{
-    READ_PARCEL_WITH_RET(parcel, String, name_, false);
-    READ_PARCEL_WITH_RET(parcel, Int32, uid_, false);
-    READ_PARCEL_WITH_RET(parcel, Int32, pid_, false);
-    READ_PARCEL_WITH_RET(parcel, Int32, abilityId_, false);
-
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "name_: %{public}s, uid_: %{public}d, \
-        pid_: %{public}d, abilityId_: %{public}d", name_.c_str(), uid_, pid_, abilityId_);
-    return true;
-}
-
-WorkTrigger* WorkTrigger::Unmarshalling(Parcel& parcel)
-{
-    WorkTrigger* workTrigger = new WorkTrigger();
-    if (workTrigger == nullptr) {
-        return nullptr;
-    }
-    if (!workTrigger->ReadFromParcel(parcel)) {
-        delete workTrigger;
-        return nullptr;
-    }
-    return workTrigger;
-}
-
-bool WorkTrigger::Marshalling(Parcel& parcel) const
-{
-    WRITE_PARCEL_WITH_RET(parcel, String, name_, false);
-    WRITE_PARCEL_WITH_RET(parcel, Int32, uid_, false);
-    WRITE_PARCEL_WITH_RET(parcel, Int32, pid_, false);
-    WRITE_PARCEL_WITH_RET(parcel, Int32, abilityId_, false);
-
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "name_: %{public}s, uid_: %{public}d, \
-        pid_: %{public}d, abilityId_: %{public}d", name_.c_str(), uid_, pid_, abilityId_);
     return true;
 }
 } // namespace PowerMgr

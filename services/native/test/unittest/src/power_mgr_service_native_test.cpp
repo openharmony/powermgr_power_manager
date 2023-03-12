@@ -145,9 +145,7 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN));
     EXPECT_FALSE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     EXPECT_TRUE(g_pmsTest->Lock(token, runningLockInfo1, SUSCALLTIMEMS));
-    WorkTriggerList worklist;
-    EXPECT_TRUE(g_pmsTest->SetWorkTriggerList(token, worklist));
-    EXPECT_TRUE(g_pmsTest->ProxyRunningLock(token, PID, PID));
+    EXPECT_TRUE(g_pmsTest->ProxyRunningLock(token, UID, PID));
     EXPECT_TRUE(g_pmsTest->UnLock(token));
     EXPECT_FALSE(g_pmsTest->ReleaseRunningLock(token));
 

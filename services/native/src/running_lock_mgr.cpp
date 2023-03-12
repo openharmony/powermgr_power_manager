@@ -378,25 +378,6 @@ bool RunningLockMgr::ExistValidRunningLock()
     return false;
 }
 
-void RunningLockMgr::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
-    const WorkTriggerList& workTriggerList)
-{
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p", remoteObj.GetRefPtr());
-
-    auto lockInner = GetRunningLockInner(remoteObj);
-    if (lockInner == nullptr) {
-        return;
-    }
-    lockInner->SetWorkTriggerList(workTriggerList);
-    NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED);
-    // After update triggerlist, maybe need disabled the lock or enable the lock.
-    SetRunningLockDisableFlag(lockInner);
-    // If enabled, we really lock here.
-    LockReally(remoteObj, lockInner);
-    // If disabled, we really unlock here.
-    UnLockReally(remoteObj, lockInner);
-}
-
 void RunningLockMgr::NotifyHiViewRunningLockInfo(const string& remoteObjStr,
     const RunningLockInner& lockInner,
     RunningLockChangedType changeType) const
@@ -472,11 +453,6 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
             NotifyHiView(changeType, str, *lockInner);
             break;
         }
-        case NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTriggerChanged remoteObjStr=%{public}s", remoteObjStr.c_str());
-            NotifyHiViewRunningLockInfo(remoteObjStr, *lockInner, changeType);
-            break;
-        }
         case NOTIFY_RUNNINGLOCK_OVERTIME: {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "Overtime remoteObjStr=%{public}s", remoteObjStr.c_str());
             break;
@@ -537,29 +513,7 @@ void RunningLockMgr::SetRunningLockDisableFlag(
             userIPCinfo.uid, userIPCinfo.pid);
         return;
     }
-    const RunningLockInfo& runningLockInfo = lockInner->GetRunningLockInfo();
-    const WorkTriggerList& list = runningLockInfo.workTriggerlist;
-    if (list.empty()) {
-        // Not matched, and no trigger list.
-        lockInner->SetDisabled(false);
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Work trigger list is empty");
-        return;
-    }
-    bool triggerMatched = true;
-    // Have trigger list, need to judge whether or not all of the list matched,
-    // otherwise we should hold the lock.
-    for (auto& workTrigger : list) {
-        UserIPCInfo triggerIPCInfo {workTrigger->GetUid(), workTrigger->GetPid()};
-        if (!MatchProxyMap(triggerIPCInfo)) {
-            triggerMatched = false;
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "WorkTrigger not matched uid = %{public}d, pid = %{public}d",
-                triggerIPCInfo.uid, triggerIPCInfo.pid);
-            break;
-        }
-    }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "TriggerMatched = %{public}d, uid = %{public}d, pid = %{public}d",
-        userIPCinfo.uid, userIPCinfo.pid, triggerMatched);
-    lockInner->SetDisabled(triggerMatched);
+    lockInner->SetDisabled(false);
 }
 
 void RunningLockMgr::LockReally(const sptr<IRemoteObject>& remoteObj,

@@ -90,8 +90,7 @@
                         "power_mgr_client.h",
                         "power_state_machine_info.h",
                         "running_lock.h",
-                        "running_lock_info.h",
-                        "work_trigger.h"
+                        "running_lock_info.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/innerkits/native/include"
                     }
