@@ -65,8 +65,6 @@ public:
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
-    virtual bool SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
-        const WorkTriggerList& workTriggerList) override;
     virtual bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;

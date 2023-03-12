@@ -94,9 +94,6 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_UNLOCK):
             ret = UnLockStub(data);
             break;
-        case static_cast<int>(IPowerMgr::RUNNINGLOCK_SET_WORK_TRIGGER_LIST):
-            ret = SetWorkTriggerListStub(data);
-            break;
         case static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK):
             ret = ProxyRunningLockStub(data);
             break;
@@ -198,16 +195,6 @@ int32_t PowerMgrStub::IsUsedStub(MessageParcel& data, MessageParcel& reply)
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     bool ret = IsUsed(remoteObj);
     WRITE_PARCEL_WITH_RET(reply, Bool, ret, E_WRITE_PARCEL_ERROR);
-    return ERR_OK;
-}
-
-int32_t PowerMgrStub::SetWorkTriggerListStub(MessageParcel& data)
-{
-    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
-    WorkTriggerList workTriggerList;
-    RunningLockInfo::ReadFromParcelWorkTriggerList(data, workTriggerList);
-    SetWorkTriggerList(remoteObj, workTriggerList);
     return ERR_OK;
 }
 

@@ -29,11 +29,6 @@ namespace OHOS {
 namespace PowerMgr {
 class RunningLockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void) {}
-    void SetUp() {}
-    void TearDown() {}
-
     void TestRunningLockInnerExisit(sptr<IRemoteObject>& token, RunningLockInfo& runningLockInfo)
     {
         auto lockMap = runningLockMgr_->GetRunningLockMap();

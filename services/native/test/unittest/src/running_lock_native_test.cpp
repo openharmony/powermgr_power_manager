@@ -97,19 +97,14 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->Init());
     EXPECT_FALSE(runningLockMgr->ExistValidRunningLock());
     runningLockMgr->CheckOverTime();
-    std::shared_ptr<WorkTrigger> worker = std::make_shared<WorkTrigger>();
     RunningLockInfo runningLockInfo {"runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN};
-    auto& worklist = runningLockInfo.workTriggerlist;
     sptr<IRemoteObject> token = new RunningLockTokenStub();
-    runningLockMgr->SetWorkTriggerList(token, worklist);
-    worklist.push_back(worker);
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     UserIPCInfo userIPCinfo {IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid()};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockInfo, userIPCinfo) != nullptr);
     EXPECT_FALSE(runningLockMgr->ExistValidRunningLock());
     runningLockMgr->Lock(remoteObj, runningLockInfo, userIPCinfo, TIMEOUTMS);
     EXPECT_TRUE(runningLockMgr->ExistValidRunningLock() == true);
-    runningLockMgr->SetWorkTriggerList(remoteObj, worklist);
     runningLockMgr->CheckOverTime();
     runningLockMgr->CheckOverTime();
 
@@ -231,11 +226,9 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     RunningLockInfo runningLockInfo {"runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN};
-    auto& worklist = runningLockInfo.workTriggerlist;
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     UserIPCInfo userIPCinfo {UNUID, UNPID};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockInfo, userIPCinfo) != nullptr);
-    runningLockMgr->SetWorkTriggerList(remoteObj, worklist);
     runningLockMgr->Lock(remoteObj, runningLockInfo, userIPCinfo, TIMEOUTMS);
     runningLockMgr->Lock(remoteObj, runningLockInfo, userIPCinfo, TIMEOUTMS);
     RunningLockInfo runningLockInfo1 {"runninglockNativeTest2", static_cast<RunningLockType>(MAXTYPE)};

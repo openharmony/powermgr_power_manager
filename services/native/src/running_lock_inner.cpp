@@ -25,7 +25,6 @@ RunningLockInner::RunningLockInner(const RunningLockInfo& runningLockInfo, const
 {
     runningLockInfo_.name = runningLockInfo.name;
     runningLockInfo_.type = runningLockInfo.type;
-    SetWorkTriggerList(runningLockInfo.workTriggerlist);
     userIPCinfo_ = userIPCinfo;
     lockTimeMs_ = GetTickCount();
 }
@@ -44,25 +43,11 @@ std::shared_ptr<RunningLockInner> RunningLockInner::CreateRunningLockInner(const
     return runningLockInner;
 }
 
-void RunningLockInner::SetWorkTriggerList(const WorkTriggerList& workTriggerList)
-{
-    DumpInfo("before");
-    runningLockInfo_.workTriggerlist = workTriggerList;
-    DumpInfo("after");
-}
-
 void RunningLockInner::DumpInfo(const std::string& description)
 {
     // this statement used to debug, can't find isDebugEnabled() interface. will be replaced later.
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "description: %{public}s, name: %{public}s, type: %{public}d,",
         description.c_str(), runningLockInfo_.name.c_str(), runningLockInfo_.type);
-
-    auto& list = runningLockInfo_.workTriggerlist;
-    for (auto& worker : list) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "use_count: %{public}ld, name: %{public}s, uid: %{public}d,\
-            pid: %{public}d, abilityId: %{public}d", worker.use_count(), worker->GetName().c_str(),
-            worker->GetUid(), worker->GetPid(), worker->GetAbilityId());
-    }
 }
 } // namespace PowerMgr
 } // namespace OHOS
