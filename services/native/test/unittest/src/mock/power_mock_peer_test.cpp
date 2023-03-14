@@ -28,8 +28,6 @@
 #include "running_lock.h"
 #include "running_lock_info.h"
 #include "running_lock_token_stub.h"
-#include "work_trigger.h"
-
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
@@ -113,11 +111,6 @@ HWTEST_F(MockPeerTest, MockPeerTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->Lock(token, info, 0));
     EXPECT_FALSE(sptrProxy->UnLock(token));
     EXPECT_FALSE(sptrProxy->IsUsed(token));
-    WorkTriggerList worklist;
-    worklist.push_back(nullptr);
-    worklist.push_back(nullptr);
-    worklist.push_back(nullptr);
-    EXPECT_FALSE(sptrProxy->SetWorkTriggerList(token, worklist));
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, uid, pid));
 }
 

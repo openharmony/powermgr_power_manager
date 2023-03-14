@@ -29,7 +29,6 @@
 #include "running_lock.h"
 #include "running_lock_info.h"
 #include "running_lock_token_stub.h"
-#include "work_trigger.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -117,15 +116,9 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest003, TestSize.Level2)
 {
     Parcel parcel;
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    EXPECT_FALSE(info.ReadFromParcelWorkTriggerList(parcel, info.workTriggerlist));
-    EXPECT_FALSE(info.MarshallingWorkTriggerList(parcel, info.workTriggerlist));
     EXPECT_FALSE(info.ReadFromParcel(parcel));
     EXPECT_FALSE(info.Marshalling(parcel));
     EXPECT_FALSE(info.Unmarshalling(parcel));
-    WorkTrigger* workTrigger = new WorkTrigger();
-    EXPECT_FALSE(workTrigger->ReadFromParcel(parcel));
-    EXPECT_FALSE(workTrigger->Marshalling(parcel));
-    EXPECT_FALSE(workTrigger->Unmarshalling(parcel));
 }
 
 /**
@@ -144,11 +137,6 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     sptrProxy->CreateRunningLock(token, info);
     sptrProxy->ReleaseRunningLock(token);
-    WorkTriggerList worklist;
-    worklist.push_back(nullptr);
-    worklist.push_back(nullptr);
-    worklist.push_back(nullptr);
-    sptrProxy->SetWorkTriggerList(token, worklist);
     sptrProxy->ProxyRunningLock(true, uid, pid);
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     sptrProxy->Lock(token, info, 0);

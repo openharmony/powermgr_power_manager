@@ -783,18 +783,6 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
     }
 }
 
-bool PowerMgrService::SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj,
-    const WorkTriggerList& workTriggerList)
-{
-    std::lock_guard lock(lockMutex_);
-    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return false;
-    }
-
-    runningLockMgr_->SetWorkTriggerList(remoteObj, workTriggerList);
-    return true;
-}
-
 bool PowerMgrService::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 {
     std::lock_guard lock(lockMutex_);
