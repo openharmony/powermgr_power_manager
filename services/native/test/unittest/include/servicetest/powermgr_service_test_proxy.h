@@ -44,7 +44,6 @@ public:
     bool IsRunningLockTypeSupported(RunningLockType type);
     bool Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo, uint32_t timeOutMs);
     bool UnLock(const sptr<IRemoteObject>& remoteObj);
-    bool SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList);
     bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid);
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     PowerErrors SuspendDevice(int64_t callTimeMs,

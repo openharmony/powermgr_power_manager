@@ -24,7 +24,6 @@
 #include "power_state_machine_info.h"
 #include "powermgr_service_test_proxy.h"
 #include "running_lock_token_stub.h"
-#include "work_trigger.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -90,11 +89,6 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
     EXPECT_FALSE(g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnLock(token));
     EXPECT_FALSE(g_powerMgrServiceProxy->IsUsed(token));
-    WorkTriggerList workList;
-    workList.push_back(nullptr);
-    workList.push_back(nullptr);
-    workList.push_back(nullptr);
-    EXPECT_FALSE(g_powerMgrServiceProxy->SetWorkTriggerList(token, workList));
     EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLock(true, uid, pid));
 }
 

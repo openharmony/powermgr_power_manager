@@ -23,6 +23,9 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+
 struct UserIPCInfo {
     pid_t uid = INVALID_UID;
     pid_t pid = INVALID_PID;
@@ -43,7 +46,6 @@ public:
 
     static std::shared_ptr<RunningLockInner> CreateRunningLockInner(const RunningLockInfo& runningLockInfo,
         const UserIPCInfo &userIPCinfo);
-    void SetWorkTriggerList(const WorkTriggerList& workTriggerList);
     void DumpInfo(const std::string& description);
 
     RunningLockType GetRunningLockType() const

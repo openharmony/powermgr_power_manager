@@ -39,7 +39,6 @@ public:
         IS_RUNNINGLOCK_TYPE_SUPPORTED,
         RUNNINGLOCK_LOCK,
         RUNNINGLOCK_UNLOCK,
-        RUNNINGLOCK_SET_WORK_TRIGGER_LIST,
         RUNNINGLOCK_ISUSED,
         PROXY_RUNNINGLOCK,
         WAKEUP_DEVICE,
@@ -73,7 +72,6 @@ public:
         uint32_t timeOutMs) = 0;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
-    virtual bool SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList) = 0;
     virtual bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) = 0;
 
     // Used for power state machine.

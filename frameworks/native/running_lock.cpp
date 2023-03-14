@@ -102,34 +102,6 @@ bool RunningLock::IsUsed()
     return CheckUsedNoLock();
 }
 
-ErrCode RunningLock::SetWorkTriggerList(const WorkTriggerList& workTriggerList)
-{
-    auto& list = runningLockInfo_.workTriggerlist;
-    list.clear();
-    std::copy_if(workTriggerList.begin(), workTriggerList.end(), std::back_inserter(list), [](const auto& work) {
-        return work != nullptr;
-    });
-
-    if (!CheckUsedNoLock()) {
-        // no need to notify service when the lock is not used.
-        return ERR_OK;
-    }
-
-    sptr<IPowerMgr> proxy = proxy_.promote();
-    if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
-        return E_GET_POWER_SERVICE_FAILED;
-    }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side SetWorkTriggerList call");
-    proxy->SetWorkTriggerList(token_, runningLockInfo_.workTriggerlist);
-    return ERR_OK;
-}
-
-const WorkTriggerList& RunningLock::GetWorkTriggerList() const
-{
-    return runningLockInfo_.workTriggerlist;
-}
-
 PowerErrors RunningLock::Create()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();

@@ -52,11 +52,6 @@ public:
      */
     ErrCode UnLock();
 
-    /**
-     * Maintain the information about the application that attempts to acquire the runninglock.
-     */
-    ErrCode SetWorkTriggerList(const WorkTriggerList& list);
-    const WorkTriggerList& GetWorkTriggerList() const;
     static constexpr uint32_t MAX_NAME_LEN = 256;
     static constexpr uint32_t CREATE_WITH_SCREEN_ON = 0x10000000;
 

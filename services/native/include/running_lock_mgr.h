@@ -53,7 +53,6 @@ public:
     bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
-    void SetWorkTriggerList(const sptr<IRemoteObject>& remoteObj, const WorkTriggerList& workTriggerList);
     bool Init();
     bool ExistValidRunningLock();
     std::shared_ptr<RunningLockInner> GetRunningLockInner(const sptr<IRemoteObject>& remoteObj);
@@ -188,13 +187,11 @@ private:
     enum RunningLockChangedType {
         NOTIFY_RUNNINGLOCK_ADD,
         NOTIFY_RUNNINGLOCK_REMOVE,
-        NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED,
         NOTIFY_RUNNINGLOCK_OVERTIME,
         RUNNINGLOCK_CHANGED_BUTT
     };
     const std::array<std::string, RUNNINGLOCK_CHANGED_BUTT> runninglockNotifyStr_ {
-        "DUBAI_TAG_RUNNINGLOCK_ADD", "DUBAI_TAG_RUNNINGLOCK_REMOVE",
-        "DUBAI_TAG_RUNNINGLOCK_WORKTRIGGER_CHANGED", "DUBAI_TAG_RUNNINGLOCK_OVERTIME"
+        "DUBAI_TAG_RUNNINGLOCK_ADD", "DUBAI_TAG_RUNNINGLOCK_REMOVE", "DUBAI_TAG_RUNNINGLOCK_OVERTIME"
     };
     void NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
         RunningLockChangedType changeType);
