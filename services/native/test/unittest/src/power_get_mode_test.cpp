@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,12 +42,16 @@ namespace {
 HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level0)
 {
     PowerMode mode;
+    PowerMode mode1 = PowerMode::NORMAL_MODE;
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     if (true) {
         mode = powerMgrClient.GetDeviceMode();
+        powerMgrClient.SetDeviceMode(mode1);
+        EXPECT_EQ(mode1, powerMgrClient.GetDeviceMode());
+        powerMgrClient.SetDeviceMode(mode);
     }
 }
 }

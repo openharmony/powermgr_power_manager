@@ -164,13 +164,15 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
 {
+    bool ret = 0;
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
     sptr<IShutdownCallback> cb2 = new PowerShutdownTestCallback();
     sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
     auto priority = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW;
-    sptrProxy->RegisterPowerStateCallback(cb1);
+    ret = sptrProxy->RegisterPowerStateCallback(cb1);
+    EXPECT_EQ(ret, false);
     sptrProxy->UnRegisterPowerStateCallback(cb1);
     sptrProxy->RegisterPowerStateCallback(nullptr);
     sptrProxy->UnRegisterPowerStateCallback(nullptr);
