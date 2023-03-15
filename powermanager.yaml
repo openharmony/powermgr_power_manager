@@ -38,7 +38,8 @@ SCREEN_ON_TIMEOUT:
   MSG: {type: STRING, desc: screen on timeout message}
 
 STATE_CORRECTION:
-  __BASE: {type: FAULT, level: CRITICAL, desc: the power status is inconsistent with the display status }
-  ERROR_STATE: {type: INT32, desc: the status of the current error}
+  __BASE: {type: FAULT, level: CRITICAL, desc: the power state is inconsistent with the display state}
+  ERROR_STATE: {type: INT32, desc: the state of the current error}
   CORRECTION_STATE: {type: INT32, desc: the corrected state}
+  DISPLAY_STATE: {type: INT32, desc: the display state}
   MSG: {type: STRING, desc: correct error information}

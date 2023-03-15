@@ -540,6 +540,26 @@ static const std::string GetPowerStateString(PowerState state)
     return std::string("UNKNOWN");
 }
 
+static const std::string GetDisplayStateString(DisplayState state)
+{
+    switch (state) {
+        case DisplayState::DISPLAY_OFF:
+            return std::string("DISPLAY_OFF");
+        case DisplayState::DISPLAY_DIM:
+            return std::string("DISPLAY_DIM");
+        case DisplayState::DISPLAY_ON:
+            return std::string("DISPLAY_ON");
+        case DisplayState::DISPLAY_SUSPEND:
+            return std::string("DISPLAY_SUSPEND");
+        case DisplayState::DISPLAY_UNKNOWN:
+            return std::string("DISPLAY_UNKNOWN");
+        default:
+            break;
+    }
+
+    return std::string("DISPLAY_UNKNOWN");
+}
+
 static const std::string GetRunningLockTypeString(RunningLockType type)
 {
     switch (type) {
@@ -1111,6 +1131,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(
         GetPowerStateString(this->state_).c_str(),
         GetReasonTypeString(reason).c_str(),
         ignoreLock);
+    MatchState(owner->currentState_, owner->stateAction_->GetDisplayState());
     if (!CheckState()) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", owner->currentState_);
         RecordFailure(owner->currentState_, reason, TransitResult::ALREADY_IN_STATE);
@@ -1142,42 +1163,54 @@ bool PowerStateMachine::StateController::CheckState()
         POWER_HILOGW(FEATURE_POWER_STATE, "Owner is nullptr");
         return false;
     }
-    MatchStatus(owner->currentState_, owner->stateAction_->GetDisplayState());
     auto state = GetState();
     POWER_HILOGD(FEATURE_POWER_STATE, "state: %{public}u, currentState_: %{public}u", state, owner->currentState_);
     return state != owner->currentState_;
 }
 
-void PowerStateMachine::StateController::CorrectionState(PowerState& currentState, PowerState correctState)
+void PowerStateMachine::StateController::CorrectState(PowerState& currentState,
+    PowerState correctState, DisplayState state)
 {
-    if (currentState != correctState) {
-        std::string msg = "Correct power state errors ";
-        msg.append(GetPowerStateString(currentState)).append(" to ").append(GetPowerStateString(correctState));
-        POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION",
-            HiviewDFX::HiSysEvent::EventType::FAULT, "ERROR_STATE", static_cast<uint32_t>(currentState),
-            "CORRECTION_STATE", static_cast<uint32_t>(correctState), "MSG", msg);
-        currentState = correctState;
-    }
+    std::string msg = "Correct power state errors from";
+    msg.append(GetPowerStateString(currentState))
+        .append(" to ")
+        .append(GetPowerStateString(correctState))
+        .append(" due to cuurent display state is ")
+        .append(GetDisplayStateString(state));
+    POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION",
+        HiviewDFX::HiSysEvent::EventType::FAULT, "ERROR_STATE", static_cast<uint32_t>(currentState),
+        "CORRECTION_STATE", static_cast<uint32_t>(correctState), "DISPLAY_STATE", static_cast<uint32_t>(state),
+        "MSG", msg);
+    currentState = correctState;
 }
 
-void PowerStateMachine::StateController::MatchStatus(PowerState& currentState, DisplayState state)
+void PowerStateMachine::StateController::MatchState(PowerState& currentState, DisplayState state)
 {
-    if (GetState() == PowerState::SLEEP || currentState == PowerState::SLEEP) {
+    if (GetState() == PowerState::SLEEP || currentState == PowerState::SLEEP ||
+        GetState() == PowerState::HIBERNATE || currentState == PowerState::HIBERNATE ||
+        GetState() == PowerState::SHUTDOWN || currentState == PowerState::SHUTDOWN) {
         return;
     }
+
     // Keep the state of display consistent with the state of power
-    switch (state)
-    {
-    case DisplayState::DISPLAY_DIM:
-    case DisplayState::DISPLAY_ON:
-        CorrectionState(currentState, PowerState::AWAKE);
-        break;
-    case DisplayState::DISPLAY_OFF:
-        CorrectionState(currentState, PowerState::INACTIVE);
-        break;
-    default:
-        break;
+    switch (state) {
+        case DisplayState::DISPLAY_OFF:
+            if (currentState == PowerState::AWAKE  || currentState == PowerState::FREEZE) {
+                CorrectState(currentState, PowerState::INACTIVE, state);
+            }
+            break;
+        case DisplayState::DISPLAY_DIM:
+        case DisplayState::DISPLAY_ON:
+            if (currentState == PowerState::INACTIVE || currentState == PowerState::STAND_BY ||
+                currentState == PowerState::DOZE) {
+                CorrectState(currentState, PowerState::AWAKE, state);
+            }
+            break;
+        case DisplayState::DISPLAY_SUSPEND:
+        case DisplayState::DISPLAY_UNKNOWN:
+        default:
+            break;
     }
 }
 
