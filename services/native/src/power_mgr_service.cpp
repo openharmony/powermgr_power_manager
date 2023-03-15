@@ -267,6 +267,32 @@ void PowerMgrService::KeyMonitorCancel()
         inputManager->RemoveMonitor(monitorId_);
     }
 }
+void PowerMgrService::SwitchSubscriberInit()
+{
+    POWER_HILOGW(FEATURE_INPUT, "Initialize the subscription switch");
+    switchId_ = InputManager::GetInstance()->SubscribeSwitchEvent(
+        [this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
+            POWER_HILOGI(FEATURE_WAKEUP, "Lid event received");
+            auto now = static_cast<int64_t>(time(nullptr));
+            if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
+                POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
+                this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, true);
+            } else {
+                POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
+                std::string reason = "lid open";
+                this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
+            }
+    });
+}
+
+void PowerMgrService::SwitchSubscriberCancel()
+{
+    POWER_HILOGI(FEATURE_INPUT, "Unsubscribe switch information");
+    if (switchId_ >= 0) {
+        InputManager::GetInstance()->UnsubscribeSwitchEvent(switchId_);
+        switchId_ = -1;
+    }
+}
 
 void PowerMgrService::HallSensorSubscriberInit()
 {
@@ -479,6 +505,7 @@ void PowerMgrService::PowerMgrService::OnStop()
 
     KeyMonitorCancel();
     HallSensorSubscriberCancel();
+    SwitchSubscriberCancel();
     eventRunner_.reset();
     handler_.reset();
     ready_ = false;
