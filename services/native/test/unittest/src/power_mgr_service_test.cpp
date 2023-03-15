@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,20 +99,6 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
     runningLock1->Lock();
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 end.");
-}
-
-/**
- * @tc.name: PowerMgrService004
- * @tc.desc: Test Reboot
- * @tc.type: FUNC
- */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService004, TestSize.Level0)
-{
-    if (false) {
-        auto& powerMgrClient = PowerMgrClient::GetInstance();
-        powerMgrClient.RebootDevice("test");
-    }
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 end.");
 }
 
 /**
