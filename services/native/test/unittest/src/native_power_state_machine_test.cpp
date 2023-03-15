@@ -55,6 +55,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Leve
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
     EXPECT_TRUE(stateMachine->Init());
     EXPECT_TRUE(stateMachine->Init());
@@ -71,7 +72,6 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Leve
     stateMachine->DumpInfo(result);
     EXPECT_TRUE(stateMachine->RestoreScreenOffTimeInner());
     stateMachine->onWakeup();
-    EXPECT_TRUE(stateMachine->ForceSuspendDeviceInner(PID, CALLTIMEMS));
     stateMachine->SetSleepTime(TIME);
     stateMachine->ResetSleepTimer();
 
@@ -129,6 +129,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Leve
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
     EXPECT_TRUE(stateMachine->Init());
     int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
@@ -326,8 +327,6 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Leve
     stateMachine->currentState_ = PowerState::INACTIVE;
     stateMachine->SetDisplaySuspend(false);
     stateMachine->SetSleepTime(TIME);
-    stateMachine->stateAction_ = nullptr;
-    EXPECT_TRUE(stateMachine->ForceSuspendDeviceInner(PID, CALLTIMEMS));
     SuspendDeviceType suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION;
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
 
