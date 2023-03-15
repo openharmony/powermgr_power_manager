@@ -40,6 +40,7 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
         case INIT_KEY_MONITOR_MSG: {
             pmsptr->KeyMonitorInit();
             pmsptr->HallSensorSubscriberInit();
+            pmsptr->SwitchSubscriberInit();
             break;
         }
         case CHECK_RUNNINGLOCK_OVERTIME_MSG: {
