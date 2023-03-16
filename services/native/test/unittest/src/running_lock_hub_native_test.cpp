@@ -15,6 +15,12 @@
 
 #include "running_lock_hub_native_test.h"
 
+#ifdef POWER_GTEST
+#define private   public
+#define protected public
+#define final
+#endif
+
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
@@ -43,6 +49,7 @@ HWTEST_F (RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
     auto sc = std::make_shared<Suspend::SuspendController>();
     auto runningLockHub = std::make_shared<Suspend::RunningLockHub>(sc);
     runningLockHub->Acquire("777");
+    EXPECT_FALSE(runningLockHub->runningLockMap_.empty());
     runningLockHub->Release("777");
     runningLockHub->lockFd_ = static_cast<UniqueFd>(UNFD);
     runningLockHub->Acquire("777");
