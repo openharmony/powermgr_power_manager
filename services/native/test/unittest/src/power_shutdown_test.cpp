@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,39 +51,32 @@ namespace {
  */
 HWTEST_F (PowerShutdownTest, PowerShutdownCallback001, TestSize.Level0)
 {
+    bool ret = 0;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IShutdownCallback> cb1 = new PowerShutdownTest1Callback();
-    powerMgrClient.RegisterShutdownCallback(cb1);
+    ret = powerMgrClient.RegisterShutdownCallback(cb1);
+    EXPECT_TRUE(ret);
+    ret = 0;
     POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 1.");
     {
         sptr<IShutdownCallback> cb2 = new PowerShutdownTest2Callback();
-        powerMgrClient.UnRegisterShutdownCallback(cb2);
+        ret = powerMgrClient.UnRegisterShutdownCallback(cb2);
+        EXPECT_TRUE(ret);
+        ret = 0;
         POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 2.");
-        powerMgrClient.RegisterShutdownCallback(cb2);
+        ret = powerMgrClient.RegisterShutdownCallback(cb2);
+        EXPECT_TRUE(ret);
+        ret = 0;
         POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 3.");
-        powerMgrClient.RegisterShutdownCallback(cb2);
+        ret = powerMgrClient.RegisterShutdownCallback(cb2);
+        EXPECT_TRUE(ret);
+        ret = 0;
         POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 4.");
     }
-    powerMgrClient.UnRegisterShutdownCallback(cb1);
+    ret = powerMgrClient.UnRegisterShutdownCallback(cb1);
+    EXPECT_TRUE(ret);
+    ret = 0;
     POWER_HILOGD(LABEL_TEST, "PowerShutdownTest::PowerShutdownCallback001 end.");
-}
-
-/**
- * @tc.name: ShutDownDeviceTest001
- * @tc.desc: test ShutDownDevice in proxy
- * @tc.type: FUNC
- */
-HWTEST_F (PowerShutdownTest, ShutDownDeviceTest001, TestSize.Level2)
-{
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "ShutDownDeviceTest001: ShutDownDevice start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    if (false) {
-        powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
-    }
-
-    GTEST_LOG_(INFO) << "ShutDownDeviceTest001: ShutDownDevice end.";
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -172,25 +172,6 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
 
     GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device end.";
 }
-
-
-/**
- * @tc.name: PowerStateMachine007
- * @tc.desc: test ForceSuspendDevice in proxy
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level2)
-{
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerStateMachine007: ForceSuspendDevice start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    if (false) {
-        powerMgrClient.ForceSuspendDevice();
-    }
-
-    GTEST_LOG_(INFO) << "PowerStateMachine007: ForceSuspendDevice end.";
-}
 }
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
@@ -229,44 +210,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
     powerMgrClient.UnRegisterPowerStateCallback(cb1);
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
 }
-
-/**
- * @tc.name: ShutDownDeviceTest001
- * @tc.desc: test ShutDownDevice in proxy
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, ShutDownDeviceTest001, TestSize.Level2)
-{
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "ShutDownDeviceTest001: ShutDownDevice start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    if (false) {
-        powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
-    }
-
-    GTEST_LOG_(INFO) << "ShutDownDeviceTest001: ShutDownDevice end.";
 }
-
-/**
- * @tc.name: RebootDeviceTest001
- * @tc.desc: test RebootDevice in proxy
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, RebootDeviceTest001, TestSize.Level2)
-{
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "RebootDeviceTest001: RebootDevice start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    if (false) {
-        powerMgrClient.RebootDevice(string("RebootDeviceTest001"));
-    }
-
-    GTEST_LOG_(INFO) << "RebootDeviceTest001: RebootDevice end.";
-}
-}
-
 
 void PowerStateMachineTest::WakeUpthread()
 {

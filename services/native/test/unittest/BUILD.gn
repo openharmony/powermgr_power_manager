@@ -93,24 +93,6 @@ ohos_unittest("shutdown_test") {
   external_deps = deps_ex
 }
 
-##############################reboot_test#####################################
-ohos_unittest("reboot_test") {
-  module_out_path = module_output_path
-  sources = [ "src/reboot_test.cpp" ]
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":module_private_config",
-  ]
-  deps = [
-    "${powermgr_innerkits}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
-    "${powermgr_service_path}:powermgrservice",
-    "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gtest_main",
-  ]
-  external_deps = deps_ex
-}
-
 ##############################client_test##########################################
 
 ohos_unittest("test_power_mgr_client") {
@@ -357,28 +339,6 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_innerkits}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = deps_ex
-}
-
-ohos_unittest("test_power_mgr_mock") {
-  module_out_path = module_output_path
-
-  sources = [ "src/power_mgr_mock_test.cpp" ]
-
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":module_private_config",
-  ]
-
-  deps = [
-    "${powermgr_innerkits}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
-    "${powermgr_service_path}:powermgrservice",
-    "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -739,6 +699,8 @@ ohos_unittest("test_running_lock_hub_native") {
   defines = defs
 
   sources = [ "src/running_lock_hub_native_test.cpp" ]
+
+  defines += [ "POWER_GTEST" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
