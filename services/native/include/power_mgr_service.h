@@ -84,6 +84,8 @@ public:
     void NotifyDisplayActionDone(uint32_t event);
     void KeyMonitorInit();
     void KeyMonitorCancel();
+    void SwitchSubscriberInit();
+    void SwitchSubscriberCancel();
     void HallSensorSubscriberInit();
     void HallSensorSubscriberCancel();
     bool ShowPowerDialog();
@@ -178,6 +180,7 @@ private:
     int32_t powerkeyLongPressId_ {0};
     int32_t powerkeyShortPressId_ {0};
     int32_t powerkeyReleaseId_ {0};
+    int32_t switchId_ {0};
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
     SensorUser sensorUser_;
