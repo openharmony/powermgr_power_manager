@@ -21,14 +21,14 @@ using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
-void RunningLockAction::Lock(RunningLockType type, const string& name)
+void RunningLockAction::Lock(const RunningLockParam& param)
 {
-    SystemSuspendController::GetInstance().AcquireRunningLock(type, name);
+    SystemSuspendController::GetInstance().AcquireRunningLock(param);
 }
 
-void RunningLockAction::Unlock(RunningLockType type, const string& name)
+void RunningLockAction::Unlock(const RunningLockParam& param)
 {
-    SystemSuspendController::GetInstance().ReleaseRunningLock(type, name);
+    SystemSuspendController::GetInstance().ReleaseRunningLock(param);
 }
 } // namespace PowerMgr
 } // namespace OHOS

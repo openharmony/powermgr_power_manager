@@ -45,11 +45,10 @@ public:
     explicit RunningLockMgr(const wptr<PowerMgrService>& pms) : pms_(pms) {}
     ~RunningLockMgr();
 
-    void Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
-        const UserIPCInfo &userIPCinfo, uint32_t timeOutMS = 0);
+    void Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
     void UnLock(const sptr<IRemoteObject> remoteObj);
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
-        const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo);
+        const RunningLockParam& runningLockParam);
     bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
@@ -80,8 +79,7 @@ private:
 
     class SystemLock {
     public:
-        SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type, const std::string& name)
-            : action_(action), name_(name), type_(type), locking_(false) {};
+        SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type, const std::string& name);
         ~SystemLock() = default;
         void Lock();
         void Unlock();
@@ -96,8 +94,7 @@ private:
         }
     private:
         std::shared_ptr<IRunningLockAction> action_;
-        const std::string name_;
-        const RunningLockType type_;
+        RunningLockParam param_;
         bool locking_;
     };
 
@@ -167,13 +164,13 @@ private:
         virtual ~RunningLockDeathRecipient() = default;
     };
     bool InitLocks();
-    bool MatchProxyMap(const UserIPCInfo& userIPCinfo);
+    bool MatchProxyMap(const int32_t pid, const int32_t uid);
     void SetRunningLockDisableFlag(std::shared_ptr<RunningLockInner>& lockInner, bool forceRefresh = false);
     void LockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void UnLockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void ProxyRunningLockInner(bool proxyLock);
-    void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, uint32_t timeOutMS = 0);
-    RunningLockType ConvertTypeForLockCounters(RunningLockType type);
+    void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
+    bool IsSceneRunningLockType(RunningLockType type);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
     std::weak_ptr<PowermsEventHandler> handler_;

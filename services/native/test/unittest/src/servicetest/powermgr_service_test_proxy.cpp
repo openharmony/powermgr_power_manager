@@ -114,8 +114,7 @@ bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(RunningLockType type)
     return result;
 }
 
-bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
-    uint32_t timeOutMs)
+bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
@@ -129,8 +128,7 @@ bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, const 
     }
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
-    data.WriteParcelable(&runningLockInfo);
-    data.WriteUint32(timeOutMs);
+    data.WriteInt32(timeOutMs);
 
     int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK),
         data, reply, option);

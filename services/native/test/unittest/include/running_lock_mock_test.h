@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_MOCK_LOCK_ACTION_H
-#define POWERMGR_MOCK_LOCK_ACTION_H
+#ifndef POWERMGR_RUNNING_LOCK_MOCK_TEST_H
+#define POWERMGR_RUNNING_LOCK_MOCK_TEST_H
 
-#include <gmock/gmock.h>
-#include "actions/irunning_lock_action.h"
+#include <gtest/gtest.h>
 
 namespace OHOS {
 namespace PowerMgr {
-class MockLockAction : public IRunningLockAction {
+class RunningLockMockTest : public testing::Test {
 public:
-    MockLockAction() = default;
-    virtual ~MockLockAction() = default;
-    MOCK_METHOD1(Acquire, void(RunningLockType type));
-    MOCK_METHOD1(Release, void(RunningLockType type));
-    MOCK_METHOD1(Lock, void(const RunningLockParam& param));
-    MOCK_METHOD1(Unlock, void(const RunningLockParam& param));
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp(void);
 };
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // POWERMGR_MOCK_POWER_ACTION_H
+#endif // POWERMGR_RUNNING_LOCK_MOCK_TEST_H

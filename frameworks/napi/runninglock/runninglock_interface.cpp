@@ -134,8 +134,8 @@ napi_value RunningLockInterface::Lock(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_typeof(env, args[0], &type));
     NAPI_ASSERT(env, type == napi_number, "Wrong argument type. number expected.");
 
-    uint32_t timeOut;
-    status = napi_get_value_uint32(env, args[0], &timeOut);
+    int32_t timeOut;
+    status = napi_get_value_int32(env, args[0], &timeOut);
     if (status != napi_ok) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "napi_get_value_uint32 failed");
         return nullptr;

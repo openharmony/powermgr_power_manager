@@ -22,7 +22,7 @@
 #include <string>
 
 #include "power_common.h"
-#include "running_lock_info.h"
+#include "running_lock_action_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -39,8 +39,8 @@ public:
     virtual void Acquire(RunningLockType type);
     virtual void Release(RunningLockType type);
 
-    virtual void Lock(RunningLockType type, const std::string& name) = 0;
-    virtual void Unlock(RunningLockType type, const std::string& name) = 0;
+    virtual void Lock(const RunningLockParam& param) = 0;
+    virtual void Unlock(const RunningLockParam& param) = 0;
 
 private:
     class RunningLockDesc {
@@ -73,9 +73,9 @@ private:
     {
         return type < RunningLockType::RUNNINGLOCK_BUTT;
     }
+    RunningLockParam FillRunningLockParam(RunningLockType type);
 
     static const std::array<std::string, ToUnderlying(RunningLockType::RUNNINGLOCK_BUTT)> LOCK_TAGS;
-
     std::array<RunningLockDesc, ToUnderlying(RunningLockType::RUNNINGLOCK_BUTT)> lockDescs_;
 };
 } // namespace PowerMgr

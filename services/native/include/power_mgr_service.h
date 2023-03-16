@@ -60,8 +60,7 @@ public:
         const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj,
-        const RunningLockInfo& runningLockInfo, uint32_t timeOutMS) override;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
@@ -153,7 +152,7 @@ private:
     void HandlePowerKeyDown();
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
-    void FillUserIPCInfo(UserIPCInfo &userIPCinfo);
+    RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
     bool IsSupportSensor(SensorTypeId);
     static void HallSensorCallback(SensorEvent* event);
     static void RegisterBootCompletedCallback();

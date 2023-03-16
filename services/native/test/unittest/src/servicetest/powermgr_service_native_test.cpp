@@ -275,14 +275,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     RunningLockInfo runningLockInfo;
     runningLockInfo.name = "runninglock";
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_SCREEN;
-    uint32_t timeOutMs = 0;
+    int32_t timeOutMs = 0;
     pid_t uid = 0;
     pid_t pid = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     EXPECT_TRUE(g_powerMgrServiceProxy->ProxyRunningLock(true, uid, pid));
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
-    g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token, timeOutMs);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S);
@@ -308,12 +308,12 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
     RunningLockInfo runningLockInfo;
     runningLockInfo.name = "runninglock";
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_SCREEN;
-    uint32_t timeOutMs = 0;
+    int32_t timeOutMs = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
 
-    g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token, timeOutMs);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S * DOUBLE_TIMES);
@@ -340,12 +340,12 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
     RunningLockInfo runningLockInfo;
     runningLockInfo.name = "runninglock";
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_SCREEN;
-    uint32_t timeOutMs = 0;
+    int32_t timeOutMs = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
 
-    g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token, timeOutMs);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
@@ -372,14 +372,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest013, TestSize.Level
     RunningLockInfo runningLockInfo;
     runningLockInfo.name = "runninglock";
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_BACKGROUND;
-    uint32_t timeOutMs = 0;
+    int32_t timeOutMs = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token, timeOutMs);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     sleep(5);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
@@ -404,10 +404,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest014, TestSize.Level
     RunningLockInfo runningLockInfo;
     runningLockInfo.name = "runninglock";
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_BACKGROUND;
-    uint32_t timeOutMs = 0;
+    int32_t timeOutMs = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
-    g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token, timeOutMs);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);

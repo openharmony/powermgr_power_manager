@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,26 +36,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int64_t CALLTIMEMS = 1;
-constexpr pid_t PID = 1;
-constexpr pid_t PID_A = 2;
-constexpr pid_t UNPID = -1;
-constexpr pid_t UID = 1;
-constexpr pid_t UID_A = 2;
-constexpr pid_t UNUID = -1;
-constexpr uint32_t LOCKNUM_A = 0;
-constexpr uint32_t LOCKNUM_B = 1;
-constexpr int32_t TIMEOUTMS = 7;
-constexpr uint32_t MAXTYPE = 77;
-constexpr int32_t UNTYPE = -1;
-
-class RunningLockNativeTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
-};
+class RunningLockNativeTest : public testing::Test {};
 
 class PowerShutdownTest1Callback : public PowerShutdownCallbackStub {
 public:
