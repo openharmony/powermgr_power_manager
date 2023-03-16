@@ -173,6 +173,10 @@ static void Lock(const uint8_t* data)
     }
 
     auto fuzzLock = g_powerMgrClient.CreateRunningLock("FUZZ", static_cast <RunningLockType>(type[0]));
+    if (fuzzLock == nullptr) {
+        return;
+    }
+
     fuzzLock -> Lock();
 }
 
@@ -185,6 +189,10 @@ static void UnLock(const uint8_t* data)
     }
 
     auto fuzzLock = g_powerMgrClient.CreateRunningLock("FUZZ", static_cast <RunningLockType>(type[0]));
+    if (fuzzLock == nullptr) {
+        return;
+    }
+
     fuzzLock -> Lock();
     fuzzLock -> UnLock();
 }

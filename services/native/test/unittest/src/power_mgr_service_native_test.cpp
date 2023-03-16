@@ -27,15 +27,19 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
+namespace {
+constexpr int32_t TIMEOUTMS = 7;
+constexpr int64_t CALLTIMEMS = 1;
+constexpr int64_t SUSCALLTIMEMS = 3;
+constexpr pid_t PID = 1;
+constexpr pid_t UID = 1;
+constexpr int32_t UNCANCELID = -1;
+constexpr int64_t UNCALLTIMEMS = -7;
+constexpr uint32_t LID_CLOSED_HALL_FLAG = 0x1;
+constexpr uint32_t LID_CLOSED_HALL_FLAG_B = 0x2;
+} // namespace
+
 sptr<PowerMgrService> g_pmsTest;
-
-void PowerMgrServiceNativeTest::SetUpTestCase()
-{
-}
-
-void PowerMgrServiceNativeTest::TearDownTestCase()
-{
-}
 
 void PowerMgrServiceNativeTest::SetUp()
 {
@@ -52,10 +56,10 @@ void PowerMgrServiceNativeTest::SetUp()
     auto runningLockMgr = std::make_shared<RunningLockMgr>(g_pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
-    RunningLockInfo runningLockInfo {"runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN};
-    UserIPCInfo userIPCinfo {UID, PID};
-    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockInfo, userIPCinfo) != nullptr);
-    runningLockMgr->Lock(remoteObj, runningLockInfo, userIPCinfo, TIMEOUTMS);
+    RunningLockParam runningLockParam {
+        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
+    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
 }
 
@@ -144,7 +148,7 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->CreateRunningLock(token, runningLockInfo1) == PowerErrors::ERR_OK);
     EXPECT_TRUE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN));
     EXPECT_FALSE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
-    EXPECT_TRUE(g_pmsTest->Lock(token, runningLockInfo1, SUSCALLTIMEMS));
+    EXPECT_TRUE(g_pmsTest->Lock(token, SUSCALLTIMEMS));
     EXPECT_TRUE(g_pmsTest->ProxyRunningLock(token, UID, PID));
     EXPECT_TRUE(g_pmsTest->UnLock(token));
     EXPECT_FALSE(g_pmsTest->ReleaseRunningLock(token));

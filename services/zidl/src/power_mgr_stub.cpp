@@ -173,11 +173,9 @@ int32_t PowerMgrStub::LockStub(MessageParcel& data)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
-    std::unique_ptr<RunningLockInfo> runningLockInfo(data.ReadParcelable<RunningLockInfo>());
-    RETURN_IF_WITH_RET((runningLockInfo == nullptr), E_READ_PARCEL_ERROR);
-    uint32_t timeOutMs = 0;
-    READ_PARCEL_WITH_RET(data, Uint32, timeOutMs, E_READ_PARCEL_ERROR);
-    Lock(remoteObj, *runningLockInfo, timeOutMs);
+    int32_t timeOutMs = 0;
+    READ_PARCEL_WITH_RET(data, Int32, timeOutMs, E_READ_PARCEL_ERROR);
+    Lock(remoteObj, timeOutMs);
     return ERR_OK;
 }
 

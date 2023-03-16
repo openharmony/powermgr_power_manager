@@ -107,8 +107,7 @@ bool PowerMgrProxy::IsRunningLockTypeSupported(RunningLockType type)
     return result;
 }
 
-bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
-    uint32_t timeOutMs)
+bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
@@ -123,8 +122,7 @@ bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, const RunningLock
     }
 
     WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
-    WRITE_PARCEL_WITH_RET(data, Parcelable, &runningLockInfo, false);
-    WRITE_PARCEL_WITH_RET(data, Uint32, timeOutMs, false);
+    WRITE_PARCEL_WITH_RET(data, Int32, timeOutMs, false);
 
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK),
         data, reply, option);

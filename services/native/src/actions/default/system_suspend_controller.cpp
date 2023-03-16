@@ -25,7 +25,6 @@ using namespace OHOS::HDI::Power::V1_1;
 namespace {
 const std::string HDI_SERVICE_NAME = "power_interface_service";
 constexpr uint32_t RETRY_TIME = 1000;
-constexpr int32_t RUNNINGLOCK_TIMEOUT_NONE = -1;
 }
 
 namespace OHOS {
@@ -126,45 +125,44 @@ void SystemSuspendController::Wakeup()
 #endif
 }
 
-OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLockInfo(
-    OHOS::PowerMgr::RunningLockType type, const std::string& name)
+OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
 {
     OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo {};
-    filledInfo.name = name;
-    filledInfo.type = static_cast<OHOS::HDI::Power::V1_1::RunningLockType>(type);
-    filledInfo.timeoutMs = RUNNINGLOCK_TIMEOUT_NONE;
-    filledInfo.uid = 0;
-    filledInfo.pid = 0;
+    filledInfo.name = param.name;
+    filledInfo.type = static_cast<OHOS::HDI::Power::V1_1::RunningLockType>(param.type);
+    filledInfo.timeoutMs = param.timeoutMs;
+    filledInfo.uid = param.uid;
+    filledInfo.pid = param.pid;
     return filledInfo;
 }
 
-void SystemSuspendController::AcquireRunningLock(OHOS::PowerMgr::RunningLockType type, const std::string& name)
+void SystemSuspendController::AcquireRunningLock(const RunningLockParam& param)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
-    if (type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
-        powerInterface_->SuspendBlock(name);
+    if (param.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
+        powerInterface_->SuspendBlock(param.name);
     } else {
-        OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(type, name);
+        OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(param);
         powerInterface_->HoldRunningLock(filledInfo);
     }
 #endif
 }
 
-void SystemSuspendController::ReleaseRunningLock(OHOS::PowerMgr::RunningLockType type, const std::string& name)
+void SystemSuspendController::ReleaseRunningLock(const RunningLockParam& param)
 {
 #ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
-    if (type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
-        powerInterface_->SuspendUnblock(name);
+    if (param.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
+        powerInterface_->SuspendUnblock(param.name);
     } else {
-        OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(type, name);
+        OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(param);
         powerInterface_->UnholdRunningLock(filledInfo);
     }
 #endif

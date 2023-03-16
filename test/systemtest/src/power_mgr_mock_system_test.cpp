@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start.");
+    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start");
     g_powerState = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
@@ -68,8 +68,8 @@ namespace {
  */
 HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
 {
-    GTEST_LOG_(INFO) << "PowerMgrMock106: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:Start.");
+    GTEST_LOG_(INFO) << "PowerMgrMock106: start";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -81,7 +81,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     ON_CALL(*g_powerState, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
     pms->CreateRunningLock(token, info);
     pms->SetDisplaySuspend(true);
-    pms->Lock(token, info, 0);
+    pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
@@ -92,7 +92,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
     EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End.");
-    GTEST_LOG_(INFO) << "PowerMgrMock106: end.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
+    GTEST_LOG_(INFO) << "PowerMgrMock106: end";
 }
 }

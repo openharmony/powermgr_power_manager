@@ -697,10 +697,15 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
     return powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
 }
 
-inline void PowerMgrService::FillUserIPCInfo(UserIPCInfo &userIPCinfo)
+RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS)
 {
-    userIPCinfo.pid = IPCSkeleton::GetCallingPid();
-    userIPCinfo.uid = IPCSkeleton::GetCallingUid();
+    RunningLockParam filledParam {};
+    filledParam.name = info.name;
+    filledParam.type = info.type;
+    filledParam.timeoutMs = timeOutMS;
+    filledParam.pid = IPCSkeleton::GetCallingPid();
+    filledParam.uid = IPCSkeleton::GetCallingUid();
+    return filledParam;
 }
 
 PowerErrors PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
@@ -710,13 +715,16 @@ PowerErrors PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remote
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-
+    if (!IsRunningLockTypeSupported(runningLockInfo.type)) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Create runninglock failed, name: %{public}s, type: %{public}d",
+            runningLockInfo.name.c_str(), runningLockInfo.type);
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d",
         runningLockInfo.name.c_str(), runningLockInfo.type);
 
-    UserIPCInfo userIPCInfo;
-    FillUserIPCInfo(userIPCInfo);
-    runningLockMgr_->CreateRunningLock(remoteObj, runningLockInfo, userIPCInfo);
+    RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo);
+    runningLockMgr_->CreateRunningLock(remoteObj, runningLockParam);
     return PowerErrors::ERR_OK;
 }
 
@@ -749,24 +757,15 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
 }
 
-bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj,
-    const RunningLockInfo& runningLockInfo,
-    uint32_t timeOutMS)
+bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
 
-    POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "timeOutMS: %{public}d, name: %{public}s, type: %{public}d",
-        timeOutMS,
-        runningLockInfo.name.c_str(),
-        runningLockInfo.type);
-
-    UserIPCInfo userIPCInfo;
-    FillUserIPCInfo(userIPCInfo);
-    runningLockMgr_->Lock(remoteObj, runningLockInfo, userIPCInfo, timeOutMS);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "timeOutMS: %{public}d", timeOutMS);
+    runningLockMgr_->Lock(remoteObj, timeOutMS);
     return true;
 }
 

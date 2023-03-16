@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,25 +21,21 @@
 
 namespace OHOS {
 namespace PowerMgr {
-RunningLockInner::RunningLockInner(const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo)
+RunningLockInner::RunningLockInner(const RunningLockParam& runningLockParam)
 {
-    runningLockInfo_.name = runningLockInfo.name;
-    runningLockInfo_.type = runningLockInfo.type;
-    userIPCinfo_ = userIPCinfo;
+    runningLockParam_ = runningLockParam;
     lockTimeMs_ = GetTickCount();
 }
 
-std::shared_ptr<RunningLockInner> RunningLockInner::CreateRunningLockInner(const RunningLockInfo& runningLockInfo,
-    const UserIPCInfo &userIPCinfo)
+std::shared_ptr<RunningLockInner> RunningLockInner::CreateRunningLockInner(const RunningLockParam& runningLockParam)
 {
-    std::shared_ptr<RunningLockInner> runningLockInner = std::make_shared<RunningLockInner>(runningLockInfo,
-        userIPCinfo);
+    std::shared_ptr<RunningLockInner> runningLockInner = std::make_shared<RunningLockInner>(runningLockParam);
     if (runningLockInner == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockInner is nullptr");
         return nullptr;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d", runningLockInfo.name.c_str(),
-        runningLockInfo.type);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d", runningLockParam.name.c_str(),
+        runningLockParam.type);
     return runningLockInner;
 }
 
@@ -47,7 +43,7 @@ void RunningLockInner::DumpInfo(const std::string& description)
 {
     // this statement used to debug, can't find isDebugEnabled() interface. will be replaced later.
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "description: %{public}s, name: %{public}s, type: %{public}d,",
-        description.c_str(), runningLockInfo_.name.c_str(), runningLockInfo_.type);
+        description.c_str(), runningLockParam_.name.c_str(), runningLockParam_.type);
 }
 } // namespace PowerMgr
 } // namespace OHOS
