@@ -57,7 +57,7 @@ enum class PowerState : uint32_t {
     AWAKE = 0,
 
     /**
-     * Power State: screen on or off and some background user processes are frozen.
+     * Power State: screen on or active and some background user processes are frozen.
      */
     FREEZE,
 

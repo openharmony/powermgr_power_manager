@@ -43,3 +43,7 @@ STATE_CORRECTION:
   CORRECTION_STATE: {type: INT32, desc: the corrected state}
   DISPLAY_STATE: {type: INT32, desc: the display state}
   MSG: {type: STRING, desc: correct error information}
+
+STATE:
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: power state}
+  STATE: {type: INT32, desc: power state}
