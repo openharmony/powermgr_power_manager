@@ -150,8 +150,8 @@ private:
         int64_t failTime_ {0};
     protected:
         bool CheckState();
-        void MatchStatus(PowerState& currentState, DisplayState state);
-        void CorrectionState(PowerState& currentState, PowerState correctState);
+        void MatchState(PowerState& currentState, DisplayState state);
+        void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
         PowerState state_;
         std::weak_ptr<PowerStateMachine> owner_;
         std::function<TransitResult(StateChangeReason)> action_;
