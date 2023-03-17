@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,13 +27,8 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int NEXT_WAIT_TIME_S = 1;
-constexpr int ASYNC_WAIT_TIME_S = 3;
-constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
-constexpr int SCREEN_OFF_WAIT_TIME_S = (DEFAULT_DISPLAY_OFF_TIME / 1000);
-constexpr int SCREEN_DIM_WAIT_TIME_S = (SCREEN_OFF_WAIT_TIME_S * 2 / 3);
-constexpr int SCREEN_DIM_TO_OFF_TIME_S = (SCREEN_OFF_WAIT_TIME_S / 3);
-constexpr int SLEEP_WAIT_TIME_S = (DEFAULT_SLEEP_TIME / 1000);
+constexpr int SLEEP_WAIT_TIME_MS = 100;
+constexpr int TRANSFER_NS_TO_MS = 1000;
 
 class PowerMgrMockTest : public testing::Test {
 public:
