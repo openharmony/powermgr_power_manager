@@ -110,30 +110,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock002, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrMock003
- * @tc.desc: test RebootDeviceForDeprecated by mock
- * @tc.type: FUNC
- * @tc.require: issueI6KRS8
- */
-HWTEST_F(PowerMgrSTMockTest, PowerMgrMock003, TestSize.Level2)
-{
-    GTEST_LOG_(INFO) << "PowerMgrMock003: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock003:Start.");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock003: Failed to get PowerMgrService";
-    }
-
-    EXPECT_CALL(*g_powerAction, Reboot(std::string("test"))).Times(1);
-    pms->RebootDeviceForDeprecated(std::string("test"));
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock003:End.");
-    GTEST_LOG_(INFO) << "PowerMgrMock003: end.";
-    usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
-}
-
-/**
  * @tc.name: PowerMgrMock029
  * @tc.desc: test ForceSuspendDevice by mock
  * @tc.type: FUNC

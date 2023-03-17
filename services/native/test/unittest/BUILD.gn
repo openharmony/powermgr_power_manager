@@ -346,6 +346,28 @@ ohos_unittest("test_power_state_machine") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_power_mgr_mock") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_mock_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_power_mgr_fail_check") {
   module_out_path = module_output_path
 
@@ -732,6 +754,7 @@ group("unittest") {
     ":test_power_mgr_client",
     ":test_power_mgr_client_native",
     ":test_power_mgr_dump",
+    ":test_power_mgr_mock",
     ":test_power_mgr_service",
     ":test_power_mgr_service_death",
     ":test_power_mgr_service_native",
