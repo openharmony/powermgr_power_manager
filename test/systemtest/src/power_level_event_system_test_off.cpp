@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ void PowerLevelEventSystemTestOff::SetUpTestCase(void)
 
 class CommonEventScreenOffTest : public EventFwk::CommonEventSubscriber {
 public:
-    CommonEventScreenOffTest(const EventFwk::CommonEventSubscribeInfo& subscriberInfo);
+    explicit CommonEventScreenOffTest(const EventFwk::CommonEventSubscribeInfo& subscriberInfo);
     virtual ~CommonEventScreenOffTest() {};
     virtual void OnReceiveEvent(const EventFwk::CommonEventData& data);
     static shared_ptr<CommonEventScreenOffTest> RegisterEvent();
