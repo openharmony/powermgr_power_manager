@@ -30,6 +30,8 @@ constexpr uint32_t HIBERNATE = 6;
 constexpr uint32_t SHUTDOWN = 7;
 
 class PowerStateLevelFrameworkTest : public testing::Test {
+public:
+    static void SetUpTestCase();
 };
 } // namespace PowerMgr
 } // namespace OHOS
