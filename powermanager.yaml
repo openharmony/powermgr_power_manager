@@ -13,7 +13,7 @@
 
 domain: POWER
 
-POWER_RUNNINGLOCK:
+RUNNINGLOCK:
   __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: runninglock information}
   PID: {type: INT32, desc: application pid}
   UID: {type: INT32, desc: application uid}
@@ -24,7 +24,7 @@ POWER_RUNNINGLOCK:
   TAG: {type: STRING, desc: runninglock tag}
   MESSAGE: {type: STRING, desc: runninglock message}
 
-POWER_SCREEN:
+SCREEN:
   __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: screen state}
   STATE: {type: INT32, desc: screen state}
   BRIGHTNESS: {type: INT32, desc: brightness level}
