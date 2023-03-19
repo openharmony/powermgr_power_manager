@@ -717,6 +717,28 @@ ohos_unittest("test_running_lock_hub_native") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_running_lock_mock") {
+  module_out_path = module_output_path
+
+  sources = [ "src/running_lock_mock_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -742,6 +764,7 @@ group("unittest") {
     ":test_power_state_machine",
     ":test_running_lock",
     ":test_running_lock_hub_native",
+    ":test_running_lock_mock",
     ":test_running_lock_native",
   ]
 }

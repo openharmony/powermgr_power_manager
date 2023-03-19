@@ -92,8 +92,8 @@ napi_value RunningLockNapi::Hold(napi_env env, napi_callback_info info)
         return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
     }
 
-    uint32_t timeOut;
-    if (napi_ok != napi_get_value_uint32(env, argv[INDEX_0], &timeOut)) {
+    int32_t timeOut;
+    if (napi_ok != napi_get_value_int32(env, argv[INDEX_0], &timeOut)) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "napi_get_value_uint32 failed");
         return nullptr;
     }

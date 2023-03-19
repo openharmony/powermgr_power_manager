@@ -33,7 +33,7 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
-constexpr uint32_t RUNNINGLOCK_TYPE_BACKGROUND_MASK = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BACKGROUND);
+constexpr int32_t INVALID_PID = -1;
 }
 
 RunningLockMgr::~RunningLockMgr() {}
@@ -200,17 +200,15 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
     return nullptr;
 }
 
-std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
-    const sptr<IRemoteObject>& remoteObj,
-    const RunningLockInfo& runningLockInfo,
-    const UserIPCInfo& userIPCinfo)
+std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+    const RunningLockParam& runningLockParam)
 {
-    auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockInfo, userIPCinfo);
+    auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockParam);
     if (lockInner == nullptr) {
         return nullptr;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, remoteObj=%{private}p, name=%{public}s, type=%{public}d",
-        remoteObj.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
+        remoteObj.GetRefPtr(), runningLockParam.name.c_str(), runningLockParam.type);
 
     mutex_.lock();
     runningLocks_.emplace(remoteObj, lockInner);
@@ -227,9 +225,9 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     if (lockInner == nullptr) {
         return result;
     }
-    if (!lockInner->GetDisabled()) {
-        UnLock(remoteObj);
-    }
+
+    UnLock(remoteObj);
+
     mutex_.lock();
     runningLocks_.erase(remoteObj);
     mutex_.unlock();
@@ -237,8 +235,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     return result;
 }
 
-void RunningLockMgr::RemoveAndPostUnlockTask(
-    const sptr<IRemoteObject>& remoteObj, uint32_t timeOutMS)
+void RunningLockMgr::RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
     auto handler = handler_.lock();
     if (handler == nullptr) {
@@ -249,50 +246,56 @@ void RunningLockMgr::RemoveAndPostUnlockTask(
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p, remoteObjStr=%{public}s, timeOutMS=%{public}d",
         remoteObj.GetRefPtr(), remoteObjStr.c_str(), timeOutMS);
     handler->RemoveTask(remoteObjStr);
-    if (timeOutMS != 0) {
+    if (timeOutMS > 0) {
         std::function<void()> unLockFunc = std::bind(&RunningLockMgr::UnLock, this,  remoteObj);
         handler->PostTask(unLockFunc, remoteObjStr, timeOutMS);
     }
 }
 
-RunningLockType RunningLockMgr::ConvertTypeForLockCounters(RunningLockType type)
+bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
 {
-    if ((static_cast<uint32_t>(type) & RUNNINGLOCK_TYPE_BACKGROUND_MASK)
-        == RUNNINGLOCK_TYPE_BACKGROUND_MASK) {
-        return RunningLockType::RUNNINGLOCK_BACKGROUND;
-    }
-    return type;
+    return type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
-void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj,
-    const RunningLockInfo& runningLockInfo,
-    const UserIPCInfo& userIPCinfo, uint32_t timeOutMS)
+void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
     StartTrace(HITRACE_TAG_POWER, "RunningLock_Lock");
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p, name=%{public}s, type=%{public}d",
-        remoteObj.GetRefPtr(), runningLockInfo.name.c_str(), runningLockInfo.type);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p", remoteObj.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr, remoteObj=%{private}p", remoteObj.GetRefPtr());
         return;
     }
+    RunningLockParam lockInnerParam = lockInner->GetRunningLockParam();
+    lockInnerParam.timeoutMs = timeOutMS;
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
+    if (IsSceneRunningLockType(lockInnerParam.type)) {
+        runningLockAction_->Lock(lockInnerParam);
+        NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_ADD);
+        return;
+    }
+
     if (!lockInner->GetDisabled()) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled, remoteObj=%{private}p", remoteObj.GetRefPtr());
         return;
     }
-
-    RunningLockType lockType = ConvertTypeForLockCounters(lockInner->GetRunningLockType());
-    auto iterator = lockCounters_.find(lockType);
+    auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, remoteObj=%{private}p, type=%{public}d",
-            remoteObj.GetRefPtr(), lockInner->GetRunningLockType());
+            remoteObj.GetRefPtr(), lockInnerParam.type);
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     counter->Increase(remoteObj, lockInner);
     lockInner->SetDisabled(false);
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
     if (timeOutMS > 0) {
         RemoveAndPostUnlockTask(remoteObj, timeOutMS);
@@ -309,8 +312,15 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     if (lockInner == nullptr) {
         return;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockInner remoteObj=%{private}p, name=%{public}s, type=%{public}d",
-        remoteObj.GetRefPtr(), lockInner->GetRunningLockName().c_str(), lockInner->GetRunningLockType());
+    auto lockInnerParam = lockInner->GetRunningLockParam();
+    POWER_HILOGD(
+        FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
+    if (IsSceneRunningLockType(lockInnerParam.type)) {
+        runningLockAction_->Unlock(lockInnerParam);
+        NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
+        return;
+    }
+
     if (lockInner->GetDisabled()) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already disabled, remoteObj=%{private}p, name=%{public}s",
             remoteObj.GetRefPtr(), lockInner->GetRunningLockName().c_str());
@@ -318,17 +328,16 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     }
     RemoveAndPostUnlockTask(remoteObj);
 
-    RunningLockType lockType = ConvertTypeForLockCounters(lockInner->GetRunningLockType());
-    auto iterator = lockCounters_.find(lockType);
+    auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, remoteObj=%{private}p, type=%{public}d",
-            remoteObj.GetRefPtr(), lockInner->GetRunningLockType());
+            remoteObj.GetRefPtr(), lockInnerParam.type);
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     counter->Decrease(remoteObj, lockInner);
     lockInner->SetDisabled(true);
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInner->GetRunningLockType(),
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
     FinishTrace(HITRACE_TAG_POWER);
 }
@@ -356,8 +365,7 @@ uint32_t RunningLockMgr::GetRunningLockNum(RunningLockType type)
 
 uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type)
 {
-    RunningLockType lockType = ConvertTypeForLockCounters(type);
-    auto iterator = lockCounters_.find(lockType);
+    auto iterator = lockCounters_.find(type);
     if (iterator == lockCounters_.end()) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "No specific lock, type=%{public}d", type);
         return 0;
@@ -462,29 +470,26 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
         }
     }
 }
-bool RunningLockMgr::MatchProxyMap(const UserIPCInfo& userIPCinfo)
+bool RunningLockMgr::MatchProxyMap(const int32_t pid, const int32_t uid)
 {
     if (proxyMap_.empty()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "ProxyMap_ is empty, uid = %{public}d, pid = %{public}d",
-            userIPCinfo.uid, userIPCinfo.pid);
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "ProxyMap_ is empty, uid = %{public}d, pid = %{public}d", uid, pid);
         return false;
     }
-    auto it = proxyMap_.find(userIPCinfo.uid);
+    auto it = proxyMap_.find(uid);
     // 1. Find pidset by uid.
     if (it == proxyMap_.end()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Pid set not match, uid = %{public}d, pid = %{public}d",
-            userIPCinfo.uid, userIPCinfo.pid);
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Pid set not match, uid = %{public}d, pid = %{public}d", uid, pid);
         return false;
     }
     auto& pidset = it->second;
     // 2. Count by owner pid.
-    if (pidset.count(userIPCinfo.pid) > 0) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Pid set match and count > 0, uid = %{public}d, pid = %{public}d",
-            userIPCinfo.uid, userIPCinfo.pid);
+    if (pidset.count(pid) > 0) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Pid set match and count > 0, uid = %{public}d, pid = %{public}d", uid, pid);
         return true;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Pid set match and count(-1) = %{public}d, uid = %{public}d, pid = %{public}d",
-        static_cast<unsigned int>(pidset.count(INVALID_PID)), userIPCinfo.uid, userIPCinfo.pid);
+        static_cast<unsigned int>(pidset.count(INVALID_PID)), uid, pid);
     // 3. Count by INVALID_PID, return true when proxy (uid, -1).
     return (pidset.count(INVALID_PID) > 0);
 }
@@ -504,13 +509,13 @@ void RunningLockMgr::SetRunningLockDisableFlag(
         lockInner->SetDisabled(false);
         return;
     }
-    const UserIPCInfo& userIPCinfo = lockInner->GetUserIPCInfo();
-    bool matched = MatchProxyMap(userIPCinfo);
+    const int32_t pid = lockInner->GetRunningLockPid();
+    const int32_t uid = lockInner->GetRunningLockUid();
+    bool matched = MatchProxyMap(pid, uid);
     if (matched) {
-        // Matched the lock owner useripcinfo, set disabled directly.
+        // Matched the lock owner pid and uid, set disabled directly.
         lockInner->SetDisabled(true);
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock and ipc matched, uid = %{public}d, pid = %{public}d",
-            userIPCinfo.uid, userIPCinfo.pid);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock and ipc matched, uid = %{public}d, pid = %{public}d", uid, pid);
         return;
     }
     lockInner->SetDisabled(false);
@@ -629,9 +634,8 @@ void RunningLockMgr::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
 void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
     const std::string& msg, const RunningLockInner& lockInner) const
 {
-    const UserIPCInfo& ipcInfo = lockInner.GetUserIPCInfo();
-    int32_t pid = ipcInfo.pid;
-    int32_t uid = ipcInfo.uid;
+    int32_t pid = lockInner.GetRunningLockPid();
+    int32_t uid = lockInner.GetRunningLockUid();
     bool state = lockInner.GetDisabled();
     int32_t type = static_cast <int32_t>(lockInner.GetRunningLockType());
     string name = lockInner.GetRunningLockName();
@@ -667,6 +671,18 @@ static const std::string GetRunningLockTypeString(RunningLockType type)
             return "BACKGROUND";
         case RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL:
             return "PROXIMITY_SCREEN_CONTROL";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE:
+            return "BACKGROUND_PHONE";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION:
+            return "BACKGROUND_NOTIFICATION";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO:
+            return "BACKGROUND_AUDIO";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT:
+            return "BACKGROUND_SPORT";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION:
+            return "BACKGROUND_NAVIGATION";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_TASK:
+            return "BACKGROUND_TASK";
         case RunningLockType::RUNNINGLOCK_BUTT:
             return "BUTT";
         default:
@@ -707,14 +723,13 @@ void RunningLockMgr::DumpInfo(std::string& result)
         if (lockInner == nullptr) {
             return;
         }
-        auto& lockinfo = lockInner->GetRunningLockInfo();
-        auto& ipcinfo = lockInner->GetUserIPCInfo();
+        auto& lockParam = lockInner->GetRunningLockParam();
         result.append("  index=").append(ToString(index))
             .append(" time=").append(ToString(curTick - lockInner->GetLockTimeMs()))
-            .append(" type=").append(GetRunningLockTypeString(lockinfo.type))
-            .append(" name=").append(lockinfo.name)
-            .append(" uid=").append(ToString(ipcinfo.uid))
-            .append(" pid=").append(ToString(ipcinfo.pid))
+            .append(" type=").append(GetRunningLockTypeString(lockParam.type))
+            .append(" name=").append(lockParam.name)
+            .append(" uid=").append(ToString(lockInner->GetRunningLockUid()))
+            .append(" pid=").append(ToString(lockInner->GetRunningLockPid()))
             .append(" disable=").append(ToString(lockInner->GetDisabled()))
             .append("\n");
     }
@@ -750,10 +765,17 @@ void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteO
     handler->PostTask(forceUnLockFunc, TASK_RUNNINGLOCK_FORCEUNLOCK);
 }
 
+RunningLockMgr::SystemLock::SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type,
+    const std::string& name) : action_(action), locking_(false)
+{
+    param_.type = type;
+    param_.name = name;
+}
+
 void RunningLockMgr::SystemLock::Lock()
 {
     if (!locking_) {
-        action_->Lock(type_, name_.c_str());
+        action_->Lock(param_);
         locking_ = true;
     }
 }
@@ -761,7 +783,7 @@ void RunningLockMgr::SystemLock::Lock()
 void RunningLockMgr::SystemLock::Unlock()
 {
     if (locking_) {
-        action_->Unlock(type_, name_.c_str());
+        action_->Unlock(param_);
         locking_ = false;
     }
 }

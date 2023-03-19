@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_MOCK_LOCK_ACTION_H
-#define POWERMGR_MOCK_LOCK_ACTION_H
+#ifndef POWERMGR_IRUNNING_LOCK_ACTION_INFO_H
+#define POWERMGR_IRUNNING_LOCK_ACTION_INFO_H
 
-#include <gmock/gmock.h>
-#include "actions/irunning_lock_action.h"
+#include "running_lock_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class MockLockAction : public IRunningLockAction {
-public:
-    MockLockAction() = default;
-    virtual ~MockLockAction() = default;
-    MOCK_METHOD1(Acquire, void(RunningLockType type));
-    MOCK_METHOD1(Release, void(RunningLockType type));
-    MOCK_METHOD1(Lock, void(const RunningLockParam& param));
-    MOCK_METHOD1(Unlock, void(const RunningLockParam& param));
+/**
+ * Runninglock parameter: used to convert to HDI RunningLockInfo
+ */
+struct RunningLockParam {
+    std::string name;
+    RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT;
+    int32_t timeoutMs = -1;
+    int32_t pid = 0;
+    int32_t uid = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS
-
-#endif // POWERMGR_MOCK_POWER_ACTION_H
+#endif // POWERMGR_IRUNNING_LOCK_ACTION_INFO_H

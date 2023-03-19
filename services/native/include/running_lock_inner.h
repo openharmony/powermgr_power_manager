@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,51 +18,39 @@
 
 #include <mutex>
 
+#include "actions/running_lock_action_info.h"
 #include "power_common.h"
 #include "running_lock_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int32_t INVALID_PID = -1;
-constexpr int32_t INVALID_UID = -1;
-
-struct UserIPCInfo {
-    pid_t uid = INVALID_UID;
-    pid_t pid = INVALID_PID;
-
-    bool operator==(const UserIPCInfo& other) const
-    {
-        return (((uid == other.uid) && (pid == other.pid)) ||
-                ((uid == other.uid) && (other.pid == INVALID_PID)) ||
-                ((other.uid == INVALID_PID) && (pid == other.pid)) ||
-                ((other.uid == INVALID_PID) && (other.pid == INVALID_PID)));
-    }
-};
-
 class RunningLockInner {
 public:
-    RunningLockInner(const RunningLockInfo& runningLockInfo, const UserIPCInfo &userIPCinfo);
+    RunningLockInner(const RunningLockParam& runningLockParam);
     ~RunningLockInner() = default;
 
-    static std::shared_ptr<RunningLockInner> CreateRunningLockInner(const RunningLockInfo& runningLockInfo,
-        const UserIPCInfo &userIPCinfo);
+    static std::shared_ptr<RunningLockInner> CreateRunningLockInner(const RunningLockParam& runningLockParam);
     void DumpInfo(const std::string& description);
 
-    RunningLockType GetRunningLockType() const
-    {
-        return runningLockInfo_.type;
-    }
     const std::string& GetRunningLockName() const
     {
-        return runningLockInfo_.name;
+        return runningLockParam_.name;
     }
-    const RunningLockInfo& GetRunningLockInfo() const
+    RunningLockType GetRunningLockType() const
     {
-        return runningLockInfo_;
+        return runningLockParam_.type;
     }
-    const UserIPCInfo& GetUserIPCInfo() const
+    int32_t GetRunningLockPid() const
     {
-        return userIPCinfo_;
+        return runningLockParam_.pid;
+    }
+    int32_t GetRunningLockUid() const
+    {
+        return runningLockParam_.uid;
+    }
+    const RunningLockParam& GetRunningLockParam() const
+    {
+        return runningLockParam_;
     }
     void SetDisabled(bool disabled)
     {
@@ -95,8 +83,7 @@ public:
 
 private:
     std::mutex mutex_;
-    RunningLockInfo runningLockInfo_;
-    UserIPCInfo userIPCinfo_;
+    RunningLockParam runningLockParam_;
     bool disabled_ {true};
     bool reallyLocked_ {false};
     bool overTimeFlag_ {false};
