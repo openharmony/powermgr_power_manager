@@ -47,8 +47,7 @@ public:
         const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo,
-        uint32_t timeOutMs) override;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) override;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;

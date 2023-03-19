@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ public:
      * @param timeOutMs timeOutMs this runninglock will be released in timeOutMs milliseconds. If it is called without
      *                  parameter or parameter is 0 a lasting runninglock will be hold.
      */
-    ErrCode Lock(uint32_t timeOutMs = 0);
+    ErrCode Lock(int32_t timeOutMs = -1);
 
     /**
      * Release the runninglock, no matter how many times Lock() was called.

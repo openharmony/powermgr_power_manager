@@ -71,7 +71,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     state = sptrProxy->GetState();
     EXPECT_EQ(state, PowerState::UNKNOWN);
-    EXPECT_FALSE(sptrProxy->Lock(token, info, 0));
+    EXPECT_FALSE(sptrProxy->Lock(token, 0));
     EXPECT_FALSE(sptrProxy->UnLock(token));
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 }

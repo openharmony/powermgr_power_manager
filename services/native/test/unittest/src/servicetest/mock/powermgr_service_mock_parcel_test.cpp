@@ -82,11 +82,11 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
     runningLockInfo.type = RunningLockType::RUNNINGLOCK_SCREEN;
     pid_t uid = 0;
     pid_t pid = 0;
-    uint32_t timeOutMs = 0;
+    int32_t timeOutMs = 0;
     EXPECT_FALSE(g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo) == PowerErrors::ERR_OK);
     EXPECT_FALSE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
     EXPECT_FALSE(g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
-    EXPECT_FALSE(g_powerMgrServiceProxy->Lock(token, runningLockInfo, timeOutMs));
+    EXPECT_FALSE(g_powerMgrServiceProxy->Lock(token, timeOutMs));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnLock(token));
     EXPECT_FALSE(g_powerMgrServiceProxy->IsUsed(token));
     EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLock(true, uid, pid));

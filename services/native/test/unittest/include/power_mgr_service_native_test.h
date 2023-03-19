@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,20 +30,8 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int32_t TIMEOUTMS = 7;
-constexpr int64_t CALLTIMEMS = 1;
-constexpr int64_t SUSCALLTIMEMS = 3;
-constexpr pid_t PID = 1;
-constexpr pid_t UID = 1;
-constexpr int32_t UNCANCELID = -1;
-constexpr int64_t UNCALLTIMEMS = -7;
-constexpr uint32_t LID_CLOSED_HALL_FLAG = 0x1;
-constexpr uint32_t LID_CLOSED_HALL_FLAG_B = 0x2;
-
 class PowerMgrServiceNativeTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };

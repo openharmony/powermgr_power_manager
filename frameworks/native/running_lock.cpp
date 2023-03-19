@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@ PowerErrors RunningLock::Init()
     return Create();
 }
 
-ErrCode RunningLock::Lock(uint32_t timeOutMs)
+ErrCode RunningLock::Lock(int32_t timeOutMs)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock timeOutMs: %{public}u", timeOutMs);
 
@@ -64,7 +64,7 @@ ErrCode RunningLock::Lock(uint32_t timeOutMs)
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call");
-    proxy->Lock(token_, runningLockInfo_, timeOutMs);
+    proxy->Lock(token_, timeOutMs);
 
     return ERR_OK;
 }

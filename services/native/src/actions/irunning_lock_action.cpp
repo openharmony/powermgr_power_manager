@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void IRunningLockAction::Acquire(RunningLockType type)
     auto t = ToUnderlying(type);
     RunningLockDesc& desc = lockDescs_[t];
     if (desc.IsRefNone()) {
-        Lock(type, GetLockTag(type));
+        Lock(FillRunningLockParam(type));
     }
     desc.IncRef();
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Acquire runninglock, type: %{public}u, refCnt: %{public}u", t,
@@ -60,8 +60,16 @@ void IRunningLockAction::Release(RunningLockType type)
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Release runninglock, type: %{public}u, refCnt: %{public}u", t,
         desc.GetRefCnt());
     if (desc.IsRefNone()) {
-        Unlock(type, GetLockTag(type));
+        Unlock(FillRunningLockParam(type));
     }
+}
+
+RunningLockParam IRunningLockAction::FillRunningLockParam(RunningLockType type)
+{
+    RunningLockParam filledParam {};
+    filledParam.name = GetLockTag(type);
+    filledParam.type = type;
+    return filledParam;
 }
 } // namespace PowerMgr
 } // namespace OHOS
