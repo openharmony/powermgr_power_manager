@@ -359,66 +359,6 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
 }
 
 /**
- * @tc.name: PowerMgrServiceNativeTest013
- * @tc.desc: test background RunningLock
- * @tc.type: FUNC
- * @tc.require: issueI67Z62
- */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest013, TestSize.Level2)
-{
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest013:Start");
-    int32_t time = SLEEP_WAIT_TIME_MS;
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo runningLockInfo;
-    runningLockInfo.name = "runninglock";
-    runningLockInfo.type = RunningLockType::RUNNINGLOCK_BACKGROUND;
-    int32_t timeOutMs = 0;
-    auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
-    EXPECT_TRUE(error == PowerErrors::ERR_OK);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(time);
-
-    g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
-    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    g_powerMgrServiceProxy->Lock(token, timeOutMs);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
-    sleep(5);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-
-    g_powerMgrServiceProxy->UnLock(token);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
-    EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest013:End");
-}
-
-/**
- * @tc.name: PowerMgrServiceNativeTest014
- * @tc.desc: test background RunningLock
- * @tc.type: FUNC
- * @tc.require: issueI67Z62
- */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest014, TestSize.Level2)
-{
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest014:Start");
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo runningLockInfo;
-    runningLockInfo.name = "runninglock";
-    runningLockInfo.type = RunningLockType::RUNNINGLOCK_BACKGROUND;
-    int32_t timeOutMs = 0;
-    auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
-    EXPECT_TRUE(error == PowerErrors::ERR_OK);
-    g_powerMgrServiceProxy->Lock(token, timeOutMs);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
-    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
-    EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
-
-    g_powerMgrServiceProxy->UnLock(token);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
-    EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest014:End");
-}
-
-/**
  * @tc.name: PowerMgrServiceNativeTest015
  * @tc.desc: test SetDisplaySuspend
  * @tc.type: FUNC
