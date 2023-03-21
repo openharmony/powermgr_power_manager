@@ -445,9 +445,7 @@ void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallbac
         object->AddDeathRecipient(powerStateCBDeathRecipient_);
     }
     POWER_HILOGD(FEATURE_POWER_STATE,
-        "object = %{private}p, callback = %{private}p, listeners.size = %{public}d, insertOk = %{public}d",
-        object.GetRefPtr(),
-        callback.GetRefPtr(),
+        "listeners.size = %{public}d, insertOk = %{public}d",
         static_cast<unsigned int>(powerStateListeners_.size()),
         retIt.second);
 }
@@ -463,9 +461,7 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
         object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
     }
     POWER_HILOGD(FEATURE_POWER_STATE,
-        "object = %{private}p, callback = %{private}p, listeners.size = %{public}d, eraseNum = %{public}zu",
-        object.GetRefPtr(),
-        callback.GetRefPtr(),
+        "listeners.size = %{public}d, eraseNum = %{public}zu",
         static_cast<unsigned int>(powerStateListeners_.size()),
         eraseNum);
 }
@@ -636,7 +632,6 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(
     if (remote == nullptr || remote.promote() == nullptr) {
         return;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "remote = %{private}p", remote.promote().GetRefPtr());
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
