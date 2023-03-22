@@ -816,6 +816,28 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient033, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PowerMgrClient046
+ * @tc.desc: test WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient046, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient046: Prepare Fail, Screen is On.";
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient046: Wakeup Device Fail, Screen is Off";
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is end!");
+}
+
+/**
  * @tc.name: PowerMgrClient034
  * @tc.desc: test WakeupDevice
  * @tc.type: FUNC
