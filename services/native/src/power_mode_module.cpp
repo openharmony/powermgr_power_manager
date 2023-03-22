@@ -136,9 +136,8 @@ void PowerModeModule::CallbackManager::AddCallback(const sptr<IPowerModeCallback
     if (retIt.second) {
         object->AddDeathRecipient(this);
     }
-    POWER_HILOGD(FEATURE_POWER_MODE,
-                 "object = %{private}p, callback = %{private}p, callbacks.size = %{public}zu, insertOk = %{public}d",
-                 object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size(), retIt.second);
+    POWER_HILOGD(FEATURE_POWER_MODE, "callbacks.size = %{public}zu, insertOk = %{public}d",
+            callbacks_.size(), retIt.second);
 }
 
 void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallback>& callback)
@@ -151,8 +150,7 @@ void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallb
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
-    POWER_HILOGD(FEATURE_POWER_MODE, "object = %{private}p, callback = %{private}p, callbacks.size = %{public}zu,",
-                 object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size());
+    POWER_HILOGD(FEATURE_POWER_MODE, "callbacks.size = %{public}zu,", callbacks_.size());
 }
 
 void PowerModeModule::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
@@ -169,7 +167,7 @@ void PowerModeModule::CallbackManager::WaitingCallback()
     for (auto& obj: callbacks_) {
         sptr<IPowerModeCallback> callback = iface_cast<IPowerModeCallback>(obj);
         if (callback != nullptr) {
-            POWER_HILOGD(FEATURE_POWER_MODE, "Call IPowerModeCallback: %{private}p", callback.GetRefPtr());
+            POWER_HILOGD(FEATURE_POWER_MODE, "Call IPowerModeCallback");
             PowerMode mode = PowerMode::NORMAL_MODE;
             callback->OnPowerModeChanged(mode);
         }
