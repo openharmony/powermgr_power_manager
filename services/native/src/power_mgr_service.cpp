@@ -827,8 +827,7 @@ bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d, callback: %{private}p", pid, uid,
-        callback.GetRefPtr());
+    POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->RegisterPowerStateCallback(callback);
     return true;
 }
@@ -841,8 +840,7 @@ bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d, callback: %{private}p", pid, uid,
-        callback.GetRefPtr());
+    POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->UnRegisterPowerStateCallback(callback);
     return true;
 }
@@ -856,8 +854,8 @@ bool PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriori
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d, callback: %{private}p",
-        pid, uid, priority, callback.GetRefPtr());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d",
+        pid, uid, priority);
     shutdownService_.AddShutdownCallback(priority, callback);
     return true;
 }
@@ -870,8 +868,7 @@ bool PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& 
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, callback: %{private}p", pid, uid,
-        callback.GetRefPtr());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownService_.DelShutdownCallback(callback);
     return true;
 }
@@ -884,8 +881,7 @@ bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& 
     if (!Permission::IsSystem()) {
         return false; 
     }
-    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, callback: %{private}p", pid, uid,
-        callback.GetRefPtr());
+    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerModeModule_.AddPowerModeCallback(callback);
     return true;
 }
@@ -898,8 +894,7 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, callback: %{private}p", pid, uid,
-        callback.GetRefPtr());
+    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerModeModule_.DelPowerModeCallback(callback);
     return true;
 }

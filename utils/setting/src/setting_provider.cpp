@@ -238,8 +238,7 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
 {
     auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY);
     if (helper == nullptr) {
-        POWER_HILOGW(COMP_UTILS, "helper is nullptr, uri=%{public}s, remoteObj_=%{private}p", SETTING_URI_PROXY.c_str(),
-            remoteObj_.GetRefPtr());
+        POWER_HILOGW(COMP_UTILS, "helper is nullptr, uri=%{public}s", SETTING_URI_PROXY.c_str());
         return nullptr;
     }
     return helper;
@@ -248,7 +247,7 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
 bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper)
 {
     if (!helper->Release()) {
-        POWER_HILOGW(COMP_UTILS, "release helper fail, remoteObj_=%{private}p", remoteObj_.GetRefPtr());
+        POWER_HILOGW(COMP_UTILS, "release helper fail");
         return false;
     }
     return true;

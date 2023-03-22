@@ -207,8 +207,8 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, remoteObj=%{private}p, name=%{public}s, type=%{public}d",
-        remoteObj.GetRefPtr(), runningLockParam.name.c_str(), runningLockParam.type);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, name=%{public}s, type=%{public}d",
+        runningLockParam.name.c_str(), runningLockParam.type);
 
     mutex_.lock();
     runningLocks_.emplace(remoteObj, lockInner);
@@ -219,7 +219,6 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
 
 bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p", remoteObj.GetRefPtr());
     bool result = false;
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
@@ -243,8 +242,8 @@ void RunningLockMgr::RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteOb
         return;
     }
     const string& remoteObjStr = to_string(reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr()));
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p, remoteObjStr=%{public}s, timeOutMS=%{public}d",
-        remoteObj.GetRefPtr(), remoteObjStr.c_str(), timeOutMS);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObjStr=%{public}s, timeOutMS=%{public}d",
+        remoteObjStr.c_str(), timeOutMS);
     handler->RemoveTask(remoteObjStr);
     if (timeOutMS > 0) {
         std::function<void()> unLockFunc = std::bind(&RunningLockMgr::UnLock, this,  remoteObj);
@@ -265,11 +264,10 @@ bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
 void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
     StartTrace(HITRACE_TAG_POWER, "RunningLock_Lock");
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p", remoteObj.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr, remoteObj=%{private}p", remoteObj.GetRefPtr());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr");
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetRunningLockParam();
@@ -283,13 +281,12 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     }
 
     if (!lockInner->GetDisabled()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled, remoteObj=%{private}p", remoteObj.GetRefPtr());
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled");
         return;
     }
     auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, remoteObj=%{private}p, type=%{public}d",
-            remoteObj.GetRefPtr(), lockInnerParam.type);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, type=%{public}d", lockInnerParam.type);
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
@@ -306,7 +303,6 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
 void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
 {
     StartTrace(HITRACE_TAG_POWER, "RunningLock_Unlock");
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObj=%{private}p", remoteObj.GetRefPtr());
 
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
@@ -322,16 +318,16 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     }
 
     if (lockInner->GetDisabled()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already disabled, remoteObj=%{private}p, name=%{public}s",
-            remoteObj.GetRefPtr(), lockInner->GetRunningLockName().c_str());
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already disabled, name=%{public}s",
+            lockInner->GetRunningLockName().c_str());
         return;
     }
     RemoveAndPostUnlockTask(remoteObj);
 
     auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, remoteObj=%{private}p, type=%{public}d",
-            remoteObj.GetRefPtr(), lockInnerParam.type);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, type=%{public}d",
+            lockInnerParam.type);
         return;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
@@ -761,7 +757,6 @@ void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteO
     }
     std::function<void()> forceUnLockFunc = std::bind(&PowerMgrService::ForceUnLock, pms,
         remote.promote());
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remote.promote() = %{private}p", remote.promote().GetRefPtr());
     handler->PostTask(forceUnLockFunc, TASK_RUNNINGLOCK_FORCEUNLOCK);
 }
 
