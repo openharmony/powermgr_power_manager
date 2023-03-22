@@ -113,6 +113,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Leve
     stateMachine->HandleDelayTimer(powermsEvent);
     powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
     stateMachine->HandleDelayTimer(powermsEvent);
+    powermsEvent = PowermsEventHandler::SYSTEM_WAKE_UP_MSG;
+    stateMachine->HandleDelayTimer(powermsEvent);
     powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG;
     stateMachine->HandleDelayTimer(powermsEvent);
 
@@ -332,5 +334,43 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Leve
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device end.";
+}
+
+/**
+ * @tc.name: NativePowerStateMachine008
+ * @tc.desc: test init in powerStateMachine
+ * @tc.type: FUNC
+ */
+HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008::fun is start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+
+    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    EXPECT_TRUE(ret);
+    stateMachine->HandleSystemWakeup();
+    stateMachine->HandleActivitySleepTimeout();
+    ret = stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    EXPECT_TRUE(ret);
+    stateMachine->HandleSystemWakeup();
+
+    sptr<IRemoteObject> token = new RunningLockTokenStub();
+    RunningLockInfo infoInactive("test1", RunningLockType::RUNNINGLOCK_SCREEN);
+    pmsTest->CreateRunningLock(token, infoInactive);
+    pmsTest->Lock(token, 0);
+    EXPECT_EQ(pmsTest->IsUsed(token), true);
+    stateMachine->HandleActivityTimeout();
+    stateMachine->HandleActivityOffTimeout();
+
+    pmsTest->UnLock(token);
+    EXPECT_EQ(pmsTest->IsUsed(token), false);
+
+    pmsTest->UnLock(token);
+    EXPECT_EQ(pmsTest->IsUsed(token), false);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008::fun is end!");
+    GTEST_LOG_(INFO) << "NativePowerStateMachine008: Suspend Device end.";
 }
 }
