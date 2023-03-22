@@ -172,6 +172,21 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
 
     GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device end.";
 }
+
+/**
+ * @tc.name: PowerStateMachine007
+ * @tc.desc: test Suspend Device in proxy
+ * @tc.type: FUNC
+ * @tc.require: issueI6MZ3M
+ */
+HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine007::fun is start!");
+    sleep(SLEEP_WAIT_TIME_S);
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime());
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine007::fun is end!");
+}
 }
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
