@@ -135,9 +135,8 @@ void ShutdownService::CallbackManager::AddCallback(const sptr<IShutdownCallback>
     if (retIt.second) {
         object->AddDeathRecipient(this);
     }
-    POWER_HILOGI(MODULE_SERVICE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,"
-        " insertOk = %{public}d", object.GetRefPtr(),
-        callback.GetRefPtr(), callbacks_.size(), retIt.second);
+    POWER_HILOGI(MODULE_SERVICE, "callbacks.size = %{public}zu, insertOk = %{public}d",
+        callbacks_.size(), retIt.second);
 }
 
 void ShutdownService::CallbackManager::RemoveCallback(const sptr<IShutdownCallback>& callback)
@@ -150,8 +149,7 @@ void ShutdownService::CallbackManager::RemoveCallback(const sptr<IShutdownCallba
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
-    POWER_HILOGI(MODULE_SERVICE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,",
-        object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size());
+    POWER_HILOGI(MODULE_SERVICE, "callbacks.size = %{public}zu", callbacks_.size());
 }
 
 void ShutdownService::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
