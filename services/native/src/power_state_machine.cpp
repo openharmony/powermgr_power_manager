@@ -331,14 +331,8 @@ void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallbac
     if (retIt.second) {
         object->AddDeathRecipient(powerStateCBDeathRecipient_);
     }
-    POWER_HILOGI(MODULE_SERVICE,
-        "%{public}s, object = %{public}p, callback = %{public}p, listeners.size = %{public}d,"
-        " insertOk = %{public}d",
-        __func__,
-        object.GetRefPtr(),
-        callback.GetRefPtr(),
-        static_cast<unsigned int>(powerStateListeners_.size()),
-        retIt.second);
+    POWER_HILOGI(MODULE_SERVICE, "%{public}s, listeners.size = %{public}d, insertOk = %{public}d",
+        __func__, static_cast<unsigned int>(powerStateListeners_.size()), retIt.second);
 }
 
 void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
@@ -352,14 +346,8 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
     if (eraseNum != 0) {
         object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
     }
-    POWER_HILOGI(MODULE_SERVICE,
-        "%{public}s, object = %{public}p, callback = %{public}p, listeners.size = %{public}d,"
-        " eraseNum = %zu",
-        __func__,
-        object.GetRefPtr(),
-        callback.GetRefPtr(),
-        static_cast<unsigned int>(powerStateListeners_.size()),
-        eraseNum);
+    POWER_HILOGI(MODULE_SERVICE, "%{public}s, listeners.size = %{public}d, eraseNum = %zu",
+        __func__, static_cast<unsigned int>(powerStateListeners_.size()), eraseNum);
 }
 
 static const std::string GetReasonTypeString(StateChangeReason type)

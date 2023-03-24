@@ -140,9 +140,7 @@ void PowerModeModule::CallbackManager::AddCallback(const sptr<IPowerModeCallback
     if (retIt.second) {
         object->AddDeathRecipient(this);
     }
-    POWER_HILOGI(MODULE_SERVICE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,"
-    " insertOk = %{public}d", object.GetRefPtr(),
-        callback.GetRefPtr(), callbacks_.size(), retIt.second);
+    POWER_HILOGI(MODULE_SERVICE, "callbacks.size = %{public}zu, insertOk = %{public}d", callbacks_.size(), retIt.second);
 }
 
 void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallback>& callback)
@@ -155,8 +153,7 @@ void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallb
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
-    POWER_HILOGI(MODULE_SERVICE, "object = %{public}p, callback = %{public}p, callbacks.size = %{public}zu,",
-        object.GetRefPtr(), callback.GetRefPtr(), callbacks_.size());
+    POWER_HILOGI(MODULE_SERVICE, "callbacks.size = %{public}zu,", callbacks_.size());
 }
 
 void PowerModeModule::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
