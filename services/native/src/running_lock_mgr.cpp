@@ -238,8 +238,6 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(
 
 void RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> token)
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :token = %{public}p",
-        __func__, token.GetRefPtr());
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
@@ -287,8 +285,7 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
 
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
-        POWER_HILOGD(MODULE_SERVICE, "RunningLockMgr::Lock failed, can't find %{public}p",
-            token.GetRefPtr());
+        POWER_HILOGD(MODULE_SERVICE, "RunningLockMgr::Lock failed, can't find token");
         return;
     }
     if (!lockInner->GetDisabled()) {
