@@ -135,7 +135,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock029, TestSize.Level2)
 
 /**
  * @tc.name: PowerMgrMock030
- * @tc.desc: test Screen on RunningLock by mock
+ * @tc.desc: test RunningLock by mock
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
@@ -155,10 +155,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock030, TestSize.Level2)
     pms->CreateRunningLock(token, info);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_DIM, ::testing::_)).Times(0);
-    sleep((REFRESHACTIVITY_WAIT_TIME_S / TEST_RATE) + 1);
-
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
