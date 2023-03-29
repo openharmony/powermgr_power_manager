@@ -1249,7 +1249,7 @@ void PowerStateMachine::StateController::RecordFailure(PowerState from,
         .append("\n");
     const int logLevel = 2;
     const std::string tag = "TAG_POWER";
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "POWER_SCREEN",
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN",
         HiviewDFX::HiSysEvent::EventType::FAULT, "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
 }
