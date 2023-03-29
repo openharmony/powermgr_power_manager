@@ -21,6 +21,7 @@
 #define final
 #endif
 
+#include <fcntl.h>
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
