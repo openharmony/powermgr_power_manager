@@ -118,6 +118,43 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: RunningLockInnerKit005
+ * @tc.desc: Test CreateRunningLock function.
+ * @tc.type: FUNC
+ * @tc.require: issueI6NWQD
+ */
+HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level1)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock("backgroudPhone", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock(
+        "backgroudNatification", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock("backgroudAudio", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock("backgroudSport", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock(
+        "backgroudNavigation", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock("backgroudTask", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock = powerMgrClient.CreateRunningLock("butt", RunningLockType::RUNNINGLOCK_BUTT);
+    EXPECT_EQ(runningLock, nullptr);
+}
+
 #ifdef IPC_AVAILABLE
 /**
  * @tc.name: RunningLockInnerKit003

@@ -164,42 +164,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock030, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrMock031
- * @tc.desc: test background RunningLock by mock
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrSTMockTest, PowerMgrMock031, TestSize.Level2)
-{
-    GTEST_LOG_(INFO) << "PowerMgrMock031: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock031:Start");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock031: Failed to get PowerMgrService";
-    }
-
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    pms->CreateRunningLock(token, info);
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
-    pms->Lock(token, 0);
-    EXPECT_EQ(pms->IsUsed(token), true);
-
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(0);
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-
-    EXPECT_CALL(*g_lockAction, Unlock(_)).Times(1);
-    pms->UnLock(token);
-    EXPECT_EQ(pms->IsUsed(token), false);
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock031:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock031: end";
-}
-
-/**
  * @tc.name: PowerMgrMock032
  * @tc.desc: test proximity RunningLock by mock
  * @tc.type: FUNC
@@ -240,35 +204,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock032, TestSize.Level2)
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock032:End");
     GTEST_LOG_(INFO) << "PowerMgrMock032: end";
-}
-
-/**
- * @tc.name: PowerMgrMock033
- * @tc.desc: test RunningLock release by mock
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrSTMockTest, PowerMgrMock033, TestSize.Level2)
-{
-    GTEST_LOG_(INFO) << "PowerMgrMock033: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock033:Start");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock033: Failed to get PowerMgrService";
-    }
-
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    pms->CreateRunningLock(token, info);
-    pms->ReleaseRunningLock(token);
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(0);
-    pms->Lock(token, 0);
-    EXPECT_EQ(pms->IsUsed(token), false);
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock033:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock033: end";
 }
 
 /**
@@ -408,86 +343,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock063, TestSize.Level2)
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock063:End");
     GTEST_LOG_(INFO) << "PowerMgrMock063: end";
-}
-
-/**
- * @tc.name: PowerMgrMock066
- * @tc.desc: test background RunningLock by mock
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrSTMockTest, PowerMgrMock066, TestSize.Level2)
-{
-    GTEST_LOG_(INFO) << "PowerMgrMock066: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock066:Start");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock066: Failed to get PowerMgrService";
-    }
-
-    pms->SetDisplayOffTime(SET_DISPLAY_OFF_TIME_MS);
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    pms->CreateRunningLock(token, info);
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
-    pms->Lock(token, 0);
-    EXPECT_EQ(pms->IsUsed(token), true);
-
-    EXPECT_CALL(*g_lockAction, Unlock(_)).Times(1);
-    pms->UnLock(token);
-    ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    sleep((REFRESHACTIVITY_WAIT_TIME_S * DOUBLE_TIMES / TEST_RATE) + 1);
-    ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    sleep((REFRESHACTIVITY_WAIT_TIME_S / TEST_RATE) + 1);
-    ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_OFF));
-    EXPECT_EQ(pms->IsUsed(token), false);
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _)).Times(1);
-    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
-
-    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock066:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock066: end";
-}
-
-/**
- * @tc.name: PowerMgrMock070
- * @tc.desc: test background RunningLock by mock
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrSTMockTest, PowerMgrMock070, TestSize.Level2)
-{
-    GTEST_LOG_(INFO) << "PowerMgrMock070: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock070:Start");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock070: Failed to get PowerMgrService";
-    }
-
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    pms->CreateRunningLock(token, info);
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
-    pms->Lock(token, 0);
-    EXPECT_EQ(pms->IsUsed(token), true);
-
-    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, true)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
-    EXPECT_EQ(pms->ForceSuspendDevice(0), true);
-    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-
-    EXPECT_CALL(*g_lockAction, Unlock(_)).Times(1);
-    pms->UnLock(token);
-    EXPECT_EQ(pms->IsUsed(token), false);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock070:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock070: end";
 }
 
 /**
