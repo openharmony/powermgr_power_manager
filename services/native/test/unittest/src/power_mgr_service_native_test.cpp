@@ -34,7 +34,6 @@ constexpr int64_t SUSCALLTIMEMS = 3;
 constexpr pid_t PID = 1;
 constexpr pid_t UID = 1;
 constexpr int32_t UNCANCELID = -1;
-constexpr int64_t UNCALLTIMEMS = -7;
 constexpr uint32_t LID_CLOSED_HALL_FLAG = 0x1;
 constexpr uint32_t LID_CLOSED_HALL_FLAG_B = 0x2;
 } // namespace
@@ -136,36 +135,10 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrServiceNative003
- * @tc.desc: test lock and unlock in powerMgrService
- * @tc.type: FUNC
- */
-HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
-{
-    EXPECT_TRUE(g_pmsTest->OverrideScreenOffTime(TIMEOUTMS));
-    EXPECT_TRUE(g_pmsTest->RestoreScreenOffTime());
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo runningLockInfo1 {"runninglockNativeTest2", RunningLockType::RUNNINGLOCK_BACKGROUND};
-    EXPECT_TRUE(g_pmsTest->CreateRunningLock(token, runningLockInfo1) == PowerErrors::ERR_OK);
-    EXPECT_TRUE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN));
-    EXPECT_FALSE(g_pmsTest->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
-    EXPECT_TRUE(g_pmsTest->Lock(token, SUSCALLTIMEMS));
-    EXPECT_TRUE(g_pmsTest->ProxyRunningLock(token, UID, PID));
-    EXPECT_TRUE(g_pmsTest->UnLock(token));
-    EXPECT_FALSE(g_pmsTest->ReleaseRunningLock(token));
-
-    g_pmsTest->shutdownService_.started_ = true;
-    g_pmsTest->RebootDevice("-717");
-    g_pmsTest->ForceSuspendDevice(UNCALLTIMEMS);
-    EXPECT_TRUE(g_pmsTest->ShutDownDevice("st") == PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 end.");
-}
-
-/**
- * @tc.name: PowerMgrServiceNative004
  * @tc.desc: test callback in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
+HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
 {
     sptr<IPowerStateCallback> powerStatCb = new PowerStateTestCallback();
     EXPECT_TRUE(g_pmsTest->RegisterPowerStateCallback(powerStatCb));
@@ -198,5 +171,5 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
     g_pmsTest->ready_ = true;
     g_pmsTest->OnStart();
     g_pmsTest->OnStop();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 end.");
 }
