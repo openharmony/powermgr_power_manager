@@ -136,35 +136,39 @@ OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLock
     return filledInfo;
 }
 
-void SystemSuspendController::AcquireRunningLock(const RunningLockParam& param)
+int32_t SystemSuspendController::AcquireRunningLock(const RunningLockParam& param)
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    int32_t status = RUNNINGLOCK_FAILURE;
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
-        return;
+        return status;
     }
     if (param.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
-        powerInterface_->SuspendBlock(param.name);
+        status = powerInterface_->SuspendBlock(param.name);
     } else {
         OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(param);
-        powerInterface_->HoldRunningLock(filledInfo);
+        status = powerInterface_->HoldRunningLock(filledInfo);
     }
+    return status;
 #endif
 }
 
-void SystemSuspendController::ReleaseRunningLock(const RunningLockParam& param)
+int32_t SystemSuspendController::ReleaseRunningLock(const RunningLockParam& param)
 {
 #ifndef POWER_SUSPEND_NO_HDI
+    int32_t status = RUNNINGLOCK_FAILURE;
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
-        return;
+        return status;
     }
     if (param.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
-        powerInterface_->SuspendUnblock(param.name);
+        status = powerInterface_->SuspendUnblock(param.name);
     } else {
         OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(param);
-        powerInterface_->UnholdRunningLock(filledInfo);
+        status = powerInterface_->UnholdRunningLock(filledInfo);
     }
+    return status;
 #endif
 }
 

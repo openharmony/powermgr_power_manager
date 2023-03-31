@@ -14,34 +14,11 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 import("actions.gni")
 
-config("powermgr_actions_common_public_config") {
-  include_dirs = [
-    "${powermgr_innerkits}/native/include",
-    "${powermgr_service_path}/native/include",
-  ]
-}
-
-ohos_source_set("powermgr_actions_common") {
-  sources = [ "irunning_lock_action.cpp" ]
-
-  public_configs = [
-    ":powermgr_actions_common_public_config",
-    "${powermgr_utils_path}:utils_config",
-  ]
-
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-
-  part_name = "${powermgr_part_name}"
-}
-
 actions_target = powermgr_actions_target
 if (system_type == powermgr_actions_default) {
   actions_target = powermgr_actions_default_target
 }
 
 group("powermgr_actions") {
-  public_deps = [
-    ":powermgr_actions_common",
-    "${system_type}:${actions_target}",
-  ]
+  public_deps = [ "${system_type}:${actions_target}" ]
 }

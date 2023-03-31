@@ -63,7 +63,7 @@ public:
     {
         return proxyMap_;
     }
-    void ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid);
+    bool SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid);
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     void CheckOverTime();
@@ -165,12 +165,12 @@ private:
     };
     bool InitLocks();
     bool MatchProxyMap(const int32_t pid, const int32_t uid);
-    void SetRunningLockDisableFlag(std::shared_ptr<RunningLockInner>& lockInner, bool forceRefresh = false);
-    void LockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
-    void UnLockReally(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
-    void ProxyRunningLockInner(bool proxyLock);
+    void SetRunningLockProxiedFlag(std::shared_ptr<RunningLockInner>& lockInner);
+    void SetRunningLockProxyInner(bool isProxied);
     void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
     bool IsSceneRunningLockType(RunningLockType type);
+    void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
+    void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
     std::weak_ptr<PowermsEventHandler> handler_;

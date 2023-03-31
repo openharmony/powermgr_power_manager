@@ -101,7 +101,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest002, TestSize.Level2)
     EXPECT_EQ(sptrProxy->SetDeviceMode(mode), PowerErrors::ERR_CONNECTION_FAIL);
     auto ret = sptrProxy->GetDeviceMode();
     EXPECT_TRUE(ret == mode);
-    EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, uid, pid));
+    EXPECT_FALSE(sptrProxy->SetRunningLockProxy(true, pid, uid));
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND));
     EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200));
     EXPECT_FALSE(sptrProxy->RestoreScreenOffTime());

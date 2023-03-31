@@ -89,7 +89,7 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
     EXPECT_FALSE(g_powerMgrServiceProxy->Lock(token, timeOutMs));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnLock(token));
     EXPECT_FALSE(g_powerMgrServiceProxy->IsUsed(token));
-    EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLock(true, uid, pid));
+    EXPECT_FALSE(g_powerMgrServiceProxy->SetRunningLockProxy(true, pid, uid));
 }
 
 /**
