@@ -21,6 +21,28 @@
 namespace OHOS {
 namespace PowerMgr {
 /**
+ * Enumerates runninglock operation return status
+ */
+enum RunningLockStatus : int32_t {
+    /**
+     * RunningLock status: runninglock operation is successful
+     */
+    RUNNINGLOCK_SUCCESS  = 0,
+    /**
+     * RunningLock status: runninglock operation is failed
+     */
+    RUNNINGLOCK_FAILURE = -1,
+    /**
+     * RunningLock status: runninglock operation is not supported, not found the runninglock
+     */
+    RUNNINGLOCK_NOT_SUPPORT = -2,
+    /**
+     * RunningLock status: invalid input parameter for runninglock operation
+     */
+    RUNNINGLOCK_INVALID_PARAM = -3,
+};
+
+/**
  * Runninglock parameter: used to convert to HDI RunningLockInfo
  */
 struct RunningLockParam {

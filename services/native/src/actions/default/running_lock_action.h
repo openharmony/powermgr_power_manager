@@ -22,8 +22,8 @@ namespace OHOS {
 namespace PowerMgr {
 class RunningLockAction : public IRunningLockAction {
 public:
-    void Lock(const RunningLockParam& param) override;
-    void Unlock(const RunningLockParam& param) override;
+    int32_t Lock(const RunningLockParam& param) override;
+    int32_t Unlock(const RunningLockParam& param) override;
 };
 } // namespace PowerMgr
 } // namespace OHOS

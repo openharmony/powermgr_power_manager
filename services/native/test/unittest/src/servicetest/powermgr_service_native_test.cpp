@@ -280,7 +280,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     pid_t pid = 0;
     auto error = g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
-    EXPECT_TRUE(g_powerMgrServiceProxy->ProxyRunningLock(true, uid, pid));
+    EXPECT_FALSE(g_powerMgrServiceProxy->SetRunningLockProxy(true, pid, uid));
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
     g_powerMgrServiceProxy->Lock(token, timeOutMs);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);

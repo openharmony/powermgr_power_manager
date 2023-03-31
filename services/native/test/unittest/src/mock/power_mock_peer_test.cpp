@@ -111,7 +111,7 @@ HWTEST_F(MockPeerTest, MockPeerTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->Lock(token, 0));
     EXPECT_FALSE(sptrProxy->UnLock(token));
     EXPECT_FALSE(sptrProxy->IsUsed(token));
-    EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, uid, pid));
+    EXPECT_FALSE(sptrProxy->SetRunningLockProxy(true, pid, uid));
 }
 
 /**
