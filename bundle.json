@@ -71,7 +71,7 @@
                 ],
                 "fwk_group": [
                     "//base/powermgr/power_manager/frameworks:power_napi",
-                    "//base/powermgr/power_manager/interfaces/inner_api:powermgr_client"
+                    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client"
                 ],
                 "service_group": [
                     "//base/powermgr/power_manager/sa_profile:powermgr_sa_profile",
@@ -80,7 +80,7 @@
             },
             "inner_kits": [
                 {
-                    "name": "//base/powermgr/power_manager/interfaces/inner_api:powermgr_client",
+                    "name": "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
                     "header": {
                       "header_files": [
                         "ipower_mgr.h",
@@ -92,7 +92,7 @@
                         "running_lock.h",
                         "running_lock_info.h"
                       ],
-                      "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"
+                      "header_base": "//base/powermgr/power_manager/interfaces/innerkits/native/include"
                     }
                 }
             ],
