@@ -523,10 +523,20 @@ static const std::string GetPowerStateString(PowerState state)
     switch (state) {
         case PowerState::AWAKE:
             return std::string("AWAKE");
+        case PowerState::FREEZE:
+            return std::string("FREEZE");
         case PowerState::INACTIVE:
             return std::string("INACTIVE");
+        case PowerState::STAND_BY:
+            return std::string("STAND_BY");
+        case PowerState::DOZE:
+            return std::string("DOZE");
         case PowerState::SLEEP:
             return std::string("SLEEP");
+        case PowerState::HIBERNATE:
+            return std::string("HIBERNATE");
+        case PowerState::SHUTDOWN:
+            return std::string("SHUTDOWN");
         case PowerState::UNKNOWN:
             return std::string("UNKNOWN");
         default:
@@ -592,6 +602,8 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "state = %{public}u, listeners.size = %{public}zu",
         state, powerStateListeners_.size());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", static_cast<uint32_t>(state));
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
