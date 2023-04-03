@@ -309,6 +309,9 @@ ohos_unittest("ces_system") {
 ohos_unittest("test_power_state_level_framework") {
   module_out_path = module_output_path
 
+  resource_config_file =
+      "${powermgr_service_path}/native/test/unittest/resources/ohos_test.xml"
+
   sources = [ "src/power_state_level_framework_test.cpp" ]
 
   configs = [
