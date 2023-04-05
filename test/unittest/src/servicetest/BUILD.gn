@@ -23,16 +23,16 @@ config("module_private_config") {
   include_dirs = [
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
-    "${powermgr_service_path}/native/test/unittest/include",
-    "${powermgr_service_path}/native/test/unittest/include/servicetest",
-    "${powermgr_service_path}/native/test/unittest/include/servicetest/mock",
+    "${powermgr_root_path}/test/unittest/include",
+    "${powermgr_root_path}/test/unittest/include/servicetest",
+    "${powermgr_root_path}/test/unittest/include/servicetest/mock",
   ]
 }
 
 config("module_mock_private_config") {
   include_dirs = [
-    "${powermgr_service_path}/native/test/unittest/include/mock",
-    "${powermgr_service_path}/native/test/unittest/mock",
+    "${powermgr_root_path}/test/unittest/include/mock",
+    "${powermgr_root_path}/test/unittest/mock",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include/",
     "//commonlibrary/c_utils/base/include/",
     "${powermgr_service_zidl}/include",
@@ -67,7 +67,7 @@ ohos_unittest("powermgr_native_test") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "//third_party/googletest:gtest_main",
@@ -81,8 +81,8 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
   module_out_path = module_output_path
 
   sources = [
-    "${powermgr_service_path}/native/test/unittest/mock/mock_message_parcel.cpp",
-    "${powermgr_service_path}/native/test/unittest/mock/mock_parcel.cpp",
+    "${powermgr_root_path}/test/unittest/mock/mock_message_parcel.cpp",
+    "${powermgr_root_path}/test/unittest/mock/mock_parcel.cpp",
     "mock/powermgr_service_mock_parcel_test.cpp",
     "powermgr_service_test_proxy.cpp",
   ]
@@ -96,7 +96,7 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
   defines = [ "MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE" ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "//third_party/googletest:gtest_main",
