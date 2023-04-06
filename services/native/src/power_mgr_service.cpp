@@ -742,19 +742,18 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 
 bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 {
-    if (!Permission::IsHap()) {
-        return type == RunningLockType::RUNNINGLOCK_SCREEN ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
-            type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION ||
-            type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+    if (Permission::IsHap()) {
+        return type <= RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
     }
-    return type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
-        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+    return type == RunningLockType::RUNNINGLOCK_SCREEN ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
+        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
 bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
