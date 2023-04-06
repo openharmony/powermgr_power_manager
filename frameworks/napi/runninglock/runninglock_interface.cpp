@@ -238,11 +238,16 @@ void RunningLockInterface::CreateRunningLockCallBack(napi_env env, RunningLockAs
     napi_create_async_work(
         env, nullptr, resource,
         [](napi_env env, void* data) {
-            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
+            auto* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
+            if (!IsTypeSupported(asyncInfo->type)) {
+                auto type = static_cast<uint32_t>(asyncInfo->type);
+                POWER_HILOGW(FEATURE_RUNNING_LOCK, "type=%{public}u not supported", type);
+                return;
+            }
             asyncInfo->runningLock = g_powerMgrClient.CreateRunningLock(std::string(asyncInfo->name), asyncInfo->type);
         },
         [](napi_env env, napi_status status, void* data) {
-            RunningLockAsyncInfo* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
+            auto* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
             napi_value result[RESULT_SIZE] = {0};
             result[1] = CreateInstanceForRunningLock(env, asyncInfo);
             if (result[1] == nullptr) {
@@ -279,9 +284,9 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
         env, nullptr, resource,
         [](napi_env env, void* data) {
             auto* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
-            asyncInfo->isSupported = g_powerMgrClient.IsRunningLockTypeSupported(asyncInfo->type);
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "runningLock: %{public}d, isSupported: %{public}s", asyncInfo->type,
-                asyncInfo->isSupported ? "true" : "false");
+            asyncInfo->isSupported = IsTypeSupported(asyncInfo->type);
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "type=%{public}u, isSupported=%{public}s",
+                static_cast<uint32_t>(asyncInfo->type), asyncInfo->isSupported ? "true" : "false");
         },
         [](napi_env env, napi_status status, void* data) {
             auto* asyncInfo = reinterpret_cast<RunningLockAsyncInfo*>(data);
@@ -302,6 +307,12 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
         },
         reinterpret_cast<void*>(asyncInfo), &asyncInfo->asyncWork);
     napi_queue_async_work(env, asyncInfo->asyncWork);
+}
+
+bool RunningLockInterface::IsTypeSupported(RunningLockType type)
+{
+    return type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
+        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
 }
 } // namespace PowerMgr
 } // namespace OHOS
