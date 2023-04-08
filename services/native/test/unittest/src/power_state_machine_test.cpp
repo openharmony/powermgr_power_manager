@@ -222,7 +222,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
         powerMgrClient.RegisterPowerStateCallback(cb2);
         POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 4.");
     }
-    powerMgrClient.UnRegisterPowerStateCallback(cb1);
+    EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(cb1));
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
 }
 }
