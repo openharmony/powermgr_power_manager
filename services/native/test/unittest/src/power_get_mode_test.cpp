@@ -47,11 +47,9 @@ HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level0)
     GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
-    if (true) {
-        mode = powerMgrClient.GetDeviceMode();
-        powerMgrClient.SetDeviceMode(mode1);
-        EXPECT_EQ(mode1, powerMgrClient.GetDeviceMode());
-        powerMgrClient.SetDeviceMode(mode);
-    }
+    mode = powerMgrClient.GetDeviceMode();
+    powerMgrClient.SetDeviceMode(mode1);
+    EXPECT_EQ(mode1, powerMgrClient.GetDeviceMode());
+    powerMgrClient.SetDeviceMode(mode);
 }
 }

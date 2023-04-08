@@ -108,14 +108,12 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
 {
-    if (false) {
-        auto& powerMgrClient = PowerMgrClient::GetInstance();
-        powerMgrClient.WakeupDevice();
-        EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000));
-        sleep(2);
-        EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService005: Prepare Fail, Screen is ON.";
-        EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime());
-    }
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000));
+    sleep(2);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService005: Prepare Fail, Screen is ON.";
+    EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime());
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 end.");
 }
 
@@ -156,15 +154,12 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
 {
-    if (false) {
-        auto& powerMgrClient = PowerMgrClient::GetInstance();
-        powerMgrClient.SuspendDevice();
-        EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000));
-        powerMgrClient.WakeupDevice();
-        sleep(2);
-        EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService008: Prepare Fail, Screen is ON.";
-        EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime());
-    }
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice();
+    EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000));
+    powerMgrClient.WakeupDevice();
+    sleep(2);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService008: Prepare Fail, Screen is ON.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 end.");
 }
 

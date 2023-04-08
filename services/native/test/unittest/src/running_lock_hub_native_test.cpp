@@ -56,6 +56,7 @@ HWTEST_F (RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
     runningLockHub->Acquire("777");
     runningLockHub->Release("777");
     runningLockHub->Release("333");
+    EXPECT_TRUE(runningLockHub->runningLockMap_.empty());
 }
 
 /**
