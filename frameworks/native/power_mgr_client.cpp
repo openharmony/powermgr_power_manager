@@ -218,6 +218,12 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     return runningLock;
 }
 
+bool PowerMgrClient::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    return proxy_->SetRunningLockProxy(isProxied, pid, uid);
+}
+
 bool PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);

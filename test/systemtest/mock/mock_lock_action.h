@@ -25,10 +25,8 @@ class MockLockAction : public IRunningLockAction {
 public:
     MockLockAction() = default;
     virtual ~MockLockAction() = default;
-    MOCK_METHOD1(Acquire, void(RunningLockType type));
-    MOCK_METHOD1(Release, void(RunningLockType type));
-    MOCK_METHOD1(Lock, void(const RunningLockParam& param));
-    MOCK_METHOD1(Unlock, void(const RunningLockParam& param));
+    MOCK_METHOD1(Lock, int32_t(const RunningLockParam& param));
+    MOCK_METHOD1(Unlock, int32_t(const RunningLockParam& param));
 };
 } // namespace PowerMgr
 } // namespace OHOS

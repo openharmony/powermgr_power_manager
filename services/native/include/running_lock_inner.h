@@ -48,25 +48,41 @@ public:
     {
         return runningLockParam_.uid;
     }
+    void SetRunningLockTimeOutMs(int32_t timeoutMs)
+    {
+        runningLockParam_.timeoutMs = timeoutMs;
+    }
+    int32_t GetRunningLockTimeOutMs() const
+    {
+        return runningLockParam_.timeoutMs;
+    }
     const RunningLockParam& GetRunningLockParam() const
     {
         return runningLockParam_;
     }
-    void SetDisabled(bool disabled)
+    void SetEnabled(bool isEnabled)
     {
-        disabled_ = disabled;
+        isEnabled_ = isEnabled;
     }
-    bool GetDisabled() const
+    bool GetEnabled() const
     {
-        return disabled_;
+        return isEnabled_;
     }
-    void SetReallyLocked(bool reallyLocked)
+    void SetProxied(bool isProxied)
     {
-        reallyLocked_ = reallyLocked;
+        isProxied_ = isProxied;
     }
-    bool GetReallyLocked() const
+    bool GetProxied() const
     {
-        return reallyLocked_;
+        return isProxied_;
+    }
+    void SetNeedRestoreLock(bool need)
+    {
+        needRestoreLock_ = need;
+    }
+    bool GetNeedRestoreLock() const
+    {
+        return needRestoreLock_;
     }
     void SetOverTimeFlag(bool overTimeFlag)
     {
@@ -84,8 +100,9 @@ public:
 private:
     std::mutex mutex_;
     RunningLockParam runningLockParam_;
-    bool disabled_ {true};
-    bool reallyLocked_ {false};
+    bool isEnabled_ {false};
+    bool isProxied_ {false};
+    bool needRestoreLock_ {false};
     bool overTimeFlag_ {false};
     int64_t lockTimeMs_ {0};
 };

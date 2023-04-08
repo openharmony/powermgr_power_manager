@@ -71,7 +71,7 @@ public:
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) = 0;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
-    virtual bool ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid) = 0;
+    virtual bool SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid) = 0;
 
     // Used for power state machine.
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;

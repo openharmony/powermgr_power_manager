@@ -23,16 +23,18 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
-sptr<PowerMgrService> RunningLockTest::pmsTest_ = nullptr;
-std::shared_ptr<RunningLockMgr> RunningLockTest::runningLockMgr_ = nullptr;
+
+namespace {
+constexpr int32_t US_PER_MS = 1000;
+}
 
 namespace {
 /**
- * @tc.name: RunningLockInnerKit000
+ * @tc.name: RunningLockTest001
  * @tc.desc: Test RunningLockInnerKit function, connect PowerMgrService and call member function.
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockTest, RunningLockInnerKit000, TestSize.Level0)
+HWTEST_F (RunningLockTest, RunningLockTest001, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -48,11 +50,11 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit000, TestSize.Level0)
 }
 
 /**
- * @tc.name: RunningLockInnerKit002
+ * @tc.name: RunningLockTest002
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -78,11 +80,11 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockInnerKit004
+ * @tc.name: RunningLockTest003
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest003, TestSize.Level1)
 {
     if (false) {
         auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -119,12 +121,12 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit004, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockInnerKit005
+ * @tc.name: RunningLockTest004
  * @tc.desc: Test CreateRunningLock function.
  * @tc.type: FUNC
  * @tc.require: issueI6NWQD
  */
-HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest004, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
@@ -155,195 +157,156 @@ HWTEST_F (RunningLockTest, RunningLockInnerKit005, TestSize.Level1)
     EXPECT_EQ(runningLock, nullptr);
 }
 
-#ifdef IPC_AVAILABLE
 /**
- * @tc.name: RunningLockInnerKit003
- * @tc.desc: Test RunningLockInnerKit function, timeout lock.
+ * @tc.name: RunningLockTest005
+ * @tc.desc: Test SetRunningLockProxy function.
  * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockTest, RunningLockInnerKit003, TestSize.Level0)
+HWTEST_F (RunningLockTest, SetRunningLockProxy, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock2", RunningLockType::RUNNINGLOCK_SCREEN);
-    ASSERT_TRUE(runningLock1 != nullptr);
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    // after 8ms unlock
-    runningLock1->Lock(30);
-    runningLock1->Lock(80);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 1");
-    usleep(50000);
-    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    usleep(50000);
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    // no unlock
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 2");
-    runningLock1->Lock(2);
-    runningLock1->Lock(3);
-    runningLock1->Lock();
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 3");
-    usleep(8000);
-    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    // after 3ms unlock
-    runningLock1->Lock(30);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 4");
-    usleep(50000);
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    runningLock1->Lock(5);
-    runningLock1->UnLock();
-    ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit004 5");
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test005", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    EXPECT_NE(runningLock, nullptr);
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(true, curPid, curUid));
+    runningLock->Lock();
+    EXPECT_FALSE(runningLock->IsUsed());
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(false, curPid, curUid));
 }
 
 /**
- * @tc.name: RunningLockMgr001
- * @tc.desc: Test RunningLockMgr function, connect PowerMgrService and call member function.
+ * @tc.name: RunningLockTest006
+ * @tc.desc: Test SetRunningLockProxy function.
  * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockTest, RunningLockMgr001, TestSize.Level0)
+HWTEST_F (RunningLockTest, RunningLockTest006, TestSize.Level1)
 {
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    ASSERT_TRUE(token != nullptr);
-    sptr<IRemoteObject> token2 = new RunningLockTokenStub();
-    ASSERT_TRUE(token2 != nullptr);
-    RunningLockInfo runningLockInfo1 {"runninglockTest1", RunningLockType::RUNNINGLOCK_SCREEN};
-    UserIPCInfo userIPCinfo {IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid()};
-    {
-        runningLockMgr_->Lock(token, runningLockInfo1, userIPCinfo);
-        TestRunningLockInnerExisit(token, runningLockInfo1);
-        ASSERT_TRUE(1 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND));
-    }
-    RunningLockInfo runningLockInfo2 {"runninglockTest2", RunningLockType::RUNNINGLOCK_BACKGROUND};
-    {
-        runningLockMgr_->Lock(token2, runningLockInfo2, userIPCinfo);
-        TestRunningLockInnerExisit(token2, runningLockInfo2);
-        ASSERT_TRUE(1 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        ASSERT_TRUE(1 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND));
-    }
-    {
-        runningLockMgr_->UnLock(token);
-        TestRunningLockInnerNoExisit(token);
-        ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        ASSERT_TRUE(1 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND));
-    }
-    {
-        runningLockMgr_->UnLock(token2);
-        TestRunningLockInnerNoExisit(token2);
-        ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        ASSERT_TRUE(0 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND));
-    }
-    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr001 end");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test006", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    EXPECT_NE(runningLock, nullptr);
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(true, curPid, curUid));
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(false, curPid, curUid));
+    EXPECT_TRUE(runningLock->IsUsed());
 }
 
 /**
- * @tc.name: RunningLockMgr003
- * @tc.desc: Test RunningLockMgr Proxy function.
+ * @tc.name: RunningLockTest007
+ * @tc.desc: Test SetRunningLockProxy function.
  * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockTest, RunningLockMgr003, TestSize.Level0)
+HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
 {
-    sptr<IRemoteObject> token1 = new RunningLockTokenStub();
-    sptr<IRemoteObject> token2 = new RunningLockTokenStub();
-    RunningLockInfo runningLockInfo1 {"runninglocktest1", RunningLockType::RUNNINGLOCK_SCREEN};
-    RunningLockInfo runningLockInfo2 {"runninglocktest2", RunningLockType::RUNNINGLOCK_SCREEN};
-    UserIPCInfo userIPCinfo1 {1, 1};
-    UserIPCInfo userIPCinfo2 {2, 2};
-    runningLockMgr_->Lock(token1, runningLockInfo1, userIPCinfo1);
-    runningLockMgr_->Lock(token2, runningLockInfo2, userIPCinfo2);
-    TestRunningLockInnerExisit(token1, runningLockInfo1);
-    TestRunningLockInnerExisit(token2, runningLockInfo2);
-    ASSERT_TRUE(2 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-    ASSERT_TRUE(2 == runningLockMgr_->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-    auto& proxymap = runningLockMgr_->GetRunningLockProxyMap();
-    ASSERT_TRUE(proxymap.empty());
-    {
-        // proxy by userIPCinfo1, lockinner1 disabled
-        runningLockMgr_->ProxyRunningLock(true, userIPCinfo1.uid, userIPCinfo1.pid);
-        auto lockInner1 = runningLockMgr_->GetRunningLockInner(token1);
-        ASSERT_TRUE(!lockInner1->GetReallyLocked());
-        ASSERT_TRUE(lockInner1->GetDisabled());
-        ASSERT_TRUE(!proxymap.empty() && (proxymap.count(userIPCinfo1.uid) > 0));
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test007", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    EXPECT_NE(runningLock, nullptr);
 
-        runningLockMgr_->ProxyRunningLock(true, userIPCinfo2.uid, userIPCinfo2.pid);
-        auto lockInner2 = runningLockMgr_->GetRunningLockInner(token2);
-        ASSERT_TRUE(!lockInner2->GetReallyLocked());
-        ASSERT_TRUE(lockInner2->GetDisabled());
-        ASSERT_TRUE(!proxymap.empty() && (proxymap.count(userIPCinfo2.uid) > 0));
-        ASSERT_TRUE(2 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        ASSERT_TRUE(0 == runningLockMgr_->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+    int32_t timeoutMs = 50;
 
-        runningLockMgr_->ProxyRunningLock(false, userIPCinfo1.uid, userIPCinfo1.pid);
-        ASSERT_TRUE(lockInner1->GetReallyLocked());
-        ASSERT_TRUE(!lockInner1->GetDisabled());
-        ASSERT_TRUE(!proxymap.empty() && (proxymap.count(userIPCinfo1.uid) == 0));
+    runningLock->Lock(timeoutMs);
+    EXPECT_TRUE(runningLock->IsUsed());
 
-        runningLockMgr_->ProxyRunningLock(false, userIPCinfo2.uid, userIPCinfo2.pid);
-        ASSERT_TRUE(lockInner2->GetReallyLocked());
-        ASSERT_TRUE(!lockInner2->GetDisabled());
-        ASSERT_TRUE(proxymap.empty());
-        ASSERT_TRUE(2 == runningLockMgr_->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        ASSERT_TRUE(2 == runningLockMgr_->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-    }
-    runningLockMgr_->UnLock(token1);
-    runningLockMgr_->UnLock(token2);
-    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr003 end");
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(true, curPid, curUid));
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    usleep(timeoutMs * US_PER_MS);
+
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(false, curPid, curUid));
+    EXPECT_TRUE(runningLock->IsUsed());
+    usleep(timeoutMs / 2 * US_PER_MS);
+    EXPECT_TRUE(runningLock->IsUsed());
+    usleep(timeoutMs * US_PER_MS);
+    EXPECT_FALSE(runningLock->IsUsed());
 }
 
 /**
- * @tc.name: RunningLockMgr004
- * @tc.desc: Test RunningLockMgr Proxy function.
+ * @tc.name: RunningLockTest008
+ * @tc.desc: Test SetRunningLockProxy function.
  * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockTest, RunningLockMgr004, TestSize.Level0)
+HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
 {
-    sptr<IRemoteObject> token3 = new RunningLockTokenStub();
-    sptr<IRemoteObject> token4 = new RunningLockTokenStub();
-    RunningLockInfo runningLockInfo3 {"runninglocktest3", RunningLockType::RUNNINGLOCK_SCREEN};
-    RunningLockInfo runningLockInfo4 {"runninglocktest4", RunningLockType::RUNNINGLOCK_SCREEN};
-    UserIPCInfo userIPCinfo3 {3, 3};
-    UserIPCInfo userIPCinfo4 {3, 4};
-    runningLockMgr_->Lock(token3, runningLockInfo3, userIPCinfo3);
-    runningLockMgr_->Lock(token4, runningLockInfo4, userIPCinfo4);
-    TestRunningLockInnerExisit(token3, runningLockInfo3);
-    TestRunningLockInnerExisit(token4, runningLockInfo4);
-    ASSERT_TRUE(2 == runningLockMgr_->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-    auto& proxymap = runningLockMgr_->GetRunningLockProxyMap();
-    ASSERT_TRUE(proxymap.empty());
-    {
-        // lockinner3 and lockinner4 have same pid, save uid key, pid set {uid3,{pid3, pid4}}
-        runningLockMgr_->ProxyRunningLock(true, userIPCinfo3.uid, userIPCinfo3.pid);
-        runningLockMgr_->ProxyRunningLock(true, userIPCinfo4.uid, userIPCinfo4.pid);
-        auto lockInner3 = runningLockMgr_->GetRunningLockInner(token3);
-        ASSERT_TRUE(!lockInner3->GetReallyLocked());
-        ASSERT_TRUE(lockInner3->GetDisabled());
-        ASSERT_TRUE(!proxymap.empty() && (proxymap.count(userIPCinfo3.uid) > 0));
-        {
-            auto it = proxymap.find(userIPCinfo3.uid);
-            ASSERT_TRUE(it != proxymap.end());
-            auto& pidset = it->second;
-            ASSERT_TRUE(pidset.count(userIPCinfo3.pid) == 1);
-        }
-        auto lockInner4 = runningLockMgr_->GetRunningLockInner(token4);
-        ASSERT_TRUE(lockInner4 != nullptr);
-        ASSERT_TRUE(!lockInner4->GetReallyLocked());
-        ASSERT_TRUE(lockInner4->GetDisabled());
-        ASSERT_TRUE(!proxymap.empty() && (proxymap.count(userIPCinfo4.uid) > 0));
-        {
-            auto it = proxymap.find(userIPCinfo4.uid);
-            ASSERT_TRUE(it != proxymap.end());
-            auto& pidset = it->second;
-            ASSERT_TRUE(pidset.count(userIPCinfo4.pid) == 1);
-        }
-        ASSERT_TRUE(0 == runningLockMgr_->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-        runningLockMgr_->ProxyRunningLock(false, userIPCinfo3.uid, INVALID_PID);
-        ASSERT_TRUE(proxymap.empty());
-        ASSERT_TRUE(lockInner3->GetReallyLocked() && !lockInner3->GetDisabled());
-        ASSERT_TRUE(lockInner4->GetReallyLocked() && !lockInner4->GetDisabled());
-        ASSERT_TRUE(2 == runningLockMgr_->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN));
-    }
-    runningLockMgr_->UnLock(token3);
-    runningLockMgr_->UnLock(token4);
-    POWER_HILOGD(LABEL_TEST, "RunningLockTest::RunningLockMgr004 end");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(true, curPid, curUid));
+
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test008", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    EXPECT_NE(runningLock, nullptr);
+
+    runningLock->Lock();
+    EXPECT_FALSE(runningLock->IsUsed());
+
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(false, curPid, curUid));
+    EXPECT_FALSE(runningLock->IsUsed());
 }
-#endif // IPC_AVAILABLE
+
+/**
+ * @tc.name: RunningLockTest009
+ * @tc.desc: Test SetRunningLockProxy function.
+ * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
+ */
+HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::shared_ptr<RunningLock> screenRunningLock = powerMgrClient.CreateRunningLock(
+        "screen.test009", RunningLockType::RUNNINGLOCK_SCREEN);
+    EXPECT_NE(screenRunningLock, nullptr);
+    std::shared_ptr<RunningLock> proximityRunningLock = powerMgrClient.CreateRunningLock(
+        "proximity.test009", RunningLockType::RUNNINGLOCK_SCREEN);
+    EXPECT_NE(proximityRunningLock, nullptr);
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(true, curPid, curUid));
+
+    screenRunningLock->Lock();
+    EXPECT_TRUE(screenRunningLock->IsUsed());
+    screenRunningLock->UnLock();
+    EXPECT_FALSE(screenRunningLock->IsUsed());
+
+    proximityRunningLock->Lock();
+    EXPECT_TRUE(proximityRunningLock->IsUsed());
+    proximityRunningLock->UnLock();
+    EXPECT_FALSE(proximityRunningLock->IsUsed());
+
+    EXPECT_TRUE(powerMgrClient.SetRunningLockProxy(false, curPid, curUid));
+}
+
+/**
+ * @tc.name: RunningLockTest010
+ * @tc.desc: Test SetRunningLockProxy function, pid is invalid
+ * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
+ */
+HWTEST_F (RunningLockTest, RunningLockTest010, TestSize.Level1)
+{
+    pid_t curUid = 1;
+    pid_t curPid = -1;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_FALSE(powerMgrClient.SetRunningLockProxy(true, curPid, curUid));
+    EXPECT_FALSE(powerMgrClient.SetRunningLockProxy(false, curPid, curUid));
+}
 }

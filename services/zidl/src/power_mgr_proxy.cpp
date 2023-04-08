@@ -184,7 +184,7 @@ bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
     return used;
 }
 
-bool PowerMgrProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
+bool PowerMgrProxy::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
@@ -198,16 +198,18 @@ bool PowerMgrProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
         return false;
     }
 
-    WRITE_PARCEL_WITH_RET(data, Bool, proxyLock, false);
-    WRITE_PARCEL_WITH_RET(data, Int32, uid, false);
+    WRITE_PARCEL_WITH_RET(data, Bool, isProxied, false);
     WRITE_PARCEL_WITH_RET(data, Int32, pid, false);
+    WRITE_PARCEL_WITH_RET(data, Int32, uid, false);
     int ret = remote->SendRequest(static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
         return false;
     }
-    return true;
+    bool succ = false;
+    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    return succ;
 }
 
 PowerErrors PowerMgrProxy::RebootDevice(const std::string& reason)
