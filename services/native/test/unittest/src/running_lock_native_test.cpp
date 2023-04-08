@@ -122,13 +122,13 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     runningLockMgr->CheckOverTime();
     runningLockMgr->CheckOverTime();
 
-    runningLockMgr->ProxyRunningLock(false, uid, pid);
-    runningLockMgr->ProxyRunningLock(true, uid, pid);
-    runningLockMgr->ProxyRunningLock(true, uid, pid);
-    runningLockMgr->ProxyRunningLock(true, UID, UNPID);
-    runningLockMgr->ProxyRunningLock(true, UID, UNPID);
-    runningLockMgr->ProxyRunningLock(false, uid, pid);
-    runningLockMgr->ProxyRunningLock(false, UID, UNPID);
+    runningLockMgr->SetRunningLockProxy(false, pid, uid);
+    runningLockMgr->SetRunningLockProxy(true, pid, uid);
+    runningLockMgr->SetRunningLockProxy(true, pid, uid);
+    runningLockMgr->SetRunningLockProxy(true, UNPID, UID);
+    runningLockMgr->SetRunningLockProxy(true, UNPID, UID);
+    runningLockMgr->SetRunningLockProxy(false, pid, uid);
+    runningLockMgr->SetRunningLockProxy(false, UNPID, UID);
     runningLockMgr->UnLock(remoteObj);
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002 end");

@@ -17,8 +17,16 @@ import("../actions.gni")
 config("powermgr_actions_impl_public_config") {
   include_dirs = [ "." ]
 }
+
 config("powermgr_display_actions_impl_public_config") {
   include_dirs = [ "./display" ]
+}
+
+config("powermgr_actions_common_config") {
+  include_dirs = [
+    "${powermgr_innerkits}/native/include",
+    "${powermgr_service_path}/native/include",
+  ]
 }
 
 ohos_source_set("${powermgr_actions_default_target}") {
@@ -30,9 +38,12 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "system_suspend_controller.cpp",
   ]
 
-  public_configs = [ ":powermgr_actions_impl_public_config" ]
+  configs = [
+    ":powermgr_actions_common_config",
+    "${powermgr_utils_path}:utils_config",
+  ]
 
-  deps = [ "../:powermgr_actions_common" ]
+  public_configs = [ ":powermgr_actions_impl_public_config" ]
 
   external_deps = [
     "c_utils:utils",
@@ -50,7 +61,6 @@ ohos_source_set("${powermgr_actions_default_target}") {
   if (has_display_manager_part) {
     sources += [ "display/device_state_action.cpp" ]
     public_configs += [ ":powermgr_display_actions_impl_public_config" ]
-    deps += [ "//foundation/window/window_manager/utils:libwmutil" ]
     external_deps += [
       "display_manager:displaymgr",
       "window_manager:libdm",

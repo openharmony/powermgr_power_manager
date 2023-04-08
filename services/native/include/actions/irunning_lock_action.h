@@ -31,52 +31,8 @@ public:
     IRunningLockAction() = default;
     virtual ~IRunningLockAction() = default;
 
-    static inline std::string GetLockTag(RunningLockType type)
-    {
-        return LOCK_TAGS[ToUnderlying(type)];
-    }
-
-    virtual void Acquire(RunningLockType type);
-    virtual void Release(RunningLockType type);
-
-    virtual void Lock(const RunningLockParam& param) = 0;
-    virtual void Unlock(const RunningLockParam& param) = 0;
-
-private:
-    class RunningLockDesc {
-    public:
-        inline void IncRef()
-        {
-            refCnt++;
-        }
-
-        inline void DecRef()
-        {
-            refCnt--;
-        }
-
-        inline bool IsRefNone() const
-        {
-            return refCnt == 0;
-        }
-
-        inline uint32_t GetRefCnt() const
-        {
-            return refCnt;
-        }
-
-    private:
-        uint32_t refCnt{0};
-    };
-
-    static inline bool IsValidType(RunningLockType type)
-    {
-        return type < RunningLockType::RUNNINGLOCK_BUTT;
-    }
-    RunningLockParam FillRunningLockParam(RunningLockType type);
-
-    static const std::array<std::string, ToUnderlying(RunningLockType::RUNNINGLOCK_BUTT)> LOCK_TAGS;
-    std::array<RunningLockDesc, ToUnderlying(RunningLockType::RUNNINGLOCK_BUTT)> lockDescs_;
+    virtual int32_t Lock(const RunningLockParam& param) = 0;
+    virtual int32_t Unlock(const RunningLockParam& param) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

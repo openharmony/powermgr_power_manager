@@ -188,7 +188,7 @@ bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
     return used;
 }
 
-bool PowerMgrServiceTestProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t pid)
+bool PowerMgrServiceTestProxy::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
@@ -201,9 +201,9 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t
         return false;
     }
 
-    data.WriteBool(proxyLock);
-    data.WriteInt32(uid);
+    data.WriteBool(isProxied);
     data.WriteInt32(pid);
+    data.WriteInt32(uid);
 
     int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK),
         data, reply, option);
@@ -211,7 +211,9 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool proxyLock, pid_t uid, pid_t
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
         return false;
     }
-    return true;
+    bool succ = false;
+    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    return succ;
 }
 
 PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
