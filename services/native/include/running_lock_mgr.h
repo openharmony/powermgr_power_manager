@@ -193,10 +193,8 @@ private:
     void NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
         RunningLockChangedType changeType);
     void SendCheckOverTimeMsg(int64_t delayTime);
-    void NotifyHiViewRunningLockInfo(const std::string& tokenstr, const RunningLockInner& lockInner,
-        RunningLockChangedType changeType) const;
-    void NotifyHiView(RunningLockChangedType changeType, const std::string& msg,
-        const RunningLockInner& lockInner) const;
+    void NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner, RunningLockChangedType changeType) const;
+    void NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const;
 };
 } // namespace PowerMgr
 } // namespace OHOS
