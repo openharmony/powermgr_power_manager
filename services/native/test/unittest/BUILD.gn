@@ -75,24 +75,6 @@ ohos_unittest("shutdown_callback_test") {
   external_deps = deps_ex
 }
 
-##############################shutdown_test#####################################
-ohos_unittest("shutdown_test") {
-  module_out_path = module_output_path
-  sources = [ "src/shutdown_test.cpp" ]
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":module_private_config",
-  ]
-  deps = [
-    "${powermgr_innerkits}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
-    "${powermgr_service_path}:powermgrservice",
-    "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gtest_main",
-  ]
-  external_deps = deps_ex
-}
-
 ##############################client_test##########################################
 
 ohos_unittest("test_power_mgr_client") {

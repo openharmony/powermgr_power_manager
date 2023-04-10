@@ -91,11 +91,11 @@ HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
     GTEST_LOG_(INFO) << "SetDeviceModeTest001: SetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    PowerMode mode1 = powerMgrClient.GetDeviceMode();
     PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    if (false) {
-        powerMgrClient.SetDeviceMode(mode);
-        EXPECT_EQ(powerMgrClient.GetDeviceMode(), mode);
-    }
+    powerMgrClient.SetDeviceMode(mode);
+    EXPECT_EQ(powerMgrClient.GetDeviceMode(), mode);
+    powerMgrClient.SetDeviceMode(mode1);
 
     GTEST_LOG_(INFO) << "SetDeviceModeTest001: SetDeviceMode end.";
 }
@@ -115,11 +115,9 @@ HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     mode = powerMgrClient.GetDeviceMode();
 
-    if (false) {
-        powerMgrClient.SetDeviceMode(mode1);
-        mode2 = powerMgrClient.GetDeviceMode();
-        EXPECT_EQ(mode1, mode2);
-    }
     powerMgrClient.SetDeviceMode(mode1);
+    mode2 = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(mode1, mode2);
+    powerMgrClient.SetDeviceMode(mode);
 }
 }

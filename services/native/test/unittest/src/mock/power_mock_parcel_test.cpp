@@ -168,10 +168,10 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
     sptrProxy->UnRegisterShutdownCallback(cb2);
     sptrProxy->RegisterShutdownCallback(priority, nullptr);
     sptrProxy->UnRegisterShutdownCallback(nullptr);
-    sptrProxy->RegisterPowerModeCallback(cb3);
-    sptrProxy->UnRegisterPowerModeCallback(cb3);
-    sptrProxy->RegisterPowerModeCallback(nullptr);
-    sptrProxy->UnRegisterPowerModeCallback(nullptr);
+    EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(cb3));
+    EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
+    EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(nullptr));
 }
 
 /**
