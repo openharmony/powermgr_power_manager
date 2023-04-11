@@ -248,8 +248,7 @@ void RunningLockMgr::RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteOb
         return;
     }
     const string& remoteObjStr = to_string(reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr()));
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "remoteObjStr=%{public}s, timeOutMS=%{public}d",
-        remoteObjStr.c_str(), timeOutMS);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "timeOutMS=%{public}d", timeOutMS);
     handler->RemoveTask(remoteObjStr);
     if (timeOutMS > 0) {
         std::function<void()> unLockFunc = std::bind(&RunningLockMgr::UnLock, this,  remoteObj);
@@ -396,12 +395,10 @@ bool RunningLockMgr::ExistValidRunningLock()
     return false;
 }
 
-void RunningLockMgr::NotifyHiViewRunningLockInfo(const string& remoteObjStr,
-    const RunningLockInner& lockInner,
+void RunningLockMgr::NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner,
     RunningLockChangedType changeType) const
 {
-    string msg = "token=" + remoteObjStr;
-    NotifyHiView(changeType, msg, lockInner);
+    NotifyHiView(changeType, lockInner);
 }
 
 void RunningLockMgr::CheckOverTime()
@@ -460,19 +457,15 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
     const string& remoteObjStr = to_string(reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr()));
     switch (changeType) {
         case NOTIFY_RUNNINGLOCK_ADD: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add remoteObjStr=%{public}s", remoteObjStr.c_str());
-            NotifyHiViewRunningLockInfo(remoteObjStr, *lockInner, changeType);
+            NotifyHiViewRunningLockInfo(*lockInner, changeType);
             SendCheckOverTimeMsg(CHECK_TIMEOUT_INTERVAL_MS);
             break;
         }
         case NOTIFY_RUNNINGLOCK_REMOVE: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remove remoteObjStr=%{public}s", remoteObjStr.c_str());
-            string str = "token=" + remoteObjStr;
-            NotifyHiView(changeType, str, *lockInner);
+            NotifyHiView(changeType, *lockInner);
             break;
         }
         case NOTIFY_RUNNINGLOCK_OVERTIME: {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Overtime remoteObjStr=%{public}s", remoteObjStr.c_str());
             break;
         }
         default: {
@@ -609,8 +602,7 @@ bool RunningLockMgr::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
     return true;
 }
 
-void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
-    const std::string& msg, const RunningLockInner& lockInner) const
+void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const
 {
     int32_t pid = lockInner.GetRunningLockPid();
     int32_t uid = lockInner.GetRunningLockUid();
@@ -623,9 +615,9 @@ void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType,
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "PID", pid, "UID", uid, "STATE", state, "PROXY_STATE", isProxied, "TYPE", type, "NAME", name,
-        "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", msg);
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s, msg=%{public}s",
-        pid, uid, tag.c_str(), msg.c_str());
+        "LOG_LEVEL", logLevel, "TAG", tag);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s",
+        pid, uid, tag.c_str());
 }
 
 void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
