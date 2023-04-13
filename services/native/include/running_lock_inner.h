@@ -24,6 +24,13 @@
 
 namespace OHOS {
 namespace PowerMgr {
+enum class RunningLockState : uint32_t {
+    RUNNINGLOCK_STATE_DISABLE  = 0,
+    RUNNINGLOCK_STATE_ENABLE,
+    RUNNINGLOCK_STATE_PROXIED,
+    RUNNINGLOCK_STATE_UNPROXIED_RESTORE,
+};
+
 class RunningLockInner {
 public:
     RunningLockInner(const RunningLockParam& runningLockParam);
@@ -32,57 +39,46 @@ public:
     static std::shared_ptr<RunningLockInner> CreateRunningLockInner(const RunningLockParam& runningLockParam);
     void DumpInfo(const std::string& description);
 
-    const std::string& GetRunningLockName() const
+    const std::string& GetName() const
     {
         return runningLockParam_.name;
     }
-    RunningLockType GetRunningLockType() const
+    RunningLockType GetType() const
     {
         return runningLockParam_.type;
     }
-    int32_t GetRunningLockPid() const
+    int32_t GetPid() const
     {
         return runningLockParam_.pid;
     }
-    int32_t GetRunningLockUid() const
+    int32_t GetUid() const
     {
         return runningLockParam_.uid;
     }
-    void SetRunningLockTimeOutMs(int32_t timeoutMs)
+    void SetTimeOutMs(int32_t timeoutMs)
     {
         runningLockParam_.timeoutMs = timeoutMs;
     }
-    int32_t GetRunningLockTimeOutMs() const
+    int32_t GetTimeOutMs() const
     {
         return runningLockParam_.timeoutMs;
     }
-    const RunningLockParam& GetRunningLockParam() const
+    const RunningLockParam& GetParam() const
     {
         return runningLockParam_;
     }
-    void SetEnabled(bool isEnabled)
+    void SetState(RunningLockState state)
     {
-        isEnabled_ = isEnabled;
+        state_ = state;
     }
-    bool GetEnabled() const
+    RunningLockState GetState() const
     {
-        return isEnabled_;
+        return state_;
     }
-    void SetProxied(bool isProxied)
+    bool IsProxied() const
     {
-        isProxied_ = isProxied;
-    }
-    bool GetProxied() const
-    {
-        return isProxied_;
-    }
-    void SetNeedRestoreLock(bool need)
-    {
-        needRestoreLock_ = need;
-    }
-    bool GetNeedRestoreLock() const
-    {
-        return needRestoreLock_;
+        return state_ == RunningLockState::RUNNINGLOCK_STATE_PROXIED ||
+            state_ == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE;
     }
     void SetOverTimeFlag(bool overTimeFlag)
     {
@@ -100,11 +96,9 @@ public:
 private:
     std::mutex mutex_;
     RunningLockParam runningLockParam_;
-    bool isEnabled_ {false};
-    bool isProxied_ {false};
-    bool needRestoreLock_ {false};
-    bool overTimeFlag_ {false};
-    int64_t lockTimeMs_ {0};
+    RunningLockState state_ = RunningLockState::RUNNINGLOCK_STATE_DISABLE;
+    bool overTimeFlag_ = false;
+    int64_t lockTimeMs_ = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

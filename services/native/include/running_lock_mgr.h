@@ -18,13 +18,12 @@
 
 #include <array>
 #include <map>
-#include <unordered_map>
-#include <unordered_set>
 
 #include <iremote_object.h>
 
 #include "actions/irunning_lock_action.h"
 #include "running_lock_inner.h"
+#include "running_lock_proxy.h"
 #include "running_lock_token_stub.h"
 #include "sensor_agent.h"
 
@@ -41,15 +40,14 @@ public:
         PROXIMITY_AWAY = 0,
         PROXIMITY_CLOSE
     };
-    using RunningLockProxyMap = std::unordered_map<pid_t, std::unordered_set<pid_t>>;
     explicit RunningLockMgr(const wptr<PowerMgrService>& pms) : pms_(pms) {}
     ~RunningLockMgr();
 
-    void Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
-    void UnLock(const sptr<IRemoteObject> remoteObj);
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockParam& runningLockParam);
     bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
+    void Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
+    void UnLock(const sptr<IRemoteObject> remoteObj);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     bool Init();
@@ -59,11 +57,7 @@ public:
     {
         return runningLocks_;
     }
-    const RunningLockProxyMap& GetRunningLockProxyMap() const
-    {
-        return proxyMap_;
-    }
-    bool SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid);
+    bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     void CheckOverTime();
@@ -164,20 +158,17 @@ private:
         virtual ~RunningLockDeathRecipient() = default;
     };
     bool InitLocks();
-    bool MatchProxyMap(const int32_t pid, const int32_t uid);
-    void SetRunningLockProxiedFlag(std::shared_ptr<RunningLockInner>& lockInner);
-    void SetRunningLockProxyInner(bool isProxied);
+    void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
+    void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
     bool IsSceneRunningLockType(RunningLockType type);
-    void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
-    void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
     std::weak_ptr<PowermsEventHandler> handler_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
-    RunningLockProxyMap proxyMap_;
+    std::shared_ptr<RunningLockProxy> runninglockProxy_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;
     std::shared_ptr<SystemLock> backgroundLock_ = nullptr;

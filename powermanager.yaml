@@ -18,7 +18,6 @@ RUNNINGLOCK:
   PID: {type: INT32, desc: application pid}
   UID: {type: INT32, desc: application uid}
   STATE: {type: INT32, desc: runninglock state}
-  PROXY_STATE: {type: BOOL, desc: runninglock proxy state}
   TYPE: {type: INT32, desc: runninglock type}
   NAME: {type: STRING, desc: runninglock name}
   LOG_LEVEL: {type: INT32, desc: runninglock log level}
