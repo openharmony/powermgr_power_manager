@@ -121,7 +121,7 @@ public:
     PowerMode GetDeviceMode();
 
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
-    bool SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid);
+    bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,

@@ -808,13 +808,13 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
     }
 }
 
-bool PowerMgrService::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
+bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem()) {
         return false;
     }
-    return runningLockMgr_->SetRunningLockProxy(isProxied, pid, uid);
+    return runningLockMgr_->ProxyRunningLock(isProxied, pid, uid);
 }
 
 bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)

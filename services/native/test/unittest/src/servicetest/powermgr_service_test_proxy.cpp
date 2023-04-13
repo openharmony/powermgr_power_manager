@@ -188,7 +188,7 @@ bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
     return used;
 }
 
-bool PowerMgrServiceTestProxy::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
+bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 

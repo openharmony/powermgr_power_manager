@@ -184,7 +184,7 @@ bool PowerMgrProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
     return used;
 }
 
-bool PowerMgrProxy::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
+bool PowerMgrProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
