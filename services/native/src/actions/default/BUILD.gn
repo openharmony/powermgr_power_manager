@@ -24,7 +24,7 @@ config("powermgr_display_actions_impl_public_config") {
 
 config("powermgr_actions_common_config") {
   include_dirs = [
-    "${powermgr_innerkits}/native/include",
+    "${powermgr_inner_api}/native/include",
     "${powermgr_service_path}/native/include",
   ]
 }

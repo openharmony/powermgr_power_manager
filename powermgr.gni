@@ -38,9 +38,7 @@ powermgr_service_zidl = "${powermgr_service_path}/zidl"
 powermgr_framework = "${powermgr_root_path}/frameworks"
 powermgr_framework_native = "${powermgr_framework}/native"
 
-powermgr_innerkits = "${powermgr_root_path}/interfaces/innerkits"
-
-powermgr_kits = "${powermgr_root_path}/interfaces/kits"
+powermgr_inner_api = "${powermgr_root_path}/interfaces/inner_api"
 
 powermgr_utils_path = "${powermgr_root_path}/utils"
 

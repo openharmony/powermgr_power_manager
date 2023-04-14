@@ -26,6 +26,7 @@ The Power Manager module provides the following functions:
 │   └── native                  # Native layer
 ├── interfaces                  # API layer
 │   └── inner_api               # Internal APIs
+├── power_dialog                # Power dialog
 ├── sa_profile                  # SA profile
 └── services                    # Service layer
 │   ├── native                  # Native layer

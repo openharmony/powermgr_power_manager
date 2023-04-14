@@ -23,7 +23,7 @@ config("utils_config") {
 
 ohos_executable("power-shell") {
   include_dirs = [
-    "${powermgr_innerkits}/native/include",
+    "${powermgr_inner_api}/native/include",
     "${powermgr_utils_path}/shell/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/tools/aa/include",
@@ -36,7 +36,7 @@ ohos_executable("power-shell") {
 
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
   ]
 
   configs = [
