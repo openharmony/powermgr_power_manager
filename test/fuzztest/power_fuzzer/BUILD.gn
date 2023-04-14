@@ -32,7 +32,7 @@ ohos_fuzztest("PowerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "./power_fuzzer.cpp" ]
-  deps = [ "${powermgr_innerkits}:powermgr_client" ]
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
   external_deps = [
     "c_utils:utils",

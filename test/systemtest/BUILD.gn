@@ -54,7 +54,7 @@ ohos_systemtest("test_power_st_mgr_mock") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -78,7 +78,7 @@ ohos_systemtest("test_power_mgr_mock_system") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -102,7 +102,7 @@ ohos_systemtest("test_power_mgr_powersavemode") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -129,7 +129,7 @@ ohos_systemtest("test_power_mgr_system") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -153,7 +153,7 @@ ohos_systemtest("test_power_mgr_shutdown_fast") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -177,7 +177,7 @@ ohos_systemtest("test_power_mgr_powerdialog") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -205,7 +205,7 @@ ohos_systemtest("test_power_level_event_system_test_off") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
@@ -229,7 +229,7 @@ ohos_systemtest("test_power_level_event_system_test_on") {
   ]
 
   deps = [
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",

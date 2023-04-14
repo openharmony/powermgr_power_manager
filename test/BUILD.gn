@@ -23,3 +23,11 @@ group("fuzztest") {
   testonly = true
   deps = [ "fuzztest/power_fuzzer:fuzztest" ]
 }
+
+group("unittest") {
+  testonly = true
+  deps = [
+    "unittest:unittest",
+    "unittest/src/servicetest:unittest",
+  ]
+}

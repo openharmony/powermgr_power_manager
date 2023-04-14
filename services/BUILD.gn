@@ -17,7 +17,7 @@ config("powermgr_public_config") {
   include_dirs = [
     "native/include",
     "zidl/include",
-    "${powermgr_innerkits}/native/include",
+    "${powermgr_inner_api}/native/include",
     "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie/",
   ]
 }
@@ -54,7 +54,7 @@ ohos_shared_library("powermgrservice") {
 
   deps = [
     ":powermgr_stub",
-    "${powermgr_innerkits}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_client",
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
@@ -106,7 +106,7 @@ ohos_shared_library("powermgr_stub") {
 
   public_configs = [ ":powermgr_public_config" ]
 
-  deps = [ "${powermgr_innerkits}:powermgr_client" ]
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
   external_deps = [
     "c_utils:utils",

@@ -22,7 +22,7 @@
 
 namespace {
 static std::u16string g_interfaceTokenName {};
-}// namespace
+} // namespace
 
 namespace OHOS {
 MessageParcel::MessageParcel() :
