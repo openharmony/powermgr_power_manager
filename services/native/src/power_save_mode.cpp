@@ -18,22 +18,34 @@
 #include "libxml/parser.h"
 #include "libxml/tree.h"
 #include "power_log.h"
+#include "config_policy_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 const std::string TAG_ROOT = "switch_policy";
-const std::string VENDOR_CONFIG = "/vendor/etc/power_config/power_mode_config.xml";
-const std::string SYSTEM_CONFIG = "/system/etc/power_config/power_mode_config.xml";
+const std::string POWER_MODE_CONFIG_PATH = "etc/power_config/power_mode_config.xml";
+const std::string VENDOR_POWER_MODE_CONFIG_PATH = "/vendor/etc/power_config/power_mode_config.xml";
+const std::string SYSTEM_POWER_MODE_CONFIG_PATH = "/system/etc/power_config/power_mode_config.xml";
 constexpr uint32_t SLEEP_FILTER = SLEEP_FILTER_VALUE;
 }
 
 PowerSaveMode::PowerSaveMode()
 {
     POWER_HILOGD(FEATURE_POWER_MODE, "Start to parse power_mode_config.xml");
-    if (!StartXMlParse(VENDOR_CONFIG)) {
+
+    char buf[MAX_PATH_LEN];
+    char* path = GetOneCfgFile(POWER_MODE_CONFIG_PATH.c_str(), buf, MAX_PATH_LEN);
+    if (path != nullptr && *path != '\0') {
+        if (!StartXMlParse(path)) {
+            POWER_HILOGE(FEATURE_POWER_MODE, "policy config file power_mode_config.xml err");
+        }
+        return;
+    }
+
+    if (!StartXMlParse(VENDOR_POWER_MODE_CONFIG_PATH)) {
         POWER_HILOGI(FEATURE_POWER_MODE, "No vendor power_mode_config.xml, start to parse system config");
-        StartXMlParse(SYSTEM_CONFIG);
+        StartXMlParse(SYSTEM_POWER_MODE_CONFIG_PATH);
     }
 }
 
