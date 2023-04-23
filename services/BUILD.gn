@@ -48,6 +48,7 @@ ohos_shared_library("powermgrservice") {
   configs = [
     ":powermgr_private_config",
     "${powermgr_utils_path}:utils_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   public_configs = [ ":powermgr_public_config" ]
@@ -102,7 +103,10 @@ ohos_shared_library("powermgr_stub") {
     "zidl/src/power_state_callback_stub.cpp",
   ]
 
-  configs = [ "${powermgr_utils_path}:utils_config" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
 
   public_configs = [ ":powermgr_public_config" ]
 

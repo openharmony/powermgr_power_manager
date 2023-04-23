@@ -25,6 +25,9 @@ ohos_fuzztest("PowerFuzzTest") {
     "./",
     "${powermgr_utils_path}:utils_config",
   ]
+
+  configs = [ "${powermgr_utils_path}:coverage_flags" ]
+
   cflags = [
     "-g",
     "-O0",

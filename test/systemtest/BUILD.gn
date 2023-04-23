@@ -51,6 +51,7 @@ ohos_systemtest("test_power_st_mgr_mock") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -75,6 +76,7 @@ ohos_systemtest("test_power_mgr_mock_system") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -99,6 +101,7 @@ ohos_systemtest("test_power_mgr_powersavemode") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -126,6 +129,7 @@ ohos_systemtest("test_power_mgr_system") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -150,6 +154,7 @@ ohos_systemtest("test_power_mgr_shutdown_fast") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -174,6 +179,7 @@ ohos_systemtest("test_power_mgr_powerdialog") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -202,6 +208,7 @@ ohos_systemtest("test_power_level_event_system_test_off") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [
@@ -226,6 +233,7 @@ ohos_systemtest("test_power_level_event_system_test_on") {
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   deps = [

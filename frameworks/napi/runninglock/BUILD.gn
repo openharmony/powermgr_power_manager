@@ -23,7 +23,10 @@ ohos_shared_library("runninglock") {
     "runninglock_module.cpp",
     "runninglock_napi.cpp",
   ]
-  configs = [ "${powermgr_utils_path}:utils_config" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
   deps = [ "${powermgr_inner_api}:powermgr_client" ]
   if (!build_public_version) {
     external_deps = [ "hilog_native:libhilog" ]
