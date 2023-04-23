@@ -30,7 +30,10 @@ ohos_shared_library("power_setting") {
     "src/setting_provider.cpp",
   ]
 
-  configs = [ ":private_config" ]
+  configs = [
+    ":private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
 
   public_configs = [ ":public_config" ]
 

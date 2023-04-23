@@ -32,6 +32,8 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
   ]
 
+  configs = [ "${powermgr_utils_path}:coverage_flags" ]
+
   public_configs = [
     ":powermgr_public_config",
     "${powermgr_utils_path}:utils_config",
