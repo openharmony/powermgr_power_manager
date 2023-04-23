@@ -68,7 +68,9 @@ bool RunningLockMgr::Init()
         backgroundLock_ = std::make_shared<SystemLock>(
             runningLockAction_, RunningLockType::RUNNINGLOCK_BACKGROUND, RUNNINGLOCK_TAG_BACKGROUND);
     }
-
+    if (runninglockProxy_ == nullptr) {
+        runninglockProxy_ = std::make_shared<RunningLockProxy>();
+    }
     bool ret = InitLocks();
 
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Init success");
@@ -212,12 +214,12 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     if (lockInner == nullptr) {
         return nullptr;
     }
-    SetRunningLockProxiedFlag(lockInner);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, name=%{public}s, type=%{public}d",
         runningLockParam.name.c_str(), runningLockParam.type);
 
     mutex_.lock();
     runningLocks_.emplace(remoteObj, lockInner);
+    runninglockProxy_->AddRunningLock(lockInner->GetPid(), lockInner->GetUid(), remoteObj);
     mutex_.unlock();
     remoteObj->AddDeathRecipient(runningLockDeathRecipient_);
     return lockInner;
@@ -235,6 +237,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
 
     mutex_.lock();
     runningLocks_.erase(remoteObj);
+    runninglockProxy_->RemoveRunningLock(lockInner->GetPid(), lockInner->GetUid(), remoteObj);
     mutex_.unlock();
     result = remoteObj->RemoveDeathRecipient(runningLockDeathRecipient_);
     return result;
@@ -275,12 +278,12 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr");
         return;
     }
-    if (lockInner->GetProxied()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
+    if (lockInner->IsProxied()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
         return;
     }
-    lockInner->SetRunningLockTimeOutMs(timeOutMS);
-    RunningLockParam lockInnerParam = lockInner->GetRunningLockParam();
+    lockInner->SetTimeOutMs(timeOutMS);
+    RunningLockParam lockInnerParam = lockInner->GetParam();
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
@@ -289,7 +292,7 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
         return;
     }
 
-    if (lockInner->GetEnabled()) {
+    if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled");
         return;
     }
@@ -298,9 +301,9 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, type=%{public}d", lockInnerParam.type);
         return;
     }
+    lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
     counter->Increase(remoteObj, lockInner);
-    lockInner->SetEnabled(true);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
     if (timeOutMS > 0) {
@@ -317,11 +320,11 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     if (lockInner == nullptr) {
         return;
     }
-    if (lockInner->GetProxied()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
+    if (lockInner->IsProxied()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
         return;
     }
-    auto lockInnerParam = lockInner->GetRunningLockParam();
+    auto lockInnerParam = lockInner->GetParam();
     POWER_HILOGD(
         FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
@@ -330,9 +333,8 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
         return;
     }
 
-    if (!lockInner->GetEnabled()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is not enabled, name=%{public}s",
-            lockInner->GetRunningLockName().c_str());
+    if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is not enabled, name=%{public}s", lockInner->GetName().c_str());
         return;
     }
 
@@ -343,9 +345,9 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
         return;
     }
     RemoveAndPostUnlockTask(remoteObj);
+    lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
     counter->Decrease(remoteObj, lockInner);
-    lockInner->SetEnabled(false);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
     FinishTrace(HITRACE_TAG_POWER);
@@ -354,7 +356,7 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
 bool RunningLockMgr::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
     auto lockInner = GetRunningLockInner(remoteObj);
-    if (lockInner == nullptr || !lockInner->GetEnabled()) {
+    if (lockInner == nullptr || lockInner->GetState() != RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
         return false;
     }
     return true;
@@ -368,7 +370,7 @@ uint32_t RunningLockMgr::GetRunningLockNum(RunningLockType type)
     }
     return std::count_if(runningLocks_.begin(), runningLocks_.end(),
         [&type](const auto& pair) {
-            return pair.second->GetRunningLockType() == type;
+            return pair.second->GetType() == type;
         });
 }
 
@@ -388,7 +390,7 @@ bool RunningLockMgr::ExistValidRunningLock()
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto it = runningLocks_.begin(); it != runningLocks_.end(); it++) {
         auto& lockinner = it->second;
-        if (lockinner->GetEnabled() == true) {
+        if (lockinner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
             return true;
         }
     }
@@ -421,7 +423,8 @@ void RunningLockMgr::CheckOverTime()
     int64_t nextDetectTime = INT_MAX;
     for (auto& it : runningLocks_) {
         auto lockInner = it.second;
-        if (lockInner->GetEnabled() && (!lockInner->GetOverTimeFlag())) {
+        if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE &&
+            (!lockInner->GetOverTimeFlag())) {
             if (lockInner->GetLockTimeMs() < detectTime) {
                 lockInner->SetOverTimeFlag(true);
                 NotifyRunningLockChanged(it.first, lockInner, NOTIFY_RUNNINGLOCK_OVERTIME);
@@ -473,148 +476,80 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
         }
     }
 }
-bool RunningLockMgr::MatchProxyMap(const int32_t pid, const int32_t uid)
-{
-    if (proxyMap_.empty()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK,
-            "Runnninglock proxy map is empty, uid=%{public}d, pid=%{public}d", uid, pid);
-        return false;
-    }
-    auto it = proxyMap_.find(uid);
-    if (it == proxyMap_.end()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK,
-            "Uid not match runnninglock proxy map, uid=%{public}d, pid=%{public}d", uid, pid);
-        return false;
-    }
-    auto& pidset = it->second;
-    if (pidset.count(pid) > 0) {
-        return true;
-    }
-    return false;
-}
 
-void RunningLockMgr::SetRunningLockProxiedFlag(std::shared_ptr<RunningLockInner>& lockInner)
+bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
-    RunningLockType runninglockType = lockInner->GetRunningLockType();
-    if (proxyMap_.empty() ||
-        runninglockType == RunningLockType::RUNNINGLOCK_SCREEN ||
-        runninglockType == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
-        lockInner->SetProxied(false);
-        return;
+    bool isSuccess = false;
+    if (pid < VALID_PID_LIMIT) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Proxy runninglock failed, pid=%{public}d is invalid", pid);
+        return isSuccess;
     }
-    const int32_t pid = lockInner->GetRunningLockPid();
-    const int32_t uid = lockInner->GetRunningLockUid();
-    bool matched = MatchProxyMap(pid, uid);
-    if (matched) {
-        lockInner->SetProxied(true);
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock and ipc matched, uid=%{public}d, pid=%{public}d", uid, pid);
-        return;
+    auto remoteObjList = runninglockProxy_->GetRemoteObjectList(pid, uid);
+    if (remoteObjList.empty()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Proxy runninglock failed, no matching runninglock exist");
+        return isSuccess;
     }
-    lockInner->SetProxied(false);
+    for (auto it : remoteObjList) {
+        auto lockInner = GetRunningLockInner(it);
+        if (isProxied) {
+            UnlockInnerByProxy(it, lockInner);
+        } else {
+            LockInnerByProxy(it, lockInner);
+        }
+    }
+    isSuccess = true;
+    return isSuccess;
 }
 
 void RunningLockMgr::LockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner)
 {
-    if (lockInner->GetProxied() || !lockInner->GetNeedRestoreLock()) {
+    if (!lockInner->IsProxied()) {
         return;
     }
-    int32_t lastTimeOutMs = lockInner->GetRunningLockTimeOutMs();
-    Lock(remoteObj, lastTimeOutMs);
-    lockInner->SetNeedRestoreLock(false);
-    return;
+    RunningLockState lastState = lockInner->GetState();
+    lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
+    if (lastState == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE) {
+        Lock(remoteObj, lockInner->GetTimeOutMs());
+    }
 }
 
 void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner)
 {
-    if (!lockInner->GetProxied()) {
+    RunningLockState lastState = lockInner->GetState();
+    lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_PROXIED);
+    auto lockParam = lockInner->GetParam();
+    if (IsSceneRunningLockType(lockInner->GetType()) &&
+        runningLockAction_->Unlock(lockParam) == RUNNINGLOCK_SUCCESS) {
+        lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
+        NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
         return;
     }
-    auto lockParam = lockInner->GetRunningLockParam();
-    if (IsSceneRunningLockType(lockInner->GetRunningLockType())) {
-        if (runningLockAction_->Unlock(lockParam) == RUNNINGLOCK_SUCCESS) {
-            lockInner->SetNeedRestoreLock(true);
-            NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
-        }
-        return;
-    }
-    if (!lockInner->GetEnabled() ||
-        lockInner->GetRunningLockType() != RunningLockType::RUNNINGLOCK_BACKGROUND) {
+    if (lastState == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
         return;
     }
     auto counterIter = lockCounters_.find(lockParam.type);
     if (counterIter == lockCounters_.end()) {
         return;
     }
+    lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
     RemoveAndPostUnlockTask(remoteObj);
     counterIter->second->Decrease(remoteObj, lockInner);
-    lockInner->SetEnabled(false);
-    lockInner->SetNeedRestoreLock(true);
-    return;
-}
-
-void RunningLockMgr::SetRunningLockProxyInner(bool isProxied)
-{
-    for (auto& it : runningLocks_) {
-        SetRunningLockProxiedFlag(it.second);
-        if (isProxied) {
-            UnlockInnerByProxy(it.first, it.second);
-        } else {
-            LockInnerByProxy(it.first, it.second);
-        }
-    }
-}
-
-bool RunningLockMgr::SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid)
-{
-    if (pid < VALID_PID_LIMIT) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Set runninglock failed, pid=%{public}d is invalid", pid);
-        return false;
-    }
-    auto it = proxyMap_.find(uid);
-    if (isProxied) {
-        if (it == proxyMap_.end()) {
-            unordered_set<pid_t> pidset({pid});
-            proxyMap_.emplace(uid, pidset);
-            POWER_HILOGD(FEATURE_RUNNING_LOCK,
-                "Add first runninglock proxy, uid=%{public}d, pid=%{public}d", uid, pid);
-        } else {
-            auto& pidset = it->second;
-            pidset.insert(pid);
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Insert runninglock proxy, uid=%{public}d, pid=%{public}d", uid, pid);
-        }
-    } else {
-        if (it == proxyMap_.end()) {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock proxy map is empty");
-            return false;
-        }
-        auto& pidset = it->second;
-        pidset.erase(pid);
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Erase runninglock proxy, uid=%{public}d, pid=%{public}d", uid, pid);
-        if (pidset.size() == 0) {
-            proxyMap_.erase(uid);
-            POWER_HILOGD(FEATURE_RUNNING_LOCK,
-                "Pid list is empty and erase uid from rrunninglock map, uid=%{public}d", uid);
-        }
-    }
-    SetRunningLockProxyInner(isProxied);
-    return true;
 }
 
 void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const
 {
-    int32_t pid = lockInner.GetRunningLockPid();
-    int32_t uid = lockInner.GetRunningLockUid();
-    bool state = lockInner.GetEnabled();
-    bool isProxied = lockInner.GetProxied();
-    int32_t type = static_cast <int32_t>(lockInner.GetRunningLockType());
-    string name = lockInner.GetRunningLockName();
+    int32_t pid = lockInner.GetPid();
+    int32_t uid = lockInner.GetUid();
+    int32_t state = static_cast<int32_t>(lockInner.GetState());
+    int32_t type = static_cast <int32_t>(lockInner.GetType());
+    string name = lockInner.GetName();
     const int logLevel = 2;
     const string &tag = runninglockNotifyStr_.at(changeType);
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "PID", pid, "UID", uid, "STATE", state, "PROXY_STATE", isProxied, "TYPE", type, "NAME", name,
+        "PID", pid, "UID", uid, "STATE", state, "TYPE", type, "NAME", name,
         "LOG_LEVEL", logLevel, "TAG", tag);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s",
         pid, uid, tag.c_str());
@@ -694,14 +629,14 @@ void RunningLockMgr::DumpInfo(std::string& result)
         if (lockInner == nullptr) {
             return;
         }
-        auto& lockParam = lockInner->GetRunningLockParam();
+        auto& lockParam = lockInner->GetParam();
         result.append("  index=").append(ToString(index))
             .append(" time=").append(ToString(curTick - lockInner->GetLockTimeMs()))
             .append(" type=").append(GetRunningLockTypeString(lockParam.type))
             .append(" name=").append(lockParam.name)
-            .append(" uid=").append(ToString(lockInner->GetRunningLockUid()))
-            .append(" pid=").append(ToString(lockInner->GetRunningLockPid()))
-            .append(" enable=").append(ToString(lockInner->GetEnabled()))
+            .append(" uid=").append(ToString(lockInner->GetUid()))
+            .append(" pid=").append(ToString(lockInner->GetPid()))
+            .append(" state=").append(ToString(static_cast<uint32_t>(lockInner->GetState())))
             .append("\n");
     }
 

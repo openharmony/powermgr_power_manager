@@ -137,7 +137,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     sptrProxy->CreateRunningLock(token, info);
     sptrProxy->ReleaseRunningLock(token);
-    sptrProxy->SetRunningLockProxy(true, pid, uid);
+    sptrProxy->ProxyRunningLock(true, pid, uid);
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     sptrProxy->Lock(token, 0);
     sptrProxy->UnLock(token);
