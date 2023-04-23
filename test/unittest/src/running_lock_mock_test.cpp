@@ -77,9 +77,9 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
     ASSERT_NE(g_lockAction, nullptr);
 
     RunningLockInfo runninglockInfo(
-        "RunningLockMockProximity3.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+        "RunningLockMockProximity1.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     RunningLockInfo runninglockInfo2(
-        "RunningLockMockProximity4.2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+        "RunningLockMockProximity1.2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     int32_t timeoutMs = 100;
     auto runningLockMgr = g_powerService->GetRunningLockMgr();
     uint32_t lockActionCount = 0;
@@ -133,7 +133,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
     ASSERT_NE(g_lockAction, nullptr);
 
     RunningLockInfo runninglockInfo(
-        "RunningLockMockProximity4.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+        "RunningLockMockProximity2.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     int32_t timeoutMs = 100;
     auto runningLockMgr = g_powerService->GetRunningLockMgr();
     uint32_t lockActionCount = 0;
@@ -175,8 +175,8 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest003, TestSize.Level2)
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockPhone("RunningLockMockPhone5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
-    RunningLockInfo runninglockNotify("RunningLockMockNotify5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    RunningLockInfo runninglockPhone("RunningLockMockPhone3.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    RunningLockInfo runninglockNotify("RunningLockMockNotify3.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
     int32_t timeoutMs = 100;
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
@@ -232,8 +232,8 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest004, TestSize.Level2)
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockAudio("RunningLockMockAudio6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
-    RunningLockInfo runninglockSport("RunningLockMockSport6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    RunningLockInfo runninglockAudio("RunningLockMockAudio4.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    RunningLockInfo runninglockSport("RunningLockMockSport4.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
     int32_t timeoutMs = 100;
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
@@ -289,8 +289,8 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest005, TestSize.Level2)
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockNavi("RunningLockMockNavi7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
-    RunningLockInfo runninglockTask("RunningLockMockTask7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    RunningLockInfo runninglockNavi("RunningLockMockNavi5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    RunningLockInfo runninglockTask("RunningLockMockTask5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
     int32_t timeoutMs = 100;
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
@@ -347,9 +347,9 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest006, TestSize.Level2)
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockPhone("RunningLockMockPhone8.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
-    RunningLockInfo runninglockNotify("RunningLockMockNotify8.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
-    RunningLockInfo runninglockAudio("RunningLockMockAudio8.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    RunningLockInfo runninglockPhone("RunningLockMockPhone6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    RunningLockInfo runninglockNotify("RunningLockMockNotify6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    RunningLockInfo runninglockAudio("RunningLockMockAudio6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
     int32_t timeoutMs = 100;
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
@@ -411,9 +411,9 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockSport("RunningLockMockSport9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
-    RunningLockInfo runninglockNavi("RunningLockMockNavi9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
-    RunningLockInfo runninglockTask("RunningLockMockTask9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    RunningLockInfo runninglockSport("RunningLockMockSport7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    RunningLockInfo runninglockNavi("RunningLockMockNavi7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    RunningLockInfo runninglockTask("RunningLockMockTask7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
     int32_t timeoutMs = 100;
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
@@ -466,7 +466,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
 
 /**
  * @tc.name: RunningLockMockTest008
- * @tc.desc: Test SetRunningLockProxy function, test Background runninglock
+ * @tc.desc: Test ProxyRunningLock function, test Background runninglock
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
@@ -501,18 +501,15 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
     auto backgroundLock = runningLockMgr->GetRunningLockInner(runninglockToken);
     ASSERT_NE(backgroundLock, nullptr);
     g_powerService->Lock(runninglockToken, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
-    EXPECT_TRUE(backgroundLock->GetEnabled());
-    EXPECT_FALSE(backgroundLock->GetNeedRestoreLock());
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     EXPECT_EQ(lockActionCount, 1);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(true, curPid, curUid));
-    EXPECT_FALSE(backgroundLock->GetEnabled());
-    EXPECT_TRUE(backgroundLock->GetNeedRestoreLock());
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
     EXPECT_EQ(unlockActionCount, 1);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(false, curPid, curUid));
-    EXPECT_TRUE(backgroundLock->GetEnabled());
-    EXPECT_FALSE(backgroundLock->GetNeedRestoreLock());
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     EXPECT_EQ(lockActionCount, 2);
 
     g_powerService->ReleaseRunningLock(runninglockToken);
@@ -521,7 +518,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
 
 /**
  * @tc.name: RunningLockMockTest009
- * @tc.desc: Test SetRunningLockProxy function, test Scene runninglock
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
@@ -565,7 +562,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
     EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
     EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
     EXPECT_EQ(unlockActionCount, 2);
 
     g_powerService->Lock(phoneToken, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
@@ -576,7 +573,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
     EXPECT_EQ(lockActionCount, 0);
     EXPECT_EQ(unlockActionCount, 2);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
     EXPECT_EQ(lockActionCount, 0);
 
     g_powerService->ReleaseRunningLock(phoneToken);
@@ -585,7 +582,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
 
 /**
  * @tc.name: RunningLockMockTest010
- * @tc.desc: Test SetRunningLockProxy function, test Scene runninglock
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
@@ -630,18 +627,18 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
     g_powerService->Lock(audioToken, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
     g_powerService->Lock(sportToken, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
     EXPECT_EQ(lockActionCount, 2);
-    EXPECT_FALSE(audioLock->GetNeedRestoreLock());
-    EXPECT_FALSE(sportLock->GetNeedRestoreLock());
+    EXPECT_TRUE(audioLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
+    EXPECT_TRUE(sportLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(true, getpid(), getuid()));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, getpid(), getuid()));
     EXPECT_EQ(unlockActionCount, 2);
-    EXPECT_TRUE(audioLock->GetNeedRestoreLock());
-    EXPECT_TRUE(sportLock->GetNeedRestoreLock());
+    EXPECT_TRUE(audioLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
+    EXPECT_TRUE(sportLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(false, getpid(), getuid()));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, getpid(), getuid()));
     EXPECT_EQ(lockActionCount, 4);
-    EXPECT_FALSE(audioLock->GetNeedRestoreLock());
-    EXPECT_FALSE(sportLock->GetNeedRestoreLock());
+    EXPECT_TRUE(audioLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
+    EXPECT_TRUE(sportLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     g_powerService->ReleaseRunningLock(audioToken);
     g_powerService->ReleaseRunningLock(sportToken);
@@ -649,7 +646,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
 
 /**
  * @tc.name: RunningLockMockTest011
- * @tc.desc: Test SetRunningLockProxy function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_NOT_SUPPORT
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_NOT_SUPPORT
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
@@ -686,21 +683,22 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
 
     g_powerService->Lock(naviToken, timeoutMs);
     EXPECT_EQ(lockActionCount, 1);
-    EXPECT_FALSE(naviLock->GetNeedRestoreLock());
+    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
     EXPECT_EQ(unlockActionCount, 1);
-    EXPECT_FALSE(naviLock->GetNeedRestoreLock());
+    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
     EXPECT_EQ(lockActionCount, 1);
+    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     g_powerService->ReleaseRunningLock(naviToken);
 }
 
 /**
  * @tc.name: RunningLockMockTest012
- * @tc.desc: Test SetRunningLockProxy function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_SUCCESS
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_SUCCESS
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
@@ -737,15 +735,68 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
 
     g_powerService->Lock(taskToken, timeoutMs);
     EXPECT_EQ(lockActionCount, 1);
-    EXPECT_FALSE(taskLock->GetNeedRestoreLock());
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
     EXPECT_EQ(unlockActionCount, 1);
-    EXPECT_TRUE(taskLock->GetNeedRestoreLock());
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
 
-    EXPECT_TRUE(g_powerService->SetRunningLockProxy(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
     EXPECT_EQ(lockActionCount, 2);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     g_powerService->ReleaseRunningLock(taskToken);
+}
+
+/**
+ * @tc.name: RunningLockMockTest013
+ * @tc.desc: Test ProxyRunningLock function, runninglock release first, then cancel the proxy
+ * @tc.type: FUNC
+ * @tc.require: issueI6TW2R
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest013, TestSize.Level2)
+{
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockTask("RunningLockMockTask13.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    auto runningLockMgr = g_powerService->GetRunningLockMgr();
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    int32_t timeoutMs = 100;
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, runninglockTask.name);
+            EXPECT_EQ(param.type, runninglockTask.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, runninglockTask.name);
+            EXPECT_EQ(param.type, runninglockTask.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
+    auto taskLock = runningLockMgr->GetRunningLockInner(taskToken);
+
+    g_powerService->Lock(taskToken, timeoutMs);
+    EXPECT_EQ(lockActionCount, 1);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
+
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_EQ(unlockActionCount, 1);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
+
+    g_powerService->ReleaseRunningLock(taskToken);
+    EXPECT_EQ(runningLockMgr->GetRunningLockInner(taskToken), nullptr);
+
+    EXPECT_FALSE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_EQ(lockActionCount, 1);
 }
 }

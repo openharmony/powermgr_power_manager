@@ -36,8 +36,8 @@ public:
         ASSERT_TRUE(iterator != lockMap.end());
         auto runningLockInner = iterator->second;
         ASSERT_TRUE(runningLockInner != nullptr);
-        ASSERT_TRUE(runningLockInner->GetRunningLockType() == runningLockInfo.type);
-        ASSERT_TRUE((runningLockInfo.name).compare(runningLockInner->GetRunningLockName()) == 0);
+        ASSERT_TRUE(runningLockInner->GetType() == runningLockInfo.type);
+        ASSERT_TRUE((runningLockInfo.name).compare(runningLockInner->GetName()) == 0);
     }
 
     void TestRunningLockInnerNoExisit(sptr<IRemoteObject>& token)

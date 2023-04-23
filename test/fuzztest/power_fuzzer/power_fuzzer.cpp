@@ -164,7 +164,7 @@ static void RegisterShutdownCallback(const uint8_t* data)
     g_powerMgrClient.UnRegisterShutdownCallback(callback);
 }
 
-static void SetRunningLockProxy(const uint8_t* data)
+static void ProxyRunningLock(const uint8_t* data)
 {
     int32_t type[1];
     int32_t idSize = 4;
@@ -175,7 +175,7 @@ static void SetRunningLockProxy(const uint8_t* data)
     bool isProxied = static_cast <bool>(type[0]);
     pid_t pid = static_cast <pid_t>(type[0]);
     pid_t uid = static_cast <pid_t>(type[0]);
-    g_powerMgrClient.SetRunningLockProxy(isProxied, pid, uid);
+    g_powerMgrClient.ProxyRunningLock(isProxied, pid, uid);
 }
 
 static void Lock(const uint8_t* data)
@@ -328,7 +328,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
                 RegisterShutdownCallback(data);
                 break;
             case ApiNumber::NUM_TWENTY_TWO:
-                SetRunningLockProxy(data);
+                ProxyRunningLock(data);
                 break;
             default:
                 break;

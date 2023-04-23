@@ -95,7 +95,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             ret = UnLockStub(data);
             break;
         case static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK):
-            ret = SetRunningLockProxyStub(data, reply);
+            ret = ProxyRunningLockStub(data, reply);
             break;
         case static_cast<int>(IPowerMgr::RUNNINGLOCK_ISUSED):
             ret = IsUsedStub(data, reply);
@@ -196,7 +196,7 @@ int32_t PowerMgrStub::IsUsedStub(MessageParcel& data, MessageParcel& reply)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::SetRunningLockProxyStub(MessageParcel& data, MessageParcel& reply)
+int32_t PowerMgrStub::ProxyRunningLockStub(MessageParcel& data, MessageParcel& reply)
 {
     bool isProxied = false;
     pid_t uid;
@@ -204,7 +204,7 @@ int32_t PowerMgrStub::SetRunningLockProxyStub(MessageParcel& data, MessageParcel
     READ_PARCEL_WITH_RET(data, Bool, isProxied, E_READ_PARCEL_ERROR);
     READ_PARCEL_WITH_RET(data, Int32, pid, E_READ_PARCEL_ERROR);
     READ_PARCEL_WITH_RET(data, Int32, uid, E_READ_PARCEL_ERROR);
-    bool ret = SetRunningLockProxy(isProxied, pid, uid);
+    bool ret = ProxyRunningLock(isProxied, pid, uid);
     WRITE_PARCEL_WITH_RET(reply, Bool, ret, E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }

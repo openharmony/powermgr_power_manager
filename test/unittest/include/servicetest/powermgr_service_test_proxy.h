@@ -44,7 +44,7 @@ public:
     bool IsRunningLockTypeSupported(RunningLockType type);
     bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs);
     bool UnLock(const sptr<IRemoteObject>& remoteObj);
-    bool SetRunningLockProxy(bool isProxied, pid_t pid, pid_t uid);
+    bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     PowerErrors SuspendDevice(int64_t callTimeMs,
         SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
