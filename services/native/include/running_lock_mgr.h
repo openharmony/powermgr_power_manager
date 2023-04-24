@@ -175,8 +175,8 @@ private:
     bool InitLocks();
     bool MatchProxyMap(const UserIPCInfo& userIPCinfo);
     void SetRunningLockDisableFlag(std::shared_ptr<RunningLockInner>& lockInner, bool forceRefresh = false);
-    void LockReally(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner);
-    void UnLockReally(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner);
+    void LockReally(std::shared_ptr<RunningLockInner>& lockInner);
+    void UnLockReally(std::shared_ptr<RunningLockInner>& lockInner);
     void ProxyRunningLockInner(bool proxyLock);
     void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& token, uint32_t timeOutMS = 0);
     const wptr<PowerMgrService> pms_;
@@ -200,11 +200,9 @@ private:
         "DUBAI_TAG_RUNNINGLOCK_ADD", "DUBAI_TAG_RUNNINGLOCK_REMOVE",
         "DUBAI_TAG_RUNNINGLOCK_WORKTRIGGER_CHANGED", "DUBAI_TAG_RUNNINGLOCK_OVERTIME"
     };
-    void NotifyRunningLockChanged(const sptr<IRemoteObject>& token, std::shared_ptr<RunningLockInner>& lockInner,
-        RunningLockChangedType changeType);
+    void NotifyRunningLockChanged(std::shared_ptr<RunningLockInner>& lockInner, RunningLockChangedType changeType);
     void SendCheckOverTimeMsg(int64_t delayTime);
-    void NotifyHiViewRunningLockInfo(const std::string& tokenstr, const RunningLockInner& lockInner,
-        RunningLockChangedType changeType) const;
+    void NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner, RunningLockChangedType changeType) const;
     void NotifyHiView(RunningLockChangedType changeType, const std::string& msg) const;
 };
 } // namespace PowerMgr

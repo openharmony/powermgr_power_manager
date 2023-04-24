@@ -61,7 +61,7 @@ namespace PowerMgr {
 #define WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                              \
     do {                                                                               \
         if (!(parcel).Write##type(data)) {                                             \
-            POWER_HILOGE(MODULE_COMMON, "%{public}s write "#data" failed", __func__);                       \
+            POWER_HILOGE(MODULE_COMMON, "%{public}s write data failed", __func__);                       \
             return (retval);                                                           \
         }                                                                              \
     } while (0)
