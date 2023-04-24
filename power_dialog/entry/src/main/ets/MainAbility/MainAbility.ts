@@ -15,37 +15,37 @@
 
 import Ability from '@ohos.app.ability.UIAbility';
 
-var TAG = "Dialog_MainAbility:";
+let TAG = 'Dialog_MainAbility:';
 
 export default class MainAbility extends Ability {
-    onCreate(want, launchParam) {
-        console.log(TAG + "MainAbility onCreate, ability name is " + want.abilityName + ".");
-        globalThis.context = this.context;
-    }
+  onCreate(want, launchParam) {
+    console.log(TAG + 'MainAbility onCreate, ability name is ' + want.abilityName + '.');
+    globalThis.context = this.context;
+  }
 
-    onWindowStageCreate(windowStage) {
-        // Main window is created, set main page for this ability
-        windowStage.setUIContent(this.context, "pages/powerdialog", null);
-        console.log(TAG + "MainAbility onWindowStageCreate.");
-    }
+  onWindowStageCreate(windowStage) {
+    // Main window is created, set main page for this ability
+    windowStage.setUIContent(this.context, 'pages/powerdialog', null);
+    console.log(TAG + 'MainAbility onWindowStageCreate.');
+  }
 
-    onForeground() {
-        // Ability has brought to foreground
-        console.log(TAG + "MainAbility onForeground.");
-    }
+  onForeground() {
+    // Ability has brought to foreground
+    console.log(TAG + 'MainAbility onForeground.');
+  }
 
-    onBackground() {
-        // Ability has back to background
-        console.log(TAG + "MainAbility onBackground.");
-        this.context.terminateSelf();
-    }
+  onBackground() {
+    // Ability has back to background
+    console.log(TAG + 'MainAbility onBackground.');
+    this.context.terminateSelf();
+  }
 
-    onDestroy() {
-        console.log(TAG + "MainAbility onDestroy.");
-    }
+  onDestroy() {
+    console.log(TAG + 'MainAbility onDestroy.');
+  }
 
-    onWindowStageDestroy() {
-        // Main window is destroyed, release UI related resources
-        console.log(TAG + "MainAbility onWindowStageDestroy.");
-    }
+  onWindowStageDestroy() {
+    // Main window is destroyed, release UI related resources
+    console.log(TAG + 'MainAbility onWindowStageDestroy.');
+  }
 };

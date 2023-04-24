@@ -81,7 +81,7 @@ struct BatteryDialog {
   }
 
   existApp() {
-    this.onCancel()
+    this.onCancel();
   }
 
   build() {
