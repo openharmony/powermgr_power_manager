@@ -52,7 +52,7 @@ struct PowerCustomDialog {
         Button($r('app.string.BUTTON_CANCEL_POWERDIALOG'))
           .onClick(() => {
             this.controller.close()
-            this.cancel()
+            this.cancel();
           })
           .customizeButton()
           .margin({right: Constants.BUTTON_MARGIN})
@@ -107,15 +107,15 @@ struct PowerDialog {
   }
 
   onShutdown() {
-    power.shutdown("power_dialog")
+    power.shutdown("power_dialog");
   }
 
   onReboot() {
-    power.reboot("power_dialog")
+    power.reboot("power_dialog");
   }
 
   existApp() {
-    this.onCancel()
+    this.onCancel();
   }
 
   build() {
