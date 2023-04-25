@@ -80,7 +80,7 @@ struct LowDialog {
   }
 
   existApp() {
-    this.onCancel()
+    this.onCancel();
   }
 
   build() {

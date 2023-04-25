@@ -18,7 +18,7 @@ export default class Constants {
   static FULL_HEIGHT = '100%';
 
   static DIALOG_WIDTH = 395;
-  static DIALOG_HEIGHT = 117
+  static DIALOG_HEIGHT = 117;
   static DIALOG_BORDER_RADIUS = 32;
 
   static DIALOG_TITLE_FONT_SIZE = 16;
