@@ -55,7 +55,6 @@ void RunningLockProxy::RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemot
         return;
     }
     remoteObjList.erase(remoteObjIter);
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock list size=%{public}d", proxyIter->second.size());
     if (remoteObjList.empty()) {
         proxyMap_.erase(proxyKey);
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock list is empty, earse proxyKey=%{public}s", proxyKey.c_str());
