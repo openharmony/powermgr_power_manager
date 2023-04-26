@@ -938,6 +938,9 @@ PowerMode PowerMgrService::GetDeviceMode()
 
 std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uint32_t argc)
 {
+    if (!Permission::IsSystem()) {
+        return "";
+    }
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
