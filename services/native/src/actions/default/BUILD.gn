@@ -41,6 +41,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
   configs = [
     ":powermgr_actions_common_config",
     "${powermgr_utils_path}:utils_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   public_configs = [ ":powermgr_actions_impl_public_config" ]
