@@ -21,6 +21,18 @@ config("utils_config") {
   ]
 }
 
+declare_args() {
+  power_manager_feature_coverage = false
+}
+
+config("coverage_flags") {
+  if (power_manager_feature_coverage) {
+    cflags = [ "--coverage" ]
+    cflags_cc += [ "--coverage" ]
+    ldflags = [ "--coverage" ]
+  }
+}
+
 ohos_executable("power-shell") {
   include_dirs = [
     "${powermgr_inner_api}/native/include",
@@ -42,6 +54,7 @@ ohos_executable("power-shell") {
   configs = [
     "${ability_runtime_path}/tools/aa:ability_command_config",
     "${ability_runtime_services_path}/common:common_config",
+    "${powermgr_utils_path}:coverage_flags",
   ]
 
   external_deps = [
