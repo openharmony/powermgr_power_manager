@@ -491,6 +491,9 @@ bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
     }
     for (auto it : remoteObjList) {
         auto lockInner = GetRunningLockInner(it);
+        if (lockInner == nullptr) {
+            continue;
+        }
         if (isProxied) {
             UnlockInnerByProxy(it, lockInner);
         } else {
