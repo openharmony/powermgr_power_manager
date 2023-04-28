@@ -32,6 +32,7 @@ public:
     void AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     void RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     std::vector<sptr<IRemoteObject>> GetRemoteObjectList(pid_t pid, pid_t uid);
+    void Clear();
 private:
     std::string AssembleProxyKey(pid_t pid, pid_t uid);
     RunningLockProxyMap proxyMap_;
