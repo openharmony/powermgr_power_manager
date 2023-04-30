@@ -11,15 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
+import("../../../powermgr.gni")
 
 module_output_path = "${powermgr_part_name}/powermgr_native"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("PowerFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//base/powermgr/power_manager/test/fuzztest/power_fuzzer"
+  fuzz_config_file = "${powermgr_root_path}/test/fuzztest/power_fuzzer"
 
   include_dirs = [
     "./",

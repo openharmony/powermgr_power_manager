@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
+import("../../../../../powermgr.gni")
 import("../actions.gni")
 
 config("powermgr_actions_impl_public_config") {
@@ -70,5 +70,6 @@ ohos_source_set("${powermgr_actions_default_target}") {
     sources += [ "display/default_device_state_action.cpp" ]
   }
 
+  subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }

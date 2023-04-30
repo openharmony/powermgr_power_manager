@@ -94,6 +94,30 @@
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"
                     }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/utils/param:power_sysparam",
+                    "header": {
+                      "header_files": [ "sysparam.h" ],
+                      "header_base": "//base/powermgr/power_manager/utils/param/include"
+                    }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/utils/permission:power_permission",
+                    "header": {
+                      "header_files": [ "permission.h" ],
+                      "header_base": "//base/powermgr/power_manager/utils/permission/include"
+                    }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/utils/setting:power_setting",
+                    "header": {
+                      "header_files": [
+                        "setting_observer.h",
+                        "setting_provider.h"
+                      ],
+                      "header_base": "//base/powermgr/power_manager/utils/setting/include"
+                    }
                 }
             ],
             "test": [

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/ohos/sa_profile/sa_profile.gni")
+import("../powermgr.gni")
 
 ohos_sa_profile("powermgr_sa_profile") {
   sources = [ "3301.xml" ]
