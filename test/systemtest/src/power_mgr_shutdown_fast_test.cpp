@@ -58,12 +58,14 @@ void PowerMgrShutDownFast::TearDownTestCase()
 void PowerMgrShutDownFast::SetUp()
 {
     g_action = "";
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("test call SetUp"));
 }
 
 void PowerMgrShutDownFast::TearDown()
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("test call"));
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("test call TearDown"));
 }
 
 PowerMgrShutDownFast::CommonEventServiceSystemTest::CommonEventServiceSystemTest()
