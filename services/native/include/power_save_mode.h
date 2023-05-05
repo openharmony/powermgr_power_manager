@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,10 @@
 #include <list>
 #include <map>
 
-#include <system_ability.h>
-#include "sp_singleton.h"
 #include "ipc_object_stub.h"
+#include "libxml/tree.h"
+#include "sp_singleton.h"
+#include "system_ability.h"
 
 #define RETURN_FLAG_FALSE (-1)
 #define SLEEP_FILTER_VALUE 124
@@ -57,6 +58,7 @@ public:
 private:
     std::map<int32_t, std::list<ModePolicy>> policyCache_;
     bool StartXMlParse(std::string path);
+    std::string GetProp(const xmlNodePtr& nodePtr, const std::string& key);
 };
 } // namespace PowerMgr
 } // namespace OHOS
