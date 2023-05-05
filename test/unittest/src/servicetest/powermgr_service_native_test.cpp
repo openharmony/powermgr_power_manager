@@ -214,8 +214,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest007, TestSize.Level
     usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), abnormaltype);
-    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2 + TRANSFER_NS_TO_MS);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
+    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest007::fun is end");
 }

@@ -99,6 +99,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Leve
     stateMachine->ReceiveScreenEvent(false);
     sptr<IPowerStateCallback> cb = new PowerStateTest1Callback();
     stateMachine->RegisterPowerStateCallback(cb);
+    stateMachine->SetState(PowerState::INACTIVE,
+                  StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE,
                   StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
     stateMachine->UnRegisterPowerStateCallback(cb);
@@ -107,7 +109,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Leve
     sptr<IPowerStateCallback> cb2 = nullptr;
     stateMachine->RegisterPowerStateCallback(cb2);
     stateMachine->UnRegisterPowerStateCallback(cb2);
-
+    stateMachine->SetState(PowerState::INACTIVE,
+                  StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true));
     int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
     stateMachine->HandleDelayTimer(powermsEvent);
