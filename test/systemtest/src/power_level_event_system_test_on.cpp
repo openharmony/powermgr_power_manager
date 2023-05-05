@@ -103,6 +103,7 @@ HWTEST_F(PowerLevelEventSystemTestOn, PowerSavemode_001, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerScreenOn_001 start";
     shared_ptr<CommonEventScreenOnTest> subscriber = CommonEventScreenOnTest::RegisterEvent();
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION);
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
     std::unique_lock<std::mutex> lck(g_mtx);
     if (g_cv.wait_for(lck, std::chrono::seconds(TIME_OUT)) == std::cv_status::timeout) {
