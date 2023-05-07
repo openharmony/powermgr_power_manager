@@ -70,6 +70,7 @@ ohos_shared_library("powermgrservice") {
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
     "drivers_interface_power:libpower_proxy_1.1",
     "eventhandler:libeventhandler",
