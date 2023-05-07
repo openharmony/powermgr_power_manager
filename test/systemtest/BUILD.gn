@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
 import("//build/test.gni")
+import("../../powermgr.gni")
 
 module_output_path = "${powermgr_part_name}/powermgr_native"
 
@@ -122,7 +122,7 @@ ohos_systemtest("test_power_mgr_system") {
   module_out_path = module_output_path
 
   resource_config_file =
-      "//base/powermgr/power_manager/test/systemtest/resources/ohos_test.xml"
+      "${powermgr_root_path}/test/systemtest/resources/ohos_test.xml"
 
   sources = [ "src/power_mgr_system_test.cpp" ]
 

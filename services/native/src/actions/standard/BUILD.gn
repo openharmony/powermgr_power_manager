@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
+import("../../../../../powermgr.gni")
 import("../actions.gni")
 
 ohos_source_set("${powermgr_actions_target}") {
   public_deps =
       [ "${powermgr_actions_default_path}:${powermgr_actions_default_target}" ]
+  subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }
