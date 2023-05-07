@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/powermgr/power_manager/powermgr.gni")
+import("../../../powermgr.gni")
 
 ohos_shared_library("power") {
   include_dirs = [ "../utils" ]
@@ -28,13 +28,17 @@ ohos_shared_library("power") {
     "${powermgr_utils_path}:coverage_flags",
   ]
   deps = [ "${powermgr_inner_api}:powermgr_client" ]
+
+  deps_ex = [
+    "c_utils:utils",
+    "hilog_native:libhilog",
+  ]
+
   if (!build_public_version) {
-    external_deps = [ "hilog_native:libhilog" ]
+    external_deps = deps_ex
   } else {
-    external_deps = [
-      "hilog_native:libhilog",
-      "napi:ace_napi",
-    ]
+    external_deps = deps_ex
+    external_deps += [ "napi:ace_napi" ]
   }
 
   relative_install_dir = "module"
