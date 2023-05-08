@@ -565,6 +565,7 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
     for (auto it = lockCounters_.begin(); it != lockCounters_.end(); it++) {
         it->second->Clear();
     }
+    runninglockProxy_->Clear();
     proximityController_.Clear();
     std::shared_ptr<IRunningLockAction> mock(mockAction);
     backgroundLock_->EnableMock(mock);
