@@ -126,6 +126,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         auto powerHandler = power->GetHandler();
         powerHandler->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
     };
+    WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
 
@@ -622,7 +623,9 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs,
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
+    WakeupRunningLock::Lock();
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
+    WakeupRunningLock::Unlock();
     return PowerErrors::ERR_OK;
 }
 
@@ -950,6 +953,37 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
     bool ret = PowerMgrDumper::Dump(args, result);
     POWER_HILOGI(COMP_SVC, "ret :%{public}d", ret);
     return result;
+}
+
+sptr<RunningLockTokenStub> PowerMgrService::WakeupRunningLock::token_;
+
+void PowerMgrService::WakeupRunningLock::Create()
+{
+    token_ = new (std::nothrow) RunningLockTokenStub();
+    if (!token_) {
+        POWER_HILOGE(COMP_SVC, "create runninglock token failed");
+        return;
+    }
+    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    pms->CreateRunningLock(token_->AsObject(), info);
+}
+
+void PowerMgrService::WakeupRunningLock::Lock()
+{
+    if (!token_) {
+        return;
+    }
+    pms->Lock(token_->AsObject(), TIMEOUT);
+}
+
+void PowerMgrService::WakeupRunningLock::Unlock()
+{
+    if (!token_) {
+        return;
+    }
+    if (pms->IsUsed(token_)) {
+        pms->UnLock(token_->AsObject());
+    }
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -71,6 +71,11 @@ std::vector<sptr<IRemoteObject>> RunningLockProxy::GetRemoteObjectList(pid_t pid
     return std::vector<sptr<IRemoteObject>>();
 }
 
+void RunningLockProxy::Clear()
+{
+    proxyMap_.clear();
+}
+
 std::string RunningLockProxy::AssembleProxyKey(pid_t pid, pid_t uid)
 {
     return std::to_string(pid) + "_" + std::to_string(uid);
