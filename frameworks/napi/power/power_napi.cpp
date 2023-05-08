@@ -28,6 +28,7 @@ constexpr uint32_t REBOOT_SHUTDOWN_MAX_ARGC = 1;
 constexpr uint32_t WAKEUP_MAX_ARGC = 1;
 constexpr uint32_t SET_MODE_CALLBACK_MAX_ARGC = 2;
 constexpr uint32_t SET_MODE_PROMISE_MAX_ARGC = 1;
+constexpr uint32_t SUSPEND_MAX_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
@@ -72,10 +73,30 @@ napi_value PowerNapi::Wakeup(napi_env env, napi_callback_info info)
 
 napi_value PowerNapi::Suspend(napi_env env, napi_callback_info info)
 {
+    size_t argc = SUSPEND_MAX_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
     NapiErrors error;
-    PowerErrors code = g_powerMgrClient.SuspendDevice();
-    if (code != PowerErrors::ERR_OK) {
-        error.ThrowError(env, code);
+    if (argc != SUSPEND_MAX_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_boolean)) {
+        std::string detail = NapiUtils::GetStringFromNapi(env, argv[INDEX_0]);
+        if (detail.compare("undefined") && !detail.empty()) {
+            return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+        }
+    }
+    bool isForce = false;
+    napi_get_value_bool(env, argv[0], &isForce);
+
+    if (isForce) {
+        bool ret = g_powerMgrClient.ForceSuspendDevice();
+        if (!ret) {
+            POWER_HILOGE(FEATURE_WAKEUP, "Forcesuspend Device fail");
+        }
+    } else {
+        PowerErrors code = g_powerMgrClient.SuspendDevice();
+        if (code != PowerErrors::ERR_OK) {
+            error.ThrowError(env, code);
+        }
     }
     return nullptr;
 }
