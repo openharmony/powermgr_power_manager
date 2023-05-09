@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,12 +104,34 @@ bool Permission::IsSystemHap()
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
     POWER_HILOGD(COMP_UTILS, "checking system hap, type=%{public}d, pid=%{public}d, uid=%{public}d",
         static_cast<int32_t>(type), pid, uid);
-    auto bundleMgr = GetBundleMgr();
-    if (bundleMgr == nullptr) {
-        POWER_HILOGW(COMP_SVC, "BundleMgr is nullptr, return false");
+    bool result = false;
+    switch (type) {
+        case ATokenTypeEnum::TOKEN_HAP:
+        {
+            auto bundleMgr = GetBundleMgr();
+            if (bundleMgr == nullptr) {
+                POWER_HILOGW(COMP_SVC, "BundleMgr is nullptr, return false");
+                return false;
+            }
+            result = bundleMgr->CheckIsSystemAppByUid(uid);
+            break;
+        }
+        case ATokenTypeEnum::TOKEN_NATIVE:
+        case ATokenTypeEnum::TOKEN_SHELL:
+            result = true;
+            break;
+        case ATokenTypeEnum::TOKEN_INVALID:
+        case ATokenTypeEnum::TOKEN_TYPE_BUTT:
+            break;
+        default:
+            break;
+    }
+    if (!result) {
+        POWER_HILOGW(COMP_UTILS, "system denied, type=%{public}d, pid=%{public}d, uid=%{public}d",
+            static_cast<int32_t>(type), pid, uid);
         return false;
     }
-    return bundleMgr->CheckIsSystemAppByUid(uid);
+    return true;
 }
 
 bool Permission::IsSystem()
