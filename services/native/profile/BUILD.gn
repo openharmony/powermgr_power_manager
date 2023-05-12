@@ -21,6 +21,28 @@ ohos_prebuilt_etc("power_mode_config") {
   subsystem_name = "powermgr"
 }
 
+## Install power_suspend.json to /system/etc/power_config/power_suspend.json
+ohos_prebuilt_etc("power_suspend_config") {
+  source = "power_suspend.json"
+  relative_install_dir = "power_config"
+  install_images = [ system_base_dir ]
+  part_name = "${powermgr_part_name}"
+  subsystem_name = "powermgr"
+}
+
+## Install power_wakeup.json to /system/etc/power_config/power_wakeup.json
+ohos_prebuilt_etc("power_wakeup_config") {
+  source = "power_wakeup.json"
+  relative_install_dir = "power_config"
+  install_images = [ system_base_dir ]
+  part_name = "${powermgr_part_name}"
+  subsystem_name = "powermgr"
+}
+
 group("power_service_config") {
-  deps = [ ":power_mode_config" ]
+  deps = [
+    ":power_mode_config",
+    ":power_suspend_config",
+    ":power_wakeup_config",
+  ]
 }

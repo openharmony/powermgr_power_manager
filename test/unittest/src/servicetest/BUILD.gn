@@ -26,6 +26,7 @@ config("module_private_config") {
     "${powermgr_root_path}/test/unittest/include",
     "${powermgr_root_path}/test/unittest/include/servicetest",
     "${powermgr_root_path}/test/unittest/include/servicetest/mock",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
 }
 
@@ -74,7 +75,8 @@ ohos_unittest("powermgr_native_test") {
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = deps_ex
+  external_deps = [ "multimedia_image_framework:image_native" ]
+  external_deps += deps_ex
 }
 
 ##############################native_mock_parcel_test##########################################

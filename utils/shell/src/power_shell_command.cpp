@@ -175,7 +175,7 @@ ErrCode PowerShellCommand::RunAsWakeupCommand()
 ErrCode PowerShellCommand::RunAsSuspendCommand()
 {
     PowerMgrClient& client = PowerMgrClient::GetInstance();
-    client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON);
+    client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     resultReceiver_.append("SuspendDevice is called\n");
     return ERR_OK;
 }

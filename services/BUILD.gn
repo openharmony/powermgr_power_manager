@@ -44,6 +44,12 @@ ohos_shared_library("powermgrservice") {
     "native/src/running_lock_proxy.cpp",
     "native/src/setting/setting_helper.cpp",
     "native/src/shutdown_service.cpp",
+    "native/src/suspend/suspend_controller.cpp",
+    "native/src/suspend/suspend_source_parser.cpp",
+    "native/src/suspend/suspend_sources.cpp",
+    "native/src/wakeup/wakeup_controller.cpp",
+    "native/src/wakeup/wakeup_source_parser.cpp",
+    "native/src/wakeup/wakeup_sources.cpp",
   ]
 
   configs = [
