@@ -25,11 +25,11 @@
 #ifdef HAS_DISPLAY_MANAGER_PART
 #include "display_power_mgr_client.h"
 #endif
-#include "running_lock_token_stub.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
+#include "running_lock_token_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -557,7 +557,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient025, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient025: Prepare Fail, Screen is OFF.";
 
-    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID, false);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient025: Suspend Device Fail, Screen is On";
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient025::fun is end!");
@@ -578,7 +578,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient026, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient026: Prepare Fail, Screen is OFF.";
 
-    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient026: Suspend Device Fail, Screen is On";
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient026::fun is end!");
@@ -620,7 +620,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient028, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient028: Prepare Fail, Screen is OFF.";
 
-    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_BUTTON, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY, false);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient028: Suspend Device Fail, Screen is On";
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient028::fun is end!");
@@ -1044,4 +1044,4 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
     EXPECT_EQ(ret, false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient045:End.");
 }
-}
+} // namespace

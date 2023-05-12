@@ -27,8 +27,8 @@
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 
-#define DEFAULT_DISPLAY_OFF_TIME    30000
-#define DEFAULT_SLEEP_TIME          5000
+#define DEFAULT_DISPLAY_OFF_TIME 30000
+#define DEFAULT_SLEEP_TIME       5000
 
 namespace OHOS {
 namespace PowerMgr {
@@ -68,15 +68,15 @@ public:
     explicit PowerStateMachine(const wptr<PowerMgrService>& pms);
     ~PowerStateMachine();
 
-    static void  onSuspend();
-    static void  onWakeup();
+    static void onSuspend();
+    static void onWakeup();
 
     bool Init();
     void InitState();
-    void SuspendDeviceInner(pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed,
-        bool ignoreScreenState = false);
-    void WakeupDeviceInner(pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
-        const std::string& pkgName);
+    void SuspendDeviceInner(
+        pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed, bool ignoreScreenState = false);
+    void WakeupDeviceInner(
+        pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName);
     void RefreshActivityInner(pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
@@ -98,6 +98,9 @@ public:
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
     void SetDisplaySuspend(bool enable);
     void ActionCallback(uint32_t event);
+    StateChangeReason GetReasonByUserActivity(UserActivityType type);
+    StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
+    StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
 
     // only use for test
     int64_t GetLastSuspendDeviceTime() const
@@ -129,12 +132,16 @@ public:
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
+
 private:
     class StateController {
     public:
         StateController(PowerState state, std::shared_ptr<PowerStateMachine> owner,
-            std::function<TransitResult(StateChangeReason)> action)
-            : state_(state), owner_(owner), action_(action) {}
+            std::function<TransitResult(StateChangeReason)> action) :
+            state_(state),
+            owner_(owner), action_(action)
+        {
+        }
         ~StateController() = default;
         PowerState GetState()
         {
@@ -148,6 +155,7 @@ private:
         StateChangeReason failTrigger_;
         std::string failReasion_;
         int64_t failTime_ {0};
+
     protected:
         bool CheckState();
         void MatchState(PowerState& currentState, DisplayState state);
@@ -158,7 +166,7 @@ private:
     };
 
     struct classcomp {
-        bool operator() (const sptr<IPowerStateCallback>& l, const sptr<IPowerStateCallback>& r) const
+        bool operator()(const sptr<IPowerStateCallback>& l, const sptr<IPowerStateCallback>& r) const
         {
             return l->AsObject() < r->AsObject();
         }
@@ -180,9 +188,6 @@ private:
     void HandleActivityOffTimeout();
     void HandleActivitySleepTimeout();
     void HandleSystemWakeup();
-    StateChangeReason GetReasonByUserActivity(UserActivityType type);
-    StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
-    StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
 
     const wptr<PowerMgrService> pms_;
     PowerMgrMonitor powerMgrMonitor_;
@@ -197,8 +202,8 @@ private:
     std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
-    bool isScreenOffTimeOverride_ { false };
-    int64_t beforeOverrideTime_ { -1 };
+    bool isScreenOffTimeOverride_ {false};
+    int64_t beforeOverrideTime_ {-1};
 };
 } // namespace PowerMgr
 } // namespace OHOS

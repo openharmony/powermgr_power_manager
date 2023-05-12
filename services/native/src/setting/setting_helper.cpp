@@ -15,9 +15,9 @@
 
 #include "setting_helper.h"
 
+#include "power_log.h"
 #include <cinttypes>
 #include <system_ability_definition.h>
-#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -123,6 +123,100 @@ void SettingHelper::SetSettingWindowRotation(SwitchStatus status)
     ErrCode ret = provider.PutIntValue(SETTING_WINDOW_ROTATION_KEY, static_cast<int32_t>(status));
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "set setting window rotation failed, status=%{public}d, ret=%{public}d", status, ret);
+    }
+}
+
+sptr<SettingObserver> SettingHelper::RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto observer = provider.CreateObserver(SETTING_POWER_SUSPEND_SOURCES_KEY, func);
+    ErrCode ret = provider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting brightness observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return observer;
+}
+
+void SettingHelper::UnregisterSettingSuspendSourcesObserver(sptr<SettingObserver>& observer)
+{
+    if (observer == nullptr) {
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    provider.UnregisterObserver(observer);
+}
+
+bool SettingHelper::IsSuspendSourcesSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_SUSPEND_SOURCES_KEY);
+}
+
+const std::string SettingHelper::GetSettingSuspendSources()
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    std::string value;
+    ErrCode ret = provider.GetStringValue(SETTING_POWER_SUSPEND_SOURCES_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power suspend sources key failed, ret=%{public}d", ret);
+    }
+    return value;
+}
+
+void SettingHelper::SetSettingSuspendSources(const std::string& jsonConfig)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    ErrCode ret = provider.PutStringValue(SETTING_POWER_SUSPEND_SOURCES_KEY, jsonConfig);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power suspend sources key failed, jsonConfig=%{public}s ret=%{public}d",
+            jsonConfig.c_str(), ret);
+    }
+}
+
+sptr<SettingObserver> SettingHelper::RegisterSettingWakeupSourcesObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto observer = provider.CreateObserver(SETTING_POWER_WAKEUP_SOURCES_KEY, func);
+    ErrCode ret = provider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting brightness observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return observer;
+}
+
+void SettingHelper::UnregisterSettingWakeupSourcesObserver(sptr<SettingObserver>& observer)
+{
+    if (observer == nullptr) {
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    provider.UnregisterObserver(observer);
+}
+
+bool SettingHelper::IsWakeupSourcesSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_SOURCES_KEY);
+}
+
+const std::string SettingHelper::GetSettingWakeupSources()
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    std::string value;
+    ErrCode ret = provider.GetStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power Wakeup sources key failed, ret=%{public}d", ret);
+    }
+    return value;
+}
+
+void SettingHelper::SetSettingWakeupSources(const std::string& jsonConfig)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    ErrCode ret = provider.PutStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, jsonConfig);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power Wakeup sources key failed, jsonConfig=%{public}s ret=%{public}d",
+            jsonConfig.c_str(), ret);
     }
 }
 } // namespace PowerMgr

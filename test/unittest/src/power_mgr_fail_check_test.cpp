@@ -54,13 +54,9 @@ void PowerMgrMockTest::TearDownTestCase(void)
     delete g_lockAction;
 }
 
-void PowerMgrMockTest::SetUp(void)
-{
-}
+void PowerMgrMockTest::SetUp(void) {}
 
-void PowerMgrMockTest::TearDown(void)
-{
-}
+void PowerMgrMockTest::TearDown(void) {}
 
 namespace {
 /**
@@ -68,7 +64,7 @@ namespace {
  * @tc.desc: test SuspendDevice failed by mock
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
+HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: start.";
@@ -82,7 +78,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::FAILED));
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
+    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
 
     std::vector<std::string> args;
     std::string str("-s");
@@ -100,7 +96,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
  * @tc.desc: test WakeupDevice failed by mock
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
+HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002:  start.";
@@ -111,7 +107,7 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrFailCheck002: Failed to get PowerMgrService";
     }
 
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
+    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::FAILED));
@@ -127,4 +123,4 @@ HWTEST_F (PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck002:End.");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002: end.";
 }
-}
+} // namespace

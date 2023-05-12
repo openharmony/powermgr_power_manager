@@ -24,20 +24,16 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
-void NativePowerStateMachineTest::SetUpTestCase()
-{
-}
+void NativePowerStateMachineTest::SetUpTestCase() {}
 
 void PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
-        static_cast<uint32_t>(state));
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
 }
 
 void PowerStateTest2Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
-        static_cast<uint32_t>(state));
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
 }
 
 namespace {
@@ -51,7 +47,7 @@ TransitResult TransitResultToStateChangeReason(StateChangeReason trigger)
  * @tc.desc: test init in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -89,7 +85,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Leve
  * @tc.desc: test callback in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -99,18 +95,15 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Leve
     stateMachine->ReceiveScreenEvent(false);
     sptr<IPowerStateCallback> cb = new PowerStateTest1Callback();
     stateMachine->RegisterPowerStateCallback(cb);
-    stateMachine->SetState(PowerState::INACTIVE,
-                  StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
-    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE,
-                  StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
+    stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
+    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
     stateMachine->UnRegisterPowerStateCallback(cb);
     sptr<IPowerStateCallback> cb1 = new PowerStateTest2Callback();
     stateMachine->UnRegisterPowerStateCallback(cb1);
     sptr<IPowerStateCallback> cb2 = nullptr;
     stateMachine->RegisterPowerStateCallback(cb2);
     stateMachine->UnRegisterPowerStateCallback(cb2);
-    stateMachine->SetState(PowerState::INACTIVE,
-                  StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
+    stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true));
     int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
     stateMachine->HandleDelayTimer(powermsEvent);
@@ -130,7 +123,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Leve
  * @tc.desc: test suspendDeviceInner in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -146,9 +139,9 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Leve
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, true);
     suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT;
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
-    suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH;
+    suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
-    suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_BUTTON;
+    suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY;
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
     suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI;
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
@@ -174,7 +167,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Leve
  * @tc.desc: test setDisplaySuspend and handleDelayTimer in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -205,8 +198,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Leve
     stateMachine->InitState();
     stateMachine->HandleDelayTimer(powermsEvent);
 
-    uint32_t retSet = stateMachine->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON,
-                                                                  StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    uint32_t retSet = stateMachine->stateAction_->SetDisplayState(
+        DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     EXPECT_TRUE(retSet == ActionResult::SUCCESS);
     powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
     stateMachine->HandleDelayTimer(powermsEvent);
@@ -225,7 +218,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Leve
  * @tc.desc: test refreshActivityInner and wakeupDeviceInner in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine005::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -279,7 +272,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Leve
  * @tc.desc: test recordFailure in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -287,8 +280,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Leve
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
     EXPECT_TRUE(stateMachine->Init());
 
-    auto stateMachineController = std::make_shared<PowerStateMachine::StateController>(PowerState::INACTIVE,
-                                    stateMachine, TransitResultToStateChangeReason);
+    auto stateMachineController = std::make_shared<PowerStateMachine::StateController>(
+        PowerState::INACTIVE, stateMachine, TransitResultToStateChangeReason);
     StateChangeReason trigger = StateChangeReason::STATE_CHANGE_REASON_BATTERY;
     TransitResult failReason = TransitResult::LOCKING;
     stateMachineController->RecordFailure(PowerState::INACTIVE, trigger, failReason);
@@ -304,8 +297,8 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Leve
     EXPECT_TRUE(stateMachineController->TransitTo(trigger, false) == TransitResult::ALREADY_IN_STATE);
     stateMachine->SetDisplayOffTime(TIME, false);
 
-    auto stateMachineController2 = std::make_shared<PowerStateMachine::StateController>(PowerState::INACTIVE,
-                                    nullptr, TransitResultToStateChangeReason);
+    auto stateMachineController2 = std::make_shared<PowerStateMachine::StateController>(
+        PowerState::INACTIVE, nullptr, TransitResultToStateChangeReason);
     EXPECT_TRUE(stateMachineController2->TransitTo(trigger, false) == TransitResult::OTHER_ERR);
     EXPECT_FALSE(stateMachineController2->CheckState());
 
@@ -318,15 +311,15 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Leve
  * @tc.desc: test recordFailure in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007::fun is start!");
     auto stateMachine = std::make_shared<PowerStateMachine>(nullptr);
     EXPECT_TRUE(stateMachine->Init());
     EXPECT_FALSE(stateMachine->CheckRunningLock(PowerState::INACTIVE));
 
-    auto stateMachineController = std::make_shared<PowerStateMachine::StateController>(PowerState::INACTIVE,
-                                    stateMachine, TransitResultToStateChangeReason);
+    auto stateMachineController = std::make_shared<PowerStateMachine::StateController>(
+        PowerState::INACTIVE, stateMachine, TransitResultToStateChangeReason);
     StateChangeReason trigger = StateChangeReason::STATE_CHANGE_REASON_BATTERY;
     EXPECT_TRUE(stateMachineController->TransitTo(trigger, false) == TransitResult::LOCKING);
     stateMachine->currentState_ = PowerState::INACTIVE;
@@ -344,7 +337,7 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Leve
  * @tc.desc: test init in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -376,4 +369,4 @@ HWTEST_F (NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Leve
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine008: Suspend Device end.";
 }
-}
+} // namespace
