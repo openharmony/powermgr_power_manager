@@ -29,9 +29,9 @@ class SuspendSourceParser {
 public:
     static std::shared_ptr<SuspendSources> ParseSources();
     static std::shared_ptr<SuspendSources> ParseSources(const std::string& config);
-    static bool GetTargetPath(char* targetPath);
-    static bool ParseSourcesProc(std::shared_ptr<SuspendSources> &parseSources,  Json::Value& valueObj,
-                                                    bool &matchSource,  bool &needContinue, std::string& key);
+    static bool GetTargetPath(std::string& targetPath);
+    static bool ParseSourcesProc(
+        std::shared_ptr<SuspendSources> &parseSources,  Json::Value& valueObj, std::string& key);
 };
 } // namespace PowerMgr
 } // namespace OHOS

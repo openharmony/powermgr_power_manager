@@ -211,6 +211,10 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     }
 
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    if (wakeupController == nullptr) {
+        POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
+        return;
+    }
 
     if (keyCode == KeyEvent::KEYCODE_F1) {
         wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD);
@@ -425,8 +429,6 @@ void DoubleClickWakeupMonitor::Cancel() {}
 
 /** LidWakeupMonitor Implement */
 
-std::weak_ptr<LidWakeupMonitor> LidWakeupMonitor::self_;
-
 bool LidWakeupMonitor::Init()
 {
     if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
@@ -437,7 +439,6 @@ bool LidWakeupMonitor::Init()
         POWER_HILOGE(FEATURE_INPUT, "strcpy_s error");
         return false;
     }
-    self_ = shared_from_this();
     sensorUser_.userData = nullptr;
     sensorUser_.callback = &HallSensorCallback;
     SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
@@ -465,10 +466,20 @@ void LidWakeupMonitor::HallSensorCallback(SensorEvent* event)
     auto status = static_cast<uint32_t>(data->status);
     if (!(status & LID_CLOSED_HALL_FLAG)) {
         POWER_HILOGI(FEATURE_SUSPEND, "Lid open event received, begin to wakeup");
-        std::shared_ptr<LidWakeupMonitor> self = self_.lock();
-        if (self != nullptr) {
-            self->Notify();
+        uint32_t wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_LID);
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_INPUT, "get powerMgrService instance error");
+            return;
         }
+
+        std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+        if (wakeupController == nullptr) {
+            POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
+            return;
+        }
+
+        wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
 }
 

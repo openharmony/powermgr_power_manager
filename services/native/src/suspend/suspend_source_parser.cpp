@@ -42,22 +42,13 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     if (isSettingUpdated) {
         configJsonStr = SettingHelper::GetSettingSuspendSources();
     } else {
-        char buf[MAX_PATH_LEN];
-        char targetPath[MAX_PATH_LEN] = {0};
-        char* path = GetOneCfgFile(POWER_SUSPEND_CONFIG_FILE.c_str(), buf, MAX_PATH_LEN);
-        if (path != nullptr && *path != '\0') {
-            if (strcpy_s(targetPath, sizeof(targetPath), path) != EOK) {
-                POWER_HILOGE(COMP_SVC, "strcpy_s error");
-                return parseSources;
-            }
-        } else {
-            bool ret = GetTargetPath(targetPath);
-            if (ret == false) {
-                return parseSources;
-            }
+        std::string targetPath;
+        bool ret = GetTargetPath(targetPath);
+        if (ret == false) {
+            return parseSources;
         }
-        POWER_HILOGI(COMP_SVC, "use targetPath %{public}s", targetPath);
-        std::ifstream inputStream(targetPath, std::ios::in | std::ios::binary);
+        POWER_HILOGI(COMP_SVC, "use targetPath %{public}s", targetPath.c_str());
+        std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
         std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
         configJsonStr = fileStringStr;
     }
@@ -68,25 +59,28 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     return parseSources;
 }
 
-bool SuspendSourceParser::GetTargetPath(char* targetPath)
+bool SuspendSourceParser::GetTargetPath(std::string& targetPath)
 {
+    targetPath.clear();
     bool ret = true;
+    char buf[MAX_PATH_LEN];
+    char* path = GetOneCfgFile(POWER_SUSPEND_CONFIG_FILE.c_str(), buf, MAX_PATH_LEN);
+    if (path != nullptr && *path != '\0') {
+        POWER_HILOGI(COMP_SVC, "use policy path=%{public}s", path);
+        targetPath = path;
+        return true;
+    }
+
     if (access(VENDOR_POWER_SUSPEND_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
         POWER_HILOGE(COMP_SVC, "vendor suspend config is not exist or permission denied");
         if (access(SYSTEM_POWER_SUSPEND_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
             POWER_HILOGE(COMP_SVC, "system suspend config is not exist or permission denied");
             ret = false;
-        }
-
-        if (strcpy_s(targetPath, sizeof(targetPath), SYSTEM_POWER_SUSPEND_CONFIG_FILE.c_str()) != EOK) {
-            POWER_HILOGE(COMP_SVC, "strcpy_s error");
-            ret = false;
+        } else {
+            targetPath = SYSTEM_POWER_SUSPEND_CONFIG_FILE;
         }
     } else {
-        if (strcpy_s(targetPath, sizeof(targetPath), VENDOR_POWER_SUSPEND_CONFIG_FILE.c_str()) != EOK) {
-            POWER_HILOGE(COMP_SVC, "strcpy_s error");
-            ret = false;
-        }
+        targetPath = VENDOR_POWER_SUSPEND_CONFIG_FILE;
     }
     return ret;
 }
@@ -103,80 +97,50 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::str
     }
 
     Json::Value::Members members = root.getMemberNames();
-    bool matchSource = false;
-    std::vector<std::string> sourceKeys = SuspendSources::getSourceKeys();
     for (auto iter = members.begin(); iter != members.end(); iter++) {
         std::string key = *iter;
         Json::Value valueObj = root[key];
-        std::vector<std::string>::iterator it = sourceKeys.begin();
-        for (; it != sourceKeys.end(); it++) {
-            if (key == *it) {
-                matchSource = true;
-                sourceKeys.erase(it);
-                break;
-            }
-        }
-
-        if (!matchSource) {
-            POWER_HILOGE(COMP_SVC, "invalid key %{public}s", key.c_str());
-            return parseSources;
-        }
-        POWER_HILOGI(COMP_SVC, "key %{public}s", key.c_str());
-
-        bool needContinue = false;
-        bool ret = ParseSourcesProc(parseSources, valueObj, matchSource, needContinue, key);
+        POWER_HILOGI(COMP_SVC, "key=%{public}s", key.c_str());
+        bool ret = ParseSourcesProc(parseSources, valueObj, key);
         if (ret == false) {
-            return parseSources;
-        }
-        if (needContinue == true) {
+            POWER_HILOGI(COMP_SVC, "lost map config key");
             continue;
         }
-        matchSource = false;
     }
-
-    if (sourceKeys.size()) {
-        POWER_HILOGE(COMP_SVC, "config file configuration item lose");
-    }
-
     return parseSources;
 }
 
-bool SuspendSourceParser::ParseSourcesProc(std::shared_ptr<SuspendSources>& parseSources, Json::Value& valueObj,
-    bool& matchSource, bool& needContinue, std::string& key)
+bool SuspendSourceParser::ParseSourcesProc(
+    std::shared_ptr<SuspendSources>& parseSources, Json::Value& valueObj, std::string& key)
 {
-    bool ret = true;
+    SuspendDeviceType suspendDeviceType = SuspendSources::mapSuspendDeviceType(key);
+    POWER_HILOGI(COMP_SVC, "key map type=%{public}u", suspendDeviceType);
+    if (suspendDeviceType == SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN) {
+        return false;
+    }
+
+    uint32_t action = 1;
+    uint32_t delayMs = 0;
     if (valueObj.isObject()) {
         Json::Value actionValue = valueObj[SuspendSource::ACTION_KEY];
         Json::Value delayValue = valueObj[SuspendSource::DELAY_KEY];
         if (actionValue.isUInt() && delayValue.isUInt()) {
-            SuspendDeviceType suspendDeviceType = SuspendSources::mapSuspendDeviceType(key);
-            POWER_HILOGI(COMP_SVC, "key map type %{public}u", suspendDeviceType);
-            if (suspendDeviceType == SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN) {
-                ret = false;
-            }
             uint32_t action = actionValue.asUInt();
-            POWER_HILOGI(COMP_SVC, "action %{public}u", action);
-            if (action >= ILLEGAL_ACTION) {
-                ret = false;
-            }
-            if (action == 0) {
-                matchSource = false;
-                needContinue = true;
-            }
+            POWER_HILOGI(COMP_SVC, "action=%{public}u", action);
             uint32_t delayMs = delayValue.asUInt();
-            POWER_HILOGI(COMP_SVC, "delayMs %{public}u", delayMs);
-            SuspendSource suspendSource = SuspendSource(suspendDeviceType, action, delayMs);
-            parseSources->PutSource(suspendSource);
-        } else {
-            POWER_HILOGE(COMP_SVC, "config file configuration item error");
-            ret = false;
+            POWER_HILOGI(COMP_SVC, "delayMs=%{public}u", delayMs);
+            if (action >= ILLEGAL_ACTION) {
+                action = 1;
+            }
         }
-    } else {
-        POWER_HILOGE(COMP_SVC, "config file configuration item error");
-        ret = false;
     }
 
-    return ret;
+    if (action != 0) {
+        SuspendSource suspendSource = SuspendSource(suspendDeviceType, action, delayMs);
+        parseSources->PutSource(suspendSource);
+    }
+
+    return true;
 }
 
 } // namespace PowerMgr

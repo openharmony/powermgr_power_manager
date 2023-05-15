@@ -97,6 +97,14 @@ void SuspendController::Init()
     RegisterSettingsObserver();
 }
 
+void SuspendController::ExecSuspendMonitorByReason(uint32_t reason)
+{
+    if (monitorMap_.find(reason) != monitorMap_.end()) {
+        auto monitor = monitorMap_[reason];
+        monitor->Notify();
+    }
+}
+
 void SuspendController::RegisterSettingsObserver()
 {
     if (g_suspendSourcesKeyObserver) {
@@ -223,7 +231,8 @@ void SuspendController::StartSleepTimer(uint32_t reason, uint32_t action, int64_
 {
     int64_t timeout = GetTickCount() + delay;
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
-        POWER_HILOGI(FEATURE_INPUT, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")", timeout, sleepTime_);
+        POWER_HILOGI(FEATURE_INPUT, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")",
+            timeout, sleepTime_);
         return;
     }
     sleepTime_ = timeout;
@@ -433,7 +442,6 @@ void TimeoutSuspendMonitor::HandleEvent(uint32_t eventId)
 }
 
 /** LidSuspendMonitor Implement */
-std::weak_ptr<LidSuspendMonitor> LidSuspendMonitor::self_;
 
 bool LidSuspendMonitor::Init()
 {
@@ -445,7 +453,6 @@ bool LidSuspendMonitor::Init()
         POWER_HILOGE(FEATURE_INPUT, "strcpy_s error");
         return false;
     }
-    self_ = shared_from_this();
     sensorUser_.userData = nullptr;
     sensorUser_.callback = &HallSensorCallback;
     SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
@@ -473,10 +480,18 @@ void LidSuspendMonitor::HallSensorCallback(SensorEvent* event)
     auto status = static_cast<uint32_t>(data->status);
     if (status & LID_CLOSED_HALL_FLAG) {
         POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
-        std::shared_ptr<LidSuspendMonitor> self = self_.lock();
-        if (self != nullptr) {
-            self->Notify();
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_INPUT, "get powerMgrService instance error");
+            return;
         }
+        uint32_t suspendType = static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID);
+        std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
+        if (suspendController == nullptr) {
+            POWER_HILOGE(FEATURE_INPUT, "suspendController is not init");
+            return;
+        }
+        suspendController->ExecSuspendMonitorByReason(suspendType);
     }
 }
 

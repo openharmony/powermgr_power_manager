@@ -46,13 +46,10 @@ WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint
     }
 
     if (key == WakeupSources::TOUCHSCREEN_KEY) {
-        if (click == 1) {
+        if (click == WakeupSources::SINGLE_CLICK) {
             return WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
         }
-
-        if (click == 2) {
-            return WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
-        }
+        return WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     }
 
     return WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
