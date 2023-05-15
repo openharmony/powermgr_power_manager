@@ -14,7 +14,7 @@
  */
 
 #include "setting_provider.h"
-
+#include <thread>
 #include "datashare_predicates.h"
 #include "datashare_result_set.h"
 #include "datashare_values_bucket.h"
@@ -118,6 +118,11 @@ sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, Se
     return observer;
 }
 
+void SettingProvider::ExecRegisterCb(const sptr<SettingObserver>& observer)
+{
+    observer->OnChange();
+}
+
 ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
@@ -128,6 +133,9 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
         return ERR_NO_INIT;
     }
     helper->RegisterObserver(uri, observer);
+    helper->NotifyChange(uri);
+    std::thread execCb(SettingProvider::ExecRegisterCb, observer);
+    execCb.detach();
     ReleaseDataShareHelper(helper);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
     POWER_HILOGD(COMP_UTILS, "succeed to register observer of uri=%{public}s", uri.ToString().c_str());

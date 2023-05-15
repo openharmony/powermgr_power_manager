@@ -19,9 +19,9 @@
 #include <hisysevent.h>
 
 #include "hitrace_meter.h"
-#include "powerms_event_handler.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
+#include "powerms_event_handler.h"
 #include "setting_helper.h"
 
 namespace OHOS {
@@ -29,8 +29,7 @@ namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
 }
-PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
-    : pms_(pms), currentState_(PowerState::UNKNOWN)
+PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Instance start");
     // NOTICE Need get screen state when device startup,
@@ -46,33 +45,21 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms)
     std::vector<RunningLockType> awakeBlocker {};
     std::vector<RunningLockType> freezeBlocker {};
     std::vector<RunningLockType> inactiveBlocker {
-        RunningLockType::RUNNINGLOCK_SCREEN,
-        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL
-    };
+        RunningLockType::RUNNINGLOCK_SCREEN, RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL};
     std::vector<RunningLockType> standByBlocker {};
     std::vector<RunningLockType> dozeBlocker {};
-    std::vector<RunningLockType> sleepBlocker {
-        RunningLockType::RUNNINGLOCK_BACKGROUND
-    };
+    std::vector<RunningLockType> sleepBlocker {RunningLockType::RUNNINGLOCK_BACKGROUND};
     std::vector<RunningLockType> hibernateBlocker {};
     std::vector<RunningLockType> shutdownBlocker {};
 
-    lockMap_.emplace(PowerState::AWAKE,
-        std::make_shared<std::vector<RunningLockType>>(awakeBlocker));
-    lockMap_.emplace(PowerState::FREEZE,
-        std::make_shared<std::vector<RunningLockType>>(freezeBlocker));
-    lockMap_.emplace(PowerState::INACTIVE,
-        std::make_shared<std::vector<RunningLockType>>(inactiveBlocker));
-    lockMap_.emplace(PowerState::STAND_BY,
-        std::make_shared<std::vector<RunningLockType>>(standByBlocker));
-    lockMap_.emplace(PowerState::DOZE,
-        std::make_shared<std::vector<RunningLockType>>(dozeBlocker));
-    lockMap_.emplace(PowerState::SLEEP,
-        std::make_shared<std::vector<RunningLockType>>(sleepBlocker));
-    lockMap_.emplace(PowerState::HIBERNATE,
-        std::make_shared<std::vector<RunningLockType>>(hibernateBlocker));
-    lockMap_.emplace(PowerState::SHUTDOWN,
-        std::make_shared<std::vector<RunningLockType>>(shutdownBlocker));
+    lockMap_.emplace(PowerState::AWAKE, std::make_shared<std::vector<RunningLockType>>(awakeBlocker));
+    lockMap_.emplace(PowerState::FREEZE, std::make_shared<std::vector<RunningLockType>>(freezeBlocker));
+    lockMap_.emplace(PowerState::INACTIVE, std::make_shared<std::vector<RunningLockType>>(inactiveBlocker));
+    lockMap_.emplace(PowerState::STAND_BY, std::make_shared<std::vector<RunningLockType>>(standByBlocker));
+    lockMap_.emplace(PowerState::DOZE, std::make_shared<std::vector<RunningLockType>>(dozeBlocker));
+    lockMap_.emplace(PowerState::SLEEP, std::make_shared<std::vector<RunningLockType>>(sleepBlocker));
+    lockMap_.emplace(PowerState::HIBERNATE, std::make_shared<std::vector<RunningLockType>>(hibernateBlocker));
+    lockMap_.emplace(PowerState::SHUTDOWN, std::make_shared<std::vector<RunningLockType>>(shutdownBlocker));
 
     POWER_HILOGD(FEATURE_POWER_STATE, "Instance end");
 }
@@ -84,8 +71,7 @@ bool PowerStateMachine::Init()
     POWER_HILOGD(FEATURE_POWER_STATE, "Start init");
 
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
-    std::function<void(uint32_t)> callback = std::bind(&PowerStateMachine::ActionCallback,
-        this, std::placeholders::_1);
+    std::function<void(uint32_t)> callback = std::bind(&PowerStateMachine::ActionCallback, this, std::placeholders::_1);
     stateAction_->RegisterCallback(callback);
     InitStateMap();
 
@@ -114,40 +100,34 @@ void PowerStateMachine::InitState()
 void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
-        std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_AWAKE lambda start");
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             // Display power service maybe not ready when init
-            if (ret != ActionResult::SUCCESS
-                && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
+            if (ret != ActionResult::SUCCESS && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_ON_ERR;
             }
             ResetInactiveTimer();
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceFreeze()
 {
     controllerMap_.emplace(PowerState::FREEZE,
-        std::make_shared<StateController>(PowerState::FREEZE, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::FREEZE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_FREEZE lambda start");
-            //Subsequent added functions
+            // Subsequent added functions
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceInactive()
 {
     controllerMap_.emplace(PowerState::INACTIVE,
-        std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_INACTIVE lambda start");
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
@@ -157,86 +137,63 @@ void PowerStateMachine::EmplaceInactive()
             }
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
             // Display power service maybe not ready when init
-            if (ret != ActionResult::SUCCESS
-                && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
+            if (ret != ActionResult::SUCCESS && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to INACTIVE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_OFF_ERR;
             }
-            ResetSleepTimer();
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceStandBy()
 {
     controllerMap_.emplace(PowerState::STAND_BY,
-        std::make_shared<StateController>(PowerState::STAND_BY, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::STAND_BY, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_STAND_BY lambda start");
             mDeviceState_.screenState.lastOffTime = GetTickCount();
-            //Subsequent added functions
+            // Subsequent added functions
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceDoze()
 {
     controllerMap_.emplace(PowerState::DOZE,
-        std::make_shared<StateController>(PowerState::DOZE, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::DOZE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_DOZE lambda start");
             mDeviceState_.screenState.lastOffTime = GetTickCount();
-            //Subsequent added functions
+            // Subsequent added functions
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceSleep()
 {
     controllerMap_.emplace(PowerState::SLEEP,
-        std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SLEEP lambda start");
-            DisplayState state = DisplayState::DISPLAY_OFF;
-            if (enableDisplaySuspend_) {
-                POWER_HILOGI(FEATURE_POWER_STATE, "Display suspend enabled");
-                state = DisplayState::DISPLAY_SUSPEND;
-            }
-            uint32_t ret = this->stateAction_->GoToSleep(onSuspend, onWakeup, false);
-            if (ret != ActionResult::SUCCESS) {
-                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to SLEEP, sleep error, ret: %{public}u", ret);
-                return TransitResult::HDI_ERR;
-            }
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceHibernate()
 {
     controllerMap_.emplace(PowerState::HIBERNATE,
-        std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_HIBERNATE lambda start");
-            //Subsequent added functions
+            // Subsequent added functions
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::EmplaceShutdown()
 {
     controllerMap_.emplace(PowerState::SHUTDOWN,
-        std::make_shared<StateController>(PowerState::SHUTDOWN, shared_from_this(),
-        [this](StateChangeReason reason) {
+        std::make_shared<StateController>(PowerState::SHUTDOWN, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SHUTDOWN lambda start");
-            //Subsequent added functions
+            // Subsequent added functions
             return TransitResult::SUCCESS;
-        })
-    );
+        }));
 }
 
 void PowerStateMachine::InitStateMap()
@@ -280,11 +237,8 @@ void PowerStateMachine::onWakeup()
     handler->SendEvent(PowermsEventHandler::SYSTEM_WAKE_UP_MSG, 0, 0);
 }
 
-void PowerStateMachine::SuspendDeviceInner(pid_t pid,
-    int64_t callTimeMs,
-    SuspendDeviceType type,
-    bool suspendImmed,
-    bool ignoreScreenState)
+void PowerStateMachine::SuspendDeviceInner(
+    pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed, bool ignoreScreenState)
 {
     StartTrace(HITRACE_TAG_POWER, "SuspendDevice");
     if (type > SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX) {
@@ -294,8 +248,8 @@ void PowerStateMachine::SuspendDeviceInner(pid_t pid,
     // Check the screen state
     if (!ignoreScreenState) {
         if (stateAction_ != nullptr) {
-            stateAction_->Suspend(callTimeMs, type, suspendImmed ?
-                SUSPEND_DEVICE_IMMEDIATELY : SUSPEND_DEVICE_NEED_DOZE);
+            stateAction_->Suspend(
+                callTimeMs, type, suspendImmed ? SUSPEND_DEVICE_IMMEDIATELY : SUSPEND_DEVICE_NEED_DOZE);
         }
         mDeviceState_.lastSuspendDeviceTime = callTimeMs;
         POWER_HILOGD(FEATURE_SUSPEND, "Suspend device success");
@@ -308,11 +262,8 @@ void PowerStateMachine::SuspendDeviceInner(pid_t pid,
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
 }
 
-void PowerStateMachine::WakeupDeviceInner(pid_t pid,
-    int64_t callTimeMs,
-    WakeupDeviceType type,
-    const std::string& details,
-    const std::string& pkgName)
+void PowerStateMachine::WakeupDeviceInner(
+    pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
     StartTrace(HITRACE_TAG_POWER, "WakeupDevice");
     if (type > WakeupDeviceType::WAKEUP_DEVICE_MAX) {
@@ -332,10 +283,8 @@ void PowerStateMachine::WakeupDeviceInner(pid_t pid,
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup device finish");
 }
 
-void PowerStateMachine::RefreshActivityInner(pid_t pid,
-    int64_t callTimeMs,
-    UserActivityType type,
-    bool needChangeBacklight)
+void PowerStateMachine::RefreshActivityInner(
+    pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
 {
     if (type > UserActivityType::USER_ACTIVITY_TYPE_MAX) {
         POWER_HILOGW(FEATURE_ACTIVITY, "Invalid type: %{public}d", type);
@@ -344,8 +293,8 @@ void PowerStateMachine::RefreshActivityInner(pid_t pid,
     // Check the screen state
     if (IsScreenOn()) {
         if (stateAction_ != nullptr) {
-            stateAction_->RefreshActivity(callTimeMs, type, needChangeBacklight ?
-                REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
+            stateAction_->RefreshActivity(callTimeMs, type,
+                needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, GetReasonByUserActivity(type));
         }
@@ -396,8 +345,8 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
 
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
-    SetState(PowerState::INACTIVE,
-        GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
+    SetState(
+        PowerState::INACTIVE, GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
     if (stateAction_ != nullptr) {
         currentState_ = PowerState::SLEEP;
         stateAction_->GoToSleep(onSuspend, onWakeup, true);
@@ -410,8 +359,7 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 bool PowerStateMachine::IsScreenOn()
 {
     DisplayState state = stateAction_->GetDisplayState();
-    if (state == DisplayState::DISPLAY_ON ||
-        state == DisplayState::DISPLAY_DIM) {
+    if (state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is on, state: %{public}u", state);
         return true;
     }
@@ -444,10 +392,8 @@ void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallbac
     if (retIt.second) {
         object->AddDeathRecipient(powerStateCBDeathRecipient_);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE,
-        "listeners.size = %{public}d, insertOk = %{public}d",
-        static_cast<unsigned int>(powerStateListeners_.size()),
-        retIt.second);
+    POWER_HILOGD(FEATURE_POWER_STATE, "listeners.size = %{public}d, insertOk = %{public}d",
+        static_cast<unsigned int>(powerStateListeners_.size()), retIt.second);
 }
 
 void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
@@ -460,10 +406,8 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
     if (eraseNum != 0) {
         object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE,
-        "listeners.size = %{public}d, eraseNum = %{public}zu",
-        static_cast<unsigned int>(powerStateListeners_.size()),
-        eraseNum);
+    POWER_HILOGD(FEATURE_POWER_STATE, "listeners.size = %{public}d, eraseNum = %{public}zu",
+        static_cast<unsigned int>(powerStateListeners_.size()), eraseNum);
 }
 
 static const std::string GetReasonTypeString(StateChangeReason type)
@@ -600,10 +544,10 @@ void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 
 void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(FEATURE_POWER_STATE, "state = %{public}u, listeners.size = %{public}zu",
-        state, powerStateListeners_.size());
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE",
-        HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", static_cast<uint32_t>(state));
+    POWER_HILOGI(
+        FEATURE_POWER_STATE, "state = %{public}u, listeners.size = %{public}zu", state, powerStateListeners_.size());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE",
+        static_cast<uint32_t>(state));
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
@@ -638,8 +582,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
 
 const std::string TASK_UNREG_POWER_STATE_CALLBACK = "PowerState_UnRegPowerStateCB";
 
-void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(
-    const wptr<IRemoteObject>& remote)
+void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (remote == nullptr || remote.promote() == nullptr) {
         return;
@@ -655,8 +598,7 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(
         return;
     }
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(remote.promote());
-    std::function<void()> unRegFunc =
-        std::bind(&PowerMgrService::UnRegisterPowerStateCallback, pms, callback);
+    std::function<void()> unRegFunc = std::bind(&PowerMgrService::UnRegisterPowerStateCallback, pms, callback);
     handler->PostTask(unRegFunc, TASK_UNREG_POWER_STATE_CALLBACK);
 }
 
@@ -706,8 +648,8 @@ void PowerStateMachine::ResetInactiveTimer()
     if (this->CheckRunningLock(PowerState::INACTIVE)) {
         const uint32_t TWO = 2;
         const uint32_t THREE = 3;
-        this->SetDelayTimer(this->GetDisplayOffTime() * TWO / THREE,
-            PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+        this->SetDelayTimer(
+            this->GetDisplayOffTime() * TWO / THREE, PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     }
 }
 
@@ -722,8 +664,7 @@ void PowerStateMachine::ResetSleepTimer()
     }
 
     if (this->CheckRunningLock(PowerState::SLEEP)) {
-        this->SetDelayTimer(this->GetSleepTime(),
-            PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+        this->SetDelayTimer(this->GetSleepTime(), PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
     }
 }
 
@@ -733,12 +674,6 @@ void PowerStateMachine::HandleDelayTimer(int32_t event)
     switch (event) {
         case PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG:
             HandleActivityTimeout();
-            break;
-        case PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG:
-            HandleActivityOffTimeout();
-            break;
-        case PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG:
-            HandleActivitySleepTimeout();
             break;
         case PowermsEventHandler::SYSTEM_WAKE_UP_MSG:
             HandleSystemWakeup();
@@ -758,14 +693,12 @@ void PowerStateMachine::HandleActivityTimeout()
         return;
     }
     if (dispState == DisplayState::DISPLAY_ON) {
-        stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM,
-            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+        stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
         if (this->GetDisplayOffTime() < 0) {
             POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
             return;
         } else {
-            SetDelayTimer(GetDisplayOffTime() / THREE,
-                PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            SetDelayTimer(GetDisplayOffTime() / THREE, PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
         }
     } else {
         POWER_HILOGW(FEATURE_ACTIVITY, "Display is not on, ignore activity timeout, state = %{public}d", dispState);
@@ -782,8 +715,7 @@ void PowerStateMachine::HandleActivityOffTimeout()
     }
     DisplayState dispState = stateAction_->GetDisplayState();
     // Also transit state when ON if system not support DIM
-    if (dispState == DisplayState::DISPLAY_ON
-        || dispState == DisplayState::DISPLAY_DIM) {
+    if (dispState == DisplayState::DISPLAY_ON || dispState == DisplayState::DISPLAY_DIM) {
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     } else {
         POWER_HILOGW(FEATURE_ACTIVITY, "Display is off, ignore activity off timeout, state = %{public}d", dispState);
@@ -835,15 +767,12 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
     }
 
     std::shared_ptr<std::vector<RunningLockType>> pLock = iterator->second;
-    for (std::vector<RunningLockType>::const_iterator iter = pLock->begin();
-        iter != pLock->end(); ++iter) {
+    for (std::vector<RunningLockType>::const_iterator iter = pLock->begin(); iter != pLock->end(); ++iter) {
         uint32_t count = runningLockMgr->GetValidRunningLockNum(*iter);
         if (count > 0) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "RunningLock %{public}s is locking (count=%{public}d), blocking %{public}s",
-                GetRunningLockTypeString(*iter).c_str(),
-                count,
-                GetPowerStateString(state).c_str());
+                GetRunningLockTypeString(*iter).c_str(), count, GetPowerStateString(state).c_str());
             return false;
         }
     }
@@ -855,7 +784,7 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
 void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
-                 displayOffTime_.load(), time);
+        displayOffTime_.load(), time);
     displayOffTime_ = time;
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
@@ -874,7 +803,7 @@ static void DisplayOffTimeUpdateFunc()
         return;
     }
     POWER_HILOGD(FEATURE_POWER_STATE, "setting update display off time %{public}" PRId64 " -> %{public}" PRId64 "",
-                 systemTime, settingTime);
+        systemTime, settingTime);
     stateMachine->SetDisplayOffTime(settingTime, false);
 }
 
@@ -885,7 +814,9 @@ void PowerStateMachine::RegisterDisplayOffTimeObserver()
         return;
     }
     DisplayOffTimeUpdateFunc();
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) { DisplayOffTimeUpdateFunc(); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        DisplayOffTimeUpdateFunc();
+    };
     g_displayOffTimeObserver = SettingHelper::RegisterSettingDisplayOffTimeObserver(updateFunc);
 }
 
@@ -902,9 +833,6 @@ void PowerStateMachine::UnregisterDisplayOffTimeObserver()
 void PowerStateMachine::SetSleepTime(int64_t time)
 {
     sleepTime_ = time;
-    if (currentState_ == PowerState::INACTIVE) {
-        ResetSleepTimer();
-    }
 }
 
 int64_t PowerStateMachine::GetDisplayOffTime()
@@ -919,8 +847,7 @@ int64_t PowerStateMachine::GetSleepTime()
 
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
-    POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}d, reason=%{public}d, force=%{public}d",
-        state, reason, force);
+    POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}d, reason=%{public}d, force=%{public}d", state, reason, force);
     auto iterator = controllerMap_.find(state);
     if (iterator == controllerMap_.end()) {
         return false;
@@ -942,11 +869,11 @@ void PowerStateMachine::SetDisplaySuspend(bool enable)
     if (GetState() == PowerState::INACTIVE) {
         POWER_HILOGI(FEATURE_POWER_STATE, "Change display state");
         if (enable) {
-            stateAction_->SetDisplayState(DisplayState::DISPLAY_SUSPEND,
-                StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+            stateAction_->SetDisplayState(
+                DisplayState::DISPLAY_SUSPEND, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
         } else {
-            stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF,
-                StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+            stateAction_->SetDisplayState(
+                DisplayState::DISPLAY_OFF, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
         }
     }
 }
@@ -969,7 +896,7 @@ StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType ty
             ret = StateChangeReason::STATE_CHANGE_REASON_APPLICATION;
             break;
         case UserActivityType::USER_ACTIVITY_TYPE_ATTENTION: // fail through
-        case UserActivityType::USER_ACTIVITY_TYPE_OTHER: // fail through
+        case UserActivityType::USER_ACTIVITY_TYPE_OTHER:     // fail through
         default:
             break;
     }
@@ -983,7 +910,7 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
-            ret =  StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+            ret = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_WAKE_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
@@ -1008,13 +935,13 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             ret = StateChangeReason::STATE_CHANGE_REASON_LID;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK:
-            ret =  StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK;
+            ret = StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD:
-            ret =  StateChangeReason::STATE_CHANGE_REASON_KEYBOARD;
+            ret = StateChangeReason::STATE_CHANGE_REASON_KEYBOARD;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_MOUSE:
-            ret =  StateChangeReason::STATE_CHANGE_REASON_MOUSE;
+            ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
         default:
@@ -1038,11 +965,11 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT:
             ret = StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
             break;
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH:
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID:
             ret = StateChangeReason::STATE_CHANGE_REASON_LID;
             break;
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON: // fall through
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_BUTTON:
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY: // fall through
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI:
@@ -1065,41 +992,29 @@ void PowerStateMachine::DumpInfo(std::string& result)
 {
     result.append("POWER STATE DUMP:\n");
     result.append("Current State: ")
-            .append(GetPowerStateString(GetState()))
-            .append("  Reason: ")
-            .append(ToString(static_cast<uint32_t>(
-                controllerMap_.find(GetState())->second->lastReason_)))
-            .append("  Time: ")
-            .append(ToString(controllerMap_.find(GetState())->second->lastTime_))
-            .append("\n");
+        .append(GetPowerStateString(GetState()))
+        .append("  Reason: ")
+        .append(ToString(static_cast<uint32_t>(controllerMap_.find(GetState())->second->lastReason_)))
+        .append("  Time: ")
+        .append(ToString(controllerMap_.find(GetState())->second->lastTime_))
+        .append("\n");
 
     result.append("ScreenOffTime: Timeout=");
     if (isScreenOffTimeOverride_) {
         result.append((ToString(beforeOverrideTime_)))
-                .append("ms  OverrideTimeout=")
-                .append((ToString(GetDisplayOffTime())))
-                .append("ms\n");
+            .append("ms  OverrideTimeout=")
+            .append((ToString(GetDisplayOffTime())))
+            .append("ms\n");
     } else {
-        result.append((ToString(GetDisplayOffTime())))
-                .append("ms\n");
+        result.append((ToString(GetDisplayOffTime()))).append("ms\n");
     }
 
     result.append("DUMP DETAILS:\n");
-    result.append("Last Screen On: ")
-            .append(ToString(mDeviceState_.screenState.lastOnTime))
-            .append("\n");
-    result.append("Last Screen Off: ")
-            .append(ToString(mDeviceState_.screenState.lastOffTime))
-            .append("\n");
-    result.append("Last SuspendDevice: ")
-            .append(ToString(mDeviceState_.lastSuspendDeviceTime))
-            .append("\n");
-    result.append("Last WakeupDevice: ")
-            .append(ToString(mDeviceState_.lastWakeupDeviceTime))
-            .append("\n");
-    result.append("Last Refresh: ")
-            .append(ToString(mDeviceState_.lastRefreshActivityTime))
-            .append("\n");
+    result.append("Last Screen On: ").append(ToString(mDeviceState_.screenState.lastOnTime)).append("\n");
+    result.append("Last Screen Off: ").append(ToString(mDeviceState_.screenState.lastOffTime)).append("\n");
+    result.append("Last SuspendDevice: ").append(ToString(mDeviceState_.lastSuspendDeviceTime)).append("\n");
+    result.append("Last WakeupDevice: ").append(ToString(mDeviceState_.lastWakeupDeviceTime)).append("\n");
+    result.append("Last Refresh: ").append(ToString(mDeviceState_.lastRefreshActivityTime)).append("\n");
 
     result.append("DUMP EACH STATES:\n");
     for (auto it = controllerMap_.begin(); it != controllerMap_.end(); it++) {
@@ -1122,9 +1037,7 @@ void PowerStateMachine::DumpInfo(std::string& result)
     }
 }
 
-TransitResult PowerStateMachine::StateController::TransitTo(
-    StateChangeReason reason,
-    bool ignoreLock)
+TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason reason, bool ignoreLock)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Start");
     std::shared_ptr<PowerStateMachine> owner = owner_.lock();
@@ -1132,12 +1045,9 @@ TransitResult PowerStateMachine::StateController::TransitTo(
         POWER_HILOGW(FEATURE_POWER_STATE, "owner is nullptr");
         return TransitResult::OTHER_ERR;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE,
-        "Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
-        GetPowerStateString(owner->currentState_).c_str(),
-        GetPowerStateString(this->state_).c_str(),
-        GetReasonTypeString(reason).c_str(),
-        ignoreLock);
+    POWER_HILOGI(FEATURE_POWER_STATE, "Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
+        GetPowerStateString(owner->currentState_).c_str(), GetPowerStateString(this->state_).c_str(),
+        GetReasonTypeString(reason).c_str(), ignoreLock);
     MatchState(owner->currentState_, owner->stateAction_->GetDisplayState());
     if (!CheckState()) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", owner->currentState_);
@@ -1175,8 +1085,8 @@ bool PowerStateMachine::StateController::CheckState()
     return state != owner->currentState_;
 }
 
-void PowerStateMachine::StateController::CorrectState(PowerState& currentState,
-    PowerState correctState, DisplayState state)
+void PowerStateMachine::StateController::CorrectState(
+    PowerState& currentState, PowerState correctState, DisplayState state)
 {
     std::string msg = "Correct power state errors from";
     msg.append(GetPowerStateString(currentState))
@@ -1185,25 +1095,24 @@ void PowerStateMachine::StateController::CorrectState(PowerState& currentState,
         .append(" due to cuurent display state is ")
         .append(GetDisplayStateString(state));
     POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION",
-        HiviewDFX::HiSysEvent::EventType::FAULT, "ERROR_STATE", static_cast<uint32_t>(currentState),
-        "CORRECTION_STATE", static_cast<uint32_t>(correctState), "DISPLAY_STATE", static_cast<uint32_t>(state),
-        "MSG", msg);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION", HiviewDFX::HiSysEvent::EventType::FAULT,
+        "ERROR_STATE", static_cast<uint32_t>(currentState), "CORRECTION_STATE", static_cast<uint32_t>(correctState),
+        "DISPLAY_STATE", static_cast<uint32_t>(state), "MSG", msg);
     currentState = correctState;
 }
 
 void PowerStateMachine::StateController::MatchState(PowerState& currentState, DisplayState state)
 {
-    if (GetState() == PowerState::SLEEP || currentState == PowerState::SLEEP ||
-        GetState() == PowerState::HIBERNATE || currentState == PowerState::HIBERNATE ||
-        GetState() == PowerState::SHUTDOWN || currentState == PowerState::SHUTDOWN) {
+    if (GetState() == PowerState::SLEEP || currentState == PowerState::SLEEP || GetState() == PowerState::HIBERNATE ||
+        currentState == PowerState::HIBERNATE || GetState() == PowerState::SHUTDOWN ||
+        currentState == PowerState::SHUTDOWN) {
         return;
     }
 
     // Keep the state of display consistent with the state of power
     switch (state) {
         case DisplayState::DISPLAY_OFF:
-            if (currentState == PowerState::AWAKE  || currentState == PowerState::FREEZE) {
+            if (currentState == PowerState::AWAKE || currentState == PowerState::FREEZE) {
                 CorrectState(currentState, PowerState::INACTIVE, state);
             }
             break;
@@ -1221,8 +1130,8 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
     }
 }
 
-void PowerStateMachine::StateController::RecordFailure(PowerState from,
-    StateChangeReason trigger, TransitResult failReason)
+void PowerStateMachine::StateController::RecordFailure(
+    PowerState from, StateChangeReason trigger, TransitResult failReason)
 {
     failFrom_ = from;
     failTrigger_ = trigger;
@@ -1261,8 +1170,8 @@ void PowerStateMachine::StateController::RecordFailure(PowerState from,
         .append("\n");
     const int logLevel = 2;
     const std::string tag = "TAG_POWER";
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN",
-        HiviewDFX::HiSysEvent::EventType::FAULT, "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN", HiviewDFX::HiSysEvent::EventType::FAULT,
+        "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
 }
 } // namespace PowerMgr

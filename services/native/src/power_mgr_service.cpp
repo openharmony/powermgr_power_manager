@@ -31,9 +31,9 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
+#include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "ui_service_mgr_client.h"
-#include "sysparam.h"
 #include "watchdog.h"
 
 using namespace OHOS::AppExecFwk;
@@ -49,7 +49,7 @@ static std::string g_wakeupReason = "";
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
-}
+} // namespace
 
 using namespace MMI;
 
@@ -146,42 +146,6 @@ bool PowerMgrService::PowerStateMachineInit()
     return true;
 }
 
-class InputCallback : public IInputEventConsumer {
-    virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
-    virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
-    virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
-};
-
-void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
-{
-    POWER_HILOGD(FEATURE_INPUT, "KeyEvent");
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
-    pms->HandleKeyEvent(keyEvent->GetKeyCode());
-}
-
-void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
-{
-    POWER_HILOGD(FEATURE_INPUT, "PointerEvent");
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
-    int32_t type = pointerEvent->GetSourceType();
-    pms->HandlePointEvent(type);
-}
-
-void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
-{
-    POWER_HILOGD(FEATURE_INPUT, "AxisEvent");
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
-}
-
 void PowerMgrService::KeyMonitorInit()
 {
     POWER_HILOGD(FEATURE_INPUT, "Initialize the subscription key");
@@ -192,56 +156,28 @@ void PowerMgrService::KeyMonitorInit()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(LONG_PRESS_DELAY_MS);
-    powerkeyLongPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-        [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+    powerkeyLongPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
+        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_INPUT, "Receive long press powerkey");
             handler_->SendEvent(PowermsEventHandler::SHUTDOWN_REQUEST_MSG);
-    });
+        });
     if (powerkeyLongPressId_ >= 0) {
-        keyOption.reset();
-        keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-        keyOption->SetPreKeys(preKeys);
-        keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
-        keyOption->SetFinalKeyDown(true);
-        keyOption->SetFinalKeyDownDuration(0);
-        powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-            [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-                POWER_HILOGI(FEATURE_INPUT, "Receive short press powerkey");
-                powerkeyPressed_ = true;
-                this->HandlePowerKeyDown();
-        });
-
-        keyOption.reset();
-        keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-        keyOption->SetPreKeys(preKeys);
-        keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
-        keyOption->SetFinalKeyDown(false);
-        keyOption->SetFinalKeyDownDuration(0);
-        powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-            [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-                powerkeyPressed_ = false;
-                this->HandlePowerKeyUp();
-        });
-
         keyOption.reset();
         keyOption = std::make_shared<OHOS::MMI::KeyOption>();
         keyOption->SetPreKeys(preKeys);
         keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_F1);
         keyOption->SetFinalKeyDown(true);
         keyOption->SetFinalKeyDownDuration(0);
-        doubleClickId_ = InputManager::GetInstance()->SubscribeKeyEvent(keyOption,
-            [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+        doubleClickId_ = InputManager::GetInstance()->SubscribeKeyEvent(
+            keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
                 POWER_HILOGI(FEATURE_INPUT, "Receive double click");
                 this->HandleKeyEvent(keyEvent->GetKeyCode());
-        });
+            });
     } else if (powerkeyLongPressId_ != ERROR_UNSUPPORT) {
         POWER_HILOGI(FEATURE_INPUT, "SubscribeKeyEvent failed: %{public}d", powerkeyLongPressId_);
         handler_->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
         return;
     }
-
-    std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
-    monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
 }
 
 void PowerMgrService::KeyMonitorCancel()
@@ -255,107 +191,11 @@ void PowerMgrService::KeyMonitorCancel()
     if (powerkeyLongPressId_ >= 0) {
         inputManager->UnsubscribeKeyEvent(powerkeyLongPressId_);
     }
-    if (powerkeyShortPressId_ >= 0) {
-        inputManager->UnsubscribeKeyEvent(powerkeyShortPressId_);
-    }
-    if (powerkeyReleaseId_ >= 0) {
-        inputManager->UnsubscribeKeyEvent(powerkeyReleaseId_);
-    }
     if (doubleClickId_ >= 0) {
         inputManager->UnsubscribeKeyEvent(doubleClickId_);
     }
     if (monitorId_ >= 0) {
         inputManager->RemoveMonitor(monitorId_);
-    }
-}
-void PowerMgrService::SwitchSubscriberInit()
-{
-    POWER_HILOGW(FEATURE_INPUT, "Initialize the subscription switch");
-    switchId_ = InputManager::GetInstance()->SubscribeSwitchEvent(
-        [this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
-            POWER_HILOGI(FEATURE_WAKEUP, "Lid event received");
-            auto now = static_cast<int64_t>(time(nullptr));
-            if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
-                POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
-                this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, true);
-            } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
-                std::string reason = "lid open";
-                this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
-            }
-    });
-}
-
-void PowerMgrService::SwitchSubscriberCancel()
-{
-    POWER_HILOGI(FEATURE_INPUT, "Unsubscribe switch information");
-    if (switchId_ >= 0) {
-        InputManager::GetInstance()->UnsubscribeSwitchEvent(switchId_);
-        switchId_ = -1;
-    }
-}
-
-void PowerMgrService::HallSensorSubscriberInit()
-{
-    if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
-        POWER_HILOGW(FEATURE_INPUT, "SENSOR_TYPE_ID_HALL sensor not support");
-        return;
-    }
-    if (strcpy_s(sensorUser_.name, sizeof(sensorUser_.name), "PowerManager") != EOK) {
-        POWER_HILOGW(FEATURE_INPUT, "strcpy_s error");
-        return;
-    }
-    sensorUser_.userData = nullptr;
-    sensorUser_.callback = &HallSensorCallback;
-    SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
-    SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
-    ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
-}
-
-bool PowerMgrService::IsSupportSensor(SensorTypeId typeId)
-{
-    bool isSupport = false;
-    SensorInfo* sensorInfo = nullptr;
-    int32_t count;
-    int32_t ret = GetAllSensors(&sensorInfo, &count);
-    if (ret != 0 || sensorInfo == nullptr) {
-        POWER_HILOGW(FEATURE_INPUT, "Get sensors fail, ret=%{public}d", ret);
-        return isSupport;
-    }
-    for (int32_t i = 0; i < count; i++) {
-        if (sensorInfo[i].sensorTypeId == typeId) {
-            isSupport = true;
-            break;
-        }
-    }
-    return isSupport;
-}
-
-void PowerMgrService::HallSensorCallback(SensorEvent* event)
-{
-    if (event == nullptr || event->sensorTypeId != SENSOR_TYPE_ID_HALL || event->data == nullptr) {
-        POWER_HILOGW(FEATURE_INPUT, "Hall sensor event is invalid");
-        return;
-    }
-    const uint32_t LID_CLOSED_HALL_FLAG = 0x1;
-    auto now = static_cast<int64_t>(time(nullptr));
-    auto data = reinterpret_cast<HallData*>(event->data);
-    auto status = static_cast<uint32_t>(data->status);
-    if (status & LID_CLOSED_HALL_FLAG) {
-        POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
-        pms->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, false);
-    } else {
-        POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
-        std::string reason = "lid open";
-        pms->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
-    }
-}
-
-void PowerMgrService::HallSensorSubscriberCancel()
-{
-    if (IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
-        DeactivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
-        UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
     }
 }
 
@@ -391,8 +231,8 @@ bool PowerMgrService::CheckDialogAndShuttingDown()
 {
     bool isShuttingDown = this->shutdownService_.IsShuttingDown();
     if (isDialogShown_ || isShuttingDown) {
-        POWER_HILOGW(FEATURE_INPUT, "isDialogShown: %{public}d, isShuttingDown: %{public}d",
-            isDialogShown_, isShuttingDown);
+        POWER_HILOGW(
+            FEATURE_INPUT, "isDialogShown: %{public}d, isShuttingDown: %{public}d", isDialogShown_, isShuttingDown);
         isDialogShown_ = false;
         return true;
     }
@@ -424,9 +264,36 @@ void PowerMgrService::HandlePowerKeyUp()
         return;
     }
     if (this->IsScreenOn() && !isPowerKeyDown_) {
-        this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
+        this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     }
     isPowerKeyDown_ = false;
+}
+
+void PowerMgrService::SwitchSubscriberInit()
+{
+    POWER_HILOGW(FEATURE_INPUT, "Initialize the subscription switch");
+    switchId_ =
+        InputManager::GetInstance()->SubscribeSwitchEvent([this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
+            POWER_HILOGI(FEATURE_WAKEUP, "switch event received");
+            auto now = static_cast<int64_t>(time(nullptr));
+            if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
+                POWER_HILOGI(FEATURE_SUSPEND, "switch close event received, begin to suspend");
+                this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, true);
+            } else {
+                POWER_HILOGI(FEATURE_WAKEUP, "switch open event received, begin to wakeup");
+                std::string reason = "switch open";
+                this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
+            }
+        });
+}
+
+void PowerMgrService::SwitchSubscriberCancel()
+{
+    POWER_HILOGI(FEATURE_INPUT, "Unsubscribe switch information");
+    if (switchId_ >= 0) {
+        InputManager::GetInstance()->UnsubscribeSwitchEvent(switchId_);
+        switchId_ = -1;
+    }
 }
 
 void PowerMgrService::HandleKeyEvent(int32_t keyCode)
@@ -441,8 +308,7 @@ void PowerMgrService::HandleKeyEvent(int32_t keyCode)
             std::string reason = "double click";
             reason.append(std::to_string(keyCode));
             this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK, reason);
-        } else if (keyCode >= KeyEvent::KEYCODE_0
-            && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
+        } else if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
             POWER_HILOGI(FEATURE_WAKEUP, "Wakeup by keyboard");
             std::string reason = "keyboard:";
             reason.append(std::to_string(keyCode));
@@ -481,10 +347,9 @@ void PowerMgrService::HandleScreenOnTimeout()
     } else {
         message.append("BUT DISPLAY NOT FINISHED");
     }
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT",
-        HiviewDFX::HiSysEvent::EventType::FAULT,
-        "PID", IPCSkeleton::GetCallingPid(), "UID", IPCSkeleton::GetCallingUid(),
-        "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", message.c_str());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT", HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", IPCSkeleton::GetCallingPid(), "UID", IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "", "PROCESS_NAME",
+        "", "MSG", message.c_str());
     POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
 }
 
@@ -494,18 +359,18 @@ void PowerMgrService::PowerMgrService::OnStop()
     if (!ready_) {
         return;
     }
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
     powerStateMachine_->UnregisterDisplayOffTimeObserver();
+    if (suspendController_) {
+        suspendController_->StopSleep();
+    }
+
     SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
     handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
 
     KeyMonitorCancel();
-    HallSensorSubscriberCancel();
     SwitchSubscriberCancel();
     eventRunner_.reset();
     handler_.reset();
@@ -516,8 +381,7 @@ int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& arg
 {
     POWER_HILOGI(COMP_SVC, "Dump service");
     std::vector<std::string> argsInStr;
-    std::transform(args.begin(), args.end(), std::back_inserter(argsInStr),
-        [](const std::u16string &arg) {
+    std::transform(args.begin(), args.end(), std::back_inserter(argsInStr), [](const std::u16string& arg) {
         std::string ret = Str16ToStr8(arg);
         POWER_HILOGI(COMP_SVC, "arg: %{public}s", ret.c_str());
         return ret;
@@ -550,13 +414,12 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
-
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    if (suspendController_) {
+        suspendController_->StopSleep();
+    }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownService_.Reboot(reason);
     return PowerErrors::ERR_OK;
@@ -578,27 +441,25 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     }
     g_wakeupReason = "";
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SHUTDOWN, "Cancel auto sleep timer");
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    powerStateMachine_->CancelDelayTimer(
-        PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+    powerStateMachine_->CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    if (suspendController_) {
+        suspendController_->StopSleep();
+    }
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownService_.Shutdown(reason);
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs,
-    SuspendDeviceType reason,
-    bool suspendImmed)
+PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
@@ -612,12 +473,10 @@ PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs,
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs,
-    WakeupDeviceType reason,
-    const std::string& details)
+PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
@@ -629,15 +488,13 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs,
     return PowerErrors::ERR_OK;
 }
 
-bool PowerMgrService::RefreshActivity(int64_t callTimeMs,
-    UserActivityType type,
-    bool needChangeBacklight)
+bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
 {
     std::lock_guard lock(mutex_);
     if (powerStateMachine_->CheckRefreshTime()) {
         return false;
     }
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {
         return false;
@@ -667,7 +524,6 @@ bool PowerMgrService::RestoreScreenOffTime()
     return powerStateMachine_->RestoreScreenOffTimeInner();
 }
 
-
 PowerState PowerMgrService::GetState()
 {
     std::lock_guard lock(mutex_);
@@ -687,7 +543,7 @@ bool PowerMgrService::IsScreenOn()
 bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return false;
@@ -711,8 +567,8 @@ RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& in
     return filledParam;
 }
 
-PowerErrors PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
-    const RunningLockInfo& runningLockInfo)
+PowerErrors PowerMgrService::CreateRunningLock(
+    const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
@@ -723,8 +579,8 @@ PowerErrors PowerMgrService::CreateRunningLock(const sptr<IRemoteObject>& remote
             runningLockInfo.name.c_str(), runningLockInfo.type);
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d",
-        runningLockInfo.name.c_str(), runningLockInfo.type);
+    POWER_HILOGI(
+        FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d", runningLockInfo.name.c_str(), runningLockInfo.type);
 
     RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo);
     runningLockMgr_->CreateRunningLock(remoteObj, runningLockParam);
@@ -800,13 +656,12 @@ void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
 {
     if (isUnLock) {
         // When unlock we try to suspend
-        if (!runningLockMgr_->ExistValidRunningLock()
-            && !powerStateMachine_->IsScreenOn()) {
+        if (!runningLockMgr_->ExistValidRunningLock() && !powerStateMachine_->IsScreenOn()) {
             // runninglock is empty and Screen is off,
             // so we try to suspend device from Z side.
             POWER_HILOGI(FEATURE_RUNNING_LOCK, "RunningLock is empty, try to suspend");
-            powerStateMachine_->SuspendDeviceInner(getpid(), GetTickCount(),
-                SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN, true, true);
+            powerStateMachine_->SuspendDeviceInner(
+                getpid(), GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN, true, true);
         }
     }
 }
@@ -823,7 +678,7 @@ bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
@@ -836,7 +691,7 @@ bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
 bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
@@ -846,17 +701,16 @@ bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     return true;
 }
 
-bool PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
-    const sptr<IShutdownCallback>& callback)
+bool PowerMgrService::RegisterShutdownCallback(
+    IShutdownCallback::ShutdownPriority priority, const sptr<IShutdownCallback>& callback)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d",
-        pid, uid, priority);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d", pid, uid, priority);
     shutdownService_.AddShutdownCallback(priority, callback);
     return true;
 }
@@ -864,7 +718,7 @@ bool PowerMgrService::RegisterShutdownCallback(IShutdownCallback::ShutdownPriori
 bool PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return false;
@@ -877,10 +731,10 @@ bool PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& 
 bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return false; 
+        return false;
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerModeModule_.AddPowerModeCallback(callback);
@@ -890,7 +744,7 @@ bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& 
 bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return false;
@@ -903,7 +757,7 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
 bool PowerMgrService::SetDisplaySuspend(bool enable)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid  = IPCSkeleton::GetCallingPid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return false;
@@ -985,5 +839,18 @@ void PowerMgrService::WakeupRunningLock::Unlock()
         pms->UnLock(token_->AsObject());
     }
 }
+
+void PowerMgrService::SuspendControllerInit()
+{
+    suspendController_ = std::make_shared<SuspendController>(&shutdownService_, powerStateMachine_, eventRunner_);
+    suspendController_->Init();
+}
+
+void PowerMgrService::WakeupControllerInit()
+{
+    wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_, eventRunner_);
+    wakeupController_->Init();
+}
+
 } // namespace PowerMgr
 } // namespace OHOS

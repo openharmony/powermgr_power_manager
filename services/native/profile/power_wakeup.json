@@ -1,0 +1,24 @@
+{
+    "powerkey": {
+        "enable": true
+    },
+    "keyborad": {
+        "enable": true
+    },
+    "mouse": {
+        "enable": true
+    },
+    "touchscreen": {
+        "enable": true,
+        "click": 2
+    },
+    "touchpad": {
+        "enable": true
+    },
+    "pen": {
+        "enable": true
+    },
+    "lid": {
+        "enable": true
+    }
+}

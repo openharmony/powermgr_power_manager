@@ -39,8 +39,9 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
     switch (event->GetInnerEventId()) {
         case INIT_KEY_MONITOR_MSG: {
             pmsptr->KeyMonitorInit();
-            pmsptr->HallSensorSubscriberInit();
             pmsptr->SwitchSubscriberInit();
+            pmsptr->SuspendControllerInit();
+            pmsptr->WakeupControllerInit();
             break;
         }
         case CHECK_RUNNINGLOCK_OVERTIME_MSG: {
@@ -52,14 +53,20 @@ void PowermsEventHandler::ProcessEvent([[maybe_unused]] const AppExecFwk::InnerE
             break;
         }
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: // fallthrough
-        case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: // fallthrough
-        case CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG: // fallthrough
         case SYSTEM_WAKE_UP_MSG: {
             auto powerStateMachine = pmsptr->GetPowerStateMachine();
             if (powerStateMachine == nullptr) {
                 return;
             }
             powerStateMachine->HandleDelayTimer(event->GetInnerEventId());
+            break;
+        }
+        case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
+            auto suspendController = pmsptr->GetSuspendController();
+            if (suspendController == nullptr) {
+                return;
+            }
+            suspendController->HandleEvent(event->GetInnerEventId());
             break;
         }
         case SCREEN_ON_TIMEOUT_MSG: {

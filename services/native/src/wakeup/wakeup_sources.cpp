@@ -1,0 +1,85 @@
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "wakeup_sources.h"
+#include "power_log.h"
+#include <string>
+namespace OHOS {
+namespace PowerMgr {
+
+WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint32_t click)
+{
+    if (key == WakeupSources::POWERKEY_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON;
+    }
+
+    if (key == WakeupSources::MOUSE_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
+    }
+
+    if (key == WakeupSources::KEYBOARD_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
+    }
+
+    if (key == WakeupSources::PEN_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_PEN;
+    }
+
+    if (key == WakeupSources::TOUCHPAD_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD;
+    }
+
+    if (key == WakeupSources::LID_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_LID;
+    }
+
+    if (key == WakeupSources::TOUCHSCREEN_KEY) {
+        if (click == 1) {
+            return WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
+        }
+
+        if (click == 2) {
+            return WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
+        }
+    }
+
+    return WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
+}
+
+std::vector<std::string> WakeupSources::getSourceKeys()
+{
+    std::vector<std::string> sourceKeys;
+    sourceKeys.push_back(WakeupSources::POWERKEY_KEY);
+    sourceKeys.push_back(WakeupSources::MOUSE_KEY);
+    sourceKeys.push_back(WakeupSources::KEYBOARD_KEY);
+    sourceKeys.push_back(WakeupSources::TOUCHSCREEN_KEY);
+    sourceKeys.push_back(WakeupSources::TOUCHPAD_KEY);
+    sourceKeys.push_back(WakeupSources::PEN_KEY);
+    sourceKeys.push_back(WakeupSources::LID_KEY);
+    return sourceKeys;
+}
+
+void WakeupSources::PutSource(WakeupSource& source)
+{
+    sourceList_.push_back(source);
+}
+
+std::vector<WakeupSource> WakeupSources::GetSourceList()
+{
+    return sourceList_;
+}
+
+} // namespace PowerMgr
+} // namespace OHOS
