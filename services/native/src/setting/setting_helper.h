@@ -43,6 +43,16 @@ public:
     static void SetSettingVibration(SwitchStatus status);
     static bool IsWindowRotationSettingValid();
     static void SetSettingWindowRotation(SwitchStatus status);
+    static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingSuspendSourcesObserver(sptr<SettingObserver>& observer);
+    static bool IsSuspendSourcesSettingValid();
+    static const std::string GetSettingSuspendSources();
+    static void SetSettingSuspendSources(const std::string& jsonConfig);
+    static sptr<SettingObserver> RegisterSettingWakeupSourcesObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingWakeupSourcesObserver(sptr<SettingObserver>& observer);
+    static bool IsWakeupSourcesSettingValid();
+    static const std::string GetSettingWakeupSources();
+    static void SetSettingWakeupSources(const std::string& jsonConfig);
 
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
@@ -50,6 +60,8 @@ private:
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
     static constexpr const char* SETTING_VIBRATION_KEY {"settings.sound.vibrate_status"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.display.default_screen_rotation"};
+    static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
+    static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
 };
 } // namespace PowerMgr
 } // namespace OHOS

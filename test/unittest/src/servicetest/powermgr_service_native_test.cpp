@@ -15,16 +15,16 @@
 
 #include "powermgr_service_native_test.h"
 
-#include <iostream>
-#include <datetime_ex.h>
-#include <if_system_ability_manager.h>
-#include <ipc_skeleton.h>
-#include <string_ex.h>
-#include "running_lock_token_stub.h"
 #include "power_common.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "powermgr_service_test_proxy.h"
+#include "running_lock_token_stub.h"
+#include <datetime_ex.h>
+#include <if_system_ability_manager.h>
+#include <iostream>
+#include <ipc_skeleton.h>
+#include <string_ex.h>
 
 using namespace OHOS;
 using namespace OHOS::PowerMgr;
@@ -439,7 +439,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest019, TestSize.Level
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
-    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_LID_SWITCH, false);
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_LID, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest019::fun is end");
 }
@@ -456,7 +456,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest020, TestSize.Level
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
-    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_BUTTON, false);
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest020::fun is end");
 }
@@ -490,7 +490,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest022, TestSize.Level
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
-    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_BUTTON, false);
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest022::fun is end");
 }
@@ -507,8 +507,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest023, TestSize.Level
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
-    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(),
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_ACCESSIBILITY, false);
+    g_powerMgrServiceProxy->SuspendDevice(
+        GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_ACCESSIBILITY, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest023::fun is end");
 }
@@ -525,8 +525,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest024, TestSize.Level
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
-    g_powerMgrServiceProxy->SuspendDevice(GetTickCount(),
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND, false);
+    g_powerMgrServiceProxy->SuspendDevice(
+        GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest024::fun is end");
 }
@@ -815,7 +815,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: issueI67Z62
  */
-HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level0)
 {
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     std::vector<std::string> dumpArgsNone {};
@@ -833,4 +833,4 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Leve
     auto helpIndex = helpDebugInfo.find(expectedDebugInfo);
     EXPECT_TRUE(helpIndex != string::npos);
 }
-}
+} // namespace

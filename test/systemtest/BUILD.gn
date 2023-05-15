@@ -23,6 +23,7 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
 }
 
@@ -40,31 +41,6 @@ deps_ex = [
   "samgr:samgr_proxy",
   "sensor:sensor_interface_native",
 ]
-
-##############################sttest##########################################
-
-ohos_systemtest("test_power_st_mgr_mock") {
-  module_out_path = module_output_path
-
-  sources = [ "src/power_mgr_st_mock_test.cpp" ]
-
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":module_private_config",
-    "${powermgr_utils_path}:coverage_flags",
-  ]
-
-  deps = [
-    "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
-    "${powermgr_service_path}:powermgrservice",
-    "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = deps_ex
-}
 
 ##############################systemtest##########################################
 
@@ -258,6 +234,5 @@ group("systemtest_powermgr") {
     ":test_power_mgr_powersavemode",
     ":test_power_mgr_shutdown_fast",
     ":test_power_mgr_system",
-    ":test_power_st_mgr_mock",
   ]
 }

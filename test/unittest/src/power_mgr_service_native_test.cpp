@@ -18,9 +18,9 @@
 #include <csignal>
 #include <iostream>
 
-#include "power_mgr_service.h"
 #include "key_event.h"
 #include "pointer_event.h"
+#include "power_mgr_service.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -69,8 +69,7 @@ void PowerMgrServiceNativeTest::TearDown()
 
 void PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %u.",
-        static_cast<uint32_t>(state));
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
 }
 
 /**
@@ -78,7 +77,7 @@ void PowerStateTestCallback::OnPowerStateChanged(PowerState state)
  * @tc.desc: test init in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
 {
     g_pmsTest->KeyMonitorInit();
     g_pmsTest->KeyMonitorCancel();
@@ -112,7 +111,7 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
  * @tc.desc: test handleKeyEvent in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
 {
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
     g_pmsTest->HandleKeyEvent(keyCode);
@@ -131,45 +130,4 @@ HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
     SuspendDeviceType reasonSDT = SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN;
     EXPECT_TRUE(g_pmsTest->SuspendDevice(SUSCALLTIMEMS, reasonSDT, false) == PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 end.");
-}
-
-/**
- * @tc.name: PowerMgrServiceNative003
- * @tc.desc: test callback in powerMgrService
- * @tc.type: FUNC
- */
-HWTEST_F (PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
-{
-    sptr<IPowerStateCallback> powerStatCb = new PowerStateTestCallback();
-    EXPECT_TRUE(g_pmsTest->RegisterPowerStateCallback(powerStatCb));
-    EXPECT_TRUE(g_pmsTest->UnRegisterPowerStateCallback(powerStatCb));
-
-    EXPECT_TRUE(g_pmsTest->SetDisplaySuspend(true));
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    EXPECT_TRUE(g_pmsTest->SetDeviceMode(mode) == PowerErrors::ERR_OK);
-    g_pmsTest->NotifyRunningLockChanged(true);
-    g_pmsTest->NotifyRunningLockChanged(false);
-    g_pmsTest->powerkeyPressed_ = true;
-    g_pmsTest->HandleScreenOnTimeout();
-    g_pmsTest->HandlePowerKeyUp();
-    g_pmsTest->HandlePowerKeyUp();
-
-    SensorEvent sensorEvent;
-    HallData data;
-    data.status = LID_CLOSED_HALL_FLAG;
-    sensorEvent.sensorTypeId = SENSOR_TYPE_ID_HALL;
-    sensorEvent.data = reinterpret_cast<uint8_t*>(&data);
-    g_pmsTest->HallSensorCallback(&sensorEvent);
-    data.status = LID_CLOSED_HALL_FLAG_B;
-    g_pmsTest->HallSensorCallback(&sensorEvent);
-    sensorEvent.data = nullptr;
-    g_pmsTest->HallSensorCallback(&sensorEvent);
-    sensorEvent.sensorTypeId = TIMEOUTMS;
-    g_pmsTest->HallSensorCallback(&sensorEvent);
-    g_pmsTest->HallSensorCallback(nullptr);
-
-    g_pmsTest->ready_ = true;
-    g_pmsTest->OnStart();
-    g_pmsTest->OnStop();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 end.");
 }

@@ -21,15 +21,17 @@
 
 #include "actions/idevice_power_action.h"
 #include "ipower_mgr.h"
-#include "powerms_event_handler.h"
 #include "power_mgr_notify.h"
 #include "power_mgr_stub.h"
+#include "power_mode_module.h"
+#include "power_save_mode.h"
 #include "power_state_machine.h"
+#include "powerms_event_handler.h"
 #include "running_lock_mgr.h"
 #include "shutdown_service.h"
 #include "sp_singleton.h"
-#include "power_mode_module.h"
-#include "power_save_mode.h"
+#include "suspend_controller.h"
+#include "wakeup_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -45,19 +47,16 @@ public:
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
-    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,
-        bool suspendImmed) override;
-    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
-        const std::string& details) override;
-    virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type,
-        bool needChangeBacklight) override;
+    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
+    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
+    virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
     virtual bool OverrideScreenOffTime(int64_t timeout) override;
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    virtual PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
-        const RunningLockInfo& runningLockInfo) override;
+    virtual PowerErrors CreateRunningLock(
+        const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS) override;
@@ -67,8 +66,8 @@ public:
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    virtual bool RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
-        const sptr<IShutdownCallback>& callback) override;
+    virtual bool RegisterShutdownCallback(
+        IShutdownCallback::ShutdownPriority priority, const sptr<IShutdownCallback>& callback) override;
     virtual bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
@@ -85,9 +84,10 @@ public:
     void KeyMonitorCancel();
     void SwitchSubscriberInit();
     void SwitchSubscriberCancel();
-    void HallSensorSubscriberInit();
-    void HallSensorSubscriberCancel();
     bool ShowPowerDialog();
+    void SuspendControllerInit();
+    void WakeupControllerInit();
+
     std::shared_ptr<PowermsEventHandler> GetHandler() const
     {
         return handler_;
@@ -108,6 +108,14 @@ public:
         return powerMgrNotify_;
     }
 
+    std::shared_ptr<SuspendController> GetSuspendController() const
+    {
+        return suspendController_;
+    }
+    std::shared_ptr<WakeupController> GetWakeupController() const
+    {
+        return wakeupController_;
+    }
     bool IsServiceReady() const
     {
         return ready_;
@@ -122,8 +130,8 @@ public:
     }
     void HandleScreenOnTimeout();
 
-    void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState,
-        IDevicePowerAction* powerAction, IRunningLockAction* lockAction)
+    void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState, IDevicePowerAction* powerAction,
+        IRunningLockAction* lockAction)
     {
         POWER_HILOGE(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
@@ -140,12 +148,17 @@ public:
     {
         PowerStateMachine::onWakeup();
     }
+
+    std::shared_ptr<SuspendController> suspendController_ = nullptr;
+    std::shared_ptr<WakeupController> wakeupController_ = nullptr;
+
 private:
     class WakeupRunningLock {
     public:
         static void Create();
         static void Lock();
         static void Unlock();
+
     private:
         WakeupRunningLock() = default;
         ~WakeupRunningLock() = default;
@@ -166,8 +179,6 @@ private:
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
-    bool IsSupportSensor(SensorTypeId);
-    static void HallSensorCallback(SensorEvent* event);
     static void RegisterBootCompletedCallback();
 
     inline PowerModeModule& GetPowerModeModule()
@@ -190,8 +201,6 @@ private:
     uint32_t mockCount_ {0};
     bool isDialogShown_ {false};
     int32_t powerkeyLongPressId_ {0};
-    int32_t powerkeyShortPressId_ {0};
-    int32_t powerkeyReleaseId_ {0};
     int32_t switchId_ {0};
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};

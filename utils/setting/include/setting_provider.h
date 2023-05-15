@@ -36,6 +36,7 @@ public:
     ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
     bool IsValidKey(const std::string& key);
     sptr<SettingObserver> CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func);
+    static void ExecRegisterCb(const sptr<SettingObserver>& observer);
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);
 
