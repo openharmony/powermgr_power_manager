@@ -39,6 +39,7 @@ public:
         std::shared_ptr<AppExecFwk::EventRunner>& runner);
     ~SuspendController();
     void Init();
+    void ExecSuspendMonitorByReason(uint32_t reason);
     void RegisterSettingsObserver();
     void Execute();
     void Cancel();
@@ -127,8 +128,13 @@ public:
     {
         listener_ = listener;
     }
+
     bool IsSupportSensor(SensorTypeId typeId);
 
+    void Notify()
+    {
+        listener_(reason_, action_, delayMs_);
+    }
 protected:
     SuspendMonitor(SuspendSource& source)
     {
@@ -136,10 +142,7 @@ protected:
         action_ = source.GetAction();
         delayMs_ = source.GetDelay();
     }
-    void Notify()
-    {
-        listener_(reason_, action_, delayMs_);
-    }
+
     uint32_t reason_;
     uint32_t action_;
     int64_t delayMs_;
@@ -168,7 +171,7 @@ public:
     void HandleEvent(uint32_t eventId) override;
 };
 
-class LidSuspendMonitor : public SuspendMonitor, std::enable_shared_from_this<LidSuspendMonitor> {
+class LidSuspendMonitor : public SuspendMonitor {
 public:
     LidSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
     ~LidSuspendMonitor() = default;
@@ -179,8 +182,6 @@ public:
 private:
     static constexpr int32_t HALL_REPORT_INTERVAL = 0;
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
-
-    static std::weak_ptr<LidSuspendMonitor> self_;
     SensorUser sensorUser_;
 };
 
