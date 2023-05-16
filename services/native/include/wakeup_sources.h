@@ -65,6 +65,8 @@ public:
     static const constexpr char* TOUCHPAD_KEY = "touchpad";
     static const constexpr char* PEN_KEY = "pen";
     static const constexpr char* LID_KEY = "lid";
+    static const constexpr uint32_t SINGLE_CLICK = 1;
+    static const constexpr uint32_t DOUBLC_CLICK = 2;
 
     WakeupSources() = default;
     ~WakeupSources() = default;
