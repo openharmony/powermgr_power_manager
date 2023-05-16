@@ -71,9 +71,6 @@ ErrCode RunningLock::Lock(int32_t timeOutMs)
 
 ErrCode RunningLock::UnLock()
 {
-    if (!CheckUsedNoLock()) {
-        return ERR_OK;
-    }
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
