@@ -36,9 +36,9 @@ constexpr pid_t UID = 1;
 constexpr int32_t UNCANCELID = -1;
 constexpr uint32_t LID_CLOSED_HALL_FLAG = 0x1;
 constexpr uint32_t LID_CLOSED_HALL_FLAG_B = 0x2;
-} // namespace
 
 sptr<PowerMgrService> g_pmsTest;
+} // namespace
 
 void PowerMgrServiceNativeTest::SetUp()
 {
@@ -72,6 +72,7 @@ void PowerStateTestCallback::OnPowerStateChanged(PowerState state)
     POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
 }
 
+namespace {
 /**
  * @tc.name: PowerMgrServiceNative001
  * @tc.desc: test init in powerMgrService
@@ -131,3 +132,4 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->SuspendDevice(SUSCALLTIMEMS, reasonSDT, false) == PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 end.");
 }
+} // namespace
