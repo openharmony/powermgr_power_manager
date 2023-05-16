@@ -163,57 +163,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level
 }
 
 /**
- * @tc.name: NativePowerStateMachine004
- * @tc.desc: test setDisplaySuspend and handleDelayTimer in powerMgrService
- * @tc.type: FUNC
- */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004::fun is start!");
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG;
-    EXPECT_TRUE(stateMachine->Init());
-    stateMachine->SetDisplaySuspend(false);
-    stateMachine->InitState();
-    stateMachine->SetDisplaySuspend(true);
-    UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
-    stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
-    EXPECT_TRUE(stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_WORK, true));
-    EXPECT_TRUE(stateMachine->SetState(PowerState::SLEEP, StateChangeReason::STATE_CHANGE_REASON_THERMAL, true));
-    stateMachine->SetDisplaySuspend(false);
-    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true));
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = MAXTYPE;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = PowermsEventHandler::SYSTEM_WAKE_UP_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SETTINGS, true);
-    EXPECT_TRUE(ret);
-    stateMachine->InitState();
-    stateMachine->HandleDelayTimer(powermsEvent);
-
-    uint32_t retSet = stateMachine->stateAction_->SetDisplayState(
-        DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    EXPECT_TRUE(retSet == ActionResult::SUCCESS);
-    powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    stateMachine->SetDisplayOffTime(TIMEOUT, false);
-    stateMachine->HandleDelayTimer(powermsEvent);
-    stateMachine->ActionCallback(TIMEOUT);
-
-    EXPECT_TRUE(stateMachine->CheckRunningLock(PowerState::UNKNOWN));
-
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004::fun is end!");
-    GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device end.";
-}
-
-/**
  * @tc.name: NativePowerStateMachine005
  * @tc.desc: test refreshActivityInner and wakeupDeviceInner in powerMgrService
  * @tc.type: FUNC

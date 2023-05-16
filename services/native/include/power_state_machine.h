@@ -137,8 +137,8 @@ private:
     class StateController {
     public:
         StateController(PowerState state, std::shared_ptr<PowerStateMachine> owner,
-            std::function<TransitResult(StateChangeReason)> action) :
-            state_(state),
+            std::function<TransitResult(StateChangeReason)> action)
+            : state_(state),
             owner_(owner), action_(action)
         {
         }

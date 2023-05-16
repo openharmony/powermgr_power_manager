@@ -83,7 +83,7 @@ public:
     };
     WakeupEventHandler(
         const std::shared_ptr<AppExecFwk::EventRunner>& runner, std::shared_ptr<WakeupController> controller)
-         : AppExecFwk::EventHandler(runner),
+        : AppExecFwk::EventHandler(runner),
         controller_(controller)
     {
     }
@@ -193,7 +193,7 @@ public:
     void Cancel() override;
 };
 
-class LidWakeupMonitor : public WakeupMonitor, std::enable_shared_from_this<LidWakeupMonitor> {
+class LidWakeupMonitor : public WakeupMonitor {
 public:
     LidWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
     ~LidWakeupMonitor() = default;
@@ -204,8 +204,6 @@ public:
 private:
     static constexpr int32_t HALL_REPORT_INTERVAL = 0;
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
-
-    static std::weak_ptr<LidWakeupMonitor> self_;
     SensorUser sensorUser_;
 };
 
