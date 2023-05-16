@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,7 +137,7 @@ void PowerModeModule::CallbackManager::AddCallback(const sptr<IPowerModeCallback
         object->AddDeathRecipient(this);
     }
     POWER_HILOGD(FEATURE_POWER_MODE, "callbacks.size = %{public}zu, insertOk = %{public}d",
-            callbacks_.size(), retIt.second);
+        callbacks_.size(), retIt.second);
 }
 
 void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallback>& callback)

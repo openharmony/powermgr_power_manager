@@ -174,7 +174,6 @@ void ShutdownService::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& r
 void ShutdownService::CallbackManager::WaitingCallback()
 {
     auto callbackStart = [&]() {
-        
         unique_lock<mutex> lock(mutex_);
         for (auto &obj : callbacks_) {
             sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
