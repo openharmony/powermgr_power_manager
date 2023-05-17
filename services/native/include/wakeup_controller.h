@@ -76,11 +76,6 @@ class InputCallback : public IInputEventConsumer {
 
 class WakeupEventHandler : public AppExecFwk::EventHandler {
 public:
-    enum {
-        WAKEUP_TIMEOUT_MSG = 100,
-        SCREEN_OFF_TIMEOUT_MSG,
-        WAKEUP_MAX_MSG,
-    };
     WakeupEventHandler(
         const std::shared_ptr<AppExecFwk::EventRunner>& runner, std::shared_ptr<WakeupController> controller)
         : AppExecFwk::EventHandler(runner),

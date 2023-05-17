@@ -159,6 +159,7 @@ void WakeupController::ControlListener(uint32_t reason)
 
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
+        StartWakeupTimer();
         POWER_HILOGI(FEATURE_INPUT, "wakeup Request: %{public}d", reason);
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
@@ -266,7 +267,13 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
             break;
     }
 
-    if (wakeupType != static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_PEN)) {
+    if (wakeupType == static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK)) {
+        POWER_HILOGI(FEATURE_INPUT, "refresh Activity");
+        int64_t now = static_cast<int64_t>(time(0));
+        pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    }
+
+    if (wakeupType != static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN)) {
         POWER_HILOGI(FEATURE_INPUT, "current wakeup reason %{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
