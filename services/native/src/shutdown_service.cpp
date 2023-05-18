@@ -29,6 +29,11 @@
 #include "power_log.h"
 #include "power_mgr_factory.h"
 
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+#include "battery_srv_client.h"
+#include "v1_0/ifactory_interface.h"
+#endif
+
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
 using namespace std;
@@ -94,6 +99,35 @@ void ShutdownService::SetController(ShutdownController* controller)
     shutdownController_ = controller;
 }
 
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+static bool IsNeedWritePoweroffChargeFlag()
+{
+    auto& batterySvcClient = BatterySrvClient::GetInstance();
+    const auto pluggedType = batterySvcClient.GetPluggedType();
+    POWER_HILOGI(FEATURE_SHUTDOWN, "pluggedType : %{public}u", pluggedType);
+    return (pluggedType == BatteryPluggedType::PLUGGED_TYPE_AC) ||
+        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_USB) ||
+        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS);
+}
+
+static const unsigned int OEMINFO_REUSED_ID_204_8K_VALID_SIZE_64_BYTE = 204;
+static const unsigned int OEMINFO_SHUTFLAG_SUBID = 4;
+static const char POWEROFF_CHARGE_FLAG[] = {0xAA, 0x55, 0x00, 0x00};
+
+static void WritePoweroffChargeFlag()
+{
+    auto factoryInterfaceImpl = OHOS::HDI::Factory::V1_0::IFactoryInterface::Get("factory_interface_service", false);
+    if (factoryInterfaceImpl == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "get factory_interface_service failed");
+        return;
+    }
+
+    int ret = factoryInterfaceImpl->OeminfoWriteReused(OEMINFO_REUSED_ID_204_8K_VALID_SIZE_64_BYTE,
+        OEMINFO_SHUTFLAG_SUBID, sizeof(POWEROFF_CHARGE_FLAG), POWEROFF_CHARGE_FLAG);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "write oem flag:0x55AA, result:%{public}d", ret);
+}
+#endif
+
 void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 {
     if (started_) {
@@ -113,6 +147,13 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
         Prepare();
         TurnOffScreen();
         POWER_HILOGD(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
+
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+        if (IsNeedWritePoweroffChargeFlag()) {
+            WritePoweroffChargeFlag();
+        }
+#endif
+
         if (devicePowerAction_ != nullptr) {
             isReboot ? devicePowerAction_->Reboot(reason) : devicePowerAction_->Shutdown(reason);
         }
