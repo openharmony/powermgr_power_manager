@@ -503,8 +503,6 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(
     if (remote == nullptr || remote.promote() == nullptr) {
         return;
     }
-    POWER_HILOGI(MODULE_SERVICE, "PowerStateMachine::%{public}s remote = %p", __func__,
-        remote.promote().GetRefPtr());
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
