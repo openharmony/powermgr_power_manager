@@ -88,6 +88,12 @@ bool ShutdownService::IsShuttingDown()
     return started_;
 }
 
+/* depends on shutdown controller temporarily */
+void ShutdownService::SetController(ShutdownController* controller)
+{
+    shutdownController_ = controller;
+}
+
 void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 {
     if (started_) {
@@ -95,6 +101,13 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
         return;
     }
     started_ = true;
+    if (shutdownController_ != nullptr) {
+        bool isTakeOver = shutdownController_->TriggerTakeOverShutdownCallback(isReboot);
+        if (isTakeOver) {
+            started_ = false;
+            return;
+        }
+    }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
     make_unique<thread>([=] {
         Prepare();

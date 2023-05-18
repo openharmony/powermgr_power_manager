@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,24 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
+import("//build/ohos.gni")
 import("../powermgr.gni")
 
-group("systemtest") {
-  testonly = true
-  deps = [ "systemtest:systemtest_powermgr" ]
-}
+powermgr_test_path = "${powermgr_root_path}/test"
 
-group("fuzztest") {
-  testonly = true
-  deps = [ "fuzztest/power_fuzzer:fuzztest" ]
-}
-
-group("unittest") {
-  testonly = true
-  deps = [
-    "apitest/inner_api/shutdown:unittest",
-    "unittest:unittest",
-    "unittest/src/servicetest:unittest",
-  ]
-}
+module_output_path = "${powermgr_part_name}/powermgr_native"

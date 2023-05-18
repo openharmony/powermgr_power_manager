@@ -15,10 +15,8 @@
 
 #include "power_mgr_client.h"
 
-#include <cstdint>
 #include <cinttypes>
 #include <mutex>
-#include <iosfwd>
 #include <memory>
 #include <vector>
 #include <datetime_ex.h>
@@ -26,7 +24,6 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include "new"
-#include "errors.h"
 #include "refbase.h"
 #include "ipower_mgr.h"
 #include "ipower_mode_callback.h"
@@ -36,7 +33,6 @@
 #include "ishutdown_callback.h"
 #include "power_log.h"
 #include "power_common.h"
-#include "power_mgr_errors.h"
 #include "running_lock_info.h"
 
 namespace OHOS {

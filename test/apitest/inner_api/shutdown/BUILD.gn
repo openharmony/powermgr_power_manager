@@ -1,0 +1,70 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../powermgr.gni")
+import("../../../powermgr_test.gni")
+
+config("module_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "include",
+    "include/utils",
+    "${powermgr_service_zidl}/include",
+    "${powermgr_service_zidl}/src/shutdown",
+    "${powermgr_service_path}/native/src/",
+    "${powermgr_service_path}/native/src/actions/",
+    "${powermgr_service_path}/native/src/actions/default",
+    "${powermgr_service_path}/native/src/actions/default/suspend",
+    "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_test_path}/mock/action",
+  ]
+}
+
+deps_ex = [
+  "ability_base:base",
+  "ability_base:want",
+  "eventhandler:libeventhandler",
+  "common_event_service:cesfwk_innerkits",
+  "ipc:ipc_core",
+  "hiviewdfx_hilog_native:libhilog",
+  "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
+  "sensor:sensor_interface_native",
+  "c_utils:utils",
+  "input:libmmi-client",
+]
+
+ohos_unittest("takeover_shutdown_callback_test") {
+  sources = [ "takeover_shutdown_callback_test.cpp" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+  external_deps = deps_ex
+  module_out_path = module_output_path
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":takeover_shutdown_callback_test" ]
+}

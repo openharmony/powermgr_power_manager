@@ -28,10 +28,11 @@
 #include "power_errors.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
+#include "shutdown/ishutdown_client.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class IPowerMgr : public IRemoteBroker {
+class IPowerMgr : public IShutdownClient, public IRemoteBroker {
 public:
     enum {
         CREATE_RUNNINGLOCK = 0,
@@ -101,6 +102,10 @@ public:
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) = 0;
     virtual PowerMode GetDeviceMode() = 0;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
+
+    virtual void RegisterShutdownCallback(
+        const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;
+    virtual void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgr");
 };

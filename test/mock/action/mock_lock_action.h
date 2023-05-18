@@ -31,4 +31,4 @@ public:
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // POWERMGR_MOCK_POWER_ACTION_H
+#endif // POWERMGR_MOCK_LOCK_ACTION_H

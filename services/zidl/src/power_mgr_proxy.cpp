@@ -17,8 +17,8 @@
 
 #include <message_parcel.h>
 #include <string_ex.h>
-#include "errors.h"
 #include "message_option.h"
+#include "shutdown_proxy_delegator.h"
 #include "power_log.h"
 #include "power_common.h"
 
@@ -764,6 +764,18 @@ std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint3
     result = reply.ReadString();
 
     return result;
+}
+
+void PowerMgrProxy::RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
+{
+    auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
+    delegator->RegisterShutdownCallback(callback, priority);
+}
+
+void PowerMgrProxy::UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback)
+{
+    auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
+    delegator->UnRegisterShutdownCallback(callback);
 }
 } // namespace PowerMgr
 } // namespace OHOS
