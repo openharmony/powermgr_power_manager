@@ -19,7 +19,9 @@
             "SystemCapability.PowerManager.PowerManager.Core",
             "SystemCapability.PowerManager.PowerManager.Extension"
         ],
-        "features": [],
+        "features": [
+            "power_manager_feature_poweroff_charge"
+        ],
         "adapted_system_type": [ "standard" ],
         "rom": "1024KB",
         "ram": "2048KB",
