@@ -260,10 +260,8 @@ void RunningLockMgr::RemoveAndPostUnlockTask(
     }
     const string& tokenStr = to_string(reinterpret_cast<uintptr_t>(token.GetRefPtr()));
     POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockMgr::%{public}s :token = %p,tokenStr = %s,timeOutMS = %d",
+        "RunningLockMgr::%{public}s :timeOutMS = %d",
         __func__,
-        token.GetRefPtr(),
-        tokenStr.c_str(),
         timeOutMS);
     handler->RemoveTask(tokenStr);
     if (timeOutMS != 0) {
@@ -277,9 +275,8 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
     const UserIPCInfo& userIPCinfo, uint32_t timeOutMS)
 {
     POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockMgr::%{public}s :token = %p,name = %s,type = %d",
+        "RunningLockMgr::%{public}s :name = %s,type = %d",
         __func__,
-        token.GetRefPtr(),
         runningLockInfo.name.c_str(),
         runningLockInfo.type);
 
@@ -315,9 +312,6 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& token,
 
 void RunningLockMgr::UnLock(const sptr<IRemoteObject> token)
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :token = %p",
-        __func__, token.GetRefPtr());
-
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
@@ -391,31 +385,25 @@ bool RunningLockMgr::ExistValidRunningLock()
 void RunningLockMgr::SetWorkTriggerList(const sptr<IRemoteObject>& token,
     const WorkTriggerList& workTriggerList)
 {
-    POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :token = %p",
-        __func__,
-        token.GetRefPtr());
-
     auto lockInner = GetRunningLockInner(token);
     if (lockInner == nullptr) {
         return;
     }
     lockInner->SetWorkTriggerList(workTriggerList);
-    NotifyRunningLockChanged(token, lockInner, NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED);
+    NotifyRunningLockChanged(lockInner, NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED);
     // After update triggerlist, maybe need disabled the lock or enable the lock.
     SetRunningLockDisableFlag(lockInner);
     // If enabled, we really lock here.
-    LockReally(token, lockInner);
+    LockReally(lockInner);
     // If disabled, we really unlock here.
-    UnLockReally(token, lockInner);
+    UnLockReally(lockInner);
 }
 
-void RunningLockMgr::NotifyHiViewRunningLockInfo(const string& tokenStr,
-    const RunningLockInner& lockInner,
-    RunningLockChangedType changeType) const
+void RunningLockMgr::NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner, RunningLockChangedType changeType) const
 {
     string lockName = lockInner.GetRunningLockName().empty()
         ? "NULL" : lockInner.GetRunningLockName();
-    string msg = "token=" + tokenStr + " lockName=" + lockName + " type=" +
+    string msg = " lockName=" + lockName + " type=" +
         to_string(ToUnderlying(lockInner.GetRunningLockType()));
     auto MakeNotifyInfo = [](int uid, int pid, const string& tag) {
         return (" uid=" + to_string(uid) + " pid=" + to_string(pid) + " tag=" + tag);
@@ -460,7 +448,7 @@ void RunningLockMgr::CheckOverTime()
         if (!lockInner->GetDisabled() && (!lockInner->GetOverTimeFlag())) {
             if (lockInner->GetLockTimeMs() < detectTime) {
                 lockInner->SetOverTimeFlag(true);
-                NotifyRunningLockChanged(it.first, lockInner, NOTIFY_RUNNINGLOCK_OVERTIME);
+                NotifyRunningLockChanged(lockInner, NOTIFY_RUNNINGLOCK_OVERTIME);
             } else {
                 if (lockInner->GetLockTimeMs() < nextDetectTime) {
                     nextDetectTime = lockInner->GetLockTimeMs();
@@ -486,33 +474,30 @@ void RunningLockMgr::SendCheckOverTimeMsg(int64_t delayTime)
     handler->SendEvent(PowermsEventHandler::CHECK_RUNNINGLOCK_OVERTIME_MSG, 0, delayTime);
 }
 
-void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& token,
-    std::shared_ptr<RunningLockInner>& lockInner, RunningLockChangedType changeType)
+void RunningLockMgr::NotifyRunningLockChanged(std::shared_ptr<RunningLockInner>& lockInner, RunningLockChangedType changeType)
 {
     if (changeType >= RUNNINGLOCK_CHANGED_BUTT) {
         return;
     }
-    const string& tokenStr = to_string(reinterpret_cast<uintptr_t>(token.GetRefPtr()));
     switch (changeType) {
         case NOTIFY_RUNNINGLOCK_ADD: {
-            NotifyHiViewRunningLockInfo(tokenStr, *lockInner, changeType);
+            NotifyHiViewRunningLockInfo(*lockInner, changeType);
             SendCheckOverTimeMsg(CHECK_TIMEOUT_INTERVAL_MS);
             break;
         }
         case NOTIFY_RUNNINGLOCK_REMOVE: {
-            string str = "token=" + tokenStr;
+            string str = " ";
             NotifyHiView(changeType, str);
             break;
         }
         case NOTIFY_RUNNINGLOCK_WORKTRIGGER_CHANGED: {
-            NotifyHiViewRunningLockInfo(tokenStr, *lockInner, changeType);
+            NotifyHiViewRunningLockInfo(*lockInner, changeType);
             break;
         }
         case NOTIFY_RUNNINGLOCK_OVERTIME: {
-            POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :%s token=%s",
+            POWER_HILOGI(MODULE_SERVICE, "RunningLockMgr::%{public}s :%s",
                 __func__,
-                runninglockNotifyStr_.at(changeType).c_str(),
-                tokenStr.c_str());
+                runninglockNotifyStr_.at(changeType).c_str());
             break;
         }
         default: {
@@ -619,8 +604,7 @@ void RunningLockMgr::SetRunningLockDisableFlag(
         triggerMatched);
 }
 
-void RunningLockMgr::LockReally(const sptr<IRemoteObject>& token,
-    std::shared_ptr<RunningLockInner>& lockInner)
+void RunningLockMgr::LockReally(std::shared_ptr<RunningLockInner>& lockInner)
 {
     if (lockInner->GetReallyLocked()) {
         POWER_HILOGD(MODULE_SERVICE,
@@ -634,11 +618,10 @@ void RunningLockMgr::LockReally(const sptr<IRemoteObject>& token,
     }
     runningLockAction_->Acquire(lockInner->GetRunningLockType());
     lockInner->SetReallyLocked(true);
-    NotifyRunningLockChanged(token, lockInner, NOTIFY_RUNNINGLOCK_ADD);
+    NotifyRunningLockChanged(lockInner, NOTIFY_RUNNINGLOCK_ADD);
     POWER_HILOGD(MODULE_SERVICE, "%{public}s :called end.", __func__);
 }
-void RunningLockMgr::UnLockReally(const sptr<IRemoteObject>& token,
-    std::shared_ptr<RunningLockInner>& lockInner)
+void RunningLockMgr::UnLockReally(std::shared_ptr<RunningLockInner>& lockInner)
 {
     /**
      * Case 1: Firstly PGManager ProxyRunningLock by uid and pid,
@@ -662,7 +645,7 @@ void RunningLockMgr::UnLockReally(const sptr<IRemoteObject>& token,
     }
     runningLockAction_->Release(lockInner->GetRunningLockType());
     lockInner->SetReallyLocked(false);
-    NotifyRunningLockChanged(token, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
+    NotifyRunningLockChanged(lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
     POWER_HILOGD(MODULE_SERVICE, "%{public}s :called end.", __func__);
 }
 
@@ -671,12 +654,12 @@ void RunningLockMgr::ProxyRunningLockInner(bool proxyLock)
     if (proxyLock) {
         for (auto& it : runningLocks_) {
             SetRunningLockDisableFlag(it.second);
-            UnLockReally(it.first, it.second);
+            UnLockReally(it.second);
         }
     } else {
         for (auto& it : runningLocks_) {
             SetRunningLockDisableFlag(it.second, true);
-            LockReally(it.first, it.second);
+            LockReally(it.second);
         }
     }
 }
@@ -864,10 +847,6 @@ void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteO
     }
     std::function<void()> forceUnLockFunc = std::bind(&PowerMgrService::ForceUnLock, pms,
         remote.promote());
-    POWER_HILOGI(MODULE_SERVICE,
-        "RunningLockDeathRecipient::%{public}s :remote.promote() = %p",
-        __func__,
-        remote.promote().GetRefPtr());
     handler->PostTask(forceUnLockFunc, TASK_RUNNINGLOCK_FORCEUNLOCK);
 }
 
