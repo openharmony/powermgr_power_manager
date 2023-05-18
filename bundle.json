@@ -90,7 +90,11 @@
                         "power_mgr_client.h",
                         "power_state_machine_info.h",
                         "running_lock.h",
-                        "running_lock_info.h"
+                        "running_lock_info.h",
+                        "shutdown/ishutdown_client.h",
+                        "shutdown/itakeover_shutdown_callback.h",
+                        "shutdown/shutdown_client.h",
+                        "shutdown/shutdown_priority.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"
                     }

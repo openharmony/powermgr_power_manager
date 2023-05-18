@@ -28,6 +28,7 @@
 #include "power_state_machine.h"
 #include "powerms_event_handler.h"
 #include "running_lock_mgr.h"
+#include "shutdown_controller.h"
 #include "shutdown_service.h"
 #include "sp_singleton.h"
 #include "suspend_controller.h"
@@ -75,6 +76,9 @@ public:
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
+
+    void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
+    void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
 
     void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
@@ -148,6 +152,10 @@ public:
     {
         PowerStateMachine::onWakeup();
     }
+    ShutdownService& getShutdownService()
+    {
+        return shutdownService_;
+    }
 
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
@@ -195,6 +203,7 @@ private:
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
     ShutdownService shutdownService_;
+    ShutdownController shutdownController_;
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};
     bool isPowerKeyDown_ {false};

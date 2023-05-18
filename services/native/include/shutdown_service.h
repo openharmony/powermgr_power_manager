@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "actions/idevice_state_action.h"
 #include "ishutdown_callback.h"
 #include "want.h"
+#include "shutdown_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -44,6 +45,8 @@ public:
         deviceStateAction_ = std::move(mockState);
         started_ = false;
     }
+    void SetController(ShutdownController* controller);
+
 private:
     using IntentWant = OHOS::AAFwk::Want;
     class CallbackManager : public IRemoteObject::DeathRecipient {
@@ -68,6 +71,7 @@ private:
     std::atomic<bool> started_;
     std::unique_ptr<IDevicePowerAction> devicePowerAction_;
     std::unique_ptr<IDeviceStateAction> deviceStateAction_;
+    ShutdownController* shutdownController_ = nullptr;
 };
 } // namespace PowerMgr
 } // namespace OHOS

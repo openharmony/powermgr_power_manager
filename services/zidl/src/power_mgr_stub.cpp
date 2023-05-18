@@ -20,7 +20,7 @@
 
 #include "power_common.h"
 #include "power_errors.h"
-#include "power_mgr_proxy.h"
+#include "shutdown_stub_delegator.h"
 #include "xcollie.h"
 
 using namespace OHOS::HiviewDFX;
@@ -29,17 +29,25 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 constexpr uint32_t PARAM_MAX_NUM = 10;
+std::unique_ptr<ShutdownStubDelegator> g_shutdownDelegator;
 }
-int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
-    MessageParcel &reply, MessageOption &option)
+int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    POWER_HILOGD(COMP_FWK, "cmd = %{public}u, flags= %{public}d", code, option.GetFlags());
-    std::u16string descripter = PowerMgrStub::GetDescriptor();
-    std::u16string remoteDescripter = data.ReadInterfaceToken();
-    if (descripter != remoteDescripter) {
+    POWER_HILOGD(COMP_FWK, "code=%{public}u, flags=%{public}d", code, option.GetFlags());
+    std::u16string descriptor = PowerMgrStub::GetDescriptor();
+    std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (descriptor != remoteDescriptor) {
         POWER_HILOGE(COMP_FWK, "Descriptor is not matched");
         return E_GET_POWER_SERVICE_FAILED;
     }
+    if (IsShutdownCommand(code)) {
+        if (g_shutdownDelegator == nullptr) {
+            g_shutdownDelegator = std::make_unique<ShutdownStubDelegator>(*this);
+        }
+        RETURN_IF_WITH_RET(g_shutdownDelegator == nullptr, ERR_NO_INIT)
+        return g_shutdownDelegator->HandleRemoteRequest(code, data, reply, option);
+    }
+
     const int DFX_DELAY_MS = 10000;
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerMgrStub", DFX_DELAY_MS, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_NOOP);
@@ -456,6 +464,11 @@ int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
+}
+
+bool PowerMgrStub::IsShutdownCommand(uint32_t code)
+{
+    return (code >= IShutdownClient::CMD_START) && (code <= IShutdownClient::CMD_END);
 }
 } // namespace PowerMgr
 } // namespace OHOS

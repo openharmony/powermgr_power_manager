@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("../../powermgr.gni")
+import("../powermgr_test.gni")
 
 module_output_path = "${powermgr_part_name}/powermgr_native"
 
@@ -25,10 +26,13 @@ config("module_private_config") {
     "mock",
     "include/utils",
     "${powermgr_service_zidl}/include",
+    "${powermgr_service_zidl}/src/shutdown",
     "${powermgr_service_path}/native/src/",
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
     "${powermgr_service_path}/native/src/actions/default/suspend",
+    "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_test_path}/mock/action",
   ]
 }
 
@@ -39,6 +43,7 @@ config("module_mock_private_config") {
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include/",
     "//commonlibrary/c_utils/base/include/",
     "${powermgr_service_zidl}/include",
+    "${powermgr_service_path}/test/mock/action",
   ]
 }
 
