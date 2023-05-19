@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 #include "power_save_mode.h"
 
 #include "libxml/parser.h"
-#include "libxml/tree.h"
-#include "power_log.h"
+
 #include "config_policy_utils.h"
+#include "power_log.h"
+#include "string_ex.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -71,15 +72,16 @@ bool PowerSaveMode::StartXMlParse(std::string path)
     }
 
     for (auto nodePtr = rootPtr->xmlChildrenNode; nodePtr != nullptr; nodePtr = nodePtr->next) {
-        int32_t policyId = atoi(reinterpret_cast<char*>(xmlGetProp(nodePtr, BAD_CAST("id"))));
+        int32_t policyId = 0;
+        StrToInt(TrimStr(GetProp(nodePtr, "id")), policyId);
         POWER_HILOGD(FEATURE_POWER_MODE, "policyId: %{public}d.", policyId);
         std::list<ModePolicy> listPolicy;
         for (auto policyNodePtr = nodePtr->xmlChildrenNode;
             policyNodePtr != nullptr; policyNodePtr = policyNodePtr->next) {
             ModePolicy pmp;
-            pmp.id = atoi(reinterpret_cast<char*>(xmlGetProp(policyNodePtr, BAD_CAST("id"))));
-            pmp.recover_flag = atoi(reinterpret_cast<char*>(xmlGetProp(policyNodePtr, BAD_CAST("recover_flag"))));
-            pmp.value = atoi(reinterpret_cast<char*>(xmlGetProp(policyNodePtr, BAD_CAST("value"))));
+            StrToInt(TrimStr(GetProp(policyNodePtr, "id")), pmp.id);
+            StrToInt(TrimStr(GetProp(policyNodePtr, "recover_flag")), pmp.recover_flag);
+            StrToInt(TrimStr(GetProp(policyNodePtr, "value")), pmp.value);
             listPolicy.push_back(pmp);
             POWER_HILOGD(FEATURE_POWER_MODE, "id=%{public}d, value=%{public}d, recover_flag=%{public}d", pmp.id,
                 pmp.value, pmp.recover_flag);
@@ -88,6 +90,17 @@ bool PowerSaveMode::StartXMlParse(std::string path)
         this->policyCache_.insert(policyPair);
     }
     return true;
+}
+
+std::string PowerSaveMode::GetProp(const xmlNodePtr& nodePtr, const std::string& key)
+{
+    xmlChar* prop = xmlGetProp(nodePtr, BAD_CAST(key.c_str()));
+    if (prop == nullptr) {
+        return "";
+    }
+    std::string value = reinterpret_cast<char*>(prop);
+    xmlFree(prop);
+    return value;
 }
 
 bool PowerSaveMode::GetValuePolicy(std::list<ModePolicy> &openPolicy, int32_t mode)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "sysparam.h"
 
 #include "power_log.h"
+#include "string_ex.h"
 #include "syspara/parameter.h"
 
 namespace OHOS {
@@ -43,7 +44,9 @@ int32_t SysParam::GetIntValue(const std::string& key, int32_t def)
         POWER_HILOGW(COMP_UTILS, "GetParameter failed, return default value, ret=%{public}d, def=%{public}d", ret, def);
         return def;
     }
-    return atoi(value);
+    int32_t intValue = def;
+    StrToInt(TrimStr(value), intValue);
+    return intValue;
 }
 } // namespace PowerMgr
 } // namespace OHOS

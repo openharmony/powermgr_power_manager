@@ -42,6 +42,8 @@ bool Permission::IsHap()
         case ATokenTypeEnum::TOKEN_INVALID:
         case ATokenTypeEnum::TOKEN_TYPE_BUTT:
             return false;
+        default:
+            break;
     }
     return false;
 }
@@ -65,6 +67,8 @@ bool Permission::IsSystem()
             break;
         case ATokenTypeEnum::TOKEN_INVALID:
         case ATokenTypeEnum::TOKEN_TYPE_BUTT:
+            break;
+        default:
             break;
     }
     if (!result) {
@@ -94,6 +98,8 @@ bool Permission::IsPermissionGranted(const std::string& perm)
             break;
         case ATokenTypeEnum::TOKEN_INVALID:
         case ATokenTypeEnum::TOKEN_TYPE_BUTT:
+            break;
+        default:
             break;
     }
     if (result == PermissionState::PERMISSION_DENIED) {

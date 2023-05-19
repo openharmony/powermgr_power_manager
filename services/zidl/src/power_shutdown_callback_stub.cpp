@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,12 +41,10 @@ int PowerShutdownCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
     }
 
     int ret = ERR_OK;
-    switch (code) {
-        case static_cast<uint32_t>(IShutdownCallback::POWER_SHUTDOWN_CHANGED):
-            ret = OnPowerShutdownCallbackStub();
-            break;
-        default:
-            ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    if (code == static_cast<uint32_t>(IShutdownCallback::POWER_SHUTDOWN_CHANGED)) {
+        ret = OnPowerShutdownCallbackStub();
+    } else {
+        ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return ret;
