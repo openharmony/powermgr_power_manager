@@ -365,7 +365,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock071, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
-     EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).Times(::testing::AtLeast(1))
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(::testing::AtLeast(1))

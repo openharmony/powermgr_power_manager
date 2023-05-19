@@ -29,8 +29,10 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
+namespace {
 sptr<PowerMgrService> g_pmsTest;
 std::shared_ptr<PowerStateMachine> g_stateMachineTest;
+}
 
 void PowerStateLevelFrameworkTest::SetUpTestCase()
 {
