@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <cerrno>
 #include <getopt.h>
 #include <string_ex.h>
+#include <sstream>
 
 #include "power_mgr_client.h"
 #ifdef HAS_DISPLAY_MANAGER_PART
@@ -107,6 +108,18 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
     };
+
+#ifdef HAS_DISPLAY_MANAGER_PART
+    commandDisplay_ = {
+        {'h', std::bind(&PowerShellCommand::RunAsDisplayCommandHelp,        this)},
+        {'r', std::bind(&PowerShellCommand::RunAsDisplayCommandRestore,     this)},
+        {'s', std::bind(&PowerShellCommand::RunAsDisplayCommandSetValue,    this)},
+        {'o', std::bind(&PowerShellCommand::RunAsDisplayCommandOverride,    this)},
+        {'b', std::bind(&PowerShellCommand::RunAsDisplayCommandBoost,       this)},
+        {'c', std::bind(&PowerShellCommand::RunAsDisplayCommandCancelBoost, this)},
+        {'d', std::bind(&PowerShellCommand::RunAsDisplayCommandDiscount,    this)},
+    };
+#endif
 
     return ERR_OK;
 }
@@ -203,82 +216,123 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
 
 #ifdef HAS_DISPLAY_MANAGER_PART
 using namespace OHOS::DisplayPowerMgr;
+bool PowerShellCommand::DisplayOptargEmpty()
+{
+    if (!optarg) {
+        resultReceiver_.append("Error! please input your brightness value.\n");
+        resultReceiver_.append(DISPLAY_HELP_MSG);
+        return true;
+    }
+    return false;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandHelp()
+{
+    resultReceiver_.append(DISPLAY_HELP_MSG);
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandOverride()
+{
+    if (DisplayOptargEmpty()) {
+        return ERR_OK;
+    }
+    int32_t value = 0;
+    StrToInt(optarg, value);
+    bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(static_cast<uint32_t>(value));
+    resultReceiver_.append("Override brightness to ");
+    resultReceiver_.append(std::to_string(value));
+    if (!ret) {
+        resultReceiver_.append(" failed");
+    }
+    resultReceiver_.append("\n");
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandRestore()
+{
+    bool ret = DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+    resultReceiver_.append("Restore brightness");
+    if (!ret) {
+        resultReceiver_.append(" failed");
+    }
+    resultReceiver_.append("\n");
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandBoost()
+{
+    if (DisplayOptargEmpty()) {
+        return ERR_OK;
+    }
+    int32_t value = 0;
+    StrToInt(optarg, value);
+    bool ret = DisplayPowerMgrClient::GetInstance().BoostBrightness(static_cast<uint32_t>(value));
+    resultReceiver_.append("Boost brightness timeout ");
+    resultReceiver_.append(std::to_string(value)).append("ms");
+    if (!ret) {
+        resultReceiver_.append(" failed");
+    }
+    resultReceiver_.append("\n");
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandCancelBoost()
+{
+    bool ret = DisplayPowerMgrClient::GetInstance().CancelBoostBrightness();
+    resultReceiver_.append("Cancel boost brightness");
+    if (!ret) {
+        resultReceiver_.append(" failed");
+    }
+    resultReceiver_.append("\n");
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandSetValue()
+{
+    if (DisplayOptargEmpty()) {
+        return ERR_OK;
+    }
+    int32_t value = 0;
+    StrToInt(optarg, value);
+    bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(static_cast<uint32_t>(value));
+    resultReceiver_.append("Set brightness to ");
+    resultReceiver_.append(std::to_string(value));
+    if (!ret) {
+        resultReceiver_.append(" failed");
+    }
+    resultReceiver_.append("\n");
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsDisplayCommandDiscount()
+{
+    if (DisplayOptargEmpty()) {
+        return ERR_OK;
+    }
+    std::stringstream fstr(optarg);
+    double discount = 0;
+    fstr >> discount;
+    bool ret = DisplayPowerMgrClient::GetInstance().DiscountBrightness(discount);
+    resultReceiver_.append("Set brightness discount to ");
+    resultReceiver_.append(std::to_string(discount));
+    if (!ret) {
+        resultReceiver_.append(" failed");
+    }
+    resultReceiver_.append("\n");
+    return ERR_OK;
+}
+
 ErrCode PowerShellCommand::RunAsDisplayCommand()
 {
     int ind = 0;
     int option = getopt_long(argc_, argv_, "hrcs:o:b:d:", DISPLAY_OPTIONS, &ind);
     resultReceiver_.clear();
-    if (option == 'h') {
-        resultReceiver_.append(DISPLAY_HELP_MSG);
-        return ERR_OK;
+    auto item = commandDisplay_.find(option);
+    if (item != commandDisplay_.end()) {
+        return item->second();
     }
-    if (option == 'r') {
-        bool ret = DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-        resultReceiver_.append("Restore brightness");
-        if (!ret) {
-            resultReceiver_.append(" failed");
-        }
-        resultReceiver_.append("\n");
-        return ERR_OK;
-    }
-    if (option == 'c') {
-        bool ret = DisplayPowerMgrClient::GetInstance().CancelBoostBrightness();
-        resultReceiver_.append("Cancel boost brightness");
-        if (!ret) {
-            resultReceiver_.append(" failed");
-        }
-        resultReceiver_.append("\n");
-        return ERR_OK;
-    }
-    if (!optarg) {
-        resultReceiver_.append("Error! please input your brightness value.\n");
-        resultReceiver_.append(DISPLAY_HELP_MSG);
-        return ERR_OK;
-    }
-    if (option == 's') {
-        auto value = static_cast<uint32_t>(atoi(optarg));
-        bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(value);
-        resultReceiver_.append("Set brightness to ");
-        resultReceiver_.append(std::to_string(value));
-        if (!ret) {
-            resultReceiver_.append(" failed");
-        }
-        resultReceiver_.append("\n");
-        return ERR_OK;
-    }
-    if (option == 'o') {
-        auto value = static_cast<uint32_t>(atoi(optarg));
-        bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(value);
-        resultReceiver_.append("Override brightness to ");
-        resultReceiver_.append(std::to_string(value));
-        if (!ret) {
-            resultReceiver_.append(" failed");
-        }
-        resultReceiver_.append("\n");
-        return ERR_OK;
-    }
-    if (option == 'b') {
-        auto value = static_cast<uint32_t>(atoi(optarg));
-        bool ret = DisplayPowerMgrClient::GetInstance().BoostBrightness(value);
-        resultReceiver_.append("Boost brightness timeout ");
-        resultReceiver_.append(std::to_string(value)).append("ms");
-        if (!ret) {
-            resultReceiver_.append(" failed");
-        }
-        resultReceiver_.append("\n");
-        return ERR_OK;
-    }
-    if (option == 'd') {
-        auto discount = static_cast<double>(atof(optarg));
-        bool ret = DisplayPowerMgrClient::GetInstance().DiscountBrightness(discount);
-        resultReceiver_.append("Set brightness discount to ");
-        resultReceiver_.append(std::to_string(discount));
-        if (!ret) {
-            resultReceiver_.append(" failed");
-        }
-        resultReceiver_.append("\n");
-        return ERR_OK;
-    }
+    resultReceiver_.append(DISPLAY_HELP_MSG);
     return ERR_OK;
 }
 #endif
@@ -306,9 +360,10 @@ ErrCode PowerShellCommand::RunAsTimeOutCommand()
         resultReceiver_.append(TIME_OUT_HELP_MSG);
         return ERR_OK;
     }
-    auto timeout = static_cast<int64_t>(atoi(optarg));
     if (option == 'o') {
-        bool ret = PowerMgrClient::GetInstance().OverrideScreenOffTime(timeout);
+        int32_t timeout = 0;
+        StrToInt(optarg, timeout);
+        bool ret = PowerMgrClient::GetInstance().OverrideScreenOffTime(static_cast<int64_t>(timeout));
         resultReceiver_.append("Override screen off time to ");
         resultReceiver_.append(std::to_string(timeout));
         if (!ret) {

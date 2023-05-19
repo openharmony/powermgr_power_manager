@@ -16,6 +16,8 @@
 #ifndef POWER_SHELL_COMMAND_H
 #define POWER_SHELL_COMMAND_H
 
+#include <functional>
+#include <map>
 #include "shell_command.h"
 
 #include "power_mgr_client.h"
@@ -38,6 +40,15 @@ private:
     ErrCode RunAsSuspendCommand();
 #ifdef HAS_DISPLAY_MANAGER_PART
     ErrCode RunAsDisplayCommand();
+    bool DisplayOptargEmpty();
+    ErrCode RunAsDisplayCommandHelp();
+    ErrCode RunAsDisplayCommandOverride();
+    ErrCode RunAsDisplayCommandRestore();
+    ErrCode RunAsDisplayCommandBoost();
+    ErrCode RunAsDisplayCommandCancelBoost();
+    ErrCode RunAsDisplayCommandSetValue();
+    ErrCode RunAsDisplayCommandDiscount();
+    std::map<char, std::function<int32_t()>> commandDisplay_;
 #endif
     ErrCode RunAsTimeOutCommand();
 };
