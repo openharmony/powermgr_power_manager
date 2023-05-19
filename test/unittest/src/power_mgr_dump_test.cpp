@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ void PowerMgrDumpTest::TearDown(void)
 {
 }
 
+namespace {
 /**
  * @tc.name: PowerMgrDumpNative001
  * @tc.desc: Test that args in PowerMgrDump is -i.
@@ -111,3 +112,4 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level0)
     args.push_back(arg);
     EXPECT_TRUE(pmsTest_->Dump(fd, args) == ERR_OK);
 }
+} // namespace
