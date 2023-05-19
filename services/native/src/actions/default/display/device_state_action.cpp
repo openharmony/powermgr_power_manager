@@ -85,7 +85,7 @@ DisplayState DeviceStateAction::GetDisplayState()
 
 uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
 {
-    POWER_HILOGI(FEATURE_POWER_STATE, "Action: SetDisplayState: %{public}d, %{public}d",
+    POWER_HILOGI(FEATURE_POWER_STATE, "Action: SetDisplayState: DisplayState=%{public}d, StateChangeReason=%{public}d",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
 
     DisplayState currentState = GetDisplayState();
