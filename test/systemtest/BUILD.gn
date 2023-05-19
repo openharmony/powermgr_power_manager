@@ -23,6 +23,8 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
+    "${powermgr_service_path}/native/src/suspend",
+    "${powermgr_service_path}/native/src/wakeup",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
 }

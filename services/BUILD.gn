@@ -23,7 +23,11 @@ config("powermgr_public_config") {
 }
 
 config("powermgr_private_config") {
-  include_dirs = [ "native/src/setting" ]
+  include_dirs = [
+    "native/src/setting",
+    "native/src/suspend",
+    "native/src/wakeup",
+  ]
 }
 
 ohos_shared_library("powermgrservice") {
