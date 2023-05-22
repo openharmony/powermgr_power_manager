@@ -30,8 +30,9 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/",
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
-    "${powermgr_service_path}/native/src/actions/default/suspend",
     "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_service_path}/native/src/suspend",
+    "${powermgr_service_path}/native/src/wakeup",
     "${powermgr_test_path}/mock/action",
   ]
 }
@@ -739,9 +740,10 @@ ohos_unittest("test_running_lock_hub_native") {
   module_out_path = module_output_path
   defines = defs
 
-  sources = [ "src/running_lock_hub_native_test.cpp" ]
+  include_dirs =
+      [ "${powermgr_service_path}/native/src/actions/default/suspend" ]
 
-  defines += [ "POWER_GTEST" ]
+  sources = [ "src/running_lock_hub_native_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",

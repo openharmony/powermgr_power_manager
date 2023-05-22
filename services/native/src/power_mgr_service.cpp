@@ -199,6 +199,83 @@ void PowerMgrService::KeyMonitorCancel()
     }
 }
 
+void PowerMgrService::HallSensorSubscriberInit()
+{
+    if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
+        POWER_HILOGW(FEATURE_INPUT, "SENSOR_TYPE_ID_HALL sensor not support");
+        return;
+    }
+    if (strcpy_s(sensorUser_.name, sizeof(sensorUser_.name), "PowerManager") != EOK) {
+        POWER_HILOGW(FEATURE_INPUT, "strcpy_s error");
+        return;
+    }
+    sensorUser_.userData = nullptr;
+    sensorUser_.callback = &HallSensorCallback;
+    SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
+    ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+}
+
+bool PowerMgrService::IsSupportSensor(SensorTypeId typeId)
+{
+    bool isSupport = false;
+    SensorInfo* sensorInfo = nullptr;
+    int32_t count;
+    int32_t ret = GetAllSensors(&sensorInfo, &count);
+    if (ret != 0 || sensorInfo == nullptr) {
+        POWER_HILOGW(FEATURE_INPUT, "Get sensors fail, ret=%{public}d", ret);
+        return isSupport;
+    }
+    for (int32_t i = 0; i < count; i++) {
+        if (sensorInfo[i].sensorTypeId == typeId) {
+            isSupport = true;
+            break;
+        }
+    }
+    return isSupport;
+}
+
+void PowerMgrService::HallSensorCallback(SensorEvent* event)
+{
+    if (event == nullptr || event->sensorTypeId != SENSOR_TYPE_ID_HALL || event->data == nullptr) {
+        POWER_HILOGW(FEATURE_INPUT, "Hall sensor event is invalid");
+        return;
+    }
+
+    std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_INPUT, "get suspendController instance error");
+        return;
+    }
+
+    std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    if (wakeupController == nullptr) {
+        POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
+        return;
+    }
+    const uint32_t LID_CLOSED_HALL_FLAG = 0x1;
+    auto data = reinterpret_cast<HallData*>(event->data);
+    auto status = static_cast<uint32_t>(data->status);
+
+    if (status & LID_CLOSED_HALL_FLAG) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
+        uint32_t reason = static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID);
+        suspendController->ExecSuspendMonitorByReason(reason);
+    } else {
+        POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
+        uint32_t reason = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_LID);
+        wakeupController->ExecWakeupMonitorByReason(reason);
+    }
+}
+
+void PowerMgrService::HallSensorSubscriberCancel()
+{
+    if (IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
+        DeactivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+        UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    }
+}
+
 bool PowerMgrService::ShowPowerDialog()
 {
     POWER_HILOGD(COMP_SVC, "PowerMgrService::ShowPowerDialog start.");
@@ -242,7 +319,7 @@ bool PowerMgrService::CheckDialogAndShuttingDown()
 void PowerMgrService::HandlePowerKeyDown()
 {
     POWER_HILOGD(FEATURE_INPUT, "Receive press powerkey");
-    int64_t now = static_cast<int64_t>(time(0));
+    int64_t now = static_cast<int64_t>(time(nullptr));
     RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     if (CheckDialogAndShuttingDown()) {
         return;
@@ -257,7 +334,7 @@ void PowerMgrService::HandlePowerKeyDown()
 void PowerMgrService::HandlePowerKeyUp()
 {
     POWER_HILOGD(FEATURE_INPUT, "Receive release powerkey");
-    int64_t now = static_cast<int64_t>(time(0));
+    int64_t now = static_cast<int64_t>(time(nullptr));
     RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     if (CheckDialogAndShuttingDown()) {
         isPowerKeyDown_ = false;
@@ -275,14 +352,24 @@ void PowerMgrService::SwitchSubscriberInit()
     switchId_ =
         InputManager::GetInstance()->SubscribeSwitchEvent([this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
             POWER_HILOGI(FEATURE_WAKEUP, "switch event received");
-            auto now = static_cast<int64_t>(time(nullptr));
+            std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
+            if (suspendController == nullptr) {
+                POWER_HILOGE(FEATURE_INPUT, "get suspendController instance error");
+                return;
+            }
+            std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+            if (wakeupController == nullptr) {
+                POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
+                return;
+            }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
                 POWER_HILOGI(FEATURE_SUSPEND, "switch close event received, begin to suspend");
-                this->SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, true);
+                uint32_t reason = static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID);
+                suspendController->ExecSuspendMonitorByReason(reason);
             } else {
                 POWER_HILOGI(FEATURE_WAKEUP, "switch open event received, begin to wakeup");
-                std::string reason = "switch open";
-                this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_LID, reason);
+                uint32_t reason = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_LID);
+                wakeupController->ExecWakeupMonitorByReason(reason);
             }
         });
 }
@@ -299,7 +386,7 @@ void PowerMgrService::SwitchSubscriberCancel()
 void PowerMgrService::HandleKeyEvent(int32_t keyCode)
 {
     POWER_HILOGD(FEATURE_INPUT, "keyCode: %{public}d", keyCode);
-    int64_t now = static_cast<int64_t>(time(0));
+    int64_t now = static_cast<int64_t>(time(nullptr));
     if (IsScreenOn()) {
         this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     } else {
@@ -320,7 +407,7 @@ void PowerMgrService::HandleKeyEvent(int32_t keyCode)
 void PowerMgrService::HandlePointEvent(int32_t type)
 {
     POWER_HILOGD(FEATURE_INPUT, "type: %{public}d", type);
-    int64_t now = static_cast<int64_t>(time(0));
+    int64_t now = static_cast<int64_t>(time(nullptr));
     if (this->IsScreenOn()) {
         this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
     } else {
@@ -371,6 +458,7 @@ void PowerMgrService::PowerMgrService::OnStop()
     handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
 
     KeyMonitorCancel();
+    HallSensorSubscriberCancel();
     SwitchSubscriberCancel();
     eventRunner_.reset();
     handler_.reset();

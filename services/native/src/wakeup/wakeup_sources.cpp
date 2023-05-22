@@ -45,6 +45,10 @@ WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint
         return WakeupDeviceType::WAKEUP_DEVICE_LID;
     }
 
+    if (key == WakeupSources::SWITCH_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
+    }
+
     if (key == WakeupSources::TOUCHSCREEN_KEY) {
         if (click == WakeupSources::SINGLE_CLICK) {
             return WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
@@ -65,6 +69,7 @@ std::vector<std::string> WakeupSources::getSourceKeys()
     sourceKeys.push_back(WakeupSources::TOUCHPAD_KEY);
     sourceKeys.push_back(WakeupSources::PEN_KEY);
     sourceKeys.push_back(WakeupSources::LID_KEY);
+    sourceKeys.push_back(WakeupSources::SWITCH_KEY);
     return sourceKeys;
 }
 

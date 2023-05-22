@@ -88,7 +88,10 @@ public:
     void KeyMonitorCancel();
     void SwitchSubscriberInit();
     void SwitchSubscriberCancel();
+    void HallSensorSubscriberInit();
+    void HallSensorSubscriberCancel();
     bool ShowPowerDialog();
+    bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
 
@@ -182,11 +185,12 @@ private:
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
     bool Init();
     bool PowerStateMachineInit();
-    bool CheckDialogAndShuttingDown();
     void HandlePowerKeyDown();
     void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
+    bool IsSupportSensor(SensorTypeId);
+    static void HallSensorCallback(SensorEvent* event);
     static void RegisterBootCompletedCallback();
 
     inline PowerModeModule& GetPowerModeModule()

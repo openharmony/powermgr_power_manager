@@ -33,6 +33,10 @@ SuspendDeviceType SuspendSources::mapSuspendDeviceType(const std::string& key)
         return SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
     }
 
+    if (key == SuspendSources::SWITCH_KEY) {
+        return SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
+    }
+
     return SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN;
 }
 
@@ -42,6 +46,7 @@ std::vector<std::string> SuspendSources::getSourceKeys()
     sourceKeys.push_back(SuspendSources::POWERKEY_KEY);
     sourceKeys.push_back(SuspendSources::TIMEOUT_KEY);
     sourceKeys.push_back(SuspendSources::LID_KEY);
+    sourceKeys.push_back(SuspendSources::SWITCH_KEY);
     return sourceKeys;
 }
 
