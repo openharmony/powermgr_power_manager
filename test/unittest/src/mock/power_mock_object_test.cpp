@@ -127,8 +127,6 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnRegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(sptrProxy->RegisterShutdownCallback(priority, cb2));
     EXPECT_FALSE(sptrProxy->UnRegisterShutdownCallback(cb2));
-    EXPECT_FALSE(sptrProxy->RegisterShutdownCallback(priority, nullptr));
-    EXPECT_FALSE(sptrProxy->UnRegisterShutdownCallback(nullptr));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));

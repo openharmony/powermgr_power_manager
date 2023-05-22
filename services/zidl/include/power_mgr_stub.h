@@ -27,10 +27,12 @@ class PowerMgrStub : public IRemoteStub<IPowerMgr> {
 public:
     DISALLOW_COPY_AND_MOVE(PowerMgrStub);
     PowerMgrStub() = default;
-    virtual ~PowerMgrStub() = default;
+    ~PowerMgrStub() override = default;
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
+    static bool IsShutdownCommand(uint32_t code);
+
     int32_t WakeupDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t SuspendDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RefreshActivityStub(MessageParcel& data);

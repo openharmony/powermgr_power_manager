@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_MOCK_POWER_ACTION_H
-#define POWERMGR_MOCK_POWER_ACTION_H
-
-#include <gmock/gmock.h>
-
-#include "actions/idevice_power_action.h"
+#ifndef POWERMGR_POWER_MANAGER_SHUTDOWN_PRIORITY_H
+#define POWERMGR_POWER_MANAGER_SHUTDOWN_PRIORITY_H
 
 namespace OHOS {
 namespace PowerMgr {
-class MockPowerAction : public IDevicePowerAction {
-public:
-    MockPowerAction() = default;
-    virtual ~MockPowerAction() = default;
-    MOCK_METHOD1(Reboot, void(const std::string& reason));
-    MOCK_METHOD1(Shutdown, void(const std::string& reason));
+/**
+ * Shutdown or reboot priority.
+ */
+enum class ShutdownPriority : uint32_t {
+    /** Low priority */
+    LOW = 0,
+    /** Default priority */
+    DEFAULT,
+    /** High priority */
+    HIGH,
 };
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // POWERMGR_MOCK_POWER_ACTION_H
+#endif // POWERMGR_POWER_MANAGER_SHUTDOWN_PRIORITY_H

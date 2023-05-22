@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_MOCK_LOCK_ACTION_H
-#define POWERMGR_MOCK_LOCK_ACTION_H
+#ifndef POWER_MOCK_POWER_ACTION_H
+#define POWER_MOCK_POWER_ACTION_H
 
 #include <gmock/gmock.h>
-#include "actions/irunning_lock_action.h"
+
+#include "actions/idevice_power_action.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class MockLockAction : public IRunningLockAction {
+class MockPowerAction : public IDevicePowerAction {
 public:
-    MockLockAction() = default;
-    virtual ~MockLockAction() = default;
-    MOCK_METHOD1(Lock, int32_t(const RunningLockParam& param));
-    MOCK_METHOD1(Unlock, int32_t(const RunningLockParam& param));
+    MockPowerAction() = default;
+    virtual ~MockPowerAction() = default;
+    MOCK_METHOD1(Reboot, void(const std::string& reason));
+    MOCK_METHOD1(Shutdown, void(const std::string& reason));
 };
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // POWERMGR_MOCK_LOCK_ACTION_H
+#endif // POWER_MOCK_POWER_ACTION_H
