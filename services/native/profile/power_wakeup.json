@@ -20,5 +20,8 @@
     },
     "lid": {
         "enable": true
+    },
+    "switch": {
+        "enable": true
     }
 }

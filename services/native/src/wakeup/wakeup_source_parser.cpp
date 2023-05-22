@@ -128,7 +128,7 @@ bool WakeupSourceParser::ParseSourcesProc(
         }
         if (enableValue.isBool()) {
             enable = enableValue.asBool();
-            POWER_HILOGI(COMP_SVC, "enable %{public}u", enable);
+            POWER_HILOGI(COMP_SVC, "enable=%{public}u", enable);
         }
     }
 
