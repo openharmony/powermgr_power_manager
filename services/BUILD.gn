@@ -26,6 +26,8 @@ config("powermgr_private_config") {
   include_dirs = [
     "native/src/setting",
     "native/src/shutdown",
+    "native/src/suspend",
+    "native/src/wakeup",
   ]
 }
 
