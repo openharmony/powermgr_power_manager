@@ -24,6 +24,8 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
     "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_service_path}/native/src/suspend",
+    "${powermgr_service_path}/native/src/wakeup",
     "${powermgr_root_path}/test/unittest/include",
     "${powermgr_root_path}/test/unittest/include/servicetest",
     "${powermgr_root_path}/test/unittest/include/servicetest/mock",
