@@ -23,6 +23,7 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "mock",
+    "${powermgr_service_path}/native/src/shutdown",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
 }

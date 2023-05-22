@@ -20,19 +20,33 @@ config("powermgr_public_config") {
   ]
 }
 
+config("powermgr_private_config") {
+  include_dirs = [
+    "${powermgr_framework_native}",
+    "${powermgr_service_zidl}/src/shutdown",
+  ]
+}
+
 ohos_shared_library("powermgr_client") {
   sources = [
+    "${powermgr_framework_native}/client_lifecycle.cpp",
     "${powermgr_framework_native}/power_mgr_client.cpp",
     "${powermgr_framework_native}/running_lock.cpp",
     "${powermgr_framework_native}/running_lock_info.cpp",
     "${powermgr_framework_native}/running_lock_token_stub.cpp",
+    "${powermgr_framework_native}/shutdown/shutdown_client.cpp",
     "${powermgr_service_zidl}/src/power_mgr_proxy.cpp",
     "${powermgr_service_zidl}/src/power_mode_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/shutdown_proxy_delegator.cpp",
+    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
   ]
 
-  configs = [ "${powermgr_utils_path}:coverage_flags" ]
+  configs = [
+    "${powermgr_utils_path}:coverage_flags",
+    ":powermgr_private_config",
+  ]
 
   public_configs = [
     ":powermgr_public_config",

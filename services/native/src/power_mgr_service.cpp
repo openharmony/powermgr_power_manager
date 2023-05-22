@@ -421,6 +421,7 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
         suspendController_->StopSleep();
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
+    shutdownService_.SetController(&shutdownController_);
     shutdownService_.Reboot(reason);
     return PowerErrors::ERR_OK;
 }
@@ -452,6 +453,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     }
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
+    shutdownService_.SetController(&shutdownController_);
     shutdownService_.Shutdown(reason);
     return PowerErrors::ERR_OK;
 }
@@ -807,6 +809,29 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
     bool ret = PowerMgrDumper::Dump(args, result);
     POWER_HILOGI(COMP_SVC, "ret :%{public}d", ret);
     return result;
+}
+
+void PowerMgrService::RegisterShutdownCallback(
+    const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
+{
+    if (callback == nullptr) {
+        return;
+    }
+    if (!Permission::IsSystem()) {
+        return;
+    }
+    shutdownController_.AddCallback(callback, priority);
+}
+
+void PowerMgrService::UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback)
+{
+    if (callback == nullptr) {
+        return;
+    }
+    if (!Permission::IsSystem()) {
+        return;
+    }
+    shutdownController_.RemoveCallback(callback);
 }
 
 sptr<RunningLockTokenStub> PowerMgrService::WakeupRunningLock::token_;
