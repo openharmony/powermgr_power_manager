@@ -28,6 +28,7 @@
 #include "power_state_callback_stub.h"
 #include "powerms_event_handler.h"
 #include "setting_helper.h"
+#include "system_suspend_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -160,6 +161,7 @@ void WakeupController::ControlListener(uint32_t reason)
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
         StartWakeupTimer();
+        SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_INPUT, "wakeup Request: %{public}d", reason);
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
