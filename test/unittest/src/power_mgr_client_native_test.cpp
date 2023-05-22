@@ -76,7 +76,7 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
 }
 
 /**
- * @tc.name: RunningLockNative001
+ * @tc.name: RunningLockNative002
  * @tc.desc: test init in RunningLock
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
@@ -86,7 +86,7 @@ HWTEST_F(PowerMgrClientNativeTest, RunningLockNative002, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002::fun is start!");
     std::shared_ptr<RunningLock> runningLock =
         std::make_shared<RunningLock>(nullptr, "runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_TRUE(runningLock->UnLock() == ERR_OK);
+    EXPECT_TRUE(runningLock->UnLock() == E_GET_POWER_SERVICE_FAILED);
     runningLock->Create();
     runningLock->Release();
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002::fun is end!");
