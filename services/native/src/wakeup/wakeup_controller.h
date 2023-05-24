@@ -65,6 +65,7 @@ private:
     std::shared_ptr<WakeupEventHandler> handler_;
     uint32_t wakeupReason_ {0};
     std::mutex mutex_;
+    std::mutex monitorMutex_;
     int32_t monitorId_ {-1};
 };
 
