@@ -99,6 +99,7 @@ void WakeupController::RegisterSettingsObserver()
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        std::lock_guard lock(monitorMutex_);
         POWER_HILOGI(COMP_SVC, "start setting string update");
         std::string jsonStr = SettingHelper::GetSettingWakeupSources();
         std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources(jsonStr);
@@ -123,6 +124,7 @@ void WakeupController::RegisterSettingsObserver()
 
 void WakeupController::ExecWakeupMonitorByReason(uint32_t reason)
 {
+    std::lock_guard lock(monitorMutex_);
     if (monitorMap_.find(reason) != monitorMap_.end()) {
         auto monitor = monitorMap_[reason];
         monitor->Notify();
