@@ -10,5 +10,9 @@
     "lid": {
         "action": 1,
         "delayMs": 0
+    },
+    "switch": {
+        "action": 1,
+        "delayMs": 0
     }
 }
