@@ -26,6 +26,7 @@
 #include "power_common.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
+#include "power_save_mode.h"
 #include "power_state_machine.h"
 
 using namespace testing::ext;
