@@ -99,6 +99,7 @@ void SuspendController::Init()
 
 void SuspendController::ExecSuspendMonitorByReason(uint32_t reason)
 {
+    std::lock_guard lock(monitorMutex_);
     if (monitorMap_.find(reason) != monitorMap_.end()) {
         auto monitor = monitorMap_[reason];
         monitor->Notify();
@@ -112,6 +113,7 @@ void SuspendController::RegisterSettingsObserver()
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        std::lock_guard lock(monitorMutex_);
         POWER_HILOGI(COMP_SVC, "start setting string update");
         std::string jsonStr = SettingHelper::GetSettingSuspendSources();
         std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);

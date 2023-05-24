@@ -68,6 +68,7 @@ private:
     void HandleForceSleep(uint32_t reason);
     void HandleHibernate(uint32_t reason);
     void HandleShutdown(uint32_t reason);
+    std::mutex monitorMutex_;
     std::vector<SuspendSource> sourceList_;
     std::map<uint32_t, std::shared_ptr<SuspendMonitor>> monitorMap_;
     ShutdownService* shutdownService_;
