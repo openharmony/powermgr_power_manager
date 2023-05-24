@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_SUSPEND_SOURCES_PARSER_H
-#define POWERMGR_SUSPEND_SOURCES_PARSER_H
+#ifndef POWERMGR_WAKEUP_SOURCES_PARSER_H
+#define POWERMGR_WAKEUP_SOURCES_PARSER_H
 
-#include "suspend_sources.h"
+#include "wakeup_sources.h"
 
 #include <memory>
 #include <string>
@@ -25,13 +25,13 @@
 
 namespace OHOS {
 namespace PowerMgr {
-class SuspendSourceParser {
+class WakeupSourceParser {
 public:
-    static std::shared_ptr<SuspendSources> ParseSources();
-    static std::shared_ptr<SuspendSources> ParseSources(const std::string& config);
-    static bool GetTargetPath(std::string& targetPath);
+    static std::shared_ptr<WakeupSources> ParseSources();
+    static std::shared_ptr<WakeupSources> ParseSources(const std::string& config);
     static bool ParseSourcesProc(
-        std::shared_ptr<SuspendSources> &parseSources,  Json::Value& valueObj, std::string& key);
+        std::shared_ptr<WakeupSources>& parseSources, Json::Value& valueObj, std::string& key);
+    static bool GetTargetPath(std::string& targetPath);
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -37,7 +37,7 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
 {
     std::shared_ptr<SuspendSources> parseSources;
     bool isSettingUpdated = SettingHelper::IsSuspendSourcesSettingValid();
-    POWER_HILOGI(COMP_SVC, "ParseSources setting %{public}d", isSettingUpdated);
+    POWER_HILOGI(COMP_SVC, "ParseSources setting=%{public}d", isSettingUpdated);
     std::string configJsonStr;
     if (isSettingUpdated) {
         configJsonStr = SettingHelper::GetSettingSuspendSources();
@@ -47,7 +47,7 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
         if (ret == false) {
             return parseSources;
         }
-        POWER_HILOGI(COMP_SVC, "use targetPath %{public}s", targetPath.c_str());
+        POWER_HILOGI(COMP_SVC, "use targetPath=%{public}s", targetPath.c_str());
         std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
         std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
         configJsonStr = fileStringStr;
@@ -125,9 +125,9 @@ bool SuspendSourceParser::ParseSourcesProc(
         Json::Value actionValue = valueObj[SuspendSource::ACTION_KEY];
         Json::Value delayValue = valueObj[SuspendSource::DELAY_KEY];
         if (actionValue.isUInt() && delayValue.isUInt()) {
-            uint32_t action = actionValue.asUInt();
+            action = actionValue.asUInt();
             POWER_HILOGI(COMP_SVC, "action=%{public}u", action);
-            uint32_t delayMs = delayValue.asUInt();
+            delayMs = delayValue.asUInt();
             POWER_HILOGI(COMP_SVC, "delayMs=%{public}u", delayMs);
             if (action >= ILLEGAL_ACTION) {
                 action = 1;
