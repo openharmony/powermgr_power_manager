@@ -79,9 +79,11 @@ napi_value PowerNapi::Suspend(napi_env env, napi_callback_info info)
 
     NapiErrors error;
     if (argc != SUSPEND_MAX_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_boolean)) {
-        std::string detail = NapiUtils::GetStringFromNapi(env, argv[INDEX_0]);
-        if (detail.compare("undefined") && !detail.empty()) {
-            return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+        if (!NapiUtils::CheckValueType(env, argv[INDEX_0], napi_undefined)) {
+            std::string detail = NapiUtils::GetStringFromNapi(env, argv[INDEX_0]);
+            if (!detail.empty()) {
+                return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+            }
         }
     }
     bool isForce = false;
