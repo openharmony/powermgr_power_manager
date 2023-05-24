@@ -24,6 +24,8 @@
 
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
+#include "running_lock_proxy.h"
+#include "running_lock_token_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {

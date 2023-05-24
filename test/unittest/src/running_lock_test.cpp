@@ -18,6 +18,8 @@
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
+#include "power_mgr_service.h"
+#include "running_lock_mgr.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -304,5 +306,59 @@ HWTEST_F (RunningLockTest, RunningLockTest010, TestSize.Level1)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_FALSE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_FALSE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
+}
+
+/**
+ * @tc.name: RunningLockTest011
+ * @tc.desc: Test RunningLockProxt AddRunningLock function
+ * @tc.type: FUNC
+ * @tc.require: issueI7405P
+ */
+HWTEST_F (RunningLockTest, RunningLockTest011, TestSize.Level1)
+{
+    auto runninglockProxy = std::make_shared<RunningLockProxy>();
+    pid_t pid = 1;
+    pid_t uid = -1;
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    runninglockProxy->AddRunningLock(pid, uid, remoteObj);
+    runninglockProxy->AddRunningLock(pid, uid, remoteObj);
+    auto ret = runninglockProxy->GetRemoteObjectList(pid, uid);
+    EXPECT_TRUE(!ret.empty());
+}
+
+/**
+ * @tc.name: RunningLockTest012
+ * @tc.desc: Test RunningLockProxt RemoveRunningLock function
+ * @tc.type: FUNC
+ * @tc.require: issueI7405P
+ */
+HWTEST_F (RunningLockTest, RunningLockTest012, TestSize.Level1)
+{
+    auto runninglockProxy = std::make_shared<RunningLockProxy>();
+    pid_t pid = 1;
+    pid_t uid = -1;
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    sptr<IRemoteObject> remoteObj2 = nullptr;
+    runninglockProxy->AddRunningLock(pid, uid, remoteObj);
+    runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
+    auto ret = runninglockProxy->GetRemoteObjectList(pid, uid);
+    EXPECT_TRUE(!ret.empty());
+}
+
+/**
+ * @tc.name: RunningLockTest013
+ * @tc.desc: Test RunningLockProxt RemoveRunningLock function
+ * @tc.type: FUNC
+ * @tc.require: issueI7405P
+ */
+HWTEST_F (RunningLockTest, RunningLockTest013, TestSize.Level1)
+{
+    auto runninglockProxy = std::make_shared<RunningLockProxy>();
+    pid_t pid = 1;
+    pid_t uid = -1;
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
+    auto ret = runninglockProxy->GetRemoteObjectList(pid, uid);
+    EXPECT_TRUE(ret.empty());
 }
 }
