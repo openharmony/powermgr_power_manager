@@ -134,7 +134,7 @@ public:
         listener_(reason_, action_, delayMs_);
     }
 protected:
-    SuspendMonitor(SuspendSource& source)
+    explicit SuspendMonitor(SuspendSource& source)
     {
         reason_ = static_cast<uint32_t>(source.GetReason());
         action_ = source.GetAction();
@@ -149,8 +149,8 @@ protected:
 
 class PowerKeySuspendMonitor : public SuspendMonitor {
 public:
-    PowerKeySuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
-    ~PowerKeySuspendMonitor() = default;
+    explicit PowerKeySuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
+    ~PowerKeySuspendMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 
@@ -162,8 +162,8 @@ private:
 
 class TimeoutSuspendMonitor : public SuspendMonitor {
 public:
-    TimeoutSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
-    ~TimeoutSuspendMonitor() = default;
+    explicit TimeoutSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
+    ~TimeoutSuspendMonitor() override = default;
     bool Init() override;
     void Cancel() override;
     void HandleEvent(uint32_t eventId) override;
@@ -171,16 +171,16 @@ public:
 
 class LidSuspendMonitor : public SuspendMonitor {
 public:
-    LidSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
-    ~LidSuspendMonitor() = default;
+    explicit LidSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
+    ~LidSuspendMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class SwitchSuspendMonitor : public SuspendMonitor {
 public:
-    SwitchSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
-    ~SwitchSuspendMonitor() = default;
+    explicit SwitchSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
+    ~SwitchSuspendMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };

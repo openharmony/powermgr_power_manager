@@ -197,7 +197,8 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 
 void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_t delay)
 {
-    POWER_HILOGI(FEATURE_INPUT, "Suspend Request: reason=%{public}d, action=%{public}d, delay=%{public}" PRId64 "", reason, action, delay);
+    POWER_HILOGI(FEATURE_INPUT, "Suspend Request: reason=%{public}d, action=%{public}d, delay=%{public}" PRId64 "",
+        reason, action, delay);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
