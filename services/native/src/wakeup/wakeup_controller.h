@@ -118,7 +118,7 @@ public:
     }
 
 protected:
-    WakeupMonitor(WakeupSource& source)
+    explicit WakeupMonitor(WakeupSource& source)
     {
         reason_ = static_cast<uint32_t>(source.GetReason());
     }
@@ -129,8 +129,8 @@ protected:
 
 class PowerkeyWakeupMonitor : public WakeupMonitor {
 public:
-    PowerkeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~PowerkeyWakeupMonitor() = default;
+    explicit PowerkeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~PowerkeyWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 
@@ -140,64 +140,64 @@ private:
 
 class KeyboardWakeupMonitor : public WakeupMonitor {
 public:
-    KeyboardWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~KeyboardWakeupMonitor() = default;
+    explicit KeyboardWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~KeyboardWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class MousekeyWakeupMonitor : public WakeupMonitor {
 public:
-    MousekeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~MousekeyWakeupMonitor() = default;
+    explicit MousekeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~MousekeyWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class TouchpadWakeupMonitor : public WakeupMonitor {
 public:
-    TouchpadWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~TouchpadWakeupMonitor() = default;
+    explicit TouchpadWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~TouchpadWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class PenWakeupMonitor : public WakeupMonitor {
 public:
-    PenWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~PenWakeupMonitor() = default;
+    explicit PenWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~PenWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class SingleClickWakeupMonitor : public WakeupMonitor {
 public:
-    SingleClickWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~SingleClickWakeupMonitor() = default;
+    explicit SingleClickWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~SingleClickWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class DoubleClickWakeupMonitor : public WakeupMonitor {
 public:
-    DoubleClickWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~DoubleClickWakeupMonitor() = default;
+    explicit DoubleClickWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~DoubleClickWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class LidWakeupMonitor : public WakeupMonitor {
 public:
-    LidWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~LidWakeupMonitor() = default;
+    explicit LidWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~LidWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
 
 class SwitchWakeupMonitor : public WakeupMonitor {
 public:
-    SwitchWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
-    ~SwitchWakeupMonitor() = default;
+    explicit SwitchWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~SwitchWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };
