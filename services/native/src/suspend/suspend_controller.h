@@ -63,7 +63,7 @@ public:
 
 private:
     void ControlListener(uint32_t reason, uint32_t action, int64_t delay);
-    void StartSleepTimer(uint32_t reason, uint32_t action, int64_t time);
+    void StartSleepTimer(uint32_t reason, uint32_t action, int64_t delay);
     void HandleAutoSleep(uint32_t reason);
     void HandleForceSleep(uint32_t reason);
     void HandleHibernate(uint32_t reason);
