@@ -17,7 +17,7 @@
 #define POWERMGR_WAKEUP_SOURCES_H
 
 #include "power_state_machine_info.h"
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 
