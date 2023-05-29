@@ -18,6 +18,8 @@
 
 #include "iremote_broker.h"
 #include "itakeover_shutdown_callback.h"
+#include "iasync_shutdown_callback.h"
+#include "isync_shutdown_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -30,12 +32,23 @@ public:
         CMD_SHUTDOWN,
         CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK,
         CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK,
+        CMD_REG_ASYNC_SHUTDOWN_CALLBACK,
+        CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK,
+        CMD_REG_SYNC_SHUTDOWN_CALLBACK,
+        CMD_UNREG_SYNC_SHUTDOWN_CALLBACK,
         CMD_END = 299,
     };
 
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;
     virtual void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) = 0;
+
+    virtual void RegisterShutdownCallback(
+        const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority) = 0;
+    virtual void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) = 0;
+    virtual void RegisterShutdownCallback(
+        const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) = 0;
+    virtual void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

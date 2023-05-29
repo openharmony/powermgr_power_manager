@@ -21,6 +21,8 @@
 #include "ipower_mgr.h"
 #include "ishutdown_client.h"
 #include "itakeover_shutdown_callback.h"
+#include "iasync_shutdown_callback.h"
+#include "isync_shutdown_callback.h"
 #include "power_errors.h"
 
 namespace OHOS {
@@ -51,6 +53,42 @@ public:
      * @param callback Registered callback to take over shutdown or reboot.
      */
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback);
+
+    /**
+     * Register the asynchronous shutdown callback interface
+     * <p>
+     * Callbacks are executed in order of highest to lowest priority.
+     *
+     * @param callback Asynchronous shutdown or reboot callbacks.
+     * @param priority Change the priority of execution.
+     */
+    void RegisterShutdownCallback(
+        const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority = ShutdownPriority::DEFAULT);
+
+    /**
+     * Unregister the asynchronous shutdown callback interface.
+     *
+     * @param callback Registered callback to asynchronous shutdown or reboot.
+     */
+    void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback);
+
+    /**
+     * Register the synchronous shutdown callback interface
+     * <p>
+     * Callbacks are executed in order of highest to lowest priority.
+     *
+     * @param callback Synchronous shutdown or reboot callbacks.
+     * @param priority Change the priority of execution.
+     */
+    void RegisterShutdownCallback(
+        const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority = ShutdownPriority::DEFAULT);
+
+    /**
+     * Unregister the synchronous shutdown callback interface.
+     *
+     * @param callback Registered callback to synchronous shutdown or reboot.
+     */
+    void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback);
 
 private:
     ErrCode Connect();

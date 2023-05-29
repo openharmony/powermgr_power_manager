@@ -15,6 +15,8 @@
 
 #include "shutdown_controller.h"
 
+#include <cinttypes>
+#include <datetime_ex.h>
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "power_common.h"
@@ -24,6 +26,8 @@ namespace PowerMgr {
 ShutdownController::ShutdownController()
 {
     takeoverShutdownCallbackHolder_ = new ShutdownCallbackHolder();
+    asyncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
+    syncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
 }
 
 void ShutdownController::AddCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
@@ -35,11 +39,45 @@ void ShutdownController::AddCallback(const sptr<ITakeOverShutdownCallback>& call
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
+void ShutdownController::AddCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    RETURN_IF(callback->AsObject() == nullptr)
+    asyncShutdownCallbackHolder_->AddCallback(callback->AsObject(), priority);
+    POWER_HILOGI(FEATURE_SHUTDOWN,
+        "async shutdown callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+}
+
+void ShutdownController::AddCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    RETURN_IF(callback->AsObject() == nullptr)
+    syncShutdownCallbackHolder_->AddCallback(callback->AsObject(), priority);
+    POWER_HILOGI(FEATURE_SHUTDOWN,
+        "sync shutdown callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+}
+
 void ShutdownController::RemoveCallback(const sptr<ITakeOverShutdownCallback>& callback)
 {
     RETURN_IF(callback->AsObject() == nullptr)
     takeoverShutdownCallbackHolder_->RemoveCallback(callback->AsObject());
     POWER_HILOGI(FEATURE_SHUTDOWN, "takeover shutdown callback removed, pid=%{public}d, uid=%{public}d",
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+}
+
+void ShutdownController::RemoveCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    RETURN_IF(callback->AsObject() == nullptr)
+    asyncShutdownCallbackHolder_->RemoveCallback(callback->AsObject());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "async shutdown callback removed, pid=%{public}d, uid=%{public}d",
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+}
+
+void ShutdownController::RemoveCallback(const sptr<ISyncShutdownCallback>& callback)
+{
+    RETURN_IF(callback->AsObject() == nullptr)
+    syncShutdownCallbackHolder_->RemoveCallback(callback->AsObject());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "sync shutdown callback removed, pid=%{public}d, uid=%{public}d",
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
@@ -67,5 +105,50 @@ bool ShutdownController::TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRem
     return isTakeover;
 }
 
+void ShutdownController::TriggerAsyncShutdownCallback()
+{
+    auto highPriorityCallbacks = asyncShutdownCallbackHolder_->GetHighPriorityCallbacks();
+    TriggerAsyncShutdownCallbackInner(highPriorityCallbacks);
+    auto defaultPriorityCallbacks = asyncShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
+    TriggerAsyncShutdownCallbackInner(defaultPriorityCallbacks);
+    auto lowPriorityCallbacks = asyncShutdownCallbackHolder_->GetLowPriorityCallbacks();
+    TriggerAsyncShutdownCallbackInner(lowPriorityCallbacks);
+}
+
+void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks)
+{
+    for (auto &obj : callbacks) {
+        sptr<IAsyncShutdownCallback> callback = iface_cast<IAsyncShutdownCallback>(obj);
+        if (callback != nullptr) {
+            int64_t start = GetTickCount();
+            callback->OnAsyncShutdown();
+            int64_t cost = GetTickCount() - start;
+            POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
+        }
+    }
+}
+
+void ShutdownController::TriggerSyncShutdownCallback()
+{
+    auto highPriorityCallbacks = syncShutdownCallbackHolder_->GetHighPriorityCallbacks();
+    TriggerSyncShutdownCallbackInner(highPriorityCallbacks);
+    auto defaultPriorityCallbacks = syncShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
+    TriggerSyncShutdownCallbackInner(defaultPriorityCallbacks);
+    auto lowPriorityCallbacks = syncShutdownCallbackHolder_->GetLowPriorityCallbacks();
+    TriggerSyncShutdownCallbackInner(lowPriorityCallbacks);
+}
+
+void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks)
+{
+    for (auto &obj : callbacks) {
+        sptr<ISyncShutdownCallback> callback = iface_cast<ISyncShutdownCallback>(obj);
+        if (callback != nullptr) {
+            int64_t start = GetTickCount();
+            callback->OnSyncShutdown();
+            int64_t cost = GetTickCount() - start;
+            POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
+        }
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

@@ -777,5 +777,29 @@ void PowerMgrProxy::UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallb
     auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
     delegator->UnRegisterShutdownCallback(callback);
 }
+
+void PowerMgrProxy::RegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
+    delegator->RegisterShutdownCallback(callback, priority);
+}
+
+void PowerMgrProxy::UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
+    delegator->UnRegisterShutdownCallback(callback);
+}
+
+void PowerMgrProxy::RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
+    delegator->RegisterShutdownCallback(callback, priority);
+}
+
+void PowerMgrProxy::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback)
+{
+    auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());
+    delegator->UnRegisterShutdownCallback(callback);
+}
 } // namespace PowerMgr
 } // namespace OHOS
