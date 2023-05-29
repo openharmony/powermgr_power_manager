@@ -77,6 +77,11 @@ public:
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
+ 
+    void RegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority) override;
+    void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) override;
+    void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) override;
+    void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) override;
 
 private:
     static inline BrokerDelegator<PowerMgrProxy> delegator_;

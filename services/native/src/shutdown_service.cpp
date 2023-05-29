@@ -143,6 +143,10 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
         }
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+    PublishShutdownEvent();
+    if (shutdownController_ != nullptr) {
+        shutdownController_->TriggerSyncShutdownCallback();
+    }
     make_unique<thread>([=] {
         Prepare();
         TurnOffScreen();
@@ -163,13 +167,28 @@ void ShutdownService::RebootOrShutdown(const std::string& reason, bool isReboot)
 
 void ShutdownService::Prepare()
 {
-    PublishShutdownEvent();
-    POWER_HILOGD(FEATURE_SHUTDOWN, "High priority shutdown callback started");
-    highCallbackMgr_->WaitingCallback();
-    POWER_HILOGD(FEATURE_SHUTDOWN, "Default priority shutdown callback started");
-    defaultCallbackMgr_->WaitingCallback();
-    POWER_HILOGD(FEATURE_SHUTDOWN, "Low priority shutdown callback started");
-    lowCallbackMgr_->WaitingCallback();
+    auto callbackStart = [&]() {
+        POWER_HILOGD(FEATURE_SHUTDOWN, "High priority shutdown callback started");
+        highCallbackMgr_->WaitingCallback();
+        POWER_HILOGD(FEATURE_SHUTDOWN, "Default priority shutdown callback started");
+        defaultCallbackMgr_->WaitingCallback();
+        POWER_HILOGD(FEATURE_SHUTDOWN, "Low priority shutdown callback started");
+        lowCallbackMgr_->WaitingCallback();
+        if (shutdownController_ != nullptr) {
+            shutdownController_->TriggerAsyncShutdownCallback();
+        }
+    };
+
+    packaged_task<void()> callbackTask(callbackStart);
+    future<void> fut = callbackTask.get_future();
+    make_unique<thread>(std::move(callbackTask))->detach();
+
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Waiting for the callback execution complete...");
+    future_status status = fut.wait_for(std::chrono::seconds(MAX_TIMEOUT_SEC));
+    if (status == future_status::timeout) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown callback execution timeout");
+    }
+    POWER_HILOGI(FEATURE_SHUTDOWN, "The callback execution is complete");
 }
 
 void ShutdownService::PublishShutdownEvent() const
@@ -227,29 +246,16 @@ void ShutdownService::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& r
 
 void ShutdownService::CallbackManager::WaitingCallback()
 {
-    auto callbackStart = [&]() {
-        unique_lock<mutex> lock(mutex_);
-        for (auto &obj : callbacks_) {
-            sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
-            if (callback != nullptr) {
-                int64_t start = GetTickCount();
-                callback->ShutdownCallback();
-                int64_t cost = GetTickCount() - start;
-                POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
-            }
+    unique_lock<mutex> lock(mutex_);
+    for (auto &obj : callbacks_) {
+        sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
+        if (callback != nullptr) {
+            int64_t start = GetTickCount();
+            callback->ShutdownCallback();
+            int64_t cost = GetTickCount() - start;
+            POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
         }
-    };
-
-    packaged_task<void()> callbackTask(callbackStart);
-    future<void> fut = callbackTask.get_future();
-    make_unique<thread>(std::move(callbackTask))->detach();
-
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Waiting for the callback execution complete...");
-    future_status status = fut.wait_for(std::chrono::seconds(MAX_TIMEOUT_SEC));
-    if (status == future_status::timeout) {
-        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown callback execution timeout");
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "The callback execution is complete");
 }
 } // namespace PowerMgr
 } // namespace OHOS
