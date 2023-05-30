@@ -31,7 +31,7 @@ public:
      * Asynchronous shutdown callback interface.
      * <p>
      * Asynchronously execute the shutdown callback. Wait for a maximum of 30 seconds.
-     * If this timeout occurs, theasynchronous task will be interrupted and the shutdown will be forcibly executed.
+     * If this timeout occurs, the asynchronous task will be interrupted and the shutdown will be forcibly executed.
      * Execute from high priority to low priority.
      */
     virtual void OnAsyncShutdown() = 0;
