@@ -95,6 +95,8 @@
                         "running_lock_info.h",
                         "shutdown/ishutdown_client.h",
                         "shutdown/itakeover_shutdown_callback.h",
+                        "shutdown/iasync_shutdown_callback.h",
+                        "shutdown/isync_shutdown_callback.h",
                         "shutdown/shutdown_client.h",
                         "shutdown/shutdown_priority.h"
                       ],

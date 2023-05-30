@@ -37,6 +37,18 @@ int32_t ShutdownStubDelegator::HandleRemoteRequest(
         case IShutdownClient::CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK:
             ret = UnRegisterTakeOverShutdownCallback(data);
             break;
+        case IShutdownClient::CMD_REG_ASYNC_SHUTDOWN_CALLBACK:
+            ret = RegisterAsyncShutdownCallback(data);
+            break;
+        case IShutdownClient::CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK:
+            ret = UnRegisterAsyncShutdownCallback(data);
+            break;
+        case IShutdownClient::CMD_REG_SYNC_SHUTDOWN_CALLBACK:
+            ret = RegisterSyncShutdownCallback(data);
+            break;
+        case IShutdownClient::CMD_UNREG_SYNC_SHUTDOWN_CALLBACK:
+            ret = UnRegisterSyncShutdownCallback(data);
+            break;
         default:
             ret = ERR_INVALID_OPERATION;
             break;
@@ -62,6 +74,50 @@ int32_t ShutdownStubDelegator::UnRegisterTakeOverShutdownCallback(MessageParcel&
     sptr<IRemoteObject> obj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
     auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    stub_.UnRegisterShutdownCallback(callback);
+    return ERR_OK;
+}
+
+int32_t ShutdownStubDelegator::RegisterAsyncShutdownCallback(MessageParcel& data)
+{
+    uint32_t priority;
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    READ_PARCEL_WITH_RET(data, Uint32, priority, E_READ_PARCEL_ERROR);
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    auto callback = iface_cast<IAsyncShutdownCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    stub_.RegisterShutdownCallback(callback, static_cast<ShutdownPriority>(priority));
+    return ERR_OK;
+}
+
+int32_t ShutdownStubDelegator::UnRegisterAsyncShutdownCallback(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    auto callback = iface_cast<IAsyncShutdownCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    stub_.UnRegisterShutdownCallback(callback);
+    return ERR_OK;
+}
+
+int32_t ShutdownStubDelegator::RegisterSyncShutdownCallback(MessageParcel& data)
+{
+    uint32_t priority;
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    READ_PARCEL_WITH_RET(data, Uint32, priority, E_READ_PARCEL_ERROR);
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    auto callback = iface_cast<ISyncShutdownCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    stub_.RegisterShutdownCallback(callback, static_cast<ShutdownPriority>(priority));
+    return ERR_OK;
+}
+
+int32_t ShutdownStubDelegator::UnRegisterSyncShutdownCallback(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    auto callback = iface_cast<ISyncShutdownCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
     stub_.UnRegisterShutdownCallback(callback);
     return ERR_OK;

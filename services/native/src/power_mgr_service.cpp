@@ -902,23 +902,51 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
 void PowerMgrService::RegisterShutdownCallback(
     const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
 {
-    if (callback == nullptr) {
-        return;
-    }
-    if (!Permission::IsSystem()) {
-        return;
-    }
+    RETURN_IF (callback == nullptr);
+    RETURN_IF (!Permission::IsSystem());
+
     shutdownController_.AddCallback(callback, priority);
 }
 
 void PowerMgrService::UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback)
 {
-    if (callback == nullptr) {
-        return;
-    }
-    if (!Permission::IsSystem()) {
-        return;
-    }
+    RETURN_IF (callback == nullptr);
+    RETURN_IF (!Permission::IsSystem());
+
+    shutdownController_.RemoveCallback(callback);
+}
+
+void PowerMgrService::RegisterShutdownCallback(
+    const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    RETURN_IF (callback == nullptr);
+    RETURN_IF (!Permission::IsSystem());
+
+    shutdownController_.AddCallback(callback, priority);
+}
+
+void PowerMgrService::UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    RETURN_IF (callback == nullptr);
+    RETURN_IF (!Permission::IsSystem());
+
+    shutdownController_.RemoveCallback(callback);
+}
+
+void PowerMgrService::RegisterShutdownCallback(
+    const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    RETURN_IF (callback == nullptr);
+    RETURN_IF (!Permission::IsSystem());
+
+    shutdownController_.AddCallback(callback, priority);
+}
+
+void PowerMgrService::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback)
+{
+    RETURN_IF (callback == nullptr);
+    RETURN_IF (!Permission::IsSystem());
+
     shutdownController_.RemoveCallback(callback);
 }
 

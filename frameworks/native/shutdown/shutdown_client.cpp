@@ -41,5 +41,31 @@ void ShutdownClient::UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCall
     RETURN_IF(Connect() != ERR_OK);
     proxy_->UnRegisterShutdownCallback(callback);
 }
+
+void ShutdownClient::RegisterShutdownCallback(
+    const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    proxy_->RegisterShutdownCallback(callback, priority);
+}
+
+void ShutdownClient::UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    proxy_->UnRegisterShutdownCallback(callback);
+}
+
+void ShutdownClient::RegisterShutdownCallback(
+    const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    proxy_->RegisterShutdownCallback(callback, priority);
+}
+
+void ShutdownClient::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    proxy_->UnRegisterShutdownCallback(callback);
+}
 } // namespace PowerMgr
 } // namespace OHOS

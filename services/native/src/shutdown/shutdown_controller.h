@@ -17,6 +17,8 @@
 #define POWERMGR_POWER_MANAGER_SHUTDOWN_CONTROLLER_H
 
 #include "shutdown/itakeover_shutdown_callback.h"
+#include "shutdown/iasync_shutdown_callback.h"
+#include "shutdown/isync_shutdown_callback.h"
 #include "shutdown_callback_holer.h"
 
 namespace OHOS {
@@ -26,14 +28,27 @@ public:
     ShutdownController();
     ~ShutdownController() = default;
     void AddCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority);
+
+    void AddCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority);
+    void AddCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority);
+
     void RemoveCallback(const sptr<ITakeOverShutdownCallback>& callback);
 
+    void RemoveCallback(const sptr<IAsyncShutdownCallback>& callback);
+    void RemoveCallback(const sptr<ISyncShutdownCallback>& callback);
+
     bool TriggerTakeOverShutdownCallback(bool isReboot);
+    void TriggerAsyncShutdownCallback();
+    void TriggerSyncShutdownCallback();
 
 private:
     static bool TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
+    static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks);
+    static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks);
 
     sptr<ShutdownCallbackHolder> takeoverShutdownCallbackHolder_;
+    sptr<ShutdownCallbackHolder> asyncShutdownCallbackHolder_;
+    sptr<ShutdownCallbackHolder> syncShutdownCallbackHolder_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -80,7 +80,6 @@ HWTEST_F (PowerShutdownNativeTest, PowerShutdownNative001, TestSize.Level0)
     powerShutdownTest->AddShutdownCallback(priority, powerShutdownCb);
     powerShutdownTest->Prepare();
     powerShutdownTest->DelShutdownCallback(powerShutdownCb);
-    powerShutdownTest->DelShutdownCallback(nullptr);
 
     POWER_HILOGI(LABEL_TEST, "PowerShutdownNativeTest::PowerShutdownNative001 end.");
 }
