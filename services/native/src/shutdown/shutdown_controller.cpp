@@ -85,13 +85,13 @@ bool ShutdownController::TriggerTakeOverShutdownCallback(bool isReboot)
 {
     bool isTakeover = false;
     auto highPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighPriorityCallbacks();
-    isTakeover |= TriggerTakeOverShutdownCallbackInner(highPriorityCallbacks, isReboot);
+    isTakeover = TriggerTakeOverShutdownCallbackInner(highPriorityCallbacks, isReboot);
     RETURN_IF_WITH_RET(isTakeover, true);
     auto defaultPriorityCallbacks = takeoverShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
-    isTakeover |= TriggerTakeOverShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
+    isTakeover = TriggerTakeOverShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
     RETURN_IF_WITH_RET(isTakeover, true);
     auto lowPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowPriorityCallbacks();
-    isTakeover |= TriggerTakeOverShutdownCallbackInner(lowPriorityCallbacks, isReboot);
+    isTakeover = TriggerTakeOverShutdownCallbackInner(lowPriorityCallbacks, isReboot);
     return isTakeover;
 }
 
@@ -100,7 +100,7 @@ bool ShutdownController::TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRem
     bool isTakeover = false;
     for (const auto& obj : callbacks) {
         auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
-        isTakeover |= callback->OnTakeOverShutdown(isReboot);
+        isTakeover = callback->OnTakeOverShutdown(isReboot);
     }
     return isTakeover;
 }
