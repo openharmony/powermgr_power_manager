@@ -34,6 +34,11 @@ public:
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority);
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback);
 
+    void RegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority);
+    void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback);
+    void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority);
+    void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback);
+
 private:
     sptr<IRemoteObject> remote_;
     std::u16string descriptor_;

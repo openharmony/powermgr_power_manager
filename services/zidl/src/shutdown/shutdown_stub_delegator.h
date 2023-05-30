@@ -30,6 +30,11 @@ private:
     int32_t RegisterTakeOverShutdownCallback(MessageParcel& data);
     int32_t UnRegisterTakeOverShutdownCallback(MessageParcel& data);
 
+    int32_t RegisterAsyncShutdownCallback(MessageParcel& data);
+    int32_t UnRegisterAsyncShutdownCallback(MessageParcel& data);
+    int32_t RegisterSyncShutdownCallback(MessageParcel& data);
+    int32_t UnRegisterSyncShutdownCallback(MessageParcel& data);
+
     IRemoteStub<IPowerMgr>& stub_;
 };
 } // namespace PowerMgr

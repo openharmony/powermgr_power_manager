@@ -107,6 +107,13 @@ public:
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;
     virtual void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) = 0;
 
+    virtual void RegisterShutdownCallback(
+        const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority) = 0;
+    virtual void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) = 0;
+    virtual void RegisterShutdownCallback(
+        const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) = 0;
+    virtual void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) = 0;
+
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgr");
 };
 } // namespace PowerMgr

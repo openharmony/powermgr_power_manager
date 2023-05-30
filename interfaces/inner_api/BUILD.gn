@@ -39,7 +39,9 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_service_zidl}/src/power_mode_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/shutdown_proxy_delegator.cpp",
+    "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
   ]
 
