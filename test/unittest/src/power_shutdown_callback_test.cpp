@@ -21,12 +21,20 @@
 #include <gtest/gtest.h>
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
+#include <string>
 #include <string_ex.h>
 
+#include "config_policy_utils.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
+#include "power_save_mode.h"
 #include "power_state_machine.h"
+
+char* GetOneCfgFile(const char *pathSuffix, char *buf, unsigned int bufLength)
+{
+    return nullptr;
+}
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -61,5 +69,17 @@ HWTEST_F (PowerShutdownCallbackTest, PowerShutdownCallback001, TestSize.Level0)
         powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
     }
     POWER_HILOGD(LABEL_TEST, "PowerShutdownCallback001 1.");
+}
+
+/**
+ * @tc.name: SaveModeTest001
+ * @tc.desc: test StartXMlParse
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerShutdownCallbackTest, SaveModeTest001, TestSize.Level0)
+{
+    auto mode = std::make_shared<PowerSaveMode>();
+    int32_t ret = mode->GetSleepTime(0);
+    EXPECT_TRUE(ret == -1);
 }
 }
