@@ -21,8 +21,10 @@
 #include <gtest/gtest.h>
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
+#include <string>
 #include <string_ex.h>
 
+#include "config_policy_utils.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
@@ -33,6 +35,12 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
+
+char* GetOneCfgFile(const char *pathSuffix, char *buf, unsigned int bufLength)
+{
+    std::string ret = "/";
+    return const_cast<char*>(ret.c_str());
+}
 
 namespace {
 /**
@@ -65,5 +73,17 @@ HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
     }
 
     GTEST_LOG_(INFO) << "SetModeTest001: SetMode end.";
+}
+
+/**
+ * @tc.name: SaveModeTest001
+ * @tc.desc: test StartXMlParse
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerSetModeTest, SaveModeTest001, TestSize.Level0)
+{
+    auto mode = std::make_shared<PowerSaveMode>();
+    int32_t ret = mode->GetSleepTime(0);
+    EXPECT_TRUE(ret == -1);
 }
 }
