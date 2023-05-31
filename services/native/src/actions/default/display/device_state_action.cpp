@@ -179,6 +179,7 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
 
 void DeviceStateAction::DisplayPowerCallback::NotifyDisplayActionDone(uint32_t event)
 {
+    std::lock_guard lock(notifyMutex_);
     if (notify_ != nullptr) {
         notify_(event);
     }
