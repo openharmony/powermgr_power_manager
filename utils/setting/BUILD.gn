@@ -37,11 +37,10 @@ ohos_shared_library("power_setting") {
 
   public_configs = [ ":public_config" ]
 
-  deps = [ "${ability_runtime_path}/interfaces/inner_api/dataobs_manager:dataobs_manager" ]
-
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:ability_manager",
+    "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
