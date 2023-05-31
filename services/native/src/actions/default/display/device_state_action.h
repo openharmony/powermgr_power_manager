@@ -46,6 +46,7 @@ private:
     private:
         void NotifyDisplayActionDone(uint32_t event);
         std::function<void(uint32_t)> notify_ {nullptr};
+        std::mutex notifyMutex_;
     };
     bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};
