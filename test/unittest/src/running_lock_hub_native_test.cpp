@@ -15,16 +15,16 @@
 
 #include "running_lock_hub_native_test.h"
 
-#ifdef POWER_GTEST
-#define private   public
-#define protected public
-#define final
-#endif
-
 #include <fcntl.h>
 #include <ipc_skeleton.h>
 
+#include <datetime_ex.h>
+#include <input_manager.h>
+#include <securec.h>
+
 #include "actions/irunning_lock_action.h"
+#include "running_lock_hub.h"
+#include "suspend_controller.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -45,7 +45,7 @@ void RunningSuspendCallback()
  * @tc.desc: test Acquire and Release inrunningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
+HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
 {
     auto sc = std::make_shared<Suspend::SuspendController>();
     auto runningLockHub = std::make_shared<Suspend::RunningLockHub>(sc);
@@ -64,7 +64,7 @@ HWTEST_F (RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
  * @tc.desc: test Suspend inrunningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
+HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
 {
     auto SuspendController = std::make_shared<Suspend::SuspendController>();
     SuspendController->Wakeup();
@@ -81,4 +81,4 @@ HWTEST_F (RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
     SuspendController->DecSuspendBlockCounter();
     SuspendController->DecSuspendBlockCounter();
 }
-}
+} // namespace
