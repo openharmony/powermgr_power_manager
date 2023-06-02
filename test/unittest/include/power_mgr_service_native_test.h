@@ -17,16 +17,16 @@
 #define POWERMGR_MGR_SERVICE_NATIVE_TEST_H
 
 #ifdef POWER_GTEST
-#define private    public
-#define protected  public
+#define private   public
+#define protected public
 #endif
 
-#include <gtest/gtest.h>
 #include "mock_lock_action.h"
 #include "mock_power_action.h"
 #include "mock_state_action.h"
-#include "sensor_agent.h"
 #include "power_state_callback_stub.h"
+#include "sensor_agent.h"
+#include <gtest/gtest.h>
 
 namespace OHOS {
 namespace PowerMgr {
