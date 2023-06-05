@@ -58,6 +58,7 @@ public:
         return runningLocks_;
     }
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
+    void ResetRunningLockProxy();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     void CheckOverTime();
