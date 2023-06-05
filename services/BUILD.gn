@@ -75,6 +75,7 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_utils_path}/setting:power_setting",
     "native/src/actions:powermgr_actions",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+    "//third_party/jsoncpp:jsoncpp",
     "//third_party/libxml2:libxml2",
   ]
 
