@@ -18,9 +18,6 @@
 #include "power_common.h"
 #include "power_log.h"
 #include "suspend/running_lock_hub.h"
-#ifdef POWER_SUSPEND_NO_HDI
-#include "suspend/suspend_controller.h"
-#endif
 
 using namespace OHOS::HDI::Power::V1_1;
 
@@ -37,7 +34,6 @@ SystemSuspendController::~SystemSuspendController() = default;
 
 void SystemSuspendController::RegisterHdiStatusListener(const std::shared_ptr<PowermsEventHandler>& handler)
 {
-#ifndef POWER_SUSPEND_NO_HDI
     POWER_HILOGD(COMP_SVC, "power rigister Hdi status listener");
     hdiServiceMgr_ = OHOS::HDI::ServiceManager::V1_0::IServiceManager::Get();
     if (hdiServiceMgr_ == nullptr) {
@@ -64,9 +60,6 @@ void SystemSuspendController::RegisterHdiStatusListener(const std::shared_ptr<Po
         handler->SendEvent(PowermsEventHandler::RETRY_REGISTER_HDI_STATUS_LISTENER, 0, RETRY_TIME);
         POWER_HILOGW(COMP_SVC, "Register hdi failed");
     }
-#else
-    sc_ = std::make_shared<Suspend::SuspendController>();
-#endif
 }
 
 void SystemSuspendController::RegisterPowerHdiCallback()
@@ -96,7 +89,6 @@ void SystemSuspendController::UnRegisterPowerHdiCallback()
 void SystemSuspendController::Suspend(
     const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force)
 {
-#ifndef POWER_SUSPEND_NO_HDI
     POWER_HILOGI(COMP_SVC, "The hdf interface");
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
@@ -107,22 +99,15 @@ void SystemSuspendController::Suspend(
     } else {
         powerInterface_->StartSuspend();
     }
-#else
-    sc_->Suspend(onSuspend, onWakeup, force);
-#endif
 }
 
 void SystemSuspendController::Wakeup()
 {
-#ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface_->StopSuspend();
-#else
-    sc_->Wakeup();
-#endif
 }
 
 OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
@@ -138,7 +123,6 @@ OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLock
 
 int32_t SystemSuspendController::AcquireRunningLock(const RunningLockParam& param)
 {
-#ifndef POWER_SUSPEND_NO_HDI
     int32_t status = RUNNINGLOCK_FAILURE;
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
@@ -151,12 +135,10 @@ int32_t SystemSuspendController::AcquireRunningLock(const RunningLockParam& para
         status = powerInterface_->HoldRunningLock(filledInfo);
     }
     return status;
-#endif
 }
 
 int32_t SystemSuspendController::ReleaseRunningLock(const RunningLockParam& param)
 {
-#ifndef POWER_SUSPEND_NO_HDI
     int32_t status = RUNNINGLOCK_FAILURE;
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
@@ -169,18 +151,15 @@ int32_t SystemSuspendController::ReleaseRunningLock(const RunningLockParam& para
         status = powerInterface_->UnholdRunningLock(filledInfo);
     }
     return status;
-#endif
 }
 
 void SystemSuspendController::Dump(std::string& info)
 {
-#ifndef POWER_SUSPEND_NO_HDI
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
     powerInterface_->PowerDump(info);
-#endif
 }
 
 int32_t SystemSuspendController::PowerHdfCallback::OnSuspend()
