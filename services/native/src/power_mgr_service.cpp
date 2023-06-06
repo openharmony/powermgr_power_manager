@@ -260,11 +260,11 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
 
     if (status & LID_CLOSED_HALL_FLAG) {
         POWER_HILOGI(FEATURE_SUSPEND, "swtich close event received, begin to suspend");
-        uint32_t reason = static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+        SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
         suspendController->ExecSuspendMonitorByReason(reason);
     } else {
         POWER_HILOGI(FEATURE_WAKEUP, "swtich open event received, begin to wakeup");
-        uint32_t reason = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
+        WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
         wakeupController->ExecWakeupMonitorByReason(reason);
     }
 }
@@ -365,11 +365,11 @@ void PowerMgrService::SwitchSubscriberInit()
             }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
                 POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
-                uint32_t reason = static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID);
+                SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
-                uint32_t reason = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_LID);
+                POWER_HILOGI(FEATURE_WAKEUP, "Lid close event received, begin to suspend");
+                WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_LID;
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
         });
