@@ -44,6 +44,7 @@ class PowerMgrService final : public SystemAbility, public PowerMgrStub {
 public:
     virtual void OnStart() override;
     virtual void OnStop() override;
+    virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
