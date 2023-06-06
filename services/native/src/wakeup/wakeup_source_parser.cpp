@@ -36,7 +36,7 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
 {
     std::shared_ptr<WakeupSources> parseSources;
     bool isSettingUpdated = SettingHelper::IsWakeupSourcesSettingValid();
-    POWER_HILOGI(COMP_SVC, "ParseSources setting=%{public}d", isSettingUpdated);
+    POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isSettingUpdated);
     std::string configJsonStr;
     if (isSettingUpdated) {
         configJsonStr = SettingHelper::GetSettingWakeupSources();
@@ -47,7 +47,7 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
             return parseSources;
         }
 
-        POWER_HILOGI(COMP_SVC, "use targetPath=%{public}s", targetPath.c_str());
+        POWER_HILOGI(FEATURE_WAKEUP, "use targetPath=%{public}s", targetPath.c_str());
         std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
         std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
         configJsonStr = fileStringStr;
@@ -65,15 +65,15 @@ bool WakeupSourceParser::GetTargetPath(std::string& targetPath)
     char buf[MAX_PATH_LEN];
     char* path = GetOneCfgFile(POWER_WAKEUP_CONFIG_FILE.c_str(), buf, MAX_PATH_LEN);
     if (path != nullptr && *path != '\0') {
-        POWER_HILOGI(COMP_SVC, "use policy path=%{public}s", path);
+        POWER_HILOGI(FEATURE_WAKEUP, "use policy path=%{public}s", path);
         targetPath = path;
         return true;
     }
 
     if (access(VENDOR_POWER_WAKEUP_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
-        POWER_HILOGE(COMP_SVC, "vendor suspend config is not exist or permission denied");
+        POWER_HILOGE(FEATURE_WAKEUP, "vendor wakeup config is not exist or permission denied");
         if (access(SYSTEM_POWER_WAKEUP_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
-            POWER_HILOGE(COMP_SVC, "system suspend config is not exist or permission denied");
+            POWER_HILOGE(FEATURE_WAKEUP, "system wakeup config is not exist or permission denied");
             return false;
         } else {
             targetPath = SYSTEM_POWER_WAKEUP_CONFIG_FILE;
@@ -92,7 +92,7 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::strin
     Json::Value root;
     std::string errors;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
-        POWER_HILOGE(COMP_SVC, "json parse error");
+        POWER_HILOGE(FEATURE_WAKEUP, "json parse error");
         return parseSources;
     }
 
@@ -101,11 +101,11 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::strin
         std::string key = *iter;
         Json::Value valueObj = root[key];
 
-        POWER_HILOGI(COMP_SVC, "key=%{public}s", key.c_str());
+        POWER_HILOGI(FEATURE_WAKEUP, "key=%{public}s", key.c_str());
 
         bool ret = ParseSourcesProc(parseSources, valueObj, key);
         if (ret == false) {
-            POWER_HILOGI(COMP_SVC, "lost map config key");
+            POWER_HILOGI(FEATURE_WAKEUP, "lost map config key");
             continue;
         }
     }
@@ -123,17 +123,17 @@ bool WakeupSourceParser::ParseSourcesProc(
         Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
         Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
         if (!clickValue.isNull()) {
-            POWER_HILOGI(COMP_SVC, "clickValue=%{public}u", clickValue.asUInt());
+            POWER_HILOGI(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
             click = clickValue.asUInt() <= DOUBLE_CLICK ? clickValue.asUInt() : 0;
         }
         if (enableValue.isBool()) {
             enable = enableValue.asBool();
-            POWER_HILOGI(COMP_SVC, "enable=%{public}u", enable);
+            POWER_HILOGI(FEATURE_WAKEUP, "enable=%{public}u", enable);
         }
     }
 
     wakeupDeviceType = WakeupSources::mapWakeupDeviceType(key, click);
-    POWER_HILOGI(COMP_SVC, "key map type=%{public}u", wakeupDeviceType);
+    POWER_HILOGI(FEATURE_WAKEUP, "key map type=%{public}u", wakeupDeviceType);
 
     if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         return false;
