@@ -67,15 +67,15 @@ void WakeupController::Init()
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
-        POWER_HILOGE(FEATURE_INPUT, "InputManager is null");
+        POWER_HILOGE(FEATURE_WAKEUP, "InputManager is null");
         return;
     }
 
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
-        POWER_HILOGI(FEATURE_INPUT, "registered type=%{public}u", (*source).GetReason());
+        POWER_HILOGI(FEATURE_WAKEUP, "registered type=%{public}u", (*source).GetReason());
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
-            POWER_HILOGI(FEATURE_INPUT, "register type=%{public}u", (*source).GetReason());
+            POWER_HILOGI(FEATURE_WAKEUP, "register type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
@@ -135,12 +135,12 @@ void WakeupController::Wakeup()
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_INPUT, "get powerMgrService instance error");
+        POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
     auto suspendController = pms->GetSuspendController();
     if (suspendController == nullptr) {
-        POWER_HILOGE(FEATURE_INPUT, "get suspendController instance error");
+        POWER_HILOGE(FEATURE_WAKEUP, "get suspendController instance error");
         return;
     }
     suspendController->StopSleep();
@@ -169,14 +169,14 @@ void WakeupController::ControlListener(uint32_t reason)
         Wakeup();
         StartWakeupTimer();
         SystemSuspendController::GetInstance().Wakeup();
-        POWER_HILOGI(FEATURE_INPUT, "wakeup Request: %{public}d", reason);
+        POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
         if (ret != true) {
-            POWER_HILOGI(FEATURE_INPUT, "setstate wakeup error");
+            POWER_HILOGI(FEATURE_WAKEUP, "setstate wakeup error");
         }
     } else {
-        POWER_HILOGI(FEATURE_INPUT, "state=%{public}u no transitor", stateMachine_->GetState());
+        POWER_HILOGI(FEATURE_WAKEUP, "state=%{public}u no transitor", stateMachine_->GetState());
     }
 }
 
@@ -191,10 +191,10 @@ void WakeupEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& eve
 {
     std::shared_ptr<WakeupController> controller = controller_.lock();
     if (controller == nullptr) {
-        POWER_HILOGI(FEATURE_INPUT, "ProcessEvent: No controller");
+        POWER_HILOGI(FEATURE_WAKEUP, "ProcessEvent: No controller");
         return;
     }
-    POWER_HILOGI(FEATURE_INPUT, "recv event=%{public}d", event->GetInnerEventId());
+    POWER_HILOGI(FEATURE_WAKEUP, "recv event=%{public}d", event->GetInnerEventId());
     switch (event->GetInnerEventId()) {
         case PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG: {
             std::string message = "POWER KEY TIMEOUT BUT DISPLAY NOT FINISHED";
@@ -215,13 +215,13 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     uint32_t wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_INPUT, "get powerMgrService instance error");
+        POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
 
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     if (wakeupController == nullptr) {
-        POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
+        POWER_HILOGE(FEATURE_WAKEUP, "wakeupController is not init");
         return;
     }
 
@@ -233,7 +233,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD);
     }
 
-    POWER_HILOGI(FEATURE_INPUT, "KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
+    POWER_HILOGI(FEATURE_WAKEUP, "KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
     if (wakeupType != static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN)) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
@@ -249,14 +249,14 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     uint32_t wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN);
     PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        POWER_HILOGI(FEATURE_INPUT, "GetPointerItem false");
+        POWER_HILOGI(FEATURE_WAKEUP, "GetPointerItem false");
     }
     int32_t deviceType = pointerItem.GetToolType();
     int32_t sourceType = pointerEvent->GetSourceType();
-    POWER_HILOGI(FEATURE_INPUT, "deviceType=%{public}d", deviceType);
+    POWER_HILOGI(FEATURE_WAKEUP, "deviceType=%{public}d", deviceType);
     if (deviceType == PointerEvent::TOOL_TYPE_PEN) {
         wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_PEN);
-        POWER_HILOGI(FEATURE_INPUT, "current wakeup reason=%{public}u", wakeupType);
+        POWER_HILOGI(FEATURE_WAKEUP, "current wakeup reason=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
         return;
     }
@@ -281,14 +281,14 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     }
 
     if (wakeupType != static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN)) {
-        POWER_HILOGI(FEATURE_INPUT, "current wakeup reason=%{public}u", wakeupType);
+        POWER_HILOGI(FEATURE_WAKEUP, "current wakeup reason=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
 }
 
 void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 {
-    POWER_HILOGD(FEATURE_INPUT, "AxisEvent");
+    POWER_HILOGD(FEATURE_WAKEUP, "AxisEvent");
 }
 
 /* WakeupMonitor Implement */
@@ -296,7 +296,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source)
 {
     WakeupDeviceType reason = source.GetReason();
-    POWER_HILOGE(FEATURE_INPUT, "CreateMonitor reason=%{public}d", reason);
+    POWER_HILOGE(FEATURE_WAKEUP, "CreateMonitor reason=%{public}d", reason);
     std::shared_ptr<WakeupMonitor> monitor = nullptr;
     switch (reason) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
@@ -327,7 +327,7 @@ std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source
             monitor = std::static_pointer_cast<WakeupMonitor>(std::make_shared<SwitchWakeupMonitor>(source));
             break;
         default:
-            POWER_HILOGE(FEATURE_INPUT, "CreateMonitor : Invalid reason=%{public}d", reason);
+            POWER_HILOGE(FEATURE_WAKEUP, "CreateMonitor : Invalid reason=%{public}d", reason);
             break;
     }
     return monitor;
@@ -350,7 +350,7 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_INPUT, "receive wakeup controller key down");
+            POWER_HILOGI(FEATURE_WAKEUP, "receive wakeup controller key down");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
@@ -360,7 +360,7 @@ bool PowerkeyWakeupMonitor::Init()
             Notify();
         });
 
-    POWER_HILOGI(FEATURE_INPUT, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
+    POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
     return powerkeyShortPressId_ >= 0 ? true : false;
 }
 

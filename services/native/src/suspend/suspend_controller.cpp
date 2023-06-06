@@ -58,11 +58,11 @@ public:
     {
         auto controller = controller_.lock();
         if (controller == nullptr) {
-            POWER_HILOGI(FEATURE_INPUT, "OnPowerStateChanged: No controller");
+            POWER_HILOGI(FEATURE_SUSPEND, "OnPowerStateChanged: No controller");
             return;
         }
         if (state == PowerState::AWAKE) {
-            POWER_HILOGI(FEATURE_INPUT, "Turn awake, stop sleep timer");
+            POWER_HILOGI(FEATURE_SUSPEND, "Turn awake, stop sleep timer");
             controller->StopSleep();
         }
     }
@@ -76,16 +76,16 @@ void SuspendController::Init()
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
-        POWER_HILOGE(FEATURE_INPUT, "InputManager is null");
+        POWER_HILOGE(FEATURE_SUSPEND, "InputManager is null");
         return;
     }
 
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
-        POWER_HILOGI(FEATURE_INPUT, "registered type=%{public}u action=%{public}u delayMs=%{public}" PRId64 "",
+        POWER_HILOGI(FEATURE_SUSPEND, "registered type=%{public}u action=%{public}u delayMs=%{public}" PRId64 "",
             (*source).GetReason(), (*source).GetAction(), (*source).GetDelay());
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
-            POWER_HILOGI(FEATURE_INPUT, "register type=%{public}u", (*source).GetReason());
+            POWER_HILOGI(FEATURE_SUSPEND, "register type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
             monitorMap_.emplace(monitor->GetReason(), monitor);
@@ -165,7 +165,7 @@ void SuspendController::StopSleep()
 
 void SuspendController::HandleEvent(uint32_t eventId)
 {
-    POWER_HILOGI(FEATURE_INPUT, "HandleEvent=%{public}d", eventId);
+    POWER_HILOGI(FEATURE_SUSPEND, "HandleEvent=%{public}d", eventId);
     switch (eventId) {
         case PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
             auto timeoutSuspendMonitor =
@@ -184,7 +184,7 @@ void SuspendController::HandleEvent(uint32_t eventId)
 void SuspendController::RecordPowerKeyDown()
 {
     bool isScreenOn = stateMachine_->IsScreenOn();
-    POWER_HILOGI(FEATURE_INPUT, "Suspend record key down action isScreenOn=%{public}d", isScreenOn);
+    POWER_HILOGI(FEATURE_SUSPEND, "Suspend record key down action isScreenOn=%{public}d", isScreenOn);
     if (!isScreenOn) {
         powerkeyDownWhenScreenOff_ = true;
     }
@@ -199,7 +199,7 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 
 void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_t delay)
 {
-    POWER_HILOGI(FEATURE_INPUT, "Suspend Request: reason=%{public}d, action=%{public}d, delay=%{public}" PRId64 "",
+    POWER_HILOGI(FEATURE_SUSPEND, "Suspend Request: reason=%{public}d, action=%{public}d, delay=%{public}" PRId64 "",
         reason, action, delay);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -215,7 +215,7 @@ void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_
     }
 
     if (stateMachine_->GetState() == PowerState::AWAKE) {
-        POWER_HILOGI(FEATURE_INPUT, "Suspend set inactive");
+        POWER_HILOGI(FEATURE_SUSPEND, "Suspend set inactive");
         bool force = true;
         if (reason == static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT)) {
             force = false;
@@ -226,7 +226,7 @@ void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_
             StartSleepTimer(reason, action, delay);
         }
     } else {
-        POWER_HILOGI(FEATURE_INPUT, "state=%{public}u no transiator", stateMachine_->GetState());
+        POWER_HILOGI(FEATURE_SUSPEND, "state=%{public}u no transiator", stateMachine_->GetState());
     }
 }
 
@@ -234,7 +234,7 @@ void SuspendController::StartSleepTimer(uint32_t reason, uint32_t action, int64_
 {
     int64_t timeout = GetTickCount() + delay;
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
-        POWER_HILOGI(FEATURE_INPUT, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")", timeout,
+        POWER_HILOGI(FEATURE_SUSPEND, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")", timeout,
             sleepTime_);
         return;
     }
@@ -274,46 +274,46 @@ void SuspendController::HandleAction(uint32_t reason, uint32_t action)
 
 void SuspendController::HandleAutoSleep(uint32_t reason)
 {
-    POWER_HILOGI(FEATURE_INPUT, "auto suspend by reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 
     bool ret = stateMachine_->SetState(
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)));
     if (ret) {
-        POWER_HILOGI(FEATURE_INPUT, "State changed, set sleep timer");
+        POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
     } else {
-        POWER_HILOGI(FEATURE_INPUT, "auto suspend: State change failed");
+        POWER_HILOGI(FEATURE_SUSPEND, "auto suspend: State change failed");
     }
 }
 
 void SuspendController::HandleForceSleep(uint32_t reason)
 {
-    POWER_HILOGI(FEATURE_INPUT, "force suspend by reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     bool ret = stateMachine_->SetState(
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), true);
     if (ret) {
-        POWER_HILOGI(FEATURE_INPUT, "State changed, system suspend");
+        POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
     } else {
-        POWER_HILOGI(FEATURE_INPUT, "force suspend: State change failed");
+        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
 }
 
 void SuspendController::HandleHibernate(uint32_t reason)
 {
-    POWER_HILOGI(FEATURE_INPUT, "force suspend by reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     bool ret = stateMachine_->SetState(
         PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), true);
     if (ret) {
-        POWER_HILOGI(FEATURE_INPUT, "State changed, call hibernate");
+        POWER_HILOGI(FEATURE_SUSPEND, "State changed, call hibernate");
     } else {
-        POWER_HILOGI(FEATURE_INPUT, "Hibernate: State change failed");
+        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate: State change failed");
     }
 }
 
 void SuspendController::HandleShutdown(uint32_t reason)
 {
-    POWER_HILOGI(FEATURE_INPUT, "shutdown by reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
     shutdownService_->Shutdown(std::to_string(reason));
 }
 
@@ -322,13 +322,13 @@ void SuspendEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& ev
 {
     std::shared_ptr<SuspendController> controller = controller_.lock();
     if (controller == nullptr) {
-        POWER_HILOGI(FEATURE_INPUT, "ProcessEvent: No controller");
+        POWER_HILOGI(FEATURE_SUSPEND, "ProcessEvent: No controller");
         return;
     }
-    POWER_HILOGI(FEATURE_INPUT, "recv event=%{public}d", event->GetInnerEventId());
+    POWER_HILOGI(FEATURE_SUSPEND, "recv event=%{public}d", event->GetInnerEventId());
     switch (event->GetInnerEventId()) {
         case SLEEP_TIMEOUT_MSG: {
-            POWER_HILOGI(FEATURE_INPUT, "reason=%{public}u action=%{public}u", controller->GetLastReason(),
+            POWER_HILOGI(FEATURE_SUSPEND, "reason=%{public}u action=%{public}u", controller->GetLastReason(),
                 controller->GetLastAction());
             controller->HandleAction(controller->GetLastReason(), controller->GetLastAction());
             break;
@@ -336,13 +336,13 @@ void SuspendEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& ev
         default:
             break;
     }
-    POWER_HILOGI(FEATURE_INPUT, "process event fin");
+    POWER_HILOGI(FEATURE_SUSPEND, "process event fin");
 }
 
 std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
     SuspendDeviceType reason = source.GetReason();
-    POWER_HILOGI(FEATURE_INPUT, "CreateMonitor reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_SUSPEND, "CreateMonitor reason=%{public}d", reason);
     std::shared_ptr<SuspendMonitor> monitor = nullptr;
     switch (reason) {
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
@@ -358,7 +358,7 @@ std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& sou
             monitor = std::static_pointer_cast<SuspendMonitor>(std::make_shared<SwitchSuspendMonitor>(source));
             break;
         default:
-            POWER_HILOGE(FEATURE_INPUT, "CreateMonitor : Invalid reason=%{public}d", reason);
+            POWER_HILOGE(FEATURE_SUSPEND, "CreateMonitor : Invalid reason=%{public}d", reason);
             break;
     }
     return monitor;
@@ -381,19 +381,19 @@ bool PowerKeySuspendMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_INPUT, "Receive key on notify");
+            POWER_HILOGI(FEATURE_SUSPEND, "Receive key on notify");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
             }
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
             if (suspendController->GetPowerkeyDownWhenScreenOff()) {
-                POWER_HILOGI(FEATURE_INPUT, "no action suspend");
+                POWER_HILOGI(FEATURE_SUSPEND, "no action suspend");
                 return;
             }
             Notify();
         });
-    POWER_HILOGI(FEATURE_INPUT, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
+    POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 }
 
@@ -415,7 +415,7 @@ void TimeoutSuspendMonitor::Cancel() {}
 
 void TimeoutSuspendMonitor::HandleEvent(uint32_t eventId)
 {
-    POWER_HILOGI(FEATURE_INPUT, "TimeoutSuspendMonitor HandleEvent=%{public}d", eventId);
+    POWER_HILOGI(FEATURE_SUSPEND, "TimeoutSuspendMonitor HandleEvent=%{public}d", eventId);
     switch (eventId) {
         case SuspendEventHandler::SCREEN_OFF_TIMEOUT_MSG: {
             Notify();
