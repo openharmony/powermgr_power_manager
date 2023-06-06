@@ -62,10 +62,11 @@ private:
     std::map<uint32_t, std::shared_ptr<WakeupMonitor>> monitorMap_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
-    std::shared_ptr<WakeupEventHandler> handler_;
+    std::shared_ptr<WakeupEventHandler> handler_ = nullptr;
     uint32_t wakeupReason_ {0};
     std::mutex mutex_;
     std::mutex monitorMutex_;
+    std::mutex handlerMutex_;
     int32_t monitorId_ {-1};
 };
 
