@@ -13,32 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
-#define POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
-
-#ifdef THERMAL_GTEST
-#define private    public
-#define protected  public
-#endif
-
-#include <map>
-#include <memory>
-#include <stdlib.h>
+#ifndef POWERMGR_WAKEUP_PARSE_TEST_H
+#define POWERMGR_WAKEUP_PARSE_TEST_H
 
 #include <gtest/gtest.h>
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int32_t UNFD = -1;
-constexpr int32_t FD = 1;
-
-class RunningLockHubNativeTest : public testing::Test {
+class PowerWakeupParseTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
 };
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
+#endif // POWERMGR_WAKEUP_PARSE_TEST_H
