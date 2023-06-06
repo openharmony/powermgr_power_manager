@@ -625,6 +625,8 @@ ohos_unittest("test_power_mgr_service_native") {
   module_out_path = module_output_path
   defines = defs
 
+  defines += [ "THERMAL_GTEST" ]
+
   sources = [ "src/power_mgr_service_native_test.cpp" ]
 
   configs = [
@@ -763,6 +765,8 @@ ohos_unittest("test_running_lock_hub_native") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
+  defines += [ "THERMAL_GTEST" ]
+
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
@@ -796,6 +800,80 @@ ohos_unittest("test_running_lock_mock") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_power_suspend_parse") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_suspend_parse_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+
+  defines = [ "THERMAL_GTEST" ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  external_deps += deps_ex
+}
+
+ohos_unittest("test_power_wakeup_parse") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_wakeup_parse_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+
+  defines = [ "THERMAL_GTEST" ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  external_deps += deps_ex
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -814,12 +892,16 @@ group("unittest") {
     ":test_power_mgr_mock",
     ":test_power_mgr_service",
     ":test_power_mgr_service_death",
+    ":test_power_mgr_service_native",
     ":test_power_mgr_util",
     ":test_power_mock_object",
     ":test_power_shutdown",
     ":test_power_state_level_framework",
     ":test_power_state_machine",
+    ":test_power_suspend_parse",
+    ":test_power_wakeup_parse",
     ":test_running_lock",
+    ":test_running_lock_hub_native",
     ":test_running_lock_mock",
     ":test_running_lock_native",
   ]

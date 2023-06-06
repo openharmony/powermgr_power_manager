@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,32 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
-#define POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
+#ifndef POWERMGR_POWERMGR_ST_SUSPEND_TEST_H
+#define POWERMGR_POWERMGR_ST_SUSPEND_TEST_H
 
-#ifdef THERMAL_GTEST
-#define private    public
-#define protected  public
-#endif
-
-#include <map>
-#include <memory>
-#include <stdlib.h>
-
+#include "power_common.h"
+#include "power_mgr_service.h"
 #include <gtest/gtest.h>
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int32_t UNFD = -1;
-constexpr int32_t FD = 1;
+constexpr int SLEEP_WAIT_TIME_S = 5;
+constexpr int SET_DISPLAY_OFF_TIME = 8;
+constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
+constexpr int DOUBLE_TIMES = 2;
+constexpr int TEST_RATE = 3;
+constexpr int ONE_SECOND = 1;
 
-class RunningLockHubNativeTest : public testing::Test {
+class PowerMgrSTSuspendTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
 };
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_RUNNING_LOCK_HUB_NATIVE_TEST_H
+
+#endif // POWERMGR_POWERMGR_MOCK_TEST_H

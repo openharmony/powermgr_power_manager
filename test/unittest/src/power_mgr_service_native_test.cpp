@@ -15,11 +15,17 @@
 
 #include "power_mgr_service_native_test.h"
 
+#ifdef THERMAL_GTEST
+#define private   public
+#define protected public
+#endif
+
 #include <csignal>
 #include <iostream>
 
 #include "key_event.h"
 #include "pointer_event.h"
+#include "power_common.h"
 #include "power_mgr_service.h"
 
 using namespace testing::ext;
@@ -34,8 +40,6 @@ constexpr int64_t SUSCALLTIMEMS = 3;
 constexpr pid_t PID = 1;
 constexpr pid_t UID = 1;
 constexpr int32_t UNCANCELID = -1;
-constexpr uint32_t LID_CLOSED_HALL_FLAG = 0x1;
-constexpr uint32_t LID_CLOSED_HALL_FLAG_B = 0x2;
 
 sptr<PowerMgrService> g_pmsTest;
 } // namespace
@@ -98,8 +102,6 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->RestoreScreenOffTime());
 
     g_pmsTest->powerkeyLongPressId_ = UNCANCELID;
-    g_pmsTest->powerkeyShortPressId_ = UNCANCELID;
-    g_pmsTest->powerkeyReleaseId_ = UNCANCELID;
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;
     g_pmsTest->KeyMonitorCancel();
