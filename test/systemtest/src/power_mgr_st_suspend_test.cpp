@@ -37,12 +37,12 @@ void PowerMgrSTSuspendTest::TearDownTestCase(void)
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
 }
 
-void SuspendController::HandleAutoSleep(uint32_t reason)
+void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_INPUT, "auto suspend by reason=%{public}d", reason);
 
     bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)));
+        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
     if (ret) {
         POWER_HILOGI(FEATURE_INPUT, "State changed, Mock suspend intreface");
     } else {
@@ -51,7 +51,6 @@ void SuspendController::HandleAutoSleep(uint32_t reason)
 }
 
 namespace {
-constexpr int32_t SUSPEND_DEVICE_REASON_POWER_KEY = 4;
 /**
  * @tc.name: PowerMgrMockSuspend001
  * @tc.desc: test suspend by mock
@@ -70,7 +69,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
     pms->SuspendControllerInit();
     auto suspendController = pms->GetSuspendController();
-    suspendController->ExecSuspendMonitorByReason(SUSPEND_DEVICE_REASON_POWER_KEY);
+    suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: end";
@@ -135,7 +134,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock03, TestSize.Level2)
 
     pms->SuspendControllerInit();
     auto suspendController = pms->GetSuspendController();
-    suspendController->ExecSuspendMonitorByReason(SUSPEND_DEVICE_REASON_POWER_KEY);
+    suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
 
@@ -169,7 +168,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock04, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->SuspendControllerInit();
     auto suspendController = pms->GetSuspendController();
-    suspendController->ExecSuspendMonitorByReason(SUSPEND_DEVICE_REASON_POWER_KEY);
+    suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
 
     sleep(SLEEP_WAIT_TIME_S + 1);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());

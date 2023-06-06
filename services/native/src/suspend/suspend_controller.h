@@ -29,7 +29,7 @@
 namespace OHOS {
 namespace PowerMgr {
 
-using SuspendListener = std::function<void(uint32_t, uint32_t, int64_t)>;
+using SuspendListener = std::function<void(SuspendDeviceType, uint32_t, int64_t)>;
 
 class SuspendMonitor;
 class SuspendEventHandler;
@@ -39,20 +39,20 @@ public:
         std::shared_ptr<AppExecFwk::EventRunner>& runner);
     ~SuspendController();
     void Init();
-    void ExecSuspendMonitorByReason(uint32_t reason);
+    void ExecSuspendMonitorByReason(SuspendDeviceType reason);
     void RegisterSettingsObserver();
     void Execute();
     void Cancel();
     void StopSleep();
     void HandleEvent(uint32_t eventId);
-    void HandleAction(uint32_t reason, uint32_t action);
+    void HandleAction(SuspendDeviceType reason, uint32_t action);
     void RecordPowerKeyDown();
     bool GetPowerkeyDownWhenScreenOff();
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;
     }
-    uint32_t GetLastReason()
+    SuspendDeviceType GetLastReason()
     {
         return sleepReason_;
     }
@@ -62,23 +62,23 @@ public:
     }
 
 private:
-    void ControlListener(uint32_t reason, uint32_t action, int64_t delay);
-    void StartSleepTimer(uint32_t reason, uint32_t action, int64_t delay);
-    void HandleAutoSleep(uint32_t reason);
-    void HandleForceSleep(uint32_t reason);
-    void HandleHibernate(uint32_t reason);
-    void HandleShutdown(uint32_t reason);
+    void ControlListener(SuspendDeviceType reason, uint32_t action, int64_t delay);
+    void StartSleepTimer(SuspendDeviceType reason, uint32_t action, int64_t delay);
+    void HandleAutoSleep(SuspendDeviceType reason);
+    void HandleForceSleep(SuspendDeviceType reason);
+    void HandleHibernate(SuspendDeviceType reason);
+    void HandleShutdown(SuspendDeviceType reason);
     std::mutex monitorMutex_;
     std::mutex handlerMutex_;
     std::vector<SuspendSource> sourceList_;
-    std::map<uint32_t, std::shared_ptr<SuspendMonitor>> monitorMap_;
+    std::map<SuspendDeviceType, std::shared_ptr<SuspendMonitor>> monitorMap_;
     ShutdownService* shutdownService_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<SuspendEventHandler> handler_ = nullptr;
     int64_t sleepDuration_ {0};
     int64_t sleepTime_ {-1};
-    uint32_t sleepReason_ {0};
+    SuspendDeviceType sleepReason_ {0};
     uint32_t sleepAction_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
 };
@@ -114,7 +114,7 @@ public:
     {
         // do nothing in base class
     }
-    uint32_t GetReason()
+    SuspendDeviceType GetReason()
     {
         return reason_;
     }
@@ -138,12 +138,12 @@ public:
 protected:
     explicit SuspendMonitor(SuspendSource& source)
     {
-        reason_ = static_cast<uint32_t>(source.GetReason());
+        reason_ = source.GetReason();
         action_ = source.GetAction();
         delayMs_ = source.GetDelay();
     }
 
-    uint32_t reason_;
+    SuspendDeviceType reason_;
     uint32_t action_;
     int64_t delayMs_;
     SuspendListener listener_;

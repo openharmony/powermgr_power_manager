@@ -123,7 +123,7 @@ void WakeupController::RegisterSettingsObserver()
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
 }
 
-void WakeupController::ExecWakeupMonitorByReason(uint32_t reason)
+void WakeupController::ExecWakeupMonitorByReason(WakeupDeviceType reason)
 {
     std::lock_guard lock(monitorMutex_);
     if (monitorMap_.find(reason) != monitorMap_.end()) {
@@ -147,7 +147,7 @@ void WakeupController::Wakeup()
     suspendController->StopSleep();
 }
 
-void WakeupController::ControlListener(uint32_t reason)
+void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -217,7 +217,7 @@ void WakeupEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& eve
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
     int32_t keyCode = keyEvent->GetKeyCode();
-    uint32_t wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN);
+    WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
@@ -231,15 +231,15 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     }
 
     if (keyCode == KeyEvent::KEYCODE_F1) {
-        wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
+        wakeupType = WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     }
 
     if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
-        wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD);
+        wakeupType = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
     }
 
     POWER_HILOGI(FEATURE_WAKEUP, "KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
-    if (wakeupType != static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN)) {
+    if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
 }
@@ -251,7 +251,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         return;
     }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
-    uint32_t wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN);
+    WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
         POWER_HILOGI(FEATURE_WAKEUP, "GetPointerItem false");
@@ -260,7 +260,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     int32_t sourceType = pointerEvent->GetSourceType();
     POWER_HILOGI(FEATURE_WAKEUP, "deviceType=%{public}d", deviceType);
     if (deviceType == PointerEvent::TOOL_TYPE_PEN) {
-        wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_PEN);
+        wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
         POWER_HILOGI(FEATURE_WAKEUP, "current wakeup reason=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
         return;
@@ -268,24 +268,24 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
 
     switch (sourceType) {
         case PointerEvent::SOURCE_TYPE_MOUSE:
-            wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_MOUSE);
+            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
             break;
         case PointerEvent::SOURCE_TYPE_TOUCHPAD:
-            wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD);
+            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD;
             break;
         case PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
-            wakeupType = static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK);
+            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
             break;
         default:
             break;
     }
 
-    if (wakeupType == static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK)) {
+    if (wakeupType == WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK) {
         int64_t now = static_cast<int64_t>(time(nullptr));
         pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     }
 
-    if (wakeupType != static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN)) {
+    if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         POWER_HILOGI(FEATURE_WAKEUP, "current wakeup reason=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
