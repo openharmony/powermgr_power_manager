@@ -18,7 +18,11 @@
 #include <csignal>
 #include <iostream>
 
+#define private public
+#define protected public
 #include "power_mgr_service.h"
+#undef private
+#undef protected
 #include "power_mgr_dumper.h"
 #include "key_event.h"
 #include "pointer_event.h"
@@ -28,8 +32,13 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
+namespace {
+auto g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+}
+
 void PowerMgrDumpTest::SetUpTestCase()
 {
+    g_pmsTest->isBootCompleted_ = true;
 }
 
 void PowerMgrDumpTest::TearDownTestCase()
@@ -52,13 +61,12 @@ namespace {
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level0)
 {
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_TRUE(pmsTest_ != nullptr) << "PowerMgrDumpNative001 fail to get PowerMgrService";
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative001 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-i";
     args.push_back(arg);
-    EXPECT_TRUE(pmsTest_->Dump(fd, args) == ERR_OK);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
 }
 
 /**
@@ -68,13 +76,12 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level0)
 {
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_TRUE(pmsTest_ != nullptr) << "PowerMgrDumpNative002 fail to get PowerMgrService";
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative002 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-k";
     args.push_back(arg);
-    EXPECT_TRUE(pmsTest_->Dump(fd, args) == ERR_OK);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
 }
 
 /**
@@ -84,8 +91,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level0)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
 {
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_TRUE(pmsTest_ != nullptr) << "PowerMgrDumpNative003 fail to get PowerMgrService";
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative003 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-r";
@@ -94,7 +100,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
     args.push_back(arg);
     args.push_back(arg1);
     args.push_back(arg2);
-    EXPECT_TRUE(pmsTest_->Dump(fd, args) == ERR_OK);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
 }
 
 /**
@@ -104,12 +110,11 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level0)
 {
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_TRUE(pmsTest_ != nullptr) << "PowerMgrDumpNative004 fail to get PowerMgrService";
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative004 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-h";
     args.push_back(arg);
-    EXPECT_TRUE(pmsTest_->Dump(fd, args) == ERR_OK);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
 }
 } // namespace
