@@ -65,7 +65,6 @@ WakeupController::~WakeupController()
 void WakeupController::Init()
 {
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
-    std::lock_guard lock(handlerMutex_);
     handler_ = std::make_shared<WakeupEventHandler>(runner_, shared_from_this());
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -183,7 +182,6 @@ void WakeupController::ControlListener(uint32_t reason)
 
 void WakeupController::StartWakeupTimer()
 {
-    std::lock_guard lock(handlerMutex_);
     if (handler_ == nullptr) {
         return;
     }
