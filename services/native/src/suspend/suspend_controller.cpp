@@ -74,6 +74,7 @@ private:
 void SuspendController::Init()
 {
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
+    handler_ = std::make_shared<SuspendEventHandler>(runner_, shared_from_this());
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
         POWER_HILOGE(FEATURE_INPUT, "InputManager is null");
@@ -91,7 +92,6 @@ void SuspendController::Init()
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
     }
-    handler_ = std::make_shared<SuspendEventHandler>(runner_, shared_from_this());
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
     stateMachine_->RegisterPowerStateCallback(callback);
     RegisterSettingsObserver();
@@ -244,6 +244,9 @@ void SuspendController::StartSleepTimer(uint32_t reason, uint32_t action, int64_
     if (delay == 0) {
         HandleAction(reason, action);
     } else {
+        if (handler_ == nullptr) {
+            return;
+        }
         handler_->SendEvent(SuspendEventHandler::SLEEP_TIMEOUT_MSG, delay);
     }
 }
