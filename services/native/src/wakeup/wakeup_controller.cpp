@@ -65,6 +65,7 @@ WakeupController::~WakeupController()
 void WakeupController::Init()
 {
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
+    handler_ = std::make_shared<WakeupEventHandler>(runner_, shared_from_this());
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
         POWER_HILOGE(FEATURE_INPUT, "InputManager is null");
@@ -80,7 +81,6 @@ void WakeupController::Init()
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
     }
-    handler_ = std::make_shared<WakeupEventHandler>(runner_, shared_from_this());
     RegisterSettingsObserver();
 }
 
@@ -182,6 +182,9 @@ void WakeupController::ControlListener(uint32_t reason)
 
 void WakeupController::StartWakeupTimer()
 {
+    if (handler_ == nullptr) {
+        return;
+    }
     handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS);
 }
 
