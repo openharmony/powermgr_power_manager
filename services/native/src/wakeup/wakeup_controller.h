@@ -66,7 +66,6 @@ private:
     uint32_t wakeupReason_ {0};
     std::mutex mutex_;
     std::mutex monitorMutex_;
-    std::mutex handlerMutex_;
     int32_t monitorId_ {-1};
 };
 
