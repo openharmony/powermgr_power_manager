@@ -74,7 +74,6 @@ private:
 void SuspendController::Init()
 {
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
-    std::lock_guard lock(handlerMutex_);
     handler_ = std::make_shared<SuspendEventHandler>(runner_, shared_from_this());
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -153,7 +152,6 @@ void SuspendController::Cancel()
 
 void SuspendController::StopSleep()
 {
-    std::lock_guard lock(handlerMutex_);
     if (handler_ == nullptr) {
         return;
     }
@@ -247,7 +245,6 @@ void SuspendController::StartSleepTimer(uint32_t reason, uint32_t action, int64_
     if (delay == 0) {
         HandleAction(reason, action);
     } else {
-        std::lock_guard lock(handlerMutex_);
         if (handler_ == nullptr) {
             return;
         }
