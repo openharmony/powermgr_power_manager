@@ -51,6 +51,7 @@ config("module_mock_private_config") {
 deps_ex = [
   "ability_base:base",
   "ability_base:want",
+  "config_policy:configpolicy_util",
   "eventhandler:libeventhandler",
   "common_event_service:cesfwk_innerkits",
   "ipc:ipc_core",
@@ -895,6 +896,7 @@ group("unittest") {
     ":test_power_mgr_service_native",
     ":test_power_mgr_util",
     ":test_power_mock_object",
+    ":test_power_set_mode",
     ":test_power_shutdown",
     ":test_power_state_level_framework",
     ":test_power_state_machine",
