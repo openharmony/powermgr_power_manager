@@ -21,8 +21,8 @@
 
 #include "power_log.h"
 #include "power_mgr_errors.h"
-#include "xcollie.h"
-#include "xcollie_define.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 namespace OHOS {
 namespace PowerMgr {

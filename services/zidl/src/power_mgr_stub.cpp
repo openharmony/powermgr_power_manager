@@ -21,7 +21,7 @@
 #include "power_common.h"
 #include "power_errors.h"
 #include "shutdown_stub_delegator.h"
-#include "xcollie.h"
+#include "xcollie/xcollie.h"
 
 using namespace OHOS::HiviewDFX;
 

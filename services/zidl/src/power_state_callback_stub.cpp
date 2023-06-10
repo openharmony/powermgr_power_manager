@@ -19,7 +19,7 @@
 
 #include "power_common.h"
 #include "power_state_callback_proxy.h"
-#include "xcollie.h"
+#include "xcollie/xcollie.h"
 
 namespace OHOS {
 namespace PowerMgr {
