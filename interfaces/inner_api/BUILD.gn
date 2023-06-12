@@ -17,6 +17,7 @@ config("powermgr_public_config") {
   include_dirs = [
     "native/include",
     "${powermgr_service_zidl}/include",
+    "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie/",
   ]
 }
 
@@ -43,6 +44,7 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_service_zidl}/src/shutdown/shutdown_proxy_delegator.cpp",
     "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_sutb.cpp",
   ]
 
   configs = [
@@ -57,6 +59,7 @@ ohos_shared_library("powermgr_client") {
 
   external_deps = [
     "c_utils:utils",
+    "hicollie_native:libhicollie",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",

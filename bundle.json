@@ -103,7 +103,8 @@
                         "shutdown/iasync_shutdown_callback.h",
                         "shutdown/isync_shutdown_callback.h",
                         "shutdown/shutdown_client.h",
-                        "shutdown/shutdown_priority.h"
+                        "shutdown/shutdown_priority.h",
+                        "shutdown/takeover_shutdown_callback_stub.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"
                     }
