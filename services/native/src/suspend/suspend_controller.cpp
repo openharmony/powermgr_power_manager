@@ -97,7 +97,7 @@ void SuspendController::Init()
     RegisterSettingsObserver();
 }
 
-void SuspendController::ExecSuspendMonitorByReason(uint32_t reason)
+void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
     std::lock_guard lock(monitorMutex_);
     if (monitorMap_.find(reason) != monitorMap_.end()) {
@@ -169,7 +169,7 @@ void SuspendController::HandleEvent(uint32_t eventId)
     switch (eventId) {
         case PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
             auto timeoutSuspendMonitor =
-                monitorMap_.find(static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT));
+                monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
             if (timeoutSuspendMonitor != monitorMap_.end()) {
                 timeoutSuspendMonitor->second->HandleEvent(
                     static_cast<uint32_t>(SuspendEventHandler::SCREEN_OFF_TIMEOUT_MSG));
@@ -197,7 +197,7 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
     return powerKeyDown;
 }
 
-void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_t delay)
+void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, int64_t delay)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "Suspend Request: reason=%{public}d, action=%{public}d, delay=%{public}" PRId64 "",
         reason, action, delay);
@@ -217,7 +217,7 @@ void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_
     if (stateMachine_->GetState() == PowerState::AWAKE) {
         POWER_HILOGI(FEATURE_SUSPEND, "Suspend set inactive");
         bool force = true;
-        if (reason == static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT)) {
+        if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
             force = false;
         }
         bool ret = stateMachine_->SetState(PowerState::INACTIVE,
@@ -230,7 +230,7 @@ void SuspendController::ControlListener(uint32_t reason, uint32_t action, int64_
     }
 }
 
-void SuspendController::StartSleepTimer(uint32_t reason, uint32_t action, int64_t delay)
+void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, int64_t delay)
 {
     int64_t timeout = GetTickCount() + delay;
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
@@ -252,7 +252,7 @@ void SuspendController::StartSleepTimer(uint32_t reason, uint32_t action, int64_
     }
 }
 
-void SuspendController::HandleAction(uint32_t reason, uint32_t action)
+void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
 {
     switch (static_cast<SuspendAction>(action)) {
         case SuspendAction::ACTION_AUTO_SUSPEND:
@@ -275,12 +275,12 @@ void SuspendController::HandleAction(uint32_t reason, uint32_t action)
     sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
 }
 
-void SuspendController::HandleAutoSleep(uint32_t reason)
+void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 
     bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)));
+        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
@@ -289,11 +289,11 @@ void SuspendController::HandleAutoSleep(uint32_t reason)
     }
 }
 
-void SuspendController::HandleForceSleep(uint32_t reason)
+void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), true);
+        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
@@ -302,11 +302,11 @@ void SuspendController::HandleForceSleep(uint32_t reason)
     }
 }
 
-void SuspendController::HandleHibernate(uint32_t reason)
+void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     bool ret = stateMachine_->SetState(
-        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), true);
+        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, call hibernate");
     } else {
@@ -314,10 +314,10 @@ void SuspendController::HandleHibernate(uint32_t reason)
     }
 }
 
-void SuspendController::HandleShutdown(uint32_t reason)
+void SuspendController::HandleShutdown(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
-    shutdownService_->Shutdown(std::to_string(reason));
+    shutdownService_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
 }
 
 /** SuspendEventHandler Implement */

@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace PowerMgr {
 
-using WakeupListener = std::function<void(uint32_t)>;
+using WakeupListener = std::function<void(WakeupDeviceType)>;
 using namespace OHOS::MMI;
 class WakeupMonitor;
 class WakeupEventHandler;
@@ -44,26 +44,26 @@ public:
     void Init();
     void Cancel();
     void RegisterSettingsObserver();
-    void ExecWakeupMonitorByReason(uint32_t reason);
+    void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;
     }
-    uint32_t GetLastReason()
+    WakeupDeviceType GetLastReason()
     {
         return wakeupReason_;
     }
 
 private:
-    void ControlListener(uint32_t reason);
+    void ControlListener(WakeupDeviceType reason);
     void StartWakeupTimer();
     std::vector<WakeupSource> sourceList_;
-    std::map<uint32_t, std::shared_ptr<WakeupMonitor>> monitorMap_;
+    std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<WakeupEventHandler> handler_ = nullptr;
-    uint32_t wakeupReason_ {0};
+    WakeupDeviceType wakeupReason_ {0};
     std::mutex mutex_;
     std::mutex monitorMutex_;
     int32_t monitorId_ {-1};
@@ -103,7 +103,7 @@ public:
         // do nothing in base class
     }
 
-    uint32_t GetReason()
+    WakeupDeviceType GetReason()
     {
         return reason_;
     }
@@ -121,10 +121,10 @@ public:
 protected:
     explicit WakeupMonitor(WakeupSource& source)
     {
-        reason_ = static_cast<uint32_t>(source.GetReason());
+        reason_ = source.GetReason();
     }
 
-    uint32_t reason_;
+    WakeupDeviceType reason_;
     WakeupListener listener_;
 };
 
