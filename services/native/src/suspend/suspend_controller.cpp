@@ -82,7 +82,7 @@ void SuspendController::Init()
     }
 
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
-        POWER_HILOGI(FEATURE_SUSPEND, "registered type=%{public}u action=%{public}u delayMs=%{public}" PRId64 "",
+        POWER_HILOGI(FEATURE_SUSPEND, "registered type=%{public}u action=%{public}u delayMs=%{public}u",
             (*source).GetReason(), (*source).GetAction(), (*source).GetDelay());
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
@@ -197,9 +197,9 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
     return powerKeyDown;
 }
 
-void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, int64_t delay)
+void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "Suspend Request: reason=%{public}d, action=%{public}d, delay=%{public}" PRId64 "",
+    POWER_HILOGI(FEATURE_SUSPEND, "Suspend Request: reason=%{public}d, action=%{public}u, delay=%{public}u",
         reason, action, delay);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -230,7 +230,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     }
 }
 
-void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, int64_t delay)
+void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
     int64_t timeout = GetTickCount() + delay;
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
