@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-enum class WakeUpAction : uint32_t { DEFAULT = 0, CLICK_SINGLE = 1, CLICK_DOUBLE = 2 };
+enum class WakeUpAction : uint32_t { CLICK_SINGLE = 1, CLICK_DOUBLE = 2 };
 
 class WakeupSource {
 public:
