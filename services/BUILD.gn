@@ -134,7 +134,6 @@ ohos_shared_library("powermgr_stub") {
     "zidl/src/shutdown/async_shutdown_callback_sutb.cpp",
     "zidl/src/shutdown/shutdown_stub_delegator.cpp",
     "zidl/src/shutdown/sync_shutdown_callback_sutb.cpp",
-    "zidl/src/shutdown/takeover_shutdown_callback_sutb.cpp",
   ]
 
   configs = [

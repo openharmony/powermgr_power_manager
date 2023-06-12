@@ -56,7 +56,6 @@ ohos_unittest("takeover_shutdown_callback_test") {
   ]
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
