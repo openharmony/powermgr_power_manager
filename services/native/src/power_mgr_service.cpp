@@ -68,7 +68,6 @@ void PowerMgrService::OnStart()
         POWER_HILOGE(COMP_SVC, "Call init fail");
         return;
     }
-    AddSystemAbilityListener(APP_MGR_SERVICE_ID);
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     SystemSuspendController::GetInstance().RegisterHdiStatusListener(handler_);
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
@@ -464,7 +463,6 @@ void PowerMgrService::OnStop()
     eventRunner_.reset();
     handler_.reset();
     ready_ = false;
-    RemoveSystemAbilityListener(APP_MGR_SERVICE_ID);
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
 }
 
