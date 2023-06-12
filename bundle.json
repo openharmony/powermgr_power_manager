@@ -20,9 +20,17 @@
             "SystemCapability.PowerManager.PowerManager.Extension"
         ],
         "features": [
-            "power_manager_feature_poweroff_charge"
+            "power_manager_feature_poweroff_charge",
+            "power_manager_feature_runninglock",
+            "power_manager_feature_shutdown_reboot",
+            "power_manager_feature_screen_on_off",
+            "power_manager_feature_power_state",
+            "power_manager_feature_power_mode"
         ],
-        "adapted_system_type": [ "standard" ],
+        "adapted_system_type": [
+            "small",
+            "standard"
+        ],
         "rom": "1024KB",
         "ram": "2048KB",
         "hisysevent_config": [
