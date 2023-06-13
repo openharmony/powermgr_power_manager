@@ -50,7 +50,7 @@
                 "drivers_interface_power",
                 "eventhandler",
                 "hdf_core",
-                "hicollie_native",
+                "hicollie",
                 "hilog_native",
                 "hisysevent_native",
                 "hitrace_native",
