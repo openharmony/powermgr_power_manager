@@ -43,10 +43,14 @@ void PowerStateMachineTest::TearDownTestCase(void)
 
 void PowerStateMachineTest::SetUp(void)
 {
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
 }
 
 void PowerStateMachineTest::TearDown(void)
 {
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.RestoreScreenOffTime();
 }
 
 namespace {
@@ -65,7 +69,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
     // Wakeup Device before test
     GTEST_LOG_(INFO) << "PowerStateMachine003: Wakeup Device before test.";
     powerMgrClient.WakeupDevice();
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine003: Prepare Fail, Screen is OFF.";
     GTEST_LOG_(INFO) << "PowerStateMachine003: Screen is On, Begin to Suspend Device!";
 
@@ -93,13 +97,13 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
     // Suspend Device before test
     GTEST_LOG_(INFO) << "PowerStateMachine004: Suspend Device before test.";
     powerMgrClient.SuspendDevice();
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine004: Prepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine004: Screen is Off, Begin to Wakeup Device!";
 
     powerMgrClient.WakeupDevice();
 
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Wakeup Device Fail, Screen is Off";
 
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is end!");
@@ -120,12 +124,12 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
     for (int i = 0; i < 3; i++) {
         if (powerMgrClient.IsScreenOn()) {
             powerMgrClient.SuspendDevice();
-            sleep(SLEEP_WAIT_TIME_S);
+            usleep(SLEEP_WAIT_TIME_MS);
             EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine005_" << i
                 << ": Suspend Device Fail, Screen is On";
         } else {
             powerMgrClient.WakeupDevice();
-            sleep(SLEEP_WAIT_TIME_S);
+            usleep(SLEEP_WAIT_TIME_MS);
             EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine005_" << i
                 << ": Wakeup Device Fail, Screen is Off";
         }
@@ -148,26 +152,26 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
     // Suspend Device before test
     GTEST_LOG_(INFO) << "PowerStateMachine006: Suspend Device before test.";
     powerMgrClient.SuspendDevice();
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine006: Prepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine006: Screen is Off, Begin to Wakeup Device!";
 
     // Check illegal para details
     GTEST_LOG_(INFO) << "PowerStateMachine006: Check illegal para details Begin!";
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine006: Check details test Fail, Screen is Off.";
 
     // Suspend Device before test
     GTEST_LOG_(INFO) << "PowerStateMachine006: Suspend Device before real test.";
     powerMgrClient.SuspendDevice();
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine006: Real test tprepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine006: Screen is Off, Begin to Real Wakeup Device!";
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
 
-    sleep(SLEEP_WAIT_TIME_S);
+    usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine006: Real Wakeup Device Fail, Screen is Off";
 
     GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device end.";
@@ -184,7 +188,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerStateMachine007::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime());
+    EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime());
     POWER_HILOGD(LABEL_TEST, "PowerStateMachine007::fun is end!");
 }
 }
