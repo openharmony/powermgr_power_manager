@@ -990,13 +990,20 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
 
 void PowerStateMachine::DumpInfo(std::string& result)
 {
+    std::string reason = "UNKNOWN";
+    std::string time = "UNKNOWN";
+    auto it = controllerMap_.find(GetState());
+    if (it != controllerMap_.end() && it->second != nullptr) {
+        reason = ToString(static_cast<uint32_t>(it->second->lastReason_));
+        time = ToString(it->second->lastTime_);
+    }
     result.append("POWER STATE DUMP:\n");
     result.append("Current State: ")
         .append(GetPowerStateString(GetState()))
         .append("  Reason: ")
-        .append(ToString(static_cast<uint32_t>(controllerMap_.find(GetState())->second->lastReason_)))
+        .append(reason)
         .append("  Time: ")
-        .append(ToString(controllerMap_.find(GetState())->second->lastTime_))
+        .append(time)
         .append("\n");
 
     result.append("ScreenOffTime: Timeout=");

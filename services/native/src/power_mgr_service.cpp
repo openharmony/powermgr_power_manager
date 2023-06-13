@@ -51,6 +51,7 @@ const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefP
 SysParam::BootCompletedCallback g_bootCompletedCallback;
 } // namespace
 
+std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 using namespace MMI;
 
 PowerMgrService::PowerMgrService() : SystemAbility(POWER_MANAGER_SERVICE_ID, true) {}
@@ -125,6 +126,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         powerStateMachine->InitState();
         auto powerHandler = power->GetHandler();
         powerHandler->SendEvent(PowermsEventHandler::INIT_KEY_MONITOR_MSG, 0, INIT_KEY_MONITOR_DELAY_MS);
+        isBootCompleted_ = true;
     };
     WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
@@ -463,6 +465,7 @@ void PowerMgrService::OnStop()
     eventRunner_.reset();
     handler_.reset();
     ready_ = false;
+    isBootCompleted_ = false;
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
 }
 
@@ -476,7 +479,12 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
 
 int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
-    POWER_HILOGI(COMP_SVC, "Dump service");
+    if (!isBootCompleted_) {
+        return ERR_NO_INIT;
+    }
+    if (!Permission::IsSystem()) {
+        return ERR_PERMISSION_DENIED;
+    }
     std::vector<std::string> argsInStr;
     std::transform(args.begin(), args.end(), std::back_inserter(argsInStr), [](const std::u16string& arg) {
         std::string ret = Str16ToStr8(arg);
@@ -894,7 +902,7 @@ PowerMode PowerMgrService::GetDeviceMode()
 
 std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uint32_t argc)
 {
-    if (!Permission::IsSystem()) {
+    if (!Permission::IsSystem() || !isBootCompleted_) {
         return "";
     }
     std::lock_guard lock(mutex_);
