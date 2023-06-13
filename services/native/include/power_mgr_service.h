@@ -205,6 +205,7 @@ private:
     }
 
     bool ready_ {false};
+    static std::atomic_bool isBootCompleted_;
     std::mutex mutex_;
     std::mutex lockMutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_;
