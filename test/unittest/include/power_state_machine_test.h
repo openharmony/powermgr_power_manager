@@ -25,8 +25,10 @@ namespace OHOS {
 namespace PowerMgr {
 constexpr int NEXT_WAIT_TIME_S = 1;
 constexpr int SLEEP_WAIT_TIME_S = 6;
+constexpr int SLEEP_WAIT_TIME_MS = 500;
 constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
 constexpr int SCREEN_OFF_WAIT_TIME_S = 15;
+constexpr int SCREEN_OFF_WAIT_TIME_MS = 1000;
 
 class PowerStateMachineTest : public testing::Test {
 public:
