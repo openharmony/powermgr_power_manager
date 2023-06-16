@@ -221,6 +221,63 @@ bool PowerMgrProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
     return succ;
 }
 
+bool PowerMgrProxy::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    int32_t size = processInfos.size();
+    WRITE_PARCEL_WITH_RET(data, Bool, isProxied, false);
+    WRITE_PARCEL_WITH_RET(data, Int32, size, false);
+    for (int i = 0; i < size; ++i) {
+        WRITE_PARCEL_WITH_RET(data, Int32, processInfos[i].first, false);
+        WRITE_PARCEL_WITH_RET(data, Int32, processInfos[i].second, false);
+    }
+    int ret = remote->SendRequest(static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCKS),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    bool succ = false;
+    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    return succ;
+}
+
+bool PowerMgrProxy::ResetRunningLocks()
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    int ret = remote->SendRequest(static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESET_RUNNINGLOCKS),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    bool succ = false;
+    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    return succ;
+}
+
 PowerErrors PowerMgrProxy::RebootDevice(const std::string& reason)
 {
     sptr<IRemoteObject> remote = Remote();

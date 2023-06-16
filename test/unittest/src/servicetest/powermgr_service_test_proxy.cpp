@@ -225,6 +225,64 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t
     return succ;
 }
 
+bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
+    const std::vector<std::pair<pid_t, pid_t>>& processInfos)
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    int32_t size = processInfos.size();
+    data.WriteBool(isProxied);
+    data.WriteUint32(size);
+    for (int i = 0; i < size; ++i) {
+        data.WriteInt32(processInfos[i].first);
+        data.WriteInt32(processInfos[i].second);
+    }
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCKS),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    bool succ = false;
+    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    return succ;
+}
+
+bool PowerMgrServiceTestProxy::ResetRunningLocks()
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    int ret = stub_->SendRequest(static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESET_RUNNINGLOCKS),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    bool succ = false;
+    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    return succ;
+}
+
 PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);

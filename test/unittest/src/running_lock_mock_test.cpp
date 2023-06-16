@@ -417,7 +417,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
     int32_t timeoutMs = 100;
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
-    
+
     auto GetRunningLockInfo = [&](RunningLockType type) {
         RunningLockInfo lockInfo {};
         switch (type) {
@@ -505,10 +505,12 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
     EXPECT_EQ(lockActionCount, 1);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
     EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
     EXPECT_EQ(unlockActionCount, 1);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
     EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     EXPECT_EQ(lockActionCount, 2);
 
@@ -563,6 +565,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
     EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(unlockActionCount, 2);
 
     g_powerService->Lock(phoneToken, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
@@ -574,6 +577,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
     EXPECT_EQ(unlockActionCount, 2);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(lockActionCount, 0);
 
     g_powerService->ReleaseRunningLock(phoneToken);
@@ -631,11 +635,13 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
     EXPECT_TRUE(sportLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, getpid(), getuid()));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(getpid(), getuid())}));
     EXPECT_EQ(unlockActionCount, 2);
     EXPECT_TRUE(audioLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
     EXPECT_TRUE(sportLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, getpid(), getuid()));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(getpid(), getuid())}));
     EXPECT_EQ(lockActionCount, 4);
     EXPECT_TRUE(audioLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
     EXPECT_TRUE(sportLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
@@ -686,10 +692,12 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
     EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(unlockActionCount, 1);
     EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(lockActionCount, 1);
     EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
@@ -738,10 +746,12 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
     EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(unlockActionCount, 1);
     EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(lockActionCount, 2);
     EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
@@ -790,13 +800,15 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest013, TestSize.Level2)
     EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(unlockActionCount, 1);
     EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
 
     g_powerService->ReleaseRunningLock(taskToken);
     EXPECT_EQ(runningLockMgr->GetRunningLockInner(taskToken), nullptr);
 
-    EXPECT_FALSE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
     EXPECT_EQ(lockActionCount, 1);
 }
 }

@@ -57,7 +57,8 @@ public:
         return runningLocks_;
     }
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
-    void ResetRunningLockProxy();
+    void ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
+    void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     void CheckOverTime();
@@ -70,6 +71,7 @@ private:
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
     void InitLocksTypeProximity();
+    void ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid);
 
     class SystemLock {
     public:

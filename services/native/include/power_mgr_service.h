@@ -64,6 +64,9 @@ public:
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
+    virtual bool ProxyRunningLocks(bool isProxied,
+        const std::vector<std::pair<pid_t, pid_t>>& processInfos) override;
+    virtual bool ResetRunningLocks() override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
