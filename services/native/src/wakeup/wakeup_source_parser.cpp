@@ -122,13 +122,13 @@ bool WakeupSourceParser::ParseSourcesProc(
     if (valueObj.isObject()) {
         Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
         Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
-        if (!clickValue.isNull()) {
-            POWER_HILOGI(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
+        if (!clickValue.isNull() && clickValue.isUInt()) {
+            POWER_HILOGD(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
             click = clickValue.asUInt() <= DOUBLE_CLICK ? clickValue.asUInt() : 0;
         }
         if (enableValue.isBool()) {
             enable = enableValue.asBool();
-            POWER_HILOGI(FEATURE_WAKEUP, "enable=%{public}u", enable);
+            POWER_HILOGD(FEATURE_WAKEUP, "enable=%{public}d", enable);
         }
     }
 
