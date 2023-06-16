@@ -219,6 +219,18 @@ bool PowerMgrClient::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
     return proxy_->ProxyRunningLock(isProxied, pid, uid);
 }
 
+bool PowerMgrClient::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    return proxy_->ProxyRunningLocks(isProxied, processInfos);
+}
+
+bool PowerMgrClient::ResetRunningLocks()
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    return proxy_->ResetRunningLocks();
+}
+
 bool PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
     RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);

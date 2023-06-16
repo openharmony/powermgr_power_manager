@@ -275,6 +275,10 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
         return;
     }
+    if (runninglockProxy_->IsProxied(lockInner->GetPid(), lockInner->GetUid())) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied, do not allow lock");
+        return;
+    }
     lockInner->SetTimeOutMs(timeOutMS);
     RunningLockParam lockInnerParam = lockInner->GetParam();
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
@@ -472,10 +476,25 @@ bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Proxy runninglock failed, pid=%{public}d is invalid", pid);
         return isSuccess;
     }
+
+    if (isProxied) {
+        runninglockProxy_->IncreaseProxyCnt(pid, uid, [this, pid, uid] () {
+            this->ProxyRunningLockInner(true, pid, uid);
+        });
+    } else {
+        runninglockProxy_->DecreaseProxyCnt(pid, uid, [this, pid, uid] () {
+            this->ProxyRunningLockInner(false, pid, uid);
+        });
+    }
+    return true;
+}
+
+void RunningLockMgr::ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid)
+{
     auto remoteObjList = runninglockProxy_->GetRemoteObjectList(pid, uid);
     if (remoteObjList.empty()) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Proxy runninglock failed, no matching runninglock exist");
-        return isSuccess;
+        return;
     }
     for (auto it : remoteObjList) {
         auto lockInner = GetRunningLockInner(it);
@@ -488,16 +507,22 @@ bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
             LockInnerByProxy(it, lockInner);
         }
     }
-    isSuccess = true;
-    return isSuccess;
 }
 
-void RunningLockMgr::ResetRunningLockProxy()
+void RunningLockMgr::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
+{
+    for (const auto& [pid, uid] : processInfos) {
+        ProxyRunningLock(isProxied, pid, uid);
+    }
+}
+
+void RunningLockMgr::ResetRunningLocks()
 {
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Reset runninglock proxy");
     for (auto& it : runningLocks_) {
         LockInnerByProxy(it.first, it.second);
     }
+    runninglockProxy_->ResetRunningLocks();
 }
 
 void RunningLockMgr::LockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
@@ -639,6 +664,9 @@ void RunningLockMgr::DumpInfo(std::string& result)
             .append(" state=").append(ToString(static_cast<uint32_t>(lockInner->GetState())))
             .append("\n");
     }
+
+    result.append("Dump Proxy List: \n");
+    result.append(runninglockProxy_->DumpProxyInfo());
 
     result.append("Peripherals Info: \n")
             .append("  Proximity: ")

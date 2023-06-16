@@ -71,6 +71,7 @@ void PowerMgrService::OnStart()
         return;
     }
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
+    AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
@@ -393,14 +394,16 @@ void PowerMgrService::OnStop()
     ready_ = false;
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
+    RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
 }
 
 void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s", systemAbilityId, deviceId.c_str());
-    if (systemAbilityId == SUSPEND_MANAGER_SYSTEM_ABILITY_ID) {
+    if (systemAbilityId == SUSPEND_MANAGER_SYSTEM_ABILITY_ID ||
+        systemAbilityId == DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID) {
         std::lock_guard lock(lockMutex_);
-        runningLockMgr_->ResetRunningLockProxy();
+        runningLockMgr_->ResetRunningLocks();
     }
 }
 
@@ -703,6 +706,26 @@ bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
         return false;
     }
     return runningLockMgr_->ProxyRunningLock(isProxied, pid, uid);
+}
+
+bool PowerMgrService::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
+{
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    std::lock_guard lock(lockMutex_);
+    runningLockMgr_->ProxyRunningLocks(isProxied, processInfos);
+    return true;
+}
+
+bool PowerMgrService::ResetRunningLocks()
+{
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    std::lock_guard lock(lockMutex_);
+    runningLockMgr_->ResetRunningLocks();
+    return true;
 }
 
 bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
