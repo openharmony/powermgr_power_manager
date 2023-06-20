@@ -59,7 +59,7 @@ ohos_shared_library("powermgr_client") {
 
   external_deps = [
     "c_utils:utils",
-    "hicollie_native:libhicollie",
+    "hicollie:libhicollie",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
