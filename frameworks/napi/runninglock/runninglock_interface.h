@@ -49,8 +49,8 @@ public:
 
 private:
     static napi_value CreateInstanceForRunningLock(napi_env env, RunningLockAsyncInfo* asyncInfo);
-    static void CreateRunningLockCallBack(napi_env env, RunningLockAsyncInfo* asyncInfo);
-    static void IsRunningLockTypeSupportedCallBack(napi_env env, RunningLockAsyncInfo* asyncInfo);
+    static void CreateRunningLockCallBack(napi_env env, std::unique_ptr<RunningLockAsyncInfo>& asyncInfo);
+    static void IsRunningLockTypeSupportedCallBack(napi_env env, std::unique_ptr<RunningLockAsyncInfo>& asyncInfo);
     static bool IsTypeSupported(RunningLockType type);
 };
 } // namespace PowerMgr
