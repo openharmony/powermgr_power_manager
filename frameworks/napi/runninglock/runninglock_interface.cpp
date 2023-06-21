@@ -31,6 +31,9 @@ constexpr int RESULT_SIZE = 2;
 constexpr int RUNNINGLOCK_NAME_MAX = 512;
 constexpr int CREATRUNNINGLOCK_ARGC = 3;
 constexpr int ISRUNNINGLOCKTYPESUPPORTED_ARGC = 2;
+constexpr int32_t INDEX_0 = 0;
+constexpr int32_t INDEX_1 = 1;
+constexpr int32_t INDEX_2 = 2;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 }
 
@@ -44,29 +47,30 @@ napi_value RunningLockInterface::CreateRunningLock(napi_env env, napi_callback_i
     napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisArg, &data);
     NAPI_ASSERT(env, (status == napi_ok) && (argc >= CREATRUNNINGLOCK_ARGC - 1), "Failed to get cb info");
 
-    auto asyncInfo = new RunningLockAsyncInfo();
+    std::unique_ptr<RunningLockAsyncInfo> asyncInfo = std::make_unique<RunningLockAsyncInfo>();
     if (asyncInfo == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "asyncInfo is nullptr");
         return nullptr;
     }
     asyncInfo->napiRunningLockIns = napiRunningLock;
 
-    for (size_t i = 0; i < argc; i++) {
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(env, argv[i], &valueType);
-        if ((i == 0) && (valueType == napi_string)) {
-            char name[RUNNINGLOCK_NAME_MAX] = {0};
-            napi_get_value_string_utf8(env, argv[i], name, RUNNINGLOCK_NAME_MAX + 1, &asyncInfo->nameLen);
-            asyncInfo->name = name;
-        }
-        if (i == 1) {
-            int32_t type = static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-            napi_get_value_int32(env, argv[i], &type);
-            asyncInfo->type = static_cast<RunningLockType>(type);
-        }
-        if (valueType == napi_function) {
-            napi_create_reference(env, argv[i], 1, &asyncInfo->callbackRef);
-        }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[INDEX_0], &valueType);
+    NAPI_ASSERT(env, valueType == napi_string, "The input parameter type is not string");
+    char name[RUNNINGLOCK_NAME_MAX] = {0};
+    napi_get_value_string_utf8(env, argv[INDEX_0], name, RUNNINGLOCK_NAME_MAX + 1, &asyncInfo->nameLen);
+    asyncInfo->name = name;
+
+    napi_typeof(env, argv[INDEX_1], &valueType);
+    NAPI_ASSERT(env, valueType == napi_number, "The input parameter type is not number");
+    int32_t type = static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BUTT);
+    napi_get_value_int32(env, argv[INDEX_1], &type);
+    asyncInfo->type = static_cast<RunningLockType>(type);
+
+    if (argc == CREATRUNNINGLOCK_ARGC) {
+        napi_typeof(env, argv[INDEX_2], &valueType);
+        NAPI_ASSERT(env, valueType == napi_function, "The input parameter type is not function");
+        napi_create_reference(env, argv[INDEX_2], 1, &asyncInfo->callbackRef);
     }
     napi_value result = nullptr;
     if (asyncInfo->callbackRef == nullptr) {
@@ -90,23 +94,23 @@ napi_value RunningLockInterface::IsRunningLockTypeSupported(napi_env env, napi_c
     napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisArg, &data);
     NAPI_ASSERT(env, (status == napi_ok) && (argc >= 1), "Failed to get cb info");
 
-    auto asyncInfo = new RunningLockAsyncInfo();
+    std::unique_ptr<RunningLockAsyncInfo> asyncInfo = std::make_unique<RunningLockAsyncInfo>();
     if (asyncInfo == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "asyncInfo is nullptr");
         return nullptr;
     }
 
-    for (size_t i = 0; i < argc; i++) {
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(env, argv[i], &valueType);
-        if (i == 0) {
-            int32_t type = static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BUTT);
-            napi_get_value_int32(env, argv[i], &type);
-            asyncInfo->type = static_cast<RunningLockType>(type);
-        }
-        if (valueType == napi_function) {
-            napi_create_reference(env, argv[i], 1, &asyncInfo->callbackRef);
-        }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[INDEX_0], &valueType);
+    NAPI_ASSERT(env, valueType == napi_number, "The input parameter type is not number");
+    int32_t type = static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BUTT);
+    napi_get_value_int32(env, argv[INDEX_0], &type);
+    asyncInfo->type = static_cast<RunningLockType>(type);
+
+    if (argc == ISRUNNINGLOCKTYPESUPPORTED_ARGC) {
+        napi_typeof(env, argv[INDEX_1], &valueType);
+        NAPI_ASSERT(env, valueType == napi_function, "The input parameter type is not function");
+        napi_create_reference(env, argv[INDEX_1], 1, &asyncInfo->callbackRef);
     }
 
     napi_value result = nullptr;
@@ -231,7 +235,7 @@ napi_value RunningLockInterface::CreateInstanceForRunningLock(napi_env env, Runn
     return instance;
 }
 
-void RunningLockInterface::CreateRunningLockCallBack(napi_env env, RunningLockAsyncInfo* asyncInfo)
+void RunningLockInterface::CreateRunningLockCallBack(napi_env env, std::unique_ptr<RunningLockAsyncInfo>& asyncInfo)
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "createRunningLock", NAPI_AUTO_LENGTH, &resource);
@@ -272,11 +276,14 @@ void RunningLockInterface::CreateRunningLockCallBack(napi_env env, RunningLockAs
             napi_delete_async_work(env, asyncInfo->asyncWork);
             delete asyncInfo;
         },
-        reinterpret_cast<void*>(asyncInfo), &asyncInfo->asyncWork);
-    napi_queue_async_work(env, asyncInfo->asyncWork);
+        reinterpret_cast<void*>(asyncInfo.get()), &asyncInfo->asyncWork);
+    if (napi_ok == napi_queue_async_work(env, asyncInfo->asyncWork)) {
+        asyncInfo.release();
+    }
 }
 
-void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, RunningLockAsyncInfo* asyncInfo)
+void RunningLockInterface::IsRunningLockTypeSupportedCallBack(
+    napi_env env, std::unique_ptr<RunningLockAsyncInfo>& asyncInfo)
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "isRunningLockTypeSupported", NAPI_AUTO_LENGTH, &resource);
@@ -305,8 +312,10 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(napi_env env, Runn
             napi_delete_async_work(env, asyncInfo->asyncWork);
             delete asyncInfo;
         },
-        reinterpret_cast<void*>(asyncInfo), &asyncInfo->asyncWork);
-    napi_queue_async_work(env, asyncInfo->asyncWork);
+        reinterpret_cast<void*>(asyncInfo.get()), &asyncInfo->asyncWork);
+    if (napi_ok == napi_queue_async_work(env, asyncInfo->asyncWork)) {
+        asyncInfo.release();
+    }
 }
 
 bool RunningLockInterface::IsTypeSupported(RunningLockType type)
