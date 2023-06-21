@@ -16,7 +16,7 @@
 #include "shutdown_stub_delegator.h"
 
 #include "power_common.h"
-#include "xcollie.h"
+#include "xcollie/xcollie.h"
 
 namespace OHOS {
 namespace PowerMgr {

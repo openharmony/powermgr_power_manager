@@ -17,8 +17,8 @@
 
 #include "message_parcel.h"
 #include "power_common.h"
-#include "xcollie.h"
-#include "xcollie_define.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 namespace OHOS {
 namespace PowerMgr {
