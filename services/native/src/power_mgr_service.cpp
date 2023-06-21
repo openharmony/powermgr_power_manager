@@ -33,8 +33,7 @@
 #include "power_mgr_dumper.h"
 #include "sysparam.h"
 #include "system_suspend_controller.h"
-#include "ui_service_mgr_client.h"
-#include "watchdog.h"
+#include "xcollie/watchdog.h"
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
