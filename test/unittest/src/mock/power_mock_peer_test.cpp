@@ -38,11 +38,6 @@ void MockPeerTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
     POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
-void MockPeerTest::PowerShutdownTestCallback::ShutdownCallback()
-{
-    POWER_HILOGD(LABEL_TEST, "PowerShutdownTestCallback::ShutdownCallback.");
-}
-
 void MockPeerTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
@@ -59,13 +54,10 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest001, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> stateCallback = nullptr;
-    sptr<IShutdownCallback> shutdownCallback = nullptr;
     sptr<IPowerModeCallback> modeCallback= nullptr;
 
     EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(stateCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(stateCallback));
-    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(shutdownCallback));
-    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(shutdownCallback));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
 }
@@ -80,13 +72,10 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest002, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
-    sptr<IShutdownCallback> shutdownCallback = new PowerShutdownTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
 
     EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(stateCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(stateCallback));
-    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(shutdownCallback));
-    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(shutdownCallback));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
 }
@@ -154,15 +143,11 @@ HWTEST_F(MockPeerTest, MockPeerTest003, TestSize.Level2)
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
-    sptr<IShutdownCallback> cb2 = new PowerShutdownTestCallback();
     sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
-    auto priority = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW;
     EXPECT_FALSE(sptrProxy->RegisterPowerStateCallback(cb1));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerStateCallback(cb1));
     EXPECT_FALSE(sptrProxy->RegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerStateCallback(nullptr));
-    EXPECT_FALSE(sptrProxy->RegisterShutdownCallback(priority, cb2));
-    EXPECT_FALSE(sptrProxy->UnRegisterShutdownCallback(cb2));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));

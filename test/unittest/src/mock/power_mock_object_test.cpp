@@ -38,11 +38,6 @@ void PowerMockObjectTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mo
     POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
-void PowerMockObjectTest::PowerShutdownTestCallback::ShutdownCallback()
-{
-    POWER_HILOGD(LABEL_TEST, "PowerShutdownTestCallback::ShutdownCallback.");
-}
-
 void PowerMockObjectTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
@@ -118,15 +113,11 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     sptr<MockPowerRemoteObject> remote = new MockPowerRemoteObject();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
-    sptr<IShutdownCallback> cb2 = new PowerShutdownTestCallback();
     sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
-    auto priority = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW;
     EXPECT_FALSE(sptrProxy->RegisterPowerStateCallback(cb1));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerStateCallback(cb1));
     EXPECT_FALSE(sptrProxy->RegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerStateCallback(nullptr));
-    EXPECT_FALSE(sptrProxy->RegisterShutdownCallback(priority, cb2));
-    EXPECT_FALSE(sptrProxy->UnRegisterShutdownCallback(cb2));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));

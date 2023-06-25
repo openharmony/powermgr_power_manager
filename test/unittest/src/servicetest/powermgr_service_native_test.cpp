@@ -57,11 +57,6 @@ void PowerMgrServiceNativeTest::PowerModeTestCallback::OnPowerModeChanged(PowerM
     POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged");
 }
 
-void PowerMgrServiceNativeTest::PowerShutdownTestCallback::ShutdownCallback()
-{
-    POWER_HILOGD(LABEL_TEST, "PowerShutdownTestCallback::ShutdownCallback");
-}
-
 void PowerMgrServiceNativeTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged");
@@ -798,13 +793,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest038, TestSize.Level
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level2)
 {
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
-    sptr<IShutdownCallback> shutdownCallback = new PowerShutdownTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
 
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerStateCallback(stateCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(stateCallback));
-    EXPECT_TRUE(g_powerMgrServiceProxy->RegisterShutdownCallback(shutdownCallback));
-    EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterShutdownCallback(shutdownCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerModeCallback(modeCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCallback));
 }
