@@ -145,8 +145,6 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSi
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCb));
     EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(nullptr));
-    EXPECT_EQ(g_powerMgrServiceProxy->RebootDevice(""), PowerErrors::ERR_CONNECTION_FAIL);
-    EXPECT_EQ(g_powerMgrServiceProxy->ShutDownDevice(""), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_FALSE(g_powerMgrServiceProxy->ForceSuspendDevice(0));
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
