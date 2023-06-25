@@ -19,7 +19,7 @@
 #include "iremote_stub.h"
 #include "nocopyable.h"
 
-#include "shutdown/isync_shutdown_callback.h"
+#include "isync_shutdown_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
