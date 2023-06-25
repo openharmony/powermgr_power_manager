@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "iremote_object.h"
-#include "ishutdown_callback.h"
 #include "ipower_mode_callback.h"
 #include "ipower_state_callback.h"
 #include "ipower_mgr.h"
@@ -63,10 +62,6 @@ public:
     PowerErrors ShutDownDevice(const std::string& reason);
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    bool RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
-        IShutdownCallback::ShutdownPriority priority
-            = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT);
-    bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool SetDisplaySuspend(bool enable);
