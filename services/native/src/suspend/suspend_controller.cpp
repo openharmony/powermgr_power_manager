@@ -36,10 +36,10 @@ sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 
 /** SuspendController Implement */
 
-SuspendController::SuspendController(ShutdownService* shutdownService, std::shared_ptr<PowerStateMachine>& stateMachine,
-    std::shared_ptr<AppExecFwk::EventRunner>& runner)
+SuspendController::SuspendController(ShutdownController* shutdownController,
+    std::shared_ptr<PowerStateMachine>& stateMachine, std::shared_ptr<AppExecFwk::EventRunner>& runner)
 {
-    shutdownService_ = shutdownService;
+    shutdownController_ = shutdownController;
     stateMachine_ = stateMachine;
     runner_ = runner;
 }
@@ -317,7 +317,7 @@ void SuspendController::HandleHibernate(SuspendDeviceType reason)
 void SuspendController::HandleShutdown(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
-    shutdownService_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
+    shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
 }
 
 /** SuspendEventHandler Implement */

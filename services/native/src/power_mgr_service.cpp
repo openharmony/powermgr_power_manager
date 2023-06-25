@@ -307,7 +307,7 @@ void PowerMgrService::HandleShutdownRequest()
 
 bool PowerMgrService::CheckDialogAndShuttingDown()
 {
-    bool isShuttingDown = this->shutdownService_.IsShuttingDown();
+    bool isShuttingDown = this->shutdownController_.IsShuttingDown();
     if (isDialogShown_ || isShuttingDown) {
         POWER_HILOGW(
             FEATURE_INPUT, "isDialogShown: %{public}d, isShuttingDown: %{public}d", isDialogShown_, isShuttingDown);
@@ -525,8 +525,7 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
         suspendController_->StopSleep();
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
-    shutdownService_.SetController(&shutdownController_);
-    shutdownService_.Reboot(reason);
+    shutdownController_.Reboot(reason);
     return PowerErrors::ERR_OK;
 }
 
@@ -557,8 +556,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     }
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
-    shutdownService_.SetController(&shutdownController_);
-    shutdownService_.Shutdown(reason);
+    shutdownController_.Shutdown(reason);
     return PowerErrors::ERR_OK;
 }
 
@@ -570,7 +568,7 @@ PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs, SuspendDeviceType
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    if (shutdownService_.IsShuttingDown()) {
+    if (shutdownController_.IsShuttingDown()) {
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
         return PowerErrors::ERR_OK;
     }
@@ -654,7 +652,7 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
     if (!Permission::IsSystem()) {
         return false;
     }
-    if (shutdownService_.IsShuttingDown()) {
+    if (shutdownController_.IsShuttingDown()) {
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't force suspend");
         return false;
     }
@@ -804,33 +802,6 @@ bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->UnRegisterPowerStateCallback(callback);
-    return true;
-}
-
-bool PowerMgrService::RegisterShutdownCallback(
-    IShutdownCallback::ShutdownPriority priority, const sptr<IShutdownCallback>& callback)
-{
-    std::lock_guard lock(mutex_);
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystem()) {
-        return false;
-    }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d, priority: %{public}d", pid, uid, priority);
-    shutdownService_.AddShutdownCallback(priority, callback);
-    return true;
-}
-
-bool PowerMgrService::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
-{
-    std::lock_guard lock(mutex_);
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystem()) {
-        return false;
-    }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "pid: %{public}d, uid: %{public}d", pid, uid);
-    shutdownService_.DelShutdownCallback(callback);
     return true;
 }
 
@@ -999,7 +970,7 @@ void PowerMgrService::WakeupRunningLock::Unlock()
 
 void PowerMgrService::SuspendControllerInit()
 {
-    suspendController_ = std::make_shared<SuspendController>(&shutdownService_, powerStateMachine_, eventRunner_);
+    suspendController_ = std::make_shared<SuspendController>(&shutdownController_, powerStateMachine_, eventRunner_);
     suspendController_->Init();
 }
 

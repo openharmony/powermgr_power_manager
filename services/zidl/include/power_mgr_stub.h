@@ -53,8 +53,6 @@ private:
     int32_t ShutDownDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterPowerStateCallbackStub(MessageParcel& data);
     int32_t UnRegisterPowerStateCallbackStub(MessageParcel& data);
-    int32_t RegisterShutdownCallbackStub(MessageParcel& data);
-    int32_t UnRegisterShutdownCallbackStub(MessageParcel& data);
     int32_t RegisterPowerModeCallbackStub(MessageParcel& data);
     int32_t UnRegisterPowerModeCallbackStub(MessageParcel& data);
     int32_t SetDisplaySuspendStub(MessageParcel& data);

@@ -24,7 +24,6 @@
 
 #include "ipower_mode_callback.h"
 #include "ipower_state_callback.h"
-#include "ishutdown_callback.h"
 #include "power_errors.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
@@ -55,8 +54,6 @@ public:
         SHUTDOWN_DEVICE,
         REG_POWER_STATE_CALLBACK,
         UNREG_POWER_STATE_CALLBACK,
-        REG_SHUTDOWN_CALLBACK,
-        UNREG_SHUTDOWN_CALLBACK,
         REG_POWER_MODE_CALLBACK,
         UNREG_POWER_MODE_CALLBACK,
         SET_DISPLAY_SUSPEND,
@@ -88,11 +85,6 @@ public:
     virtual bool ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
-
-    // Used for callback registration upon shutdown.
-    virtual bool RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
-        const sptr<IShutdownCallback>& callback) = 0;
-    virtual bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) = 0;
 
     // Used for callback registration upon power mode.
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
