@@ -42,11 +42,13 @@
                 "ability_runtime",
                 "access_token",
                 "ace_engine",
+                "battery_manager",
                 "common_event_service",
                 "config_policy",
                 "c_utils",
                 "data_share",
                 "display_manager",
+                "drivers_interface_factory",
                 "drivers_interface_power",
                 "eventhandler",
                 "hdf_core",
@@ -66,7 +68,10 @@
                 "sensor",
                 "window_manager"
             ],
-            "third_party": []
+            "third_party": [
+                "jsoncpp",
+                "libxml2"
+            ]
         },
         "build": {
             "group_type": {

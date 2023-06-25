@@ -43,10 +43,7 @@ ohos_executable("power-shell") {
     "shell/src/power_shell_command.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "${powermgr_inner_api}:powermgr_client",
-  ]
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
   configs = [
     "${ability_runtime_path}/tools/aa:ability_command_config",
@@ -55,6 +52,7 @@ ohos_executable("power-shell") {
   ]
 
   external_deps = [
+    "ability_runtime:tools_aa_source_set",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
