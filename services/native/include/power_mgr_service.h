@@ -29,7 +29,6 @@
 #include "powerms_event_handler.h"
 #include "running_lock_mgr.h"
 #include "shutdown_controller.h"
-#include "shutdown_service.h"
 #include "sp_singleton.h"
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
@@ -68,9 +67,6 @@ public:
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    virtual bool RegisterShutdownCallback(
-        IShutdownCallback::ShutdownPriority priority, const sptr<IShutdownCallback>& callback) override;
-    virtual bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
@@ -149,7 +145,7 @@ public:
         POWER_HILOGE(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
         powerStateMachine_->EnableMock(powerState);
-        shutdownService_.EnableMock(powerAction, shutdownState);
+        shutdownController_.EnableMock(powerAction, shutdownState);
     }
     void MockProximity(uint32_t status)
     {
@@ -161,9 +157,9 @@ public:
     {
         PowerStateMachine::onWakeup();
     }
-    ShutdownService& getShutdownService()
+    ShutdownController& getShutdownController()
     {
-        return shutdownService_;
+        return shutdownController_;
     }
 
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
@@ -213,7 +209,6 @@ private:
     std::shared_ptr<PowermsEventHandler> handler_;
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
-    ShutdownService shutdownService_;
     ShutdownController shutdownController_;
     PowerModeModule powerModeModule_;
     bool powerkeyPressed_ {false};

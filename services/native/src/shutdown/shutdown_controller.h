@@ -16,9 +16,15 @@
 #ifndef POWERMGR_POWER_MANAGER_SHUTDOWN_CONTROLLER_H
 #define POWERMGR_POWER_MANAGER_SHUTDOWN_CONTROLLER_H
 
-#include "shutdown/itakeover_shutdown_callback.h"
+#include "actions/idevice_state_action.h"
+#include "device_power_action.h"
+#include "want.h"
+#include <atomic>
+#include <string>
+
 #include "shutdown/iasync_shutdown_callback.h"
 #include "shutdown/isync_shutdown_callback.h"
+#include "shutdown/itakeover_shutdown_callback.h"
 #include "shutdown_callback_holer.h"
 
 namespace OHOS {
@@ -27,13 +33,23 @@ class ShutdownController {
 public:
     ShutdownController();
     ~ShutdownController() = default;
-    void AddCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority);
 
+    void Reboot(const std::string& reason);
+    void Shutdown(const std::string& reason);
+    bool IsShuttingDown();
+    void EnableMock(IDevicePowerAction* mockPowerAction, IDeviceStateAction* mockStateAction)
+    {
+        std::unique_ptr<IDevicePowerAction> mockPower(mockPowerAction);
+        devicePowerAction_ = std::move(mockPower);
+        std::unique_ptr<IDeviceStateAction> mockState(mockStateAction);
+        deviceStateAction_ = std::move(mockState);
+        started_ = false;
+    }
+
+    void AddCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority);
     void AddCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority);
     void AddCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority);
-
     void RemoveCallback(const sptr<ITakeOverShutdownCallback>& callback);
-
     void RemoveCallback(const sptr<IAsyncShutdownCallback>& callback);
     void RemoveCallback(const sptr<ISyncShutdownCallback>& callback);
 
@@ -42,6 +58,12 @@ public:
     void TriggerSyncShutdownCallback();
 
 private:
+    using IntentWant = OHOS::AAFwk::Want;
+    void RebootOrShutdown(const std::string& reason, bool isReboot);
+    void Prepare();
+    void TurnOffScreen();
+    void PublishShutdownEvent() const;
+
     static bool TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
     static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks);
     static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks);
@@ -49,6 +71,10 @@ private:
     sptr<ShutdownCallbackHolder> takeoverShutdownCallbackHolder_;
     sptr<ShutdownCallbackHolder> asyncShutdownCallbackHolder_;
     sptr<ShutdownCallbackHolder> syncShutdownCallbackHolder_;
+
+    std::atomic<bool> started_;
+    std::unique_ptr<IDevicePowerAction> devicePowerAction_;
+    std::unique_ptr<IDeviceStateAction> deviceStateAction_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

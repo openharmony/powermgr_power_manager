@@ -19,7 +19,7 @@
 #include "event_handler.h"
 #include "power_state_machine.h"
 #include "sensor_agent.h"
-#include "shutdown_service.h"
+#include "shutdown_controller.h"
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
 #include <functional>
@@ -35,7 +35,7 @@ class SuspendMonitor;
 class SuspendEventHandler;
 class SuspendController : public std::enable_shared_from_this<SuspendController> {
 public:
-    SuspendController(ShutdownService* shutdownService, std::shared_ptr<PowerStateMachine>& stateMachine,
+    SuspendController(ShutdownController* shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine,
         std::shared_ptr<AppExecFwk::EventRunner>& runner);
     ~SuspendController();
     void Init();
@@ -71,7 +71,7 @@ private:
     std::mutex monitorMutex_;
     std::vector<SuspendSource> sourceList_;
     std::map<SuspendDeviceType, std::shared_ptr<SuspendMonitor>> monitorMap_;
-    ShutdownService* shutdownService_;
+    ShutdownController* shutdownController_ = nullptr;
     std::shared_ptr<PowerStateMachine> stateMachine_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<SuspendEventHandler> handler_ = nullptr;

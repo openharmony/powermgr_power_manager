@@ -124,10 +124,6 @@ public:
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    bool RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
-        IShutdownCallback::ShutdownPriority priority
-            = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_DEFAULT);
-    bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     std::string Dump(const std::vector<std::string>& args);

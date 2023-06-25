@@ -30,7 +30,6 @@
 #include "ipower_state_callback.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
-#include "ishutdown_callback.h"
 #include "power_log.h"
 #include "power_common.h"
 #include "running_lock_info.h"
@@ -231,21 +230,6 @@ bool PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback
 {
     RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
     bool ret = proxy_->UnRegisterPowerStateCallback(callback);
-    return ret;
-}
-
-bool PowerMgrClient::RegisterShutdownCallback(
-    const sptr<IShutdownCallback>& callback, IShutdownCallback::ShutdownPriority priority)
-{
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->RegisterShutdownCallback(priority, callback);
-    return ret;
-}
-
-bool PowerMgrClient::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
-{
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->UnRegisterShutdownCallback(callback);
     return ret;
 }
 
