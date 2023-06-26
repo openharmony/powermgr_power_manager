@@ -600,11 +600,11 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type,
     if (powerStateMachine_->CheckRefreshTime()) {
         return false;
     }
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {
+    if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION") || !Permission::IsSystem()) {
         return false;
     }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGD(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->RefreshActivityInner(pid, callTimeMs, type, needChangeBacklight);
     return true;
