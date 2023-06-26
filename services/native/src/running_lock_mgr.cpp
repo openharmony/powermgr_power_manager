@@ -507,7 +507,6 @@ bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 void RunningLockMgr::ResetRunningLockProxy()
 {
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Reset runninglock proxy");
-    std::lock_guard<std::mutex> lock(mutex_);
     for (auto& it : runningLocks_) {
         LockInnerByProxy(it.first, it.second);
     }
