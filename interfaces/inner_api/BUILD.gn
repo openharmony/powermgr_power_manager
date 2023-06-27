@@ -17,7 +17,6 @@ config("powermgr_public_config") {
   include_dirs = [
     "native/include",
     "${powermgr_service_zidl}/include",
-    "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie/",
   ]
 }
 
@@ -38,13 +37,14 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_framework_native}/shutdown/shutdown_client.cpp",
     "${powermgr_service_zidl}/src/power_mgr_proxy.cpp",
     "${powermgr_service_zidl}/src/power_mode_callback_proxy.cpp",
-    "${powermgr_service_zidl}/src/power_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/shutdown_proxy_delegator.cpp",
     "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
-    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_sutb.cpp",
+    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_stub.cpp",
   ]
 
   configs = [

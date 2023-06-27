@@ -66,8 +66,6 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
 
     EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.RegisterShutdownCallback(nullptr));
-    EXPECT_FALSE(powerMgrClient.UnRegisterShutdownCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(nullptr));
     powerMgrClient.~PowerMgrClient();

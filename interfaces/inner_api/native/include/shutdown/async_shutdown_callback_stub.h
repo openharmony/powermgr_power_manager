@@ -19,7 +19,7 @@
 #include "iremote_stub.h"
 #include "nocopyable.h"
 
-#include "shutdown/iasync_shutdown_callback.h"
+#include "iasync_shutdown_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {

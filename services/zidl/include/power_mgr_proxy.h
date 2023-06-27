@@ -26,7 +26,6 @@
 #include "refbase.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
-#include "ishutdown_callback.h"
 #include "ipower_mode_callback.h"
 #include "ipower_state_callback.h"
 #include "ipower_mgr.h"
@@ -65,9 +64,6 @@ public:
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
-    virtual bool RegisterShutdownCallback(IShutdownCallback::ShutdownPriority priority,
-        const sptr<IShutdownCallback>& callback) override;
-    virtual bool UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
@@ -77,7 +73,6 @@ public:
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
- 
     void RegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) override;
     void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) override;
