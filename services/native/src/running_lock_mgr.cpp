@@ -28,6 +28,7 @@
 #include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
+#include "system_suspend_controller.h"
 #ifdef HAS_DISPLAY_MANAGER_PART
 #include "screen_manager.h"
 #endif
@@ -101,6 +102,7 @@ void RunningLockMgr::InitLocksTypeScreen()
             }
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN active");
+                SystemSuspendController::GetInstance().Wakeup();
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->CancelDelayTimer(
