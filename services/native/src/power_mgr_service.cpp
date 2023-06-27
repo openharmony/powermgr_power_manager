@@ -472,6 +472,7 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s", systemAbilityId, deviceId.c_str());
     if (systemAbilityId == SUSPEND_MANAGER_SYSTEM_ABILITY_ID) {
+        std::lock_guard lock(lockMutex_);
         runningLockMgr_->ResetRunningLockProxy();
     }
 }
