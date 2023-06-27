@@ -114,12 +114,6 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(IPowerMgr::UNREG_POWER_STATE_CALLBACK):
             ret = UnRegisterPowerStateCallbackStub(data);
             break;
-        case static_cast<int>(IPowerMgr::REG_SHUTDOWN_CALLBACK):
-            ret = RegisterShutdownCallbackStub(data);
-            break;
-        case static_cast<int>(IPowerMgr::UNREG_SHUTDOWN_CALLBACK):
-            ret = UnRegisterShutdownCallbackStub(data);
-            break;
         case static_cast<int>(IPowerMgr::REG_POWER_MODE_CALLBACK):
             ret = RegisterPowerModeCallbackStub(data);
             break;
@@ -361,28 +355,6 @@ int32_t PowerMgrStub::UnRegisterPowerStateCallbackStub(MessageParcel& data)
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
     UnRegisterPowerStateCallback(callback);
-    return ERR_OK;
-}
-
-int32_t PowerMgrStub::RegisterShutdownCallbackStub(MessageParcel& data)
-{
-    uint32_t priority;
-    READ_PARCEL_WITH_RET(data, Uint32, priority, E_READ_PARCEL_ERROR);
-    sptr<IRemoteObject> obj = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
-    sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
-    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    RegisterShutdownCallback(static_cast<IShutdownCallback::ShutdownPriority>(priority), callback);
-    return ERR_OK;
-}
-
-int32_t PowerMgrStub::UnRegisterShutdownCallbackStub(MessageParcel& data)
-{
-    sptr<IRemoteObject> obj = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
-    sptr<IShutdownCallback> callback = iface_cast<IShutdownCallback>(obj);
-    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    UnRegisterShutdownCallback(callback);
     return ERR_OK;
 }
 

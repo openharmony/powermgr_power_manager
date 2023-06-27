@@ -56,11 +56,6 @@ void PowerMgrServiceMockParcelTest::PowerModeTestCallback::OnPowerModeChanged(Po
     POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
-void PowerMgrServiceMockParcelTest::PowerShutdownTestCallback::ShutdownCallback()
-{
-    POWER_HILOGD(LABEL_TEST, "PowerShutdownTestCallback::ShutdownCallback.");
-}
-
 void PowerMgrServiceMockParcelTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
@@ -130,17 +125,11 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSi
 {
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     sptr<IPowerStateCallback> stateCb = new PowerStateTestCallback();
-    sptr<IShutdownCallback> shutdownCb = new PowerShutdownTestCallback();
     sptr<IPowerModeCallback> modeCb = new PowerModeTestCallback();
-    auto priority = IShutdownCallback::ShutdownPriority::POWER_SHUTDOWN_PRIORITY_LOW;
     EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerStateCallback(stateCb));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(stateCb));
     EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(nullptr));
-    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterShutdownCallback(shutdownCb, priority));
-    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterShutdownCallback(shutdownCb));
-    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterShutdownCallback(nullptr, priority));
-    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterShutdownCallback(nullptr));
     EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerModeCallback(modeCb));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCb));
     EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerModeCallback(nullptr));

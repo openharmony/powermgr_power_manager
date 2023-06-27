@@ -19,7 +19,6 @@
 #include <gtest/gtest.h>
 
 #include "power_state_callback_stub.h"
-#include "power_shutdown_callback_stub.h"
 #include "power_mode_callback_stub.h"
 
 namespace OHOS {
@@ -34,12 +33,6 @@ public:
         PowerModeTestCallback() {};
         virtual ~PowerModeTestCallback() {};
         virtual void OnPowerModeChanged(PowerMode mode) override;
-    };
-    class PowerShutdownTestCallback : public PowerShutdownCallbackStub {
-    public:
-        PowerShutdownTestCallback() {};
-        virtual ~PowerShutdownTestCallback() {};
-        virtual void ShutdownCallback() override;
     };
     class PowerStateTestCallback : public PowerStateCallbackStub {
     public:

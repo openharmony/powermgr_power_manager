@@ -29,6 +29,7 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine_info.h"
+#include "shutdown/shutdown_client.h"
 #include "running_lock_action.h"
 #include "securec.h"
 
@@ -78,6 +79,7 @@ public:
 
 namespace {
 auto& g_powerMgrClient = PowerMgrClient::GetInstance();
+auto& g_shutdownClient = ShutdownClient::GetInstance();
 sptr<PowerMgrService> g_service = nullptr;
 const int32_t REWIND_READ_DATA = 0;
 } // namespace
@@ -165,18 +167,6 @@ static void RegisterPowerModeCallback(const uint8_t* data, size_t size)
     }
     g_powerMgrClient.RegisterPowerModeCallback(callback);
     g_powerMgrClient.UnRegisterPowerModeCallback(callback);
-}
-
-static void RegisterShutdownCallback(const uint8_t* data, size_t size)
-{
-    OHOS::sptr<IShutdownCallback> callback;
-    if ((memcpy_s(callback, sizeof(callback), data, sizeof(callback))) != EOK) {
-        return;
-    }
-    int32_t type = GetInt32(data, size);
-    IShutdownCallback::ShutdownPriority priority = static_cast<IShutdownCallback::ShutdownPriority>(type);
-    g_powerMgrClient.RegisterShutdownCallback(callback, priority);
-    g_powerMgrClient.UnRegisterShutdownCallback(callback);
 }
 
 static void ProxyRunningLock(const uint8_t* data, size_t size)
@@ -268,6 +258,42 @@ static void TestPowerServiceStub(const uint8_t* data, size_t size)
     g_service->OnRemoteRequest(code, datas, reply, option);
 }
 
+static void RegisterAsyncShutdownCallback(const uint8_t* data, size_t size)
+{
+    OHOS::sptr<IAsyncShutdownCallback> callback;
+    if ((memcpy_s(callback, sizeof(callback), data, sizeof(callback))) != EOK) {
+        return;
+    }
+    int32_t type = GetInt32(data, size);
+    ShutdownPriority priority = static_cast<ShutdownPriority>(type);
+    g_shutdownClient.RegisterShutdownCallback(callback, priority);
+    g_shutdownClient.UnRegisterShutdownCallback(callback);
+}
+
+static void RegisterSyncShutdownCallback(const uint8_t* data, size_t size)
+{
+    OHOS::sptr<ISyncShutdownCallback> callback;
+    if ((memcpy_s(callback, sizeof(callback), data, sizeof(callback))) != EOK) {
+        return;
+    }
+    int32_t type = GetInt32(data, size);
+    ShutdownPriority priority = static_cast<ShutdownPriority>(type);
+    g_shutdownClient.RegisterShutdownCallback(callback, priority);
+    g_shutdownClient.UnRegisterShutdownCallback(callback);
+}
+
+static void RegisterTakeOverShutdownCallback(const uint8_t* data, size_t size)
+{
+    OHOS::sptr<ITakeOverShutdownCallback> callback;
+    if ((memcpy_s(callback, sizeof(callback), data, sizeof(callback))) != EOK) {
+        return;
+    }
+    int32_t type = GetInt32(data, size);
+    ShutdownPriority priority = static_cast<ShutdownPriority>(type);
+    g_shutdownClient.RegisterShutdownCallback(callback, priority);
+    g_shutdownClient.UnRegisterShutdownCallback(callback);
+}
+
 static std::vector<std::function<void(const uint8_t*, size_t)>> fuzzFunc = {
     &SuspendDevice,
     &WakeupDevice,
@@ -279,14 +305,16 @@ static std::vector<std::function<void(const uint8_t*, size_t)>> fuzzFunc = {
     &CreateRunningLock,
     &RegisterPowerStateCallback,
     &RegisterPowerModeCallback,
-    &RegisterShutdownCallback,
     &ProxyRunningLock,
     &Lock,
     &UnLock,
     &OverrideScreenOffTime,
     &RestoreScreenOffTime,
     &IsRunningLockTypeSupported,
-    &SetDisplaySuspend
+    &SetDisplaySuspend,
+    &RegisterAsyncShutdownCallback,
+    &RegisterSyncShutdownCallback,
+    &RegisterTakeOverShutdownCallback
 };
 
 namespace OHOS {

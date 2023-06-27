@@ -39,11 +39,6 @@ constexpr uint32_t MAXTYPE = 77;
 constexpr int32_t UNTYPE = -1;
 } //namespace
 
-void PowerShutdownTest1Callback::ShutdownCallback()
-{
-    POWER_HILOGI(LABEL_TEST, "PowerShutdownTest1Callback::ShutdownCallback");
-}
-
 namespace {
 /**
  * @tc.name: RunningLockNative001
@@ -288,11 +283,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     runningLockMgrController->support_ = true;
     runningLockMgrController->Enable();
     runningLockMgrController->Disable();
-
-    auto runningLockMgrRecipient = std::make_shared<RunningLockMgr::RunningLockDeathRecipient>();
-    wptr<IRemoteObject> remoteObject = new PowerShutdownTest1Callback();
-    runningLockMgrRecipient->OnRemoteDied(remoteObject);
-    runningLockMgrRecipient->OnRemoteDied(nullptr);
 
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
     POWER_HILOGI(LABEL_TEST, "RunningLockNative006 end");

@@ -15,19 +15,159 @@
 
 #include "shutdown_controller.h"
 
-#include <cinttypes>
-#include <datetime_ex.h>
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "power_common.h"
+#include "power_mgr_factory.h"
+
+#include <algorithm>
+#include <cinttypes>
+#include <common_event_data.h>
+#include <common_event_manager.h>
+#include <common_event_publish_info.h>
+#include <common_event_support.h>
+#include <datetime_ex.h>
+#include <future>
+#include <thread>
+
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+#include "battery_srv_client.h"
+#include "v1_0/ifactory_interface.h"
+#endif
+
+using namespace OHOS::AAFwk;
+using namespace OHOS::EventFwk;
+using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
-ShutdownController::ShutdownController()
+namespace {
+const time_t MAX_TIMEOUT_SEC = 30;
+}
+ShutdownController::ShutdownController() : started_(false)
 {
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Instance create");
+    devicePowerAction_ = PowerMgrFactory::GetDevicePowerAction();
+    deviceStateAction_ = PowerMgrFactory::GetDeviceStateAction();
     takeoverShutdownCallbackHolder_ = new ShutdownCallbackHolder();
     asyncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
     syncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
+}
+
+void ShutdownController::Reboot(const std::string& reason)
+{
+    RebootOrShutdown(reason, true);
+}
+
+void ShutdownController::Shutdown(const std::string& reason)
+{
+    RebootOrShutdown(reason, false);
+}
+
+bool ShutdownController::IsShuttingDown()
+{
+    return started_;
+}
+
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+static bool IsNeedWritePoweroffChargeFlag()
+{
+    auto& batterySvcClient = BatterySrvClient::GetInstance();
+    const auto pluggedType = batterySvcClient.GetPluggedType();
+    POWER_HILOGI(FEATURE_SHUTDOWN, "pluggedType : %{public}u", pluggedType);
+    return (pluggedType == BatteryPluggedType::PLUGGED_TYPE_AC) ||
+        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_USB) ||
+        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS);
+}
+
+static const unsigned int OEMINFO_REUSED_ID_204_8K_VALID_SIZE_64_BYTE = 204;
+static const unsigned int OEMINFO_SHUTFLAG_SUBID = 4;
+static const char POWEROFF_CHARGE_FLAG[] = {0xAA, 0x55, 0x00, 0x00};
+
+static void WritePoweroffChargeFlag()
+{
+    auto factoryInterfaceImpl = OHOS::HDI::Factory::V1_0::IFactoryInterface::Get("factory_interface_service", false);
+    if (factoryInterfaceImpl == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "get factory_interface_service failed");
+        return;
+    }
+
+    int ret = factoryInterfaceImpl->OeminfoWriteReused(OEMINFO_REUSED_ID_204_8K_VALID_SIZE_64_BYTE,
+        OEMINFO_SHUTFLAG_SUBID, sizeof(POWEROFF_CHARGE_FLAG), POWEROFF_CHARGE_FLAG);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "write oem flag:0x55AA, result:%{public}d", ret);
+}
+#endif
+
+void ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot)
+{
+    if (started_) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown is already running");
+        return;
+    }
+    started_ = true;
+    bool isTakeOver = TriggerTakeOverShutdownCallback(isReboot);
+    if (isTakeOver) {
+        started_ = false;
+        return;
+    }
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+    PublishShutdownEvent();
+    TriggerSyncShutdownCallback();
+    make_unique<thread>([=] {
+        Prepare();
+        TurnOffScreen();
+        POWER_HILOGD(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
+
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+        if (IsNeedWritePoweroffChargeFlag()) {
+            WritePoweroffChargeFlag();
+        }
+#endif
+
+        if (devicePowerAction_ != nullptr) {
+            isReboot ? devicePowerAction_->Reboot(reason) : devicePowerAction_->Shutdown(reason);
+        }
+        started_ = false;
+    })->detach();
+}
+
+void ShutdownController::Prepare()
+{
+    auto callbackStart = [&]() {
+        TriggerAsyncShutdownCallback();
+    };
+
+    packaged_task<void()> callbackTask(callbackStart);
+    future<void> fut = callbackTask.get_future();
+    make_unique<thread>(std::move(callbackTask))->detach();
+
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Waiting for the callback execution complete...");
+    future_status status = fut.wait_for(std::chrono::seconds(MAX_TIMEOUT_SEC));
+    if (status == future_status::timeout) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown callback execution timeout");
+    }
+    POWER_HILOGI(FEATURE_SHUTDOWN, "The callback execution is complete");
+}
+
+void ShutdownController::PublishShutdownEvent() const
+{
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Start of publishing shutdown event");
+    CommonEventPublishInfo publishInfo;
+    publishInfo.SetOrdered(false);
+    IntentWant shutdownWant;
+    shutdownWant.SetAction(CommonEventSupport::COMMON_EVENT_SHUTDOWN);
+    CommonEventData event(shutdownWant);
+    if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Publish the shutdown event fail");
+        return;
+    }
+    POWER_HILOGD(FEATURE_SHUTDOWN, "End of publishing shutdown event");
+}
+
+void ShutdownController::TurnOffScreen()
+{
+    POWER_HILOGD(FEATURE_SHUTDOWN, "Turn off screen before shutdown");
+    deviceStateAction_->SetDisplayState(DisplayState::DISPLAY_OFF, StateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
 void ShutdownController::AddCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)

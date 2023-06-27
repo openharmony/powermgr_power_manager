@@ -527,54 +527,6 @@ bool PowerMgrServiceTestProxy::UnRegisterPowerStateCallback(const sptr<IPowerSta
     return true;
 }
 
-bool PowerMgrServiceTestProxy::RegisterShutdownCallback(const sptr<IShutdownCallback>& callback,
-    IShutdownCallback::ShutdownPriority priority)
-{
-    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
-        return false;
-    }
-
-    data.WriteUint32(static_cast<uint32_t>(priority));
-    data.WriteRemoteObject(callback->AsObject());
-
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::REG_SHUTDOWN_CALLBACK), data, reply, option);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
-        return false;
-    }
-    return true;
-}
-
-bool PowerMgrServiceTestProxy::UnRegisterShutdownCallback(const sptr<IShutdownCallback>& callback)
-{
-    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
-        return false;
-    }
-
-    data.WriteRemoteObject(callback->AsObject());
-
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::UNREG_SHUTDOWN_CALLBACK), data, reply, option);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
-        return false;
-    }
-    return true;
-}
-
 bool PowerMgrServiceTestProxy::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);

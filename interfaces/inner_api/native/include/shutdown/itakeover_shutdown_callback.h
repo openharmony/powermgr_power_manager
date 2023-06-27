@@ -16,7 +16,7 @@
 #ifndef POWERMGR_POWER_MANAGER_ITAKEOVER_SHUTDOWN_CALLBACK_H
 #define POWERMGR_POWER_MANAGER_ITAKEOVER_SHUTDOWN_CALLBACK_H
 
-#include "ishutdown_callback.h"
+#include <iremote_broker.h>
 #include "shutdown_priority.h"
 
 namespace OHOS {
