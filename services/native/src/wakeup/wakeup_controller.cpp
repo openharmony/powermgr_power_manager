@@ -188,6 +188,11 @@ void WakeupController::StartWakeupTimer()
     handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS);
 }
 
+void WakeupController::NotifyDisplayActionDone(uint32_t event)
+{
+    handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
+}
+
 /** WakeupEventHandler Implement */
 
 void WakeupEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event)
