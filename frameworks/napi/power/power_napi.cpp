@@ -240,5 +240,13 @@ void PowerNapi::AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asy
     NAPI_CALL_RETURN_VOID(env, napi_queue_async_work(env, asyncInfo->GetAsyncWork()));
     asyncInfo.release();
 }
+
+napi_value PowerNapi::IsStandby(napi_env env, napi_callback_info info)
+{
+    bool standby = false;
+    napi_value napiValue;
+    NAPI_CALL(env, napi_get_boolean(env, standby, &napiValue));
+    return napiValue;
+}
 } // namespace PowerMgr
 } // namespace OHOS
