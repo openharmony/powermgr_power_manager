@@ -259,12 +259,12 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     auto status = static_cast<uint32_t>(data->status);
 
     if (status & LID_CLOSED_HALL_FLAG) {
-        POWER_HILOGI(FEATURE_SUSPEND, "swtich close event received, begin to suspend");
-        SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
+        POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
+        SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
         suspendController->ExecSuspendMonitorByReason(reason);
     } else {
-        POWER_HILOGI(FEATURE_WAKEUP, "swtich open event received, begin to wakeup");
-        WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
+        POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
+        WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_LID;
         wakeupController->ExecWakeupMonitorByReason(reason);
     }
 }
@@ -364,12 +364,12 @@ void PowerMgrService::SwitchSubscriberInit()
                 return;
             }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
-                POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
-                SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
+                POWER_HILOGI(FEATURE_SUSPEND, "Switch close event received, begin to suspend");
+                SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "Lid close event received, begin to suspend");
-                WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_LID;
+                POWER_HILOGI(FEATURE_WAKEUP, "Switch close event received, begin to suspend");
+                WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
         });
