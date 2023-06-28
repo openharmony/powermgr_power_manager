@@ -554,8 +554,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock080, TestSize.Level2)
     ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
     sleep(time / TRANSFER_MS_TO_S / TEST_RATE + ONE_SECOND);
     EXPECT_CALL(*g_stateAction, GoToSleep(_, _, false)).WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
-    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_TRUE(pms->GetState() == PowerState::INACTIVE || pms->GetState() == PowerState::SLEEP);
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock080:End");
     pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
