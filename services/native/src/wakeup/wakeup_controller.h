@@ -46,6 +46,7 @@ public:
     void RegisterSettingsObserver();
     void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
+    void NotifyDisplayActionDone(uint32_t event);
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;
