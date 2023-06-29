@@ -59,7 +59,7 @@ void DeviceStateAction::Wakeup(int64_t callTimeMs, WakeupDeviceType type, const 
 DisplayState DeviceStateAction::GetDisplayState()
 {
     DisplayPowerMgr::DisplayState state = DisplayPowerMgrClient::GetInstance().GetDisplayState();
-    POWER_HILOGI(FEATURE_POWER_STATE, "Get display state: %{public}d", state);
+    POWER_HILOGD(FEATURE_POWER_STATE, "Get display state: %{public}d", state);
     DisplayState ret = DisplayState::DISPLAY_UNKNOWN;
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON:
@@ -85,12 +85,12 @@ DisplayState DeviceStateAction::GetDisplayState()
 
 uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
 {
-    POWER_HILOGI(FEATURE_POWER_STATE, "Action: SetDisplayState: DisplayState=%{public}d, StateChangeReason=%{public}d",
+    POWER_HILOGD(FEATURE_POWER_STATE, "Action: SetDisplayState: DisplayState=%{public}d, StateChangeReason=%{public}d",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
 
     DisplayState currentState = GetDisplayState();
     if (state == currentState) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "Already ins state: %{public}d", static_cast<uint32_t>(state));
+        POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
 
