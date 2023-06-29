@@ -214,6 +214,7 @@ void PowerStateMachine::ActionCallback(uint32_t event)
     if (pms == nullptr) {
         return;
     }
+    pms->GetWakeupController()->NotifyDisplayActionDone(event);
     pms->NotifyDisplayActionDone(event);
 }
 
