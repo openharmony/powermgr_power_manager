@@ -29,6 +29,7 @@ namespace {
 static const std::string POWER_WAKEUP_CONFIG_FILE = "etc/power_config/power_wakeup.json";
 static const std::string VENDOR_POWER_WAKEUP_CONFIG_FILE = "/vendor/etc/power_config/power_wakeup.json";
 static const std::string SYSTEM_POWER_WAKEUP_CONFIG_FILE = "/system/etc/power_config/power_wakeup.json";
+static const uint32_t SINGLE_CLICK = static_cast<uint32_t>(WakeUpAction::CLICK_SINGLE);
 static const uint32_t DOUBLE_CLICK = static_cast<uint32_t>(WakeUpAction::CLICK_DOUBLE);
 } // namespace
 
@@ -117,14 +118,15 @@ bool WakeupSourceParser::ParseSourcesProc(
     std::shared_ptr<WakeupSources>& parseSources, Json::Value& valueObj, std::string& key)
 {
     bool enable = true;
-    uint32_t click = 0;
+    uint32_t click = DOUBLE_CLICK;
     WakeupDeviceType wakeupDeviceType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     if (valueObj.isObject()) {
         Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
         Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
-        if (!clickValue.isNull() && clickValue.isUInt()) {
-            POWER_HILOGD(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
-            click = clickValue.asUInt() <= DOUBLE_CLICK ? clickValue.asUInt() : 0;
+        if (!clickValue.isNull()) {
+            POWER_HILOGI(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
+            click = (clickValue.asUInt() == SINGLE_CLICK || clickValue.asUInt() == DOUBLE_CLICK) ? clickValue.asUInt() :
+                                                                                                   DOUBLE_CLICK;
         }
         if (enableValue.isBool()) {
             enable = enableValue.asBool();

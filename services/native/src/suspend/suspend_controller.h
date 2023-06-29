@@ -29,7 +29,7 @@
 namespace OHOS {
 namespace PowerMgr {
 
-using SuspendListener = std::function<void(SuspendDeviceType, uint32_t, int64_t)>;
+using SuspendListener = std::function<void(SuspendDeviceType, uint32_t, uint32_t)>;
 
 class SuspendMonitor;
 class SuspendEventHandler;
@@ -62,8 +62,8 @@ public:
     }
 
 private:
-    void ControlListener(SuspendDeviceType reason, uint32_t action, int64_t delay);
-    void StartSleepTimer(SuspendDeviceType reason, uint32_t action, int64_t delay);
+    void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
+    void StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void HandleAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
@@ -75,7 +75,7 @@ private:
     std::shared_ptr<PowerStateMachine> stateMachine_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<SuspendEventHandler> handler_ = nullptr;
-    int64_t sleepDuration_ {0};
+    uint32_t sleepDuration_ {0};
     int64_t sleepTime_ {-1};
     SuspendDeviceType sleepReason_ {0};
     uint32_t sleepAction_ {0};
@@ -121,7 +121,7 @@ public:
     {
         return action_;
     }
-    int64_t GetDelay()
+    uint32_t GetDelay()
     {
         return delayMs_;
     }
@@ -144,7 +144,7 @@ protected:
 
     SuspendDeviceType reason_;
     uint32_t action_;
-    int64_t delayMs_;
+    uint32_t delayMs_;
     SuspendListener listener_;
 };
 
