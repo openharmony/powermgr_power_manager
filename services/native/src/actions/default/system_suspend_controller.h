@@ -23,7 +23,6 @@
 
 #include "actions/running_lock_action_info.h"
 #include "hdi_service_status_listener.h"
-#include "powerms_event_handler.h"
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
@@ -38,7 +37,7 @@ public:
     int32_t AcquireRunningLock(const RunningLockParam& param);
     int32_t ReleaseRunningLock(const RunningLockParam& param);
     void Dump(std::string& info);
-    void RegisterHdiStatusListener(const std::shared_ptr<PowermsEventHandler>& handler);
+    void RegisterHdiStatusListener();
     void RegisterPowerHdiCallback();
     void UnRegisterPowerHdiCallback();
     

@@ -50,7 +50,6 @@
                 "display_manager",
                 "drivers_interface_factory",
                 "drivers_interface_power",
-                "eventhandler",
                 "ffrt",
                 "hdf_core",
                 "hicollie",
@@ -114,6 +113,13 @@
                         "shutdown/takeover_shutdown_callback_stub.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"
+                    }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/utils/ffrt:power_ffrt",
+                    "header": {
+                        "header_files": [ "ffrt_utils.h" ],
+                        "header_base": "//base/powermgr/power_manager/utils/ffrt/include"
                     }
                 },
                 {

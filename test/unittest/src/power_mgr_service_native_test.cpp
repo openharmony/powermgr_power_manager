@@ -54,8 +54,6 @@ void PowerMgrServiceNativeTest::SetUp()
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
     auto runningLockMgr = std::make_shared<RunningLockMgr>(g_pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
@@ -91,12 +89,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
     g_pmsTest->HallSensorSubscriberCancel();
 
     g_pmsTest->HandleShutdownRequest();
-    g_pmsTest->HandleScreenOnTimeout();
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
     g_pmsTest->HandleKeyEvent(keyCode);
     int32_t type = OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
     g_pmsTest->HandlePointEvent(type);
-    g_pmsTest->HandleScreenOnTimeout();
 
     EXPECT_TRUE(g_pmsTest->OverrideScreenOffTime(TIMEOUTMS));
     EXPECT_TRUE(g_pmsTest->RestoreScreenOffTime());

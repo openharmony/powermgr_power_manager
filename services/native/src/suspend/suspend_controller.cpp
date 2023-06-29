@@ -19,30 +19,30 @@
 #include <securec.h>
 #include <ipc_skeleton.h>
 #include "power_log.h"
+#include "ffrt_utils.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
-#include "powerms_event_handler.h"
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
 
-using namespace OHOS::MMI;
-
 namespace OHOS {
 namespace PowerMgr {
-
+using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
-}
+FFRTQueue g_queue("power_suspend_controller");
+FFRTHandle g_sleepTimeoutHandle;
+FFRTHandle g_userActivityOffTimeoutHandle;
+FFRTUtils::Mutex g_monitorMutex;
+} // namespace
 
 /** SuspendController Implement */
-
-SuspendController::SuspendController(ShutdownController* shutdownController,
-    std::shared_ptr<PowerStateMachine>& stateMachine, std::shared_ptr<AppExecFwk::EventRunner>& runner)
+SuspendController::SuspendController(
+    std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine)
 {
     shutdownController_ = shutdownController;
     stateMachine_ = stateMachine;
-    runner_ = runner;
 }
 
 SuspendController::~SuspendController()
@@ -75,7 +75,6 @@ private:
 void SuspendController::Init()
 {
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
-    handler_ = std::make_shared<SuspendEventHandler>(runner_, shared_from_this());
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
         POWER_HILOGE(FEATURE_SUSPEND, "InputManager is null");
@@ -90,7 +89,9 @@ void SuspendController::Init()
             POWER_HILOGI(FEATURE_SUSPEND, "register type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
+            g_monitorMutex.Lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
+            g_monitorMutex.Unlock();
         }
     }
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
@@ -100,11 +101,12 @@ void SuspendController::Init()
 
 void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
-    std::lock_guard lock(monitorMutex_);
+    g_monitorMutex.Lock();
     if (monitorMap_.find(reason) != monitorMap_.end()) {
         auto monitor = monitorMap_[reason];
         monitor->Notify();
     }
+    g_monitorMutex.Unlock();
 }
 
 void SuspendController::RegisterSettingsObserver()
@@ -114,7 +116,6 @@ void SuspendController::RegisterSettingsObserver()
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
-        std::lock_guard lock(monitorMutex_);
         POWER_HILOGI(COMP_SVC, "start setting string update");
         std::string jsonStr = SettingHelper::GetSettingSuspendSources();
         std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
@@ -130,7 +131,9 @@ void SuspendController::RegisterSettingsObserver()
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                     std::placeholders::_2, std::placeholders::_3));
+                g_monitorMutex.Lock();
                 monitorMap_.emplace(monitor->GetReason(), monitor);
+                g_monitorMutex.Unlock();
             }
         }
     };
@@ -145,41 +148,42 @@ void SuspendController::Execute()
 
 void SuspendController::Cancel()
 {
+    g_monitorMutex.Lock();
     for (auto monitor = monitorMap_.begin(); monitor != monitorMap_.end(); monitor++) {
         monitor->second->Cancel();
     }
     monitorMap_.clear();
+    g_monitorMutex.Unlock();
 }
 
 void SuspendController::StopSleep()
 {
-    if (handler_ == nullptr) {
-        return;
-    }
-
     if (sleepAction_ != static_cast<uint32_t>(SuspendAction::ACTION_NONE)) {
-        handler_->RemoveEvent(SuspendEventHandler::SLEEP_TIMEOUT_MSG);
+        FFRTUtils::CancelTask(g_sleepTimeoutHandle, g_queue);
         sleepTime_ = -1;
         sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
     }
 }
 
-void SuspendController::HandleEvent(uint32_t eventId)
+void SuspendController::HandleEvent(int64_t delayTime)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "HandleEvent=%{public}d", eventId);
-    switch (eventId) {
-        case PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
-            auto timeoutSuspendMonitor =
-                monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-            if (timeoutSuspendMonitor != monitorMap_.end()) {
-                timeoutSuspendMonitor->second->HandleEvent(
-                    static_cast<uint32_t>(SuspendEventHandler::SCREEN_OFF_TIMEOUT_MSG));
-            }
-            break;
+    FFRTTask task = [&]() {
+        g_monitorMutex.Lock();
+        auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+        if (timeoutSuspendMonitor == monitorMap_.end()) {
+            g_monitorMutex.Unlock();
+            return;
         }
-        default:
-            break;
-    }
+        g_monitorMutex.Unlock();
+        auto monitor = timeoutSuspendMonitor->second;
+        monitor->HandleEvent();
+    };
+    g_userActivityOffTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delayTime, g_queue);
+}
+
+void SuspendController::CancelEvent()
+{
+    FFRTUtils::CancelTask(g_userActivityOffTimeoutHandle, g_queue);
 }
 
 void SuspendController::RecordPowerKeyDown()
@@ -245,10 +249,10 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     if (delay == 0) {
         HandleAction(reason, action);
     } else {
-        if (handler_ == nullptr) {
-            return;
-        }
-        handler_->SendEvent(SuspendEventHandler::SLEEP_TIMEOUT_MSG, delay);
+        FFRTTask task = [this] {
+            HandleAction(GetLastReason(), GetLastAction());
+        };
+        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, g_queue);
     }
 }
 
@@ -318,28 +322,6 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
     shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
-}
-
-/** SuspendEventHandler Implement */
-void SuspendEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event)
-{
-    std::shared_ptr<SuspendController> controller = controller_.lock();
-    if (controller == nullptr) {
-        POWER_HILOGI(FEATURE_SUSPEND, "ProcessEvent: No controller");
-        return;
-    }
-    POWER_HILOGI(FEATURE_SUSPEND, "recv event=%{public}d", event->GetInnerEventId());
-    switch (event->GetInnerEventId()) {
-        case SLEEP_TIMEOUT_MSG: {
-            POWER_HILOGI(FEATURE_SUSPEND, "reason=%{public}u action=%{public}u", controller->GetLastReason(),
-                controller->GetLastAction());
-            controller->HandleAction(controller->GetLastReason(), controller->GetLastAction());
-            break;
-        }
-        default:
-            break;
-    }
-    POWER_HILOGI(FEATURE_SUSPEND, "process event fin");
 }
 
 std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
@@ -416,17 +398,10 @@ bool TimeoutSuspendMonitor::Init()
 
 void TimeoutSuspendMonitor::Cancel() {}
 
-void TimeoutSuspendMonitor::HandleEvent(uint32_t eventId)
+void TimeoutSuspendMonitor::HandleEvent()
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "TimeoutSuspendMonitor HandleEvent=%{public}d", eventId);
-    switch (eventId) {
-        case SuspendEventHandler::SCREEN_OFF_TIMEOUT_MSG: {
-            Notify();
-            break;
-        }
-        default:
-            break;
-    }
+    POWER_HILOGI(FEATURE_INPUT, "TimeoutSuspendMonitor HandleEvent");
+    Notify();
 }
 
 /** LidSuspendMonitor Implement */

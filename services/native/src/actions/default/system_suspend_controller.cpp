@@ -17,28 +17,32 @@
 
 #include "power_common.h"
 #include "power_log.h"
+#include "ffrt_utils.h"
 #include "suspend/running_lock_hub.h"
-
-using namespace OHOS::HDI::Power::V1_1;
-
-namespace {
-const std::string HDI_SERVICE_NAME = "power_interface_service";
-constexpr uint32_t RETRY_TIME = 1000;
-} // namespace
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+const std::string HDI_SERVICE_NAME = "power_interface_service";
+FFRTQueue g_queue("power_system_suspend_controller");
+constexpr uint32_t RETRY_TIME = 1000;
+} // namespace
+using namespace OHOS::HDI::Power::V1_1;
+
 SystemSuspendController::SystemSuspendController() {}
 
 SystemSuspendController::~SystemSuspendController() = default;
 
-void SystemSuspendController::RegisterHdiStatusListener(const std::shared_ptr<PowermsEventHandler>& handler)
+void SystemSuspendController::RegisterHdiStatusListener()
 {
     POWER_HILOGD(COMP_SVC, "power rigister Hdi status listener");
     hdiServiceMgr_ = OHOS::HDI::ServiceManager::V1_0::IServiceManager::Get();
     if (hdiServiceMgr_ == nullptr) {
-        handler->SendEvent(PowermsEventHandler::RETRY_REGISTER_HDI_STATUS_LISTENER, 0, RETRY_TIME);
+        FFRTTask retryTask = [this] {
+            RegisterHdiStatusListener();
+        };
         POWER_HILOGW(COMP_SVC, "hdi service manager is nullptr");
+        FFRTUtils::SubmitDelayTask(retryTask, RETRY_TIME, g_queue);
         return;
     }
 
@@ -47,7 +51,10 @@ void SystemSuspendController::RegisterHdiStatusListener(const std::shared_ptr<Po
             RETURN_IF(status.serviceName != HDI_SERVICE_NAME || status.deviceClass != DEVICE_CLASS_DEFAULT);
 
             if (status.status == SERVIE_STATUS_START) {
-                handler->SendEvent(PowermsEventHandler::REGISTER_POWER_HDI_CALLBACK, 0, 0);
+                FFRTTask task = [this] {
+                    RegisterPowerHdiCallback();
+                };
+                FFRTUtils::SubmitTask(task);
                 POWER_HILOGI(COMP_SVC, "power interface service start");
             } else if (status.status == SERVIE_STATUS_STOP && powerInterface_) {
                 powerInterface_ = nullptr;
@@ -57,8 +64,11 @@ void SystemSuspendController::RegisterHdiStatusListener(const std::shared_ptr<Po
 
     int32_t status = hdiServiceMgr_->RegisterServiceStatusListener(hdiServStatListener_, DEVICE_CLASS_DEFAULT);
     if (status != ERR_OK) {
-        handler->SendEvent(PowermsEventHandler::RETRY_REGISTER_HDI_STATUS_LISTENER, 0, RETRY_TIME);
+        FFRTTask retryTask = [this] {
+            RegisterHdiStatusListener();
+        };
         POWER_HILOGW(COMP_SVC, "Register hdi failed");
+        FFRTUtils::SubmitDelayTask(retryTask, RETRY_TIME, g_queue);
     }
 }
 
