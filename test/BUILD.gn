@@ -14,6 +14,11 @@
 import("//build/test.gni")
 import("../powermgr.gni")
 
+group("apitest") {
+  testonly = true
+  deps = [ "apitest/inner_api/ffrt:apitest" ]
+}
+
 group("systemtest") {
   testonly = true
   deps = [ "systemtest:systemtest_powermgr" ]
@@ -27,6 +32,7 @@ group("fuzztest") {
 group("unittest") {
   testonly = true
   deps = [
+    "apitest/inner_api/ffrt:apitest",
     "apitest/inner_api/shutdown:unittest",
     "unittest:unittest",
     "unittest/src/servicetest:unittest",
