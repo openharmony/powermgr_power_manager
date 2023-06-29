@@ -283,9 +283,8 @@ void PowerStateMachine::RefreshActivityInner(
         }
         // reset timer
         ResetInactiveTimer();
-        POWER_HILOGD(FEATURE_ACTIVITY, "Refresh activity success");
     } else {
-        POWER_HILOGE(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
+        POWER_HILOGD(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
     }
 }
 
@@ -294,7 +293,6 @@ bool PowerStateMachine::CheckRefreshTime()
     // The minimum refreshactivity interval is 100ms!!
     int64_t now = GetTickCount();
     if ((mDeviceState_.lastRefreshActivityTime + MIN_TIME_MS_BETWEEN_USERACTIVITIES) > now) {
-        POWER_HILOGD(FEATURE_ACTIVITY, "Refresh activity too fast");
         return true;
     }
     mDeviceState_.lastRefreshActivityTime = now;
@@ -856,7 +854,6 @@ void PowerStateMachine::SetDisplaySuspend(bool enable)
 
 StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType type)
 {
-    POWER_HILOGD(FEATURE_ACTIVITY, "UserActivityType: %{public}u", type);
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     switch (type) {
         case UserActivityType::USER_ACTIVITY_TYPE_BUTTON:
@@ -876,7 +873,6 @@ StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType ty
         default:
             break;
     }
-    POWER_HILOGD(FEATURE_ACTIVITY, "StateChangeReason: %{public}u", ret);
     return ret;
 }
 

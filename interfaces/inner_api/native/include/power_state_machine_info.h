@@ -44,6 +44,9 @@ constexpr int MAX_STRING_LENGTH = 128;
 // Throttling interval for user activity calls.
 constexpr int64_t MIN_TIME_MS_BETWEEN_USERACTIVITIES = 100; // 100ms
 
+// Throttling interval for multimode activity calls.
+constexpr int64_t MIN_TIME_MS_BETWEEN_MULTIMODEACTIVITIES = 100; // 100ms
+
 // the reason for shut down device fast
 constexpr const char* const SHUTDOWN_FAST_REASON = "STR";
 

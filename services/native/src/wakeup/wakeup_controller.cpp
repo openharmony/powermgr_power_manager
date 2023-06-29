@@ -48,6 +48,12 @@ WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMach
     if (monitorId_ < 0) {
         monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
     }
+    eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD, 0);
+    eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_MOUSE, 0);
+    eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD, 0);
+    eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_PEN, 0);
+    eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_TOUCH_SCREEN, 0);
+    eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK, 0);
 }
 
 WakeupController::~WakeupController()
@@ -221,6 +227,10 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
 
+    PowerState state = pms->GetState();
+    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+        return;
+    }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     if (wakeupController == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "wakeupController is not init");
@@ -235,6 +245,9 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 
     if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
+        if (wakeupController->CheckEventReciveTime(wakeupType)) {
+            return;
+        }
     }
 
     POWER_HILOGI(FEATURE_WAKEUP, "KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
@@ -252,6 +265,10 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
 
+    PowerState state = pms->GetState();
+    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+        return;
+    }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
@@ -260,10 +277,11 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     }
     int32_t deviceType = pointerItem.GetToolType();
     int32_t sourceType = pointerEvent->GetSourceType();
-    POWER_HILOGI(FEATURE_WAKEUP, "deviceType=%{public}d", deviceType);
     if (deviceType == PointerEvent::TOOL_TYPE_PEN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
-        POWER_HILOGI(FEATURE_WAKEUP, "current wakeup reason=%{public}u", wakeupType);
+        if (wakeupController->CheckEventReciveTime(wakeupType)) {
+            return;
+        }
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
         return;
     }
@@ -281,14 +299,11 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         default:
             break;
     }
-
-    if (wakeupType == WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK) {
-        int64_t now = static_cast<int64_t>(time(nullptr));
-        pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    if (wakeupController->CheckEventReciveTime(wakeupType)) {
+        return;
     }
 
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
-        POWER_HILOGI(FEATURE_WAKEUP, "current wakeup reason=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
 }
@@ -302,6 +317,21 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY, false);
+}
+
+bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
+{
+    // The minimum refreshactivity interval is 100ms!!
+    int64_t now = GetTickCount();
+    std::lock_guard lock(eventHandleMutex_);
+    if (eventHandleMap_.find(wakeupType) != eventHandleMap_.end()) {
+        if ((eventHandleMap_[wakeupType] + MIN_TIME_MS_BETWEEN_MULTIMODEACTIVITIES) > now) {
+            eventHandleMap_[wakeupType] = now;
+            return false;
+        }
+        return true;
+    }
+    return true;
 }
 
 /* WakeupMonitor Implement */
