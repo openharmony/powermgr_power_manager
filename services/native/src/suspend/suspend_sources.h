@@ -52,7 +52,7 @@ public:
     {
         return action_;
     }
-    int64_t GetDelay()
+    uint32_t GetDelay()
     {
         return delayMs_;
     }
@@ -60,7 +60,7 @@ public:
 private:
     SuspendDeviceType reason_;
     uint32_t action_;
-    int64_t delayMs_;
+    uint32_t delayMs_;
 };
 
 class SuspendSources {

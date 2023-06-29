@@ -119,7 +119,7 @@ bool SuspendSourceParser::ParseSourcesProc(
         return false;
     }
 
-    uint32_t action = 1;
+    uint32_t action = 0;
     uint32_t delayMs = 0;
     if (valueObj.isObject()) {
         Json::Value actionValue = valueObj[SuspendSource::ACTION_KEY];
@@ -130,7 +130,7 @@ bool SuspendSourceParser::ParseSourcesProc(
             delayMs = delayValue.asUInt();
             POWER_HILOGI(FEATURE_SUSPEND, "delayMs=%{public}u", delayMs);
             if (action >= ILLEGAL_ACTION) {
-                action = 1;
+                action = 0;
             }
         }
     }
