@@ -51,6 +51,7 @@
                 "drivers_interface_factory",
                 "drivers_interface_power",
                 "eventhandler",
+                "ffrt",
                 "hdf_core",
                 "hicollie",
                 "hilog_native",
@@ -116,6 +117,13 @@
                     }
                 },
                 {
+                    "name": "//base/powermgr/power_manager/utils/ffrt:power_ffrt",
+                    "header": {
+                        "header_files": [ "ffrt_utils.h" ],
+                        "header_base": "//base/powermgr/power_manager/utils/ffrt/include"
+                    }
+                },
+                {
                     "name": "//base/powermgr/power_manager/utils/param:power_sysparam",
                     "header": {
                       "header_files": [ "sysparam.h" ],
@@ -141,6 +149,7 @@
                 }
             ],
             "test": [
+                "//base/powermgr/power_manager/test:apitest",
                 "//base/powermgr/power_manager/test:unittest",
                 "//base/powermgr/power_manager/test:fuzztest",
                 "//base/powermgr/power_manager/test:systemtest"
