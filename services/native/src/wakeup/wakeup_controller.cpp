@@ -26,8 +26,8 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
-#include "powerms_event_handler.h"
 #include "setting_helper.h"
+#include "ffrt_utils.h"
 #include "system_suspend_controller.h"
 
 namespace OHOS {
@@ -35,15 +35,15 @@ namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
+FFRTQueue g_queue("power_wakeup_controller");
+FFRTHandle g_screenTimeoutHandle;
 }
 
 /** WakeupController Implement */
 
-WakeupController::WakeupController(
-    std::shared_ptr<PowerStateMachine>& stateMachine, std::shared_ptr<AppExecFwk::EventRunner>& runner)
+WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine)
 {
     stateMachine_ = stateMachine;
-    runner_ = runner;
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
     if (monitorId_ < 0) {
         monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
@@ -60,12 +60,14 @@ WakeupController::~WakeupController()
     if (g_wakeupSourcesKeyObserver) {
         SettingHelper::UnregisterSettingWakeupSourcesObserver(g_wakeupSourcesKeyObserver);
     }
+    if (g_screenTimeoutHandle) {
+        FFRTUtils::CancelTask(g_screenTimeoutHandle, g_queue);
+    }
 }
 
 void WakeupController::Init()
 {
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
-    handler_ = std::make_shared<WakeupEventHandler>(runner_, shared_from_this());
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
         POWER_HILOGE(FEATURE_WAKEUP, "InputManager is null");
@@ -82,6 +84,16 @@ void WakeupController::Init()
         }
     }
     RegisterSettingsObserver();
+
+    std::function<void(uint32_t)> callback = [&](uint32_t event) {
+        POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone: %{public}d", event);
+        FFRTUtils::CancelTask(g_screenTimeoutHandle, g_queue);
+    };
+    auto stateAction = stateMachine_->GetStateAction();
+    if (stateAction != nullptr) {
+        stateAction->RegisterCallback(callback);
+        POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone callback registered");
+    }
 }
 
 void WakeupController::Cancel()
@@ -182,38 +194,20 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
 void WakeupController::StartWakeupTimer()
 {
-    if (handler_ == nullptr) {
-        return;
-    }
-    handler_->SendEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG, 0, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS);
+    FFRTTask task = [this] {
+        HandleScreenOnTimeout();
+    };
+    g_screenTimeoutHandle = FFRTUtils::SubmitDelayTask(task, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS, g_queue);
 }
 
-void WakeupController::NotifyDisplayActionDone(uint32_t event)
+void WakeupController::HandleScreenOnTimeout()
 {
-    handler_->RemoveEvent(PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG);
-}
-
-/** WakeupEventHandler Implement */
-
-void WakeupEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event)
-{
-    std::shared_ptr<WakeupController> controller = controller_.lock();
-    if (controller == nullptr) {
-        POWER_HILOGI(FEATURE_WAKEUP, "ProcessEvent: No controller");
-        return;
-    }
-    POWER_HILOGI(FEATURE_WAKEUP, "recv event=%{public}d", event->GetInnerEventId());
-    switch (event->GetInnerEventId()) {
-        case PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG: {
-            std::string message = "POWER KEY TIMEOUT BUT DISPLAY NOT FINISHED";
-            HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT",
-                HiviewDFX::HiSysEvent::EventType::FAULT, "PID", IPCSkeleton::GetCallingPid(), "UID",
-                IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", message.c_str());
-            break;
-        }
-        default:
-            break;
-    }
+    POWER_HILOGW(FEATURE_INPUT, "PowerKey press timeout");
+    std::string message = "POWER KEY TIMEOUT BUT DISPLAY NOT FINISHED";
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT", HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", IPCSkeleton::GetCallingPid(), "UID", IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "", "PROCESS_NAME",
+        "", "MSG", message.c_str());
+    POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
 }
 
 /* InputCallback achieve */

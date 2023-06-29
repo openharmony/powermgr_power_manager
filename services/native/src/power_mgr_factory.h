@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ namespace PowerMgr {
 class PowerMgrFactory {
 public:
     static std::unique_ptr<IDevicePowerAction> GetDevicePowerAction();
-    static std::unique_ptr<IDeviceStateAction> GetDeviceStateAction();
+    static std::shared_ptr<IDeviceStateAction> GetDeviceStateAction();
     static std::unique_ptr<IRunningLockAction> GetRunningLockAction();
 };
 } // namespace PowerMgr

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,12 +32,12 @@ unique_ptr<IDevicePowerAction> PowerMgrFactory::GetDevicePowerAction()
     return make_unique<DevicePowerAction>();
 }
 
-unique_ptr<IDeviceStateAction> PowerMgrFactory::GetDeviceStateAction()
+shared_ptr<IDeviceStateAction> PowerMgrFactory::GetDeviceStateAction()
 {
 #ifdef HAS_DISPLAY_MANAGER_PART
-    return make_unique<DeviceStateAction>();
+    return make_shared<DeviceStateAction>();
 #else
-    return make_unique<DefaultDeviceStateAction>();
+    return make_shared<DefaultDeviceStateAction>();
 #endif
 }
 

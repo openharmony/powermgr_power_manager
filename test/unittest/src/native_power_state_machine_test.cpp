@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,14 +105,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
     stateMachine->UnRegisterPowerStateCallback(cb2);
     stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true));
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = PowermsEventHandler::SYSTEM_WAKE_UP_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
-    powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device end.";
@@ -130,7 +122,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level
     pmsTest->OnStart();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
     EXPECT_TRUE(stateMachine->Init());
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
+    int32_t powermsEvent = PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
     stateMachine->SetDelayTimer(stateMachine->GetDisplayOffTime() / THREE, powermsEvent);
 
     SuspendDeviceType suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION;

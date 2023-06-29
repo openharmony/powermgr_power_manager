@@ -37,7 +37,6 @@ deps_ex = [
   "bundle_framework:appexecfwk_core",
   "common_event_service:cesfwk_innerkits",
   "c_utils:utils",
-  "eventhandler:libeventhandler",
   "hilog:libhilog",
   "ipc:ipc_core",
   "safwk:system_ability_fwk",
