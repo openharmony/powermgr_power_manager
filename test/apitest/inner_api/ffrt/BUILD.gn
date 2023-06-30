@@ -37,7 +37,7 @@ ohos_unittest("test_ffrt_utils") {
   external_deps = [
     "c_utils:utils",
     "ffrt:libffrt",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 }
 

@@ -36,7 +36,7 @@ ohos_shared_library("power_sysparam") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
   ]
