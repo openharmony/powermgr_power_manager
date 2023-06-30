@@ -34,7 +34,7 @@ ohos_shared_library("power_ffrt") {
   external_deps = [
     "c_utils:utils",
     "ffrt:libffrt",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 
   subsystem_name = "powermgr"

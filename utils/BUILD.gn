@@ -54,7 +54,7 @@ ohos_executable("power-shell") {
   external_deps = [
     "ability_runtime:tools_aa_source_set",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 
