@@ -20,7 +20,9 @@
 
 #include "power_common.h"
 #include "power_errors.h"
+#include "power_mgr_ipc_interface_code.h"
 #include "shutdown_stub_delegator.h"
+#include "shutdown/shutdown_client_ipc_interface_code.h"
 #include "xcollie/xcollie.h"
 
 using namespace OHOS::HiviewDFX;
@@ -54,82 +56,82 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
 
     int ret = ERR_OK;
     switch (code) {
-        case static_cast<int>(IPowerMgr::WAKEUP_DEVICE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::WAKEUP_DEVICE):
             ret = WakeupDeviceStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::SUSPEND_DEVICE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SUSPEND_DEVICE):
             ret = SuspendDeviceStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::REFRESH_ACTIVITY):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REFRESH_ACTIVITY):
             ret = RefreshActivityStub(data);
             break;
-        case static_cast<int>(IPowerMgr::REBOOT_DEVICE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REBOOT_DEVICE):
             ret = RebootDeviceStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::REBOOT_DEVICE_FOR_DEPRECATED):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REBOOT_DEVICE_FOR_DEPRECATED):
             ret = RebootDeviceForDeprecatedStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHUTDOWN_DEVICE):
             ret = ShutDownDeviceStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::OVERRIDE_DISPLAY_OFF_TIME):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME):
             ret = OverrideScreenOffTimeStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::RESTORE_DISPLAY_OFF_TIME):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME):
             ret = RestoreScreenOffTimeStub(reply);
             break;
-        case static_cast<int>(IPowerMgr::GET_STATE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GET_STATE):
             ret = GetStateStub(reply);
             break;
-        case static_cast<int>(IPowerMgr::IS_SCREEN_ON):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON):
             ret = IsScreeOnStub(reply);
             break;
-        case static_cast<int>(IPowerMgr::FORCE_DEVICE_SUSPEND):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND):
             ret = ForceSuspendDeviceStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::CREATE_RUNNINGLOCK):
             ret = CreateRunningLockStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RELEASE_RUNNINGLOCK):
             ret = ReleaseRunningLockStub(data);
             break;
-        case static_cast<int>(IPowerMgr::IS_RUNNINGLOCK_TYPE_SUPPORTED):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_RUNNINGLOCK_TYPE_SUPPORTED):
             ret = IsRunningLockTypeSupportedStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK):
             ret = LockStub(data);
             break;
-        case static_cast<int>(IPowerMgr::RUNNINGLOCK_UNLOCK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK):
             ret = UnLockStub(data);
             break;
-        case static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCK):
             ret = ProxyRunningLockStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::RUNNINGLOCK_ISUSED):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_ISUSED):
             ret = IsUsedStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::REG_POWER_STATE_CALLBACK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK):
             ret = RegisterPowerStateCallbackStub(data);
             break;
-        case static_cast<int>(IPowerMgr::UNREG_POWER_STATE_CALLBACK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_STATE_CALLBACK):
             ret = UnRegisterPowerStateCallbackStub(data);
             break;
-        case static_cast<int>(IPowerMgr::REG_POWER_MODE_CALLBACK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_MODE_CALLBACK):
             ret = RegisterPowerModeCallbackStub(data);
             break;
-        case static_cast<int>(IPowerMgr::UNREG_POWER_MODE_CALLBACK):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_MODE_CALLBACK):
             ret = UnRegisterPowerModeCallbackStub(data);
             break;
-        case static_cast<int>(IPowerMgr::SET_DISPLAY_SUSPEND):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_DISPLAY_SUSPEND):
             ret = SetDisplaySuspendStub(data);
             break;
-        case static_cast<int>(IPowerMgr::SETMODE_DEVICE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SETMODE_DEVICE):
             ret = SetDeviceModeStub(data, reply);
             break;
-        case static_cast<int>(IPowerMgr::GETMODE_DEVICE):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GETMODE_DEVICE):
             ret = GetDeviceModeStub(reply);
             break;
-        case static_cast<int>(IPowerMgr::SHELL_DUMP):
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHELL_DUMP):
             ret = ShellDumpStub(data, reply);
             break;
         default:
@@ -440,7 +442,8 @@ int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
 
 bool PowerMgrStub::IsShutdownCommand(uint32_t code)
 {
-    return (code >= IShutdownClient::CMD_START) && (code <= IShutdownClient::CMD_END);
+    return (code >= static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_START)) &&
+        (code <= static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_END));
 }
 } // namespace PowerMgr
 } // namespace OHOS

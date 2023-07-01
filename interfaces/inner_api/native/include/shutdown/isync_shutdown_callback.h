@@ -23,10 +23,6 @@ namespace OHOS {
 namespace PowerMgr {
 class ISyncShutdownCallback : public IRemoteBroker {
 public:
-    enum {
-        CMD_ON_SYNC_SHUTDOWN = 0,
-    };
-
     /**
      * Synchronous shutdown callback interface.
      * <p>

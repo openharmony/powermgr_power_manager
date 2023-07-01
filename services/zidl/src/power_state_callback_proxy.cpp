@@ -20,6 +20,7 @@
 #include "message_option.h"
 #include "power_log.h"
 #include "power_common.h"
+#include "power_state_callback_ipc_interface_code.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -39,7 +40,8 @@ void PowerStateCallbackProxy::OnPowerStateChanged(PowerState state)
 
     WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(state));
 
-    int ret = remote->SendRequest(static_cast<int>(IPowerStateCallback::POWER_STATE_CHANGED),
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerStateCallbackInterfaceCode::POWER_STATE_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
