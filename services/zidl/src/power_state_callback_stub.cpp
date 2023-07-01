@@ -18,6 +18,7 @@
 #include <message_parcel.h>
 
 #include "power_common.h"
+#include "power_state_callback_ipc_interface_code.h"
 #include "power_state_callback_proxy.h"
 #include "xcollie/xcollie.h"
 
@@ -38,7 +39,7 @@ int PowerStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     }
 
     int ret = ERR_OK;
-    if (code == static_cast<uint32_t>(IPowerStateCallback::POWER_STATE_CHANGED)) {
+    if (code == static_cast<uint32_t>(PowerMgr::PowerStateCallbackInterfaceCode::POWER_STATE_CHANGED)) {
         ret = OnPowerStateChangedStub(data);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);

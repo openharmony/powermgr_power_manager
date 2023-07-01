@@ -16,6 +16,7 @@
 #include "shutdown_stub_delegator.h"
 
 #include "power_common.h"
+#include "shutdown/shutdown_client_ipc_interface_code.h"
 #include "xcollie/xcollie.h"
 
 namespace OHOS {
@@ -29,24 +30,24 @@ int32_t ShutdownStubDelegator::HandleRemoteRequest(
 {
     int32_t id = HiviewDFX::XCollie::GetInstance().SetTimer("ShutdownStub", DFX_DELAY_MS, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_NOOP);
-    int32_t ret;
+    int32_t ret = ERR_OK;
     switch (code) {
-        case IShutdownClient::CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK:
+        case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK):
             ret = RegisterTakeOverShutdownCallback(data);
             break;
-        case IShutdownClient::CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK:
+        case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK):
             ret = UnRegisterTakeOverShutdownCallback(data);
             break;
-        case IShutdownClient::CMD_REG_ASYNC_SHUTDOWN_CALLBACK:
+        case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_ASYNC_SHUTDOWN_CALLBACK):
             ret = RegisterAsyncShutdownCallback(data);
             break;
-        case IShutdownClient::CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK:
+        case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK):
             ret = UnRegisterAsyncShutdownCallback(data);
             break;
-        case IShutdownClient::CMD_REG_SYNC_SHUTDOWN_CALLBACK:
+        case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_SYNC_SHUTDOWN_CALLBACK):
             ret = RegisterSyncShutdownCallback(data);
             break;
-        case IShutdownClient::CMD_UNREG_SYNC_SHUTDOWN_CALLBACK:
+        case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_UNREG_SYNC_SHUTDOWN_CALLBACK):
             ret = UnRegisterSyncShutdownCallback(data);
             break;
         default:

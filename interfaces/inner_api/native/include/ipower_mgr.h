@@ -33,35 +33,6 @@ namespace OHOS {
 namespace PowerMgr {
 class IPowerMgr : public IShutdownClient, public IRemoteBroker {
 public:
-    enum {
-        CREATE_RUNNINGLOCK = 0,
-        RELEASE_RUNNINGLOCK,
-        IS_RUNNINGLOCK_TYPE_SUPPORTED,
-        RUNNINGLOCK_LOCK,
-        RUNNINGLOCK_UNLOCK,
-        RUNNINGLOCK_ISUSED,
-        PROXY_RUNNINGLOCK,
-        WAKEUP_DEVICE,
-        SUSPEND_DEVICE,
-        REFRESH_ACTIVITY,
-        OVERRIDE_DISPLAY_OFF_TIME,
-        RESTORE_DISPLAY_OFF_TIME,
-        GET_STATE,
-        IS_SCREEN_ON,
-        FORCE_DEVICE_SUSPEND,
-        REBOOT_DEVICE,
-        REBOOT_DEVICE_FOR_DEPRECATED,
-        SHUTDOWN_DEVICE,
-        REG_POWER_STATE_CALLBACK,
-        UNREG_POWER_STATE_CALLBACK,
-        REG_POWER_MODE_CALLBACK,
-        UNREG_POWER_MODE_CALLBACK,
-        SET_DISPLAY_SUSPEND,
-        SETMODE_DEVICE,
-        GETMODE_DEVICE,
-        SHELL_DUMP
-    };
-
     virtual PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockInfo& runningLockInfo) = 0;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
