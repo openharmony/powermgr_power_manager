@@ -48,7 +48,7 @@ ohos_fuzztest("PowerFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "sensor:sensor_interface_native",

@@ -55,7 +55,7 @@ deps_ex = [
   "eventhandler:libeventhandler",
   "common_event_service:cesfwk_innerkits",
   "ipc:ipc_core",
-  "hiviewdfx_hilog_native:libhilog",
+  "hilog:libhilog",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "sensor:sensor_interface_native",
@@ -773,7 +773,7 @@ ohos_unittest("test_power_suspend_parse") {
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
@@ -810,7 +810,7 @@ ohos_unittest("test_power_wakeup_parse") {
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
@@ -850,7 +850,7 @@ ohos_unittest("test_power_suspend") {
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
@@ -890,7 +890,7 @@ ohos_unittest("test_power_wakeup") {
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
