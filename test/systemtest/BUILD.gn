@@ -38,7 +38,7 @@ deps_ex = [
   "common_event_service:cesfwk_innerkits",
   "c_utils:utils",
   "eventhandler:libeventhandler",
-  "hiviewdfx_hilog_native:libhilog",
+  "hilog:libhilog",
   "ipc:ipc_core",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",

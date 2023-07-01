@@ -31,7 +31,7 @@ ohos_shared_library("runninglock") {
 
   deps_ex = [
     "c_utils:utils",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 
   if (!build_public_version) {

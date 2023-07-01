@@ -89,9 +89,9 @@ ohos_shared_library("powermgrservice") {
     "hdf_core:libhdi",
     "hdf_core:libpub_utils",
     "hicollie:libhicollie",
-    "hisysevent_native:libhisysevent",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_framework:image_native",
@@ -144,7 +144,7 @@ ohos_shared_library("powermgr_stub") {
   external_deps = [
     "c_utils:utils",
     "hicollie:libhicollie",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 
