@@ -25,20 +25,6 @@ namespace OHOS {
 namespace PowerMgr {
 class IShutdownClient {
 public:
-    enum {
-        CMD_START = 200,
-        CMD_REBOOT,
-        CMD_REBOOT_FOR_DEPRECATED,
-        CMD_SHUTDOWN,
-        CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK,
-        CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK,
-        CMD_REG_ASYNC_SHUTDOWN_CALLBACK,
-        CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK,
-        CMD_REG_SYNC_SHUTDOWN_CALLBACK,
-        CMD_UNREG_SYNC_SHUTDOWN_CALLBACK,
-        CMD_END = 299,
-    };
-
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;
     virtual void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) = 0;

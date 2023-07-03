@@ -23,10 +23,6 @@ namespace OHOS {
 namespace PowerMgr {
 class IAsyncShutdownCallback : public IRemoteBroker {
 public:
-    enum {
-        CMD_ON_ASYNC_SHUTDOWN = 0,
-    };
-
     /**
      * Asynchronous shutdown callback interface.
      * <p>

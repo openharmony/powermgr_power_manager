@@ -23,10 +23,6 @@ namespace OHOS {
 namespace PowerMgr {
 class ITakeOverShutdownCallback : public IRemoteBroker {
 public:
-    enum {
-        CMD_ON_TAKEOVER_SHUTDOWN = 0,
-    };
-
     /**
      * This callback interface is executed when the system is shut down or restarted.
      *

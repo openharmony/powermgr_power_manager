@@ -16,6 +16,7 @@
 #include "shutdown_proxy_delegator.h"
 
 #include "power_common.h"
+#include "shutdown/shutdown_client_ipc_interface_code.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -36,7 +37,8 @@ void ShutdownProxyDelegator::RegisterShutdownCallback(
     WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(priority));
 
     int ret = remote_->SendRequest(
-        static_cast<int>(IShutdownClient::CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK), data, reply, option);
+        static_cast<int>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
     }
@@ -57,7 +59,8 @@ void ShutdownProxyDelegator::UnRegisterShutdownCallback(const sptr<ITakeOverShut
     WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
 
     int ret = remote_->SendRequest(
-        static_cast<int>(IShutdownClient::CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK), data, reply, option);
+        static_cast<int>(PowerMgr::ShutdownClientInterfaceCode::CMD_UNREG_TAKEOVER_SHUTDOWN_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
     }
@@ -80,7 +83,8 @@ void ShutdownProxyDelegator::RegisterShutdownCallback(
     WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(priority));
 
     int ret = remote_->SendRequest(
-        static_cast<int>(IShutdownClient::CMD_REG_ASYNC_SHUTDOWN_CALLBACK), data, reply, option);
+        static_cast<int>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_ASYNC_SHUTDOWN_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
     }
@@ -101,7 +105,8 @@ void ShutdownProxyDelegator::UnRegisterShutdownCallback(const sptr<IAsyncShutdow
     WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
 
     int ret = remote_->SendRequest(
-        static_cast<int>(IShutdownClient::CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK), data, reply, option);
+        static_cast<int>(PowerMgr::ShutdownClientInterfaceCode::CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
     }
@@ -124,7 +129,8 @@ void ShutdownProxyDelegator::RegisterShutdownCallback(
     WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(priority));
 
     int ret = remote_->SendRequest(
-        static_cast<int>(IShutdownClient::CMD_REG_SYNC_SHUTDOWN_CALLBACK), data, reply, option);
+        static_cast<int>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_SYNC_SHUTDOWN_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
     }
@@ -145,7 +151,8 @@ void ShutdownProxyDelegator::UnRegisterShutdownCallback(const sptr<ISyncShutdown
     WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
 
     int ret = remote_->SendRequest(
-        static_cast<int>(IShutdownClient::CMD_UNREG_SYNC_SHUTDOWN_CALLBACK), data, reply, option);
+        static_cast<int>(PowerMgr::ShutdownClientInterfaceCode::CMD_UNREG_SYNC_SHUTDOWN_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
     }

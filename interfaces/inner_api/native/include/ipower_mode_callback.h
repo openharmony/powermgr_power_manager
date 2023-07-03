@@ -26,10 +26,6 @@ namespace OHOS {
 namespace PowerMgr {
 class IPowerModeCallback : public IRemoteBroker {
 public:
-    enum {
-        POWER_MODE_CHANGED = 0,
-    };
-
     virtual void OnPowerModeChanged(PowerMode mode) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerModeCallback");

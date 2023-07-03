@@ -19,6 +19,7 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "power_common.h"
+#include "shutdown/sync_shutdown_callback_ipc_interface_code.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -36,7 +37,8 @@ void SyncShutdownCallbackProxy::OnSyncShutdown()
         return;
     }
 
-    int ret = remote->SendRequest(static_cast<int32_t>(ISyncShutdownCallback::CMD_ON_SYNC_SHUTDOWN),
+    int ret = remote->SendRequest(
+        static_cast<int32_t>(PowerMgr::SyncShutdownCallbackInterfaceCode::CMD_ON_SYNC_SHUTDOWN),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
