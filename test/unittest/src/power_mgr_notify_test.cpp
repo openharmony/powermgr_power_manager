@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,6 @@ public:
     bool received_ = false;
     TimePoint receivedTime_;
     std::string action_;
-    shared_ptr<OHOS::AppExecFwk::EventHandler> receiveHandler_ = nullptr;
 
     bool receivedScreenOFF = false;
     bool receivedScreenOn = false;
@@ -70,7 +69,6 @@ public:
     void OnReceive(const sptr<CommonEventData> &event) override
     {
         GTEST_LOG_(INFO) << "PowerMgrMonitor:: OnReceive!!";
-        receiveHandler_ = OHOS::AppExecFwk::EventHandler::Current();
         receivedTime_ = Clock::now();
         received_ = true;
         action_ = event->GetIntent()->GetAction();
@@ -102,7 +100,6 @@ shared_ptr<TestCommonEventSubscriber> RegisterEvent()
         } else {
             GTEST_LOG_(INFO) << "PowerMgrNotifyTest:: Fail to register Subscriber, Sleep 50ms and try again!!!";
             usleep(RETRY_WAIT_TIME_US); // sleep 50ms
-            // Reset powerMgrMonitor_, otherwise we will register fail
             subscriber = make_shared<TestCommonEventSubscriber>(subscriberInfo);
         }
         tryTimes++;

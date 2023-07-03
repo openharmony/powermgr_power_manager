@@ -30,7 +30,6 @@
 namespace OHOS {
 namespace PowerMgr {
 class PowerMgrService;
-class PowermsEventHandler;
 class PowerStateMachine;
 using RunningLockMap = std::map<const sptr<IRemoteObject>, std::shared_ptr<RunningLockInner>>;
 
@@ -165,7 +164,6 @@ private:
     bool IsSceneRunningLockType(RunningLockType type);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
-    std::weak_ptr<PowermsEventHandler> handler_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;

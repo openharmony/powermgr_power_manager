@@ -74,7 +74,7 @@ private:
 
     std::atomic<bool> started_;
     std::unique_ptr<IDevicePowerAction> devicePowerAction_;
-    std::unique_ptr<IDeviceStateAction> deviceStateAction_;
+    std::shared_ptr<IDeviceStateAction> deviceStateAction_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

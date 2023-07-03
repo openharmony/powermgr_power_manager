@@ -62,8 +62,8 @@ void AsyncShutdownCallbackTest::SetUp()
     g_isLowPriority = false;
     g_mockPowerAction = new MockPowerAction();
     g_mockStateAction = new MockStateAction();
-    auto& shutdownController = g_service->getShutdownController();
-    shutdownController.EnableMock(g_mockPowerAction, g_mockStateAction);
+    auto shutdownController = g_service->GetShutdownController();
+    shutdownController->EnableMock(g_mockPowerAction, g_mockStateAction);
 }
 
 void AsyncShutdownCallbackTest::TearDown()

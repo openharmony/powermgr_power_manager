@@ -53,8 +53,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
@@ -98,8 +96,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
@@ -142,8 +138,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level0)
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
@@ -177,8 +171,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
@@ -219,8 +211,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
-    int32_t powermsEvent = PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG;
-    stateMachine->HandleDelayTimer(powermsEvent);
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
@@ -299,8 +289,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
-    std::weak_ptr<PowermsEventHandler> powermsEventHandler;
-    runningLockMgr->handler_ = powermsEventHandler;
     runningLockMgr->CheckOverTime();
     runningLockMgr->RemoveAndPostUnlockTask(remoteObj);
     runningLockMgr->SendCheckOverTimeMsg(CALLTIMEMS);

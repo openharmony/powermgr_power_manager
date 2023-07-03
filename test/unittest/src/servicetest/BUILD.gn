@@ -46,7 +46,6 @@ config("module_mock_private_config") {
 deps_ex = [
   "ability_base:base",
   "ability_base:want",
-  "eventhandler:libeventhandler",
   "common_event_service:cesfwk_innerkits",
   "ipc:ipc_core",
   "hilog:libhilog",
