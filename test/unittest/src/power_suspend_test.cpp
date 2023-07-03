@@ -171,60 +171,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerSuspendTest005
- * @tc.desc: test StopSleep
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest005, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerSuspendTest005: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest005: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND);
-    pmsTest_->suspendController_->StopSleep();
-    EXPECT_TRUE(pmsTest_->suspendController_->handler_ != nullptr);
-
-    pmsTest_->suspendController_->handler_ = nullptr;
-    pmsTest_->suspendController_->StopSleep();
-    EXPECT_TRUE(pmsTest_->suspendController_->handler_ == nullptr);
-
-    GTEST_LOG_(INFO) << "PowerSuspendTest005:  end";
-}
-
-/**
- * @tc.name: PowerSuspendTest006
- * @tc.desc: test HandleEvent
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest006, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerSuspendTest006: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest006: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(source);
-    pmsTest_->suspendController_->monitorMap_.emplace(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, monitor);
-    uint32_t msg = static_cast<uint32_t>(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    pmsTest_->suspendController_->HandleEvent(msg);
-    EXPECT_TRUE(pmsTest_->suspendController_->monitorMap_[SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT] != nullptr);
-
-    GTEST_LOG_(INFO) << "PowerSuspendTest006:  end";
-}
-
-/**
  * @tc.name: PowerSuspendTest007
  * @tc.desc: test RecordPowerKeyDown
  * @tc.type: FUNC
@@ -319,37 +265,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerSuspendTest010
- * @tc.desc: test StartSleepTimer
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest010, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerSuspendTest010: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest010: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-
-    pmsTest_->suspendController_->sleepTime_ = 0;
-    pmsTest_->suspendController_->StartSleepTimer(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    pmsTest_->suspendController_->sleepTime_ = GetTickCount() + 1;
-    pmsTest_->suspendController_->StartSleepTimer(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    pmsTest_->suspendController_->sleepTime_ = GetTickCount() + 1;
-    pmsTest_->suspendController_->StartSleepTimer(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 1);
-    pmsTest_->suspendController_->sleepTime_ = GetTickCount() + 1;
-    pmsTest_->suspendController_->handler_ = nullptr;
-    pmsTest_->suspendController_->StartSleepTimer(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 1);
-    EXPECT_TRUE(pmsTest_->suspendController_->handler_ == nullptr);
-    GTEST_LOG_(INFO) << "PowerSuspendTest010:  end";
-}
-
-/**
  * @tc.name: PowerSuspendTest011
  * @tc.desc: test HandleAction
  * @tc.type: FUNC
@@ -441,43 +356,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest014, TestSize.Level0)
     EXPECT_TRUE(pmsTest_->suspendController_ != nullptr);
 
     GTEST_LOG_(INFO) << "PowerSuspendTest014:  end";
-}
-
-/**
- * @tc.name: PowerSuspendTest015
- * @tc.desc: test ProcessEvent
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest015, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerSuspendTest015: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest015: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-
-    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, pmsTest_->suspendController_->handler_, 0);
-    event->innerEventId_ = SuspendEventHandler::SLEEP_TIMEOUT_MSG;
-    pmsTest_->suspendController_->handler_->ProcessEvent(event);
-
-    event->innerEventId_ = SuspendEventHandler::SCREEN_OFF_TIMEOUT_MSG;
-    pmsTest_->suspendController_->handler_->ProcessEvent(event);
-    std::shared_ptr<SuspendController> cctrler1 = pmsTest_->suspendController_->handler_->controller_.lock();
-    EXPECT_TRUE(cctrler1 != nullptr);
-
-    std::weak_ptr<SuspendController> controller = pmsTest_->suspendController_->handler_->controller_;
-    pmsTest_->suspendController_->handler_->controller_ = std::shared_ptr<SuspendController>(nullptr);
-    pmsTest_->suspendController_->handler_->ProcessEvent(event);
-    std::shared_ptr<SuspendController> cctrler2 = pmsTest_->suspendController_->handler_->controller_.lock();
-    EXPECT_TRUE(cctrler2 == nullptr);
-    pmsTest_->suspendController_->handler_->controller_ = controller;
-
-    GTEST_LOG_(INFO) << "PowerSuspendTest015:  end";
 }
 
 /**

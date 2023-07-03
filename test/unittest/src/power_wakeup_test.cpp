@@ -159,69 +159,6 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerWakeupTest004
- * @tc.desc: test StartWakeupTimer(Normal and exception)
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerWakeupTest, PowerWakeupTest004, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerWakeupTest004: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest004: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
-    pmsTest_->wakeupController_->StartWakeupTimer();
-    EXPECT_TRUE(pmsTest_->wakeupController_->handler_ != nullptr);
-
-    std::shared_ptr<WakeupEventHandler> ptr = pmsTest_->wakeupController_->handler_;
-    pmsTest_->wakeupController_->handler_ = nullptr;
-    pmsTest_->wakeupController_->StartWakeupTimer();
-    EXPECT_TRUE(pmsTest_->wakeupController_->handler_ == nullptr);
-    pmsTest_->wakeupController_->handler_ = ptr;
-
-    GTEST_LOG_(INFO) << "PowerWakeupTest004:  end";
-}
-
-/**
- * @tc.name: PowerWakeupTest005
- * @tc.desc: test ProcessEvent(Normal and exception)
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerWakeupTest, PowerWakeupTest005, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerWakeupTest005: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest005: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
-    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, pmsTest_->wakeupController_->handler_, 0);
-    event->innerEventId_ = PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG;
-    pmsTest_->wakeupController_->handler_->ProcessEvent(event);
-    std::shared_ptr<WakeupController> controller = pmsTest_->wakeupController_->handler_->controller_.lock();
-    EXPECT_TRUE(controller != nullptr);
-
-    std::weak_ptr<WakeupController> controller1 = pmsTest_->wakeupController_->handler_->controller_;
-    pmsTest_->wakeupController_->handler_->controller_ = std::shared_ptr<WakeupController>(nullptr);
-    pmsTest_->wakeupController_->handler_->ProcessEvent(event);
-    controller = pmsTest_->wakeupController_->handler_->controller_.lock();
-    EXPECT_TRUE(controller == nullptr);
-    pmsTest_->wakeupController_->handler_->controller_ = controller1;
-
-    event = AppExecFwk::InnerEvent::Get(0, pmsTest_->wakeupController_->handler_, 0);
-    pmsTest_->wakeupController_->handler_->ProcessEvent(event);
-    controller = pmsTest_->wakeupController_->handler_->controller_.lock();
-    EXPECT_TRUE(controller != nullptr);
-    GTEST_LOG_(INFO) << "PowerWakeupTest005:  end";
-}
-
-/**
  * @tc.name: PowerWakeupTest006
  * @tc.desc: test Cancel(Normal and exception)
  * @tc.type: FUNC

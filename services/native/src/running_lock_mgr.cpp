@@ -25,6 +25,7 @@
 #include "dm_common.h"
 #endif
 #include "hitrace_meter.h"
+#include "ffrt_utils.h"
 #include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
@@ -40,6 +41,8 @@ namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
+FFRTQueue g_queue("power_running_lock_mgr");
+FFRTHandle g_runningLockTimeoutHandle;
 }
 
 RunningLockMgr::~RunningLockMgr() {}
@@ -58,12 +61,6 @@ bool RunningLockMgr::Init()
             return false;
         }
     }
-    auto pmsptr = pms_.promote();
-    if (pmsptr == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power manager service is null");
-        return false;
-    }
-    handler_ = pmsptr->GetHandler();
 
     if (backgroundLock_ == nullptr) {
         backgroundLock_ = std::make_shared<SystemLock>(
@@ -106,9 +103,9 @@ void RunningLockMgr::InitLocksTypeScreen()
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->CancelDelayTimer(
-                    PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+                    PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
                 stateMachine->CancelDelayTimer(
-                    PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {
@@ -138,8 +135,6 @@ void RunningLockMgr::InitLocksTypeBackground()
             }
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND active");
-                stateMachine->CancelDelayTimer(
-                    PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
                 backgroundLock_->Lock();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_BACKGROUND inactive");
@@ -182,9 +177,9 @@ void RunningLockMgr::InitLocksTypeProximity()
                         StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
                 }
                 stateMachine->CancelDelayTimer(
-                    PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+                    PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
                 stateMachine->CancelDelayTimer(
-                    PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
                 backgroundLock_->Lock();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
@@ -247,17 +242,13 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
 
 void RunningLockMgr::RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
-    auto handler = handler_.lock();
-    if (handler == nullptr) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Handler is nullptr");
-        return;
-    }
-    const string& remoteObjStr = to_string(reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr()));
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "timeOutMS=%{public}d", timeOutMS);
-    handler->RemoveTask(remoteObjStr);
+    FFRTUtils::CancelTask(g_runningLockTimeoutHandle, g_queue);
     if (timeOutMS > 0) {
-        std::function<void()> unLockFunc = std::bind(&RunningLockMgr::UnLock, this,  remoteObj);
-        handler->PostTask(unLockFunc, remoteObjStr, timeOutMS);
+        FFRTTask task = [this, &remoteObj] {
+            UnLock(remoteObj);
+        };
+        g_runningLockTimeoutHandle = FFRTUtils::SubmitDelayTask(task, timeOutMS, g_queue);
     }
 }
 
@@ -407,11 +398,7 @@ void RunningLockMgr::NotifyHiViewRunningLockInfo(const RunningLockInner& lockInn
 
 void RunningLockMgr::CheckOverTime()
 {
-    auto handler = handler_.lock();
-    if (handler == nullptr) {
-        return;
-    }
-    handler->RemoveEvent(PowermsEventHandler::CHECK_RUNNINGLOCK_OVERTIME_MSG);
+    FFRTUtils::CancelTask(g_runningLockTimeoutHandle, g_queue);
     if (runningLocks_.empty()) {
         return;
     }
@@ -445,12 +432,11 @@ void RunningLockMgr::CheckOverTime()
 
 void RunningLockMgr::SendCheckOverTimeMsg(int64_t delayTime)
 {
-    auto handler = handler_.lock();
-    if (handler == nullptr) {
-        return;
-    }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "delayTime=%{public}" PRId64 "", delayTime);
-    handler->SendEvent(PowermsEventHandler::CHECK_RUNNINGLOCK_OVERTIME_MSG, 0, delayTime);
+    FFRTTask task = [this] {
+        CheckOverTime();
+    };
+    FFRTUtils::SubmitDelayTask(task, delayTime, g_queue);
 }
 
 void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj,
@@ -665,7 +651,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
 
 void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    if (remote.promote() == nullptr) {
+    if (remote == nullptr || remote.promote() == nullptr) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Remote is nullptr");
         return;
     }
@@ -674,14 +660,10 @@ void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteO
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
-    auto handler = pms->GetHandler();
-    if (handler == nullptr) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Handler is nullptr");
-        return;
-    }
-    std::function<void()> forceUnLockFunc = std::bind(&PowerMgrService::ForceUnLock, pms,
-        remote.promote());
-    handler->PostTask(forceUnLockFunc, TASK_RUNNINGLOCK_FORCEUNLOCK);
+    FFRTTask task = [&] {
+        pms->ForceUnLock(remote.promote());
+    };
+    FFRTUtils::SubmitTask(task);
 }
 
 RunningLockMgr::SystemLock::SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type,

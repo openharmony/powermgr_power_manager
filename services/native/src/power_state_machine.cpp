@@ -14,6 +14,7 @@
  */
 
 #include "power_state_machine.h"
+
 #include <cinttypes>
 #include <datetime_ex.h>
 #include <hisysevent.h>
@@ -21,13 +22,15 @@
 #include "hitrace_meter.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
-#include "powerms_event_handler.h"
+#include "ffrt_utils.h"
 #include "setting_helper.h"
 
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
+FFRTQueue g_queue("power_state_machine");
+FFRTHandle g_userActivityTimeoutHandle;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -71,17 +74,10 @@ bool PowerStateMachine::Init()
     POWER_HILOGD(FEATURE_POWER_STATE, "Start init");
 
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
-    std::function<void(uint32_t)> callback = std::bind(&PowerStateMachine::ActionCallback, this, std::placeholders::_1);
-    stateAction_->RegisterCallback(callback);
     InitStateMap();
 
     if (powerStateCBDeathRecipient_ == nullptr) {
         powerStateCBDeathRecipient_ = new PowerStateCallbackDeathRecipient();
-    }
-
-    if (!powerMgrMonitor_.Start()) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "Failed to start monitor");
-        return false;
     }
     POWER_HILOGD(FEATURE_POWER_STATE, "Init success");
     return true;
@@ -208,16 +204,6 @@ void PowerStateMachine::InitStateMap()
     EmplaceShutdown();
 }
 
-void PowerStateMachine::ActionCallback(uint32_t event)
-{
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
-    pms->GetWakeupController()->NotifyDisplayActionDone(event);
-    pms->NotifyDisplayActionDone(event);
-}
-
 void PowerStateMachine::onSuspend()
 {
     POWER_HILOGI(FEATURE_SUSPEND, "System is suspending");
@@ -230,12 +216,9 @@ void PowerStateMachine::onWakeup()
     if (pms == nullptr) {
         return;
     }
-    auto handler = pms->GetHandler();
-    if (handler == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "Handler is null");
-        return;
-    }
-    handler->SendEvent(PowermsEventHandler::SYSTEM_WAKE_UP_MSG, 0, 0);
+    FFRTTask task = [&pms] {
+        pms->GetPowerStateMachine()->HandleSystemWakeup();
+    };
 }
 
 void PowerStateMachine::SuspendDeviceInner(
@@ -580,8 +563,6 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     }
 }
 
-const std::string TASK_UNREG_POWER_STATE_CALLBACK = "PowerState_UnRegPowerStateCB";
-
 void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (remote == nullptr || remote.promote() == nullptr) {
@@ -592,54 +573,69 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wpt
         POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
         return;
     }
-    auto handler = pms->GetHandler();
-    if (handler == nullptr) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "Handler is nullptr");
-        return;
-    }
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(remote.promote());
-    std::function<void()> unRegFunc = std::bind(&PowerMgrService::UnRegisterPowerStateCallback, pms, callback);
-    handler->PostTask(unRegFunc, TASK_UNREG_POWER_STATE_CALLBACK);
+    FFRTTask unRegFunc = [&] {
+        pms->UnRegisterPowerStateCallback(callback);
+    };
+    FFRTUtils::SubmitTask(unRegFunc);
 }
 
 void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
 {
-    POWER_HILOGD(FEATURE_ACTIVITY, "Set delay timer, delayTime: %{public}s, event: %{public}d",
+    POWER_HILOGD(FEATURE_ACTIVITY, "Set delay timer, delayTime=%{public}s, event=%{public}d",
         std::to_string(delayTime).c_str(), event);
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_ACTIVITY, "Pms is nullptr");
-        return;
+    switch (event) {
+        case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
+            FFRTTask task = [this] {
+                HandleActivityTimeout();
+            };
+            g_userActivityTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delayTime, g_queue);
+            break;
+        }
+        case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController == nullptr) {
+                POWER_HILOGW(FEATURE_ACTIVITY, "suspendController is nullptr");
+                return;
+            }
+            suspendController->HandleEvent(delayTime);
+            break;
+        }
+        default: {
+            break;
+        }
     }
-    auto handler = pms->GetHandler();
-    if (handler == nullptr) {
-        POWER_HILOGE(FEATURE_ACTIVITY, "Handler is nullptr");
-        return;
-    }
-    handler->SendEvent(event, 0, delayTime);
 }
 
 void PowerStateMachine::CancelDelayTimer(int32_t event)
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Cancel delay timer, event: %{public}d", event);
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_ACTIVITY, "Pms is nullptr");
-        return;
+    switch (event) {
+        case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
+            FFRTUtils::CancelTask(g_userActivityTimeoutHandle, g_queue);
+            break;
+        }
+        case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController == nullptr) {
+                POWER_HILOGW(FEATURE_ACTIVITY, "suspendController is nullptr");
+                return;
+            }
+            suspendController->CancelEvent();
+            break;
+        }
+        default: {
+            break;
+        }
     }
-    auto handler = pms->GetHandler();
-    if (handler == nullptr) {
-        POWER_HILOGE(FEATURE_ACTIVITY, "Handler is nullptr");
-        return;
-    }
-    handler->RemoveEvent(event);
 }
 
 void PowerStateMachine::ResetInactiveTimer()
 {
-    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
         POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
         return;
@@ -649,37 +645,17 @@ void PowerStateMachine::ResetInactiveTimer()
         const uint32_t TWO = 2;
         const uint32_t THREE = 3;
         this->SetDelayTimer(
-            this->GetDisplayOffTime() * TWO / THREE, PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            this->GetDisplayOffTime() * TWO / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     }
 }
 
 void PowerStateMachine::ResetSleepTimer()
 {
-    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    CancelDelayTimer(PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
+    CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetSleepTime() < 0) {
         POWER_HILOGD(FEATURE_ACTIVITY, "Auto sleep is disabled");
         return;
-    }
-
-    if (this->CheckRunningLock(PowerState::SLEEP)) {
-        this->SetDelayTimer(this->GetSleepTime(), PowermsEventHandler::CHECK_USER_ACTIVITY_SLEEP_TIMEOUT_MSG);
-    }
-}
-
-void PowerStateMachine::HandleDelayTimer(int32_t event)
-{
-    POWER_HILOGD(FEATURE_ACTIVITY, "Enter, event = %{public}d", event);
-    switch (event) {
-        case PowermsEventHandler::CHECK_USER_ACTIVITY_TIMEOUT_MSG:
-            HandleActivityTimeout();
-            break;
-        case PowermsEventHandler::SYSTEM_WAKE_UP_MSG:
-            HandleSystemWakeup();
-            break;
-        default:
-            break;
     }
 }
 
@@ -698,7 +674,7 @@ void PowerStateMachine::HandleActivityTimeout()
             POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
             return;
         } else {
-            SetDelayTimer(GetDisplayOffTime() / THREE, PowermsEventHandler::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            SetDelayTimer(GetDisplayOffTime() / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
         }
     } else {
         POWER_HILOGW(FEATURE_ACTIVITY, "Display is not on, ignore activity timeout, state = %{public}d", dispState);

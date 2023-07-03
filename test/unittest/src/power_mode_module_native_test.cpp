@@ -14,7 +14,6 @@
  */
 
 #include "power_mode_module_native_test.h"
-#include "event_runner.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -85,38 +84,6 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
     powerModeModuleManager->OnRemoteDied(nullptr);
 
     POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest001 end.");
-}
-
-/**
- * @tc.name: PowerEventHandlerNativeTest002
- * @tc.desc: test ProcessEvent in PowerEventHandler
- * @tc.type: FUNC
- */
-HWTEST_F (PowerModeModuleNativeTest, PowerEventHandlerNativeTest002, TestSize.Level0)
-{
-    wptr<PowerMgrService> pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_TRUE(pmsTest != nullptr) << "PowerEventHandlerNativeTest002 fail to get PowerMgrService";
-
-    sptr<IPowerModeCallback> powerModeModuleCb = new PowerModeTestCallback();
-    EXPECT_TRUE(pmsTest->RegisterPowerModeCallback(powerModeModuleCb));
-    EXPECT_TRUE(pmsTest->UnRegisterPowerModeCallback(powerModeModuleCb));
-
-    shared_ptr<PowermsEventHandler> powerEventHandlerTest = make_shared<PowermsEventHandler>(
-        AppExecFwk::EventRunner::Create(true), pmsTest);
-    AppExecFwk::InnerEvent::Pointer event =
-        AppExecFwk::InnerEvent::Get(GETI, powerEventHandlerTest, GETI);
-    event->innerEventId_ = PowermsEventHandler::CHECK_RUNNINGLOCK_OVERTIME_MSG;
-    powerEventHandlerTest->ProcessEvent(event);
-    event->innerEventId_ = PowermsEventHandler::SCREEN_ON_TIMEOUT_MSG;
-    powerEventHandlerTest->ProcessEvent(event);
-    event->innerEventId_ = PowermsEventHandler::REGISTER_POWER_HDI_CALLBACK + 1;
-    powerEventHandlerTest->ProcessEvent(event);
-
-    shared_ptr<PowermsEventHandler> powerEventHandlerTestN = make_shared<PowermsEventHandler>(
-        AppExecFwk::EventRunner::Create(true), nullptr);
-    powerEventHandlerTestN->ProcessEvent(event);
-
-    POWER_HILOGI(LABEL_TEST, "PowerEventHandlerNativeTest002 end.");
 }
 
 /**

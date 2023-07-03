@@ -26,7 +26,6 @@
 #include "power_mode_module.h"
 #include "power_save_mode.h"
 #include "power_state_machine.h"
-#include "powerms_event_handler.h"
 #include "running_lock_mgr.h"
 #include "shutdown_controller.h"
 #include "sp_singleton.h"
@@ -85,7 +84,6 @@ public:
     void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
     void HandlePointEvent(int32_t type);
-    void NotifyDisplayActionDone(uint32_t event);
     void KeyMonitorInit();
     void KeyMonitorCancel();
     void SwitchSubscriberInit();
@@ -96,11 +94,6 @@ public:
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
-
-    std::shared_ptr<PowermsEventHandler> GetHandler() const
-    {
-        return handler_;
-    }
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
@@ -137,7 +130,6 @@ public:
     {
         powerStateMachine_->SetSleepTime(time);
     }
-    void HandleScreenOnTimeout();
 
     void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState, IDevicePowerAction* powerAction,
         IRunningLockAction* lockAction)
@@ -145,7 +137,7 @@ public:
         POWER_HILOGE(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
         powerStateMachine_->EnableMock(powerState);
-        shutdownController_.EnableMock(powerAction, shutdownState);
+        shutdownController_->EnableMock(powerAction, shutdownState);
     }
     void MockProximity(uint32_t status)
     {
@@ -157,7 +149,7 @@ public:
     {
         PowerStateMachine::onWakeup();
     }
-    ShutdownController& getShutdownController()
+    std::shared_ptr<ShutdownController> GetShutdownController()
     {
         return shutdownController_;
     }
@@ -187,8 +179,6 @@ private:
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
     bool Init();
     bool PowerStateMachineInit();
-    void HandlePowerKeyDown();
-    void HandlePowerKeyUp();
     void NotifyRunningLockChanged(bool isUnLock);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
     bool IsSupportSensor(SensorTypeId);
@@ -202,17 +192,19 @@ private:
 
     bool ready_ {false};
     static std::atomic_bool isBootCompleted_;
-    std::mutex mutex_;
+    std::mutex wakeupMutex_;
+    std::mutex suspendMutex_;
+    std::mutex stateMutex_;
+    std::mutex shutdownMutex_;
+    std::mutex modeMutex_;
+    std::mutex screenMutex_;
+    std::mutex dumpMutex_;
     std::mutex lockMutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_;
-    std::shared_ptr<AppExecFwk::EventRunner> eventRunner_;
-    std::shared_ptr<PowermsEventHandler> handler_;
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
-    ShutdownController shutdownController_;
+    std::shared_ptr<ShutdownController> shutdownController_;
     PowerModeModule powerModeModule_;
-    bool powerkeyPressed_ {false};
-    bool isPowerKeyDown_ {false};
     uint32_t mockCount_ {0};
     bool isDialogShown_ {false};
     int32_t powerkeyLongPressId_ {0};

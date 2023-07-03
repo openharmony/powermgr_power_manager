@@ -46,10 +46,12 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   public_configs = [ ":powermgr_actions_impl_public_config" ]
 
+  deps = [ "${powermgr_utils_path}/ffrt:power_ffrt" ]
+
   external_deps = [
     "c_utils:utils",
     "drivers_interface_power:libpower_proxy_1.1",
-    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hdf_core:libhdf_utils",
     "hdf_core:libhdi",
     "hdf_core:libpub_utils",

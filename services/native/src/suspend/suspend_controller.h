@@ -16,15 +16,16 @@
 #ifndef POWERMGR_SUSPEND_CONTROLLER_H
 #define POWERMGR_SUSPEND_CONTROLLER_H
 
+#include <functional>
+#include <memory>
+#include <vector>
+
 #include "event_handler.h"
 #include "power_state_machine.h"
 #include "sensor_agent.h"
 #include "shutdown_controller.h"
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
-#include <functional>
-#include <memory>
-#include <vector>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -35,8 +36,8 @@ class SuspendMonitor;
 class SuspendEventHandler;
 class SuspendController : public std::enable_shared_from_this<SuspendController> {
 public:
-    SuspendController(ShutdownController* shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine,
-        std::shared_ptr<AppExecFwk::EventRunner>& runner);
+    SuspendController(
+        std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine);
     ~SuspendController();
     void Init();
     void ExecSuspendMonitorByReason(SuspendDeviceType reason);
@@ -44,7 +45,8 @@ public:
     void Execute();
     void Cancel();
     void StopSleep();
-    void HandleEvent(uint32_t eventId);
+    void HandleEvent(int64_t delayTime);
+    void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
     void RecordPowerKeyDown();
     bool GetPowerkeyDownWhenScreenOff();
@@ -68,38 +70,15 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
-    std::mutex monitorMutex_;
     std::vector<SuspendSource> sourceList_;
     std::map<SuspendDeviceType, std::shared_ptr<SuspendMonitor>> monitorMap_;
-    ShutdownController* shutdownController_ = nullptr;
+    std::shared_ptr<ShutdownController> shutdownController_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
-    std::shared_ptr<AppExecFwk::EventRunner> runner_;
-    std::shared_ptr<SuspendEventHandler> handler_ = nullptr;
     uint32_t sleepDuration_ {0};
     int64_t sleepTime_ {-1};
     SuspendDeviceType sleepReason_ {0};
     uint32_t sleepAction_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
-};
-
-class SuspendEventHandler : public AppExecFwk::EventHandler {
-public:
-    enum {
-        SLEEP_TIMEOUT_MSG = 100,
-        SCREEN_OFF_TIMEOUT_MSG,
-        SUSPEND_MAX_MSG,
-    };
-    SuspendEventHandler(
-        const std::shared_ptr<AppExecFwk::EventRunner>& runner, std::shared_ptr<SuspendController> controller)
-        : AppExecFwk::EventHandler(runner),
-        controller_(controller)
-    {
-    }
-    ~SuspendEventHandler() = default;
-    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event) override;
-
-private:
-    std::weak_ptr<SuspendController> controller_;
 };
 
 class SuspendMonitor {
@@ -109,7 +88,7 @@ public:
     virtual ~SuspendMonitor() = default;
     virtual bool Init() = 0;
     virtual void Cancel() = 0;
-    virtual void HandleEvent(uint32_t eventId)
+    virtual void HandleEvent()
     {
         // do nothing in base class
     }
@@ -132,6 +111,9 @@ public:
 
     void Notify()
     {
+        if (listener_ == nullptr) {
+            return;
+        }
         listener_(reason_, action_, delayMs_);
     }
 protected:
@@ -167,7 +149,7 @@ public:
     ~TimeoutSuspendMonitor() override = default;
     bool Init() override;
     void Cancel() override;
-    void HandleEvent(uint32_t eventId) override;
+    void HandleEvent() override;
 };
 
 class LidSuspendMonitor : public SuspendMonitor {

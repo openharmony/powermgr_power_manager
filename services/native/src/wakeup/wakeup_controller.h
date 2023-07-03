@@ -21,7 +21,6 @@
 #include <mutex>
 #include <vector>
 
-#include "event_handler.h"
 #include "i_input_event_consumer.h"
 #include "power_state_machine.h"
 #include "system_ability.h"
@@ -35,11 +34,9 @@ namespace PowerMgr {
 using WakeupListener = std::function<void(WakeupDeviceType)>;
 using namespace OHOS::MMI;
 class WakeupMonitor;
-class WakeupEventHandler;
 class WakeupController : public std::enable_shared_from_this<WakeupController> {
 public:
-    WakeupController(
-        std::shared_ptr<PowerStateMachine>& stateMachine, std::shared_ptr<AppExecFwk::EventRunner>& runner);
+    explicit WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine);
     ~WakeupController();
     void Init();
     void Cancel();
@@ -59,11 +56,10 @@ public:
 private:
     void ControlListener(WakeupDeviceType reason);
     void StartWakeupTimer();
+    void HandleScreenOnTimeout();
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
-    std::shared_ptr<AppExecFwk::EventRunner> runner_;
-    std::shared_ptr<WakeupEventHandler> handler_ = nullptr;
     WakeupDeviceType wakeupReason_ {0};
     std::mutex mutex_;
     std::mutex monitorMutex_;
@@ -74,21 +70,6 @@ class InputCallback : public IInputEventConsumer {
     virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
     virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
-};
-
-class WakeupEventHandler : public AppExecFwk::EventHandler {
-public:
-    WakeupEventHandler(
-        const std::shared_ptr<AppExecFwk::EventRunner>& runner, std::shared_ptr<WakeupController> controller)
-        : AppExecFwk::EventHandler(runner),
-        controller_(controller)
-    {
-    }
-    ~WakeupEventHandler() = default;
-    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event) override;
-
-private:
-    std::weak_ptr<WakeupController> controller_;
 };
 
 class WakeupMonitor {

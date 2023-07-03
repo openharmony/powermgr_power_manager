@@ -17,13 +17,12 @@
 #define POWERMGR_POWER_STATE_MACHINE_H
 
 #include <set>
-
+#include <map>
 #include <singleton.h>
 
 #include "actions/idevice_state_action.h"
 #include "ipower_state_callback.h"
 #include "power_common.h"
-#include "power_mgr_monitor.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 
@@ -68,6 +67,11 @@ public:
     explicit PowerStateMachine(const wptr<PowerMgrService>& pms);
     ~PowerStateMachine();
 
+    enum {
+        CHECK_USER_ACTIVITY_TIMEOUT_MSG = 0,
+        CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG,
+    };
+
     static void onSuspend();
     static void onWakeup();
 
@@ -87,6 +91,10 @@ public:
     {
         return currentState_;
     };
+    const std::shared_ptr<IDeviceStateAction>& GetStateAction()
+    {
+        return stateAction_;
+    };
     bool ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs);
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
@@ -94,10 +102,8 @@ public:
     void CancelDelayTimer(int32_t event);
     void ResetInactiveTimer();
     void ResetSleepTimer();
-    void HandleDelayTimer(int32_t event);
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
     void SetDisplaySuspend(bool enable);
-    void ActionCallback(uint32_t event);
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
@@ -190,7 +196,6 @@ private:
     void HandleSystemWakeup();
 
     const wptr<PowerMgrService> pms_;
-    PowerMgrMonitor powerMgrMonitor_;
     PowerState currentState_;
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
@@ -198,7 +203,9 @@ private:
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
-    std::unique_ptr<IDeviceStateAction> stateAction_;
+    std::shared_ptr<IDeviceStateAction> stateAction_;
+
+private:
     std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
