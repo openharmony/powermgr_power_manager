@@ -22,6 +22,7 @@
 #include "message_option.h"
 #include "power_common.h"
 #include "power_log.h"
+#include "power_mgr_ipc_interface_code.h"
 #include "power_mgr_proxy.h"
 
 namespace OHOS {
@@ -50,7 +51,8 @@ PowerErrors PowerMgrServiceTestProxy::CreateRunningLock(const sptr<IRemoteObject
     data.WriteRemoteObject(remoteObj.GetRefPtr());
     data.WriteParcelable(&runningLockInfo);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::CREATE_RUNNINGLOCK),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::CREATE_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
@@ -76,7 +78,8 @@ bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& rem
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::RELEASE_RUNNINGLOCK),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RELEASE_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
@@ -101,7 +104,9 @@ bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(RunningLockType type)
 
     data.WriteUint32(static_cast<uint32_t>(type));
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::IS_RUNNINGLOCK_TYPE_SUPPORTED), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_RUNNINGLOCK_TYPE_SUPPORTED),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
         return result;
@@ -130,7 +135,8 @@ bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_
     data.WriteRemoteObject(remoteObj.GetRefPtr());
     data.WriteInt32(timeOutMs);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_LOCK),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
@@ -154,7 +160,8 @@ bool PowerMgrServiceTestProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_UNLOCK),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
@@ -177,7 +184,8 @@ bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
     }
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::RUNNINGLOCK_ISUSED),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_ISUSED),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
@@ -205,7 +213,8 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t
     data.WriteInt32(pid);
     data.WriteInt32(uid);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::PROXY_RUNNINGLOCK),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
@@ -231,7 +240,8 @@ PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
 
     data.WriteString16(Str8ToStr16(reason));
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::REBOOT_DEVICE), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REBOOT_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
@@ -256,7 +266,8 @@ PowerErrors PowerMgrServiceTestProxy::ShutDownDevice(const std::string& reason)
 
     data.WriteString16(Str8ToStr16(reason));
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::SHUTDOWN_DEVICE), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHUTDOWN_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
@@ -283,7 +294,8 @@ PowerErrors PowerMgrServiceTestProxy::SuspendDevice(int64_t callTimeMs, SuspendD
     data.WriteUint32(static_cast<uint32_t>(reason));
     data.WriteBool(suspendImmed);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::SUSPEND_DEVICE), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SUSPEND_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
@@ -311,7 +323,8 @@ PowerErrors PowerMgrServiceTestProxy::WakeupDevice(int64_t callTimeMs, WakeupDev
     data.WriteUint32(static_cast<uint32_t>(reason));
     data.WriteString16(Str8ToStr16(details));
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::WAKEUP_DEVICE), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::WAKEUP_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "SendRequest is failed, ret: %{public}d", ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
@@ -338,7 +351,8 @@ bool PowerMgrServiceTestProxy::RefreshActivity(int64_t callTimeMs, UserActivityT
     data.WriteUint32(static_cast<uint32_t>(type));
     data.WriteBool(needChangeBacklight);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::REFRESH_ACTIVITY), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REFRESH_ACTIVITY), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_ACTIVITY, "SendRequest is failed, ret: %{public}d", ret);
         return false;
@@ -362,7 +376,9 @@ bool PowerMgrServiceTestProxy::OverrideScreenOffTime(int64_t timeout)
 
     data.WriteInt64(timeout);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::OVERRIDE_DISPLAY_OFF_TIME), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_SVC, "SendRequest is failed, ret: %{public}d", ret);
         return result;
@@ -388,7 +404,9 @@ bool PowerMgrServiceTestProxy::RestoreScreenOffTime()
         return result;
     }
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::RESTORE_DISPLAY_OFF_TIME), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
         return result;
@@ -416,7 +434,9 @@ bool PowerMgrServiceTestProxy::ForceSuspendDevice(int64_t callTimeMs)
 
     data.WriteInt64(callTimeMs);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::FORCE_DEVICE_SUSPEND), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
         return result;
@@ -442,7 +462,8 @@ PowerState PowerMgrServiceTestProxy::GetState()
         return PowerState::UNKNOWN;
     }
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::GET_STATE), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GET_STATE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
         return PowerState::UNKNOWN;
@@ -469,7 +490,8 @@ bool PowerMgrServiceTestProxy::IsScreenOn()
         return result;
     }
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::IS_SCREEN_ON), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
         return result;
@@ -496,7 +518,9 @@ bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerState
 
     data.WriteRemoteObject(callback->AsObject());
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::REG_POWER_STATE_CALLBACK), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
         return false;
@@ -519,7 +543,9 @@ bool PowerMgrServiceTestProxy::UnRegisterPowerStateCallback(const sptr<IPowerSta
 
     data.WriteRemoteObject(callback->AsObject());
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::UNREG_POWER_STATE_CALLBACK), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_STATE_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
         return false;
@@ -542,7 +568,9 @@ bool PowerMgrServiceTestProxy::RegisterPowerModeCallback(const sptr<IPowerModeCa
 
     data.WriteRemoteObject(callback->AsObject());
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::REG_POWER_MODE_CALLBACK), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_MODE_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
         return false;
@@ -565,7 +593,9 @@ bool PowerMgrServiceTestProxy::UnRegisterPowerModeCallback(const sptr<IPowerMode
 
     data.WriteRemoteObject(callback->AsObject());
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::UNREG_POWER_MODE_CALLBACK), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_MODE_CALLBACK),
+        data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
         return false;
@@ -588,7 +618,8 @@ bool PowerMgrServiceTestProxy::SetDisplaySuspend(bool enable)
 
     data.WriteBool(enable);
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::SET_DISPLAY_SUSPEND), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_DISPLAY_SUSPEND), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
         return false;
@@ -611,7 +642,8 @@ PowerErrors PowerMgrServiceTestProxy::SetDeviceMode(const PowerMode& mode)
 
     data.WriteUint32(static_cast<uint32_t>(mode));
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::SETMODE_DEVICE), data, reply, option);
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SETMODE_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
@@ -634,7 +666,8 @@ PowerMode PowerMgrServiceTestProxy::GetDeviceMode()
         return PowerMode::NORMAL_MODE;
     }
 
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::GETMODE_DEVICE),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GETMODE_DEVICE),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
@@ -666,7 +699,8 @@ std::string PowerMgrServiceTestProxy::ShellDump(const std::vector<std::string>& 
     for (uint32_t i = 0; i < argc; i++) {
         data.WriteString(args[i]);
     }
-    int ret = stub_->OnRemoteRequest(static_cast<int>(IPowerMgr::SHELL_DUMP),
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHELL_DUMP),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);

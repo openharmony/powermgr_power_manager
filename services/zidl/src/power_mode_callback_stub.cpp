@@ -21,6 +21,7 @@
 #include "power_common.h"
 #include "power_log.h"
 #include "power_mgr_errors.h"
+#include "power_mode_callback_ipc_interface_code.h"
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
 
@@ -41,7 +42,7 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
     }
 
     int ret = ERR_OK;
-    if (code == static_cast<uint32_t>(IPowerModeCallback::POWER_MODE_CHANGED)) {
+    if (code == static_cast<uint32_t>(PowerMgr::PowerModeCallbackInterfaceCode::POWER_MODE_CHANGED)) {
         ret = OnPowerModeCallbackStub(data);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -20,6 +20,7 @@
 #include "message_option.h"
 #include "power_log.h"
 #include "power_common.h"
+#include "power_mode_callback_ipc_interface_code.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -39,7 +40,8 @@ void PowerModeCallbackProxy::OnPowerModeChanged(PowerMode mode)
 
     WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
 
-    int ret = remote->SendRequest(static_cast<int>(IPowerModeCallback::POWER_MODE_CHANGED),
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerModeCallbackInterfaceCode::POWER_MODE_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);

@@ -17,6 +17,7 @@
 
 #include "message_parcel.h"
 #include "power_common.h"
+#include "shutdown/sync_shutdown_callback_ipc_interface_code.h"
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
 
@@ -36,8 +37,8 @@ int SyncShutdownCallbackStub::OnRemoteRequest(
         return E_GET_POWER_SERVICE_FAILED;
     }
 
-    int32_t ret;
-    if (code == ISyncShutdownCallback::CMD_ON_SYNC_SHUTDOWN) {
+    int32_t ret = ERR_OK;
+    if (code == static_cast<int32_t>(PowerMgr::SyncShutdownCallbackInterfaceCode::CMD_ON_SYNC_SHUTDOWN)) {
         ret = OnSyncShutdownCallbackStub(data, reply);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);

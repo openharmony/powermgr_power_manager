@@ -25,9 +25,6 @@ namespace OHOS {
 namespace PowerMgr {
 class IPowerStateCallback : public IRemoteBroker {
 public:
-    enum {
-        POWER_STATE_CHANGED = 0,
-    };
     virtual void OnPowerStateChanged(PowerState state) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerStateCallback");

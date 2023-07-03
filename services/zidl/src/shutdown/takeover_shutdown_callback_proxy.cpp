@@ -19,6 +19,7 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "power_common.h"
+#include "shutdown/takeover_shutdown_callback_ipc_interface_code.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -38,7 +39,8 @@ bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(bool isReboot)
 
     WRITE_PARCEL_WITH_RET(data, Bool, isReboot, false);
 
-    int ret = remote->SendRequest(static_cast<int32_t>(ITakeOverShutdownCallback::CMD_ON_TAKEOVER_SHUTDOWN),
+    int ret = remote->SendRequest(
+        static_cast<int32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_SHUTDOWN),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
