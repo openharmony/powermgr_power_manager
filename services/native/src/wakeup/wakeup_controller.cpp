@@ -161,21 +161,21 @@ void WakeupController::Wakeup()
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
+
     if (!Permission::IsSystem()) {
         return;
     }
-    POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
     }
-    int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+
     if (pms->IsScreenOn()) {
         return;
     }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
 
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
@@ -213,13 +213,13 @@ void WakeupController::HandleScreenOnTimeout()
 /* InputCallback achieve */
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
-    int32_t keyCode = keyEvent->GetKeyCode();
-    WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
+    int64_t now = static_cast<int64_t>(time(nullptr));
+    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
 
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     if (wakeupController == nullptr) {
@@ -227,6 +227,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         return;
     }
 
+    int32_t keyCode = keyEvent->GetKeyCode();
+    WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     if (keyCode == KeyEvent::KEYCODE_F1) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     }
@@ -247,6 +249,9 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (pms == nullptr) {
         return;
     }
+    int64_t now = static_cast<int64_t>(time(nullptr));
+    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
@@ -291,6 +296,12 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
 void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 {
     POWER_HILOGD(FEATURE_WAKEUP, "AxisEvent");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    int64_t now = static_cast<int64_t>(time(nullptr));
+    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY, false);
 }
 
 /* WakeupMonitor Implement */
