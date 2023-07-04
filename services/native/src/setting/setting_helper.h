@@ -31,7 +31,7 @@ public:
         ENABLE = 1,
     };
     static bool IsDisplayOffTimeSettingValid();
-    static int64_t GetSettingDisplayOffTime();
+    static int64_t GetSettingDisplayOffTime(int64_t defaultVal);
     static void SetSettingDisplayOffTime(int64_t time);
     static sptr<SettingObserver> RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc& func);
     static void UnregisterSettingDisplayOffTimeObserver(sptr<SettingObserver>& observer);
