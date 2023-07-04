@@ -43,7 +43,6 @@ static const struct option DISPLAY_OPTIONS[] = {
     {"boost", required_argument, nullptr, 'b'},
     {"cancel", no_argument, nullptr, 'c'},
     {"discount", required_argument, nullptr, 'd'},
-    {"override delay", required_argument, nullptr, 'e'},
 };
 #endif
 
@@ -84,8 +83,7 @@ static const std::string DISPLAY_HELP_MSG =
     "  -o  :  override brightness\n"
     "  -b  :  timing maximum brightness\n"
     "  -c  :  cancel the timing maximum brightness\n"
-    "  -d  :  discount brightness\n"
-    "  -e  :  set screenoff delay\n";
+    "  -d  :  discount brightness\n";
 #endif
 
 static const std::string TIME_OUT_HELP_MSG =
@@ -120,7 +118,6 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {'b', std::bind(&PowerShellCommand::RunAsDisplayCommandBoost,       this)},
         {'c', std::bind(&PowerShellCommand::RunAsDisplayCommandCancelBoost, this)},
         {'d', std::bind(&PowerShellCommand::RunAsDisplayCommandDiscount,    this)},
-        {'e', std::bind(&PowerShellCommand::RunAsDisplayCommandDelay,       this)},
     };
 #endif
 
@@ -326,27 +323,10 @@ ErrCode PowerShellCommand::RunAsDisplayCommandDiscount()
     return ERR_OK;
 }
 
-ErrCode PowerShellCommand::RunAsDisplayCommandDelay()
-{
-    if (DisplayOptargEmpty()) {
-        return ERR_OK;
-    }
-    int32_t value = 0;
-    StrToInt(optarg, value);
-    bool ret = DisplayPowerMgrClient::GetInstance().OverrideDisplayOffDelay(static_cast<uint32_t>(value));
-    resultReceiver_.append("Override delay time to ");
-    resultReceiver_.append(std::to_string(value));
-    if (!ret) {
-        resultReceiver_.append(" failed");
-    }
-    resultReceiver_.append("\n");
-    return ERR_OK;
-}
-
 ErrCode PowerShellCommand::RunAsDisplayCommand()
 {
     int ind = 0;
-    int option = getopt_long(argc_, argv_, "hrcs:o:b:d:e:", DISPLAY_OPTIONS, &ind);
+    int option = getopt_long(argc_, argv_, "hrcs:o:b:d:", DISPLAY_OPTIONS, &ind);
     resultReceiver_.clear();
     auto item = commandDisplay_.find(option);
     if (item != commandDisplay_.end()) {
