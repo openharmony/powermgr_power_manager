@@ -773,9 +773,9 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
 
 static void DisplayOffTimeUpdateFunc()
 {
-    auto settingTime = SettingHelper::GetSettingDisplayOffTime();
     auto stateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
-    auto systemTime = stateMachine->GetDisplayOffTime();
+    int64_t systemTime = stateMachine->GetDisplayOffTime();
+    auto settingTime = SettingHelper::GetSettingDisplayOffTime(systemTime);
     if (settingTime == systemTime) {
         return;
     }
