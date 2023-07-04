@@ -26,10 +26,10 @@ bool SettingHelper::IsDisplayOffTimeSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_DISPLAY_OFF_TIME_KEY);
 }
 
-int64_t SettingHelper::GetSettingDisplayOffTime()
+int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
 {
     SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int64_t value;
+    int64_t value = defaultVal;
     ErrCode ret = provider.GetLongValue(SETTING_DISPLAY_OFF_TIME_KEY, value);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "get setting display off time failed, ret=%{public}d", ret);
