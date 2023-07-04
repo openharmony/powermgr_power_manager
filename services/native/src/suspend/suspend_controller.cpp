@@ -14,6 +14,10 @@
  */
 
 #include "suspend_controller.h"
+#include <datetime_ex.h>
+#include <input_manager.h>
+#include <securec.h>
+#include <ipc_skeleton.h>
 #include "power_log.h"
 #include "ffrt_utils.h"
 #include "power_mgr_service.h"
@@ -21,9 +25,6 @@
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
-#include <datetime_ex.h>
-#include <input_manager.h>
-#include <securec.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -203,8 +204,6 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 
 void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "Suspend Request: reason=%{public}d, action=%{public}u, delay=%{public}u",
-        reason, action, delay);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
@@ -218,19 +217,20 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         return;
     }
 
-    if (stateMachine_->GetState() == PowerState::AWAKE) {
-        POWER_HILOGI(FEATURE_SUSPEND, "Suspend set inactive");
-        bool force = true;
-        if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
-            force = false;
-        }
-        bool ret = stateMachine_->SetState(PowerState::INACTIVE,
-            stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
-        if (ret) {
-            StartSleepTimer(reason, action, delay);
-        }
-    } else {
-        POWER_HILOGI(FEATURE_SUSPEND, "state=%{public}u no transiator", stateMachine_->GetState());
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
+        "delay=%{public}u" PRId64 "",
+        pid, uid, reason, action, delay);
+    bool force = true;
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
+        force = false;
+    }
+    bool ret = stateMachine_->SetState(
+        PowerState::INACTIVE, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
+    if (ret) {
+        StartSleepTimer(reason, action, delay);
     }
 }
 
