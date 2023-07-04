@@ -280,6 +280,7 @@ void PowerStateMachine::RefreshActivityInner(
             stateAction_->RefreshActivity(callTimeMs, type,
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
+            stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, GetReasonByUserActivity(type));
         }
         // reset timer
         ResetInactiveTimer();
