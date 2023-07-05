@@ -107,6 +107,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
     g_bootCompletedCallback = []() {
         POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
         auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (power == nullptr) {
+            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
             auto& powerModeModule = power->GetPowerModeModule();
             powerModeModule.EnableMode(powerModeModule.GetModeItem(), true);
@@ -506,11 +510,11 @@ PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs, SuspendDeviceType
 PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
 {
     std::lock_guard lock(wakeupMutex_);
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
     WakeupRunningLock::Lock();
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
