@@ -44,15 +44,15 @@ public:
         delayMs_ = delay;
     }
     ~SuspendSource() = default;
-    SuspendDeviceType GetReason()
+    SuspendDeviceType GetReason() const
     {
         return reason_;
     }
-    uint32_t GetAction()
+    uint32_t GetAction() const
     {
         return action_;
     }
-    uint32_t GetDelay()
+    uint32_t GetDelay() const
     {
         return delayMs_;
     }

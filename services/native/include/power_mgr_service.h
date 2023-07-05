@@ -134,16 +134,16 @@ public:
     void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState, IDevicePowerAction* powerAction,
         IRunningLockAction* lockAction)
     {
-        POWER_HILOGE(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
+        POWER_HILOGI(LABEL_TEST, "Service EnableMock:%{public}d", mockCount_++);
         runningLockMgr_->EnableMock(lockAction);
         powerStateMachine_->EnableMock(powerState);
         shutdownController_->EnableMock(powerAction, shutdownState);
     }
     void MockProximity(uint32_t status)
     {
-        POWER_HILOGE(LABEL_TEST, "MockProximity: fun is start");
+        POWER_HILOGI(LABEL_TEST, "MockProximity: fun is start");
         runningLockMgr_->SetProximity(status);
-        POWER_HILOGE(LABEL_TEST, "MockProximity: fun is end");
+        POWER_HILOGI(LABEL_TEST, "MockProximity: fun is end");
     }
     void MockSystemWakeup()
     {
