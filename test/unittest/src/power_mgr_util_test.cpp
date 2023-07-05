@@ -158,7 +158,8 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider001, TestSize.Level0)
     auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
     std::string valueStr;
     settingProvider.GetStringValue("settings.power.wakeup_sources", valueStr);
-    bool valueBool;
+    bool valueBool = false;
+    settingProvider.PutBoolValue("settings.power.suspend_sources", valueBool);
     settingProvider.GetBoolValue("settings.power.suspend_sources", valueBool);
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = settingProvider.CreateObserver("settings.power.suspend_sources", updateFunc);

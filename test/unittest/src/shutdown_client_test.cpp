@@ -141,9 +141,9 @@ HWTEST_F(ShutdownClientTest, AsyncShutdownCallbackStub003, TestSize.Level0)
     uint32_t code = 0;
     MessageParcel data;
     AsyncShutdownCallback asyncShutdownCallback;
-    asyncShutdownCallback.OnAsyncShutdown();
+    data.WriteInterfaceToken(AsyncShutdownCallback::GetDescriptor());
     int32_t ret = asyncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
-    EXPECT_EQ(ret, E_GET_POWER_SERVICE_FAILED);
+    EXPECT_EQ(ret, ERR_OK);
     POWER_HILOGD(LABEL_TEST, "AsyncShutdownCallbackStub003 end");
 }
 
@@ -158,9 +158,9 @@ HWTEST_F(ShutdownClientTest, SyncShutdownCallbackStub004, TestSize.Level0)
     uint32_t code = 0;
     MessageParcel data;
     SyncShutdownCallback syncShutdownCallback;
-    syncShutdownCallback.OnSyncShutdown();
+    data.WriteInterfaceToken(SyncShutdownCallback::GetDescriptor());
     int32_t ret = syncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
-    EXPECT_EQ(ret, E_GET_POWER_SERVICE_FAILED);
+    EXPECT_EQ(ret, ERR_OK);
     POWER_HILOGD(LABEL_TEST, "SyncShutdownCallbackStub004 end");
 }
 
@@ -175,9 +175,9 @@ HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub005, TestSize.Level0)
     uint32_t code = 0;
     MessageParcel data;
     TakeOverShutdownCallback takeOverShutdownCallback;
-    takeOverShutdownCallback.OnTakeOverShutdown(false);
+    data.WriteInterfaceToken(TakeOverShutdownCallback::GetDescriptor());
     int32_t ret = takeOverShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
-    EXPECT_EQ(ret, E_GET_POWER_SERVICE_FAILED);
+    EXPECT_EQ(ret, E_READ_PARCEL_ERROR);
     POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub005 end");
 }
 } // namespace UnitTest

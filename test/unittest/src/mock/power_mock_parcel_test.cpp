@@ -63,6 +63,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
     powerMgrClient.RefreshActivity(UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
     powerMgrClient.GetState();
     powerMgrClient.RebootDevice(" ");
+    powerMgrClient.RebootDeviceForDeprecated(" ");
     powerMgrClient.ShutDownDevice(" ");
     powerMgrClient.ForceSuspendDevice();
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
