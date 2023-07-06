@@ -660,10 +660,7 @@ void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteO
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
-    FFRTTask task = [&] {
-        pms->ForceUnLock(remote.promote());
-    };
-    FFRTUtils::SubmitTask(task);
+    pms->ForceUnLock(remote.promote());
 }
 
 RunningLockMgr::SystemLock::SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type,
