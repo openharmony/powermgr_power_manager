@@ -47,7 +47,12 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             g_shutdownDelegator = std::make_unique<ShutdownStubDelegator>(*this);
         }
         RETURN_IF_WITH_RET(g_shutdownDelegator == nullptr, ERR_NO_INIT)
-        return g_shutdownDelegator->HandleRemoteRequest(code, data, reply, option);
+
+        int ret = g_shutdownDelegator->HandleRemoteRequest(code, data, reply, option);
+        if (ret == ERR_INVALID_OPERATION) {
+            ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        }
+        return ret;
     }
 
     const int DFX_DELAY_MS = 10000;
