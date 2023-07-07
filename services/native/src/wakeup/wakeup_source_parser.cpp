@@ -123,7 +123,7 @@ bool WakeupSourceParser::ParseSourcesProc(
     if (valueObj.isObject()) {
         Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
         Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
-        if (!clickValue.isNull()) {
+        if (!clickValue.isNull() && clickValue.isUInt()) {
             POWER_HILOGI(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
             click = (clickValue.asUInt() == SINGLE_CLICK || clickValue.asUInt() == DOUBLE_CLICK) ? clickValue.asUInt() :
                                                                                                    DOUBLE_CLICK;
