@@ -20,10 +20,11 @@
 #include <vector>
 
 #include <iremote_object.h>
+#include <functional>
 
 namespace OHOS {
 namespace PowerMgr {
-using RunningLockProxyMap = std::map<std::string, std::vector<sptr<IRemoteObject>>>;
+using RunningLockProxyMap = std::map<std::string, std::pair<std::vector<sptr<IRemoteObject>>, int32_t>>;
 class RunningLockProxy {
 public:
     RunningLockProxy() = default;
@@ -32,7 +33,12 @@ public:
     void AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     void RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     std::vector<sptr<IRemoteObject>> GetRemoteObjectList(pid_t pid, pid_t uid);
+    bool IsProxied(pid_t pid, pid_t uid);
+    bool IncreaseProxyCnt(pid_t pid, pid_t uid, const std::function<void(void)>& proxyRunningLock);
+    bool DecreaseProxyCnt(pid_t pid, pid_t uid, const std::function<void(void)>& unProxyRunningLock);
     void Clear();
+    std::string DumpProxyInfo();
+    void ResetRunningLocks();
 private:
     std::string AssembleProxyKey(pid_t pid, pid_t uid);
     RunningLockProxyMap proxyMap_;
