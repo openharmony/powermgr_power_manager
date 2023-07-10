@@ -65,6 +65,8 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnLock(token));
     EXPECT_FALSE(sptrProxy->IsUsed(token));
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, pid, uid));
+    EXPECT_FALSE(sptrProxy->ProxyRunningLocks(true, {std::make_pair(pid, uid)}));
+    EXPECT_FALSE(sptrProxy->ResetRunningLocks());
 }
 
 /**

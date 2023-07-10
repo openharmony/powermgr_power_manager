@@ -49,6 +49,9 @@ public:
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
+    virtual bool ProxyRunningLocks(bool isProxied,
+        const std::vector<std::pair<pid_t, pid_t>>& processInfos) override;
+    virtual bool ResetRunningLocks() override;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     // Use for PowerStateMachine
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;

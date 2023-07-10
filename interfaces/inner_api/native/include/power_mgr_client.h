@@ -122,6 +122,8 @@ public:
 
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
+    bool ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
+    bool ResetRunningLocks();
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);

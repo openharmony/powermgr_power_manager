@@ -32,6 +32,7 @@ namespace PowerMgr {
 namespace {
 constexpr uint32_t PARAM_MAX_NUM = 10;
 std::unique_ptr<ShutdownStubDelegator> g_shutdownDelegator;
+constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 }
 int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -114,6 +115,12 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_ISUSED):
             ret = IsUsedStub(data, reply);
+            break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCKS):
+            ret = ProxyRunningLocksStub(data, reply);
+            break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESET_RUNNINGLOCKS):
+            ret = ResetAllPorxyStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK):
             ret = RegisterPowerStateCallbackStub(data);
@@ -214,6 +221,35 @@ int32_t PowerMgrStub::ProxyRunningLockStub(MessageParcel& data, MessageParcel& r
     READ_PARCEL_WITH_RET(data, Int32, pid, E_READ_PARCEL_ERROR);
     READ_PARCEL_WITH_RET(data, Int32, uid, E_READ_PARCEL_ERROR);
     bool ret = ProxyRunningLock(isProxied, pid, uid);
+    WRITE_PARCEL_WITH_RET(reply, Bool, ret, E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::ProxyRunningLocksStub(MessageParcel& data, MessageParcel& reply)
+{
+    bool isProxied = false;
+    std::vector<std::pair<pid_t, pid_t>> processInfos {};
+    READ_PARCEL_WITH_RET(data, Bool, isProxied, E_READ_PARCEL_ERROR);
+    int32_t size {0};
+    READ_PARCEL_WITH_RET(data, Int32, size, E_READ_PARCEL_ERROR);
+    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGW(COMP_FWK, "size exceed limit, size=%{public}d, limit=%{public}d", size,
+            MAX_PROXY_RUNNINGLOCK_NUM);
+        return E_EXCEED_PARAM_LIMIT;
+    }
+    processInfos.resize(size);
+    for (int i = 0; i < size; ++i) {
+        READ_PARCEL_WITH_RET(data, Int32, processInfos[i].first, E_READ_PARCEL_ERROR);
+        READ_PARCEL_WITH_RET(data, Int32, processInfos[i].second, E_READ_PARCEL_ERROR);
+    }
+    bool ret = ProxyRunningLocks(isProxied, processInfos);
+    WRITE_PARCEL_WITH_RET(reply, Bool, ret, E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::ResetAllPorxyStub(MessageParcel& data, MessageParcel& reply)
+{
+    bool ret = ResetRunningLocks();
     WRITE_PARCEL_WITH_RET(reply, Bool, ret, E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
