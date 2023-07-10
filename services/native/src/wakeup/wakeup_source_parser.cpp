@@ -14,6 +14,7 @@
  */
 
 #include <fstream>
+#include <unistd.h>
 
 #include "config_policy_utils.h"
 #include "power_log.h"
