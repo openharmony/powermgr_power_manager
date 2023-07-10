@@ -52,6 +52,7 @@ public:
     {
         return wakeupReason_;
     }
+    bool CheckEventReciveTime(WakeupDeviceType wakeupType);
 
 private:
     void ControlListener(WakeupDeviceType reason);
@@ -59,10 +60,12 @@ private:
     void HandleScreenOnTimeout();
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
+    std::map<WakeupDeviceType, int64_t> eventHandleMap_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
     WakeupDeviceType wakeupReason_ {0};
     std::mutex mutex_;
     std::mutex monitorMutex_;
+    std::mutex eventHandleMutex_;
     int32_t monitorId_ {-1};
 };
 
