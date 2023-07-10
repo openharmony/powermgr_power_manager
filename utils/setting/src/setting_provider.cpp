@@ -184,7 +184,6 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    POWER_HILOGD(COMP_UTILS, "key=%{public}s", key.c_str());
     Uri uri(AssembleUri(key));
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
@@ -221,7 +220,6 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
     }
-    POWER_HILOGD(COMP_UTILS, "key=%{public}s, value=%{public}s", key.c_str(), value.c_str());
     DataShare::DataShareValueObject keyObj(key);
     DataShare::DataShareValueObject valueObj(value);
     DataShare::DataShareValuesBucket bucket;
