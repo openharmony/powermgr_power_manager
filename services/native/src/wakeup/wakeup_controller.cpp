@@ -322,16 +322,16 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 {
     // The minimum refreshactivity interval is 100ms!!
-    int64_t now = GetTickCount();
     std::lock_guard lock(eventHandleMutex_);
+    int64_t now = GetTickCount();
     if (eventHandleMap_.find(wakeupType) != eventHandleMap_.end()) {
         if ((eventHandleMap_[wakeupType] + MIN_TIME_MS_BETWEEN_MULTIMODEACTIVITIES) > now) {
-            eventHandleMap_[wakeupType] = now;
-            return false;
+            return true;
         }
-        return true;
+        eventHandleMap_[wakeupType] = now;
+        return false;
     }
-    return true;
+    return false;
 }
 
 /* WakeupMonitor Implement */
