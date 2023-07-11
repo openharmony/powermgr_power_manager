@@ -26,6 +26,7 @@
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
+#include "json/reader.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
