@@ -483,8 +483,8 @@ int32_t PowerMgrStub::ShellDumpStub(MessageParcel& data, MessageParcel& reply)
 
 bool PowerMgrStub::IsShutdownCommand(uint32_t code)
 {
-    return (code >= static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_START)) &&
-        (code <= static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_END));
+    return (code >= static_cast<uint32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_START)) &&
+        (code <= static_cast<uint32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_END));
 }
 } // namespace PowerMgr
 } // namespace OHOS
