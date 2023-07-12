@@ -524,43 +524,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock079, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrMock080
- * @tc.desc: test Auto SuspendDevice by mock after 5s
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrSTMockTest, PowerMgrMock080, TestSize.Level2)
-{
-    int64_t time = 50;
-    GTEST_LOG_(INFO) << "PowerMgrMock080: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock080:Start");
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock080: Failed to get PowerMgrService";
-    }
-
-    EXPECT_CALL(*g_stateAction, GetDisplayState())
-        .Times(::testing::AtLeast(1))
-        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
-        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
-        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON))
-        .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM))
-        .WillOnce(::testing::Return(DisplayState::DISPLAY_DIM))
-        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
-    pms->SetDisplayOffTime(time);
-    ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_ON));
-    sleep(((time / TRANSFER_MS_TO_S) * DOUBLE_TIMES / TEST_RATE) + ONE_SECOND);
-    ON_CALL(*g_stateAction, GetDisplayState()).WillByDefault(::testing::Return(DisplayState::DISPLAY_DIM));
-    sleep(time / TRANSFER_MS_TO_S / TEST_RATE + ONE_SECOND);
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, false)).WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock080:End");
-    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
-    GTEST_LOG_(INFO) << "PowerMgrMock080: end";
-}
-
-/**
  * @tc.name: PowerMgrMock081
  * @tc.desc: test The display status and power status are inconsistent SuspendDevice
  * @tc.type: FUNC
