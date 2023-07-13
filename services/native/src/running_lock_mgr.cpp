@@ -245,9 +245,7 @@ void RunningLockMgr::RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteOb
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "timeOutMS=%{public}d", timeOutMS);
     FFRTUtils::CancelTask(g_runningLockTimeoutHandle, g_queue);
     if (timeOutMS > 0) {
-        FFRTTask task = [this, &remoteObj] {
-            UnLock(remoteObj);
-        };
+        FFRTTask task = std::bind(&RunningLockMgr::UnLock, this, remoteObj);
         g_runningLockTimeoutHandle = FFRTUtils::SubmitDelayTask(task, timeOutMS, g_queue);
     }
 }
