@@ -16,11 +16,10 @@
 #ifndef POWERMGR_SUSPEND_SOURCES_PARSER_H
 #define POWERMGR_SUSPEND_SOURCES_PARSER_H
 
-#include "suspend_sources.h"
-
 #include <memory>
 #include <string>
 
+#include "suspend_sources.h"
 #include "json/value.h"
 
 namespace OHOS {

@@ -35,7 +35,7 @@ public:
     }
     ~WakeupSource() = default;
 
-    WakeupDeviceType GetReason()
+    WakeupDeviceType GetReason() const
     {
         return reason_;
     }

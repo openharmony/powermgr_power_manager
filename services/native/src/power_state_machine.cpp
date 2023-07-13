@@ -640,10 +640,9 @@ void PowerStateMachine::ResetInactiveTimer()
     }
 
     if (this->CheckRunningLock(PowerState::INACTIVE)) {
-        const uint32_t TWO = 2;
-        const uint32_t THREE = 3;
+        const double DIMTIMERATE = 2.0/3;
         this->SetDelayTimer(
-            this->GetDisplayOffTime() * TWO / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            this->GetDisplayOffTime() * DIMTIMERATE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     }
 }
 

@@ -120,6 +120,10 @@ sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, Se
 
 void SettingProvider::ExecRegisterCb(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        POWER_HILOGE(COMP_UTILS, "observer is nullptr");
+        return;
+    }
     observer->OnChange();
 }
 
