@@ -225,7 +225,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SUSPEND,
         "Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
-        "delay=%{public}u" PRId64 "",
+        "delay=%{public}u" PRId32 "",
         pid, uid, reason, action, delay);
     bool force = true;
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
@@ -240,7 +240,8 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
 
 void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
-    int64_t timeout = GetTickCount() + delay;
+    const int64_t& tmpRef = delay;
+    int64_t timeout = GetTickCount() + tmpRef;
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
         POWER_HILOGI(FEATURE_SUSPEND, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")", timeout,
             sleepTime_);
