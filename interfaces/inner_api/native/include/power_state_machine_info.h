@@ -80,7 +80,7 @@ enum class PowerState : uint32_t {
     DOZE,
 
     /**
-     * Power State: screen off and cpu off and suspend to the rom.
+     * Power State: screen off and cpu off and suspend to the ram.
      */
     SLEEP,
 
