@@ -100,7 +100,7 @@ public:
     {
         return action_;
     }
-    uint32_t GetDelay()
+    uint32_t GetDelay() const
     {
         return delayMs_;
     }

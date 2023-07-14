@@ -960,15 +960,8 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
     return ret;
 }
 
-void PowerStateMachine::DumpInfo(std::string& result)
+void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason, std::string& time)
 {
-    std::string reason = "UNKNOWN";
-    std::string time = "UNKNOWN";
-    auto it = controllerMap_.find(GetState());
-    if (it != controllerMap_.end() && it->second != nullptr) {
-        reason = ToString(static_cast<uint32_t>(it->second->lastReason_));
-        time = ToString(it->second->lastTime_);
-    }
     result.append("POWER STATE DUMP:\n");
     result.append("Current State: ")
         .append(GetPowerStateString(GetState()))
@@ -1014,6 +1007,18 @@ void PowerStateMachine::DumpInfo(std::string& result)
             .append(ToString(it->second->failTime_))
             .append("\n\n");
     }
+}
+
+void PowerStateMachine::DumpInfo(std::string& result)
+{
+    std::string reason = "UNKNOWN";
+    std::string time = "UNKNOWN";
+    auto it = controllerMap_.find(GetState());
+    if (it != controllerMap_.end() && it->second != nullptr) {
+        reason = ToString(static_cast<uint32_t>(it->second->lastReason_));
+        time = ToString(it->second->lastTime_);
+    }
+    AppendDumpInfo(result, reason, time);
 }
 
 TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason reason, bool ignoreLock)

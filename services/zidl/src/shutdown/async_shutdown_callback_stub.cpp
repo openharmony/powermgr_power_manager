@@ -38,7 +38,7 @@ int AsyncShutdownCallbackStub::OnRemoteRequest(
     }
 
     int32_t ret = ERR_OK;
-    if (code == static_cast<int32_t>(PowerMgr::AsyncShutdownCallbackInterfaceCode::CMD_ON_ASYNC_SHUTDOWN)) {
+    if (code == static_cast<uint32_t>(PowerMgr::AsyncShutdownCallbackInterfaceCode::CMD_ON_ASYNC_SHUTDOWN)) {
         ret = OnAsyncShutdownCallbackStub(data, reply);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
