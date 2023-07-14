@@ -194,6 +194,7 @@ private:
     void HandleActivityOffTimeout();
     void HandleActivitySleepTimeout();
     void HandleSystemWakeup();
+    void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;

@@ -38,7 +38,7 @@ int TakeOverShutdownCallbackStub::OnRemoteRequest(
     }
 
     int32_t ret = ERR_OK;
-    if (code == static_cast<int32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_SHUTDOWN)) {
+    if (code == static_cast<uint32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_SHUTDOWN)) {
         ret = OnTakeOverShutdownCallbackStub(data, reply);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
