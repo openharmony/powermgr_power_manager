@@ -21,7 +21,7 @@
         "label": "$string:MainAbility_label",
         "startWindowIcon": "$media:icon",
         "startWindowBackground": "$color:white",
-        "visible": true,
+        "visible": false,
         "launchType": "standard"
       }
     ],
@@ -31,7 +31,7 @@
         "srcEntrance": "./ets/ServiceExtAbility/PowerDialogAbility.ts",
         "icon": "$media:icon",
         "label": "$string:PowerServiceExtAbility_label",
-        "visible": true,
+        "visible": false,
         "type": "service"
       },
       {
@@ -39,7 +39,7 @@
         "srcEntrance": "./ets/ServiceExtAbility/ThermalHighDialogAbility.ts",
         "icon": "$media:icon",
         "label": "$string:ThermalServiceExtAbility_high_label",
-        "visible": true,
+        "visible": false,
         "type": "service"
       },
       {
@@ -47,7 +47,7 @@
         "srcEntrance": "./ets/ServiceExtAbility/ThermalLowDialogAbility.ts",
         "icon": "$media:icon",
         "label": "$string:ThermalServiceExtAbility_low_label",
-        "visible": true,
+        "visible": false,
         "type": "service"
       },
       {
@@ -55,7 +55,7 @@
         "srcEntrance": "./ets/ServiceExtAbility/BatteryDialogAbility.ts",
         "icon": "$media:icon",
         "label": "$string:BatteryServiceExtAbility_label",
-        "visible": true,
+        "visible": false,
         "type": "service"
       }
     ],
