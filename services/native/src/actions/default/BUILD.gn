@@ -56,9 +56,9 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "hdf_core:libhdi",
     "hdf_core:libpub_utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "multimedia_image_framework:image_native",
   ]
 
   if (has_display_manager_part) {

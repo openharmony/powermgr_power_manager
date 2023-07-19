@@ -77,7 +77,7 @@ ohos_unittest("powermgr_native_test") {
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = [ "multimedia_image_framework:image_native" ]
+  external_deps = [ "image_framework:image_native" ]
   external_deps += deps_ex
 }
 
