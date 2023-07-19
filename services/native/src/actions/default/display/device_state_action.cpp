@@ -103,7 +103,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-            if (currentState == DisplayState::DISPLAY_OFF) {
+            if (currentState == DisplayState::DISPLAY_OFF && reason != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
                 IPCSkeleton::SetCallingIdentity(identity);
@@ -115,8 +115,8 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
             break;
         case DisplayState::DISPLAY_OFF: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-            if (currentState == DisplayState::DISPLAY_ON
-                || currentState == DisplayState::DISPLAY_DIM) {
+            if ((currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) &&
+                reason != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
                 IPCSkeleton::SetCallingIdentity(identity);
@@ -148,7 +148,7 @@ void DeviceStateAction::RegisterCallback(std::function<void(uint32_t)>& callback
 }
 
 void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t displayId,
-    DisplayPowerMgr::DisplayState state)
+    DisplayPowerMgr::DisplayState state, uint32_t reason)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Callback: OnDisplayStateChanged");
     int32_t mainDisp = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
@@ -158,16 +158,20 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
     }
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON: {
-            std::string identity = IPCSkeleton::ResetCallingIdentity();
-            DisplayManager::GetInstance().WakeUpEnd();
-            IPCSkeleton::SetCallingIdentity(identity);
+            if (StateChangeReason(reason) != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
+                std::string identity = IPCSkeleton::ResetCallingIdentity();
+                DisplayManager::GetInstance().WakeUpEnd();
+                IPCSkeleton::SetCallingIdentity(identity);
+            }
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
-            std::string identity = IPCSkeleton::ResetCallingIdentity();
-            DisplayManager::GetInstance().SuspendEnd();
-            IPCSkeleton::SetCallingIdentity(identity);
+            if (StateChangeReason(reason) != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
+                std::string identity = IPCSkeleton::ResetCallingIdentity();
+                DisplayManager::GetInstance().SuspendEnd();
+                IPCSkeleton::SetCallingIdentity(identity);
+            }
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
             break;
         }
