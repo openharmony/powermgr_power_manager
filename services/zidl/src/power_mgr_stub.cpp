@@ -32,7 +32,7 @@ namespace PowerMgr {
 namespace {
 constexpr uint32_t PARAM_MAX_NUM = 10;
 std::unique_ptr<ShutdownStubDelegator> g_shutdownDelegator;
-constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
+constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 }
 int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
