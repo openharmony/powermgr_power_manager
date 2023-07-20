@@ -929,13 +929,17 @@ void PowerMgrService::WakeupRunningLock::Unlock()
 
 void PowerMgrService::SuspendControllerInit()
 {
-    suspendController_ = std::make_shared<SuspendController>(shutdownController_, powerStateMachine_);
+    if (!suspendController_) {
+        suspendController_ = std::make_shared<SuspendController>(shutdownController_, powerStateMachine_);
+    }
     suspendController_->Init();
 }
 
 void PowerMgrService::WakeupControllerInit()
 {
-    wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_);
+    if (!wakeupController_) {
+        wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_);
+    }
     wakeupController_->Init();
 }
 
