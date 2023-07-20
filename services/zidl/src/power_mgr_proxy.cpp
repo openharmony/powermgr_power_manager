@@ -238,7 +238,7 @@ bool PowerMgrProxy::ProxyRunningLocks(bool isProxied, const std::vector<std::pai
     size_t size = processInfos.size();
     WRITE_PARCEL_WITH_RET(data, Bool, isProxied, false);
     WRITE_PARCEL_WITH_RET(data, Int32, size, false);
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         WRITE_PARCEL_WITH_RET(data, Int32, processInfos[i].first, false);
         WRITE_PARCEL_WITH_RET(data, Int32, processInfos[i].second, false);
     }
