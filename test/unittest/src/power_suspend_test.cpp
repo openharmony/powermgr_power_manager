@@ -191,7 +191,8 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest007, TestSize.Level0)
     pmsTest_->suspendController_->RecordPowerKeyDown();
     EXPECT_TRUE(
         pmsTest_->suspendController_->stateMachine_->stateAction_->GetDisplayState() == DisplayState::DISPLAY_OFF);
-
+    pmsTest_->suspendController_->powerkeyDownWhenScreenOff_ = false;
+    
     GTEST_LOG_(INFO) << "PowerSuspendTest007:  end";
 }
 
