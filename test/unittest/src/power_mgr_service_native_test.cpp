@@ -82,13 +82,11 @@ namespace {
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
 {
-    g_pmsTest->KeyMonitorInit();
     g_pmsTest->KeyMonitorCancel();
 
     g_pmsTest->HallSensorSubscriberInit();
     g_pmsTest->HallSensorSubscriberCancel();
 
-    g_pmsTest->HandleShutdownRequest();
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
     g_pmsTest->HandleKeyEvent(keyCode);
     int32_t type = OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
@@ -97,11 +95,9 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->OverrideScreenOffTime(TIMEOUTMS));
     EXPECT_TRUE(g_pmsTest->RestoreScreenOffTime());
 
-    g_pmsTest->powerkeyLongPressId_ = UNCANCELID;
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;
     g_pmsTest->KeyMonitorCancel();
-    g_pmsTest->KeyMonitorInit();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 end.");
 }
 

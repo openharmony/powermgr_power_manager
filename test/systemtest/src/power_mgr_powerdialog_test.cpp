@@ -15,41 +15,30 @@
 
 #include "power_mgr_powerdialog_test.h"
 
+#include <unistd.h>
+
+#define private public
+#define protected public
+#include "shutdown_dialog.h"
+#undef private
+#undef protected
+
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
-using namespace OHOS::EventFwk;
-using namespace OHOS;
 using namespace std;
-
-void PowerMgrPowerDialog::SetUpTestCase()
-{
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    pms->OnStart();
-    SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
-}
-
-void PowerMgrPowerDialog::TearDownTestCase()
-{
-}
-
-void PowerMgrPowerDialog::SetUp()
-{
-}
-
-void PowerMgrPowerDialog::TearDown()
-{
-}
 
 namespace {
 /**
- * @tc.name: PowerMgr_PowerDialog_001
- * @tc.desc: test pull up PowerDialog in ShowPowerDialog
+ * @tc.name: LongPressKeyMonitorInitTest
+ * @tc.desc: test KeyMonitorInit and KeyMonitorCancel
  * @tc.type: FUNC
- * @tc.require: issueI5I9BF
  */
-HWTEST_F(PowerMgrPowerDialog, PowerMgr_PowerDialog_001, TestSize.Level2)
+HWTEST_F(PowerMgrPowerDialog, LongPressKeyMonitorInitTest, TestSize.Level2)
 {
-    auto powerMgrService = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_TRUE(powerMgrService->ShowPowerDialog());  
+    ShutdownDialog shutdownDialog;
+    shutdownDialog.KeyMonitorInit();
+    EXPECT_TRUE(shutdownDialog.longPressId_ >= OHOS::ERR_OK);
+    shutdownDialog.KeyMonitorCancel();
+    EXPECT_TRUE(shutdownDialog.longPressId_ == OHOS::ERR_OK);
 }
 }
