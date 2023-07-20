@@ -28,6 +28,7 @@
 #include "power_state_machine.h"
 #include "running_lock_mgr.h"
 #include "shutdown_controller.h"
+#include "shutdown_dialog.h"
 #include "sp_singleton.h"
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
@@ -85,16 +86,13 @@ public:
     void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) override;
 
-    void HandleShutdownRequest();
     void HandleKeyEvent(int32_t keyCode);
     void HandlePointEvent(int32_t type);
-    void KeyMonitorInit();
     void KeyMonitorCancel();
     void SwitchSubscriberInit();
     void SwitchSubscriberCancel();
     void HallSensorSubscriberInit();
     void HallSensorSubscriberCancel();
-    bool ShowPowerDialog();
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
@@ -121,6 +119,10 @@ public:
     std::shared_ptr<WakeupController> GetWakeupController() const
     {
         return wakeupController_;
+    }
+    ShutdownDialog& GetShutdownDialog()
+    {
+        return shutdownDialog_;
     }
     bool IsServiceReady() const
     {
@@ -176,7 +178,6 @@ private:
         static const int32_t TIMEOUT = 10000; // 10seconds
     };
 
-    static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
     static constexpr int32_t HALL_REPORT_INTERVAL = 0;
@@ -209,9 +210,8 @@ private:
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
     std::shared_ptr<ShutdownController> shutdownController_;
     PowerModeModule powerModeModule_;
+    ShutdownDialog shutdownDialog_;
     uint32_t mockCount_ {0};
-    bool isDialogShown_ {false};
-    int32_t powerkeyLongPressId_ {0};
     int32_t switchId_ {0};
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};

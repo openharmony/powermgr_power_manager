@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import power from '@ohos.power';
-import hilog from '@ohos.hilog';
 import Constants from '../common/constant';
 
 @Extend(Button) function customizeButton() {
@@ -108,19 +108,32 @@ struct PowerDialog {
   }
 
   onCancel() {
-    globalThis.powerWindow.destroy();
-    globalThis.g_powerWindowFirst = undefined;
-    globalThis.extensionContext.terminateSelf();
+    try {
+      console.log('power dialog terminateSelf');
+      let storage = LocalStorage.GetShared()
+      let session = storage.get<UIExtensionContentSession>('session');
+      session.terminateSelf();
+    } catch(err) {
+      console.log('power dialog cancel failed: ' + JSON.stringify(err));
+    }
   }
 
   onShutdown() {
-    this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
-    power.shutdown("power_dialog");
+    try {
+      this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
+      power.shutdown("power_dialog");
+    } catch(err) {
+      console.log('power dialog shutdown failed: ' + JSON.stringify(err));
+    }
   }
 
   onReboot() {
-    this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
-    power.reboot("power_dialog");
+    try {
+      this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
+      power.reboot("power_dialog");
+    } catch(err) {
+      console.log('power dialog reboot failed: ' + JSON.stringify(err));
+    }
   }
 
   existApp() {
