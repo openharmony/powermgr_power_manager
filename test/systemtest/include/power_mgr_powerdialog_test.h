@@ -17,18 +17,11 @@
 #define POWER_MGR_POWERDIALOG_TEST_H
 
 #include <gtest/gtest.h>
-#include "power_mgr_service.h"
 
 namespace OHOS {
 namespace PowerMgr {
 
-class PowerMgrPowerDialog : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
+class PowerMgrPowerDialog : public testing::Test {};
 } // namespace PowerMgr
 } // namespace OHOS
 #endif

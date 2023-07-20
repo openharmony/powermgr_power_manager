@@ -27,13 +27,13 @@
 #include <system_ability_definition.h>
 #include <unistd.h>
 
-#include "ability_manager_client.h"
 #include "ability_connect_callback_stub.h"
+#include "ability_manager_client.h"
+#include "ffrt_utils.h"
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "sysparam.h"
-#include "ffrt_utils.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
 
