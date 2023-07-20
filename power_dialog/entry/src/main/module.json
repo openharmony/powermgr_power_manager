@@ -2,8 +2,7 @@
   "module": {
     "name": "entry",
     "type": "feature",
-    "srcEntrance": "./ets/Application/MyAbilityStage.ts",
-    "description": "$string:entry_desc",
+    "srcEntry": "",
     "mainElement": "MainAbility",
     "deviceTypes": [
       "default",
@@ -15,28 +14,27 @@
     "abilities": [
       {
         "name": "MainAbility",
-        "srcEntrance": "./ets/MainAbility/MainAbility.ts",
-        "description": "$string:MainAbility_desc",
         "icon": "$media:icon",
         "label": "$string:MainAbility_label",
         "startWindowIcon": "$media:icon",
         "startWindowBackground": "$color:white",
         "visible": false,
-        "launchType": "standard"
+        "launchType": "standard",
+        "srcEntry": ""
       }
     ],
     "extensionAbilities": [
       {
-        "name": "PowerServiceExtAbility",
-        "srcEntrance": "./ets/ServiceExtAbility/PowerDialogAbility.ts",
+        "name": "PowerUiExtensionAbility",
+        "srcEntry": "./ets/UiExtensionAbility/PowerUiExtensionAbility.ts",
         "icon": "$media:icon",
         "label": "$string:PowerServiceExtAbility_label",
         "visible": false,
-        "type": "service"
+        "type": "sysDialog/common"
       },
       {
         "name": "ThermalServiceExtAbility_high",
-        "srcEntrance": "./ets/ServiceExtAbility/ThermalHighDialogAbility.ts",
+        "srcEntry": "./ets/ServiceExtAbility/ThermalHighDialogAbility.ts",
         "icon": "$media:icon",
         "label": "$string:ThermalServiceExtAbility_high_label",
         "visible": false,
@@ -44,7 +42,7 @@
       },
       {
         "name": "ThermalServiceExtAbility_low",
-        "srcEntrance": "./ets/ServiceExtAbility/ThermalLowDialogAbility.ts",
+        "srcEntry": "./ets/ServiceExtAbility/ThermalLowDialogAbility.ts",
         "icon": "$media:icon",
         "label": "$string:ThermalServiceExtAbility_low_label",
         "visible": false,
@@ -57,7 +55,7 @@
         "name": "ohos.permission.REBOOT",
         "usedScene": {
           "abilities": [
-            "PowerDialogAbility"
+            "PowerUiExtensionAbility"
           ],
           "when": "always"
         }

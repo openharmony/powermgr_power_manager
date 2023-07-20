@@ -42,11 +42,11 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
         return true;
     }
     if (args[0] == ARGS_DIALOG) {
-        pms->HandleShutdownRequest();
+        pms->GetShutdownDialog().ConnectSystemUi();
         return true;
     }
     if (args[0] == ARGS_REG_KEY) {
-        pms->KeyMonitorInit();
+        pms->GetShutdownDialog().KeyMonitorInit();
         return true;
     }
     for (auto it = args.begin(); it != args.end(); it++) {

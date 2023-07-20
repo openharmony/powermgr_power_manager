@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-import AbilityStage from '@ohos.app.ability.AbilityStage';
+import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 
-export default class MyAbilityStage extends AbilityStage {
-  onCreate() {
-    console.log('MyAbilityStage onCreate');
+export default class PowerUiExtensionAbility extends UIExtensionAbility {
+  onSessionCreate(want, session): void {
+    let storage: LocalStorage = new LocalStorage({
+      'session': session
+    });
+    session.loadContent('pages/powerDialog', storage);
+    session.setWindowBackgroundColor('#00000000');
   }
 }
