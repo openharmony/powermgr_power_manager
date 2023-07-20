@@ -117,7 +117,7 @@ public:
         listener_(reason_, action_, delayMs_);
     }
 protected:
-    explicit SuspendMonitor(SuspendSource& source)
+    explicit SuspendMonitor(const SuspendSource& source)
     {
         reason_ = source.GetReason();
         action_ = source.GetAction();
