@@ -361,4 +361,20 @@ HWTEST_F (RunningLockTest, RunningLockTest013, TestSize.Level1)
     auto ret = runninglockProxy->GetRemoteObjectList(pid, uid);
     EXPECT_TRUE(ret.empty());
 }
+
+/**
+ * @tc.name: RunningLockTest014
+ * @tc.desc: Test ProxyRunningLocks function
+ * @tc.type: FUNC
+ * @tc.require: issueI7MNRN
+ */
+HWTEST_F(RunningLockTest, RunningLockTest014, TestSize.Level1)
+{
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+    std::vector<std::pair<pid_t, pid_t>> processInfos;
+    processInfos.push_back(std::pair<pid_t, pid_t>(curPid, curUid));
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLocks(true, processInfos));
 }
+} // namespace
