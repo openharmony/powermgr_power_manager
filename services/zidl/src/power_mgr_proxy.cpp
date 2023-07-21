@@ -808,6 +808,35 @@ std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint3
     return result;
 }
 
+PowerErrors PowerMgrProxy::IsStandby(bool& isStandby)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    int32_t ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_STANDBY), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    int32_t error;
+    
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    READ_PARCEL_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
+
+    return static_cast<PowerErrors>(error);
+}
+
 void PowerMgrProxy::RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
 {
     auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());

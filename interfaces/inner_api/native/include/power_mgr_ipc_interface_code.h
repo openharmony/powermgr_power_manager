@@ -47,7 +47,8 @@ enum class PowerMgrInterfaceCode {
     SET_DISPLAY_SUSPEND,
     SETMODE_DEVICE,
     GETMODE_DEVICE,
-    SHELL_DUMP
+    SHELL_DUMP,
+    IS_STANDBY
 };
 } // space PowerMgr
 } // namespace OHOS
