@@ -146,6 +146,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHELL_DUMP):
             ret = ShellDumpStub(data, reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_STANDBY):
+            ret = IsStandbyStub(data, reply);
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -485,6 +488,15 @@ bool PowerMgrStub::IsShutdownCommand(uint32_t code)
 {
     return (code >= static_cast<uint32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_START)) &&
         (code <= static_cast<uint32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_END));
+}
+
+int32_t PowerMgrStub::IsStandbyStub(MessageParcel& data, MessageParcel& reply)
+{
+    bool isStandby = false;
+    PowerErrors ret = IsStandby(isStandby);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
+    WRITE_PARCEL_WITH_RET(reply, Bool, isStandby, E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
 }
 } // namespace PowerMgr
 } // namespace OHOS

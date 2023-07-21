@@ -66,6 +66,7 @@
                 "safwk",
                 "samgr",
                 "sensor",
+                "device_standby",
                 "window_manager"
             ],
             "third_party": [
