@@ -290,6 +290,7 @@ void PowerMgrService::HandleShutdownRequest()
     if (!showSuccess) {
         return;
     }
+    RefreshActivity(static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
 }
 
 bool PowerMgrService::CheckDialogAndShuttingDown()
