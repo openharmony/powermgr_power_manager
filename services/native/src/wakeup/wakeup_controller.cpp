@@ -398,6 +398,8 @@ bool PowerkeyWakeupMonitor::Init()
             if (pms == nullptr) {
                 return;
             }
+            pms->RefreshActivity(
+                static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
             suspendController->RecordPowerKeyDown();
             Notify();
