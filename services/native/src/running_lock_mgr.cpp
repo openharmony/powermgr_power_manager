@@ -176,10 +176,6 @@ void RunningLockMgr::InitLocksTypeProximity()
                     stateMachine->SetState(PowerState::AWAKE,
                         StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
                 }
-                stateMachine->CancelDelayTimer(
-                    PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-                stateMachine->CancelDelayTimer(
-                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
                 backgroundLock_->Lock();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
