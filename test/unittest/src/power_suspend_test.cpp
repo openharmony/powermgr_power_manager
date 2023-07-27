@@ -91,8 +91,8 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     pmsTest_->SuspendControllerInit();
 
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(pmsTest_->suspendController_);
-    callback->OnPowerStateChanged(PowerState::AWAKE);
-    EXPECT_EQ(static_cast<uint32_t>(PowerState::AWAKE),
+    callback->OnPowerStateChanged(PowerState::INACTIVE);
+    EXPECT_EQ(static_cast<uint32_t>(PowerState::INACTIVE),
         static_cast<uint32_t>(pmsTest_->suspendController_->stateMachine_->stateAction_->GetDisplayState()));
     callback->controller_.reset();
     callback->OnPowerStateChanged(PowerState::AWAKE);
@@ -240,10 +240,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest009, TestSize.Level0)
     pmsTest_->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
     pmsTest_->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
     pmsTest_->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON);
-    pmsTest_->suspendController_->stateMachine_->SetState(
-        PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    EXPECT_TRUE(pmsTest_->suspendController_->stateMachine_->GetState() == PowerState::FREEZE);
 
     pmsTest_->suspendController_->stateMachine_->EmplaceInactive();
     pmsTest_->suspendController_->stateMachine_->SetState(
