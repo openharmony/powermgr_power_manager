@@ -49,14 +49,6 @@
         "label": "$string:ThermalServiceExtAbility_low_label",
         "visible": false,
         "type": "service"
-      },
-      {
-        "name": "BatteryServiceExtAbility",
-        "srcEntrance": "./ets/ServiceExtAbility/BatteryDialogAbility.ts",
-        "icon": "$media:icon",
-        "label": "$string:BatteryServiceExtAbility_label",
-        "visible": false,
-        "type": "service"
       }
     ],
     "requestPermissions": [
