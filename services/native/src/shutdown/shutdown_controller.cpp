@@ -113,9 +113,9 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
     PublishShutdownEvent();
     TriggerSyncShutdownCallback();
+    TurnOffScreen();
     make_unique<thread>([=] {
         Prepare();
-        TurnOffScreen();
         POWER_HILOGD(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE

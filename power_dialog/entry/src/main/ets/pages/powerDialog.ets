@@ -89,8 +89,8 @@ struct PowerDialog {
   dialogController: CustomDialogController = new CustomDialogController({
     builder: PowerCustomDialog({
       cancel: this.onCancel,
-      shutdown: this.onShutdown,
-      reboot: this.onReboot
+      shutdown: () => { this.onShutdown() },
+      reboot: () => { this.onReboot() }
     }),
     cancel: this.existApp,
     autoCancel: false,
@@ -98,7 +98,14 @@ struct PowerDialog {
     offset: { dx: 0, dy: -20 },
     gridCount: 4,
     customStyle: true
-  })
+  });
+
+  timeoutId: number;
+  timeoutMs: number = 20;
+
+  aboutToDisappear() {
+    clearTimeout(this.timeoutId);
+  }
 
   onCancel() {
     globalThis.powerWindow.destroy();
@@ -107,10 +114,12 @@ struct PowerDialog {
   }
 
   onShutdown() {
+    this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
     power.shutdown("power_dialog");
   }
 
   onReboot() {
+    this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
     power.reboot("power_dialog");
   }
 
