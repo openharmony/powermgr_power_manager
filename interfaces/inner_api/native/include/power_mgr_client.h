@@ -120,6 +120,11 @@ public:
      */
     PowerMode GetDeviceMode();
 
+    /**
+     * Check if the device has entered standby mode.
+     */
+    PowerErrors IsStandby(bool& isStandby);
+
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
