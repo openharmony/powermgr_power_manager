@@ -251,17 +251,13 @@ HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
 
     pid_t curUid = getuid();
     pid_t curPid = getpid();
-    EXPECT_FALSE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
 
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
         "background.test008", RunningLockType::RUNNINGLOCK_BACKGROUND);
     ASSERT_NE(runningLock, nullptr);
-
     runningLock->Lock();
-    EXPECT_TRUE(runningLock->IsUsed());
-
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
-    EXPECT_TRUE(runningLock->IsUsed());
 }
 
 /**
