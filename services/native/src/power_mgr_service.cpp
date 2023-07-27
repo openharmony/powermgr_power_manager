@@ -36,6 +36,9 @@
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
 
+#include "errors.h"
+#include "standby_service_client.h"
+
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
 
@@ -942,6 +945,16 @@ void PowerMgrService::WakeupControllerInit()
         wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_);
     }
     wakeupController_->Init();
+}
+
+PowerErrors PowerMgrService::IsStandby(bool& isStandby)
+{
+    DevStandbyMgr::StandbyServiceClient& standbyServiceClient = DevStandbyMgr::StandbyServiceClient::GetInstance();
+    ErrCode code = standbyServiceClient.IsDeviceInStandby(isStandby);
+    if (code == ERR_OK) {
+        return PowerErrors::ERR_OK;
+    }
+    return PowerErrors::ERR_CONNECTION_FAIL;
 }
 
 } // namespace PowerMgr

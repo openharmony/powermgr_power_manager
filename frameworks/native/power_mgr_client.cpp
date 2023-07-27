@@ -291,5 +291,12 @@ PowerErrors PowerMgrClient::GetError()
     error_ = PowerErrors::ERR_OK;
     return temp;
 }
+
+PowerErrors PowerMgrClient::IsStandby(bool& isStandby)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->IsStandby(isStandby);
+    return ret;
+}
 } // namespace PowerMgr
 } // namespace OHOS
