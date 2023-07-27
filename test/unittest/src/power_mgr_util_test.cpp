@@ -207,6 +207,22 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SettingProviderTest004
+ * @tc.desc: test PutLongValue func
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, SettingProvider004, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "SettingProvider004::fun is start!");
+    static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
+    auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
+    int64_t value = 0;
+    OHOS::ErrCode ret = settingProvider.PutLongValue(SETTING_DISPLAY_OFF_TIME_KEY, value);
+    EXPECT_EQ(OHOS::ERR_OK, ret);
+    POWER_HILOGD(LABEL_TEST, "SettingProvider004::fun is end!");
+}
+
+/**
  * @tc.name: SysparamTest001
  * @tc.desc: test GetIntValue in proxy
  * @tc.type: FUNC
