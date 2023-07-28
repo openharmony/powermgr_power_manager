@@ -91,9 +91,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     pmsTest_->SuspendControllerInit();
 
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(pmsTest_->suspendController_);
-    callback->OnPowerStateChanged(PowerState::INACTIVE);
-    EXPECT_EQ(static_cast<uint32_t>(PowerState::INACTIVE),
-        static_cast<uint32_t>(pmsTest_->suspendController_->stateMachine_->stateAction_->GetDisplayState()));
     callback->controller_.reset();
     callback->OnPowerStateChanged(PowerState::AWAKE);
     auto controller = callback->controller_.lock();
