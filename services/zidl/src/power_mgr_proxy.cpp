@@ -830,7 +830,7 @@ PowerErrors PowerMgrProxy::IsStandby(bool& isStandby)
     }
 
     int32_t error;
-    
+
     READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
     READ_PARCEL_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
 

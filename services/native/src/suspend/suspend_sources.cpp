@@ -18,6 +18,7 @@
 #include <string>
 namespace OHOS {
 namespace PowerMgr {
+std::mutex SuspendSources::sourceKeysMutex_;
 
 SuspendDeviceType SuspendSources::mapSuspendDeviceType(const std::string& key)
 {
@@ -42,6 +43,7 @@ SuspendDeviceType SuspendSources::mapSuspendDeviceType(const std::string& key)
 
 std::vector<std::string> SuspendSources::getSourceKeys()
 {
+    std::lock_guard<std::mutex> lock(sourceKeysMutex_);
     std::vector<std::string> sourceKeys;
     sourceKeys.push_back(SuspendSources::POWERKEY_KEY);
     sourceKeys.push_back(SuspendSources::TIMEOUT_KEY);
@@ -52,11 +54,13 @@ std::vector<std::string> SuspendSources::getSourceKeys()
 
 void SuspendSources::PutSource(SuspendSource& source)
 {
+    std::lock_guard<std::mutex> lock(sourceListMutex_);
     sourceList_.push_back(source);
 }
 
 std::vector<SuspendSource> SuspendSources::GetSourceList()
 {
+    std::lock_guard<std::mutex> lock(sourceListMutex_);
     return sourceList_;
 }
 

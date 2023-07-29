@@ -36,6 +36,7 @@ int32_t PowerModePolicy::GetPowerModeValuePolicy(uint32_t type)
 int32_t PowerModePolicy::GetPolicyFromMap(uint32_t type)
 {
     int32_t ret = INIT_VALUE_FALSE;
+    std::lock_guard<std::mutex> lock(policyMutex_);
     valueiter = valueModePolicy.find(type);
     if (valueiter != valueModePolicy.end()) {
         ret = valueiter->second;
@@ -46,6 +47,7 @@ int32_t PowerModePolicy::GetPolicyFromMap(uint32_t type)
 int32_t PowerModePolicy::GetRecoverPolicyFromMap(uint32_t type)
 {
     int32_t ret = INIT_VALUE_FALSE;
+    std::lock_guard<std::mutex> lock(policyMutex_);
     recoveriter = recoverModePolicy.find(type);
     if (recoveriter != recoverModePolicy.end()) {
         ret = recoveriter->second;
@@ -88,6 +90,7 @@ void PowerModePolicy::ReadRecoverPolicy(uint32_t mode)
 
 void PowerModePolicy::CompareModeItem(uint32_t mode, uint32_t lastMode)
 {
+    std::lock_guard<std::mutex> lock(policyMutex_);
     recoverModePolicy.clear();
     valueModePolicy.clear();
 
@@ -108,11 +111,13 @@ void PowerModePolicy::CompareModeItem(uint32_t mode, uint32_t lastMode)
 void PowerModePolicy::AddAction(uint32_t type, ModeAction& action)
 {
     POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", type);
+    std::lock_guard<std::mutex> lock(actionMapMutex_);
     actionMap.emplace(type, action);
 }
 
 void PowerModePolicy::TriggerAllActions(bool isBoot)
 {
+    std::lock_guard<std::mutex> lock(actionMapMutex_);
     for (auto iterator = actionMap.begin(); iterator != actionMap.end(); iterator++) {
         POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", iterator->first);
         iterator->second(isBoot);

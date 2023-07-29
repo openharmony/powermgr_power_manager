@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -78,6 +79,8 @@ public:
 
 private:
     std::vector<WakeupSource> sourceList_;
+    std::mutex sourceListMutex_;
+    static std::mutex sourceKeysMutex_;
 };
 
 } // namespace PowerMgr
