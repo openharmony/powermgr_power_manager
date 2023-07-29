@@ -106,6 +106,7 @@ void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
         auto monitor = monitorMap_[reason];
         if (monitor == nullptr) {
             POWER_HILOGI(COMP_SVC, "get monitor fail");
+            g_monitorMutex.Unlock();
             return;
         }
         monitor->Notify();

@@ -36,9 +36,9 @@ private:
 
     void PublishEvents(int64_t eventTime, sptr<IntentWant> intent);
 
-    sptr<IntentWant> screenOffWant_;
-    sptr<IntentWant> screenOnWant_;
-    sptr<OHOS::EventFwk::CommonEventPublishInfo> publishInfo_;
+    sptr<IntentWant> screenOffWant_ {nullptr};
+    sptr<IntentWant> screenOnWant_ {nullptr};
+    sptr<OHOS::EventFwk::CommonEventPublishInfo> publishInfo_ {nullptr};
 };
 } // namespace PowerMgr
 } // namespace OHOS
