@@ -47,8 +47,7 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pm
     // init lock map which will block state transit
     std::vector<RunningLockType> awakeBlocker {};
     std::vector<RunningLockType> freezeBlocker {};
-    std::vector<RunningLockType> inactiveBlocker {
-        RunningLockType::RUNNINGLOCK_SCREEN, RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL};
+    std::vector<RunningLockType> inactiveBlocker {RunningLockType::RUNNINGLOCK_SCREEN};
     std::vector<RunningLockType> standByBlocker {};
     std::vector<RunningLockType> dozeBlocker {};
     std::vector<RunningLockType> sleepBlocker {RunningLockType::RUNNINGLOCK_BACKGROUND};
