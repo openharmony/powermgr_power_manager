@@ -160,6 +160,47 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PowerWakeupTest004
+ * @tc.desc: test GetTargetPath
+ * @tc.type: FUNC
+ * @tc.require: issueI7G6OY
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest004, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeupTest004: start";
+    std::string targetPath;
+    WakeupSourceParser::GetTargetPath(targetPath);
+    EXPECT_TRUE(targetPath.size() != 0);
+    GTEST_LOG_(INFO) << "PowerWakeupTest004:  end";
+}
+
+/**
+ * @tc.name: PowerWakeupTest005
+ * @tc.desc: test CreateMonitor
+ * @tc.type: FUNC
+ * @tc.require: issueI7G6OY
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest005, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeupTest005: start";
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pmsTest_ == nullptr) {
+        GTEST_LOG_(INFO) << "PowerWakeupTest005: Failed to get PowerMgrService";
+    }
+
+    pmsTest_->Init();
+    pmsTest_->WakeupControllerInit();
+    WakeupSource source1(WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK, 1, 0);
+    std::shared_ptr<WakeupMonitor> monitor1 = WakeupMonitor::CreateMonitor(source1);
+    EXPECT_TRUE(monitor1 != nullptr);
+
+    WakeupSource source2(WakeupDeviceType::WAKEUP_DEVICE_MAX, 1, 0);
+    std::shared_ptr<WakeupMonitor> monitor2 = WakeupMonitor::CreateMonitor(source2);
+    EXPECT_TRUE(static_cast<uint32_t>(source2.reason_) == static_cast<uint32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX));
+    GTEST_LOG_(INFO) << "PowerWakeupTest005:  end";
+}
+
+/**
  * @tc.name: PowerWakeupTest006
  * @tc.desc: test Cancel(Normal and exception)
  * @tc.type: FUNC
