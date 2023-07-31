@@ -65,12 +65,16 @@ HWTEST_F (DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Leve
     EXPECT_FALSE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_UNKNOWN);
 
     DisplayPowerMgr::DisplayState stateType = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(DISPLAYID, stateType);
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(DISPLAYID_A, stateType);
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
     stateType = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(DISPLAYID_A, stateType);
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
     stateType = DisplayPowerMgr::DisplayState::DISPLAY_UNKNOWN;
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(DISPLAYID_A, stateType);
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
     stateType = static_cast<DisplayPowerMgr::DisplayState>(UNDISPLAYSTATE);
     EXPECT_TRUE(DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetDisplayState(stateType,
                                                                         reason) == ActionResult::FAILED);

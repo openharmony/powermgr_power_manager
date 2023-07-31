@@ -83,7 +83,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
-    EXPECT_EQ(PowerState::AWAKE, pms->GetState());
+    EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
     GTEST_LOG_(INFO) << "PowerMgrMock106: end";

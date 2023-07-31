@@ -21,18 +21,12 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 
-#ifdef HAS_DISPLAY_MANAGER_PART
-#include "dm_common.h"
-#endif
 #include "hitrace_meter.h"
 #include "ffrt_utils.h"
 #include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
 #include "system_suspend_controller.h"
-#ifdef HAS_DISPLAY_MANAGER_PART
-#include "screen_manager.h"
-#endif
 
 using namespace std;
 
@@ -876,10 +870,7 @@ void RunningLockMgr::ProximityController::OnClose()
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
-#ifdef HAS_DISPLAY_MANAGER_PART
-        Rosen::ScreenManager::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
-            Rosen::PowerStateChangeReason::POWER_BUTTON);
-#endif
+        stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
     }
 }
 
@@ -905,10 +896,7 @@ void RunningLockMgr::ProximityController::OnAway()
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
-#ifdef HAS_DISPLAY_MANAGER_PART
-        Rosen::ScreenManager::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_ON,
-            Rosen::PowerStateChangeReason::POWER_BUTTON);
-#endif
+        stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
     }
 }
 
