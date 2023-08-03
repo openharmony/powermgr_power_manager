@@ -18,6 +18,7 @@
 
 #include <string>
 #include <map>
+#include <mutex>
 #include <list>
 #include "power_save_mode.h"
 
@@ -66,6 +67,8 @@ private:
     void CompareModeItem(uint32_t mode, uint32_t lastMode);
     int32_t GetPolicyFromMap(uint32_t type);
     int32_t GetRecoverPolicyFromMap(uint32_t type);
+    std::mutex policyMutex_;
+    std::mutex actionMapMutex_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

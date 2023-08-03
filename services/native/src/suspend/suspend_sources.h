@@ -19,6 +19,7 @@
 #include "power_state_machine_info.h"
 #include <cstdint>
 #include <vector>
+#include <mutex>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -78,6 +79,8 @@ public:
 
 private:
     std::vector<SuspendSource> sourceList_;
+    std::mutex sourceListMutex_;
+    static std::mutex sourceKeysMutex_;
 };
 
 } // namespace PowerMgr
