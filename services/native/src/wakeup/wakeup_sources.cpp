@@ -18,6 +18,7 @@
 #include <string>
 namespace OHOS {
 namespace PowerMgr {
+std::mutex WakeupSources::sourceKeysMutex_;
 
 WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint32_t click)
 {
@@ -61,6 +62,7 @@ WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint
 
 std::vector<std::string> WakeupSources::getSourceKeys()
 {
+    std::lock_guard<std::mutex> lock(sourceKeysMutex_);
     std::vector<std::string> sourceKeys;
     sourceKeys.push_back(WakeupSources::POWERKEY_KEY);
     sourceKeys.push_back(WakeupSources::MOUSE_KEY);
@@ -75,11 +77,13 @@ std::vector<std::string> WakeupSources::getSourceKeys()
 
 void WakeupSources::PutSource(WakeupSource& source)
 {
+    std::lock_guard<std::mutex> lock(sourceListMutex_);
     sourceList_.push_back(source);
 }
 
 std::vector<WakeupSource> WakeupSources::GetSourceList()
 {
+    std::lock_guard<std::mutex> lock(sourceListMutex_);
     return sourceList_;
 }
 
