@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,21 @@
  */
 
 #include "wakeup_controller.h"
-#include "suspend_controller.h"
+
 #include <datetime_ex.h>
 #include <hisysevent.h>
 #include <input_manager.h>
 #include <ipc_skeleton.h>
 #include <securec.h>
 
+#include "ffrt_utils.h"
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "setting_helper.h"
-#include "ffrt_utils.h"
+#include "suspend_controller.h"
 #include "system_suspend_controller.h"
 
 namespace OHOS {
@@ -40,7 +41,6 @@ FFRTHandle g_screenTimeoutHandle;
 }
 
 /** WakeupController Implement */
-
 WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine)
 {
     stateMachine_ = stateMachine;

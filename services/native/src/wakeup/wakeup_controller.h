@@ -48,7 +48,7 @@ public:
     {
         return stateMachine_;
     }
-    WakeupDeviceType GetLastReason()
+    WakeupDeviceType GetLastReason() const
     {
         return wakeupReason_;
     }
@@ -88,7 +88,7 @@ public:
         // do nothing in base class
     }
 
-    WakeupDeviceType GetReason()
+    WakeupDeviceType GetReason() const
     {
         return reason_;
     }

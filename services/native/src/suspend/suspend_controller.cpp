@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,10 @@ void SuspendController::Init()
         }
     }
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
+    }
     stateMachine_->RegisterPowerStateCallback(callback);
     RegisterSettingsObserver();
 }
@@ -193,6 +197,10 @@ void SuspendController::CancelEvent()
 
 void SuspendController::RecordPowerKeyDown()
 {
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
+    }
     bool isScreenOn = stateMachine_->IsScreenOn();
     POWER_HILOGI(FEATURE_SUSPEND, "Suspend record key down action isScreenOn=%{public}d", isScreenOn);
     if (!isScreenOn) {
@@ -231,6 +239,10 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     bool force = true;
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         force = false;
+    }
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
     }
     bool ret = stateMachine_->SetState(
         PowerState::INACTIVE, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
@@ -289,6 +301,10 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
+    }
     bool ret = stateMachine_->SetState(
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
     if (ret) {
@@ -302,6 +318,10 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
+    }
     bool ret = stateMachine_->SetState(
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
@@ -315,6 +335,10 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
+    }
     bool ret = stateMachine_->SetState(
         PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
@@ -330,7 +354,7 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
     shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
 }
 
-std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
+const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
     SuspendDeviceType reason = source.GetReason();
     POWER_HILOGI(FEATURE_SUSPEND, "CreateMonitor reason=%{public}d", reason);

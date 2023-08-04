@@ -50,15 +50,15 @@ public:
     void HandleAction(SuspendDeviceType reason, uint32_t action);
     void RecordPowerKeyDown();
     bool GetPowerkeyDownWhenScreenOff();
-    std::shared_ptr<PowerStateMachine> GetStateMachine()
+    std::shared_ptr<PowerStateMachine> GetStateMachine() const
     {
         return stateMachine_;
     }
-    SuspendDeviceType GetLastReason()
+    SuspendDeviceType GetLastReason() const
     {
         return sleepReason_;
     }
-    uint32_t GetLastAction()
+    uint32_t GetLastAction() const
     {
         return sleepAction_;
     }
@@ -83,7 +83,7 @@ private:
 
 class SuspendMonitor {
 public:
-    static std::shared_ptr<SuspendMonitor> CreateMonitor(SuspendSource& source);
+    const static std::shared_ptr<SuspendMonitor> CreateMonitor(SuspendSource& source);
 
     virtual ~SuspendMonitor() = default;
     virtual bool Init() = 0;
@@ -92,11 +92,11 @@ public:
     {
         // do nothing in base class
     }
-    SuspendDeviceType GetReason()
+    SuspendDeviceType GetReason() const
     {
         return reason_;
     }
-    uint32_t GetAction()
+    uint32_t GetAction() const
     {
         return action_;
     }
