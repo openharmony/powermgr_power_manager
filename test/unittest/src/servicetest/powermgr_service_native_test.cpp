@@ -827,4 +827,19 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level
     auto helpIndex = helpDebugInfo.find(expectedDebugInfo);
     EXPECT_TRUE(helpIndex != string::npos);
 }
+
+/**
+ * @tc.name: PowerMgrServiceNativeTest041
+ * @tc.desc: test IsStandby
+ * @tc.type: FUNC
+ * @tc.require: issueI7QHBE
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level2)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is start");
+    bool standby = false;
+    auto error = g_powerMgrServiceProxy->IsStandby(standby);
+    EXPECT_TRUE(error == PowerErrors::ERR_OK);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is end");
+}
 } // namespace

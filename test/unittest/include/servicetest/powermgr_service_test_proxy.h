@@ -71,6 +71,7 @@ public:
     PowerErrors SetDeviceMode(const PowerMode& mode);
     PowerMode GetDeviceMode();
     std::string ShellDump(const std::vector<std::string>& args, uint32_t argc);
+    PowerErrors IsStandby(bool& isStandby);
 private:
     sptr<PowerMgrStub> stub_ {nullptr};
 };

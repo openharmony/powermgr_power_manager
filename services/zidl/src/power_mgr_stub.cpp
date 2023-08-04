@@ -90,7 +90,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             ret = GetStateStub(reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON):
-            ret = IsScreeOnStub(reply);
+            ret = IsScreenOnStub(reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND):
             ret = ForceSuspendDeviceStub(data, reply);
@@ -373,7 +373,7 @@ int32_t PowerMgrStub::GetStateStub(MessageParcel& reply)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::IsScreeOnStub(MessageParcel& reply)
+int32_t PowerMgrStub::IsScreenOnStub(MessageParcel& reply)
 {
     bool ret = false;
     ret = IsScreenOn();
