@@ -311,4 +311,18 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
     auto index = actualDebugInfo.find(expectedDebugInfo);
     EXPECT_TRUE(index != string::npos);
 }
+
+/**
+ * @tc.name: PowerMgrService018
+ * @tc.desc: Test IsStandby
+ * @tc.type: FUNC
+ * @tc.require: issueI7QHBE
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService018, TestSize.Level2)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool standby = false;
+    EXPECT_EQ(powerMgrClient.IsStandby(standby), PowerErrors::ERR_OK);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 end.");
+}
 }
