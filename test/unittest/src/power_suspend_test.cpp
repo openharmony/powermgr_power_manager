@@ -168,6 +168,52 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PowerSuspendTest005
+ * @tc.desc: test CreateMonitor
+ * @tc.type: FUNC
+ * @tc.require: issueI7G6OY
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest005, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSuspendTest005: start";
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pmsTest_ == nullptr) {
+        GTEST_LOG_(INFO) << "PowerSuspendTest005: Failed to get PowerMgrService";
+    }
+
+    pmsTest_->Init();
+    pmsTest_->SuspendControllerInit();
+
+    SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_STR, 1, 0);
+    std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(source);
+    EXPECT_TRUE(monitor == nullptr);
+    GTEST_LOG_(INFO) << "PowerSuspendTest005:  end";
+}
+
+/**
+ * @tc.name: PowerSuspendTest006
+ * @tc.desc: test mapSuspendDeviceType
+ * @tc.type: FUNC
+ * @tc.require: issueI7G6OY
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest006, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSuspendTest006: start";
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pmsTest_ == nullptr) {
+        GTEST_LOG_(INFO) << "PowerSuspendTest006: Failed to get PowerMgrService";
+    }
+
+    pmsTest_->Init();
+    pmsTest_->SuspendControllerInit();
+    std::string key = " ";
+    SuspendDeviceType suspendDeviceType = SuspendSources::mapSuspendDeviceType(key);
+    EXPECT_TRUE(static_cast<uint32_t>(suspendDeviceType) ==
+        static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN));
+    GTEST_LOG_(INFO) << "PowerSuspendTest006:  end";
+}
+
+/**
  * @tc.name: PowerSuspendTest007
  * @tc.desc: test RecordPowerKeyDown
  * @tc.type: FUNC
@@ -367,5 +413,4 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest016, TestSize.Level0)
     EXPECT_TRUE(tmp.size() != 0);
     GTEST_LOG_(INFO) << "PowerSuspendTest016:  end";
 }
-
 } // namespace
