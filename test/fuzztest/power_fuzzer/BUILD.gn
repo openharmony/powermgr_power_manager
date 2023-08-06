@@ -47,6 +47,7 @@ ohos_fuzztest("PowerFuzzTest") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "hilog:libhilog",
     "input:libmmi-client",

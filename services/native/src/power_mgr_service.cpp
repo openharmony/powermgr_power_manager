@@ -27,12 +27,13 @@
 #include <system_ability_definition.h>
 #include <unistd.h>
 
+#include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
+#include "ffrt_utils.h"
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "sysparam.h"
-#include "ffrt_utils.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
 
@@ -122,7 +123,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
-        power->KeyMonitorInit();
+        power->GetShutdownDialog().KeyMonitorInit();
         power->HallSensorSubscriberInit();
         power->SwitchSubscriberInit();
         power->SuspendControllerInit();
@@ -149,28 +150,6 @@ bool PowerMgrService::PowerStateMachineInit()
     return true;
 }
 
-void PowerMgrService::KeyMonitorInit()
-{
-    POWER_HILOGD(FEATURE_INPUT, "Initialize the long press powerkey");
-    std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-    std::set<int32_t> preKeys;
-
-    keyOption->SetPreKeys(preKeys);
-    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
-    keyOption->SetFinalKeyDown(true);
-    keyOption->SetFinalKeyDownDuration(LONG_PRESS_DELAY_MS);
-    powerkeyLongPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_INPUT, "Receive long press powerkey");
-            FFRTUtils::SubmitTask([this] {
-                HandleShutdownRequest();
-            });
-        });
-    if (powerkeyLongPressId_ != ERROR_UNSUPPORT) {
-        POWER_HILOGI(FEATURE_INPUT, "SubscribeKeyEvent long press powerkey success: %{public}d", powerkeyLongPressId_);
-    }
-}
-
 void PowerMgrService::KeyMonitorCancel()
 {
     POWER_HILOGI(FEATURE_INPUT, "Unsubscribe key information");
@@ -179,9 +158,7 @@ void PowerMgrService::KeyMonitorCancel()
         POWER_HILOGI(FEATURE_INPUT, "InputManager is null");
         return;
     }
-    if (powerkeyLongPressId_ >= 0) {
-        inputManager->UnsubscribeKeyEvent(powerkeyLongPressId_);
-    }
+    shutdownDialog_.KeyMonitorCancel();
     if (doubleClickId_ >= 0) {
         inputManager->UnsubscribeKeyEvent(doubleClickId_);
     }
@@ -267,42 +244,14 @@ void PowerMgrService::HallSensorSubscriberCancel()
     }
 }
 
-bool PowerMgrService::ShowPowerDialog()
-{
-    POWER_HILOGD(COMP_SVC, "PowerMgrService::ShowPowerDialog start.");
-    auto client = AbilityManagerClient::GetInstance();
-    if (client == nullptr) {
-        return false;
-    }
-    AAFwk::Want want;
-    want.SetElementName("com.ohos.powerdialog", "PowerServiceExtAbility");
-    int32_t result = client->StartAbility(want);
-    if (result != 0) {
-        POWER_HILOGE(COMP_SVC, "ShowPowerDialog failed, result = %{public}d", result);
-        return false;
-    }
-    isDialogShown_ = true;
-    POWER_HILOGD(COMP_SVC, "ShowPowerDialog success.");
-    return true;
-}
-
-void PowerMgrService::HandleShutdownRequest()
-{
-    POWER_HILOGD(FEATURE_SHUTDOWN, "HandleShutdown");
-    bool showSuccess = ShowPowerDialog();
-    if (!showSuccess) {
-        return;
-    }
-    RefreshActivity(static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
-}
-
 bool PowerMgrService::CheckDialogAndShuttingDown()
 {
-    bool isShuttingDown = this->shutdownController_->IsShuttingDown();
-    if (isDialogShown_ || isShuttingDown) {
+    bool isShuttingDown = shutdownController_->IsShuttingDown();
+    bool isLongPress = shutdownDialog_.IsLongPress();
+    if (isLongPress || isShuttingDown) {
         POWER_HILOGW(
-            FEATURE_INPUT, "isDialogShown: %{public}d, isShuttingDown: %{public}d", isDialogShown_, isShuttingDown);
-        isDialogShown_ = false;
+            FEATURE_INPUT, "isLongPress: %{public}d, isShuttingDown: %{public}d", isLongPress, isShuttingDown);
+        shutdownDialog_.ResetLongPressFlag();
         return true;
     }
     return false;

@@ -48,6 +48,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/setting/setting_helper.cpp",
     "native/src/shutdown/shutdown_callback_holer.cpp",
     "native/src/shutdown/shutdown_controller.cpp",
+    "native/src/shutdown/shutdown_dialog.cpp",
     "native/src/suspend/suspend_controller.cpp",
     "native/src/suspend/suspend_source_parser.cpp",
     "native/src/suspend/suspend_sources.cpp",
