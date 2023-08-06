@@ -51,6 +51,7 @@ config("module_mock_private_config") {
 deps_ex = [
   "ability_base:base",
   "ability_base:want",
+  "ability_runtime:ability_manager",
   "config_policy:configpolicy_util",
   "common_event_service:cesfwk_innerkits",
   "ipc:ipc_core",
