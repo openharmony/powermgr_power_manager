@@ -30,7 +30,7 @@
         "icon": "$media:icon",
         "label": "$string:PowerServiceExtAbility_label",
         "visible": false,
-        "type": "sysDialog/common"
+        "type": "sysDialog/power"
       },
       {
         "name": "ThermalServiceExtAbility_high",
