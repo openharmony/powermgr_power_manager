@@ -91,7 +91,7 @@
                     "//base/powermgr/power_manager/services:service"
                 ]
             },
-            "inner_api": [
+            "inner_kits": [
                 {
                     "name": "//base/powermgr/power_manager/interfaces/inner_api:powermgr_client",
                     "header": {
