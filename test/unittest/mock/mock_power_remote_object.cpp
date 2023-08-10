@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,17 @@
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+int32_t g_code = 1;
+}
 MockPowerRemoteObject::MockPowerRemoteObject(std::u16string descriptor) : IRemoteObject(descriptor) {}
 
 MockPowerRemoteObject::~MockPowerRemoteObject() {}
+
+void MockPowerRemoteObject::SetRequestValue(int32_t value)
+{
+    g_code = value;
+}
 
 int32_t MockPowerRemoteObject::GetObjectRefCount()
 {
@@ -38,7 +46,7 @@ int MockPowerRemoteObject::SendRequest(uint32_t code, MessageParcel& data, Messa
     (void)data;
     (void)reply;
     (void)option;
-    return 1;
+    return g_code;
 }
 
 bool MockPowerRemoteObject::AddDeathRecipient(const sptr<DeathRecipient>& recipient)
