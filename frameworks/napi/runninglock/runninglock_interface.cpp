@@ -277,7 +277,7 @@ void RunningLockInterface::CreateRunningLockCallBack(napi_env env, std::unique_p
             delete asyncInfo;
         },
         reinterpret_cast<void*>(asyncInfo.get()), &asyncInfo->asyncWork);
-    if (napi_ok == napi_queue_async_work(env, asyncInfo->asyncWork)) {
+    if (napi_ok == napi_queue_async_work_with_qos(env, asyncInfo->asyncWork, napi_qos_utility)) {
         asyncInfo.release();
     }
 }
@@ -313,7 +313,7 @@ void RunningLockInterface::IsRunningLockTypeSupportedCallBack(
             delete asyncInfo;
         },
         reinterpret_cast<void*>(asyncInfo.get()), &asyncInfo->asyncWork);
-    if (napi_ok == napi_queue_async_work(env, asyncInfo->asyncWork)) {
+    if (napi_ok == napi_queue_async_work_with_qos(env, asyncInfo->asyncWork, napi_qos_utility)) {
         asyncInfo.release();
     }
 }
