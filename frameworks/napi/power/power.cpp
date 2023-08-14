@@ -102,7 +102,7 @@ void Power::IsScreenOnCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackI
             delete asyncCallbackInfo;
         },
         reinterpret_cast<void*>(asCallbackInfoPtr.get()), &asCallbackInfoPtr->asyncWork);
-    if (napi_ok == napi_queue_async_work(env, asCallbackInfoPtr->asyncWork)) {
+    if (napi_ok == napi_queue_async_work_with_qos(env, asCallbackInfoPtr->asyncWork, napi_qos_utility)) {
         asCallbackInfoPtr.release();
     }
 }
