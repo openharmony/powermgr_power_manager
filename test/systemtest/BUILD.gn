@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -148,35 +148,6 @@ ohos_systemtest("test_power_mgr_shutdown_fast") {
   external_deps = deps_ex
 }
 
-################################powermgrdialog################################
-
-ohos_systemtest("test_power_mgr_powerdialog") {
-  module_out_path = module_output_path
-
-  sources = [ "src/power_mgr_powerdialog_test.cpp" ]
-
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":module_private_config",
-    "${powermgr_utils_path}:coverage_flags",
-  ]
-
-  deps = [
-    "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
-    "${powermgr_service_path}:powermgrservice",
-    "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "${powermgr_utils_path}/param:power_sysparam",
-    "${powermgr_utils_path}/permission:power_permission",
-    "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
-  ]
-
-  external_deps = deps_ex
-}
-
 ################################powerevent################################
 
 ohos_systemtest("test_power_level_event_system_test_off") {
@@ -280,7 +251,6 @@ group("systemtest_powermgr") {
     ":test_power_level_event_system_test_off",
     ":test_power_level_event_system_test_on",
     ":test_power_mgr_mock_system",
-    ":test_power_mgr_powerdialog",
     ":test_power_mgr_powersavemode",
     ":test_power_mgr_shutdown_fast",
     ":test_power_mgr_system",
