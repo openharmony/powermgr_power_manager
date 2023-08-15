@@ -68,6 +68,9 @@ ohos_shared_library("powermgr_client") {
   ]
 
   subsystem_name = "powermgr"
-  innerapi_tags = [ "platformsdk" ]
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
   part_name = "${powermgr_part_name}"
 }
