@@ -34,6 +34,7 @@ namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
 const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 } // namespace
 
 SettingProvider::~SettingProvider()
@@ -246,7 +247,7 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
 
 std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelper()
 {
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY);
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
         POWER_HILOGW(COMP_UTILS, "helper is nullptr, uri=%{public}s", SETTING_URI_PROXY.c_str());
         return nullptr;
