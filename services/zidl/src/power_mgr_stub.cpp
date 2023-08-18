@@ -31,8 +31,9 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 constexpr uint32_t PARAM_MAX_NUM = 10;
-std::unique_ptr<ShutdownStubDelegator> g_shutdownDelegator;
 constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
+std::unique_ptr<ShutdownStubDelegator> g_shutdownDelegator;
+std::mutex g_shutdownMutex;
 }
 int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -44,11 +45,13 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         return E_GET_POWER_SERVICE_FAILED;
     }
     if (IsShutdownCommand(code)) {
-        if (g_shutdownDelegator == nullptr) {
-            g_shutdownDelegator = std::make_unique<ShutdownStubDelegator>(*this);
+        {
+            std::lock_guard<std::mutex> lock(g_shutdownMutex);
+            if (g_shutdownDelegator == nullptr) {
+                g_shutdownDelegator = std::make_unique<ShutdownStubDelegator>(*this);
+                RETURN_IF_WITH_RET(g_shutdownDelegator == nullptr, ERR_NO_INIT)
+            }
         }
-        RETURN_IF_WITH_RET(g_shutdownDelegator == nullptr, ERR_NO_INIT)
-
         int ret = g_shutdownDelegator->HandleRemoteRequest(code, data, reply, option);
         if (ret == ERR_INVALID_OPERATION) {
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
