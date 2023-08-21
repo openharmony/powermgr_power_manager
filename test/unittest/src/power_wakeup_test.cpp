@@ -17,6 +17,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "axis_event.h"
 #include "input_device.h"
 #include "pointer_event.h"
 #include <datetime_ex.h>
@@ -33,7 +34,10 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 static sptr<PowerMgrService> g_service;
-static constexpr int SLEEP_WAIT_TIME_S = 2;
+static constexpr int32_t SLEEP_WAIT_TIME_S = 2;
+static constexpr int32_t SLEEP_WAIT_TIME_MS = 400;
+static constexpr int32_t DISPLAY_OFF_TIME_MS = 500;
+static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 
 class InputCallbackMock : public IInputEventConsumer {
 public:
@@ -42,13 +46,13 @@ public:
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
 };
 
-void PowerWakeupTest::SetUpTestCase(void)
+void PowerWakeupTest::SetUp(void)
 {
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
 }
 
-void PowerWakeupTest::TearDownTestCase(void)
+void PowerWakeupTest::TearDown(void)
 {
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
@@ -76,15 +80,9 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
 HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeup001: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest001: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
-    pmsTest_->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
-    auto monitor = pmsTest_->wakeupController_->monitorMap_[WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON];
+    g_service->WakeupControllerInit();
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
+    auto monitor = g_service->wakeupController_->monitorMap_[WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON];
     EXPECT_TRUE(monitor != nullptr);
 
     GTEST_LOG_(INFO) << "PowerWakeupTest001:  end";
@@ -100,15 +98,10 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest002: start";
     sleep(SLEEP_WAIT_TIME_S);
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest002: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
+    g_service->WakeupControllerInit();
     // test Normal
-    pmsTest_->wakeupController_->Wakeup();
-    EXPECT_TRUE(pmsTest_->wakeupController_ != nullptr);
+    g_service->wakeupController_->Wakeup();
+    EXPECT_TRUE(g_service->wakeupController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerWakeupTest002:  end";
 }
 
@@ -122,38 +115,34 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest003, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest003: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest003: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
 
-    pmsTest_->wakeupController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
-    pmsTest_->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
-    EXPECT_TRUE(pmsTest_->wakeupController_ != nullptr);
+    g_service->wakeupController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
+    g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
+    EXPECT_TRUE(g_service->wakeupController_ != nullptr);
 
-    pmsTest_->wakeupController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON);
-    pmsTest_->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
-    EXPECT_TRUE(static_cast<uint32_t>(pmsTest_->wakeupController_->stateMachine_->GetState()) ==
+    g_service->wakeupController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON);
+    g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
+    EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::AWAKE));
 
-    pmsTest_->wakeupController_->stateMachine_->EmplaceAwake();
-    pmsTest_->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
-    EXPECT_TRUE(static_cast<uint32_t>(pmsTest_->wakeupController_->stateMachine_->GetState()) ==
+    g_service->wakeupController_->stateMachine_->EmplaceAwake();
+    g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
+    EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::AWAKE));
 
-    pmsTest_->wakeupController_->stateMachine_->SetState(
+    g_service->wakeupController_->stateMachine_->SetState(
         PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
-    EXPECT_TRUE(static_cast<uint32_t>(pmsTest_->wakeupController_->stateMachine_->GetState()) ==
+    g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
+    EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::AWAKE));
 
-    pmsTest_->wakeupController_->stateMachine_->SetState(
+    g_service->wakeupController_->stateMachine_->SetState(
         PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->suspendController_->stateMachine_->controllerMap_.clear();
-    pmsTest_->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
-    EXPECT_TRUE(static_cast<uint32_t>(pmsTest_->wakeupController_->stateMachine_->GetState()) ==
+    g_service->suspendController_->stateMachine_->controllerMap_.clear();
+    g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
+    EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::INACTIVE));
 
     GTEST_LOG_(INFO) << "PowerWakeupTest003:  end";
@@ -183,13 +172,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest004, TestSize.Level0)
 HWTEST_F(PowerWakeupTest, PowerWakeupTest005, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest005: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest005: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
+    g_service->WakeupControllerInit();
     WakeupSource source1(WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK, 1, 0);
     std::shared_ptr<WakeupMonitor> monitor1 = WakeupMonitor::CreateMonitor(source1);
     EXPECT_TRUE(monitor1 != nullptr);
@@ -210,14 +193,9 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest006, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest006: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest006: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
-    pmsTest_->wakeupController_->Cancel();
-    EXPECT_TRUE(pmsTest_->wakeupController_->monitorMap_.size() == 0);
+    g_service->WakeupControllerInit();
+    g_service->wakeupController_->Cancel();
+    EXPECT_TRUE(g_service->wakeupController_->monitorMap_.size() == 0);
     GTEST_LOG_(INFO) << "PowerWakeupTest006:  end";
 }
 
@@ -230,13 +208,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest006, TestSize.Level0)
 HWTEST_F(PowerWakeupTest, PowerWakeupTest007, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest007: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest007: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
+    g_service->WakeupControllerInit();
     InputCallback* callback = new InputCallback();
     InputCallbackMock* callback_mock = reinterpret_cast<InputCallbackMock*>(callback);
     std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
@@ -249,7 +221,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest007, TestSize.Level0)
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_F2);
     callback_mock->OnInputEvent(keyEvent);
     delete callback;
-    EXPECT_TRUE(pmsTest_->wakeupController_ != nullptr);
+    EXPECT_TRUE(g_service->wakeupController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerWakeupTest007:  end";
 }
 
@@ -263,12 +235,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest008, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest008: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest008: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
+    g_service->WakeupControllerInit();
 
     constexpr int32_t DRAG_DST_X {500};
     constexpr int32_t DRAG_DST_Y {500};
@@ -295,7 +262,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest008, TestSize.Level0)
     curPointerItem = CreatePointerItem(0, deviceMouseId, {DRAG_DST_X, DRAG_DST_Y}, true);
     pointerEvent->AddPointerItem(curPointerItem);
     callback_mock->OnInputEvent(pointerEvent);
-    EXPECT_TRUE(pmsTest_->wakeupController_ != nullptr);
+    EXPECT_TRUE(g_service->wakeupController_ != nullptr);
     delete callback;
 }
 
@@ -309,12 +276,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest009, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerWakeupTest009: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerWakeupTest009: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->WakeupControllerInit();
+    g_service->WakeupControllerInit();
 
     constexpr int32_t DRAG_DST_X {500};
     constexpr int32_t DRAG_DST_Y {500};
@@ -351,7 +313,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest009, TestSize.Level0)
     callback_mock->OnInputEvent(pointerEvent2);
 
     delete callback;
-    EXPECT_TRUE(pmsTest_->wakeupController_ != nullptr);
+    EXPECT_TRUE(g_service->wakeupController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerWakeupTest009:  end";
 }
 
@@ -403,5 +365,74 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest011, TestSize.Level0)
     }
     EXPECT_TRUE(parseSources->GetSourceList().size() != 0);
     GTEST_LOG_(INFO) << "PowerWakeupTest011:  end";
+}
+
+/**
+ * @tc.name: PowerWakeupTest012
+ * @tc.desc: test OnInputEvent KeyEvent RefreshActivity
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest012, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeupTest012: start";
+    g_service->WakeupControllerInit();
+    g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupTest012");
+    EXPECT_TRUE(g_service->IsScreenOn());
+    usleep(SLEEP_WAIT_TIME_MS * 1000);
+    std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
+    InputCallback callback;
+    callback.OnInputEvent(keyEvent);
+    usleep(SLEEP_WAIT_TIME_MS * 1000);
+    EXPECT_TRUE(g_service->IsScreenOn());
+    g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
+    GTEST_LOG_(INFO) << "PowerWakeupTest012: end";
+}
+
+/**
+ * @tc.name: PowerWakeupTest013
+ * @tc.desc: test OnInputEvent PointerEvent RefreshActivity
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest013, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeupTest013: start";
+    g_service->WakeupControllerInit();
+    g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupTest013");
+    EXPECT_TRUE(g_service->IsScreenOn());
+    usleep(SLEEP_WAIT_TIME_MS * 1000);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    InputCallback callback;
+    callback.OnInputEvent(pointerEvent);
+    usleep(SLEEP_WAIT_TIME_MS * 1000);
+    EXPECT_TRUE(g_service->IsScreenOn());
+    g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
+    GTEST_LOG_(INFO) << "PowerWakeupTest013: end";
+}
+
+/**
+ * @tc.name: PowerWakeupTest014
+ * @tc.desc: test OnInputEvent AxisEvent RefreshActivity
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest014, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeupTest014: start";
+    g_service->WakeupControllerInit();
+    g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupTest014");
+    EXPECT_TRUE(g_service->IsScreenOn());
+    usleep(SLEEP_WAIT_TIME_MS * 1000);
+    std::shared_ptr<MMI::AxisEvent> axisEvent = MMI::AxisEvent::Create();
+    InputCallback callback;
+    callback.OnInputEvent(axisEvent);
+    usleep(SLEEP_WAIT_TIME_MS * 1000);
+    EXPECT_TRUE(g_service->IsScreenOn());
+    g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
+    GTEST_LOG_(INFO) << "PowerWakeupTest014: end";
 }
 } // namespace
