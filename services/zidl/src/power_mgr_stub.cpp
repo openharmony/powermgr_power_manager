@@ -238,9 +238,8 @@ int32_t PowerMgrStub::ProxyRunningLocksStub(MessageParcel& data, MessageParcel& 
     READ_PARCEL_WITH_RET(data, Bool, isProxied, E_READ_PARCEL_ERROR);
     int32_t size {0};
     READ_PARCEL_WITH_RET(data, Int32, size, E_READ_PARCEL_ERROR);
-    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
-        POWER_HILOGW(COMP_FWK, "size exceed limit, size=%{public}d, limit=%{public}d", size,
-            MAX_PROXY_RUNNINGLOCK_NUM);
+    if (size <= 0 || size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGW(COMP_FWK, "size exceed limit, size=%{public}d", size);
         return E_EXCEED_PARAM_LIMIT;
     }
     processInfos.resize(size);
