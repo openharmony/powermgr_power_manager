@@ -565,15 +565,15 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wpt
     if (remote == nullptr || remote.promote() == nullptr) {
         return;
     }
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
-        return;
-    }
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(remote.promote());
-    FFRTTask unRegFunc = [&] {
-        pms->UnRegisterPowerStateCallback(callback);
-    };
+    FFRTTask unRegFunc = std::bind([](const sptr<IPowerStateCallback>& cb) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
+            return;
+        }
+        pms->UnRegisterPowerStateCallback(cb);
+    }, callback);
     FFRTUtils::SubmitTask(unRegFunc);
 }
 
