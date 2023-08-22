@@ -49,9 +49,11 @@ ohos_fuzztest("PowerFuzzTest") {
   external_deps = [
     "ability_runtime:ability_manager",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+    "power_manager:power_ffrt",
     "sensor:sensor_interface_native",
   ]
 }
