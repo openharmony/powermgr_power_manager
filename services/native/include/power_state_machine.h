@@ -21,6 +21,7 @@
 #include <singleton.h>
 
 #include "actions/idevice_state_action.h"
+#include "ffrt_utils.h"
 #include "ipower_state_callback.h"
 #include "power_common.h"
 #include "power_state_machine_info.h"
@@ -201,6 +202,7 @@ private:
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
+    std::mutex ffrtMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
@@ -212,6 +214,8 @@ private:
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
     int64_t beforeOverrideTime_ {-1};
+    FFRTQueue queue_ {"power_state_machine"};
+    FFRTHandle userActivityTimeoutHandle_ {nullptr};
 };
 } // namespace PowerMgr
 } // namespace OHOS
