@@ -37,14 +37,16 @@ deps_ex = [
   "ability_base:base",
   "ability_base:want",
   "ability_runtime:ability_manager",
+  "c_utils:utils",
   "common_event_service:cesfwk_innerkits",
-  "ipc:ipc_core",
+  "ffrt:libffrt",
   "hilog:libhilog",
+  "input:libmmi-client",
+  "ipc:ipc_core",
+  "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "sensor:sensor_interface_native",
-  "c_utils:utils",
-  "input:libmmi-client",
 ]
 
 ohos_unittest("takeover_shutdown_callback_test") {

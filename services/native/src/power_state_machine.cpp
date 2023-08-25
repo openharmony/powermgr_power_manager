@@ -22,15 +22,12 @@
 #include "hitrace_meter.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
-#include "ffrt_utils.h"
 #include "setting_helper.h"
 
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
-FFRTQueue g_queue("power_state_machine");
-FFRTHandle g_userActivityTimeoutHandle;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -583,10 +580,9 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
         std::to_string(delayTime).c_str(), event);
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
-            FFRTTask task = [this] {
-                HandleActivityTimeout();
-            };
-            g_userActivityTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delayTime, g_queue);
+            std::lock_guard lock(ffrtMutex_);
+            FFRTTask task = std::bind(&PowerStateMachine::HandleActivityTimeout, this);
+            userActivityTimeoutHandle_ = FFRTUtils::SubmitDelayTask(task, delayTime, queue_);
             break;
         }
         case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
@@ -610,7 +606,8 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
     POWER_HILOGD(FEATURE_ACTIVITY, "Cancel delay timer, event: %{public}d", event);
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
-            FFRTUtils::CancelTask(g_userActivityTimeoutHandle, g_queue);
+            std::lock_guard lock(ffrtMutex_);
+            FFRTUtils::CancelTask(userActivityTimeoutHandle_, queue_);
             break;
         }
         case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
