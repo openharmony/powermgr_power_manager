@@ -19,7 +19,9 @@
 #include <file_ex.h>
 #include <hisysevent.h>
 #include <if_system_ability_manager.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <securec.h>
@@ -38,7 +40,9 @@
 #include "xcollie/watchdog.h"
 
 #include "errors.h"
+#ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
+#endif
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
@@ -152,6 +156,7 @@ bool PowerMgrService::PowerStateMachineInit()
 
 void PowerMgrService::KeyMonitorCancel()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGI(FEATURE_INPUT, "Unsubscribe key information");
     InputManager* inputManager = InputManager::GetInstance();
     if (inputManager == nullptr) {
@@ -165,10 +170,12 @@ void PowerMgrService::KeyMonitorCancel()
     if (monitorId_ >= 0) {
         inputManager->RemoveMonitor(monitorId_);
     }
+#endif
 }
 
 void PowerMgrService::HallSensorSubscriberInit()
 {
+#ifdef HAS_SENSORS_SENSOR_PART
     if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
         POWER_HILOGW(FEATURE_INPUT, "SENSOR_TYPE_ID_HALL sensor not support");
         return;
@@ -182,8 +189,10 @@ void PowerMgrService::HallSensorSubscriberInit()
     SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
     SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
     ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+#endif
 }
 
+#ifdef HAS_SENSORS_SENSOR_PART
 bool PowerMgrService::IsSupportSensor(SensorTypeId typeId)
 {
     bool isSupport = false;
@@ -235,13 +244,16 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
         wakeupController->ExecWakeupMonitorByReason(reason);
     }
 }
+#endif
 
 void PowerMgrService::HallSensorSubscriberCancel()
 {
+#ifdef HAS_SENSORS_SENSOR_PART
     if (IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
         DeactivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
         UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
     }
+#endif
 }
 
 bool PowerMgrService::CheckDialogAndShuttingDown()
@@ -259,6 +271,7 @@ bool PowerMgrService::CheckDialogAndShuttingDown()
 
 void PowerMgrService::SwitchSubscriberInit()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGW(FEATURE_INPUT, "Initialize the subscription switch");
     switchId_ =
         InputManager::GetInstance()->SubscribeSwitchEvent([this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
@@ -283,19 +296,23 @@ void PowerMgrService::SwitchSubscriberInit()
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
         });
+#endif
 }
 
 void PowerMgrService::SwitchSubscriberCancel()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGI(FEATURE_INPUT, "Unsubscribe switch information");
     if (switchId_ >= 0) {
         InputManager::GetInstance()->UnsubscribeSwitchEvent(switchId_);
         switchId_ = -1;
     }
+#endif
 }
 
 void PowerMgrService::HandleKeyEvent(int32_t keyCode)
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGD(FEATURE_INPUT, "keyCode: %{public}d", keyCode);
     int64_t now = static_cast<int64_t>(time(nullptr));
     if (IsScreenOn()) {
@@ -313,10 +330,12 @@ void PowerMgrService::HandleKeyEvent(int32_t keyCode)
             this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD, reason);
         }
     }
+#endif
 }
 
 void PowerMgrService::HandlePointEvent(int32_t type)
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGD(FEATURE_INPUT, "type: %{public}d", type);
     int64_t now = static_cast<int64_t>(time(nullptr));
     if (this->IsScreenOn()) {
@@ -328,6 +347,7 @@ void PowerMgrService::HandlePointEvent(int32_t type)
             this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_MOUSE, reason);
         }
     }
+#endif
 }
 
 void PowerMgrService::OnStop()
@@ -898,12 +918,16 @@ void PowerMgrService::WakeupControllerInit()
 
 PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 {
+#ifdef HAS_DEVICE_STANDBY_PART
     DevStandbyMgr::StandbyServiceClient& standbyServiceClient = DevStandbyMgr::StandbyServiceClient::GetInstance();
     ErrCode code = standbyServiceClient.IsDeviceInStandby(isStandby);
     if (code == ERR_OK) {
         return PowerErrors::ERR_OK;
     }
     return PowerErrors::ERR_CONNECTION_FAIL;
+#else
+    return PowerErrors::ERR_OK;
+#endif
 }
 
 } // namespace PowerMgr

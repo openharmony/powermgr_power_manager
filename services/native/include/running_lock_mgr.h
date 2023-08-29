@@ -25,7 +25,9 @@
 #include "running_lock_inner.h"
 #include "running_lock_proxy.h"
 #include "running_lock_token_stub.h"
+#ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -119,6 +121,7 @@ private:
         uint32_t counter_;
     };
 
+#ifdef HAS_SENSORS_SENSOR_PART
     class ProximityController {
     public:
         ProximityController();
@@ -152,6 +155,7 @@ private:
         uint32_t status_ {0};
         SensorUser user_;
     };
+#endif
 
     class RunningLockDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

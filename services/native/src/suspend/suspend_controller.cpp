@@ -15,7 +15,9 @@
 
 #include "suspend_controller.h"
 #include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <securec.h>
 #include <ipc_skeleton.h>
 #include "power_log.h"
@@ -382,6 +384,7 @@ const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSourc
 /** PowerKeySuspendMonitor Implement */
 bool PowerKeySuspendMonitor::Init()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     if (powerkeyReleaseId_ >= 0) {
         return true;
     }
@@ -410,14 +413,17 @@ bool PowerKeySuspendMonitor::Init()
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
+#endif
 }
 
 void PowerKeySuspendMonitor::Cancel()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     if (powerkeyReleaseId_ >= 0) {
         InputManager::GetInstance()->UnsubscribeKeyEvent(powerkeyReleaseId_);
         powerkeyReleaseId_ = -1;
     }
+#endif
 }
 
 /** Timeout Implement */
