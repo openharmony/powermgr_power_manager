@@ -144,6 +144,7 @@ void RunningLockMgr::InitLocksTypeBackground()
     );
 }
 
+#ifdef HAS_SENSORS_SENSOR_PART
 void RunningLockMgr::InitLocksTypeProximity()
 {
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
@@ -182,6 +183,7 @@ void RunningLockMgr::InitLocksTypeProximity()
         })
     );
 }
+#endif
 
 std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
     const sptr<IRemoteObject>& remoteObj)
@@ -575,7 +577,9 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
         it->second->Clear();
     }
     runninglockProxy_->Clear();
+#ifdef HAS_SENSORS_SENSOR_PART
     proximityController_.Clear();
+#endif
     std::shared_ptr<IRunningLockAction> mock(mockAction);
     backgroundLock_->EnableMock(mock);
     runningLockAction_ = mock;
@@ -739,6 +743,7 @@ void RunningLockMgr::LockCounter::Clear()
     counter_ = 0;
 }
 
+#ifdef HAS_SENSORS_SENSOR_PART
 void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *event)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Sensor Callback come in");
@@ -918,5 +923,7 @@ void RunningLockMgr::SetProximity(uint32_t status)
             break;
     }
 }
+#endif
+
 } // namespace PowerMgr
 } // namespace OHOS

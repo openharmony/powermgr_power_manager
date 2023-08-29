@@ -85,7 +85,6 @@ ohos_shared_library("powermgrservice") {
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
-    "device_standby:standby_innerkits",
     "drivers_interface_power:libpower_proxy_1.1",
     "ffrt:libffrt",
     "hdf_core:libhdi",
@@ -95,10 +94,8 @@ ohos_shared_library("powermgrservice") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
-    "input:libmmi-client",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "sensor:sensor_interface_native",
   ]
 
   if (has_display_manager_part) {
@@ -106,6 +103,18 @@ ohos_shared_library("powermgrservice") {
       "display_manager:displaymgr",
       "window_manager:libdm",
     ]
+  }
+
+  if (has_device_standby_part) {
+    external_deps += [ "device_standby:standby_innerkits" ]
+  }
+
+  if (has_multimodalinput_input_part) {
+    external_deps += [ "input:libmmi-client" ]
+  }
+
+  if (has_sensors_sensor_part) {
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
 
   if (power_manager_feature_poweroff_charge) {

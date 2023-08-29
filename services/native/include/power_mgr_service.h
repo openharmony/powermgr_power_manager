@@ -186,14 +186,18 @@ private:
     bool PowerStateMachineInit();
     void NotifyRunningLockChanged(bool isUnLock);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
-    bool IsSupportSensor(SensorTypeId);
-    static void HallSensorCallback(SensorEvent* event);
     static void RegisterBootCompletedCallback();
 
     inline PowerModeModule& GetPowerModeModule()
     {
         return powerModeModule_;
     }
+
+#ifdef HAS_SENSORS_SENSOR_PART
+    bool IsSupportSensor(SensorTypeId);
+    static void HallSensorCallback(SensorEvent* event);
+    SensorUser sensorUser_;
+#endif
 
     bool ready_ {false};
     static std::atomic_bool isBootCompleted_;
@@ -215,7 +219,6 @@ private:
     int32_t switchId_ {0};
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
-    SensorUser sensorUser_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
