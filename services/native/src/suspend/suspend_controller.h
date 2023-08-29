@@ -22,7 +22,9 @@
 
 #include "event_handler.h"
 #include "power_state_machine.h"
+#ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
+#endif
 #include "shutdown_controller.h"
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"

@@ -20,9 +20,11 @@
 #include <set>
 
 #include <ability_manager_client.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
 #include <key_event.h>
 #include <key_option.h>
+#endif
 #include <message_parcel.h>
 
 #include "ffrt_utils.h"
@@ -55,6 +57,7 @@ ShutdownDialog::~ShutdownDialog()
 
 void ShutdownDialog::KeyMonitorInit()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGD(FEATURE_SHUTDOWN, "Initialize the long press powerkey");
     std::shared_ptr<KeyOption> keyOption = std::make_shared<KeyOption>();
     std::set<int32_t> preKeys;
@@ -81,10 +84,12 @@ void ShutdownDialog::KeyMonitorInit()
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "SubscribeKey long press success");
+#endif
 }
 
 void ShutdownDialog::KeyMonitorCancel()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputManager* inputManager = InputManager::GetInstance();
     if (inputManager == nullptr) {
         POWER_HILOGW(FEATURE_SHUTDOWN, "InputManager is null");
@@ -94,6 +99,7 @@ void ShutdownDialog::KeyMonitorCancel()
         inputManager->UnsubscribeKeyEvent(longPressId_);
     }
     longPressId_ = 0;
+#endif
 }
 
 bool ShutdownDialog::ConnectSystemUi()
