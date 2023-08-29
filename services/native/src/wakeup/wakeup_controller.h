@@ -21,10 +21,14 @@
 #include <mutex>
 #include <vector>
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include "i_input_event_consumer.h"
+#endif
 #include "power_state_machine.h"
 #include "system_ability.h"
+#ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
+#endif
 #include "wakeup_sources.h"
 #include "wakeup_source_parser.h"
 
@@ -69,12 +73,14 @@ private:
     int32_t monitorId_ {-1};
 };
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 class InputCallback : public IInputEventConsumer {
 public:
     virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
     virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
 };
+#endif
 
 class WakeupMonitor {
 public:

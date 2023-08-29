@@ -44,10 +44,12 @@ FFRTHandle g_screenTimeoutHandle;
 WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine)
 {
     stateMachine_ = stateMachine;
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
     if (monitorId_ < 0) {
         monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
     }
+#endif
     eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD, 0);
     eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_MOUSE, 0);
     eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD, 0);
@@ -58,10 +60,12 @@ WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMach
 
 WakeupController::~WakeupController()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputManager* inputManager = InputManager::GetInstance();
     if (monitorId_ >= 0) {
         inputManager->RemoveMonitor(monitorId_);
     }
+#endif
 
     if (g_wakeupSourcesKeyObserver) {
         SettingHelper::UnregisterSettingWakeupSourcesObserver(g_wakeupSourcesKeyObserver);
@@ -216,6 +220,7 @@ void WakeupController::HandleScreenOnTimeout()
     POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
 }
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
@@ -318,6 +323,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY, false);
 }
+#endif
 
 bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 {
