@@ -141,18 +141,19 @@ private:
 #endif
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        PowerMgrDeathRecipient() = default;
+        explicit PowerMgrDeathRecipient(PowerMgrClient& client) : client_(client) {}
         ~PowerMgrDeathRecipient() = default;
         void OnRemoteDied(const wptr<IRemoteObject>& remote);
 
     private:
         DISALLOW_COPY_AND_MOVE(PowerMgrDeathRecipient);
+        PowerMgrClient& client_;
     };
 
     ErrCode Connect();
+    void ResetProxy(const wptr<IRemoteObject>& remote);
     sptr<IPowerMgr> proxy_ {nullptr};
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
-    void ResetProxy(const wptr<IRemoteObject>& remote);
     std::mutex mutex_;
     PowerErrors error_ = PowerErrors::ERR_OK;
 };
