@@ -65,23 +65,35 @@ ErrCode PowerMgrClient::Connect()
         return E_GET_POWER_SERVICE_FAILED;
     }
 
-    deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new PowerMgrDeathRecipient());
-    if (deathRecipient_ == nullptr) {
+    sptr<IRemoteObject::DeathRecipient> drt = new(std::nothrow) PowerMgrDeathRecipient(*this);
+    if (drt == nullptr) {
         POWER_HILOGE(COMP_FWK, "Failed to create PowerMgrDeathRecipient");
         return ERR_NO_MEMORY;
     }
-    if ((remoteObject_->IsProxyObject()) && (!remoteObject_->AddDeathRecipient(deathRecipient_))) {
+    if ((remoteObject_->IsProxyObject()) && (!remoteObject_->AddDeathRecipient(drt))) {
         POWER_HILOGE(COMP_FWK, "Add death recipient to PowerMgr service failed");
         return E_ADD_DEATH_RECIPIENT_FAILED;
     }
 
     proxy_ = iface_cast<IPowerMgr>(remoteObject_);
+    deathRecipient_ = drt;
     POWER_HILOGI(COMP_FWK, "Connecting PowerMgrService success");
     return ERR_OK;
 }
 
+void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    POWER_HILOGW(COMP_FWK, "Recv death notice");
+    client_.ResetProxy(remote);
+}
+
 void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
 {
+    if (remote == nullptr) {
+        POWER_HILOGE(COMP_FWK, "OnRemoteDied failed, remote is nullptr");
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mutex_);
     RETURN_IF(proxy_ == nullptr);
 
@@ -90,17 +102,6 @@ void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
         serviceRemote->RemoveDeathRecipient(deathRecipient_);
         proxy_ = nullptr;
     }
-}
-
-void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
-{
-    if (remote == nullptr) {
-        POWER_HILOGE(COMP_FWK, "OnRemoteDied failed, remote is nullptr");
-        return;
-    }
-
-    PowerMgrClient::GetInstance().ResetProxy(remote);
-    POWER_HILOGW(COMP_FWK, "Recv death notice");
 }
 
 PowerErrors PowerMgrClient::RebootDevice(const std::string& reason)
