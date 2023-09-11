@@ -36,7 +36,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
     EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
 
     std::shared_ptr<IRemoteObject::DeathRecipient> deathRecipient =
-        std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>();
+    std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>(powerMgrClient);
     wptr<IRemoteObject> remoteObj = nullptr;
     EXPECT_NE(deathRecipient, nullptr);
     deathRecipient->OnRemoteDied(remoteObj);
@@ -55,7 +55,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level
     EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
 
     std::shared_ptr<IRemoteObject::DeathRecipient> deathRecipient =
-        std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>();
+    std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>(powerMgrClient);
     EXPECT_NE(deathRecipient, nullptr);
     sptr<IRemoteObject> sptrRemoteObj = new MockPowerRemoteObject();
     EXPECT_FALSE(sptrRemoteObj == nullptr);
