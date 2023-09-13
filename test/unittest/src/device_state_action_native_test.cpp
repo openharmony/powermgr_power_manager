@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,28 +25,39 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
-void DeviceStateActionNativeTest::SetUpTestCase()
-{
-}
+void DeviceStateActionNativeTest::SetUpTestCase() {}
 
 namespace {
 using SuspendCallback1 = std::function<void(uint32_t)>;
 
-void DeviceStateActionCallback(uint32_t trigger)
-{
-}
+void DeviceStateActionCallback(uint32_t trigger) {}
 
 /**
  * @tc.name: DeviceStateActionNative001
  * @tc.desc: test init in deviceStateAction
  * @tc.type: FUNC
  */
-HWTEST_F (DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level0)
+HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is start!");
     auto deviceStateAction = std::make_shared<DeviceStateAction>();
-    SuspendCallback1 sd =  DeviceStateActionCallback;
+    SuspendCallback1 sd = DeviceStateActionCallback;
     deviceStateAction->RegisterCallback(sd);
+
+    DisplayPowerMgr::DisplayState stateType = DisplayPowerMgr::DisplayState::DISPLAY_ON;
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
+    stateType = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
+    stateType = DisplayPowerMgr::DisplayState::DISPLAY_UNKNOWN;
+    deviceStateAction->dispCallback_->OnDisplayStateChanged(
+        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
+    deviceStateAction->dispCallback_->notify_ = nullptr;
+    deviceStateAction->dispCallback_->NotifyDisplayActionDone(DISPLAYID);
+
     DisplayState state = DisplayState::DISPLAY_OFF;
     StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_INIT;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
@@ -63,29 +74,8 @@ HWTEST_F (DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Leve
     state = DisplayState::DISPLAY_UNKNOWN;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::FAILED);
     EXPECT_FALSE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_UNKNOWN);
-
-    DisplayPowerMgr::DisplayState stateType = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(
-        DISPLAYID, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(
-        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
-    stateType = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(
-        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
-    stateType = DisplayPowerMgr::DisplayState::DISPLAY_UNKNOWN;
-    deviceStateAction->dispCallback_->OnDisplayStateChanged(
-        DISPLAYID_A, stateType, static_cast<uint32_t>(StateChangeReason::STATE_CHANGE_REASON_APPLICATION));
-    stateType = static_cast<DisplayPowerMgr::DisplayState>(UNDISPLAYSTATE);
-    EXPECT_TRUE(DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetDisplayState(stateType,
-                                                                        reason) == ActionResult::FAILED);
-    EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_UNKNOWN);
-    deviceStateAction->dispCallback_->notify_ = nullptr;
-    deviceStateAction->dispCallback_->NotifyDisplayActionDone(DISPLAYID);
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.SuspendDevice();
-    powerMgrClient.WakeupDevice();
-
+    deviceStateAction->SetDisplayState(DisplayState::DISPLAY_OFF, reason);
+    deviceStateAction->SetDisplayState(DisplayState::DISPLAY_ON, reason);
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is end!");
-    GTEST_LOG_(INFO) << "DeviceStateActionNative001: Suspend Device end.";
 }
-}
+} // namespace

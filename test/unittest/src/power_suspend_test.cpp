@@ -81,21 +81,13 @@ namespace {
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspend001: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspend001: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-
-    sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(pmsTest_->suspendController_);
+    g_service->SuspendControllerInit();
+    g_service->WakeupControllerInit();
+    sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(g_service->suspendController_);
     callback->controller_.reset();
     callback->OnPowerStateChanged(PowerState::AWAKE);
     auto controller = callback->controller_.lock();
     EXPECT_EQ(controller, nullptr);
-
     GTEST_LOG_(INFO) << "PowerSuspendTest001:  end";
 }
 
@@ -109,17 +101,10 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest002: start";
     sleep(SLEEP_WAIT_TIME_S);
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest002: Failed to get PowerMgrService";
-    }
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY);
-
-    auto monitor = pmsTest_->suspendController_->monitorMap_[SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY];
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY);
+    auto monitor = g_service->suspendController_->monitorMap_[SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY];
     EXPECT_TRUE(monitor != nullptr);
-
     GTEST_LOG_(INFO) << "PowerSuspendTest002:  end";
 }
 
@@ -132,16 +117,9 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest003, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest003: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest003: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-
-    pmsTest_->suspendController_->RegisterSettingsObserver();
-    EXPECT_TRUE(pmsTest_->suspendController_ != nullptr);
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->RegisterSettingsObserver();
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
 
     GTEST_LOG_(INFO) << "PowerSuspendTest003:  end";
 }
@@ -155,15 +133,9 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest003, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest004, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest004: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest004: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->Execute();
-    EXPECT_TRUE(pmsTest_->suspendController_ != nullptr);
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->Execute();
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendTest004:  end";
 }
 
@@ -176,13 +148,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest004, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest005, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest005: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest005: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
+    g_service->SuspendControllerInit();
 
     SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_STR, 1, 0);
     std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(source);
@@ -199,13 +165,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest005, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest006, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest006: start";
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest006: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
+    g_service->SuspendControllerInit();
     std::string key = " ";
     SuspendDeviceType suspendDeviceType = SuspendSources::mapSuspendDeviceType(key);
     EXPECT_TRUE(static_cast<uint32_t>(suspendDeviceType) ==
@@ -223,18 +183,12 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest007, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest007: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest007: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
-    pmsTest_->suspendController_->RecordPowerKeyDown();
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
+    g_service->suspendController_->RecordPowerKeyDown();
     EXPECT_TRUE(
-        pmsTest_->suspendController_->stateMachine_->stateAction_->GetDisplayState() == DisplayState::DISPLAY_OFF);
-    pmsTest_->suspendController_->powerkeyDownWhenScreenOff_ = false;
+        g_service->suspendController_->stateMachine_->stateAction_->GetDisplayState() == DisplayState::DISPLAY_OFF);
+    g_service->suspendController_->powerkeyDownWhenScreenOff_ = false;
     
     GTEST_LOG_(INFO) << "PowerSuspendTest007:  end";
 }
@@ -249,14 +203,8 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest008, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest008: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest008: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    bool powerKeyDown = pmsTest_->suspendController_->GetPowerkeyDownWhenScreenOff();
+    g_service->SuspendControllerInit();
+    bool powerKeyDown = g_service->suspendController_->GetPowerkeyDownWhenScreenOff();
     EXPECT_TRUE(powerKeyDown == false);
 
     GTEST_LOG_(INFO) << "PowerSuspendTest008:  end";
@@ -272,34 +220,30 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest009, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest009: start";
 
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest009: Failed to get PowerMgrService";
-    }
+    g_service->SuspendControllerInit();
 
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
+    g_service->SuspendDevice(
+        static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    g_service->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest009");
 
-    pmsTest_->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
-    pmsTest_->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    pmsTest_->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON);
+    g_service->suspendController_->stateMachine_->EmplaceInactive();
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest009");
+    g_service->suspendController_->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, 1, 0);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() != PowerState::AWAKE);
 
-    pmsTest_->suspendController_->stateMachine_->EmplaceInactive();
-    pmsTest_->suspendController_->stateMachine_->SetState(
-        PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->suspendController_->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, 1, 0);
-    EXPECT_TRUE(pmsTest_->suspendController_->stateMachine_->GetState() != PowerState::AWAKE);
-
-    pmsTest_->suspendController_->stateMachine_->EmplaceFreeze();
-    bool ret = pmsTest_->suspendController_->stateMachine_->SetState(
+    g_service->suspendController_->stateMachine_->EmplaceFreeze();
+    bool ret = g_service->suspendController_->stateMachine_->SetState(
         PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     if (ret == false) {
         GTEST_LOG_(INFO) << "PowerSuspendTest009:  FREEZE set  Failed!";
     }
-    pmsTest_->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    uint32_t tmp = static_cast<uint32_t>(pmsTest_->suspendController_->stateMachine_->GetState());
+    g_service->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
+    uint32_t tmp = static_cast<uint32_t>(g_service->suspendController_->stateMachine_->GetState());
     GTEST_LOG_(INFO) << "PowerSuspendTest009: get State:" << tmp;
-    EXPECT_TRUE(pmsTest_->suspendController_->stateMachine_->GetState() == PowerState::FREEZE);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::FREEZE);
 
     GTEST_LOG_(INFO) << "PowerSuspendTest009:  end";
 }
@@ -313,19 +257,12 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest009, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest011, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest011: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest011: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->HandleAction(
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->HandleAction(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, static_cast<uint32_t>(SuspendAction::ACTION_NONE));
-    pmsTest_->suspendController_->HandleAction(
+    g_service->suspendController_->HandleAction(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
-    EXPECT_TRUE(pmsTest_->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
     GTEST_LOG_(INFO) << "PowerSuspendTest011:  end";
 }
 
@@ -338,17 +275,11 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest011, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest012, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest012: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest012: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->stateMachine_->controllerMap_.clear();
-    pmsTest_->suspendController_->HandleForceSleep(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-    EXPECT_TRUE(pmsTest_->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->stateMachine_->controllerMap_.clear();
+    g_service->suspendController_->HandleForceSleep(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
+    g_service->suspendController_->stateMachine_->InitStateMap();
     GTEST_LOG_(INFO) << "PowerSuspendTest012:  end";
 }
 
@@ -361,17 +292,11 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest012, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest013, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest013: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest013: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    pmsTest_->suspendController_->stateMachine_->controllerMap_.clear();
-    pmsTest_->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-    EXPECT_TRUE(pmsTest_->suspendController_->stateMachine_->GetState() != PowerState::HIBERNATE);
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->stateMachine_->controllerMap_.clear();
+    g_service->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() != PowerState::HIBERNATE);
+    g_service->suspendController_->stateMachine_->InitStateMap();
 
     GTEST_LOG_(INFO) << "PowerSuspendTest013:  end";
 }
@@ -385,16 +310,8 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest013, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest014, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest014: start";
-
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsTest_ == nullptr) {
-        GTEST_LOG_(INFO) << "PowerSuspendTest014: Failed to get PowerMgrService";
-    }
-
-    pmsTest_->Init();
-    pmsTest_->SuspendControllerInit();
-    EXPECT_TRUE(pmsTest_->suspendController_ != nullptr);
-
+    g_service->SuspendControllerInit();
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendTest014:  end";
 }
 
@@ -407,7 +324,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest014, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest016, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendTest016: start";
-
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     std::vector<std::string> tmp = sources->getSourceKeys();
     EXPECT_TRUE(tmp.size() != 0);

@@ -44,6 +44,7 @@ void PowerMgrServiceNativeTest::SetUpTestCase()
     if (g_powerMgrServiceProxy == nullptr) {
         g_powerMgrServiceProxy = std::make_shared<PowerMgrServiceTestProxy>(g_powerMgrService);
     }
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
 }
 
 void PowerMgrServiceNativeTest::TearDownTestCase()

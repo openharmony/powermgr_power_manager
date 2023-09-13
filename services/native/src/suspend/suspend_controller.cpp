@@ -76,6 +76,7 @@ private:
 
 void SuspendController::Init()
 {
+    std::lock_guard lock(mutex_);
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -128,6 +129,7 @@ void SuspendController::RegisterSettingsObserver()
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
         POWER_HILOGI(COMP_SVC, "start setting string update");
+        std::lock_guard lock(mutex_);
         std::string jsonStr = SettingHelper::GetSettingSuspendSources();
         std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
         std::vector<SuspendSource> updateSourceList = sources->GetSourceList();
