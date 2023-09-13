@@ -413,6 +413,8 @@ bool PowerKeySuspendMonitor::Init()
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
+#else
+    return false;
 #endif
 }
 
