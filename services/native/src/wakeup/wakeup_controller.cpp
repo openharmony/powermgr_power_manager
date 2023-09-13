@@ -77,6 +77,7 @@ WakeupController::~WakeupController()
 
 void WakeupController::Init()
 {
+    std::lock_guard lock(monitorMutex_);
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
