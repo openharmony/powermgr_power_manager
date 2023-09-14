@@ -96,8 +96,7 @@ void PowerStateMachine::EmplaceAwake()
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_AWAKE lambda start");
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
-            // Display power service maybe not ready when init
-            if (ret != ActionResult::SUCCESS && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
+            if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_ON_ERR;
             }
@@ -128,8 +127,7 @@ void PowerStateMachine::EmplaceInactive()
                 state = DisplayState::DISPLAY_SUSPEND;
             }
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
-            // Display power service maybe not ready when init
-            if (ret != ActionResult::SUCCESS && reason != StateChangeReason::STATE_CHANGE_REASON_INIT) {
+            if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to INACTIVE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_OFF_ERR;
             }
