@@ -81,6 +81,7 @@ private:
     SuspendDeviceType sleepReason_ {0};
     uint32_t sleepAction_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
+    std::mutex mutex_;
 };
 
 class SuspendMonitor {
