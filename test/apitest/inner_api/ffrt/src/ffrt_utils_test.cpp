@@ -194,6 +194,7 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsMutexTest001, TestSize.Level1)
         mutex.Unlock();
     };
     FFRTUtils::SubmitTask(task1); // submit task async
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(2)); // task sleep 2ms
     FFRTUtils::SubmitTask(task2); // submit task async
 
     ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
