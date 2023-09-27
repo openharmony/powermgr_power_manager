@@ -42,7 +42,7 @@ if (!defined(global_parts_info) || defined(global_parts_info.sensors_sensor)) {
   has_sensors_sensor_part = true
   cflags_cc += [ "-DHAS_SENSORS_SENSOR_PART" ]
 } else {
-  has_sensor_part = false
+  has_sensors_sensor_part = false
 }
 
 if (!defined(global_parts_info) ||
