@@ -48,6 +48,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient001, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient001::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient001: Prepare Fail, Screen is OFF.";
@@ -74,6 +75,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient002, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient002::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient002: Prepare Fail, Screen is OFF.";
@@ -100,6 +102,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient003, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient003::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient003: Prepare Fail, Screen is OFF.";
@@ -126,6 +129,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient004, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient004::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient004: Prepare Fail, Screen is OFF.";
@@ -152,6 +156,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient005, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient005::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient005: Prepare Fail, Screen is OFF.";
@@ -178,6 +183,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient006, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient006::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient006: Prepare Fail, Screen is OFF.";
@@ -205,6 +211,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient007, TestSize.Level2)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     UserActivityType abnormaltype = UserActivityType(9);
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient007: Prepare Fail, Screen is OFF.";
@@ -233,6 +240,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient008, TestSize.Level2)
     auto& displayMgrClient = OHOS::DisplayPowerMgr::DisplayPowerMgrClient::GetInstance();
 
     powerMgrClient.OverrideScreenOffTime(time);
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient008: Prepare Fail, Screen is OFF.";
@@ -258,6 +266,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient009, TestSize.Level0)
     WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     sleep(SLEEP_WAIT_TIME_S);
@@ -281,6 +290,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient010, TestSize.Level0)
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient010: Prepare Fail, Screen is OFF.";
@@ -306,6 +316,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
     auto& displayMgrClient = OHOS::DisplayPowerMgr::DisplayPowerMgrClient::GetInstance();
 
     powerMgrClient.OverrideScreenOffTime(time);
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient011: Prepare Fail, Screen is OFF.";
@@ -445,6 +456,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient016, TestSize.Level2)
 
     powerMgrClient.OverrideScreenOffTime(time);
 
+    powerMgrClient.WakeupDevice();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     runningLock->Lock();
@@ -470,6 +482,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient020, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient020::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     powerMgrClient.SetDisplaySuspend(true);
@@ -490,6 +503,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient022, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient022::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient022: Prepare Fail, Screen is OFF.";
@@ -511,6 +525,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient023, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient023::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient023: Prepare Fail, Screen is OFF.";
@@ -532,6 +547,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient024, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient024::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient024: Prepare Fail, Screen is OFF.";
@@ -553,6 +569,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient025, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient025::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient025: Prepare Fail, Screen is OFF.";
@@ -574,6 +591,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient026, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient026::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient026: Prepare Fail, Screen is OFF.";
@@ -595,6 +613,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient027, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient027::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient027: Prepare Fail, Screen is OFF.";
@@ -616,6 +635,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient028, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient028::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient028: Prepare Fail, Screen is OFF.";
@@ -637,6 +657,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient029, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient029::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient029: Prepare Fail, Screen is OFF.";
@@ -658,6 +679,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient030, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient030::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.SuspendDevice();
     // Wakeup Device before test
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient030: Prepare Fail, Screen is OFF.";
@@ -679,6 +701,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient031, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient031::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient031: Prepare Fail, Screen is On.";
@@ -701,6 +724,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient032, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient032::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient032: Prepare Fail, Screen is On.";
@@ -723,6 +747,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient033, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient033::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient033: Prepare Fail, Screen is On.";
@@ -745,6 +770,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient046, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient046: Prepare Fail, Screen is On.";
@@ -767,6 +793,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient034, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient034::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient034: Prepare Fail, Screen is On.";
@@ -789,6 +816,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient035, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient035::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient035: Prepare Fail, Screen is On.";
@@ -811,6 +839,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient036, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient036::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient036: Prepare Fail, Screen is On.";
@@ -833,6 +862,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient037, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient037::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient037: Prepare Fail, Screen is On.";
@@ -855,6 +885,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient038, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient038::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient038: Prepare Fail, Screen is On.";
@@ -877,6 +908,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient039, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient039::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient039: Prepare Fail, Screen is On.";
@@ -899,6 +931,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient040, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient040::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient040: Prepare Fail, Screen is On.";
@@ -921,6 +954,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient041, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient041::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient041: Prepare Fail, Screen is On.";
@@ -943,6 +977,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient042, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient042::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient042: Prepare Fail, Screen is On.";
@@ -965,6 +1000,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient043, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient043::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
+    powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient043: Prepare Fail, Screen is On.";
