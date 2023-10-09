@@ -65,8 +65,7 @@
                 "samgr",
                 "sensor",
                 "device_standby",
-                "window_manager",
-                "bundle_framework"
+                "window_manager"
             ],
             "third_party": [
                 "jsoncpp",

@@ -21,8 +21,6 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 
-#include "app_mgr_client.h"
-#include "bundle_mgr_client.h"
 #include "ffrt_utils.h"
 #include "permission.h"
 #include "power_errors.h"
@@ -32,7 +30,6 @@
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
-#include "window_manager.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -189,9 +186,6 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
-        if (IsHandleSysfreeze()) {
-            StartWakeupTimer();
-        }
         SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         bool ret = stateMachine_->SetState(
@@ -212,44 +206,14 @@ void WakeupController::StartWakeupTimer()
     g_screenTimeoutHandle = FFRTUtils::SubmitDelayTask(task, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS, g_queue);
 }
 
-bool WakeupController::IsHandleSysfreeze()
-{
-    Rosen::FocusChangeInfo focusChangeInfo;
-    Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
-    int uid = focusChangeInfo.uid_;
-    POWER_HILOGD(FEATURE_WAKEUP, "focusChangeInfo.uid_ %{public}d.", uid);
-    std::string bundleName;
-    AppExecFwk::BundleMgrClient client;
-    if (client.GetNameForUid(uid, bundleName) != ERR_OK) {
-        POWER_HILOGW(FEATURE_WAKEUP, "Failed to query bundleName from bms, uid:%{public}d.", uid);
-        return true;
-    } else {
-        POWER_HILOGD(FEATURE_WAKEUP, "bundleName of uid:%{public}d is %{public}s", uid, bundleName.c_str());
-    }
-
-    if (bundleName.empty()) {
-        return true;
-    }
-
-    bool ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsAttachDebug(bundleName);
-    if (ret) {
-        POWER_HILOGI(FEATURE_WAKEUP, "sysfreeze filtration %{public}s.", bundleName.c_str());
-        return false;
-    }
-
-    return true;
-}
-
 void WakeupController::HandleScreenOnTimeout()
 {
-    if (IsHandleSysfreeze()) {
-        POWER_HILOGW(FEATURE_INPUT, "PowerKey press timeout");
-        std::string message = "POWER KEY TIMEOUT BUT DISPLAY NOT FINISHED";
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT",
-            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", IPCSkeleton::GetCallingPid(), "UID",
-            IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", message.c_str());
-        POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
-    }
+    POWER_HILOGW(FEATURE_INPUT, "PowerKey press timeout");
+    std::string message = "POWER KEY TIMEOUT BUT DISPLAY NOT FINISHED";
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT", HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", IPCSkeleton::GetCallingPid(), "UID", IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "", "PROCESS_NAME",
+        "", "MSG", message.c_str());
+    POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
