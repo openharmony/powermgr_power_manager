@@ -38,6 +38,8 @@ static constexpr int32_t SLEEP_WAIT_TIME_S = 2;
 static constexpr int32_t SLEEP_WAIT_TIME_MS = 400;
 static constexpr int32_t DISPLAY_OFF_TIME_MS = 600;
 static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
+static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
+static const std::string TEST_DEVICE_ID = "test_device_id";
 
 class InputCallbackMock : public IInputEventConsumer {
 public:
@@ -50,6 +52,7 @@ void PowerWakeupTest::SetUpTestCase(void)
 {
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
+    g_service->OnAddSystemAbility(DISPLAY_POWER_MANAGER_ID, TEST_DEVICE_ID);
 }
 
 void PowerWakeupTest::TearDownTestCase(void)
