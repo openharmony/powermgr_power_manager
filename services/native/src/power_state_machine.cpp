@@ -235,7 +235,9 @@ void PowerStateMachine::SuspendDeviceInner(
         POWER_HILOGD(FEATURE_SUSPEND, "Do not suspend device, screen state is ignored");
     }
 
-    SetState(PowerState::INACTIVE, GetReasionBySuspendType(type), true);
+    if (SetState(PowerState::INACTIVE, GetReasionBySuspendType(type), true)) {
+        ResetSleepTimer();
+    }
     FinishTrace(HITRACE_TAG_POWER);
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
 }
@@ -642,11 +644,11 @@ void PowerStateMachine::ResetInactiveTimer()
 
 void PowerStateMachine::ResetSleepTimer()
 {
-    CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-    CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    if (this->GetSleepTime() < 0) {
-        POWER_HILOGD(FEATURE_ACTIVITY, "Auto sleep is disabled");
-        return;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr) {
+        suspendController->StartSleepTimer(
+            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
     }
 }
 
