@@ -49,12 +49,14 @@ private:
 
 class VibratorSourceParser {
 public:
-    std::vector<VibratorSource> ParseSources(std::string &etcPath, std::string &vendorPath, std::string &systemPath);
+    std::vector<VibratorSource> ParseSources(
+        const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath);
 
 private:
     std::vector<VibratorSource> ParseSources(const std::string& config);
-    void GetTargetPath(std::string& targetPath, std::string &etcPath, std::string &vendorPath, std::string &systemPath);
-    void ParseSourcesProc(std::vector<VibratorSource> &sources, Json::Value& valueObj, std::string& key);
+    void GetTargetPath(std::string& targetPath,
+        const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath);
+    void ParseSourcesProc(std::vector<VibratorSource>& sources, Json::Value& valueObj, std::string& key);
 };
 } // namespace PowerMgr
 } // namespace OHOS

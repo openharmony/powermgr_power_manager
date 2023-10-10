@@ -28,16 +28,21 @@ const int32_t VIBRATOR_SUCCESS = 0;
 std::mutex PowerVibrator::mutex_;
 std::shared_ptr<PowerVibrator> PowerVibrator::instance_ = nullptr;
 
-void PowerVibrator::InitConfig(std::string& etcPath, std::string& vendorPath, std::string& systemPath)
+void PowerVibrator::LoadConfig(
+    const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath)
 {
     std::shared_ptr<VibratorSourceParser> parser = std::make_shared<VibratorSourceParser>();
-    sourceList_ = parser->ParseSources(etcPath, vendorPath, systemPath);
+    std::vector<VibratorSource> sources = parser->ParseSources(etcPath, vendorPath, systemPath);
+    std::lock_guard<std::mutex> lock(sourcesMutex_);
+    for (auto source : sources) {
+        sourceList_.emplace_back(source);
+    }
 }
 
-void PowerVibrator::StartVibrator(std::string &scene)
+void PowerVibrator::StartVibrator(const std::string& scene)
 {
     VibratorSource source;
-    for (VibratorSource &src : sourceList_) {
+    for (VibratorSource& src : sourceList_) {
         if (src.GetScene() == scene) {
             source = src;
             break;
