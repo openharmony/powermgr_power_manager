@@ -30,6 +30,7 @@
 #include "ffrt_utils.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
+#include "power_vibrator.h"
 
 using namespace OHOS::MMI;
 using namespace OHOS::AAFwk;
@@ -70,6 +71,7 @@ void ShutdownDialog::KeyMonitorInit()
         InputManager::GetInstance()->SubscribeKeyEvent(keyOption, [this](std::shared_ptr<KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_SHUTDOWN, "Receive long press powerkey");
             ConnectSystemUi();
+            StartVibrator();
         });
     if (longPressId_ < ERR_OK) {
         if (g_retryCount <= INIT_LONG_PRESS_RETRY) {
@@ -180,6 +182,12 @@ void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
     });
 }
 
+void ShutdownDialog::StartVibrator()
+{
+    std::shared_ptr<PowerVibrator> vibrator = PowerVibrator::GetInstance();
+    std::string scene = "shutdown_diag";
+    vibrator->StartVibrator(scene);
+}
 void ShutdownDialog::DialogAbilityConnection::OnAbilityDisconnectDone(
     const AppExecFwk::ElementName& element, int resultCode)
 {

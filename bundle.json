@@ -65,7 +65,8 @@
                 "samgr",
                 "sensor",
                 "device_standby",
-                "window_manager"
+                "window_manager",
+                "miscdevice"
             ],
             "third_party": [
                 "jsoncpp",
@@ -126,6 +127,16 @@
                     "header": {
                         "header_files": [ "ffrt_utils.h" ],
                         "header_base": "//base/powermgr/power_manager/utils/ffrt/include"
+                    }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/utils/vibrator:power_vibrator",
+                    "header": {
+                        "header_files": [
+                          "power_vibrator.h",
+                          "vibrator_source_parser.h"
+                        ],
+                        "header_base": "//base/powermgr/power_manager/utils/vibrator/include"
                     }
                 },
                 {

@@ -35,6 +35,7 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_dumper.h"
+#include "power_vibrator.h"
 #include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
@@ -53,6 +54,9 @@ namespace {
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string REASON_POWER_KEY = "power_key";
 static std::string g_wakeupReason = "";
+std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
+std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
+std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -132,6 +136,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->SwitchSubscriberInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+        power->VibratorInit();
         isBootCompleted_ = true;
     };
     WakeupRunningLock::Create();
@@ -914,6 +919,13 @@ void PowerMgrService::WakeupControllerInit()
         wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_);
     }
     wakeupController_->Init();
+}
+
+void PowerMgrService::VibratorInit()
+{
+    std::shared_ptr<PowerVibrator> vibrator = PowerVibrator::GetInstance();
+    vibrator->InitConfig(POWER_VIBRATOR_CONFIG_FILE,
+        VENDOR_POWER_VIBRATOR_CONFIG_FILE, SYSTEM_POWER_VIBRATOR_CONFIG_FILE);
 }
 
 PowerErrors PowerMgrService::IsStandby(bool& isStandby)
