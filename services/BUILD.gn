@@ -72,6 +72,7 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/vibrator:power_vibrator",
     "native/src/actions:powermgr_actions",
     "//third_party/jsoncpp:jsoncpp",
     "//third_party/libxml2:libxml2",

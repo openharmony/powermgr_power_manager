@@ -1,0 +1,6 @@
+{
+    "shutdown_diag": {
+        "enable": false,
+        "type": ""
+    }
+}
