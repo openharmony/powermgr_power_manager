@@ -96,6 +96,7 @@ public:
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
+    void VibratorInit();
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {

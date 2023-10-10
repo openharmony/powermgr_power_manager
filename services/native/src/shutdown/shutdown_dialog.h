@@ -32,6 +32,7 @@ public:
     bool ConnectSystemUi();
     bool IsLongPress() const;
     void ResetLongPressFlag();
+    void StartVibrator();
 
 private:
     class DialogAbilityConnection : public OHOS::AAFwk::AbilityConnectionStub {
