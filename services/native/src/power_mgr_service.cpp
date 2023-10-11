@@ -54,9 +54,9 @@ namespace {
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string REASON_POWER_KEY = "power_key";
 static std::string g_wakeupReason = "";
-std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
-std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
-std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
+const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
+const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
+const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -924,7 +924,7 @@ void PowerMgrService::WakeupControllerInit()
 void PowerMgrService::VibratorInit()
 {
     std::shared_ptr<PowerVibrator> vibrator = PowerVibrator::GetInstance();
-    vibrator->InitConfig(POWER_VIBRATOR_CONFIG_FILE,
+    vibrator->LoadConfig(POWER_VIBRATOR_CONFIG_FILE,
         VENDOR_POWER_VIBRATOR_CONFIG_FILE, SYSTEM_POWER_VIBRATOR_CONFIG_FILE);
 }
 

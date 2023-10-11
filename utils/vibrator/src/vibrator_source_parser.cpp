@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace PowerMgr {
 std::vector<VibratorSource> VibratorSourceParser::ParseSources(
-    std::string &etcPath, std::string &vendorPath, std::string &systemPath)
+    const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath)
 {
     std::vector<VibratorSource> sources;
     std::string targetPath;
@@ -44,7 +44,7 @@ std::vector<VibratorSource> VibratorSourceParser::ParseSources(
 }
 
 void VibratorSourceParser::GetTargetPath(
-    std::string& targetPath, std::string &etcPath, std::string &vendorPath, std::string &systemPath)
+    std::string& targetPath, const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath)
 {
     targetPath.clear();
     char buf[MAX_PATH_LEN];
