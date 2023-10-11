@@ -24,13 +24,14 @@ class PowerVibrator {
 public:
     PowerVibrator() {};
     ~PowerVibrator() = default;
-    void InitConfig(std::string& etcPath, std::string& vendorPath, std::string& systemPath);
-    void StartVibrator(std::string& scene);
+    void LoadConfig(const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath);
+    void StartVibrator(const std::string& scene);
     static std::shared_ptr<PowerVibrator> GetInstance();
 
 private:
-    static std::mutex mutex_;
+    std::mutex sourcesMutex_;
     std::vector<VibratorSource> sourceList_;
+    static std::mutex mutex_;
     static std::shared_ptr<PowerVibrator> instance_;
 };
 } // namespace PowerMgr
