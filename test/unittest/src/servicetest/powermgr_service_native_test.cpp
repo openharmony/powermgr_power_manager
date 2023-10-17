@@ -34,12 +34,15 @@ using namespace testing::ext;
 namespace {
 static sptr<PowerMgrService> g_powerMgrService = nullptr;
 static std::shared_ptr<PowerMgrServiceTestProxy> g_powerMgrServiceProxy = nullptr;
+constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
+const std::string TEST_DEVICE_ID = "test_device_id";
 } // namespace
 
 void PowerMgrServiceNativeTest::SetUpTestCase()
 {
     g_powerMgrService = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_powerMgrService->OnStart();
+    g_powerMgrService->OnAddSystemAbility(DISPLAY_POWER_MANAGER_ID, TEST_DEVICE_ID);
 
     if (g_powerMgrServiceProxy == nullptr) {
         g_powerMgrServiceProxy = std::make_shared<PowerMgrServiceTestProxy>(g_powerMgrService);

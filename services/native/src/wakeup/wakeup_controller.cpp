@@ -70,6 +70,9 @@ WakeupController::~WakeupController()
     if (g_wakeupSourcesKeyObserver) {
         SettingHelper::UnregisterSettingWakeupSourcesObserver(g_wakeupSourcesKeyObserver);
     }
+    if (g_screenTimeoutHandle) {
+        FFRTUtils::CancelTask(g_screenTimeoutHandle, g_queue);
+    }
 }
 
 void WakeupController::Init()
@@ -95,6 +98,7 @@ void WakeupController::Init()
 
     std::function<void(uint32_t)> callback = [&](uint32_t event) {
         POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone: %{public}d", event);
+        FFRTUtils::CancelTask(g_screenTimeoutHandle, g_queue);
     };
     auto stateAction = stateMachine_->GetStateAction();
     if (stateAction != nullptr) {
