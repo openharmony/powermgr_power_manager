@@ -84,6 +84,7 @@ void PowerMgrService::OnStart()
     }
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
+    AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
@@ -110,7 +111,6 @@ bool PowerMgrService::Init()
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
 
-    RegisterBootCompletedCallback();
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
 }
@@ -377,6 +377,7 @@ void PowerMgrService::OnStop()
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
+    RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
 }
 
 void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -386,6 +387,15 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
         systemAbilityId == DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID) {
         std::lock_guard lock(lockMutex_);
         runningLockMgr_->ResetRunningLocks();
+    }
+}
+
+void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s Add",
+        systemAbilityId, deviceId.c_str());
+    if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
+        RegisterBootCompletedCallback();
     }
 }
 
