@@ -81,6 +81,9 @@ ohos_shared_library("powermgrservice") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
@@ -97,6 +100,7 @@ ohos_shared_library("powermgrservice") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "window_manager:libwm",
   ]
 
   if (has_display_manager_part) {
