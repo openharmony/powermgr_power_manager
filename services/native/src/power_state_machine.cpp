@@ -648,7 +648,8 @@ void PowerStateMachine::ResetSleepTimer()
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         suspendController->StartSleepTimer(
-            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
     }
 }
 
