@@ -649,7 +649,7 @@ void PowerStateMachine::ResetSleepTimer()
     if (suspendController != nullptr) {
         suspendController->StartSleepTimer(
             SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+            static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
     }
 }
 
