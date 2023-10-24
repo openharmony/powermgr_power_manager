@@ -296,7 +296,7 @@ void PowerMgrService::SwitchSubscriberInit()
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "Switch close event received, begin to suspend");
+                POWER_HILOGI(FEATURE_WAKEUP, "Switch open event received, begin to awaked");
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
