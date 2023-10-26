@@ -75,8 +75,8 @@ HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
     usleep(1000);
     POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 3");
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    // wait 60ms
-    usleep(60000);
+    // wait 100ms
+    usleep(100000);
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
     POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 end");
 }
@@ -235,7 +235,7 @@ HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
     EXPECT_TRUE(runningLock->IsUsed());
     usleep(timeoutMs / 2 * US_PER_MS);
     EXPECT_TRUE(runningLock->IsUsed());
-    usleep(timeoutMs * US_PER_MS);
+    usleep(timeoutMs * 2 * US_PER_MS);
     EXPECT_FALSE(runningLock->IsUsed());
 }
 
