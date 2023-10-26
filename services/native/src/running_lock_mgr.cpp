@@ -271,7 +271,7 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     }
     lockInner->SetTimeOutMs(timeOutMS);
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Lock(lockInnerParam);
@@ -312,7 +312,7 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
         return;
     }
     auto lockInnerParam = lockInner->GetParam();
-    POWER_HILOGD(
+    POWER_HILOGI(
         FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Unlock(lockInnerParam);
