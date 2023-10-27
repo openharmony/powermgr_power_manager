@@ -647,7 +647,6 @@ bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOut
         return false;
     }
 
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "timeOutMS: %{public}d", timeOutMS);
     runningLockMgr_->Lock(remoteObj, timeOutMS);
     return true;
 }
