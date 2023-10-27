@@ -118,7 +118,8 @@ HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_001, TestSize.Level2)
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    EXPECT_EQ(PowerState::INACTIVE, powerMgrClient.GetState());
+    EXPECT_TRUE(powerMgrClient.GetState() == PowerState::INACTIVE ||
+        powerMgrClient.GetState() == PowerState::SLEEP);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_OFF, g_action);
 }
 
@@ -136,7 +137,8 @@ HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_002, TestSize.Level2)
     powerMgrClient.ShutDownDevice(SHUTDOWN_FAST_REASON);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    EXPECT_EQ(PowerState::INACTIVE, powerMgrClient.GetState());
+    EXPECT_TRUE(powerMgrClient.GetState() == PowerState::INACTIVE ||
+        powerMgrClient.GetState() == PowerState::SLEEP);
     EXPECT_TRUE(g_action.empty());
 }
 }

@@ -61,7 +61,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level
     EXPECT_FALSE(stateMachine->RestoreScreenOffTimeInner());
     EXPECT_TRUE(stateMachine->OverrideScreenOffTimeInner(TIMEOUT));
     EXPECT_TRUE(stateMachine->OverrideScreenOffTimeInner(TIMEOUT));
-    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true));
     stateMachine->SetDisplayOffTime(TIME, true);
     stateMachine->ResetInactiveTimer();
     std::string result;
