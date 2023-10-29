@@ -21,6 +21,7 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_log.h"
+#include "power_vibrator.h"
 #include "setting_observer.h"
 #include "setting_provider.h"
 #include "sysparam.h"
@@ -38,6 +39,11 @@ class PowerMgrUtilTest : public testing::Test {};
 } // namespace OHOS
 
 namespace {
+const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
+const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
+const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
+const std::string SHUTDOWN_DIAG = "shutdown_diag";
+
 /**
  * @tc.name: PermissionIsSystemNative
  * @tc.desc: The IsSystem and IsPermissionGranted functions are granted by default as TOKEN_NATIVE or TOKEN_SHELL types
@@ -234,5 +240,20 @@ HWTEST_F (PowerMgrUtilTest, Sysparam001, TestSize.Level0)
     int32_t def = 0;
     EXPECT_EQ(OHOS::ERR_OK, sysParam->GetIntValue("settings.power.suspend_sources", def));
     POWER_HILOGD(LABEL_TEST, "Sysparam001::fun is end!");
+}
+
+/**
+ * @tc.name: PowerVibratorTest001
+ * @tc.desc: test power vibrator
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrUtilTest, PowerVibratorTest001, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerVibratorTest001 is start!");
+    std::shared_ptr<PowerVibrator> vibrator = PowerVibrator::GetInstance();
+    EXPECT_TRUE(vibrator != nullptr);
+    vibrator->LoadConfig(POWER_VIBRATOR_CONFIG_FILE,
+        VENDOR_POWER_VIBRATOR_CONFIG_FILE, SYSTEM_POWER_VIBRATOR_CONFIG_FILE);
+    vibrator->StartVibrator(SHUTDOWN_DIAG);
 }
 } // namespace
