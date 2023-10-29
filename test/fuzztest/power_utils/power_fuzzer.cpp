@@ -92,6 +92,8 @@ PowerFuzzerTest::~PowerFuzzerTest()
         service_->OnStop();
     }
     service_ = nullptr;
+    // wait for ffrt task exit
+    sleep(1);
 }
 
 void PowerFuzzerTest::TestPowerServiceStub(const uint32_t code, const uint8_t* data, size_t size)
