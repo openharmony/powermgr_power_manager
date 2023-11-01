@@ -390,49 +390,6 @@ void RunningLockMgr::NotifyHiViewRunningLockInfo(const RunningLockInner& lockInn
     NotifyHiView(changeType, lockInner);
 }
 
-void RunningLockMgr::CheckOverTime()
-{
-    FFRTUtils::CancelTask(g_runningLockTimeoutHandle, g_queue);
-    if (runningLocks_.empty()) {
-        return;
-    }
-    int64_t curTime = GetTickCount();
-    int64_t detectTime = curTime - CHECK_TIMEOUT_INTERVAL_MS;
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "curTime=%{public}" PRId64 " detectTime=%{public}" PRId64 "", curTime,
-        detectTime);
-    if (detectTime < 0) {
-        return;
-    }
-    int64_t nextDetectTime = INT_MAX;
-    for (auto& it : runningLocks_) {
-        auto lockInner = it.second;
-        if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE &&
-            (!lockInner->GetOverTimeFlag())) {
-            if (lockInner->GetLockTimeMs() < detectTime) {
-                lockInner->SetOverTimeFlag(true);
-                NotifyRunningLockChanged(it.first, lockInner, NOTIFY_RUNNINGLOCK_OVERTIME);
-            } else {
-                if (lockInner->GetLockTimeMs() < nextDetectTime) {
-                    nextDetectTime = lockInner->GetLockTimeMs();
-                }
-            }
-        }
-    }
-    if (nextDetectTime != INT_MAX) {
-        detectTime = nextDetectTime - curTime + CHECK_TIMEOUT_INTERVAL_MS;
-        SendCheckOverTimeMsg(detectTime);
-    }
-}
-
-void RunningLockMgr::SendCheckOverTimeMsg(int64_t delayTime)
-{
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "delayTime=%{public}" PRId64 "", delayTime);
-    FFRTTask task = [this] {
-        CheckOverTime();
-    };
-    FFRTUtils::SubmitDelayTask(task, delayTime, g_queue);
-}
-
 void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner, RunningLockChangedType changeType)
 {
@@ -443,7 +400,6 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
     switch (changeType) {
         case NOTIFY_RUNNINGLOCK_ADD: {
             NotifyHiViewRunningLockInfo(*lockInner, changeType);
-            SendCheckOverTimeMsg(CHECK_TIMEOUT_INTERVAL_MS);
             break;
         }
         case NOTIFY_RUNNINGLOCK_REMOVE: {
