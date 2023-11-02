@@ -47,6 +47,7 @@ enum RunningLockStatus : int32_t {
  */
 struct RunningLockParam {
     std::string name;
+    std::string bundleName;
     RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT;
     int32_t timeoutMs = -1;
     int32_t pid = 0;

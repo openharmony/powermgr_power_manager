@@ -63,6 +63,7 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
@@ -187,6 +188,7 @@ private:
     bool Init();
     bool PowerStateMachineInit();
     void NotifyRunningLockChanged(bool isUnLock);
+    std::string GetBundleNameByUid(const int32_t uid);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
     static void RegisterBootCompletedCallback();
 

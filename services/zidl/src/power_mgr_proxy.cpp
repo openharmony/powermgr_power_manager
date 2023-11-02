@@ -22,6 +22,7 @@
 #include "power_log.h"
 #include "power_common.h"
 #include "power_mgr_ipc_interface_code.h"
+#include "running_lock_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -161,6 +162,37 @@ bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
         return false;
+    }
+    return true;
+}
+
+bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_QUERY),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    int32_t num = reply.ReadInt32();
+    for (int i = 0; i < num; i++) {
+        std::string key = reply.ReadString();
+        RunningLockInfo* info = reply.ReadParcelable<RunningLockInfo>();
+        runningLockLists.insert(std::pair<std::string, RunningLockInfo>(key, *info));
+        delete info;
     }
     return true;
 }

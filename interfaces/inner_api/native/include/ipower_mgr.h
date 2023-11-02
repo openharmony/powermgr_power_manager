@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
@@ -39,6 +40,7 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) = 0;
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) = 0;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) = 0;
     virtual bool ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos) = 0;

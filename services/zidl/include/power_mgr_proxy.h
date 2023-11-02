@@ -48,6 +48,7 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
     virtual bool ProxyRunningLocks(bool isProxied,
         const std::vector<std::pair<pid_t, pid_t>>& processInfos) override;

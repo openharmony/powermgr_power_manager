@@ -25,6 +25,7 @@
 #include "running_lock_inner.h"
 #include "running_lock_proxy.h"
 #include "running_lock_token_stub.h"
+#include "running_lock_info.h"
 #ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
 #endif
@@ -49,6 +50,7 @@ public:
     bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
     void Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
     void UnLock(const sptr<IRemoteObject> remoteObj);
+    void QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     bool Init();
@@ -189,6 +191,9 @@ private:
         RunningLockChangedType changeType);
     void NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner, RunningLockChangedType changeType) const;
     void NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const;
+    RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
+    void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
+    std::map<std::string, RunningLockInfo> unSceneLockLists_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
