@@ -63,7 +63,6 @@ public:
     void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
-    void CheckOverTime();
     void SetProximity(uint32_t status);
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
@@ -188,7 +187,6 @@ private:
     };
     void NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
         RunningLockChangedType changeType);
-    void SendCheckOverTimeMsg(int64_t delayTime);
     void NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner, RunningLockChangedType changeType) const;
     void NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const;
 };

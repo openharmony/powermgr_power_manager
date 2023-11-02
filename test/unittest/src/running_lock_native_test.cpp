@@ -100,7 +100,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     EXPECT_FALSE(runningLockMgr->ExistValidRunningLock());
-    runningLockMgr->CheckOverTime();
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     int32_t pid = IPCSkeleton::GetCallingPid();
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -110,8 +109,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     EXPECT_FALSE(runningLockMgr->ExistValidRunningLock());
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
     EXPECT_TRUE(runningLockMgr->ExistValidRunningLock() == true);
-    runningLockMgr->CheckOverTime();
-    runningLockMgr->CheckOverTime();
 
     runningLockMgr->ProxyRunningLock(false, pid, uid);
     runningLockMgr->ProxyRunningLock(true, pid, uid);
@@ -288,28 +285,11 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
 
 /**
  * @tc.name: RunningLockNative007
- * @tc.desc: test CheckOverTime in runningLockMgr
- * @tc.type: FUNC
- */
-HWTEST_F (RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
-{
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
-    EXPECT_TRUE(runningLockMgr->Init());
-    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
-    runningLockMgr->CheckOverTime();
-    runningLockMgr->RemoveAndPostUnlockTask(remoteObj);
-    runningLockMgr->SendCheckOverTimeMsg(CALLTIMEMS);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative007 end");
-}
-
-/**
- * @tc.name: RunningLockNative008
  * @tc.desc: test activate in lockCounters
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
 {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest_);
@@ -344,12 +324,29 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level0)
     pmsTest_->powerStateMachine_ = stateMachine;
     EXPECT_TRUE(pmsTest_->powerStateMachine_ != nullptr);
 
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative007 end");
+}
+
+/**
+ * @tc.name: RunningLockNative008
+ * @tc.desc: test RemoveAndPostUnlockTask in runningLockMgr
+ * @tc.type: FUNC
+ * @tc.require: issueI7MNRN
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level0)
+{
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
+    runningLockMgr->RemoveAndPostUnlockTask(remoteObject, 1);
+    EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative008 end");
 }
 
 /**
  * @tc.name: RunningLockNative009
- * @tc.desc: test RemoveAndPostUnlockTask in runningLockMgr
+ * @tc.desc: test Lock
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
@@ -359,7 +356,8 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative009, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
-    runningLockMgr->RemoveAndPostUnlockTask(remoteObject, 1);
+    runningLockMgr->Lock(remoteObject, 0);
+    runningLockMgr->Lock(remoteObject, 1);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative009 end");
 }
@@ -376,15 +374,17 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative010, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
-    runningLockMgr->Lock(remoteObject, 0);
-    runningLockMgr->Lock(remoteObject, 1);
+    runningLockMgr->UnLock(remoteObject);
+    EXPECT_TRUE(runningLockMgr != nullptr);
+    runningLockMgr->lockCounters_.clear();
+    runningLockMgr->UnLock(remoteObject);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative010 end");
 }
 
 /**
  * @tc.name: RunningLockNative011
- * @tc.desc: test Lock
+ * @tc.desc: test IsUsed
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
@@ -394,17 +394,14 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative011, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
-    runningLockMgr->UnLock(remoteObject);
-    EXPECT_TRUE(runningLockMgr != nullptr);
-    runningLockMgr->lockCounters_.clear();
-    runningLockMgr->UnLock(remoteObject);
+    runningLockMgr->IsUsed(remoteObject);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative011 end");
 }
 
 /**
  * @tc.name: RunningLockNative012
- * @tc.desc: test IsUsed
+ * @tc.desc: test GetRunningLockNum
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
@@ -413,15 +410,14 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative012, TestSize.Level0)
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
-    runningLockMgr->IsUsed(remoteObject);
+    runningLockMgr->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative012 end");
 }
 
 /**
  * @tc.name: RunningLockNative013
- * @tc.desc: test GetRunningLockNum
+ * @tc.desc: test GetValidRunningLockNum
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
@@ -430,51 +426,18 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative013, TestSize.Level0)
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    runningLockMgr->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BUTT);
+    runningLockMgr->GetValidRunningLockNum(static_cast<RunningLockType>(-1));
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative013 end");
 }
 
 /**
  * @tc.name: RunningLockNative014
- * @tc.desc: test GetValidRunningLockNum
- * @tc.type: FUNC
- * @tc.require: issueI7MNRN
- */
-HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level0)
-{
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
-    EXPECT_TRUE(runningLockMgr->Init());
-    runningLockMgr->GetValidRunningLockNum(static_cast<RunningLockType>(-1));
-    EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative014 end");
-}
-
-/**
- * @tc.name: RunningLockNative015
- * @tc.desc: test CheckOverTime
- * @tc.type: FUNC
- * @tc.require: issueI7MNRN
- */
-HWTEST_F(RunningLockNativeTest, RunningLockNative015, TestSize.Level0)
-{
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
-    EXPECT_TRUE(runningLockMgr->Init());
-    runningLockMgr->runningLocks_.clear();
-    runningLockMgr->CheckOverTime();
-    EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative015 end");
-}
-
-/**
- * @tc.name: RunningLockNative016
  * @tc.desc: test NotifyRunningLockChanged
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
@@ -492,16 +455,16 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
     type = static_cast<RunningLockMgr::RunningLockChangedType>(UNTYPE);
     runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
     EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative016 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative014 end");
 }
 
 /**
- * @tc.name: RunningLockNative017
+ * @tc.name: RunningLockNative015
  * @tc.desc: test ProxyRunningLock
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative015, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
@@ -512,16 +475,16 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->ProxyRunningLock(true, pid, uid) == true);
     EXPECT_TRUE(runningLockMgr->ProxyRunningLock(false, pid, uid) == true);
     EXPECT_TRUE(runningLockMgr->ProxyRunningLock(true, 0, uid) == false);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative017 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative015 end");
 }
 
 /**
- * @tc.name: RunningLockNative018
+ * @tc.name: RunningLockNative016
  * @tc.desc: test ProxyRunningLockInner
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
@@ -543,16 +506,16 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level0)
     runningLockMgr->runninglockProxy_->AddRunningLock(pid, uid, nullptr);
     runningLockMgr->ProxyRunningLockInner(true, pid, uid);
     EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative018 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative016 end");
 }
 
 /**
- * @tc.name: RunningLockNative020
+ * @tc.name: RunningLockNative017
  * @tc.desc: test DumpInfo
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
@@ -568,16 +531,16 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
     runningLockMgr->DumpInfo(result);
     EXPECT_TRUE(runningLockMgr != nullptr);
 
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative020 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative017 end");
 }
 
 /**
- * @tc.name: RunningLockNative021
+ * @tc.name: RunningLockNative018
  * @tc.desc: test Lock
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
@@ -585,16 +548,16 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
     runningLockMgr->backgroundLock_->locking_ = false;
     runningLockMgr->backgroundLock_->Lock();
     EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative021 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative018 end");
 }
 
 /**
- * @tc.name: RunningLockNative022
+ * @tc.name: RunningLockNative019
  * @tc.desc: test Unlock
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative019, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
@@ -602,16 +565,16 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
     runningLockMgr->backgroundLock_->locking_ = true;
     runningLockMgr->backgroundLock_->Unlock();
     EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative022 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative019 end");
 }
 
 /**
- * @tc.name: RunningLockNative023
+ * @tc.name: RunningLockNative020
  * @tc.desc: test activate in lockCounters
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative023, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
 {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest_);
@@ -626,6 +589,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative023, TestSize.Level0)
     runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL]->Decrease(
         remoteObj, lockInner);
     EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative023 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative020 end");
 }
 } // namespace

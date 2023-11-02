@@ -80,14 +80,6 @@ public:
         return state_ == RunningLockState::RUNNINGLOCK_STATE_PROXIED ||
             state_ == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE;
     }
-    void SetOverTimeFlag(bool overTimeFlag)
-    {
-        overTimeFlag_ = overTimeFlag;
-    }
-    bool GetOverTimeFlag() const
-    {
-        return overTimeFlag_;
-    }
     int64_t GetLockTimeMs() const
     {
         return lockTimeMs_;
@@ -97,7 +89,6 @@ private:
     std::mutex mutex_;
     RunningLockParam runningLockParam_;
     RunningLockState state_ = RunningLockState::RUNNINGLOCK_STATE_DISABLE;
-    bool overTimeFlag_ = false;
     int64_t lockTimeMs_ = 0;
 };
 } // namespace PowerMgr
