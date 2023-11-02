@@ -38,6 +38,7 @@ private:
     ErrCode RunAsSetModeCommand();
     ErrCode RunAsWakeupCommand();
     ErrCode RunAsSuspendCommand();
+    ErrCode RunAsQueryLockCommand();
 #ifdef HAS_DISPLAY_MANAGER_PART
     ErrCode RunAsDisplayCommand();
     bool DisplayOptargEmpty();

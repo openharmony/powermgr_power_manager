@@ -62,7 +62,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
     int32_t pid = IPCSkeleton::GetCallingPid();
     int32_t uid = IPCSkeleton::GetCallingUid();
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     EXPECT_FALSE(runningLockMgr->IsUsed(remoteObj));
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
@@ -104,7 +104,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     int32_t pid = IPCSkeleton::GetCallingPid();
     int32_t uid = IPCSkeleton::GetCallingUid();
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     EXPECT_FALSE(runningLockMgr->ExistValidRunningLock());
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
@@ -152,7 +152,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level0)
     runningLockMgr->DumpInfo(result);
 
     RunningLockParam runningLockParam {
-        "runninglockNativeTest2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
+        "runninglockNativeTest2", "", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
     runningLockMgr->DumpInfo(result);
@@ -184,7 +184,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
     runningLockMgr->SetProximity(MAXTYPE);
 
     RunningLockParam runningLockParam {
-        "runninglockNativeTest", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
+        "runninglockNativeTest", "", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
     runningLockMgr->Lock(token, TIMEOUTMS);
@@ -195,7 +195,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
     runningLockMgr->UnLock(token);
 
     RunningLockParam runningLockParam2 {
-        "runninglockNativeTest2", static_cast<RunningLockType>(7U), TIMEOUTMS, PID_A, UID_A};
+        "runninglockNativeTest2", "", static_cast<RunningLockType>(7U), TIMEOUTMS, PID_A, UID_A};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam2) != nullptr);
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
@@ -221,12 +221,12 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
     RunningLockParam runningLockParam1 {
-        "runninglockNativeTest2", static_cast<RunningLockType>(MAXTYPE), TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest2", "", static_cast<RunningLockType>(MAXTYPE), TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam1) != nullptr);
     runningLockMgr->Lock(token, TIMEOUTMS);
@@ -248,7 +248,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
@@ -444,7 +444,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     RunningLockMgr::RunningLockChangedType type = RunningLockMgr::RunningLockChangedType::RUNNINGLOCK_CHANGED_BUTT;
     auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockParam);
     runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
@@ -496,7 +496,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr != nullptr);
 
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->ProxyRunningLockInner(false, pid, uid);
@@ -522,7 +522,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->Init());
     std::string result;
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->DumpInfo(result);
@@ -580,7 +580,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest_);
     EXPECT_TRUE(runningLockMgr->Init());
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockParam);
     runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL]->Increase(
