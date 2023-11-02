@@ -27,6 +27,8 @@
 #include <securec.h>
 #include <string_ex.h>
 #include <system_ability_definition.h>
+#include <sys_mgr_client.h>
+#include <bundle_mgr_client.h>
 #include <unistd.h>
 
 #include "ability_connect_callback_stub.h"
@@ -581,6 +583,22 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
     return powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
 }
 
+std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
+{
+    std::string tempBundleName = "";
+    BundleMgrClient bundleObj;
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    ErrCode res = bundleObj.GetNameForUid(uid, tempBundleName);
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (res != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to get bundle name for uid=%{public}d, ErrCode=%{public}d",
+            uid, static_cast<int32_t>(res));
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "bundle name for uid=%{public}d, name=%{public}s", uid, tempBundleName.c_str());
+    return tempBundleName;
+}
+
 RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS)
 {
     RunningLockParam filledParam {};
@@ -589,6 +607,7 @@ RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& in
     filledParam.timeoutMs = timeOutMS;
     filledParam.pid = IPCSkeleton::GetCallingPid();
     filledParam.uid = IPCSkeleton::GetCallingUid();
+    filledParam.bundleName = GetBundleNameByUid(filledParam.uid);
     return filledParam;
 }
 
@@ -604,10 +623,11 @@ PowerErrors PowerMgrService::CreateRunningLock(
             runningLockInfo.name.c_str(), runningLockInfo.type);
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    POWER_HILOGI(
-        FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d", runningLockInfo.name.c_str(), runningLockInfo.type);
 
     RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d, bundleName: %{public}s",
+        runningLockParam.name.c_str(), runningLockParam.type, runningLockParam.bundleName.c_str());
+
     runningLockMgr_->CreateRunningLock(remoteObj, runningLockParam);
     return PowerErrors::ERR_OK;
 }
@@ -658,6 +678,16 @@ bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
         return false;
     }
     runningLockMgr_->UnLock(remoteObj);
+    return true;
+}
+
+bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+{
+    std::lock_guard lock(lockMutex_);
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
+        return false;
+    }
+    runningLockMgr_->QueryRunningLockLists(runningLockLists);
     return true;
 }
 
@@ -909,9 +939,7 @@ void PowerMgrService::WakeupRunningLock::Unlock()
     if (!token_) {
         return;
     }
-    if (pms->IsUsed(token_)) {
-        pms->UnLock(token_->AsObject());
-    }
+    pms->UnLock(token_->AsObject());
 }
 
 void PowerMgrService::SuspendControllerInit()

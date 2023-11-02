@@ -299,5 +299,12 @@ PowerErrors PowerMgrClient::IsStandby(bool& isStandby)
     PowerErrors ret = proxy_->IsStandby(isStandby);
     return ret;
 }
+
+bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Query running lock lists by client");
+    return proxy_->QueryRunningLockLists(runningLockLists);
+}
 } // namespace PowerMgr
 } // namespace OHOS

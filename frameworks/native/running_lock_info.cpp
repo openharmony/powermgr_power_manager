@@ -26,10 +26,19 @@ bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
 {
     uint32_t readType;
     std::u16string u16Name;
+    std::u16string u16BundleName;
+    int32_t readPid;
+    int32_t readUid;
     READ_PARCEL_WITH_RET(parcel, String16, u16Name, false);
     name = Str16ToStr8(u16Name);
     READ_PARCEL_WITH_RET(parcel, Uint32, readType, false);
     type = static_cast<RunningLockType>(readType);
+    READ_PARCEL_WITH_RET(parcel, String16, u16BundleName, false);
+    bundleName = Str16ToStr8(u16BundleName);
+    READ_PARCEL_WITH_RET(parcel, Int32, readPid, false);
+    pid = readPid;
+    READ_PARCEL_WITH_RET(parcel, Int32, readUid, false);
+    uid = readUid;
     return true;
 }
 
@@ -50,6 +59,9 @@ bool RunningLockInfo::Marshalling(Parcel& parcel) const
 {
     WRITE_PARCEL_WITH_RET(parcel, String16, Str8ToStr16(name), false);
     WRITE_PARCEL_WITH_RET(parcel, Uint32, static_cast<uint32_t>(type), false);
+    WRITE_PARCEL_WITH_RET(parcel, String16, Str8ToStr16(bundleName), false);
+    WRITE_PARCEL_WITH_RET(parcel, Int32, static_cast<int32_t>(pid), false);
+    WRITE_PARCEL_WITH_RET(parcel, Int32, static_cast<int32_t>(uid), false);
     return true;
 }
 } // namespace PowerMgr

@@ -23,6 +23,7 @@ RUNNINGLOCK:
   LOG_LEVEL: {type: INT32, desc: runninglock log level}
   TAG: {type: STRING, desc: runninglock tag}
   MESSAGE: {type: STRING, desc: runninglock message}
+  BUNDLENAME: {type: STRING, desc: bundle name}
 
 SCREEN:
   __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: screen state}
@@ -37,13 +38,14 @@ SCREEN_ON_TIMEOUT:
   PROCESS_NAME: {type: STRING, desc: call process name}
   MSG: {type: STRING, desc: screen on timeout message}
 
+STATE:
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: power state}
+  STATE: {type: INT32, desc: power state}
+
+
 STATE_CORRECTION:
   __BASE: {type: FAULT, level: CRITICAL, desc: the power state is inconsistent with the display state}
   ERROR_STATE: {type: INT32, desc: the state of the current error}
   CORRECTION_STATE: {type: INT32, desc: the corrected state}
   DISPLAY_STATE: {type: INT32, desc: the display state}
   MSG: {type: STRING, desc: correct error information}
-
-STATE:
-  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: power state}
-  STATE: {type: INT32, desc: power state}

@@ -43,6 +43,12 @@ public:
     {
         return runningLockParam_.name;
     }
+
+    const std::string& GetBundleName() const
+    {
+        return runningLockParam_.bundleName;
+    }
+
     RunningLockType GetType() const
     {
         return runningLockParam_.type;
