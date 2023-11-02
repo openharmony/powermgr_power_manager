@@ -58,7 +58,7 @@ void PowerMgrServiceNativeTest::SetUp()
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     RunningLockParam runningLockParam {
-        "runninglockNativeTest1", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));

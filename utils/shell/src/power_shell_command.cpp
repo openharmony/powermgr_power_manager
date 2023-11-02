@@ -59,6 +59,7 @@ static const std::string HELP_MSG =
     "  setmode :    Set power mode. \n"
     "  wakeup  :    Wakeup system and turn screen on. \n"
     "  suspend :    Suspend system and turn screen off. \n"
+    "  lock    :    Query running lock lists by bundle app. \n"
 #ifdef HAS_DISPLAY_MANAGER_PART
     "  display :    Update or Override display brightness. \n"
 #endif
@@ -104,6 +105,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
+        {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
 #ifdef HAS_DISPLAY_MANAGER_PART
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
 #endif
@@ -193,6 +195,69 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     resultReceiver_.append("SuspendDevice is called\n");
+    return ERR_OK;
+}
+
+static const std::string GetBundleRunningLockTypeString(RunningLockType type)
+{
+    switch (type) {
+        case RunningLockType::RUNNINGLOCK_SCREEN:
+            return "SCREEN";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND:
+            return "BACKGROUND";
+        case RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL:
+            return "PROXIMITY_SCREEN_CONTROL";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE:
+            return "BACKGROUND_PHONE";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION:
+            return "BACKGROUND_NOTIFICATION";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO:
+            return "BACKGROUND_AUDIO";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT:
+            return "BACKGROUND_SPORT";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION:
+            return "BACKGROUND_NAVIGATION";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_TASK:
+            return "BACKGROUND_TASK";
+        case RunningLockType::RUNNINGLOCK_BUTT:
+            return "BUTT";
+        default:
+            break;
+    }
+
+    return "UNKNOWN";
+}
+
+ErrCode PowerShellCommand::RunAsQueryLockCommand()
+{
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
+    std::map<std::string, RunningLockInfo> runningLockLists;
+    bool ret = client.QueryRunningLockLists(runningLockLists);
+    if (!ret) {
+        resultReceiver_.append("failed.\n");
+        return ERR_OK;
+    }
+    resultReceiver_.append("The locking application information is as follows:\n");
+    int mapSize = runningLockLists.size();
+    resultReceiver_.append("The nums of holding lock by bundle app is ");
+    resultReceiver_.append(std::to_string(mapSize));
+    resultReceiver_.append(".\n");
+    int counter = 0;
+    for (auto it : runningLockLists) {
+        counter++;
+        resultReceiver_.append(std::to_string(counter));
+        resultReceiver_.append(". bundleName=");
+        resultReceiver_.append(it.first);
+        resultReceiver_.append(" name=");
+        resultReceiver_.append(it.second.name);
+        resultReceiver_.append(" type=");
+        resultReceiver_.append(GetBundleRunningLockTypeString(it.second.type));
+        resultReceiver_.append(" pid=");
+        resultReceiver_.append(std::to_string(it.second.pid));
+        resultReceiver_.append(" uid=");
+        resultReceiver_.append(std::to_string(it.second.uid));
+        resultReceiver_.append(".\n");
+    }
     return ERR_OK;
 }
 

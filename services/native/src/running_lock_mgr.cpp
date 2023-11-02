@@ -203,8 +203,8 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, name=%{public}s, type=%{public}d",
-        runningLockParam.name.c_str(), runningLockParam.type);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Create lock success, name=%{public}s, type=%{public}d, bundleName=%{public}s",
+        runningLockParam.name.c_str(), runningLockParam.type, runningLockParam.bundleName.c_str());
 
     mutex_.lock();
     runningLocks_.emplace(remoteObj, lockInner);
@@ -252,6 +252,37 @@ bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
+void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iterator = unSceneLockLists_.find(singleLockParam.bundleName);
+    if (fill) {
+        if (iterator == unSceneLockLists_.end()) {
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add non-scene lock information from lists");
+            RunningLockInfo unSceneAppLockInfo = FillAppRunningLockInfo(singleLockParam);
+            unSceneLockLists_.insert(
+                std::pair<std::string, RunningLockInfo>(unSceneAppLockInfo.bundleName, unSceneAppLockInfo));
+        }
+        return;
+    }
+    if (iterator != unSceneLockLists_.end()) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Remove non-scene lock information from lists");
+        unSceneLockLists_.erase(iterator);
+    }
+    return;
+}
+
+RunningLockInfo RunningLockMgr::FillAppRunningLockInfo(const RunningLockParam& info)
+{
+    RunningLockInfo tempAppRunningLockInfo = {};
+    tempAppRunningLockInfo.name = info.name;
+    tempAppRunningLockInfo.bundleName = info.bundleName;
+    tempAppRunningLockInfo.type = info.type;
+    tempAppRunningLockInfo.pid = info.pid;
+    tempAppRunningLockInfo.uid = info.uid;
+    return tempAppRunningLockInfo;
+}
+
 void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
     StartTrace(HITRACE_TAG_POWER, "RunningLock_Lock");
@@ -275,7 +306,6 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
         lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Lock(lockInnerParam);
-        NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_ADD);
         return;
     }
 
@@ -290,6 +320,12 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     }
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
+
+    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
+        || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
+        UpdateUnSceneLockLists(lockInnerParam, true);
+    }
+
     counter->Increase(remoteObj, lockInner);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
@@ -316,7 +352,6 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
         FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Unlock(lockInnerParam);
-        NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
         return;
     }
 
@@ -334,10 +369,26 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     RemoveAndPostUnlockTask(remoteObj);
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
+
+    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
+        || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
+        UpdateUnSceneLockLists(lockInnerParam, false);
+    }
+
     counter->Decrease(remoteObj, lockInner);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
     FinishTrace(HITRACE_TAG_POWER);
+}
+
+
+void RunningLockMgr::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto &iter : unSceneLockLists_) {
+        runningLockLists.insert(std::pair<std::string, RunningLockInfo>(iter.first, iter.second));
+    }
+    return;
 }
 
 bool RunningLockMgr::IsUsed(const sptr<IRemoteObject>& remoteObj)
@@ -515,14 +566,15 @@ void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType, const Runni
     int32_t state = static_cast<int32_t>(lockInner.GetState());
     int32_t type = static_cast <int32_t>(lockInner.GetType());
     string name = lockInner.GetName();
+    string bundleName = lockInner.GetBundleName();
     const int logLevel = 2;
     const string &tag = runninglockNotifyStr_.at(changeType);
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "PID", pid, "UID", uid, "STATE", state, "TYPE", type, "NAME", name,
+        "PID", pid, "UID", uid, "STATE", state, "TYPE", type, "NAME", name, "BUNDLENAME", bundleName,
         "LOG_LEVEL", logLevel, "TAG", tag);
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s",
-        pid, uid, tag.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s, bundleName=%{public}s",
+        pid, uid, tag.c_str(), bundleName.c_str());
 }
 
 void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)

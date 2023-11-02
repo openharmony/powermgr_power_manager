@@ -18,6 +18,7 @@
 #include <message_parcel.h>
 #include <string_ex.h>
 
+#include "running_lock_info.h"
 #include "power_common.h"
 #include "power_errors.h"
 #include "power_mgr_ipc_interface_code.h"
@@ -112,6 +113,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK):
             ret = UnLockStub(data);
+            break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_QUERY):
+            ret = QueryRunningLockListsStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCK):
             ret = ProxyRunningLockStub(data, reply);
@@ -209,6 +213,17 @@ int32_t PowerMgrStub::UnLockStub(MessageParcel& data)
     return ERR_OK;
 }
 
+int32_t PowerMgrStub::QueryRunningLockListsStub(MessageParcel& data, MessageParcel& reply)
+{
+    std::map<std::string, RunningLockInfo> runningLockLists;
+    QueryRunningLockLists(runningLockLists);
+    reply.WriteInt32(runningLockLists.size());
+    for (auto it : runningLockLists) {
+        reply.WriteString(it.first);
+        reply.WriteParcelable(&it.second);
+    }
+    return ERR_OK;
+}
 int32_t PowerMgrStub::IsUsedStub(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();

@@ -84,6 +84,10 @@ struct RunningLockInfo : public Parcelable {
      * RunningLock type: used to identify the type of RunningLock.
      */
     RunningLockType type;
+
+    std::string bundleName;
+    int32_t pid = 0;
+    int32_t uid = 0;
     RunningLockInfo() = default;
     RunningLockInfo(const std::string& namestr, RunningLockType locktype) : name(namestr), type(locktype) {}
     bool ReadFromParcel(Parcel& parcel);

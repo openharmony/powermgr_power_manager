@@ -49,6 +49,7 @@ private:
     int32_t IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply);
     int32_t LockStub(MessageParcel& data);
     int32_t UnLockStub(MessageParcel& data);
+    int32_t QueryRunningLockListsStub(MessageParcel& data, MessageParcel& reply);
     int32_t IsUsedStub(MessageParcel& data, MessageParcel& reply);
     int32_t RebootDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RebootDeviceForDeprecatedStub(MessageParcel& data, MessageParcel& reply);
