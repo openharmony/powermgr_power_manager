@@ -619,7 +619,8 @@ PowerErrors PowerMgrService::CreateRunningLock(
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     if (!IsRunningLockTypeSupported(runningLockInfo.type)) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Create runninglock failed, name: %{public}s, type: %{public}d",
+        POWER_HILOGW(FEATURE_RUNNING_LOCK,
+            "runninglock type is not supported, name=%{public}s, type=%{public}d",
             runningLockInfo.name.c_str(), runningLockInfo.type);
         return PowerErrors::ERR_PARAM_INVALID;
     }
