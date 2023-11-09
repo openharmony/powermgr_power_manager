@@ -233,21 +233,20 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
         "Suspend when screen off, reason=%{public}d, action=%{public}u, "
         "delay=%{public}u" PRId32 " ,state=%{public}d, type=%{public}u",
         reason, action, delay, stateMachine_->GetState(), sleepType_);
-    switch (stateMachine_->GetState())
-    {
-    case PowerState::INACTIVE:
-        StopSleep();
-        StartSleepTimer(reason, action, delay);
-        break;
-    case PowerState::SLEEP:
-        if (action == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)
-            && sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
-            SystemSuspendController::GetInstance().Wakeup();
-            StartSleepTimer(reason, action, 0);
-        }
-        break;
-    default:
-        break;
+    switch (stateMachine_->GetState()) {
+        case PowerState::INACTIVE:
+            StopSleep();
+            StartSleepTimer(reason, action, delay);
+            break;
+        case PowerState::SLEEP:
+            if (action == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND) &&
+                sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
+                SystemSuspendController::GetInstance().Wakeup();
+                StartSleepTimer(reason, action, 0);
+            }
+            break;
+        default:
+            break;
     }
 }
 
