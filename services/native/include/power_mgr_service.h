@@ -72,6 +72,10 @@ public:
     virtual bool ResetRunningLocks() override;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+
+    virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
+    virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) override;
+
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;

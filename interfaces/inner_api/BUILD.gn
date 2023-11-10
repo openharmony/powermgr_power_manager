@@ -40,6 +40,8 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_service_zidl}/src/power_mode_callback_stub.cpp",
     "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_state_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/shutdown_proxy_delegator.cpp",
