@@ -72,6 +72,7 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
+    void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     std::vector<SuspendSource> sourceList_;
     std::map<SuspendDeviceType, std::shared_ptr<SuspendMonitor>> monitorMap_;
     std::shared_ptr<ShutdownController> shutdownController_;
@@ -80,6 +81,7 @@ private:
     int64_t sleepTime_ {-1};
     SuspendDeviceType sleepReason_ {0};
     uint32_t sleepAction_ {0};
+    uint32_t sleepType_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
     std::mutex mutex_;
 };

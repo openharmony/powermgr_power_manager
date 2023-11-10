@@ -219,6 +219,37 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
     return powerKeyDown;
 }
 
+void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
+{
+    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Do nothing for reason %{public}d", reason);
+        return;
+    }
+    if (stateMachine_ == nullptr) {
+        return;
+    }
+
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "Suspend when screen off, reason=%{public}d, action=%{public}u, "
+        "delay=%{public}u" PRId32 " ,state=%{public}d, type=%{public}u",
+        reason, action, delay, stateMachine_->GetState(), sleepType_);
+    switch (stateMachine_->GetState()) {
+        case PowerState::INACTIVE:
+            StopSleep();
+            StartSleepTimer(reason, action, delay);
+            break;
+        case PowerState::SLEEP:
+            if (action == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND) &&
+                sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
+                SystemSuspendController::GetInstance().Wakeup();
+                StartSleepTimer(reason, action, 0);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -231,6 +262,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     }
 
     if (!pms->IsScreenOn()) {
+        SuspendWhenScreenOff(reason, action, delay);
         return;
     }
 
@@ -268,6 +300,7 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     sleepReason_ = reason;
     sleepAction_ = action;
     sleepDuration_ = delay;
+    sleepType_ = action;
     if (delay == 0) {
         HandleAction(reason, action);
     } else {
