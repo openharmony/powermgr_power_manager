@@ -28,6 +28,7 @@
 #include "shutdown_controller.h"
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
+#include "sleep_callback_holer.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -52,6 +53,11 @@ public:
     void HandleAction(SuspendDeviceType reason, uint32_t action);
     void RecordPowerKeyDown();
     bool GetPowerkeyDownWhenScreenOff();
+
+    void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
+    void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
+    void TriggerSyncSleepCallback(bool isWakeup);
+
     std::shared_ptr<PowerStateMachine> GetStateMachine() const
     {
         return stateMachine_;
@@ -72,6 +78,10 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
+
+    void TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, bool isWakeup);
+
+    void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     std::vector<SuspendSource> sourceList_;
     std::map<SuspendDeviceType, std::shared_ptr<SuspendMonitor>> monitorMap_;
     std::shared_ptr<ShutdownController> shutdownController_;
@@ -80,6 +90,7 @@ private:
     int64_t sleepTime_ {-1};
     SuspendDeviceType sleepReason_ {0};
     uint32_t sleepAction_ {0};
+    uint32_t sleepType_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
     std::mutex mutex_;
 };

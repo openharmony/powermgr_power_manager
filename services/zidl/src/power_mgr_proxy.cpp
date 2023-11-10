@@ -676,6 +676,60 @@ bool PowerMgrProxy::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>
     return true;
 }
 
+bool PowerMgrProxy::RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+    WRITE_PARCEL_WITH_RET(data, Uint32, static_cast<uint32_t>(priority), false);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SYNC_SLEEP_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+
+bool PowerMgrProxy::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+ 
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SYNC_SLEEP_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 bool PowerMgrProxy::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     sptr<IRemoteObject> remote = Remote();

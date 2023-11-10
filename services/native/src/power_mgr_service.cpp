@@ -776,6 +776,32 @@ bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     return true;
 }
 
+bool PowerMgrService::RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
+{
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d", pid, uid);
+    suspendController_->AddCallback(callback, priority);
+    return true;
+}
+
+bool PowerMgrService::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback)
+{
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d", pid, uid);
+    suspendController_->RemoveCallback(callback);
+    return true;
+}
+
 bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(modeMutex_);

@@ -49,7 +49,9 @@ enum class PowerMgrInterfaceCode {
     SETMODE_DEVICE,
     GETMODE_DEVICE,
     SHELL_DUMP,
-    IS_STANDBY
+    IS_STANDBY,
+    REG_SYNC_SLEEP_CALLBACK,
+    UNREG_SYNC_SLEEP_CALLBACK,
 };
 } // space PowerMgr
 } // namespace OHOS
