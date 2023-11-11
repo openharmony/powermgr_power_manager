@@ -30,8 +30,8 @@ public:
     virtual ~SyncSleepCallbackStub() = default;
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void OnSyncSleep(bool onForceSleep) override;
-    void OnSyncWakeup(bool onForceSleep) override;
+    void OnSyncSleep(bool onForceSleep) override {}
+    void OnSyncWakeup(bool onForceSleep) override {}
 
 private:
     int32_t OnSyncSleepStub(MessageParcel& data);
