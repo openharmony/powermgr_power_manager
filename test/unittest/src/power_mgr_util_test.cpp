@@ -21,7 +21,14 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_log.h"
+
+#define private   public
+#define protected public
 #include "power_vibrator.h"
+#include "vibrator_source_parser.h"
+#undef private
+#undef protected
+
 #include "setting_observer.h"
 #include "setting_provider.h"
 #include "sysparam.h"
@@ -254,6 +261,24 @@ HWTEST_F (PowerMgrUtilTest, PowerVibratorTest001, TestSize.Level0)
     EXPECT_TRUE(vibrator != nullptr);
     vibrator->LoadConfig(POWER_VIBRATOR_CONFIG_FILE,
         VENDOR_POWER_VIBRATOR_CONFIG_FILE, SYSTEM_POWER_VIBRATOR_CONFIG_FILE);
+    vibrator->StartVibrator(SHUTDOWN_DIAG);
+}
+
+/**
+ * @tc.name: PowerVibratorTest002
+ * @tc.desc: test power vibrator coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrUtilTest, PowerVibratorTest002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerVibratorTest002 is start!");
+    std::shared_ptr<PowerVibrator> vibrator = PowerVibrator::GetInstance();
+    EXPECT_TRUE(vibrator != nullptr);
+    std::string key = "shutdown_diag";
+    bool enable = true;
+    std::string type = "wave_form";
+    VibratorSource vibratorSource = VibratorSource(key, enable, type);
+    vibrator->sourceList_.emplace_back(vibratorSource);
     vibrator->StartVibrator(SHUTDOWN_DIAG);
 }
 } // namespace
