@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "power_state_callback_stub.h"
+#include "sync_sleep_callback_stub.h"
 
 #include <message_parcel.h>
 

@@ -18,7 +18,7 @@
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
-#include <iremote_proxyr.h>
+#include <iremote_proxy.h>
 #include <iremote_stub.h>
 #include "sleep_priority.h"
 
