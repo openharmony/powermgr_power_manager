@@ -49,10 +49,10 @@ ohos_shared_library("powermgrservice") {
     "native/src/shutdown/shutdown_callback_holer.cpp",
     "native/src/shutdown/shutdown_controller.cpp",
     "native/src/shutdown/shutdown_dialog.cpp",
-    "native/src/suspend/sleep_callback_holer.cpp",
     "native/src/suspend/suspend_controller.cpp",
     "native/src/suspend/suspend_source_parser.cpp",
     "native/src/suspend/suspend_sources.cpp",
+    "native/src/suspend/sleep_callback_holer.cpp",
     "native/src/wakeup/wakeup_controller.cpp",
     "native/src/wakeup/wakeup_source_parser.cpp",
     "native/src/wakeup/wakeup_sources.cpp",
@@ -145,8 +145,8 @@ ohos_shared_library("powermgr_stub") {
   sources = [
     "zidl/src/power_mgr_stub.cpp",
     "zidl/src/power_mode_callback_stub.cpp",
-    "zidl/src/sync_sleep_callback_stub.cpp",
     "zidl/src/power_state_callback_stub.cpp",
+    "zidl/src/sync_sleep_callback_stub.cpp",
     "zidl/src/shutdown/shutdown_stub_delegator.cpp",
   ]
 
