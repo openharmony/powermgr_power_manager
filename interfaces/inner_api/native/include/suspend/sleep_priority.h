@@ -15,12 +15,13 @@
 
 #ifndef POWERMGR_POWER_MANAGER_SLEEP_PRIORITY_H
 #define POWERMGR_POWER_MANAGER_SLEEP_PRIORITY_H
+
 namespace OHOS {
 namespace PowerMgr {
 /**
  * Sleep priority
  */
-enum class SleepPriority : unit32_t {
+enum class SleepPriority : uint32_t {
     LOW = 0,
     DEFAULT,
     HIGH,

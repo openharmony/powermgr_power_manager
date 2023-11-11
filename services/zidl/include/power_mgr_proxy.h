@@ -83,8 +83,8 @@ public:
     void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) override;
 
-    void RegisterSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
-    void UnRegisterSleepCallback(const sptr<ISyncSleepCallback>& callback) override;
+    virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
+    virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) override;
 
 private:
     static inline BrokerDelegator<PowerMgrProxy> delegator_;
