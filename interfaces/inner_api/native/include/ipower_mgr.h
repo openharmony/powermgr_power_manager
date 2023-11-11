@@ -62,7 +62,7 @@ public:
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
 
-    virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, 
+    virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback,
         SleepPriority priority = SleepPriority::DEFAULT) = 0;
     virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) = 0;
 
