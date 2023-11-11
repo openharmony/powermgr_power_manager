@@ -19,7 +19,7 @@
 #include <set>
 #include <singleton.h>
 #include "iremote_object.h"
-#include "suspend/isync_sleep_callback..h"
+#include "suspend/isync_sleep_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
