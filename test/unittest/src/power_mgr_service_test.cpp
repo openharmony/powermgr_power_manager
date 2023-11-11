@@ -325,4 +325,19 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService018, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.IsStandby(standby), PowerErrors::ERR_OK);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 end.");
 }
+
+/**
+ * @tc.name: PowerMgrService019
+ * @tc.desc: Test QueryRunningLockLists
+ * @tc.type: FUNC
+ * @tc.require: issueI8FCZA
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService019, TestSize.Level2)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::map<std::string, RunningLockInfo> runningLockLists;
+    bool ret = powerMgrClient.QueryRunningLockLists(runningLockLists);
+    EXPECT_EQ(ret, true);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 end.");
+}
 }
