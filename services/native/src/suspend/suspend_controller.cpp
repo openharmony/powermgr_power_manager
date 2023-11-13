@@ -59,7 +59,7 @@ SuspendController::~SuspendController()
 void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
 {
     RETURN_IF(callback == nullptr)
-    SleepCallbackHoler::GetInstance().AddCallback(callback, priority);
+    SleepCallbackHolder::GetInstance().AddCallback(callback, priority);
     POWER_HILOGI(FEATURE_SUSPEND,
         "sycn sleep callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
@@ -68,7 +68,7 @@ void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, Sl
 void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
 {
     RETURN_IF(callback == nullptr)
-    SleepCallbackHoler::GetInstance().RemoveCallback(callback);
+    SleepCallbackHolder::GetInstance().RemoveCallback(callback);
     POWER_HILOGI(FEATURE_SUSPEND,
         "sycn sleep callback removed, pid=%{public}d, uid=%{public}d",
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
@@ -76,11 +76,11 @@ void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
 
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
-    auto highPriorityCallbacks = SleepCallbackHoler::GetInstance().GetHighPriorityCallbacks();
+    auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
     TriggerSyncSleepCallbackInner(highPriorityCallbacks, isWakeup);
-    auto defaultPriorityCallbacks = SleepCallbackHoler::GetInstance().GetDefaultPriorityCallbacks();
+    auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
     TriggerSyncSleepCallbackInner(defaultPriorityCallbacks, isWakeup);
-    auto lowPriorityCallbacks = SleepCallbackHoler::GetInstance().GetLowPriorityCallbacks();
+    auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
     TriggerSyncSleepCallbackInner(lowPriorityCallbacks, isWakeup);
 }
 void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, bool isWakeup)

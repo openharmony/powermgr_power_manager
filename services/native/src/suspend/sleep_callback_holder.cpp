@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "sleep_callback_holer.h"
+#include "sleep_callback_holder.h"
 #include "power_common.h"
 
 namespace OHOS {
 namespace PowerMgr {
-SleepCallbackHoler::SleepCallbackHoler() {}
-SleepCallbackHoler::~SleepCallbackHoler() = default;
+SleepCallbackHolder::SleepCallbackHolder() {}
+SleepCallbackHolder::~SleepCallbackHolder() = default;
 
-void SleepCallbackHoler::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
+void SleepCallbackHolder::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     switch (priority) {
         case SleepPriority::LOW: {
             auto iter = lowPriorityCallbacks_.insert(callback);
@@ -43,33 +43,33 @@ void SleepCallbackHoler::AddCallback(const sptr<ISyncSleepCallback>& callback, S
     }
 }
 
-std::set<sptr<ISyncSleepCallback>> SleepCallbackHoler::GetHighPriorityCallbacks()
+std::set<sptr<ISyncSleepCallback>> SleepCallbackHolder::GetHighPriorityCallbacks()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     return highPriorityCallbacks_;
 }
 
-std::set<sptr<ISyncSleepCallback>> SleepCallbackHoler::GetDefaultPriorityCallbacks()
+std::set<sptr<ISyncSleepCallback>> SleepCallbackHolder::GetDefaultPriorityCallbacks()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     return defaultPriorityCallbacks_;
 }
 
-std::set<sptr<ISyncSleepCallback>> SleepCallbackHoler::GetLowPriorityCallbacks()
+std::set<sptr<ISyncSleepCallback>> SleepCallbackHolder::GetLowPriorityCallbacks()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     return lowPriorityCallbacks_;
 }
 
-void SleepCallbackHoler::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
+void SleepCallbackHolder::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     RemoveCallback(lowPriorityCallbacks_, callback);
     RemoveCallback(defaultPriorityCallbacks_, callback);
     RemoveCallback(highPriorityCallbacks_, callback);
 }
 
-void SleepCallbackHoler::RemoveCallback(
+void SleepCallbackHolder::RemoveCallback(
     std::set<sptr<ISyncSleepCallback>>& callbacks, const sptr<ISyncSleepCallback>& callback)
 {
     auto iter = callbacks.find(callback);
