@@ -170,7 +170,9 @@ void WakeupController::Wakeup()
         return;
     }
     suspendController->StopSleep();
-    suspendController->TriggerSyncSleepCallback(true);
+    if (stateMachine_->GetState() == PowerState::SLEEP) {
+        suspendController->TriggerSyncSleepCallback(true);
+    }
 }
 
 void WakeupController::ControlListener(WakeupDeviceType reason)

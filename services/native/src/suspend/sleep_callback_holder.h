@@ -23,11 +23,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
-class SleepCallbackHoler final : public DelayedRefSingleton<SleepCallbackHoler> {
-    DECLARE_DELAYED_REF_SINGLETON(SleepCallbackHoler);
+class SleepCallbackHolder final : public DelayedRefSingleton<SleepCallbackHolder> {
+    DECLARE_DELAYED_REF_SINGLETON(SleepCallbackHolder);
 
 public:
-    DISALLOW_COPY_AND_MOVE(SleepCallbackHoler);
+    DISALLOW_COPY_AND_MOVE(SleepCallbackHolder);
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
 
