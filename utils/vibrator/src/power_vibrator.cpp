@@ -17,7 +17,9 @@
 
 #include <string>
 #include "power_log.h"
+#ifdef POWER_VIBRATOR_MODE_ENABLE
 #include "vibrator_agent.h"
+#endif
 #include "vibrator_source_parser.h"
 
 namespace OHOS {
@@ -41,6 +43,7 @@ void PowerVibrator::LoadConfig(
 
 void PowerVibrator::StartVibrator(const std::string& scene)
 {
+#ifdef POWER_VIBRATOR_MODE_ENABLE
     VibratorSource source;
     for (VibratorSource& src : sourceList_) {
         if (src.GetScene() == scene) {
@@ -57,6 +60,9 @@ void PowerVibrator::StartVibrator(const std::string& scene)
         POWER_HILOGE(COMP_UTILS, "%{public}s vibrator failed", scene.c_str());
         return;
     }
+#else
+    return;
+#endif
 }
 
 std::shared_ptr<PowerVibrator> PowerVibrator::GetInstance()
