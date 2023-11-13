@@ -28,7 +28,7 @@
 #include "shutdown_controller.h"
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
-#include "sleep_callback_holer.h"
+#include "sleep_callback_holder.h"
 
 namespace OHOS {
 namespace PowerMgr {
