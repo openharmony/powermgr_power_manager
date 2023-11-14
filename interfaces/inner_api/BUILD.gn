@@ -47,6 +47,8 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_stub.cpp",
   ]
 
   configs = [

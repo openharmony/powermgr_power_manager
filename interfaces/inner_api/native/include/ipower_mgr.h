@@ -29,6 +29,7 @@
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 #include "shutdown/ishutdown_client.h"
+#include "suspend/isync_sleep_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -60,6 +61,10 @@ public:
     virtual bool ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
+
+    virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback,
+        SleepPriority priority = SleepPriority::DEFAULT) = 0;
+    virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) = 0;
 
     // Used for callback registration upon power mode.
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;

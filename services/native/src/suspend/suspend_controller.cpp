@@ -39,6 +39,8 @@ FFRTHandle g_userActivityOffTimeoutHandle;
 FFRTUtils::Mutex g_monitorMutex;
 } // namespace
 
+std::atomic_bool onForceSleep = false;
+
 /** SuspendController Implement */
 SuspendController::SuspendController(
     std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine)
@@ -53,6 +55,46 @@ SuspendController::~SuspendController()
         SettingHelper::UnregisterSettingSuspendSourcesObserver(g_suspendSourcesKeyObserver);
     }
 }
+
+void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
+{
+    RETURN_IF(callback == nullptr)
+    SleepCallbackHolder::GetInstance().AddCallback(callback, priority);
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "sycn sleep callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+}
+
+void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
+{
+    RETURN_IF(callback == nullptr)
+    SleepCallbackHolder::GetInstance().RemoveCallback(callback);
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "sycn sleep callback removed, pid=%{public}d, uid=%{public}d",
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+}
+
+void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
+{
+    auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
+    TriggerSyncSleepCallbackInner(highPriorityCallbacks, isWakeup);
+    auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
+    TriggerSyncSleepCallbackInner(defaultPriorityCallbacks, isWakeup);
+    auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
+    TriggerSyncSleepCallbackInner(lowPriorityCallbacks, isWakeup);
+}
+void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, bool isWakeup)
+{
+    for (auto &callback : callbacks) {
+        if (callback != nullptr) {
+            int64_t start = GetTickCount();
+            isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
+            int64_t cost = GetTickCount() - start;
+            POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sycn sleep callback success, cost=%{public}" PRId64 "", cost);
+        }
+    }
+}
+
 class SuspendPowerStateCallback : public PowerStateCallbackStub {
 public:
     explicit SuspendPowerStateCallback(std::shared_ptr<SuspendController> controller) : controller_(controller) {};
@@ -346,6 +388,8 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
+        onForceSleep = false;
+        TriggerSyncSleepCallback(false);
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "auto suspend: State change failed");
@@ -363,6 +407,8 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
+        onForceSleep = true;
+        TriggerSyncSleepCallback(false);
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");

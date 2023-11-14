@@ -246,6 +246,20 @@ bool PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback
     return ret;
 }
 
+bool PowerMgrClient::RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
+{
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->RegisterSyncSleepCallback(callback, priority);
+    return ret;
+}
+
+bool PowerMgrClient::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback)
+{
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    bool ret = proxy_->UnRegisterSyncSleepCallback(callback);
+    return ret;
+}
+
 bool PowerMgrClient::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
