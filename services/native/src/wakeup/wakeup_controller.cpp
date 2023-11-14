@@ -170,6 +170,7 @@ void WakeupController::Wakeup()
         return;
     }
     suspendController->StopSleep();
+    suspendController->TriggerSyncSleepCallback(true);
 }
 
 void WakeupController::ControlListener(WakeupDeviceType reason)
