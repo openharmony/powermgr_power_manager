@@ -30,6 +30,8 @@ class PowerMgrClient final : public DelayedRefSingleton<PowerMgrClient> {
 
 public:
     DISALLOW_COPY_AND_MOVE(PowerMgrClient);
+    static const uint32_t CONNECT_RETRY_COUNT = 3;
+    static const uint32_t CONNECT_RETRY_MS = 300000;
     /**
      * Reboot the device.
      *
@@ -140,6 +142,7 @@ public:
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    void RecoverRunningLocks();
     std::string Dump(const std::vector<std::string>& args);
     PowerErrors GetError();
 
@@ -162,6 +165,8 @@ private:
     sptr<IPowerMgr> proxy_ {nullptr};
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
     std::mutex mutex_;
+    static std::vector<std::weak_ptr<RunningLock>> runningLocks_;
+    static std::mutex runningLocksMutex_;
     PowerErrors error_ = PowerErrors::ERR_OK;
 };
 } // namespace PowerMgr
