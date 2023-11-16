@@ -33,6 +33,7 @@ public:
     DISALLOW_COPY_AND_MOVE(RunningLock);
 
     PowerErrors Init();
+    PowerErrors Recover(const wptr<IPowerMgr>& proxy);
     bool IsUsed();
 
     /**

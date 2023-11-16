@@ -328,23 +328,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
 }
 
 /**
- * @tc.name: RunningLockNative008
- * @tc.desc: test RemoveAndPostUnlockTask in runningLockMgr
- * @tc.type: FUNC
- * @tc.require: issueI7MNRN
- */
-HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level0)
-{
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
-    EXPECT_TRUE(runningLockMgr->Init());
-    sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
-    runningLockMgr->RemoveAndPostUnlockTask(remoteObject, 1);
-    EXPECT_TRUE(runningLockMgr != nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative008 end");
-}
-
-/**
  * @tc.name: RunningLockNative009
  * @tc.desc: test Lock
  * @tc.type: FUNC

@@ -35,8 +35,6 @@ namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
-FFRTQueue g_queue("power_running_lock_mgr");
-FFRTHandle g_runningLockTimeoutHandle;
 }
 
 RunningLockMgr::~RunningLockMgr() {}
@@ -232,16 +230,6 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     return result;
 }
 
-void RunningLockMgr::RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
-{
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "timeOutMS=%{public}d", timeOutMS);
-    FFRTUtils::CancelTask(g_runningLockTimeoutHandle, g_queue);
-    if (timeOutMS > 0) {
-        FFRTTask task = std::bind(&RunningLockMgr::UnLock, this, remoteObj);
-        g_runningLockTimeoutHandle = FFRTUtils::SubmitDelayTask(task, timeOutMS, g_queue);
-    }
-}
-
 bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
 {
     return type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
@@ -304,6 +292,17 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     RunningLockParam lockInnerParam = lockInner->GetParam();
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
+
+    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
+        || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
+        UpdateUnSceneLockLists(lockInnerParam, true);
+    }
+
+    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
+        lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+        lockInnerParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+    }
+
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Lock(lockInnerParam);
         return;
@@ -321,17 +320,9 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
 
-    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
-        || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
-        UpdateUnSceneLockLists(lockInnerParam, true);
-    }
-
     counter->Increase(remoteObj, lockInner);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
-    if (timeOutMS > 0) {
-        RemoveAndPostUnlockTask(remoteObj, timeOutMS);
-    }
     FinishTrace(HITRACE_TAG_POWER);
 }
 
@@ -350,6 +341,16 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     auto lockInnerParam = lockInner->GetParam();
     POWER_HILOGI(
         FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
+
+    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
+        || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
+        UpdateUnSceneLockLists(lockInnerParam, false);
+    }
+
+    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
+        lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
+        lockInnerParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+    }
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Unlock(lockInnerParam);
         return;
@@ -366,14 +367,8 @@ void RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
             lockInnerParam.type);
         return;
     }
-    RemoveAndPostUnlockTask(remoteObj);
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
-
-    if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
-        || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
-        UpdateUnSceneLockLists(lockInnerParam, false);
-    }
 
     counter->Decrease(remoteObj, lockInner);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
@@ -555,7 +550,6 @@ void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
         return;
     }
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
-    RemoveAndPostUnlockTask(remoteObj);
     counterIter->second->Decrease(remoteObj, lockInner);
 }
 
