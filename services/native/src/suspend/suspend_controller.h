@@ -16,6 +16,7 @@
 #ifndef POWERMGR_SUSPEND_CONTROLLER_H
 #define POWERMGR_SUSPEND_CONTROLLER_H
 
+#include <cinttypes>
 #include <functional>
 #include <memory>
 #include <vector>
