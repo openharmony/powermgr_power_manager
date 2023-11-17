@@ -34,6 +34,7 @@ group("fuzztest") {
     "powerstatecallback_fuzzer:PowerStateCallbackFuzzTest",
     "proxyrunninglock_fuzzer:ProxyRunningLocksFuzzTest",
     "proxyrunninglocks_fuzzer:ProxyRunningLockFuzzTest",
+    "queryrunninglocklists_fuzzer:QueryRunningLockListsFuzzTest",
     "rebootdevice_fuzzer:RebootDeviceFuzzTest",
     "refreshactivity_fuzzer:RefreshActivityFuzzTest",
     "releaserunninglock_fuzzer:ReleaseRunningLockFuzzTest",
