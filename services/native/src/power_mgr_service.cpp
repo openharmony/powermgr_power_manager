@@ -580,7 +580,7 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
         return false;
     }
     POWER_HILOGI(FEATURE_SUSPEND, "Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
-    suspendController->TriggerSyncSleepCallback(false);
+    suspendController_->TriggerSyncSleepCallback(false);
     return powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
 }
 

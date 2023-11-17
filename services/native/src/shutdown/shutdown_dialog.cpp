@@ -142,7 +142,7 @@ void ShutdownDialog::ResetLongPressFlag()
 void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
-    POWER_HILOGD(FEATURE_SHUTDOWN, "OnAbilityConnectDone");
+    POWER_HILOGI(FEATURE_SHUTDOWN, "OnAbilityConnectDone");
     std::lock_guard lock(mutex_);
     if (remoteObject == nullptr) {
         POWER_HILOGW(FEATURE_SHUTDOWN, "remoteObject is nullptr");
@@ -163,7 +163,7 @@ void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
         data.WriteString16(u"parameters");
         // sysDialogZOrder = 2 displayed on the lock screen
         data.WriteString16(u"{\"ability.want.params.uiExtensionType\":\"sysDialog/power\",\"sysDialogZOrder\":2}");
-        POWER_HILOGD(FEATURE_SHUTDOWN, "show power dialog is begin");
+        POWER_HILOGI(FEATURE_SHUTDOWN, "show power dialog is begin");
         const uint32_t cmdCode = 1;
         int32_t ret = remoteObject->SendRequest(cmdCode, data, reply, option);
         if (ret != ERR_OK) {
