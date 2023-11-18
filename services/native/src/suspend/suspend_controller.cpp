@@ -409,7 +409,11 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
         onForceSleep = true;
         TriggerSyncSleepCallback(false);
-        SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+
+        FFRTTask task = [this] {
+            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+        };
+        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, g_queue);
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
