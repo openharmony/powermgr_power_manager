@@ -54,6 +54,25 @@ PowerErrors RunningLock::Init()
     return Create();
 }
 
+PowerErrors RunningLock::Create()
+{
+    sptr<IPowerMgr> proxy = proxy_.promote();
+    if (proxy == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side CreateRunningLock call");
+    return proxy->CreateRunningLock(token_, runningLockInfo_);
+}
+
+PowerErrors RunningLock::Recover(const wptr<IPowerMgr>& proxy)
+{
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "recover running lock name %{public}s type %{public}d",
+        runningLockInfo_.name.c_str(), runningLockInfo_.type);
+    proxy_ = proxy;
+    return Create();
+}
+
 ErrCode RunningLock::Lock(int32_t timeOutMs)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock timeOutMs: %{public}u", timeOutMs);
@@ -65,7 +84,6 @@ ErrCode RunningLock::Lock(int32_t timeOutMs)
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call");
     proxy->Lock(token_, timeOutMs);
-
     return ERR_OK;
 }
 
@@ -97,17 +115,6 @@ bool RunningLock::CheckUsedNoLock()
 bool RunningLock::IsUsed()
 {
     return CheckUsedNoLock();
-}
-
-PowerErrors RunningLock::Create()
-{
-    sptr<IPowerMgr> proxy = proxy_.promote();
-    if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
-        return PowerErrors::ERR_CONNECTION_FAIL;
-    }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side CreateRunningLock call");
-    return proxy->CreateRunningLock(token_, runningLockInfo_);
 }
 
 void RunningLock::Release()
