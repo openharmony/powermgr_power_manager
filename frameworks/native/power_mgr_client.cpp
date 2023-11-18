@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <mutex>
 #include <memory>
+#include <unistd.h>
 #include <vector>
 #include <datetime_ex.h>
 #include <if_system_ability_manager.h>
@@ -36,6 +37,9 @@
 
 namespace OHOS {
 namespace PowerMgr {
+std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
+std::mutex PowerMgrClient::runningLocksMutex_;
+
 PowerMgrClient::PowerMgrClient() {}
 PowerMgrClient::~PowerMgrClient()
 {
@@ -85,6 +89,40 @@ void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObje
 {
     POWER_HILOGW(COMP_FWK, "Recv death notice");
     client_.ResetProxy(remote);
+
+    // wait for powermgr service restart
+    ErrCode ret = E_GET_POWER_SERVICE_FAILED;
+    uint32_t retryCount = 0;
+    while (++retryCount <= CONNECT_RETRY_COUNT) {
+        usleep(CONNECT_RETRY_MS);
+        ret = client_.Connect();
+        if (ret == ERR_OK) {
+            POWER_HILOGI(COMP_FWK, "retry connect success, count %{public}d", retryCount);
+            break;
+        }
+        POWER_HILOGI(COMP_FWK, "retry connect failed, count %{public}d", retryCount);
+    }
+    if (ret != ERR_OK) {
+        return;
+    }
+
+    // recover running lock info
+    client_.RecoverRunningLocks();
+}
+
+void PowerMgrClient::RecoverRunningLocks()
+{
+    POWER_HILOGI(COMP_FWK, "start to recover running locks");
+    std::lock_guard<std::mutex> lock(runningLocksMutex_);
+    for (auto runningLock : runningLocks_) {
+        if (runningLock.expired()) {
+            continue;
+        }
+        std::shared_ptr<RunningLock> lock = runningLock.lock();
+        if (lock != nullptr) {
+            lock->Recover(proxy_);
+        }
+    }
 }
 
 void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
@@ -210,6 +248,9 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
         error_ = error;
         return nullptr;
     }
+
+    std::lock_guard<std::mutex> lock(runningLocksMutex_);
+    runningLocks_.push_back(std::weak_ptr<RunningLock>(runningLock));
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type = %{public}d", name.c_str(), type);
     return runningLock;
 }

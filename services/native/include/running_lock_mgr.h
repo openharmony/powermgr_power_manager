@@ -167,7 +167,6 @@ private:
     bool InitLocks();
     void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
-    void RemoveAndPostUnlockTask(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
     bool IsSceneRunningLockType(RunningLockType type);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
