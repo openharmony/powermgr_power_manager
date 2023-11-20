@@ -17,14 +17,12 @@
 
 #include "power_common.h"
 #include "power_log.h"
-#include "ffrt_utils.h"
 #include "suspend/running_lock_hub.h"
 
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 const std::string HDI_SERVICE_NAME = "power_interface_service";
-FFRTQueue g_queue("power_system_suspend_controller");
 constexpr uint32_t RETRY_TIME = 1000;
 } // namespace
 using namespace OHOS::HDI::Power::V1_1;
@@ -42,7 +40,7 @@ void SystemSuspendController::RegisterHdiStatusListener()
             RegisterHdiStatusListener();
         };
         POWER_HILOGW(COMP_SVC, "hdi service manager is nullptr");
-        FFRTUtils::SubmitDelayTask(retryTask, RETRY_TIME, g_queue);
+        FFRTUtils::SubmitDelayTask(retryTask, RETRY_TIME, queue_);
         return;
     }
 
@@ -68,7 +66,7 @@ void SystemSuspendController::RegisterHdiStatusListener()
             RegisterHdiStatusListener();
         };
         POWER_HILOGW(COMP_SVC, "Register hdi failed");
-        FFRTUtils::SubmitDelayTask(retryTask, RETRY_TIME, g_queue);
+        FFRTUtils::SubmitDelayTask(retryTask, RETRY_TIME, queue_);
     }
 }
 

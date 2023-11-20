@@ -46,6 +46,14 @@ FFRTHandle FFRTUtils::SubmitDelayTask(FFRTTask& task, uint32_t delayMs, FFRTQueu
     return queue.submit_h(task, ffrt::task_attr().delay(us.count()));
 }
 
+FFRTHandle FFRTUtils::SubmitDelayTask(FFRTTask& task, uint32_t delayMs, std::shared_ptr<FFRTQueue> queue)
+{
+    using namespace std::chrono;
+    milliseconds ms(delayMs);
+    microseconds us = duration_cast<microseconds>(ms);
+    return queue->submit_h(task, ffrt::task_attr().delay(us.count()));
+}
+
 bool FFRTUtils::SubmitTimeoutTask(const FFRTTask& task, uint32_t timeoutMs)
 {
     ffrt::future<void> future = ffrt::async(task);
@@ -56,6 +64,11 @@ bool FFRTUtils::SubmitTimeoutTask(const FFRTTask& task, uint32_t timeoutMs)
 void FFRTUtils::CancelTask(FFRTHandle& handle, FFRTQueue& queue)
 {
     queue.cancel(handle);
+}
+
+void FFRTUtils::CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue)
+{
+    queue->cancel(handle);
 }
 
 FFRTUtils::Mutex::Mutex()

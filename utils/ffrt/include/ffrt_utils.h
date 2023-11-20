@@ -73,6 +73,19 @@ public:
     static FFRTHandle SubmitDelayTask(FFRTTask& task, uint32_t delayMs, FFRTQueue& queue);
 
     /**
+     * Submit the FFRT delayed task without blocking the current thread.
+     * <p>
+     * When the delay time is reached, the task starts to be executed.
+     *
+     * @param task FFRT task.
+     * @param delayMs Delay time, in milliseconds.
+     * @param queue Shared_ptr of FFRT task execution queue.
+     *
+     * @return FFRT task handle.
+     */
+    static FFRTHandle SubmitDelayTask(FFRTTask& task, uint32_t delayMs, std::shared_ptr<FFRTQueue> queue);
+
+    /**
      * Submit an FFRT timeout task without blocking the current thread.
      * <p>
      * When the timeout period is reached, the task will be canceled.
@@ -92,6 +105,16 @@ public:
      * @param handle FFRT task.
      */
     static void CancelTask(FFRTHandle& handle, FFRTQueue& queue);
+
+    /**
+     * Cancel the FFRT task.
+     * <p>
+     * You cannot cancel a completed task.
+     *
+     * @param handle FFRT task.
+     * @param queue Shared_ptr of FFRT task cancel queue.
+     */
+    static void CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
 
     /**
      * The mutex for FFRT tasks.
