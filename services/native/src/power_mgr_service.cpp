@@ -62,8 +62,6 @@ const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
-FFRTQueue g_queue("power_mgr_service");
-FFRTHandle g_screenTimeoutHandle;
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
@@ -380,6 +378,14 @@ void PowerMgrService::OnStop()
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+}
+
+void PowerMgrService::Reset()
+{
+    POWER_HILOGW(COMP_SVC, "start destruct ffrt_queue");
+    powerStateMachine_->Reset();
+    wakeupController_->Reset();
+    suspendController_->Reset();
 }
 
 void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)

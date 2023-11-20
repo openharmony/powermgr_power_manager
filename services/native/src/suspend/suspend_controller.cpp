@@ -21,7 +21,6 @@
 #include <securec.h>
 #include <ipc_skeleton.h>
 #include "power_log.h"
-#include "ffrt_utils.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "setting_helper.h"
@@ -33,7 +32,6 @@ namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
-FFRTQueue g_queue("power_suspend_controller");
 FFRTHandle g_sleepTimeoutHandle;
 FFRTHandle g_userActivityOffTimeoutHandle;
 FFRTUtils::Mutex g_monitorMutex;
@@ -119,6 +117,11 @@ private:
 void SuspendController::Init()
 {
     std::lock_guard lock(mutex_);
+    queue_ = std::make_shared<FFRTQueue>("power_suspend_controller");
+    if (queue_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "suspendQueue_ is null");
+        return;
+    }
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -214,7 +217,7 @@ void SuspendController::Cancel()
 void SuspendController::StopSleep()
 {
     if (sleepAction_ != static_cast<uint32_t>(SuspendAction::ACTION_NONE)) {
-        FFRTUtils::CancelTask(g_sleepTimeoutHandle, g_queue);
+        FFRTUtils::CancelTask(g_sleepTimeoutHandle, queue_);
         sleepTime_ = -1;
         sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
     }
@@ -233,12 +236,12 @@ void SuspendController::HandleEvent(int64_t delayTime)
         auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
     };
-    g_userActivityOffTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delayTime, g_queue);
+    g_userActivityOffTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delayTime, queue_);
 }
 
 void SuspendController::CancelEvent()
 {
-    FFRTUtils::CancelTask(g_userActivityOffTimeoutHandle, g_queue);
+    FFRTUtils::CancelTask(g_userActivityOffTimeoutHandle, queue_);
 }
 
 void SuspendController::RecordPowerKeyDown()
@@ -349,7 +352,7 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
         FFRTTask task = [this] {
             HandleAction(GetLastReason(), GetLastAction());
         };
-        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, g_queue);
+        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, queue_);
     }
 }
 
@@ -413,7 +416,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         FFRTTask task = [this] {
             SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
         };
-        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, g_queue);
+        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, queue_);
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
@@ -439,6 +442,11 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
     shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
+}
+
+void SuspendController::Reset()
+{
+    queue_.reset();
 }
 
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)

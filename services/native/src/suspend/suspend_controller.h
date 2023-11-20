@@ -30,6 +30,7 @@
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
 #include "sleep_callback_holder.h"
+#include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -72,6 +73,7 @@ public:
         return sleepAction_;
     }
     void StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay);
+    void Reset();
 
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
@@ -94,6 +96,7 @@ private:
     uint32_t sleepType_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
     std::mutex mutex_;
+    std::shared_ptr<FFRTQueue> queue_;
 };
 
 class SuspendMonitor {

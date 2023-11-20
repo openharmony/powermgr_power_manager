@@ -23,7 +23,6 @@
 
 #include "app_mgr_client.h"
 #include "bundle_mgr_client.h"
-#include "ffrt_utils.h"
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
@@ -39,7 +38,6 @@ namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
-FFRTQueue g_queue("power_wakeup_controller");
 FFRTHandle g_screenTimeoutHandle;
 }
 
@@ -74,13 +72,18 @@ WakeupController::~WakeupController()
         SettingHelper::UnregisterSettingWakeupSourcesObserver(g_wakeupSourcesKeyObserver);
     }
     if (g_screenTimeoutHandle) {
-        FFRTUtils::CancelTask(g_screenTimeoutHandle, g_queue);
+        FFRTUtils::CancelTask(g_screenTimeoutHandle, queue_);
     }
 }
 
 void WakeupController::Init()
 {
     std::lock_guard lock(monitorMutex_);
+    queue_ = std::make_shared<FFRTQueue>("power_wakeup_controller");
+    if (queue_ == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "wakeupQueue_ is null");
+        return;
+    }
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -101,7 +104,7 @@ void WakeupController::Init()
 
     std::function<void(uint32_t)> callback = [&](uint32_t event) {
         POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone: %{public}d", event);
-        FFRTUtils::CancelTask(g_screenTimeoutHandle, g_queue);
+        FFRTUtils::CancelTask(g_screenTimeoutHandle, queue_);
     };
     auto stateAction = stateMachine_->GetStateAction();
     if (stateAction != nullptr) {
@@ -216,7 +219,7 @@ void WakeupController::StartWakeupTimer()
     FFRTTask task = [this] {
         HandleScreenOnTimeout();
     };
-    g_screenTimeoutHandle = FFRTUtils::SubmitDelayTask(task, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS, g_queue);
+    g_screenTimeoutHandle = FFRTUtils::SubmitDelayTask(task, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS, queue_);
 }
 
 bool WakeupController::IsHandleSysfreeze()
@@ -258,6 +261,11 @@ void WakeupController::HandleScreenOnTimeout()
             "", "MSG", message.c_str());
         POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
     }
+}
+
+void WakeupController::Reset()
+{
+    queue_.reset();
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
