@@ -68,7 +68,10 @@ PowerStateMachine::~PowerStateMachine() {}
 bool PowerStateMachine::Init()
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Start init");
-
+    queue_ = std::make_shared<FFRTQueue>("power_state_machine");
+    if (queue_ == nullptr) {
+        return false;
+    }
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
     InitStateMap();
 
@@ -1113,6 +1116,11 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
         default:
             break;
     }
+}
+
+void PowerStateMachine::Reset()
+{
+    queue_.reset();
 }
 
 void PowerStateMachine::StateController::RecordFailure(
