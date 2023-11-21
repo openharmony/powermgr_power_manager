@@ -31,6 +31,7 @@
 #endif
 #include "wakeup_sources.h"
 #include "wakeup_source_parser.h"
+#include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -58,6 +59,7 @@ public:
         return wakeupReason_;
     }
     bool CheckEventReciveTime(WakeupDeviceType wakeupType);
+    void Reset();
 
 private:
     void ControlListener(WakeupDeviceType reason);
@@ -72,6 +74,7 @@ private:
     std::mutex monitorMutex_;
     std::mutex eventHandleMutex_;
     int32_t monitorId_ {-1};
+    std::shared_ptr<FFRTQueue> queue_;
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART

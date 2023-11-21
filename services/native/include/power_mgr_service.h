@@ -103,6 +103,7 @@ public:
     void SuspendControllerInit();
     void WakeupControllerInit();
     void VibratorInit();
+    void Reset();
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {

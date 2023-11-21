@@ -20,6 +20,7 @@
 
 #include "ability_connect_callback_interface.h"
 #include "ability_connect_callback_stub.h"
+#include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -47,6 +48,7 @@ private:
 
     int32_t longPressId_ {0};
     sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_ {nullptr};
+    FFRTQueue queue_ {"shutdown_dialog"};
 };
 } // namespace PowerMgr
 } // namespace OHOS

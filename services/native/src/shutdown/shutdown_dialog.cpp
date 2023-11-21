@@ -27,7 +27,6 @@
 #endif
 #include <message_parcel.h>
 
-#include "ffrt_utils.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_vibrator.h"
@@ -46,7 +45,6 @@ static constexpr uint32_t RETRY_TIME = 1000;
 std::atomic_bool g_isDialogShow = false;
 std::atomic_bool g_longPressShow = false;
 int32_t g_retryCount = 1;
-FFRTQueue g_queue("shutdown_dialog");
 sptr<IRemoteObject> g_remoteObject = nullptr;
 } // namespace
 ShutdownDialog::ShutdownDialog() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
@@ -80,7 +78,7 @@ void ShutdownDialog::KeyMonitorInit()
             FFRTTask task = [this] {
                 KeyMonitorInit();
             };
-            FFRTUtils::SubmitDelayTask(task, RETRY_TIME, g_queue);
+            FFRTUtils::SubmitDelayTask(task, RETRY_TIME, queue_);
             g_retryCount++;
         }
         return;

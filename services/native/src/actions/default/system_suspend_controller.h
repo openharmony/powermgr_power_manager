@@ -27,6 +27,7 @@
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
 #include "v1_1/ipower_interface.h"
+#include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -62,6 +63,7 @@ private:
     sptr<OHOS::HDI::Power::V1_1::IPowerInterface> powerInterface_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
+    FFRTQueue queue_ {"power_system_suspend_controller"};
 };
 } // namespace PowerMgr
 } // namespace OHOS

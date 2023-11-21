@@ -88,6 +88,8 @@ public:
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
+    void Reset();
+
     PowerState GetState()
     {
         return currentState_;
@@ -214,7 +216,7 @@ private:
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
     int64_t beforeOverrideTime_ {-1};
-    FFRTQueue queue_ {"power_state_machine"};
+    std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
 };
 } // namespace PowerMgr
