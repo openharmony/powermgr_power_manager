@@ -251,6 +251,8 @@ void SuspendController::RecordPowerKeyDown()
     POWER_HILOGI(FEATURE_SUSPEND, "Suspend record key down action isScreenOn=%{public}d", isScreenOn);
     if (!isScreenOn) {
         powerkeyDownWhenScreenOff_ = true;
+    } else {
+        powerkeyDownWhenScreenOff_ = false;
     }
 }
 
