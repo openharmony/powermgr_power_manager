@@ -286,10 +286,17 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
             StartSleepTimer(reason, action, delay);
             break;
         case PowerState::SLEEP:
-            if (action == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND) &&
-                sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
+            if (action != static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+                break;
+            }
+            if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
                 SystemSuspendController::GetInstance().Wakeup();
                 StartSleepTimer(reason, action, 0);
+            } else if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+                SystemSuspendController::GetInstance().Wakeup();
+                SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+            } else {
+                POWER_HILOGD(FEATURE_SUSPEND, "Nothing to do for no suspend");
             }
             break;
         default:
