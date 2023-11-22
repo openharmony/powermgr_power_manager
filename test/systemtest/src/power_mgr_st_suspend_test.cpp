@@ -70,6 +70,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
     pms->SuspendControllerInit();
     auto suspendController = pms->GetSuspendController();
     suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
+    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: end";
@@ -135,8 +136,8 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock03, TestSize.Level2)
     pms->SuspendControllerInit();
     auto suspendController = pms->GetSuspendController();
     suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
+    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     pms->UnLock(token);
 
