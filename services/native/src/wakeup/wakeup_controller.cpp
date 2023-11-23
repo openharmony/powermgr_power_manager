@@ -173,9 +173,6 @@ void WakeupController::Wakeup()
         return;
     }
     suspendController->StopSleep();
-    if (stateMachine_->GetState() == PowerState::SLEEP) {
-        suspendController->TriggerSyncSleepCallback(true);
-    }
 }
 
 void WakeupController::ControlListener(WakeupDeviceType reason)
@@ -204,6 +201,17 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         }
         SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
+
+        if (stateMachine_->GetState() == PowerState::SLEEP) {
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr) {
+                POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
+                suspendController->TriggerSyncSleepCallback(true);
+            } else {
+                POWER_HILOGI(FEATURE_WAKEUP, "suspendController is nullptr");
+            }
+        }
+
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
         if (ret != true) {

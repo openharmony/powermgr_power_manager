@@ -60,7 +60,7 @@ void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, Sl
     RETURN_IF(callback == nullptr)
     SleepCallbackHolder::GetInstance().AddCallback(callback, priority);
     POWER_HILOGI(FEATURE_SUSPEND,
-        "sycn sleep callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
+        "sync sleep callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
@@ -69,7 +69,7 @@ void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
     RETURN_IF(callback == nullptr)
     SleepCallbackHolder::GetInstance().RemoveCallback(callback);
     POWER_HILOGI(FEATURE_SUSPEND,
-        "sycn sleep callback removed, pid=%{public}d, uid=%{public}d",
+        "sync sleep callback removed, pid=%{public}d, uid=%{public}d",
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
@@ -89,7 +89,7 @@ void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCa
             int64_t start = GetTickCount();
             isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
-            POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sycn sleep callback success, cost=%{public}" PRId64 "", cost);
+            POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sync sleep callback success, cost=%{public}" PRId64 "", cost);
         }
     }
 }
