@@ -35,6 +35,7 @@ sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 FFRTHandle g_sleepTimeoutHandle;
 FFRTHandle g_userActivityOffTimeoutHandle;
 FFRTUtils::Mutex g_monitorMutex;
+const uint32_t SLEEP_DELAY_MS = 5000;
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -343,6 +344,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
 
 void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
+    delay = delay + SLEEP_DELAY_MS;
     const int64_t& tmpRef = delay;
     int64_t timeout = GetTickCount() + tmpRef;
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
@@ -355,14 +357,10 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     sleepAction_ = action;
     sleepDuration_ = delay;
     sleepType_ = action;
-    if (delay == 0) {
-        HandleAction(reason, action);
-    } else {
-        FFRTTask task = [this] {
-            HandleAction(GetLastReason(), GetLastAction());
-        };
-        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, queue_);
-    }
+    FFRTTask task = [this] {
+        HandleAction(GetLastReason(), GetLastAction());
+    };
+    g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, queue_);
 }
 
 void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
