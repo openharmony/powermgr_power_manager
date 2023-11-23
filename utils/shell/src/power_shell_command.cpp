@@ -238,7 +238,7 @@ ErrCode PowerShellCommand::RunAsQueryLockCommand()
         return ERR_OK;
     }
     resultReceiver_.append("The locking application information is as follows:\n");
-    int mapSize = runningLockLists.size();
+    uint32_t mapSize = static_cast<uint32_t>(runningLockLists.size());
     resultReceiver_.append("The nums of holding lock by bundle app is ");
     resultReceiver_.append(std::to_string(mapSize));
     resultReceiver_.append(".\n");
