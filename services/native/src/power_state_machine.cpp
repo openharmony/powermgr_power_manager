@@ -333,9 +333,13 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
     SetState(
         PowerState::INACTIVE, GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
-    if (stateAction_ != nullptr) {
-        currentState_ = PowerState::SLEEP;
-        stateAction_->GoToSleep(onSuspend, onWakeup, true);
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr) {
+        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceInner StartSleepTimer start.");
+        suspendController->StartSleepTimer(
+            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+            static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND), 0);
     }
 
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend finish");
