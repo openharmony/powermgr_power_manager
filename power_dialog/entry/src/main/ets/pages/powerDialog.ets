@@ -76,10 +76,6 @@ struct PowerCustomDialog {
           .margin({left: Constants.BUTTON_MARGIN})
       }
     }
-    .backgroundColor($r('app.color.default_background_color'))
-    .borderRadius(Constants.DIALOG_BORDER_RADIUS)
-    .width(Constants.DIALOG_WIDTH)
-    .height(Constants.DIALOG_HEIGHT)
   }
 }
 
