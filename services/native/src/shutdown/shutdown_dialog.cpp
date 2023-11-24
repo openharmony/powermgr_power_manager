@@ -155,7 +155,7 @@ void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
         MessageOption option;
         data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
         data.WriteString16(u"bundleName");
-        data.WriteString16(u"com.ohos.powerdialog");
+        data.WriteString16(u"com.power.powerdialog");
         data.WriteString16(u"abilityName");
         data.WriteString16(u"PowerUiExtensionAbility");
         data.WriteString16(u"parameters");
