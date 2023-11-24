@@ -90,6 +90,7 @@ PowerFuzzerTest::~PowerFuzzerTest()
 {
     if (service_ != nullptr) {
         service_->OnStop();
+        service_->Reset();
     }
     service_ = nullptr;
 }
