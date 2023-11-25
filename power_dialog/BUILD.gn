@@ -34,7 +34,7 @@ ohos_hap("power_dialog_hap") {
 
   subsystem_name = "applications"
   part_name = "prebuilt_hap"
-  module_install_dir = "app/com.power.powerdialog"
+  module_install_dir = "app/com.ohos.powerdialog"
 
   if (defined(sign_hap_py_path)) {
     certificate_profile = power_dialog_path
