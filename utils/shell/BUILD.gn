@@ -1,0 +1,55 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../powermgr.gni")
+
+ohos_executable("power-shell") {
+  include_dirs = [
+    "include",
+    "${powermgr_inner_api}/native/include",
+    "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/tools/aa/include",
+  ]
+
+  sources = [
+    "src/main.cpp",
+    "src/power_shell_command.cpp",
+  ]
+
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
+
+  configs = [
+    "${ability_runtime_path}/tools/aa:ability_command_config",
+    "${ability_runtime_services_path}/common:common_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  external_deps = [
+    "ability_runtime:tools_aa_source_set",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+
+  if (has_display_manager_part) {
+    external_deps += [ "display_manager:displaymgr" ]
+  }
+
+  if (build_variant == "user") {
+    defines = [ "POWER_SHELL_USER" ]
+  }
+
+  install_enable = true
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
+}

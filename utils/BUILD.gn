@@ -30,42 +30,17 @@ config("coverage_flags") {
   }
 }
 
-ohos_executable("power-shell") {
-  include_dirs = [
-    "${powermgr_inner_api}/native/include",
-    "${powermgr_utils_path}/shell/include",
-    "${ability_runtime_services_path}/common/include",
-    "${ability_runtime_path}/tools/aa/include",
-  ]
+ohos_source_set("power_utils") {
+  sources = [ "native/src/power_utils.cpp" ]
 
-  sources = [
-    "shell/src/main.cpp",
-    "shell/src/power_shell_command.cpp",
-  ]
+  include_dirs = [ "${powermgr_inner_api}/native/include" ]
 
-  deps = [ "${powermgr_inner_api}:powermgr_client" ]
+  configs = [ "${powermgr_utils_path}:coverage_flags" ]
 
-  configs = [
-    "${ability_runtime_path}/tools/aa:ability_command_config",
-    "${ability_runtime_services_path}/common:common_config",
-    "${powermgr_utils_path}:coverage_flags",
-  ]
+  public_configs = [ ":utils_config" ]
 
-  external_deps = [
-    "ability_runtime:tools_aa_source_set",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-  ]
+  external_deps = [ "c_utils:utils" ]
 
-  if (has_display_manager_part) {
-    external_deps += [ "display_manager:displaymgr" ]
-  }
-
-  if (build_variant == "user") {
-    defines = [ "POWER_SHELL_USER" ]
-  }
-
-  install_enable = true
+  subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }

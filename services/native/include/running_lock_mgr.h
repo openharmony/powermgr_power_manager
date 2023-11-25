@@ -74,6 +74,7 @@ private:
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
     void InitLocksTypeProximity();
+    void InitLocksTypeCoordination();
     void ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid);
 
     class SystemLock {
@@ -168,6 +169,7 @@ private:
     void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     bool IsSceneRunningLockType(RunningLockType type);
+    bool IsValidType(RunningLockType type);
     const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
     std::mutex mutex_;
