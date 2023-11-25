@@ -30,6 +30,13 @@ config("powermgr_actions_common_config") {
 }
 
 ohos_source_set("${powermgr_actions_default_target}") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "device_power_action.cpp",
     "running_lock_action.cpp",
