@@ -133,6 +133,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->GetShutdownDialog().KeyMonitorInit();
         power->HallSensorSubscriberInit();
         power->SwitchSubscriberInit();
+        power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
         power->VibratorInit();
@@ -314,6 +315,30 @@ void PowerMgrService::SwitchSubscriberCancel()
 #endif
 }
 
+void PowerMgrService::InputMonitorInit()
+{
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    POWER_HILOGI(FEATURE_INPUT, "PowerMgr service input monitor init");
+    std::shared_ptr<PowerMgrInputMonitor> inputMonitor = std::make_shared<PowerMgrInputMonitor>();
+    if (inputMonitorId_ < 0) {
+        inputMonitorId_ =
+            InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(inputMonitor));
+    }
+#endif
+}
+
+void PowerMgrService::InputMonitorCancel()
+{
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    POWER_HILOGI(FEATURE_INPUT, "PowerMgr service input monitor cancel");
+    InputManager* inputManager = InputManager::GetInstance();
+    if (inputMonitorId_ >= 0) {
+        inputManager->RemoveMonitor(inputMonitorId_);
+        inputMonitorId_ = -1;
+    }
+#endif
+}
+
 void PowerMgrService::HandleKeyEvent(int32_t keyCode)
 {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -372,6 +397,7 @@ void PowerMgrService::OnStop()
     KeyMonitorCancel();
     HallSensorSubscriberCancel();
     SwitchSubscriberCancel();
+    InputMonitorCancel();
     ready_ = false;
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
@@ -656,6 +682,7 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
     return type == RunningLockType::RUNNINGLOCK_SCREEN ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
         type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+        type == RunningLockType::RUNNINGLOCK_COORDINATION ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
@@ -1009,5 +1036,40 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 #endif
 }
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE)) {
+        stateMachine->OverrideScreenOffTimeCoordinated();
+        POWER_HILOGD(FEATURE_INPUT, "Key event has simulate flag in coordinated state, override screen off time");
+    }
+}
+
+void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE)) {
+        stateMachine->OverrideScreenOffTimeCoordinated();
+        POWER_HILOGD(FEATURE_INPUT, "Pointer event has simulate flag in coordinated state, override screen off time");
+    }
+}
+
+void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const {};
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
