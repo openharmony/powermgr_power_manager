@@ -62,6 +62,10 @@ ohos_executable("power-shell") {
     external_deps += [ "display_manager:displaymgr" ]
   }
 
+  if (build_variant == "user") {
+    defines = [ "POWER_SHELL_USER" ]
+  }
+
   install_enable = true
   part_name = "${powermgr_part_name}"
 }
