@@ -63,6 +63,7 @@ enum PowerManagerLogLabel {
     COMP_UTILS = 5,
     // Feature labels, use to mark major features
     FEATURE_WAKEUP,
+    FEATURE_WAKEUP_ACTION,
     FEATURE_SUSPEND,
     FEATURE_RUNNING_LOCK,
     FEATURE_ACTIVITY,

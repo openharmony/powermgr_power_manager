@@ -32,6 +32,7 @@
 #include "sp_singleton.h"
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
+#include "wakeup_action_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -104,6 +105,7 @@ public:
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
+    void WakeupActionControllerInit();
     void VibratorInit();
     void Reset();
 
@@ -129,6 +131,10 @@ public:
     std::shared_ptr<WakeupController> GetWakeupController() const
     {
         return wakeupController_;
+    }
+    std::shared_ptr<WakeupActionController> GetWakeupActionController() const
+    {
+        return wakeupActionController_;
     }
     ShutdownDialog& GetShutdownDialog()
     {
@@ -172,6 +178,7 @@ public:
 
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
+    std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
 
 private:
     class WakeupRunningLock {
