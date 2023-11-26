@@ -16,7 +16,6 @@
 #ifndef POWERMGR_WAKEUP_ACTION_CONTROLLER_H
 #define POWERMGR_WAKEUP_ACTION_CONTROLLER_H
 
-#include <cinttypes>
 #include <functional>
 #include <memory>
 #include <map>

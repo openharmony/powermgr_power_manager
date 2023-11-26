@@ -37,13 +37,13 @@ void WakeupActionController::Init()
 {
     std::lock_guard lock(mutex_);
     std::shared_ptr<WakeupActionSources> sources = WakeupActionSourceParser::ParseSources();
-    sourceMap_ = sources->GetSourceList();
+    sourceMap_ = sources->GetSourceMap();
     if (sourceMap_.empty()) {
         POWER_HILOGE(FEATURE_WAKEUP_ACTION, "InputManager is null");
     }
 }
 
-void WakeupActionController::ExecuteByGetReason()
+bool WakeupActionController::ExecuteByGetReason()
 {
     std::string reason;
     SystemSuspendController::GetInstancd().GetWakeupReason(reason);
@@ -64,14 +64,14 @@ void WakeupActionController::ExecuteByGetReason()
 
 void WakeupActionController::HandleAction(const std::string& reason)
 {
-    switch (static_cast<WakeupActionAction>(sourceMap_[reason]->GetAction())) {
-        case WakeupActionAction::ACTION_HIBERNATE:
-            HandleHibernate(WakeupActionSources::mapSuspendActionDeviceType(reason));
+    switch (static_cast<WakeupAction>(sourceMap_[reason]->GetAction())) {
+        case WakeupAction::ACTION_HIBERNATE:
+            HandleHibernate(WakeupActionSources::mapSuspendDeviceType(reason));
             break;
-        case WakeupActionAction::ACTION_SHUTDOWN:
+        case WakeupAction::ACTION_SHUTDOWN:
             HandleShutdown(sourceMap_[reason]->GetScene());
             break;
-        case WakeupActionAction::ACTION_NONE:
+        case WakeupAction::ACTION_NONE:
         default:
             break;
     }
@@ -84,7 +84,7 @@ void WakeupActionController::HandleHibernate(SuspendDeviceType reason)
         return;
     }
     bool ret = stateMachine_->SetState(
-        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendActionType(reason), true);
+        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_WAKEUP_ACTION, "State changed, call hibernate");
     } else {
@@ -92,10 +92,10 @@ void WakeupActionController::HandleHibernate(SuspendDeviceType reason)
     }
 }
 
-void WakeupActionController::HandleShutdown(const std::string& reason)
+void WakeupActionController::HandleShutdown(const std::string& scene)
 {
-    POWER_HILOGI(FEATURE_WAKEUP_ACTION, "shutdown by reason=%{public}s", reason.c_str());
-    shutdownController_->Shutdown(reason);
+    POWER_HILOGI(FEATURE_WAKEUP_ACTION, "shutdown by reason=%{public}s", scene.c_str());
+    shutdownController_->Shutdown(scene);
 }
 
 } // namespace PowerMgr
