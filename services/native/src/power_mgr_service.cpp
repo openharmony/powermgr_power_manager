@@ -136,6 +136,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+        power->WakeupActionControllerInit();
         power->VibratorInit();
         isBootCompleted_ = true;
     };
@@ -1013,6 +1014,14 @@ void PowerMgrService::WakeupControllerInit()
         wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_);
     }
     wakeupController_->Init();
+}
+
+void PowerMgrService::WakeupActionControllerInit()
+{
+    if (!wakeupActionController_) {
+        wakeupActionController_ = std::make_shared<WakeupActionController>(shutdownController_, powerStateMachine_);
+    }
+    wakeupActionController_->Init();
 }
 
 void PowerMgrService::VibratorInit()
