@@ -46,7 +46,7 @@ void WakeupActionController::Init()
 bool WakeupActionController::ExecuteByGetReason()
 {
     std::string reason;
-    SystemSuspendController::GetInstancd().GetWakeupReason(reason);
+    SystemSuspendController::GetInstance().GetWakeupReason(reason);
     reason.erase(reason.end() - 1);
     POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason %{public}s", reason.c_str());
     if (sourceMap_.find(reason) != sourceMap_.end()) {
