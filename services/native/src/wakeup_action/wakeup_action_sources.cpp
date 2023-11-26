@@ -19,9 +19,9 @@
 namespace OHOS {
 namespace PowerMgr {
 
-SuspendeviceType WakeupActionSources::mapSuspendActionDeviceType(const std::string& reason)
+SuspendDeviceType WakeupActionSources::mapSuspendDeviceType(const std::string& reason)
 {
-    if (key == WakeupActionSources::LOW_CAPACITY_KEY) {
+    if (reason == WakeupActionSources::LOW_CAPACITY_KEY) {
         return SuspendDeviceType::SUSPEND_DEVICE_LOW_CAPACITY;
     }
 
@@ -36,7 +36,7 @@ void WakeupActionSources::PutSource(const std::string& key, std::shared_ptr<Wake
 
 std::map<std::string, std::shared_ptr<WakeupActionSource>> WakeupActionSources::GetSourceMap()
 {
-    std::lock_guard<std::mutex> lock(sourceListMutex_);
+    std::lock_guard<std::mutex> lock(sourceMapMutex_);
     return sourceMap_;
 }
 

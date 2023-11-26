@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_WAKEUP_ACTION_SOURCES_PARSER_H
-#define POWERMGR_WAKEUP_ACTION_SOURCES_PARSER_H
+#ifndef POWERMGR_WAKEUP_ACTION_SOURCE_PARSER_H
+#define POWERMGR_WAKEUP_ACTION_SOURCE_PARSER_H
 
 #include <memory>
 #include <string>
@@ -35,4 +35,4 @@ public:
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // POWERMGR_WAKEUP_ACTION_SOURCES_PARSER_H
+#endif // POWERMGR_WAKEUP_ACTION_SOURCE_PARSER_H

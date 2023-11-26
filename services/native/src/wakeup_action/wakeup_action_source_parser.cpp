@@ -27,9 +27,9 @@ namespace OHOS {
 namespace PowerMgr {
 
 namespace {
-static const std::string POWER_WakeupAction_CONFIG_FILE = "etc/power_config/power_wakeup_action.json";
-static const std::string VENDOR_POWER_WakeupAction_CONFIG_FILE = "/vendor/etc/power_config/power_wakeup_action.json";
-static const std::string SYSTEM_POWER_WakeupAction_CONFIG_FILE = "/system/etc/power_config/power_wakeup_action.json";
+static const std::string POWER_WAKEUP_ACTION_CONFIG_FILE = "etc/power_config/power_wakeup_action.json";
+static const std::string VENDOR_POWER_WAKEUP_ACTION_CONFIG_FILE = "/vendor/etc/power_config/power_wakeup_action.json";
+static const std::string SYSTEM_POWER_WAKEUP_ACTION_CONFIG_FILE = "/system/etc/power_config/power_wakeup_action.json";
 static const uint32_t ILLEGAL_ACTION = static_cast<uint32_t>(WakeupAction::ACTION_INVALID);
 } // namespace
 
@@ -55,23 +55,23 @@ bool WakeupActionSourceParser::GetTargetPath(std::string& targetPath)
     targetPath.clear();
     bool ret = true;
     char buf[MAX_PATH_LEN];
-    char* path = GetOneCfgFile(POWER_WakeupAction_CONFIG_FILE.c_str(), buf, MAX_PATH_LEN);
+    char* path = GetOneCfgFile(POWER_WAKEUP_ACTION_CONFIG_FILE.c_str(), buf, MAX_PATH_LEN);
     if (path != nullptr && *path != '\0') {
         POWER_HILOGI(FEATURE_WAKEUP_ACTION, "use policy path=%{public}s", path);
         targetPath = path;
         return true;
     }
 
-    if (access(VENDOR_POWER_WakeupAction_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
+    if (access(VENDOR_POWER_WAKEUP_ACTION_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
         POWER_HILOGE(FEATURE_WAKEUP_ACTION, "vendor WakeupAction config is not exist or permission denied");
-        if (access(SYSTEM_POWER_WakeupAction_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
+        if (access(SYSTEM_POWER_WAKEUP_ACTION_CONFIG_FILE.c_str(), F_OK | R_OK) == -1) {
             POWER_HILOGE(FEATURE_WAKEUP_ACTION, "system WakeupAction config is not exist or permission denied");
             ret = false;
         } else {
-            targetPath = SYSTEM_POWER_WakeupAction_CONFIG_FILE;
+            targetPath = SYSTEM_POWER_WAKEUP_ACTION_CONFIG_FILE;
         }
     } else {
-        targetPath = VENDOR_POWER_WakeupAction_CONFIG_FILE;
+        targetPath = VENDOR_POWER_WAKEUP_ACTION_CONFIG_FILE;
     }
     return ret;
 }
@@ -123,8 +123,8 @@ bool WakeupActionSourceParser::ParseSourcesProc(
     }
 
     if (action != 0) {
-        std::shared_ptr<WakeupActionSource> WakeupActionSource = std::make_shared<WakeupActionSource>(scene, action);
-        parseSources->PutSource(key, WakeupActionSource);
+        std::shared_ptr<WakeupActionSource> wakeupActionSource = std::make_shared<WakeupActionSource>(scene, action);
+        parseSources->PutSource(key, wakeupActionSource);
     }
 
     return true;

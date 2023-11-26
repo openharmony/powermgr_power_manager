@@ -35,7 +35,7 @@ public:
     static const constexpr char* SCENE_KEY = "scene";
     static const constexpr char* ACTION_KEY = "action";
 
-    WakeupActionSource(std::string scene, uint32_t action)
+    explicit WakeupActionSource(std::string scene, uint32_t action)
     {
         scene_ = scene;
         action_ = action;
@@ -52,7 +52,7 @@ public:
 
 private:
     std::string scene_;
-    uint32_t delayMs_;
+    uint32_t action_;
 };
 
 class WakeupActionSources {
@@ -60,7 +60,7 @@ public:
     static const constexpr char* LOW_CAPACITY_KEY = "53";
     WakeupActionSources() = default;
     ~WakeupActionSources() = default;
-    static SuspendeviceType mapSuspendActionDeviceType(const std::string& reason);
+    static SuspendDeviceType mapSuspendDeviceType(const std::string& reason);
     void PutSource(const std::string& key, std::shared_ptr<WakeupActionSource>& source);
     std::map<std::string, std::shared_ptr<WakeupActionSource>> GetSourceMap();
 
