@@ -26,6 +26,7 @@
 #include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
+#include "power_utils.h"
 #include "system_suspend_controller.h"
 
 using namespace std;
@@ -35,6 +36,7 @@ namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
+constexpr uint32_t COORDINATION_LOCK_AUTO_SUSPEND_DELAY_TIME = 0;
 }
 
 RunningLockMgr::~RunningLockMgr() {}
@@ -72,6 +74,7 @@ bool RunningLockMgr::InitLocks()
     InitLocksTypeScreen();
     InitLocksTypeBackground();
     InitLocksTypeProximity();
+    InitLocksTypeCoordination();
     return true;
 }
 
@@ -183,6 +186,42 @@ void RunningLockMgr::InitLocksTypeProximity()
 }
 #endif
 
+void RunningLockMgr::InitLocksTypeCoordination()
+{
+    lockCounters_.emplace(RunningLockType::RUNNINGLOCK_COORDINATION,
+        std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_COORDINATION, [this](bool active) {
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms == nullptr) {
+                return;
+            }
+            auto stateMachine = pms->GetPowerStateMachine();
+            if (stateMachine == nullptr) {
+                return;
+            }
+            auto stateAction = stateMachine->GetStateAction();
+            if (stateAction == nullptr) {
+                return;
+            }
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Coordination runninglock action, active=%{public}d, state=%{public}d",
+                active, stateMachine->GetState());
+            struct RunningLockParam backgroundLockParam = {
+                .name = PowerUtils::GetRunningLockTypeString(RunningLockType::RUNNINGLOCK_COORDINATION),
+                .type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK
+            };
+            if (active) {
+                runningLockAction_->Lock(backgroundLockParam);
+                stateAction->SetCoordinated(true);
+            } else {
+                stateAction->SetCoordinated(false);
+                stateMachine->RestoreScreenOffTimeCoordinated();
+                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+                stateMachine->ResetInactiveTimer();
+                runningLockAction_->Unlock(backgroundLockParam);
+            }
+        })
+    );
+}
+
 std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
     const sptr<IRemoteObject>& remoteObj)
 {
@@ -271,6 +310,30 @@ RunningLockInfo RunningLockMgr::FillAppRunningLockInfo(const RunningLockParam& i
     return tempAppRunningLockInfo;
 }
 
+bool RunningLockMgr::IsValidType(RunningLockType type)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return true;
+    }
+    PowerState state = pms->GetState();
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "state=%{public}d, type=%{public}d", state, type);
+    switch (state) {
+        case PowerState::AWAKE:
+        case PowerState::FREEZE:
+        case PowerState::INACTIVE:
+        case PowerState::STAND_BY:
+        case PowerState::DOZE:
+            return true;
+        case PowerState::SLEEP:
+        case PowerState::HIBERNATE:
+            return type != RunningLockType::RUNNINGLOCK_COORDINATION;
+        default:
+            break;
+    }
+    return true;
+}
+
 void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
 {
     StartTrace(HITRACE_TAG_POWER, "RunningLock_Lock");
@@ -280,12 +343,12 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr");
         return;
     }
-    if (lockInner->IsProxied()) {
+    if (lockInner->IsProxied() || runninglockProxy_->IsProxied(lockInner->GetPid(), lockInner->GetUid())) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
         return;
     }
-    if (runninglockProxy_->IsProxied(lockInner->GetPid(), lockInner->GetUid())) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied, do not allow lock");
+    if (!IsValidType(lockInner->GetType())) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock type is invalid");
         return;
     }
     lockInner->SetTimeOutMs(timeOutMS);
@@ -587,36 +650,6 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
     runningLockAction_ = mock;
 }
 
-static const std::string GetRunningLockTypeString(RunningLockType type)
-{
-    switch (type) {
-        case RunningLockType::RUNNINGLOCK_SCREEN:
-            return "SCREEN";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND:
-            return "BACKGROUND";
-        case RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL:
-            return "PROXIMITY_SCREEN_CONTROL";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE:
-            return "BACKGROUND_PHONE";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION:
-            return "BACKGROUND_NOTIFICATION";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO:
-            return "BACKGROUND_AUDIO";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT:
-            return "BACKGROUND_SPORT";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION:
-            return "BACKGROUND_NAVIGATION";
-        case RunningLockType::RUNNINGLOCK_BACKGROUND_TASK:
-            return "BACKGROUND_TASK";
-        case RunningLockType::RUNNINGLOCK_BUTT:
-            return "BUTT";
-        default:
-            break;
-    }
-
-    return "UNKNOWN";
-}
-
 void RunningLockMgr::DumpInfo(std::string& result)
 {
     auto validSize = GetValidRunningLockNum();
@@ -628,7 +661,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
     result.append("Summary By Type: \n");
     for (auto it = lockCounters_.begin(); it != lockCounters_.end(); it++) {
         result.append("  ")
-            .append(GetRunningLockTypeString(it->first))
+            .append(PowerUtils::GetRunningLockTypeString(it->first))
             .append(": ")
             .append(ToString(it->second->GetCount()))
             .append("\n");
@@ -651,7 +684,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
         auto& lockParam = lockInner->GetParam();
         result.append("  index=").append(ToString(index))
             .append(" time=").append(ToString(curTick - lockInner->GetLockTimeMs()))
-            .append(" type=").append(GetRunningLockTypeString(lockParam.type))
+            .append(" type=").append(PowerUtils::GetRunningLockTypeString(lockParam.type))
             .append(" name=").append(lockParam.name)
             .append(" uid=").append(ToString(lockInner->GetUid()))
             .append(" pid=").append(ToString(lockInner->GetPid()))

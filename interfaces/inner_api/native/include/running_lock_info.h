@@ -40,6 +40,10 @@ enum class RunningLockType : uint32_t {
      */
     RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL = 2,
     /**
+     * RunningLock type: keeping image transmission when the current screen is off.
+     */
+    RUNNINGLOCK_COORDINATION = 4,
+    /**
      * Background runningLock type, keeping phone background task active.
      */
     RUNNINGLOCK_BACKGROUND_PHONE = RUNNINGLOCK_BACKGROUND | 1 << 1,  // 0b00000011

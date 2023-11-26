@@ -99,6 +99,8 @@ public:
     void SwitchSubscriberCancel();
     void HallSensorSubscriberInit();
     void HallSensorSubscriberCancel();
+    void InputMonitorInit();
+    void InputMonitorCancel();
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
@@ -228,7 +230,17 @@ private:
     int32_t switchId_ {0};
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
+    int32_t inputMonitorId_ {-1};
 };
+
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+class PowerMgrInputMonitor : public IInputEventConsumer {
+public:
+    virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
+    virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
+    virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
+};
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_POWER_MGR_SERVICE_H

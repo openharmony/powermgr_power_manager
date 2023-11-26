@@ -86,6 +86,8 @@ public:
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
+    void OverrideScreenOffTimeCoordinated();
+    void RestoreScreenOffTimeCoordinated();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
     void Reset();
@@ -105,6 +107,7 @@ public:
     void CancelDelayTimer(int32_t event);
     void ResetInactiveTimer();
     void ResetSleepTimer();
+    void SetAutoSuspend(SuspendDeviceType type, uint32_t delay);
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
     void SetDisplaySuspend(bool enable);
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
@@ -192,6 +195,7 @@ private:
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
+    bool IsRunningLockEnabled(RunningLockType type);
     int64_t GetSleepTime();
     void HandleActivityTimeout();
     void HandleActivityOffTimeout();
@@ -218,6 +222,7 @@ private:
     int64_t beforeOverrideTime_ {-1};
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
+    bool isCoordinatedOverride_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS
