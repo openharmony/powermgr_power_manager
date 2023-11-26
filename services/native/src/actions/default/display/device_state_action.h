@@ -34,6 +34,7 @@ public:
     DisplayState GetDisplayState() override;
     uint32_t SetDisplayState(const DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
+    void SetCoordinated(bool coordinated) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
     void RegisterCallback(std::function<void(uint32_t)>& callback) override;
 
@@ -48,9 +49,11 @@ private:
         std::function<void(uint32_t)> notify_ {nullptr};
         std::mutex notifyMutex_;
     };
+    bool IsLockScreen(StateChangeReason reason);
     bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};
     std::function<void(uint32_t)> actionCallback_ {nullptr};
+    bool coordinated_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS

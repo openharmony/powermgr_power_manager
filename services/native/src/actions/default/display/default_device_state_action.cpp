@@ -50,6 +50,11 @@ uint32_t DefaultDeviceStateAction::SetDisplayState(const DisplayState state, Sta
     return ActionResult::SUCCESS;
 }
 
+void DefaultDeviceStateAction::SetCoordinated(bool coordinated)
+{
+    (void)coordinated;
+}
+
 uint32_t DefaultDeviceStateAction::GoToSleep(
     const std::function<void()> onSuspend, const std::function<void()> onWakeup, bool force)
 {

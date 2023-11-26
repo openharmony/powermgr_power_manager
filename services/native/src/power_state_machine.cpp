@@ -22,12 +22,14 @@
 #include "hitrace_meter.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
+#include "power_utils.h"
 #include "setting_helper.h"
 
 namespace OHOS {
 namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
+constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -47,7 +49,10 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pm
     std::vector<RunningLockType> inactiveBlocker {RunningLockType::RUNNINGLOCK_SCREEN};
     std::vector<RunningLockType> standByBlocker {};
     std::vector<RunningLockType> dozeBlocker {};
-    std::vector<RunningLockType> sleepBlocker {RunningLockType::RUNNINGLOCK_BACKGROUND};
+    std::vector<RunningLockType> sleepBlocker {
+        RunningLockType::RUNNINGLOCK_BACKGROUND,
+        RunningLockType::RUNNINGLOCK_COORDINATION
+    };
     std::vector<RunningLockType> hibernateBlocker {};
     std::vector<RunningLockType> shutdownBlocker {};
 
@@ -239,13 +244,8 @@ void PowerStateMachine::SuspendDeviceInner(
     }
 
     if (SetState(PowerState::INACTIVE, GetReasionBySuspendType(type), true)) {
-        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        auto suspendController = pms->GetSuspendController();
-        if (suspendController != nullptr) {
-            suspendController->StartSleepTimer(
-                SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
-        }
+        uint32_t delay = 0;
+        SetAutoSuspend(type, delay);
     }
     FinishTrace(HITRACE_TAG_POWER);
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
@@ -329,6 +329,28 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
     return true;
 }
 
+void PowerStateMachine::OverrideScreenOffTimeCoordinated()
+{
+    if (isCoordinatedOverride_ || !IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
+        POWER_HILOGI(FEATURE_POWER_STATE,
+            "Coordianted state override screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
+        return;
+    }
+    OverrideScreenOffTimeInner(COORDINATED_STATE_SCREEN_OFF_TIME_MS);
+    isCoordinatedOverride_ = true;
+}
+
+void PowerStateMachine::RestoreScreenOffTimeCoordinated()
+{
+    if (!isCoordinatedOverride_) {
+        POWER_HILOGI(FEATURE_POWER_STATE,
+            "Coordianted state restore screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
+        return;
+    }
+    RestoreScreenOffTimeInner();
+    isCoordinatedOverride_ = false;
+}
+
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
     SetState(
@@ -400,124 +422,6 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
         static_cast<unsigned int>(powerStateListeners_.size()), eraseNum);
 }
 
-static const std::string GetReasonTypeString(StateChangeReason type)
-{
-    switch (type) {
-        case StateChangeReason::STATE_CHANGE_REASON_INIT:
-            return std::string("INIT");
-        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT:
-            return std::string("TIMEOUT");
-        case StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK:
-            return std::string("RUNNING_LOCK");
-        case StateChangeReason::STATE_CHANGE_REASON_BATTERY:
-            return std::string("BATTERY");
-        case StateChangeReason::STATE_CHANGE_REASON_THERMAL:
-            return std::string("THERMAL");
-        case StateChangeReason::STATE_CHANGE_REASON_WORK:
-            return std::string("WORK");
-        case StateChangeReason::STATE_CHANGE_REASON_SYSTEM:
-            return std::string("SYSTEM");
-        case StateChangeReason::STATE_CHANGE_REASON_APPLICATION:
-            return std::string("APPLICATION");
-        case StateChangeReason::STATE_CHANGE_REASON_SETTINGS:
-            return std::string("SETTINGS");
-        case StateChangeReason::STATE_CHANGE_REASON_HARD_KEY:
-            return std::string("HARD_KEY");
-        case StateChangeReason::STATE_CHANGE_REASON_TOUCH:
-            return std::string("TOUCH");
-        case StateChangeReason::STATE_CHANGE_REASON_CABLE:
-            return std::string("CABLE");
-        case StateChangeReason::STATE_CHANGE_REASON_SENSOR:
-            return std::string("SENSOR");
-        case StateChangeReason::STATE_CHANGE_REASON_LID:
-            return std::string("LID");
-        case StateChangeReason::STATE_CHANGE_REASON_CAMERA:
-            return std::string("CAMERA");
-        case StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY:
-            return std::string("ACCESS");
-        case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
-            return std::string("POWER_KEY");
-        case StateChangeReason::STATE_CHANGE_REASON_KEYBOARD:
-            return std::string("KEYBOARD");
-        case StateChangeReason::STATE_CHANGE_REASON_MOUSE:
-            return std::string("MOUSE");
-        case StateChangeReason::STATE_CHANGE_REASON_REMOTE:
-            return std::string("REMOTE");
-        case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
-            return std::string("UNKNOWN");
-        default:
-            break;
-    }
-
-    return std::string("UNKNOWN");
-}
-
-static const std::string GetPowerStateString(PowerState state)
-{
-    switch (state) {
-        case PowerState::AWAKE:
-            return std::string("AWAKE");
-        case PowerState::FREEZE:
-            return std::string("FREEZE");
-        case PowerState::INACTIVE:
-            return std::string("INACTIVE");
-        case PowerState::STAND_BY:
-            return std::string("STAND_BY");
-        case PowerState::DOZE:
-            return std::string("DOZE");
-        case PowerState::SLEEP:
-            return std::string("SLEEP");
-        case PowerState::HIBERNATE:
-            return std::string("HIBERNATE");
-        case PowerState::SHUTDOWN:
-            return std::string("SHUTDOWN");
-        case PowerState::UNKNOWN:
-            return std::string("UNKNOWN");
-        default:
-            break;
-    }
-
-    return std::string("UNKNOWN");
-}
-
-static const std::string GetDisplayStateString(DisplayState state)
-{
-    switch (state) {
-        case DisplayState::DISPLAY_OFF:
-            return std::string("DISPLAY_OFF");
-        case DisplayState::DISPLAY_DIM:
-            return std::string("DISPLAY_DIM");
-        case DisplayState::DISPLAY_ON:
-            return std::string("DISPLAY_ON");
-        case DisplayState::DISPLAY_SUSPEND:
-            return std::string("DISPLAY_SUSPEND");
-        case DisplayState::DISPLAY_UNKNOWN:
-            return std::string("DISPLAY_UNKNOWN");
-        default:
-            break;
-    }
-
-    return std::string("DISPLAY_UNKNOWN");
-}
-
-static const std::string GetRunningLockTypeString(RunningLockType type)
-{
-    switch (type) {
-        case RunningLockType::RUNNINGLOCK_SCREEN:
-            return std::string("SCREEN");
-        case RunningLockType::RUNNINGLOCK_BACKGROUND:
-            return std::string("BACKGROUND");
-        case RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL:
-            return std::string("PROXIMITY_SCREEN_CONTROL");
-        case RunningLockType::RUNNINGLOCK_BUTT:
-            return std::string("BUTT");
-        default:
-            break;
-    }
-
-    return std::string("UNKNOWN");
-}
-
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 {
     std::lock_guard lock(mutex_);
@@ -534,10 +438,14 @@ void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 
 void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(
-        FEATURE_POWER_STATE, "state = %{public}u, listeners.size = %{public}zu", state, powerStateListeners_.size());
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE",
-        static_cast<uint32_t>(state));
+    if (GetState() == PowerState::INACTIVE && IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Coordination is enabled, not notify power state");
+        return;
+    }
+    POWER_HILOGD(
+        FEATURE_POWER_STATE, "state=%{public}u, listeners.size=%{public}zu", state, powerStateListeners_.size());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "STATE", static_cast<uint32_t>(state));
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
@@ -665,6 +573,22 @@ void PowerStateMachine::ResetSleepTimer()
     }
 }
 
+void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Pms is nullptr");
+        return;
+    }
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Suspend controller is nullptr");
+        return;
+    }
+    suspendController->StartSleepTimer(type, static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), delay);
+    POWER_HILOGD(FEATURE_SUSPEND, "Set auto suspend finish");
+}
+
 void PowerStateMachine::HandleActivityTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
@@ -754,13 +678,32 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
         if (count > 0) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "RunningLock %{public}s is locking (count=%{public}d), blocking %{public}s",
-                GetRunningLockTypeString(*iter).c_str(), count, GetPowerStateString(state).c_str());
+                PowerUtils::GetRunningLockTypeString(*iter).c_str(), count,
+                PowerUtils::GetPowerStateString(state).c_str());
             return false;
         }
     }
 
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "No specific lock for state: %{public}u", state);
     return true;
+}
+
+bool PowerStateMachine::IsRunningLockEnabled(RunningLockType type)
+{
+    auto pms = pms_.promote();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
+        return false;
+    }
+    auto runningLockMgr = pms->GetRunningLockMgr();
+    if (runningLockMgr == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "RunningLockMgr is nullptr");
+        return false;
+    }
+    if (runningLockMgr->GetValidRunningLockNum(type) > 0) {
+        return true;
+    }
+    return false;
 }
 
 void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
@@ -839,7 +782,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
         return false;
     }
-    TransitResult ret = pController->TransitTo(reason, true);
+    TransitResult ret = pController->TransitTo(reason, force);
     POWER_HILOGI(FEATURE_POWER_STATE, "StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
@@ -972,7 +915,7 @@ void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason,
 {
     result.append("POWER STATE DUMP:\n");
     result.append("Current State: ")
-        .append(GetPowerStateString(GetState()))
+        .append(PowerUtils::GetPowerStateString(GetState()))
         .append("  Reason: ")
         .append(reason)
         .append("  Time: ")
@@ -999,18 +942,18 @@ void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason,
     result.append("DUMP EACH STATES:\n");
     for (auto it = controllerMap_.begin(); it != controllerMap_.end(); it++) {
         result.append("State: ")
-            .append(GetPowerStateString(it->second->GetState()))
+            .append(PowerUtils::GetPowerStateString(it->second->GetState()))
             .append("   Reason: ")
-            .append(GetReasonTypeString(it->second->lastReason_).c_str())
+            .append(PowerUtils::GetReasonTypeString(it->second->lastReason_).c_str())
             .append("   Time: ")
             .append(ToString(it->second->lastTime_))
             .append("\n")
             .append("   Failure: ")
-            .append(GetReasonTypeString(it->second->failTrigger_).c_str())
+            .append(PowerUtils::GetReasonTypeString(it->second->failTrigger_).c_str())
             .append("   Reason: ")
             .append(it->second->failReasion_)
             .append("   From: ")
-            .append(GetPowerStateString(it->second->failFrom_))
+            .append(PowerUtils::GetPowerStateString(it->second->failFrom_))
             .append("   Time: ")
             .append(ToString(it->second->failTime_))
             .append("\n\n");
@@ -1038,8 +981,9 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::OTHER_ERR;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
-        GetPowerStateString(owner->currentState_).c_str(), GetPowerStateString(this->state_).c_str(),
-        GetReasonTypeString(reason).c_str(), ignoreLock);
+        PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
+        PowerUtils::GetPowerStateString(this->state_).c_str(),
+        PowerUtils::GetReasonTypeString(reason).c_str(), ignoreLock);
     MatchState(owner->currentState_, owner->stateAction_->GetDisplayState());
     if (!CheckState()) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", owner->currentState_);
@@ -1081,11 +1025,11 @@ void PowerStateMachine::StateController::CorrectState(
     PowerState& currentState, PowerState correctState, DisplayState state)
 {
     std::string msg = "Correct power state errors from";
-    msg.append(GetPowerStateString(currentState))
+    msg.append(PowerUtils::GetPowerStateString(currentState))
         .append(" to ")
-        .append(GetPowerStateString(correctState))
+        .append(PowerUtils::GetPowerStateString(correctState))
         .append(" due to cuurent display state is ")
-        .append(GetDisplayStateString(state));
+        .append(PowerUtils::GetDisplayStateString(state));
     POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION", HiviewDFX::HiSysEvent::EventType::FAULT,
         "ERROR_STATE", static_cast<uint32_t>(currentState), "CORRECTION_STATE", static_cast<uint32_t>(correctState),
@@ -1155,11 +1099,11 @@ void PowerStateMachine::StateController::RecordFailure(
             break;
     }
     std::string message = "State Transit Failed from ";
-    message.append(GetPowerStateString(failFrom_))
+    message.append(PowerUtils::GetPowerStateString(failFrom_))
         .append(" to ")
-        .append(GetPowerStateString(GetState()))
+        .append(PowerUtils::GetPowerStateString(GetState()))
         .append(" by ")
-        .append(GetReasonTypeString(failTrigger_).c_str())
+        .append(PowerUtils::GetReasonTypeString(failTrigger_).c_str())
         .append("   Reason:")
         .append(failReasion_)
         .append("   Time:")

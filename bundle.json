@@ -77,7 +77,7 @@
         "build": {
             "group_type": {
                 "base_group": [
-                    "//base/powermgr/power_manager/utils:power-shell",
+                    "//base/powermgr/power_manager/utils/shell:power-shell",
                     "//base/powermgr/power_manager/utils/param:power_sysparam",
                     "//base/powermgr/power_manager/utils/permission:power_permission",
                     "//base/powermgr/power_manager/utils/setting:power_setting"
