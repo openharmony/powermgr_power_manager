@@ -26,6 +26,7 @@ ohos_fuzztest("IsRunningLockTypeSupportedFuzzTest") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/wakeup_action",
     "../power_utils",
   ]
 
