@@ -62,7 +62,7 @@ group("power_service_config") {
     ":power_mode_config",
     ":power_suspend_config",
     ":power_vibrator_config",
-    ":power_wakeup_config",
     ":power_wakeup_action_config",
+    ":power_wakeup_config",
   ]
 }
