@@ -54,7 +54,7 @@ bool WakeupActionController::ExecuteByGetReason()
         auto uid = IPCSkeleton::GetCallingUid();
         POWER_HILOGI(FEATURE_WAKEUP_ACTION,
             "WakeupAction device, pid=%{public}d, uid=%{public}d, reason=%{public}s, scene=%{public}s, "
-            "action=%{public}u" PRId32 "",
+            "action=%{public}u",
             pid, uid, reason.c_str(), sourceMap_[reason]->GetScene().c_str(), sourceMap_[reason]->GetAction());
         HandleAction(reason);
         return true;
