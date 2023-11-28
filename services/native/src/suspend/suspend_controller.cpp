@@ -312,7 +312,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         return;
     }
 
-    if (pms->CheckDialogAndShuttingDown()) {
+    if (pms->CheckDialogAndShuttingDown() && reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY) {
         return;
     }
 
