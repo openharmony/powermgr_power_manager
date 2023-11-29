@@ -261,13 +261,7 @@ bool WakeupController::IsHandleSysfreeze()
 void WakeupController::HandleScreenOnTimeout()
 {
     if (IsHandleSysfreeze()) {
-        POWER_HILOGW(FEATURE_INPUT, "PowerKey press timeout");
-        std::string message = "POWER KEY TIMEOUT BUT DISPLAY NOT FINISHED";
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_TIMEOUT",
-            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", IPCSkeleton::GetCallingPid(), "UID",
-            IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "", "PROCESS_NAME",
-            "", "MSG", message.c_str());
-        POWER_HILOGD(FEATURE_INPUT, "Send HiSysEvent msg end");
+        POWER_HILOGI(FEATURE_INPUT, "ScreenOnTimeout");
     }
 }
 
