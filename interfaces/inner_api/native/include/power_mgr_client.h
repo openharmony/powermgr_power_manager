@@ -30,8 +30,8 @@ class PowerMgrClient final : public DelayedRefSingleton<PowerMgrClient> {
 
 public:
     DISALLOW_COPY_AND_MOVE(PowerMgrClient);
-    static const uint32_t CONNECT_RETRY_COUNT = 3;
-    static const uint32_t CONNECT_RETRY_MS = 300000;
+    static const uint32_t CONNECT_RETRY_COUNT = 5;
+    static const uint32_t CONNECT_RETRY_MS = 800000;
     /**
      * Reboot the device.
      *
