@@ -30,9 +30,7 @@ config("module_private_config") {
   ]
 
   if (power_manager_feature_wakeup_action) {
-    include_dirs = [
-      "${powermgr_service_path}/native/src/wakeup_action",
-    ]
+    include_dirs = [ "${powermgr_service_path}/native/src/wakeup_action" ]
   }
 }
 
