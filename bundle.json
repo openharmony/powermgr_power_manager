@@ -16,6 +16,7 @@
         "name": "power_manager",
         "subsystem": "powermgr",
         "syscap": [
+            "SystemCapability.PowerMgr.PowerManager",
             "SystemCapability.PowerManager.PowerManager.Core",
             "SystemCapability.PowerManager.PowerManager.Extension"
         ],
