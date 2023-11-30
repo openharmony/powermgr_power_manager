@@ -194,7 +194,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     POWER_HILOGI(FEATURE_WAKEUP, "start get wakeup action reason");
     if ((reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
-        (pms->GetWakeupActionController()->ExecuteByGetReason()){
+        (pms->GetWakeupActionController()->ExecuteByGetReason()) {
             POWER_HILOGI(FEATURE_WAKEUP, "wakeup action reason avaiable");
             return;
     }
