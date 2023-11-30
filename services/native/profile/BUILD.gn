@@ -49,7 +49,7 @@ ohos_prebuilt_etc("power_vibrator_config") {
 }
 
 if (power_manager_feature_wakeup_action) {
-## Install power_wakeup_action.json to /system/etc/power_config/power_wakeup_action.json
+  ## Install power_wakeup_action.json to /system/etc/power_config/power_wakeup_action.json
   ohos_prebuilt_etc("power_wakeup_action_config") {
     source = "power_wakeup_action.json"
     relative_install_dir = "power_config"
@@ -68,8 +68,6 @@ group("power_service_config") {
   ]
 
   if (power_manager_feature_wakeup_action) {
-    deps += [
-      ":power_wakeup_action_config",
-    ]
+    deps += [ ":power_wakeup_action_config" ]
   }
 }
