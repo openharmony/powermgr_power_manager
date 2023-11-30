@@ -16,10 +16,11 @@
 #ifndef POWERMGR_WAKEUP_ACTION_SOURCES_H
 #define POWERMGR_WAKEUP_ACTION_SOURCES_H
 
-#include "power_state_machine_info.h"
 #include <cstdint>
 #include <map>
 #include <mutex>
+
+#include "power_state_machine_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
