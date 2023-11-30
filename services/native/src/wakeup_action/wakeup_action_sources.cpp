@@ -14,8 +14,10 @@
  */
 
 #include "wakeup_action_sources.h"
-#include "power_log.h"
+
 #include <string>
+#include "power_log.h"
+
 namespace OHOS {
 namespace PowerMgr {
 

@@ -14,6 +14,7 @@
  */
 
 #include "wakeup_action_controller.h"
+
 #include <ipc_skeleton.h>
 #include "power_log.h"
 #include "system_suspend_controller.h"
