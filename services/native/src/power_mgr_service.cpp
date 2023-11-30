@@ -136,7 +136,9 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+#ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
+#endif
         power->VibratorInit();
         isBootCompleted_ = true;
     };
@@ -1008,6 +1010,7 @@ void PowerMgrService::SuspendControllerInit()
     suspendController_->Init();
 }
 
+#ifdef POWER_MANAGER_WAKEUP_ACTION
 void PowerMgrService::WakeupControllerInit()
 {
     if (!wakeupController_) {
@@ -1015,6 +1018,7 @@ void PowerMgrService::WakeupControllerInit()
     }
     wakeupController_->Init();
 }
+#endif
 
 void PowerMgrService::WakeupActionControllerInit()
 {

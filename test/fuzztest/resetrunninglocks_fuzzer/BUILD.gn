@@ -26,9 +26,14 @@ ohos_fuzztest("ResetRunningLocksFuzzTest") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
-    "${powermgr_service_path}/native/src/wakeup_action",
     "../power_utils",
   ]
+
+  if (power_manager_feature_wakeup_action) {
+    include_dirs = [
+      "${powermgr_service_path}/native/src/wakeup_action",
+    ]
+  }
 
   configs = [
     "${powermgr_utils_path}:coverage_flags",

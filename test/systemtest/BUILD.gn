@@ -26,9 +26,14 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
-    "${powermgr_service_path}/native/src/wakeup_action",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
+
+  if (power_manager_feature_wakeup_action) {
+    include_dirs = [
+      "${powermgr_service_path}/native/src/wakeup_action",
+    ]
+  }
 }
 
 deps_ex = [
