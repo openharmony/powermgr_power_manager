@@ -258,6 +258,15 @@ void SuspendController::RecordPowerKeyDown()
     } else {
         powerkeyDownWhenScreenOff_ = false;
     }
+
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+
+    if (pms->CheckDialogAndShuttingDown()) {
+        return;
+    }
 }
 
 bool SuspendController::GetPowerkeyDownWhenScreenOff()
@@ -312,7 +321,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         return;
     }
 
-    if (pms->CheckDialogAndShuttingDown() && reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY) {
+    if (pms->CheckDialogAndShuttingDown()) {
         return;
     }
 

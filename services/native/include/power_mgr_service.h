@@ -105,6 +105,7 @@ public:
     void HallSensorSubscriberCancel();
     void InputMonitorInit();
     void InputMonitorCancel();
+    bool CheckDialogFlag();
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();

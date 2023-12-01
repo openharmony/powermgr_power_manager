@@ -264,6 +264,15 @@ void PowerMgrService::HallSensorSubscriberCancel()
 #endif
 }
 
+bool PowerMgrService::CheckDialogFlag()
+{
+    bool isLongPress = shutdownDialog_.IsLongPress();
+    if (isLongPress) {
+        shutdownDialog_.ResetLongPressFlag();
+    }
+    return true;
+}
+
 bool PowerMgrService::CheckDialogAndShuttingDown()
 {
     bool isShuttingDown = shutdownController_->IsShuttingDown();
