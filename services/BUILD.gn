@@ -146,7 +146,7 @@ ohos_shared_library("powermgrservice") {
   }
 
   if (power_manager_feature_wakeup_action) {
-    sources = [
+    sources += [
       "native/src/wakeup_action/wakeup_action_controller.cpp",
       "native/src/wakeup_action/wakeup_action_source_parser.cpp",
       "native/src/wakeup_action/wakeup_action_sources.cpp",
