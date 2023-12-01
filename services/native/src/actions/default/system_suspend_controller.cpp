@@ -170,6 +170,15 @@ void SystemSuspendController::Dump(std::string& info)
     powerInterface_->PowerDump(info);
 }
 
+void SystemSuspendController::GetWakeupReason(std::string& reason)
+{
+    if (powerInterface_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return;
+    }
+    powerInterface_->GetWakeupReason(reason);
+}
+
 int32_t SystemSuspendController::PowerHdfCallback::OnSuspend()
 {
     if (onSuspend_ != nullptr) {

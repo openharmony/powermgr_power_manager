@@ -1,0 +1,7 @@
+{
+    "53": {
+        "scene": "LowCapacity",
+        "action": 2,
+        "description": "(such as)53 is a uniquely wakeup reason by reading node through HDI interface(GetWakeupReason)"
+    }
+}

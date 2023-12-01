@@ -38,6 +38,7 @@ public:
     int32_t AcquireRunningLock(const RunningLockParam& param);
     int32_t ReleaseRunningLock(const RunningLockParam& param);
     void Dump(std::string& info);
+    void GetWakeupReason(std::string& reason);
     void RegisterHdiStatusListener();
     void RegisterPowerHdiCallback();
     void UnRegisterPowerHdiCallback();
