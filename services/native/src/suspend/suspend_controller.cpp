@@ -33,6 +33,7 @@ using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 FFRTHandle g_sleepTimeoutHandle;
+FFRTHandle g_forceSleepDelayHandle;
 FFRTHandle g_userActivityOffTimeoutHandle;
 FFRTUtils::Mutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
@@ -219,6 +220,7 @@ void SuspendController::StopSleep()
 {
     if (sleepAction_ != static_cast<uint32_t>(SuspendAction::ACTION_NONE)) {
         FFRTUtils::CancelTask(g_sleepTimeoutHandle, queue_);
+        FFRTUtils::CancelTask(g_forceSleepDelayHandle, queue_);
         sleepTime_ = -1;
         sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
     }
@@ -388,8 +390,10 @@ void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
         default:
             break;
     }
-    sleepTime_ = -1;
-    sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
+    if (static_cast<SuspendAction>(action) != SuspendAction::ACTION_FORCE_SUSPEND) {
+        sleepTime_ = -1;
+        sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
+    }
 }
 
 void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
@@ -427,9 +431,11 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         TriggerSyncSleepCallback(false);
 
         FFRTTask task = [this] {
-            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);        
+            sleepTime_ = -1;
+            sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
         };
-        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, queue_);
+        g_forceSleepDelayHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, queue_);
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
