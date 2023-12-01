@@ -1010,7 +1010,6 @@ void PowerMgrService::SuspendControllerInit()
     suspendController_->Init();
 }
 
-#ifdef POWER_MANAGER_WAKEUP_ACTION
 void PowerMgrService::WakeupControllerInit()
 {
     if (!wakeupController_) {
@@ -1018,8 +1017,8 @@ void PowerMgrService::WakeupControllerInit()
     }
     wakeupController_->Init();
 }
-#endif
 
+#ifdef POWER_MANAGER_WAKEUP_ACTION
 void PowerMgrService::WakeupActionControllerInit()
 {
     if (!wakeupActionController_) {
@@ -1027,6 +1026,7 @@ void PowerMgrService::WakeupActionControllerInit()
     }
     wakeupActionController_->Init();
 }
+#endif
 
 void PowerMgrService::VibratorInit()
 {
