@@ -63,6 +63,9 @@ enum PowerManagerLogLabel {
     COMP_UTILS = 5,
     // Feature labels, use to mark major features
     FEATURE_WAKEUP,
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    FEATURE_WAKEUP_ACTION,
+#endif
     FEATURE_SUSPEND,
     FEATURE_RUNNING_LOCK,
     FEATURE_ACTIVITY,
@@ -84,6 +87,9 @@ enum PowerManagerLogDomain {
     DOMAIN_DRIVER, // 0xD002904
     DOMAIN_UTILS, // 0xD002905
     DOMAIN_FEATURE_WAKEUP,
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    DOMAIN_FEATURE_WAKEUP_ACTION,
+#endif
     DOMAIN_FEATURE_SUSPEND,
     DOMAIN_FEATURE_RUNNING_LOCK,
     DOMAIN_FEATURE_ACTIVITY,
@@ -104,6 +110,9 @@ static constexpr OHOS::HiviewDFX::HiLogLabel POWER_LABEL[LABEL_END] = {
     {LOG_CORE, DOMAIN_DRIVER,               "PowerDrv"},
     {LOG_CORE, DOMAIN_UTILS,                "PowerUtils"},
     {LOG_CORE, DOMAIN_FEATURE_WAKEUP,       "PowerWakeup"},
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    {LOG_CORE, DOMAIN_FEATURE_WAKEUP_ACTION,       "PowerWakeupAction"},
+#endif
     {LOG_CORE, DOMAIN_FEATURE_SUSPEND,      "PowerSuspend"},
     {LOG_CORE, DOMAIN_FEATURE_RUNNING_LOCK, "PowerRunningLock"},
     {LOG_CORE, DOMAIN_FEATURE_ACTIVITY,     "PowerActivity"},

@@ -28,6 +28,10 @@ ohos_fuzztest("SuspendDeviceFuzzTest") {
     "../power_utils",
   ]
 
+  if (power_manager_feature_wakeup_action) {
+    include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
+  }
+
   configs = [
     "${powermgr_utils_path}:coverage_flags",
     "${powermgr_utils_path}:utils_config",

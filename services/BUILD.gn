@@ -29,6 +29,10 @@ config("powermgr_private_config") {
     "native/src/suspend",
     "native/src/wakeup",
   ]
+
+  if (power_manager_feature_wakeup_action) {
+    include_dirs += [ "native/src/wakeup_action" ]
+  }
 }
 
 ohos_shared_library("powermgrservice") {
@@ -139,6 +143,16 @@ ohos_shared_library("powermgrservice") {
     ]
 
     defines = [ "POWER_MANAGER_POWEROFF_CHARGE" ]
+  }
+
+  if (power_manager_feature_wakeup_action) {
+    sources += [
+      "native/src/wakeup_action/wakeup_action_controller.cpp",
+      "native/src/wakeup_action/wakeup_action_source_parser.cpp",
+      "native/src/wakeup_action/wakeup_action_sources.cpp",
+    ]
+
+    defines = [ "POWER_MANAGER_WAKEUP_ACTION" ]
   }
 
   subsystem_name = "powermgr"
