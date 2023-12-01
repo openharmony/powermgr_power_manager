@@ -431,7 +431,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         TriggerSyncSleepCallback(false);
 
         FFRTTask task = [this] {
-            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);        
+            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
             sleepTime_ = -1;
             sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
         };
