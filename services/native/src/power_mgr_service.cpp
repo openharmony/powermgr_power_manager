@@ -62,6 +62,7 @@ const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
+bool g_inLidMode = false;
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
@@ -244,10 +245,15 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
 
     if (status & LID_CLOSED_HALL_FLAG) {
         POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
+        g_inLidMode = true;
         SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
         suspendController->ExecSuspendMonitorByReason(reason);
     } else {
+        if (!g_inLidMode) {
+            return;
+        }
         POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
+        g_inLidMode = false;
         WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_LID;
         wakeupController->ExecWakeupMonitorByReason(reason);
     }
