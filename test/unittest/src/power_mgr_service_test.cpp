@@ -340,4 +340,21 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService019, TestSize.Level2)
     EXPECT_EQ(ret, true);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 end.");
 }
+
+/**
+ * @tc.name: PowerMgrService020
+ * @tc.desc: Test restoreScreenOffTime in screenoff
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice();
+    EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1));
+    EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime());
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_PRE_PROCESS);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService020: Prepare Fail, Screen is OFF.";
+    
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 end.");
+}
 }
