@@ -83,6 +83,7 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
     auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
     TriggerSyncSleepCallbackInner(lowPriorityCallbacks, isWakeup);
 }
+
 void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, bool isWakeup)
 {
     for (auto &callback : callbacks) {
@@ -92,6 +93,9 @@ void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCa
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sync sleep callback success, cost=%{public}" PRId64 "", cost);
         }
+    }
+    if (isWakeup && onForceSleep) {
+        onForceSleep = false;
     }
 }
 
@@ -417,7 +421,6 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
         PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
-        onForceSleep = false;
         TriggerSyncSleepCallback(false);
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
     } else {
