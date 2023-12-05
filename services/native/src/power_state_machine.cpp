@@ -266,11 +266,12 @@ void PowerStateMachine::WakeupDeviceInner(
 
     ResetInactiveTimer();
     SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
+
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto wakeupController = pms->GetWakeupController();
-    if (wakeupController != nullptr) {
-        POWER_HILOGI(FEATURE_SUSPEND, "WakeupDeviceInner wakeupController->ControllerListener start.");
-        wakeupController->ControlListener(type);
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr) {
+        POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
+        suspendController->TriggerSyncSleepCallback(true);
     }
 
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup device finish");
