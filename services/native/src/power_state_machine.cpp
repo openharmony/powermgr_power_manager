@@ -272,6 +272,8 @@ void PowerStateMachine::WakeupDeviceInner(
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
         suspendController->TriggerSyncSleepCallback(true);
+    } else {
+        POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceInner. suspendController is nullptr");
     }
 
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup device finish");
