@@ -33,10 +33,12 @@ using namespace testing::ext;
 
 namespace {
 constexpr int32_t US_PER_MS = 1000;
-constexpr int32_t WAIT_EVENT_TIME_MS = 50;
-constexpr int32_t RETRY_WAIT_TIME_MS = 20;
-constexpr int32_t WAIT_STATE_TIME_MS = 100;
-constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 50;
+constexpr uint32_t AUTO_SLEEP_DELAY_MS = 5000;
+constexpr uint32_t WAIT_AUTO_SUSPEND_SLEEP_TIME_MS = AUTO_SLEEP_DELAY_MS + 1000;
+constexpr int32_t WAIT_EVENT_TIME_MS = 200;
+constexpr int32_t RETRY_WAIT_TIME_MS = 100;
+constexpr int32_t WAIT_STATE_TIME_MS = 500;
+constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
 
 bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
@@ -278,7 +280,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Lev
     ASSERT_NE(runninglock, nullptr);
 
     powerMgrClient.SuspendDevice();
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep(WAIT_AUTO_SUSPEND_SLEEP_TIME_MS * US_PER_MS);
 
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
@@ -324,7 +326,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 
-    usleep(WAIT_STATE_TIME_MS * US_PER_MS);
+    usleep(WAIT_AUTO_SUSPEND_SLEEP_TIME_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 
     runninglock->UnLock();
@@ -335,6 +337,14 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
     EXPECT_FALSE(g_inactiveCallback);
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+
+    powerMgrClient.SuspendDevice();
+    usleep(WAIT_AUTO_SUSPEND_SLEEP_TIME_MS * US_PER_MS);
+
+    EXPECT_TRUE(g_screenOffEvent);
+    EXPECT_TRUE(g_inactiveCallback);
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
 
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
@@ -375,7 +385,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 
-    usleep(WAIT_STATE_TIME_MS * US_PER_MS);
+    usleep(WAIT_AUTO_SUSPEND_SLEEP_TIME_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 
     runninglock->UnLock();
