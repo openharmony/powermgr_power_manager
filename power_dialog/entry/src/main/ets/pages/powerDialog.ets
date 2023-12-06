@@ -28,10 +28,13 @@ import Constants from '../common/constant';
 
 @CustomDialog
 struct PowerCustomDialog {
-  controller: CustomDialogController
-  cancel: () => void
-  shutdown: () => void
-  reboot: () => void
+  controller?: CustomDialogController
+  cancel: () => void = () => {
+  }
+  shutdown: () => void = () => {
+  }
+  reboot: () => void = () => {
+  }
 
   build() {
     Column() {
@@ -51,7 +54,9 @@ struct PowerCustomDialog {
       Row() {
         Button($r('app.string.BUTTON_CANCEL_POWERDIALOG'))
           .onClick(() => {
-            this.controller.close()
+            if (this.controller) {
+              this.controller.close()
+            }
             this.cancel();
           })
           .customizeButton()
@@ -96,7 +101,7 @@ struct PowerDialog {
     customStyle: false
   });
 
-  timeoutId: number;
+  timeoutId?: number;
   timeoutMs: number = 20;
 
   aboutToDisappear() {
@@ -108,7 +113,9 @@ struct PowerDialog {
       console.log('power dialog terminateSelf');
       let storage = LocalStorage.GetShared()
       let session = storage.get<UIExtensionContentSession>('session');
-      session.terminateSelf();
+      if (session) {
+        session.terminateSelf();
+      }
     } catch(err) {
       console.log('power dialog cancel failed: ' + JSON.stringify(err));
     }
