@@ -76,12 +76,19 @@ void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
 
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d",
+        isWakeup, onForceSleep == true);
     auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
     TriggerSyncSleepCallbackInner(highPriorityCallbacks, isWakeup);
     auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
     TriggerSyncSleepCallbackInner(defaultPriorityCallbacks, isWakeup);
     auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
     TriggerSyncSleepCallbackInner(lowPriorityCallbacks, isWakeup);
+
+    if (isWakeup && onForceSleep) {
+        onForceSleep = false;
+    }
 }
 
 void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, bool isWakeup)
@@ -93,9 +100,6 @@ void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCa
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sync sleep callback success, cost=%{public}" PRId64 "", cost);
         }
-    }
-    if (isWakeup && onForceSleep) {
-        onForceSleep = false;
     }
 }
 
