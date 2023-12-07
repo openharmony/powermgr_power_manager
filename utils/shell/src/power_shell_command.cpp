@@ -109,8 +109,8 @@ ErrCode PowerShellCommand::CreateCommandMap()
     commandMap_ = {
         {"help", std::bind(&PowerShellCommand::RunAsHelpCommand, this)},
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
-#ifndef POWER_SHELL_USER
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
+#ifndef POWER_SHELL_USER
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
         {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
 #ifdef HAS_DISPLAY_MANAGER_PART
