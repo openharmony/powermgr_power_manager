@@ -274,7 +274,7 @@ void SuspendController::RecordPowerKeyDown()
         return;
     }
 
-    if (pms->CheckDialogAndShuttingDown()) {
+    if (pms->CheckDialogFlag()) {
         return;
     }
 }
