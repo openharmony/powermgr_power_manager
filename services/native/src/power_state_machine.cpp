@@ -1059,7 +1059,6 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
                 CorrectState(currentState, PowerState::INACTIVE, state);
             }
             break;
-        case DisplayState::DISPLAY_DIM:
         case DisplayState::DISPLAY_ON:
             if (currentState == PowerState::INACTIVE || currentState == PowerState::STAND_BY ||
                 currentState == PowerState::DOZE) {
