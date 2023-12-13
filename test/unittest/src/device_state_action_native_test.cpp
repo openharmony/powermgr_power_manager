@@ -62,12 +62,12 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
     StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_INIT;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_OFF);
-    state = DisplayState::DISPLAY_DIM;
-    EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
-    EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_DIM);
     state = DisplayState::DISPLAY_ON;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_ON);
+    state = DisplayState::DISPLAY_DIM;
+    EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
+    EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_DIM);
     state = DisplayState::DISPLAY_SUSPEND;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_SUSPEND);
