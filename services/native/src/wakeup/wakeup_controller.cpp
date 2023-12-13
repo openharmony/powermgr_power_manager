@@ -310,7 +310,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 
     if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
-        if (wakeupController->CheckEventReciveTime(wakeupType)) {
+        if (wakeupController->CheckEventReciveTime(wakeupType) ||
+            keyEvent->GetKeyAction() == KeyEvent::KEY_ACTION_UP) {
             return;
         }
     }
