@@ -16,6 +16,7 @@
 import ServiceExtensionAbility from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
 import display from '@ohos.display';
+import GlobalContext from '../common/GlobalContext';
 
 const BG_COLOR = '#00000000';
 let thermalHighWindowFirst = undefined;
@@ -26,8 +27,8 @@ export default class ThermalHighDialogAbility extends ServiceExtensionAbility {
    */
   onCreate(want) {
     console.log('ThermalHighDialogAbility onCreate' + want.abilityName);
-    globalThis.extensionContext = this.context;
-    globalThis.g_thermalHighWindowFirst = thermalHighWindowFirst;
+    GlobalContext.getContext().setObject('extensionContext', this.context);
+    GlobalContext.getContext().setObject('g_thermalHighWindowFirst', thermalHighWindowFirst);
   }
 
   /**
@@ -67,7 +68,7 @@ export default class ThermalHighDialogAbility extends ServiceExtensionAbility {
         thermalHighWindowFirst = thermalHighWin;
         globalThis.g_thermalHighWindowFirst = thermalHighWindowFirst;
       }
-      globalThis.thermalHighWindow = thermalHighWin;
+      GlobalContext.getContext().setObject('thermalHighWindow', thermalHighWin);
       await thermalHighWin.moveTo(rect.left, rect.top);
       await thermalHighWin.resetSize(rect.width, rect.height);
       await thermalHighWin.loadContent('pages/thermalHighDialog');
