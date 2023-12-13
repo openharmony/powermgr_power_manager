@@ -16,6 +16,7 @@
 import ServiceExtensionAbility from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
 import display from '@ohos.display';
+import GlobalContext from '../common/GlobalContext';
 
 const BG_COLOR = '#00000000';
 let thermalLowWindowFirst = undefined;
@@ -26,8 +27,8 @@ export default class ThermalLowDialogAbility extends ServiceExtensionAbility {
    */
   onCreate(want) {
     console.log('ThermalLowDialogAbility onCreate' + want.abilityName);
-    globalThis.extensionContext = this.context;
-    globalThis.g_thermalLowWindowFirst = thermalLowWindowFirst;
+    GlobalContext.getContext().setObject('extensionContext', this.context);
+    GlobalContext.getContext().setObject('g_thermalLowWindowFirst', thermalLowWindowFirst);
   }
 
   /**
@@ -67,7 +68,7 @@ export default class ThermalLowDialogAbility extends ServiceExtensionAbility {
         thermalLowWindowFirst = thermalLowWin;
         globalThis.g_thermalLowWindowFirst = thermalLowWindowFirst;
       }
-      globalThis.thermalLowWindow = thermalLowWin;
+      GlobalContext.getContext().setObject('thermalLowWindow', thermalLowWin);
       await thermalLowWin.moveTo(rect.left, rect.top);
       await thermalLowWin.resetSize(rect.width, rect.height);
       await thermalLowWin.loadContent('pages/thermalLowDialog');

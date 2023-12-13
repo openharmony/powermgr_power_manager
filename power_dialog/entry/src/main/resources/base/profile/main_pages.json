@@ -1,7 +1,6 @@
 {
   "src": [
     "pages/powerDialog",
-    "pages/batteryDialog",
     "pages/thermalHighDialog",
     "pages/thermalLowDialog"
   ]

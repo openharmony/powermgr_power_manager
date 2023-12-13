@@ -14,6 +14,7 @@
  */
 
 import Constants from '../common/constant';
+import GlobalContext from '../common/GlobalContext';
 
 @Extend(Button) function customizeButton() {
   .backgroundColor(Color.Transparent)
@@ -26,8 +27,9 @@ import Constants from '../common/constant';
 
 @CustomDialog
 struct HighCustomDialog {
-  controller: CustomDialogController
-  cancel: () => void
+  controller?: CustomDialogController
+  cancel: () => void = () => {
+  }
 
    build() {
     Column() {
@@ -47,7 +49,9 @@ struct HighCustomDialog {
       Row() {
         Button($r('app.string.BUTTON_KNOW'))
           .onClick(() => {
-            this.controller.close()
+            if (this.controller) {
+              this.controller.close()
+            }
             this.cancel();
           }).customizeButton()
       }
@@ -75,9 +79,9 @@ struct HighDialog {
   })
 
   onCancel() {
-    globalThis.thermalHighWindow.destroy();
-    globalThis.g_thermalHighWindowFirst = undefined;
-    globalThis.extensionContext.terminateSelf();
+    (GlobalContext.getContext().getObject('thermalHighWindow') as Record<string, Function>).destroy();
+    GlobalContext.getContext().setObject('g_thermalHighWindowFirst', undefined);
+   (GlobalContext.getContext().getObject('extensionContext') as Record<string, Function>).terminateSelf();
   }
 
   existApp() {
