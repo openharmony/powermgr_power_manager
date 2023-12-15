@@ -131,7 +131,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
+#ifdef POWER_MANAGER_POWER_DIALOG
+        power->GetShutdownDialog().LoadDialogConfig();
         power->GetShutdownDialog().KeyMonitorInit();
+#endif
         power->HallSensorSubscriberInit();
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
