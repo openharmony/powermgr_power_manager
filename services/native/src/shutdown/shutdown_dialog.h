@@ -34,7 +34,21 @@ public:
     bool IsLongPress() const;
     void ResetLongPressFlag();
     void StartVibrator();
+    void LoadDialogConfig();
+    static std::string GetBundleName()
+    {
+        return bundleName_;
+    }
 
+    static std::string GetAbilityName()
+    {
+        return abilityName_;
+    }
+
+    static std::string GetUiExtensionType()
+    {
+        return uiExtensionType_;
+    }
 private:
     class DialogAbilityConnection : public OHOS::AAFwk::AbilityConnectionStub {
     public:
@@ -49,6 +63,9 @@ private:
     int32_t longPressId_ {0};
     sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_ {nullptr};
     FFRTQueue queue_ {"shutdown_dialog"};
+    static std::string bundleName_;
+    static std::string abilityName_;
+    static std::string uiExtensionType_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

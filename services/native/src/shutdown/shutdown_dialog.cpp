@@ -16,8 +16,10 @@
 #include "shutdown_dialog.h"
 
 #include <atomic>
+#include <fstream>
 #include <memory>
 #include <set>
+#include <string_ex.h>
 
 #include <ability_manager_client.h>
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -27,6 +29,9 @@
 #endif
 #include <message_parcel.h>
 
+#include "config_policy_utils.h"
+#include "json/reader.h"
+#include "json/value.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_vibrator.h"
@@ -46,7 +51,13 @@ std::atomic_bool g_isDialogShow = false;
 std::atomic_bool g_longPressShow = false;
 int32_t g_retryCount = 1;
 sptr<IRemoteObject> g_remoteObject = nullptr;
+const std::string DIALOG_CONFIG_PATH = "etc/systemui/poweroff_config.json";
 } // namespace
+
+std::string ShutdownDialog::bundleName_ = "com.ohos.powerdialog";
+std::string ShutdownDialog::abilityName_ = "PowerUiExtensionAbility";
+std::string ShutdownDialog::uiExtensionType_ = "sysDialog/power";
+
 ShutdownDialog::ShutdownDialog() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
 
 ShutdownDialog::~ShutdownDialog()
@@ -137,6 +148,32 @@ void ShutdownDialog::ResetLongPressFlag()
     g_longPressShow = false;
 }
 
+void ShutdownDialog::LoadDialogConfig()
+{
+    char buf[MAX_PATH_LEN];
+    char* configPath = GetOneCfgFile(DIALOG_CONFIG_PATH.c_str(), buf, MAX_PATH_LEN);
+    if (configPath == nullptr && *configPath == '\0') {
+        POWER_HILOGI(COMP_UTILS, "do not find shutdown off json");
+        return;
+    }
+    std::ifstream inputStream(configPath, std::ios::in | std::ios::binary);
+    std::string contentStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
+    Json::Reader reader;
+    Json::Value root;
+    if (!reader.parse(contentStr.data(), contentStr.data() + contentStr.size(), root)) {
+        POWER_HILOGE(COMP_UTILS, "json parse error");
+        return;
+    }
+
+    if (!root["bundleName"].isString() ||
+        !root["abilityName"].isString() || !root["uiExtensionType"].isString()) {
+            return;
+    }
+
+    bundleName_ = root["bundleName"].asString();
+    abilityName_ = root["abilityName"].asString();
+    uiExtensionType_ = root["uiExtensionType"].asString();
+}
 void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
@@ -155,12 +192,15 @@ void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
         MessageOption option;
         data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
         data.WriteString16(u"bundleName");
-        data.WriteString16(u"com.ohos.powerdialog");
+        data.WriteString16(Str8ToStr16(ShutdownDialog::GetBundleName()));
         data.WriteString16(u"abilityName");
-        data.WriteString16(u"PowerUiExtensionAbility");
+        data.WriteString16(Str8ToStr16(ShutdownDialog::GetAbilityName()));
         data.WriteString16(u"parameters");
+        std::string midStr = "\"";
         // sysDialogZOrder = 2 displayed on the lock screen
-        data.WriteString16(u"{\"ability.want.params.uiExtensionType\":\"sysDialog/power\",\"sysDialogZOrder\":2}");
+        std::string paramStr = "{\"ability.want.params.uiExtensionType\":"+ midStr +
+            ShutdownDialog::GetUiExtensionType() + midStr + ",\"sysDialogZOrder\":2}";
+        data.WriteString16(Str8ToStr16(paramStr));
         POWER_HILOGI(FEATURE_SHUTDOWN, "show power dialog is begin");
         const uint32_t cmdCode = 1;
         int32_t ret = remoteObject->SendRequest(cmdCode, data, reply, option);

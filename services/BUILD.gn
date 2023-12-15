@@ -155,6 +155,10 @@ ohos_shared_library("powermgrservice") {
     defines = [ "POWER_MANAGER_WAKEUP_ACTION" ]
   }
 
+  if (power_manager_feature_power_dialog) {
+    defines = [ "POWER_MANAGER_POWER_DIALOG" ]
+  }
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }

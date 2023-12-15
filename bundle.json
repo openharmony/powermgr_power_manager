@@ -26,7 +26,8 @@
             "power_manager_feature_screen_on_off",
             "power_manager_feature_power_state",
             "power_manager_feature_power_mode",
-            "power_manager_feature_wakeup_action"
+            "power_manager_feature_wakeup_action",
+            "power_manager_feature_power_dialog"
         ],
         "adapted_system_type": [
             "small",
