@@ -191,15 +191,6 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         return;
     }
 
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    POWER_HILOGI(FEATURE_WAKEUP, "start get wakeup action reason");
-    if ((reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
-        (pms->GetWakeupActionController()->ExecuteByGetReason())) {
-            POWER_HILOGI(FEATURE_WAKEUP, "wakeup action reason avaiable");
-            return;
-    }
-#endif
-
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
@@ -221,6 +212,15 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
                 POWER_HILOGI(FEATURE_WAKEUP, "suspendController is nullptr");
             }
         }
+
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    POWER_HILOGI(FEATURE_WAKEUP, "start get wakeup action reason");
+    if ((reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
+        (pms->GetWakeupActionController()->ExecuteByGetReason())) {
+            POWER_HILOGI(FEATURE_WAKEUP, "wakeup action reason avaiable");
+            return;
+    }
+#endif
 
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
