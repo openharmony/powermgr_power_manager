@@ -136,13 +136,15 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "sensor:sensor_interface_native" ]
   }
 
+  defines = []
+
   if (power_manager_feature_poweroff_charge) {
     external_deps += [
       "battery_manager:batterysrv_client",
       "drivers_interface_factory:libfactory_proxy_1.0",
     ]
 
-    defines = [ "POWER_MANAGER_POWEROFF_CHARGE" ]
+    defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
   }
 
   if (power_manager_feature_wakeup_action) {
@@ -152,11 +154,11 @@ ohos_shared_library("powermgrservice") {
       "native/src/wakeup_action/wakeup_action_sources.cpp",
     ]
 
-    defines = [ "POWER_MANAGER_WAKEUP_ACTION" ]
+    defines += [ "POWER_MANAGER_WAKEUP_ACTION" ]
   }
 
   if (power_manager_feature_power_dialog) {
-    defines = [ "POWER_MANAGER_POWER_DIALOG" ]
+    defines += [ "POWER_MANAGER_POWER_DIALOG" ]
   }
 
   subsystem_name = "powermgr"
