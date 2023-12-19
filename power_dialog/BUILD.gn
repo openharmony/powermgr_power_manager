@@ -17,6 +17,9 @@ group("dialog_hap") {
   deps = [ ":power_dialog_hap" ]
 }
 
+declare_args() {
+  power_dialog_path = ""
+}
 ohos_hap("power_dialog_hap") {
   hap_profile = "entry/src/main/module.json"
 
@@ -31,6 +34,13 @@ ohos_hap("power_dialog_hap") {
   subsystem_name = "applications"
   part_name = "prebuilt_hap"
   module_install_dir = "app/com.ohos.powerdialog"
+
+  if (defined(sign_hap_py_path) && power_dialog_path != "") {
+    certificate_profile = power_dialog_path
+    key_alias = "HwPowerOptionDialog Release"
+    private_key_path = "HwPowerOptionDialog Release"
+    compatible_version = "8"
+  }
 }
 
 ohos_js_assets("power_dialog_js_assets") {
