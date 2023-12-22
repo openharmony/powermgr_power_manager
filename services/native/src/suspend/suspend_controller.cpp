@@ -243,6 +243,17 @@ void SuspendController::HandleEvent(int64_t delayTime)
             g_monitorMutex.Unlock();
             return;
         }
+
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms != nullptr) {
+            if (pms->CheckDialogFlag()) {
+                POWER_HILOGI(FEATURE_SUSPEND, "Reset long press flag before suspending device by timeout");
+            }
+        }
+        if (stateMachine_ != nullptr) {
+            int32_t timeout = stateMachine_->GetDisplayOffTime();
+            POWER_HILOGI(FEATURE_INPUT, "This time of timeout is %{public}d ms", timeout);
+        }
         g_monitorMutex.Unlock();
         auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
@@ -566,7 +577,7 @@ void TimeoutSuspendMonitor::Cancel() {}
 
 void TimeoutSuspendMonitor::HandleEvent()
 {
-    POWER_HILOGI(FEATURE_INPUT, "TimeoutSuspendMonitor HandleEvent");
+    POWER_HILOGI(FEATURE_INPUT, "TimeoutSuspendMonitor HandleEvent.");
     Notify();
 }
 
