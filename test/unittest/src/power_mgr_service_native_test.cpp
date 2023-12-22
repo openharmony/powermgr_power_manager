@@ -82,8 +82,6 @@ namespace {
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
 {
-    g_pmsTest->KeyMonitorCancel();
-
     g_pmsTest->HallSensorSubscriberInit();
     g_pmsTest->HallSensorSubscriberCancel();
 
@@ -97,7 +95,6 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
 
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;
-    g_pmsTest->KeyMonitorCancel();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 end.");
 }
 
