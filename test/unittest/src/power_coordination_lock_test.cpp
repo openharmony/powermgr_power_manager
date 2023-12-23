@@ -39,6 +39,7 @@ constexpr int32_t WAIT_EVENT_TIME_MS = 200;
 constexpr int32_t RETRY_WAIT_TIME_MS = 100;
 constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
+constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_TEST_MS = 2000 + 500;
 
 bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
@@ -378,7 +379,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
     const sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     powerMgrClient.RegisterPowerStateCallback(stateCallback);
 
-    usleep(OVER_TIME_SCREEN_OFF_TIME_MS * US_PER_MS);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
     EXPECT_FALSE(g_inactiveCallback);
