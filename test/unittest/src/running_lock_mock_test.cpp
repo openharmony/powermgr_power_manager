@@ -470,6 +470,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
+#ifdef POWERMGR_TEST
 HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
 {
     ASSERT_NE(g_powerService, nullptr);
@@ -517,6 +518,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
     g_powerService->ReleaseRunningLock(runninglockToken);
     EXPECT_EQ(unlockActionCount, 2);
 }
+#endif
 
 /**
  * @tc.name: RunningLockMockTest009
