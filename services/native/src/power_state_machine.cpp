@@ -683,7 +683,7 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
     for (std::vector<RunningLockType>::const_iterator iter = pLock->begin(); iter != pLock->end(); ++iter) {
         uint32_t count = runningLockMgr->GetValidRunningLockNum(*iter);
         if (count > 0) {
-            POWER_HILOGI(FEATURE_POWER_STATE,
+            POWER_HILOGD(FEATURE_POWER_STATE,
                 "RunningLock %{public}s is locking (count=%{public}d), blocking %{public}s",
                 PowerUtils::GetRunningLockTypeString(*iter).c_str(), count,
                 PowerUtils::GetPowerStateString(state).c_str());
