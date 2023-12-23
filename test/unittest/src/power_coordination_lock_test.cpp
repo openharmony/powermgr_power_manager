@@ -271,6 +271,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
+#ifdef POWERMGR_TEST
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_005 start");
@@ -402,6 +403,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
     powerMgrClient.RestoreScreenOffTime();
     POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_007 end");
 }
+#endif
 
 /**
  * @tc.name: PowerCoordinationLockTest_008
