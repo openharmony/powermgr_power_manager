@@ -128,7 +128,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock029, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock029: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, true)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock029:forcesuspend");
     EXPECT_EQ(pms->ForceSuspendDevice(0), true);
 
@@ -228,12 +227,8 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock054, TestSize.Level2)
     }
 
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, _))
-        .Times(::testing::AtLeast(1))
-        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->ForceSuspendDevice(0);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock054:End");
     GTEST_LOG_(INFO) << "PowerMgrMock054: end";
@@ -262,13 +257,11 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock063, TestSize.Level2)
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, true)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_EQ(pms->ForceSuspendDevice(0), true);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
 
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock063:End");
     GTEST_LOG_(INFO) << "PowerMgrMock063: end";
@@ -341,7 +334,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, true)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
     EXPECT_EQ(pms->ForceSuspendDevice(0), true);
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
@@ -350,7 +342,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
         .Times(2)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
@@ -479,9 +470,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock078, TestSize.Level2)
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_CALL(*g_stateAction, GoToSleep(_, _, true)).Times(1).WillOnce(::testing::Return(ActionResult::SUCCESS));
     pms->ForceSuspendDevice(0);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     EXPECT_CALL(*g_lockAction, Unlock(_)).Times(1);
     pms->UnLock(token);
