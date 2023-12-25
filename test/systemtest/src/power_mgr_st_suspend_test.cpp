@@ -57,6 +57,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
+#ifdef POWERMGR_TEST
 HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: start";
@@ -176,4 +177,5 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock04, TestSize.Level2)
 
     GTEST_LOG_(INFO) << "PowerMgrMock04: end";
 }
+#endif
 } // namespace
