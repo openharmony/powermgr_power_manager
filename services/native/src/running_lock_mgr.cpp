@@ -172,13 +172,11 @@ void RunningLockMgr::InitLocksTypeProximity()
                     stateMachine->SetState(PowerState::AWAKE,
                         StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
                 }
-                backgroundLock_->Lock();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->ResetInactiveTimer();
-                backgroundLock_->Unlock();
                 proximityController_.Disable();
             }
         })
