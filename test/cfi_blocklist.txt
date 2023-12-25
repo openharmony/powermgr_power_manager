@@ -1,0 +1,8 @@
+src:*powermgr/power_manager/test/mock/action/*
+src:*powermgr/power_manager/test/systemtest/mock/*
+src:*powermgr/power_manager/test/systemtest/include/*
+src:*powermgr/power_manager/test/systemtest/src/*
+src:*powermgr/power_manager/test/unittest/include/*
+src:*powermgr/power_manager/test/unittest/src/*
+src:*third_party/googletest/googlemock/include/gmock/*
+src:*third_party/googletest/googletest/include/gtest/*
