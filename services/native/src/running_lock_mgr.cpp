@@ -622,12 +622,12 @@ void RunningLockMgr::NotifyHiView(RunningLockChangedType changeType, const Runni
     string bundleName = lockInner.GetBundleName();
     const int logLevel = 2;
     const string &tag = runninglockNotifyStr_.at(changeType);
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
+    int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "PID", pid, "UID", uid, "STATE", state, "TYPE", type, "NAME", name, "BUNDLENAME", bundleName,
         "LOG_LEVEL", logLevel, "TAG", tag);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid = %{public}d, uid= %{public}d, tag=%{public}s, bundleName=%{public}s",
-        pid, uid, tag.c_str(), bundleName.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid=%{public}d, uid=%{public}d, tag=%{public}s, "
+        "bundleName=%{public}s, ret=%{public}d", pid, uid, tag.c_str(), bundleName.c_str(), ret);
 }
 
 void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
