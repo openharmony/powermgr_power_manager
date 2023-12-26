@@ -40,7 +40,7 @@ public:
 private:
     void HandleAction(const std::string& reason);
     void HandleHibernate(SuspendDeviceType reason);
-    void HandleShutdown(const std::string& reason);
+    void HandleShutdown(const std::string& scene);
 
     std::map<std::string, std::shared_ptr<WakeupActionSource>> sourceMap_;
     std::shared_ptr<ShutdownController> shutdownController_;
