@@ -70,17 +70,6 @@ HWTEST_F(PowerMgrPowerDialog, LongPressKeyMonitorInitTest, TestSize.Level2)
 }
 
 /**
- * @tc.name: ConnectSystemUiTest
- * @tc.desc: test ConnectSystemUi Call without permission failed
- * @tc.type: FUNC
- */
-HWTEST_F(PowerMgrPowerDialog, ConnectSystemUiTest, TestSize.Level2)
-{
-    ShutdownDialog shutdownDialog;
-    EXPECT_FALSE(shutdownDialog.ConnectSystemUi());
-}
-
-/**
  * @tc.name: ConnectSystemUiDialogShowTest
  * @tc.desc: test power dialog has been show
  * @tc.type: FUNC

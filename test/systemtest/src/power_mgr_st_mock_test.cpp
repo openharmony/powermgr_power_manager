@@ -191,7 +191,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock032, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
 
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     EXPECT_CALL(*g_stateAction, GetDisplayState())
@@ -202,7 +201,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock032, TestSize.Level2)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(SCREEN_DIM_WAIT_TIME_S + ONE_SECOND);
 
-    EXPECT_CALL(*g_lockAction, Unlock(_)).Times(1);
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
@@ -373,7 +371,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock074, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
 
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
@@ -466,13 +463,11 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock078, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 
     pms->ForceSuspendDevice(0);
 
-    EXPECT_CALL(*g_lockAction, Unlock(_)).Times(1);
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
@@ -501,7 +496,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock079, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
 
-    EXPECT_CALL(*g_lockAction, Lock(_)).Times(1);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
 

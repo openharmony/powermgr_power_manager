@@ -41,8 +41,8 @@ using namespace std;
 
 namespace {
 static int32_t g_sleepTime;
-const int32_t POWER_SAVEMODE_TIME = 8000;
-const int32_t POWER_MODE_MIN_TIME = 20000;
+const int32_t POWER_SAVEMODE_TIME = 10000;
+const int32_t POWER_MODE_MIN_TIME = 30000;
 const int32_t EXTREME_POWER_SAVE_MODE_TIME = 5000;
 const int32_t PERFORMANCE_MODE_TIME = -1;
 const int32_t DISPLAY_OFF_ID = 101;
