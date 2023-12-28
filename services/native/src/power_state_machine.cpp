@@ -258,6 +258,7 @@ void PowerStateMachine::WakeupDeviceInner(
         POWER_HILOGW(FEATURE_WAKEUP, "Invalid type: %{public}d", type);
         return;
     }
+
     // Call legacy wakeup, Check the screen state
     if (stateAction_ != nullptr) {
         stateAction_->Wakeup(callTimeMs, type, details, pkgName);
@@ -789,6 +790,14 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
         return false;
     }
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_PROCESS) {
+        TransitResult ret = pController->TransitTo(reason, force);
+        if (ret != TransitResult::SUCCESS) {
+            pController->TransitTo(StateChangeReason::STATE_CHANGE_REASON_CANCEL_PRE_PROCESS, force);
+            return false;
+        }
+        return true;
+    }
     TransitResult ret = pController->TransitTo(reason, force);
     POWER_HILOGI(FEATURE_POWER_STATE, "StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
@@ -836,7 +845,6 @@ StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType ty
 
 StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
 {
-    POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceType :%{public}u", type);
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
@@ -873,11 +881,16 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_MOUSE:
             ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_PROCESS:
+            ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_CANCEL_PRE_PROCESS:
+            ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
         default:
             break;
     }
-    POWER_HILOGD(FEATURE_WAKEUP, "StateChangeReason: %{public}u", ret);
     return ret;
 }
 
