@@ -95,12 +95,15 @@ void RunningLockMgr::InitLocksTypeScreen()
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN active");
                 SystemSuspendController::GetInstance().Wakeup();
-                stateMachine->SetState(PowerState::AWAKE,
-                    StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
-                stateMachine->CancelDelayTimer(
-                    PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-                stateMachine->CancelDelayTimer(
-                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+                FFRTTask task = [this, stateMachine] {
+                    stateMachine->SetState(PowerState::AWAKE,
+                        StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+                    stateMachine->CancelDelayTimer(
+                        PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+                    stateMachine->CancelDelayTimer(
+                        PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+                };
+                FFRTUtils::SubmitTask(task);
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {

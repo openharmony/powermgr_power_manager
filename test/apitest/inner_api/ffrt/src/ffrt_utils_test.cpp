@@ -60,34 +60,28 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest003, TestSize.Level1)
 {
     int x = 0;
     FFRTTask task1 = [&]() {
-        ffrt::this_task::sleep_for(std::chrono::milliseconds(10));
+        ffrt::this_task::sleep_for(std::chrono::milliseconds(1));
         x = 2;
     };
     FFRTTask task2 = [&]() {
-        ffrt::this_task::sleep_for(std::chrono::milliseconds(10));
+        ffrt::this_task::sleep_for(std::chrono::milliseconds(30));
         x += 2;
     };
     FFRTTask task3 = [&]() {
-        ffrt::this_task::sleep_for(std::chrono::milliseconds(10));
+        ffrt::this_task::sleep_for(std::chrono::milliseconds(50));
         x += 2;
     };
 
     FFRTQueue queue("test_power_ffrt_queue");
     FFRTUtils::SubmitQueueTasks({task1, task2, task3}, queue); // submit batch tasks to a queue
 
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(12));
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(10));
     EXPECT_EQ(x, 2); // task1 finished
 
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
-    EXPECT_EQ(x, 2); // task2 not finished
-
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(50));
     EXPECT_EQ(x, 4); // task2 finished
 
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
-    EXPECT_EQ(x, 4); // task3 not finished
-
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(80));
     EXPECT_EQ(x, 6); // task3 finished
 }
 

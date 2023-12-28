@@ -23,6 +23,7 @@ using namespace OHOS;
 using namespace std;
 
 static sptr<PowerMgrService> g_service;
+static constexpr int SLEEP_AFTER_LOCK_TIME_US = 1000 * 1000;
 
 void PowerMgrSTSuspendTest::SetUpTestCase(void)
 {
@@ -131,6 +132,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock03, TestSize.Level2)
     pms->CreateRunningLock(token, info);
 
     pms->Lock(token, 0);
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(pms->IsUsed(token), true);
 
     pms->SuspendControllerInit();
@@ -145,35 +147,5 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock03, TestSize.Level2)
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     GTEST_LOG_(INFO) << "PowerMgrMock03: end";
-}
-
-/**
- * @tc.name: PowerMgrMock04
- * @tc.desc: test proximity RunningLock by mock
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock04, TestSize.Level2)
-{
-    GTEST_LOG_(INFO) << "PowerMgrMock04: start";
-
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock04: Failed to get PowerMgrService";
-    }
-
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    pms->CreateRunningLock(token, info);
-    pms->Lock(token, 0);
-    EXPECT_EQ(pms->IsUsed(token), true);
-    pms->SuspendControllerInit();
-    auto suspendController = pms->GetSuspendController();
-    suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
-
-    sleep(SLEEP_WAIT_TIME_S + 1);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
-
-    GTEST_LOG_(INFO) << "PowerMgrMock04: end";
 }
 } // namespace

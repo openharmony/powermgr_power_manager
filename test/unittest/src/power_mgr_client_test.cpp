@@ -37,6 +37,8 @@ using namespace OHOS;
 using namespace std;
 
 namespace {
+constexpr int SLEEP_AFTER_LOCK_TIME_US = 1000 * 1000;
+
 /**
  * @tc.name: PowerMgrClient001
  * @tc.desc: test RefreshActivity
@@ -349,6 +351,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient012, TestSize.Level2)
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
     runningLock->Lock();
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(runningLock->IsUsed(), true);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S);
@@ -375,6 +378,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient013, TestSize.Level2)
     powerMgrClient.OverrideScreenOffTime(time);
 
     runningLock->Lock();
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(runningLock->IsUsed(), true);
 
     runningLock->UnLock();
@@ -401,6 +405,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient014, TestSize.Level2)
     powerMgrClient.OverrideScreenOffTime(time);
 
     runningLock->Lock();
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(runningLock->IsUsed(), true);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S * DOUBLE_TIMES);
@@ -429,6 +434,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient015, TestSize.Level2)
     powerMgrClient.OverrideScreenOffTime(time);
 
     runningLock->Lock();
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(runningLock->IsUsed(), true);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     powerMgrClient.SuspendDevice();
@@ -460,6 +466,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient016, TestSize.Level2)
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     runningLock->Lock();
+    usleep(SLEEP_AFTER_LOCK_TIME_US + SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(runningLock->IsUsed(), true);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S);
