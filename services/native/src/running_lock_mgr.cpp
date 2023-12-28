@@ -178,6 +178,7 @@ void RunningLockMgr::InitLocksTypeProximity()
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->ResetInactiveTimer();
                 proximityController_.Disable();
+                proximityController_.Clear();
             }
         })
     );
