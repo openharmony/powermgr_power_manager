@@ -25,7 +25,9 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
+#ifdef POWER_VIBRATOR_MODE_ENABLE
 const int32_t VIBRATOR_SUCCESS = 0;
+#endif
 }
 std::mutex PowerVibrator::mutex_;
 std::shared_ptr<PowerVibrator> PowerVibrator::instance_ = nullptr;
