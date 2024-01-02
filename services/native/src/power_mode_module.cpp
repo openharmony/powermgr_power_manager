@@ -15,6 +15,7 @@
 
 #include "power_mode_module.h"
 
+#include "display_power_mgr_client.h"
 #include "power_log.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
@@ -26,6 +27,7 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
+using namespace OHOS::DisplayPowerMgr;
 
 namespace OHOS {
 namespace PowerMgr {
@@ -269,6 +271,9 @@ void PowerModeModule::SetLcdBrightness(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
     POWER_HILOGD(FEATURE_POWER_MODE, "lcdBrightness: %{public}d", lcdBrightness);
     SettingHelper::SetSettingBrightness(lcdBrightness);
+#ifdef HAS_DISPLAY_MANAGER
+    DisplayPowerMgrClient::GetInstance().SetBrightness(lcdBrightness);
+#endif
 }
 
 void PowerModeModule::SetVibration(bool isBoot)
