@@ -47,28 +47,28 @@ static const struct option DISPLAY_OPTIONS[] = {
     {"override delay", required_argument, nullptr, 'e'},
 };
 #endif
+#endif
 
 static const struct option TIME_OUT_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"restore", no_argument, nullptr, 'r'},
     {"override", required_argument, nullptr, 'o'},
 };
-#endif
 
 static const std::string HELP_MSG =
     "usage: power-shell\n"
     "command list:\n"
     "  setmode :    Set power mode. \n"
     "  wakeup  :    Wakeup system and turn screen on. \n"
-#ifndef POWER_SHELL_USER
     "  suspend :    Suspend system and turn screen off. \n"
+#ifndef POWER_SHELL_USER
     "  lock    :    Query running lock lists by bundle app. \n"
 #ifdef HAS_DISPLAY_MANAGER_PART
     "  display :    Update or Override display brightness. \n"
 #endif
-    "  timeout :    Override or Restore screen off time. \n"
     "  dump    :    Dump power info. \n"
 #endif
+    "  timeout :    Override or Restore screen off time. \n"
     "  help    :    Show this help menu. \n";
 
 static const std::string SETMODE_HELP_MSG =
@@ -93,13 +93,13 @@ static const std::string DISPLAY_HELP_MSG =
     "  -d  :  discount brightness\n"
     "  -e  :  set screenoff delay\n";
 #endif
+#endif
 
 static const std::string TIME_OUT_HELP_MSG =
     "usage: power-shell timeout [<options>] 1000\n"
     "timeout <options are as below> \n"
     "  -o  :  override screen off time\n"
     "  -r  :  restore screen off time\n";
-#endif
 
 PowerShellCommand::PowerShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "power-shell")
 {}
@@ -110,15 +110,15 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"help", std::bind(&PowerShellCommand::RunAsHelpCommand, this)},
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
-#ifndef POWER_SHELL_USER
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
+#ifndef POWER_SHELL_USER
         {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
 #ifdef HAS_DISPLAY_MANAGER_PART
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
 #endif
-        {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
 #endif
+        {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
     };
 
 #ifndef POWER_SHELL_USER
@@ -200,7 +200,6 @@ ErrCode PowerShellCommand::RunAsWakeupCommand()
     return ERR_OK;
 }
 
-#ifndef POWER_SHELL_USER
 ErrCode PowerShellCommand::RunAsSuspendCommand()
 {
     PowerMgrClient& client = PowerMgrClient::GetInstance();
@@ -209,6 +208,7 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
     return ERR_OK;
 }
 
+#ifndef POWER_SHELL_USER
 static const std::string GetBundleRunningLockTypeString(RunningLockType type)
 {
     switch (type) {
@@ -432,6 +432,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
     return ERR_OK;
 }
 #endif
+#endif
 
 ErrCode PowerShellCommand::RunAsTimeOutCommand()
 {
@@ -470,6 +471,5 @@ ErrCode PowerShellCommand::RunAsTimeOutCommand()
     }
     return ERR_OK;
 }
-#endif
 } // namespace PowerMgr
 } // namespace OHOS
