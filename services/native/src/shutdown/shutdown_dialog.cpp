@@ -152,7 +152,7 @@ void ShutdownDialog::LoadDialogConfig()
 {
     char buf[MAX_PATH_LEN];
     char* configPath = GetOneCfgFile(DIALOG_CONFIG_PATH.c_str(), buf, MAX_PATH_LEN);
-    if (configPath == nullptr && *configPath == '\0') {
+    if (configPath == nullptr || *configPath == '\0') {
         POWER_HILOGI(COMP_UTILS, "do not find shutdown off json");
         return;
     }
