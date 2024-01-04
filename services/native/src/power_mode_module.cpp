@@ -15,6 +15,9 @@
 
 #include "power_mode_module.h"
 
+#ifdef HAS_DISPLAY_MANAGER
+#include "display_power_mgr_client.h"
+#endif
 #include "power_log.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
@@ -269,6 +272,9 @@ void PowerModeModule::SetLcdBrightness(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
     POWER_HILOGD(FEATURE_POWER_MODE, "lcdBrightness: %{public}d", lcdBrightness);
     SettingHelper::SetSettingBrightness(lcdBrightness);
+#ifdef HAS_DISPLAY_MANAGER
+    OHOS::DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(lcdBrightness);
+#endif
 }
 
 void PowerModeModule::SetVibration(bool isBoot)
