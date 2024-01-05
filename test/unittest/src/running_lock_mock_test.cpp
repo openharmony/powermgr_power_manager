@@ -465,6 +465,60 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
 }
 
 /**
+ * @tc.name: RunningLockMockTest008
+ * @tc.desc: Test ProxyRunningLock function, test Background runninglock
+ * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
+{
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockInfo("RunningLockMockBackground8.1", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    auto runningLockMgr = g_powerService->GetRunningLockMgr();
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
+    auto backgroundLock = runningLockMgr->GetRunningLockInner(runninglockToken);
+    ASSERT_NE(backgroundLock, nullptr);
+    g_powerService->Lock(runninglockToken, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+    EXPECT_EQ(lockActionCount, 1);
+
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
+    EXPECT_EQ(unlockActionCount, 0);
+
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+    EXPECT_EQ(lockActionCount, 2);
+
+    g_powerService->ReleaseRunningLock(runninglockToken);
+    EXPECT_EQ(unlockActionCount, 1);
+}
+
+/**
  * @tc.name: RunningLockMockTest009
  * @tc.desc: Test ProxyRunningLock function, test Scene runninglock
  * @tc.type: FUNC
