@@ -81,7 +81,6 @@ std::shared_ptr<WakeupActionSources> WakeupActionSourceParser::ParseSources(cons
     std::shared_ptr<WakeupActionSources> parseSources = std::make_shared<WakeupActionSources>();
     Json::Reader reader;
     Json::Value root;
-    std::string errors;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
         POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json parse error");
         return parseSources;
