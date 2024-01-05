@@ -27,7 +27,7 @@ namespace PowerMgr {
 class WakeupActionSourceParser {
 public:
     static std::shared_ptr<WakeupActionSources> ParseSources();
-    static std::shared_ptr<WakeupActionSources> ParseSources(const std::string& config);
+    static std::shared_ptr<WakeupActionSources> ParseSources(const std::string& jsonStr);
     static bool GetTargetPath(std::string& targetPath);
     static bool ParseSourcesProc(
         std::shared_ptr<WakeupActionSources> &parseSources,  Json::Value& valueObj, std::string& key);
