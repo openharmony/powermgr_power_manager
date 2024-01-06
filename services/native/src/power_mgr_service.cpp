@@ -636,6 +636,9 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
 {
     std::string tempBundleName = "";
+    if (uid < OHOS::AppExecFwk::Constants::BASE_APP_UID) {
+        return tempBundleName;
+    }
     BundleMgrClient bundleObj;
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
