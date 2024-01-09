@@ -561,6 +561,7 @@ void PowerKeySuspendMonitor::Cancel()
 {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     if (powerkeyReleaseId_ >= 0) {
+        POWER_HILOGI(FEATURE_SUSPEND, "UnsubscribeKeyEvent: PowerKeySuspendMonitor");
         InputManager::GetInstance()->UnsubscribeKeyEvent(powerkeyReleaseId_);
         powerkeyReleaseId_ = -1;
     }
