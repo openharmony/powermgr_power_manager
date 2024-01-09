@@ -479,6 +479,7 @@ bool PowerkeyWakeupMonitor::Init()
 void PowerkeyWakeupMonitor::Cancel()
 {
     if (powerkeyShortPressId_ >= 0) {
+        POWER_HILOGI(FEATURE_WAKEUP, "UnsubscribeKeyEvent: PowerkeyWakeupMonitor");
         InputManager::GetInstance()->UnsubscribeKeyEvent(powerkeyShortPressId_);
     }
 }
