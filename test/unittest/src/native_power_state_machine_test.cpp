@@ -299,7 +299,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
     pmsTest->Lock(token, 0);
     EXPECT_EQ(pmsTest->IsUsed(token), true);
     stateMachine->HandleActivityTimeout();
-    stateMachine->HandleActivityOffTimeout();
 
     pmsTest->UnLock(token);
     EXPECT_EQ(pmsTest->IsUsed(token), false);
