@@ -86,22 +86,6 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService002, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService003
- * @tc.desc: Test RunningLock Deconstructor unlock
- * @tc.type: FUNC
- */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
-{
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
-    ASSERT_TRUE(runningLock1 != nullptr);
-
-    runningLock1->Lock();
-    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 end.");
-}
-
-/**
  * @tc.name: PowerMgrService005
  * @tc.desc: Test overrideScreenOffTime in screenon
  * @tc.type: FUNC
@@ -356,5 +340,21 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService020: Prepare Fail, Screen is OFF.";
     
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 end.");
+}
+
+/**
+ * @tc.name: PowerMgrService003
+ * @tc.desc: Test RunningLock Deconstructor unlock
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
+    ASSERT_TRUE(runningLock1 != nullptr);
+    runningLock1->Lock();
+    ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
+    runningLock1->Unlock();
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 end.");
 }
 }
