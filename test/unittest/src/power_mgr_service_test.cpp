@@ -86,11 +86,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService002, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService005
+ * @tc.name: PowerMgrService003
  * @tc.desc: Test overrideScreenOffTime in screenon
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -102,11 +102,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService006
+ * @tc.name: PowerMgrService004
  * @tc.desc: Test overrideScreenOffTime in screenon
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService004, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -117,11 +117,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService007
+ * @tc.name: PowerMgrService005
  * @tc.desc: Test overrideScreenOffTime in screenon
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -132,11 +132,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService008
+ * @tc.name: PowerMgrService006
  * @tc.desc: Test overrideScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -148,11 +148,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService009
+ * @tc.name: PowerMgrService007
  * @tc.desc: Test overrideScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -164,11 +164,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService010
+ * @tc.name: PowerMgrService008
  * @tc.desc: Test overrideScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -180,11 +180,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService011
+ * @tc.name: PowerMgrService009
  * @tc.desc: Test restoreScreenOffTime in screenon
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -197,11 +197,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService012
+ * @tc.name: PowerMgrService010
  * @tc.desc: Test restoreScreenOffTime in screenon
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -213,11 +213,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService013
+ * @tc.name: PowerMgrService011
  * @tc.desc: Test restoreScreenOffTime in screenon
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -229,11 +229,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService014
+ * @tc.name: PowerMgrService012
  * @tc.desc: Test restoreScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -247,11 +247,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService015
+ * @tc.name: PowerMgrService013
  * @tc.desc: Test restoreScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService015, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -264,11 +264,11 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService015, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService016
+ * @tc.name: PowerMgrService014
  * @tc.desc: Test restoreScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService016, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -281,12 +281,12 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService016, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService017
+ * @tc.name: PowerMgrService015
  * @tc.desc: Test Dump
  * @tc.type: FUNC
  * @tc.require: issueI650CX
  */
-HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
+HWTEST_F(PowerMgrServiceTest, PowerMgrService015, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::vector<std::string> dumpArgs {};
@@ -297,12 +297,12 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrService018
+ * @tc.name: PowerMgrService016
  * @tc.desc: Test IsStandby
  * @tc.type: FUNC
  * @tc.require: issueI7QHBE
  */
-HWTEST_F(PowerMgrServiceTest, PowerMgrService018, TestSize.Level2)
+HWTEST_F(PowerMgrServiceTest, PowerMgrService016, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     bool standby = false;
@@ -311,12 +311,12 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService018, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrService019
+ * @tc.name: PowerMgrService017
  * @tc.desc: Test QueryRunningLockLists
  * @tc.type: FUNC
  * @tc.require: issueI8FCZA
  */
-HWTEST_F(PowerMgrServiceTest, PowerMgrService019, TestSize.Level2)
+HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::map<std::string, RunningLockInfo> runningLockLists;
@@ -326,11 +326,11 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService019, TestSize.Level2)
 }
 
 /**
- * @tc.name: PowerMgrService020
+ * @tc.name: PowerMgrService018
  * @tc.desc: Test restoreScreenOffTime in screenoff
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -343,18 +343,18 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrService003
+ * @tc.name: PowerMgrService019
  * @tc.desc: Test RunningLock Deconstructor unlock
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     ASSERT_TRUE(runningLock1 != nullptr);
     runningLock1->Lock();
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
-    runningLock1->Unlock();
+    runningLock1->UnLock();
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 end.");
 }
 }
