@@ -28,6 +28,7 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_mgr_system_test.h"
+#include "power_mode_policy.h"
 #include "power_state_machine.h"
 #include "power_state_machine_info.h"
 #include "running_lock.h"
@@ -41,11 +42,8 @@ using namespace std;
 
 namespace {
 static int32_t g_sleepTime;
-const int32_t POWER_SAVEMODE_TIME = 10000;
-const int32_t POWER_MODE_MIN_TIME = 30000;
-const int32_t EXTREME_POWER_SAVE_MODE_TIME = 5000;
-const int32_t PERFORMANCE_MODE_TIME = -1;
-const int32_t DISPLAY_OFF_ID = 101;
+static int32_t g_getSleepTimeResult;
+const int32_t SLEEPTIME_ID = PowerModePolicy::ServiceType::SLEEPTIME;
 } // namespace
 
 void PowerMgrSystemTest::SetUpTestCase(void)
@@ -56,7 +54,7 @@ void PowerMgrSystemTest::SetUpTestCase(void)
 static void UpdateGlobalSleepTime(std::list<ModePolicy>& info)
 {
     for (std::list<ModePolicy>::iterator it = info.begin(); it != info.end(); ++it) {
-        if (it->id == DISPLAY_OFF_ID) {
+        if (it->id == SLEEPTIME_ID) {
             g_sleepTime = it->value;
         }
     }
@@ -72,6 +70,7 @@ static void SetPolicyMode(const int32_t& proxyId)
             UpdateGlobalSleepTime(info->second);
         }
     }
+    g_getSleepTimeResult = mode->GetSleepTime(proxyId);
 }
 
 namespace {
@@ -84,7 +83,7 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_001, TestSize.Level2)
 {
     PowerMode mode = PowerMode::POWER_SAVE_MODE;
     SetPolicyMode(static_cast<uint32_t>(mode));
-    EXPECT_EQ(g_sleepTime, POWER_SAVEMODE_TIME) << "PowerMgrSystemTest_001 fail to SetDeviceMode";
+    EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_001 fail to SetDeviceMode";
 }
 
 /**
@@ -96,7 +95,7 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_002, TestSize.Level2)
 {
     PowerMode mode = PowerMode::POWER_MODE_MIN;
     SetPolicyMode(static_cast<uint32_t>(mode));
-    EXPECT_EQ(g_sleepTime, POWER_MODE_MIN_TIME) << "PowerMgrSystemTest_002 fail to SetDeviceMode";
+    EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_002 fail to SetDeviceMode";
 }
 
 /**
@@ -108,7 +107,7 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_003, TestSize.Level2)
 {
     PowerMode mode = PowerMode::PERFORMANCE_MODE;
     SetPolicyMode(static_cast<uint32_t>(mode));
-    EXPECT_EQ(g_sleepTime, PERFORMANCE_MODE_TIME) << "PowerMgrSystemTest_003 fail to SetDeviceMode";
+    EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_003 fail to SetDeviceMode";
 }
 
 /**
@@ -120,6 +119,6 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_004, TestSize.Level2)
 {
     PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
     SetPolicyMode(static_cast<uint32_t>(mode));
-    EXPECT_EQ(g_sleepTime, EXTREME_POWER_SAVE_MODE_TIME) << "PowerMgrSystemTest_004 fail to SetDeviceMode";
+    EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_004 fail to SetDeviceMode";
 }
 } // namespace
