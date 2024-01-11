@@ -26,7 +26,7 @@
 #include "system_ability.h"
 
 #define RETURN_FLAG_FALSE (-1)
-#define SLEEP_FILTER_VALUE 124
+#define SLEEP_FILTER_VALUE 102
 
 namespace OHOS {
 namespace PowerMgr {
