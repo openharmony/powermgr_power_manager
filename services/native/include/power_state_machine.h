@@ -198,7 +198,6 @@ private:
     bool IsRunningLockEnabled(RunningLockType type);
     int64_t GetSleepTime();
     void HandleActivityTimeout();
-    void HandleActivityOffTimeout();
     void HandleActivitySleepTimeout();
     void HandleSystemWakeup();
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);

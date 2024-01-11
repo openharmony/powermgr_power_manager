@@ -615,24 +615,12 @@ void PowerStateMachine::HandleActivityTimeout()
             SetDelayTimer(GetDisplayOffTime() / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
         }
     } else {
-        POWER_HILOGW(FEATURE_ACTIVITY, "Display is not on, ignore activity timeout, state = %{public}d", dispState);
-        HandleActivityOffTimeout();
-    }
-}
-
-void PowerStateMachine::HandleActivityOffTimeout()
-{
-    POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
-    if (!this->CheckRunningLock(PowerState::INACTIVE)) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "RunningLock is blocking to transit to INACTIVE");
-        return;
-    }
-    DisplayState dispState = stateAction_->GetDisplayState();
-    // Also transit state when ON if system not support DIM
-    if (dispState == DisplayState::DISPLAY_ON || dispState == DisplayState::DISPLAY_DIM) {
-        SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    } else {
-        POWER_HILOGW(FEATURE_ACTIVITY, "Display is off, ignore activity off timeout, state = %{public}d", dispState);
+        if (this->GetDisplayOffTime() < 0) {
+            POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
+            return;
+        }
+        CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+        SetDelayTimer(GetDisplayOffTime() / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     }
 }
 
