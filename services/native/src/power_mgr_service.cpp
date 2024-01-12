@@ -137,9 +137,9 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
 #ifndef CONFIG_FACTORY_MODE
         power->HallSensorSubscriberInit();
-        POWER_HILOGD(COMP_SVC, "Subscribe Hall sensor");
+        POWER_HILOGI(COMP_SVC, "Subscribe Hall sensor");
 #else
-        POWER_HILOGD(COMP_SVC, "Disabled Hall sensor");
+        POWER_HILOGI(COMP_SVC, "Disabled Hall sensor");
 #endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
