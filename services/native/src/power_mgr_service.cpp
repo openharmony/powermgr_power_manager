@@ -135,7 +135,12 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->GetShutdownDialog().LoadDialogConfig();
         power->GetShutdownDialog().KeyMonitorInit();
 #endif
+#ifndef CONFIG_FACTORY_MODE
         power->HallSensorSubscriberInit();
+        POWER_HILOGI(COMP_SVC, "Subscribe Hall sensor");
+#else
+        POWER_HILOGI(COMP_SVC, "Disabled Hall sensor");
+#endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
         power->SuspendControllerInit();
