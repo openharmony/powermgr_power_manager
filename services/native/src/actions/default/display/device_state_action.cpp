@@ -101,12 +101,12 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
     }
 
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-    PowerStateChangeReason dispReason = IsLockScreen(reason) ?
-        PowerStateChangeReason::POWER_BUTTON : PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION;
+    PowerStateChangeReason dispReason = IsTimedOutWhileCoordinated(reason) ?
+        PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : static_cast<PowerStateChangeReason>(reason);
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-            if (currentState == DisplayState::DISPLAY_OFF && reason != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
+            if (currentState == DisplayState::DISPLAY_OFF) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().WakeUpBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);
@@ -118,8 +118,7 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
             break;
         case DisplayState::DISPLAY_OFF: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-            if ((currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) &&
-                reason != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
+            if (currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().SuspendBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);
@@ -145,9 +144,9 @@ void DeviceStateAction::SetCoordinated(bool coordinated)
     POWER_HILOGI(FEATURE_POWER_STATE, "Set coordinated=%{public}d, ret=%{public}d", coordinated_, ret);
 }
 
-bool DeviceStateAction::IsLockScreen(StateChangeReason reason)
+bool DeviceStateAction::IsTimedOutWhileCoordinated(StateChangeReason reason)
 {
-    return !(coordinated_ && reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    return coordinated_ && reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
 }
 
 uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,
@@ -173,20 +172,16 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
     }
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON: {
-            if (StateChangeReason(reason) != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
-                std::string identity = IPCSkeleton::ResetCallingIdentity();
-                DisplayManager::GetInstance().WakeUpEnd();
-                IPCSkeleton::SetCallingIdentity(identity);
-            }
+            std::string identity = IPCSkeleton::ResetCallingIdentity();
+            DisplayManager::GetInstance().WakeUpEnd();
+            IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
-            if (StateChangeReason(reason) != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
-                std::string identity = IPCSkeleton::ResetCallingIdentity();
-                DisplayManager::GetInstance().SuspendEnd();
-                IPCSkeleton::SetCallingIdentity(identity);
-            }
+            std::string identity = IPCSkeleton::ResetCallingIdentity();
+            DisplayManager::GetInstance().SuspendEnd();
+            IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
             break;
         }
