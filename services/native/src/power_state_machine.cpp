@@ -778,14 +778,6 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
         return false;
     }
-    if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_PROCESS) {
-        TransitResult ret = pController->TransitTo(reason, force);
-        if (ret != TransitResult::SUCCESS) {
-            pController->TransitTo(StateChangeReason::STATE_CHANGE_REASON_CANCEL_PRE_PROCESS, force);
-            return false;
-        }
-        return true;
-    }
     TransitResult ret = pController->TransitTo(reason, force);
     POWER_HILOGI(FEATURE_POWER_STATE, "StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
@@ -867,12 +859,6 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             ret = StateChangeReason::STATE_CHANGE_REASON_KEYBOARD;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_MOUSE:
-            ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
-            break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_PROCESS:
-            ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
-            break;
-        case WakeupDeviceType::WAKEUP_DEVICE_CANCEL_PRE_PROCESS:
             ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
