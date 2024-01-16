@@ -330,7 +330,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
  * @tc.desc: Test RunningLock Deconstructor unlock
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -338,6 +338,6 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
     runningLock1->Lock();
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     runningLock1->UnLock();
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 end.");
 }
 }
