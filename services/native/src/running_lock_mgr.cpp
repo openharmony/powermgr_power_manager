@@ -169,11 +169,11 @@ void RunningLockMgr::InitLocksTypeProximity()
                 if (proximityController_.IsClose()) {
                     POWER_HILOGI(FEATURE_RUNNING_LOCK, "INACTIVE when proximity is closed");
                     stateMachine->SetState(PowerState::INACTIVE,
-                        StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
+                        StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
                 } else {
                     POWER_HILOGI(FEATURE_RUNNING_LOCK, "AWAKE when proximity is away");
                     stateMachine->SetState(PowerState::AWAKE,
-                        StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
+                        StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
                 }
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
