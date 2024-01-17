@@ -118,7 +118,8 @@ uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChang
             break;
         case DisplayState::DISPLAY_OFF: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-            if (currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) {
+            if ((currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) &&
+                reason != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().SuspendBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);
@@ -179,9 +180,11 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
-            std::string identity = IPCSkeleton::ResetCallingIdentity();
-            DisplayManager::GetInstance().SuspendEnd();
-            IPCSkeleton::SetCallingIdentity(identity);
+            if (StateChangeReason(reason) != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
+                std::string identity = IPCSkeleton::ResetCallingIdentity();
+                DisplayManager::GetInstance().SuspendEnd();
+                IPCSkeleton::SetCallingIdentity(identity);
+            }
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
             break;
         }
