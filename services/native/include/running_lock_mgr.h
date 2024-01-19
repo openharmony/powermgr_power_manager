@@ -157,6 +157,7 @@ private:
         uint32_t status_ {0};
         SensorUser user_;
     };
+    ProximityController proximityController_;
 #endif
 
     class RunningLockDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -171,7 +172,6 @@ private:
     bool IsSceneRunningLockType(RunningLockType type);
     bool IsValidType(RunningLockType type);
     const wptr<PowerMgrService> pms_;
-    ProximityController proximityController_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
