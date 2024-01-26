@@ -190,7 +190,6 @@ private:
     };
     void NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
         RunningLockChangedType changeType);
-    void NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner, RunningLockChangedType changeType) const;
     void NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const;
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
