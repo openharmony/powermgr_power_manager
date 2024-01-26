@@ -213,7 +213,8 @@ private:
     bool PowerStateMachineInit();
     void NotifyRunningLockChanged(bool isUnLock);
     std::string GetBundleNameByUid(const int32_t uid);
-    RunningLockParam FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS = -1);
+    RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid,
+        int32_t timeOutMS = -1);
     static void RegisterBootCompletedCallback();
 
     inline PowerModeModule& GetPowerModeModule()

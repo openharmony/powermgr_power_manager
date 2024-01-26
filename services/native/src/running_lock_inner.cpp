@@ -34,8 +34,8 @@ std::shared_ptr<RunningLockInner> RunningLockInner::CreateRunningLockInner(const
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockInner is nullptr");
         return nullptr;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d", runningLockParam.name.c_str(),
-        runningLockParam.type);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d lockid: %{public}s",
+        runningLockParam.name.c_str(), runningLockParam.type, std::to_string(runningLockParam.lockid).c_str());
     return runningLockInner;
 }
 

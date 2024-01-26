@@ -57,7 +57,7 @@ void PowerMgrServiceNativeTest::SetUp()
     auto runningLockMgr = std::make_shared<RunningLockMgr>(g_pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
-    RunningLockParam runningLockParam {
+    RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObj, TIMEOUTMS);

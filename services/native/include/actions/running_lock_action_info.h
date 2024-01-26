@@ -46,6 +46,7 @@ enum RunningLockStatus : int32_t {
  * Runninglock parameter: used to convert to HDI RunningLockInfo
  */
 struct RunningLockParam {
+    uint64_t lockid = 0;
     std::string name;
     std::string bundleName;
     RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT;
