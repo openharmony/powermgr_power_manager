@@ -23,8 +23,6 @@
 
 namespace OHOS {
 namespace PowerMgr {
-#define FILE_NAME           (__builtin_strrchr("/" __FILE__, '/') + 1)
-#define FORMATED(fmt, ...) "[%{public}s:%{public}d] %{public}s# " fmt, FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__
 
 #ifdef POWER_HILOGF
 #undef POWER_HILOGF
@@ -101,33 +99,43 @@ enum PowerManagerLogDomain {
     DOMAIN_END = POWER_DOMAIN_ID_END, // Max to 0xD002920, keep the sequence and length same as PowerManagerLogLabel
 };
 
-// Keep the sequence and length same as PowerManagerLogDomain
-static constexpr OHOS::HiviewDFX::HiLogLabel POWER_LABEL[LABEL_END] = {
-    {LOG_CORE, DOMAIN_APP,                  "PowerApp"},
-    {LOG_CORE, DOMAIN_FRAMEWORK,            "PowerFwk"},
-    {LOG_CORE, DOMAIN_SERVICE,              "PowerSvc"},
-    {LOG_CORE, DOMAIN_HDI,                  "PowerHdi"},
-    {LOG_CORE, DOMAIN_DRIVER,               "PowerDrv"},
-    {LOG_CORE, DOMAIN_UTILS,                "PowerUtils"},
-    {LOG_CORE, DOMAIN_FEATURE_WAKEUP,       "PowerWakeup"},
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    {LOG_CORE, DOMAIN_FEATURE_WAKEUP_ACTION,       "PowerWakeupAction"},
-#endif
-    {LOG_CORE, DOMAIN_FEATURE_SUSPEND,      "PowerSuspend"},
-    {LOG_CORE, DOMAIN_FEATURE_RUNNING_LOCK, "PowerRunningLock"},
-    {LOG_CORE, DOMAIN_FEATURE_ACTIVITY,     "PowerActivity"},
-    {LOG_CORE, DOMAIN_FEATURE_POWER_STATE,  "PowerState"},
-    {LOG_CORE, DOMAIN_FEATURE_POWER_MODE,   "PowerMode"},
-    {LOG_CORE, DOMAIN_FEATURE_SHUTDOWN,     "PowerShutdown"},
-    {LOG_CORE, DOMAIN_FEATURE_INPUT,        "PowerInput"},
-    {LOG_CORE, DOMAIN_TEST,                 "PowerTest"},
+struct PowerManagerLogLabelDomain {
+    uint32_t domainId;
+    const char* tag;
 };
 
-#define POWER_HILOGF(domain, ...) (void)OHOS::HiviewDFX::HiLog::Fatal(POWER_LABEL[domain], FORMATED(__VA_ARGS__))
-#define POWER_HILOGE(domain, ...) (void)OHOS::HiviewDFX::HiLog::Error(POWER_LABEL[domain], FORMATED(__VA_ARGS__))
-#define POWER_HILOGW(domain, ...) (void)OHOS::HiviewDFX::HiLog::Warn(POWER_LABEL[domain], FORMATED(__VA_ARGS__))
-#define POWER_HILOGI(domain, ...) (void)OHOS::HiviewDFX::HiLog::Info(POWER_LABEL[domain], FORMATED(__VA_ARGS__))
-#define POWER_HILOGD(domain, ...) (void)OHOS::HiviewDFX::HiLog::Debug(POWER_LABEL[domain], FORMATED(__VA_ARGS__))
+// Keep the sequence and length same as PowerManagerLogDomain
+static const PowerManagerLogLabelDomain POWER_LABEL[LABEL_END] = {
+    {DOMAIN_APP,                  "PowerApp"},
+    {DOMAIN_FRAMEWORK,            "PowerFwk"},
+    {DOMAIN_SERVICE,              "PowerSvc"},
+    {DOMAIN_HDI,                  "PowerHdi"},
+    {DOMAIN_DRIVER,               "PowerDrv"},
+    {DOMAIN_UTILS,                "PowerUtils"},
+    {DOMAIN_FEATURE_WAKEUP,       "PowerWakeup"},
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    {DOMAIN_FEATURE_WAKEUP_ACTION,       "PowerWakeupAction"},
+#endif
+    {DOMAIN_FEATURE_SUSPEND,      "PowerSuspend"},
+    {DOMAIN_FEATURE_RUNNING_LOCK, "PowerRunningLock"},
+    {DOMAIN_FEATURE_ACTIVITY,     "PowerActivity"},
+    {DOMAIN_FEATURE_POWER_STATE,  "PowerState"},
+    {DOMAIN_FEATURE_POWER_MODE,   "PowerMode"},
+    {DOMAIN_FEATURE_SHUTDOWN,     "PowerShutdown"},
+    {DOMAIN_FEATURE_INPUT,        "PowerInput"},
+    {DOMAIN_TEST,                 "PowerTest"},
+};
+
+#define POWER_HILOGF(domain, ...) \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+#define POWER_HILOGE(domain, ...) \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+#define POWER_HILOGW(domain, ...) \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+#define POWER_HILOGI(domain, ...) \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+#define POWER_HILOGD(domain, ...) \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
 
 } // namespace PowerMgr
 } // namespace OHOS
