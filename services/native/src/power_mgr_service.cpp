@@ -657,9 +657,11 @@ std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
     return tempBundleName;
 }
 
-RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& info, int32_t timeOutMS)
+RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& info,
+    const uint64_t lockid, int32_t timeOutMS)
 {
     RunningLockParam filledParam {};
+    filledParam.lockid = lockid;
     filledParam.name = info.name;
     filledParam.type = info.type;
     filledParam.timeoutMs = timeOutMS;
@@ -683,7 +685,9 @@ PowerErrors PowerMgrService::CreateRunningLock(
         return PowerErrors::ERR_PARAM_INVALID;
     }
 
-    RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo);
+    uintptr_t remoteObjPtr = reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr());
+    uint64_t lockid = std::hash<uintptr_t>()(remoteObjPtr);
+    RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo, lockid);
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d, bundleName: %{public}s",
         runningLockParam.name.c_str(), runningLockParam.type, runningLockParam.bundleName.c_str());
 

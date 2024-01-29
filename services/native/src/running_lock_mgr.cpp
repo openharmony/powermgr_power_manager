@@ -355,24 +355,20 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     }
     lockInner->SetTimeOutMs(timeOutMS);
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
-        lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
-
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND
         || lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
         UpdateUnSceneLockLists(lockInnerParam, true);
     }
-
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
         lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
         lockInnerParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
     }
-
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name=%{public}s, type=%{public}d, timeoutMs=%{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type, timeOutMS);
     if (IsSceneRunningLockType(lockInnerParam.type)) {
         runningLockAction_->Lock(lockInnerParam);
         return;
     }
-
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock is already enabled");
         return;
@@ -384,7 +380,6 @@ void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutM
     }
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     std::shared_ptr<LockCounter> counter = iterator->second;
-
     counter->Increase(remoteObj, lockInner);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockCounter type=%{public}d, count=%{public}d", lockInnerParam.type,
         counter->GetCount());
@@ -493,12 +488,6 @@ bool RunningLockMgr::ExistValidRunningLock()
     return false;
 }
 
-void RunningLockMgr::NotifyHiViewRunningLockInfo(const RunningLockInner& lockInner,
-    RunningLockChangedType changeType) const
-{
-    NotifyHiView(changeType, lockInner);
-}
-
 void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner, RunningLockChangedType changeType)
 {
@@ -507,20 +496,14 @@ void RunningLockMgr::NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteO
     }
     const string& remoteObjStr = to_string(reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr()));
     switch (changeType) {
-        case NOTIFY_RUNNINGLOCK_ADD: {
-            NotifyHiViewRunningLockInfo(*lockInner, changeType);
-            break;
-        }
-        case NOTIFY_RUNNINGLOCK_REMOVE: {
+        case NOTIFY_RUNNINGLOCK_ADD:
+        case NOTIFY_RUNNINGLOCK_REMOVE:
             NotifyHiView(changeType, *lockInner);
             break;
-        }
-        case NOTIFY_RUNNINGLOCK_OVERTIME: {
+        case NOTIFY_RUNNINGLOCK_OVERTIME:
             break;
-        }
-        default: {
+        default:
             break;
-        }
     }
 }
 
@@ -602,7 +585,6 @@ void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     if (IsSceneRunningLockType(lockInner->GetType()) &&
         runningLockAction_->Unlock(lockParam) == RUNNINGLOCK_SUCCESS) {
         lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_UNPROXIED_RESTORE);
-        NotifyRunningLockChanged(remoteObj, lockInner, NOTIFY_RUNNINGLOCK_REMOVE);
         return;
     }
     if (lastState == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
