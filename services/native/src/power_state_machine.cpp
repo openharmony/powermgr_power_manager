@@ -259,6 +259,13 @@ void PowerStateMachine::WakeupDeviceInner(
     }
 
     // Call legacy wakeup, Check the screen state
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Stop sleep ffrt task");
+        suspendController->StopSleep();
+    }
+
     if (stateAction_ != nullptr) {
         stateAction_->Wakeup(callTimeMs, type, details, pkgName);
     }
@@ -267,8 +274,6 @@ void PowerStateMachine::WakeupDeviceInner(
     ResetInactiveTimer();
     SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
 
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
         suspendController->TriggerSyncSleepCallback(true);
