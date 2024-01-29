@@ -63,7 +63,8 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
         powerMgrClient.deathRecipient_->OnRemoteDied(remoteObject_);
         powerMgrClient.deathRecipient_->OnRemoteDied(nullptr);
     }
-
+    EXPECT_FALSE(powerMgrClient.RegisterSyncSleepCallback(nullptr, SleepPriority::DEFAULT));
+    EXPECT_FALSE(powerMgrClient.UnRegisterSyncSleepCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(nullptr));
