@@ -109,6 +109,7 @@ public:
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
+    bool IsCollaborationState();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif

@@ -144,6 +144,7 @@ public:
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
+    bool IsRunningLockEnabled(RunningLockType type);
 
 private:
     class StateController {
@@ -195,7 +196,6 @@ private:
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
-    bool IsRunningLockEnabled(RunningLockType type);
     int64_t GetSleepTime();
     void HandleActivityTimeout();
     void HandleActivitySleepTimeout();
