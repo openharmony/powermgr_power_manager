@@ -90,6 +90,10 @@ public:
     {
         return lockTimeMs_;
     }
+    uint64_t GetLockId() const
+    {
+        return runningLockParam_.lockid;
+    }
 
 private:
     std::mutex mutex_;
