@@ -1044,6 +1044,21 @@ void PowerMgrService::WakeupControllerInit()
     wakeupController_->Init();
 }
 
+bool PowerMgrService::IsCollaborationState()
+{
+    bool collaborationState = false;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return collaborationState;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return collaborationState;
+    }
+    collaborationState = stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION);
+    return collaborationState;
+}
+
 #ifdef POWER_MANAGER_WAKEUP_ACTION
 void PowerMgrService::WakeupActionControllerInit()
 {
