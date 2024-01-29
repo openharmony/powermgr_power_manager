@@ -50,7 +50,6 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pm
     std::vector<RunningLockType> standByBlocker {};
     std::vector<RunningLockType> dozeBlocker {};
     std::vector<RunningLockType> sleepBlocker {
-        RunningLockType::RUNNINGLOCK_BACKGROUND,
         RunningLockType::RUNNINGLOCK_COORDINATION
     };
     std::vector<RunningLockType> hibernateBlocker {};
