@@ -296,6 +296,9 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
         return;
     }
+    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+        return;
+    }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     if (wakeupController == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "wakeupController is not init");
@@ -333,6 +336,9 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
 
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+        return;
+    }
+    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
         return;
     }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
