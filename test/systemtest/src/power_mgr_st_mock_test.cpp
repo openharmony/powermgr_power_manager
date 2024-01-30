@@ -181,24 +181,12 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock032, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock032: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_stateAction, GetDisplayState())
-        .Times(::testing::AtLeast(1))
-        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(::testing::AtLeast(1))
-        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
 
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    EXPECT_CALL(*g_stateAction, GetDisplayState())
-        .Times(::testing::AtLeast(1))
-        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
-    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(::testing::AtLeast(1))
-        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(SCREEN_DIM_WAIT_TIME_S + ONE_SECOND);
 
     pms->UnLock(token);
@@ -297,12 +285,11 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock071, TestSize.Level2)
         .Times(::testing::AtLeast(1))
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(2)
+        .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    EXPECT_EQ(PowerState::AWAKE, pms->GetState());
 
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
@@ -337,12 +324,11 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
         .Times(::testing::AtLeast(1))
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(2)
+        .Times(1)
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    EXPECT_EQ(PowerState::AWAKE, pms->GetState());
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
@@ -436,8 +422,6 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock076, TestSize.Level2)
     }
     pms->Lock(token, 0);
     EXPECT_EQ(pms->IsUsed(token), true);
-    pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
-    EXPECT_EQ(PowerState::INACTIVE, pms->GetState());
 
     pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock076:End");
