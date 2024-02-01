@@ -149,6 +149,36 @@ void RunningLockMgr::InitLocksTypeBackground()
 }
 
 #ifdef HAS_SENSORS_SENSOR_PART
+void RunningLockMgr::ProximityLockOn()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    if (stateMachine == nullptr || suspendController == nullptr) {
+        return;
+    }
+
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
+    proximityController_.Enable();
+    if (proximityController_.IsClose()) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "INACTIVE when proximity is closed");
+        bool ret = stateMachine->SetState(PowerState::INACTIVE,
+            StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+        if (ret) {
+            suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+        }
+    } else {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "AWAKE when proximity is away");
+        PreprocessBeforeAwake();
+        stateMachine->SetState(PowerState::AWAKE,
+            StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+    }
+}
+
 void RunningLockMgr::InitLocksTypeProximity()
 {
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
@@ -164,19 +194,10 @@ void RunningLockMgr::InitLocksTypeProximity()
                 return;
             }
             if (active) {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
-                proximityController_.Enable();
-                if (proximityController_.IsClose()) {
-                    POWER_HILOGI(FEATURE_RUNNING_LOCK, "INACTIVE when proximity is closed");
-                    stateMachine->SetState(PowerState::INACTIVE,
-                        StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
-                } else {
-                    POWER_HILOGI(FEATURE_RUNNING_LOCK, "AWAKE when proximity is away");
-                    stateMachine->SetState(PowerState::AWAKE,
-                        StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
-                }
+                ProximityLockOn();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
+                PreprocessBeforeAwake();
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->ResetInactiveTimer();
@@ -334,6 +355,27 @@ bool RunningLockMgr::IsValidType(RunningLockType type)
             break;
     }
     return true;
+}
+
+void RunningLockMgr::PreprocessBeforeAwake()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    if (stateMachine == nullptr || suspendController == nullptr) {
+        return;
+    }
+
+    suspendController->StopSleep();
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "wake up.");
+    SystemSuspendController::GetInstance().Wakeup();
+    if (stateMachine->GetState() == PowerState::SLEEP) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "TriggerSyncSleepCallback start.");
+        suspendController->TriggerSyncSleepCallback(true);
+    }
 }
 
 void RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
@@ -882,7 +924,8 @@ void RunningLockMgr::ProximityController::OnClose()
         return;
     }
     auto stateMachine = pms->GetPowerStateMachine();
-    if (stateMachine == nullptr) {
+    auto suspendController = pms->GetSuspendController();
+    if (stateMachine == nullptr || suspendController == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
@@ -892,7 +935,11 @@ void RunningLockMgr::ProximityController::OnClose()
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
-        stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+        bool ret = stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+        if (ret) {
+            suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+        }
     }
 }
 
@@ -918,6 +965,7 @@ void RunningLockMgr::ProximityController::OnAway()
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
+        runningLock->PreprocessBeforeAwake();
         stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
     }
 }
