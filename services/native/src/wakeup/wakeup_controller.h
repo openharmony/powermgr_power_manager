@@ -83,6 +83,7 @@ public:
     virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
     virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
+    bool NeedHandle(std::shared_ptr<PointerEvent>& pointerEvent, sptr<PowerMgrService>& pms) const;
 };
 #endif
 
