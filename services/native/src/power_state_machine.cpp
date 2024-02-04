@@ -314,7 +314,7 @@ bool PowerStateMachine::CheckRefreshTime()
 
 bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
 {
-    POWER_HILOGD(COMP_SVC, "Override screenOffTime, timeout=%{public}" PRId64 "", timeout);
+    POWER_HILOGI(COMP_SVC, "Override screenOffTime, timeout=%{public}" PRId64 "", timeout);
     if (!isScreenOffTimeOverride_) {
         int64_t beforeOverrideTime = this->GetDisplayOffTime();
         isScreenOffTimeOverride_ = true;
@@ -340,7 +340,7 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
 void PowerStateMachine::OverrideScreenOffTimeCoordinated()
 {
     if (isCoordinatedOverride_ || !IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
-        POWER_HILOGI(FEATURE_POWER_STATE,
+        POWER_HILOGD(FEATURE_POWER_STATE,
             "Coordianted state override screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
         return;
     }
