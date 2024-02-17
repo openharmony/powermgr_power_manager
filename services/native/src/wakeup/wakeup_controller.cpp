@@ -333,15 +333,10 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
-
-    PowerState state = pms->GetState();
-    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
-        return;
-    }
-    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
-        return;
-    }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    if (!NeedHandle(pointerEvent, pms)) {
+        return;
+    }
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
@@ -378,6 +373,22 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
+}
+
+bool InputCallback::NeedHandle(std::shared_ptr<PointerEvent>& pointerEvent, sptr<PowerMgrService>& pms) const
+{
+    PowerState state = pms->GetState();
+    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+        return false;
+    }
+    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+        return false;
+    }
+    if (pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_ENTER_WINDOW
+        || pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+            return false;
+    }
+    return true;
 }
 
 void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
