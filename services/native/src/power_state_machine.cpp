@@ -865,6 +865,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_MOUSE:
             ret = StateChangeReason::STATE_CHANGE_REASON_MOUSE;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_SWITCH:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
         default:
             break;
