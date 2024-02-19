@@ -104,7 +104,7 @@ shared_ptr<TestCommonEventSubscriber> RegisterEvent()
         }
         tryTimes++;
     }
-    if (MAX_RETRY_TIME == tryTimes) {
+    if (tryTimes == MAX_RETRY_TIME) {
         GTEST_LOG_(INFO) << "PowerMgrNotifyTest:: Fail to register Subscriber!!!";
         return nullptr;
     }
