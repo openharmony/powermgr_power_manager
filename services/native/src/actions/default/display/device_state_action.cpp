@@ -168,7 +168,7 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
     POWER_HILOGD(FEATURE_POWER_STATE, "Callback: OnDisplayStateChanged");
     int32_t mainDisp = DisplayPowerMgrClient::GetInstance().GetMainDisplayId();
     if (mainDisp < 0 || static_cast<uint32_t>(mainDisp) != displayId) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "It's not main display, skip!");
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] It's not main display, skip!");
         return;
     }
     switch (state) {
