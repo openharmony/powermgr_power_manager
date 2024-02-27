@@ -981,7 +981,8 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         POWER_HILOGW(FEATURE_POWER_STATE, "owner is nullptr");
         return TransitResult::OTHER_ERR;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
+    POWER_HILOGI(FEATURE_POWER_STATE,
+        "[UL_POWER] Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
         PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
         PowerUtils::GetPowerStateString(this->state_).c_str(),
         PowerUtils::GetReasonTypeString(reason).c_str(), ignoreLock);
