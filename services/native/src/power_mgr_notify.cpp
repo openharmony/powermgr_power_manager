@@ -51,18 +51,18 @@ void PowerMgrNotify::PublishEvents(int64_t eventTime, sptr<IntentWant> want)
 
 void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "Start to publish event %{public}s at %{public}lld",
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         screenOffWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, screenOffWant_);
-    POWER_HILOGI(FEATURE_SUSPEND, "Publish event %{public}s done", screenOffWant_->GetAction().c_str());
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", screenOffWant_->GetAction().c_str());
 }
 
 void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
 {
-    POWER_HILOGI(FEATURE_WAKEUP, "Start to publish event %{public}s at %{public}lld",
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         screenOnWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, screenOnWant_);
-    POWER_HILOGI(FEATURE_WAKEUP, "Publish event %{public}s done", screenOnWant_->GetAction().c_str());
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", screenOnWant_->GetAction().c_str());
 }
 } // namespace PowerMgr
 } // namespace OHOS

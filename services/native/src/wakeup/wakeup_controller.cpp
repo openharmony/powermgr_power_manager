@@ -193,7 +193,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
 
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
@@ -225,10 +225,10 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
         if (ret != true) {
-            POWER_HILOGI(FEATURE_WAKEUP, "setstate wakeup error");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
     } else {
-        POWER_HILOGI(FEATURE_WAKEUP, "state=%{public}u no transitor", stateMachine_->GetState());
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] state=%{public}u no transitor", stateMachine_->GetState());
     }
 }
 
@@ -477,7 +477,7 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_WAKEUP, "receive wakeup controller key down");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] receive wakeup controller key down");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;

@@ -100,7 +100,7 @@ void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_AWAKE lambda start");
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start");
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             if (ret != ActionResult::SUCCESS) {
@@ -126,7 +126,7 @@ void PowerStateMachine::EmplaceInactive()
 {
     controllerMap_.emplace(PowerState::INACTIVE,
         std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_INACTIVE lambda start");
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_INACTIVE lambda start");
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
             if (enableDisplaySuspend_) {
@@ -451,7 +451,7 @@ void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
 {
     if (GetState() == PowerState::INACTIVE && IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "Coordination is enabled, not notify power state");
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Coordination is enabled, not notify power state");
         return;
     }
     POWER_HILOGD(
@@ -783,7 +783,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         return false;
     }
     TransitResult ret = pController->TransitTo(reason, force);
-    POWER_HILOGI(FEATURE_POWER_STATE, "StateController::TransitTo ret: %{public}d", ret);
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 
@@ -981,7 +981,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         POWER_HILOGW(FEATURE_POWER_STATE, "owner is nullptr");
         return TransitResult::OTHER_ERR;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Transit from %{public}s to %{public}s for %{public}s ignoreLock=%{public}d",
         PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
         PowerUtils::GetPowerStateString(this->state_).c_str(),
         PowerUtils::GetReasonTypeString(reason).c_str(), ignoreLock);
