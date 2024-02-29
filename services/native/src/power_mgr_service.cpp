@@ -688,7 +688,8 @@ PowerErrors PowerMgrService::CreateRunningLock(
     uintptr_t remoteObjPtr = reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr());
     uint64_t lockid = std::hash<uintptr_t>()(remoteObjPtr);
     RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo, lockid);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type: %{public}d, bundleName: %{public}s",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK,
+        "Service CreateRunningLock name: %{public}s, type: %{public}d, bundleName: %{public}s",
         runningLockParam.name.c_str(), runningLockParam.type, runningLockParam.bundleName.c_str());
 
     runningLockMgr_->CreateRunningLock(remoteObj, runningLockParam);
