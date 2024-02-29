@@ -60,6 +60,7 @@ ohos_fuzztest("QueryRunningLockListsFuzzTest") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
     "power_manager:power_ffrt",
