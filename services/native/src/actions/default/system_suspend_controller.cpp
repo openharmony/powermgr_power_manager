@@ -104,10 +104,8 @@ void SystemSuspendController::Suspend(
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
-    const auto now = std::chrono::system_clock::now();
-    const auto inMilliSec = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "SUSPEND_TIMESTAMPS", static_cast<int64_t>(inMilliSec.count()));
+        "TYPE", static_cast<int32_t>(1), "SUSPEND_TIMESTAMPS", GetTimeMs());
     if (force) {
         powerInterface_->ForceSuspend();
     } else {
@@ -121,6 +119,8 @@ void SystemSuspendController::Wakeup()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "TYPE", static_cast<int32_t>(0), "SUSPEND_TIMESTAMPS", GetTimeMs());
     powerInterface_->StopSuspend();
 }
 
@@ -200,6 +200,13 @@ void SystemSuspendController::PowerHdfCallback::SetListener(
 {
     onSuspend_ = suspend;
     onWakeup_ = wakeup;
+}
+
+int64_t SystemSuspendController::GetTimeMs()
+{
+    const auto now = std::chrono::system_clock::now();
+    const auto inMilliSec = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return static_cast<int64_t>(inMilliSec.count());
 }
 } // namespace PowerMgr
 } // namespace OHOS
