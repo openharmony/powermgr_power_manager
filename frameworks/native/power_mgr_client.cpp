@@ -242,7 +242,8 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create RunningLock record");
         return nullptr;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "name: %{public}s, type = %{public}d", name.c_str(), type);
+    POWER_HILOGI(
+        FEATURE_RUNNING_LOCK, "Client CreateRunningLock name: %{public}s, type = %{public}d", name.c_str(), type);
     auto error = runningLock->Init();
     if (error != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLock init failed");
