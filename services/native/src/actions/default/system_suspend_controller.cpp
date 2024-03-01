@@ -15,7 +15,6 @@
 
 #include "system_suspend_controller.h"
 
-#include <chrono>
 #include "hisysevent.h"
 #include "power_common.h"
 #include "power_log.h"
@@ -105,7 +104,7 @@ void SystemSuspendController::Suspend(
         return;
     }
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "TYPE", static_cast<int32_t>(1), "SUSPEND_TIMESTAMPS", GetTimeMs());
+        "TYPE", static_cast<int32_t>(1));
     if (force) {
         powerInterface_->ForceSuspend();
     } else {
@@ -120,7 +119,7 @@ void SystemSuspendController::Wakeup()
         return;
     }
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "TYPE", static_cast<int32_t>(0), "SUSPEND_TIMESTAMPS", GetTimeMs());
+        "TYPE", static_cast<int32_t>(0));
     powerInterface_->StopSuspend();
 }
 
@@ -200,13 +199,6 @@ void SystemSuspendController::PowerHdfCallback::SetListener(
 {
     onSuspend_ = suspend;
     onWakeup_ = wakeup;
-}
-
-int64_t SystemSuspendController::GetTimeMs()
-{
-    const auto now = std::chrono::system_clock::now();
-    const auto inMilliSec = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    return static_cast<int64_t>(inMilliSec.count());
 }
 } // namespace PowerMgr
 } // namespace OHOS

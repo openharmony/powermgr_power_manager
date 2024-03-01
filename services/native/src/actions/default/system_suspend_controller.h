@@ -58,7 +58,6 @@ private:
         std::function<void()> onSuspend_;
         std::function<void()> onWakeup_;
     };
-    int64_t GetTimeMs();
     OHOS::HDI::Power::V1_1::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
     std::mutex mutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
