@@ -15,6 +15,7 @@
 
 #include "system_suspend_controller.h"
 
+#include "hisysevent.h"
 #include "power_common.h"
 #include "power_log.h"
 #include "suspend/running_lock_hub.h"
@@ -97,11 +98,13 @@ void SystemSuspendController::UnRegisterPowerHdiCallback()
 void SystemSuspendController::Suspend(
     const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force)
 {
-    POWER_HILOGI(COMP_SVC, "The hdf interface");
+    POWER_HILOGI(COMP_SVC, "The hdf interface, force=%{public}u", static_cast<uint32_t>(force));
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "TYPE", static_cast<int32_t>(1));
     if (force) {
         powerInterface_->ForceSuspend();
     } else {
@@ -115,6 +118,8 @@ void SystemSuspendController::Wakeup()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "TYPE", static_cast<int32_t>(0));
     powerInterface_->StopSuspend();
 }
 
