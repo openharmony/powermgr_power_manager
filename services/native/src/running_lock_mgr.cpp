@@ -73,7 +73,9 @@ bool RunningLockMgr::InitLocks()
 {
     InitLocksTypeScreen();
     InitLocksTypeBackground();
+#ifdef HAS_SENSORS_SENSOR_PART
     InitLocksTypeProximity();
+#endif
     InitLocksTypeCoordination();
     return true;
 }
@@ -718,7 +720,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
 
     result.append("Dump Proxy List: \n");
     result.append(runninglockProxy_->DumpProxyInfo());
-
+#ifdef HAS_SENSORS_SENSOR_PART
     result.append("Peripherals Info: \n")
             .append("  Proximity: ")
             .append("Enabled=")
@@ -726,6 +728,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
             .append(" Status=")
             .append(ToString(proximityController_.GetStatus()))
             .append("\n");
+#endif
 }
 
 void RunningLockMgr::RunningLockDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
