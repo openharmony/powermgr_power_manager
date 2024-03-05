@@ -252,7 +252,7 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     auto status = static_cast<uint32_t>(data->status);
 
     if (status & LID_CLOSED_HALL_FLAG) {
-        POWER_HILOGI(FEATURE_SUSPEND, "Lid close event received, begin to suspend");
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received, begin to suspend");
         g_inLidMode = true;
         SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
         suspendController->ExecSuspendMonitorByReason(reason);
@@ -260,7 +260,7 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
         if (!g_inLidMode) {
             return;
         }
-        POWER_HILOGI(FEATURE_WAKEUP, "Lid open event received, begin to wakeup");
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Lid open event received, begin to wakeup");
         g_inLidMode = false;
         WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_LID;
         wakeupController->ExecWakeupMonitorByReason(reason);
@@ -318,11 +318,11 @@ void PowerMgrService::SwitchSubscriberInit()
                 return;
             }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
-                POWER_HILOGI(FEATURE_SUSPEND, "Switch close event received, begin to suspend");
+                POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Switch close event received, begin to suspend");
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "Switch open event received, begin to wakeup");
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch open event received, begin to wakeup");
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
@@ -374,12 +374,12 @@ void PowerMgrService::HandleKeyEvent(int32_t keyCode)
         this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     } else {
         if (keyCode == KeyEvent::KEYCODE_F1) {
-            POWER_HILOGI(FEATURE_WAKEUP, "Wakeup by double click");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Wakeup by double click");
             std::string reason = "double click";
             reason.append(std::to_string(keyCode));
             this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK, reason);
         } else if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
-            POWER_HILOGI(FEATURE_WAKEUP, "Wakeup by keyboard");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Wakeup by keyboard");
             std::string reason = "keyboard:";
             reason.append(std::to_string(keyCode));
             this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD, reason);
@@ -398,7 +398,7 @@ void PowerMgrService::HandlePointEvent(int32_t type)
     } else {
         if (type == PointerEvent::SOURCE_TYPE_MOUSE) {
             std::string reason = "mouse click";
-            POWER_HILOGI(FEATURE_WAKEUP, "Wakeup by mouse");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Wakeup by mouse");
             this->WakeupDevice(now, WakeupDeviceType::WAKEUP_DEVICE_MOUSE, reason);
         }
     }
@@ -533,7 +533,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
         suspendController_->StopSleep();
     }
 
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Shutdown(reason);
     return PowerErrors::ERR_OK;
 }
@@ -550,7 +550,7 @@ PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs, SuspendDeviceType
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
         return PowerErrors::ERR_OK;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "Try to suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->SuspendDeviceInner(pid, callTimeMs, reason, suspendImmed);
     return PowerErrors::ERR_OK;
 }
@@ -563,7 +563,7 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
     WakeupRunningLock::Lock();
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
     WakeupRunningLock::Unlock();
@@ -634,7 +634,7 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't force suspend");
         return false;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
     return powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
 }
 

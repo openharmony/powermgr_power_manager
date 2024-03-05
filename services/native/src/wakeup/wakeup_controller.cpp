@@ -319,7 +319,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         }
     }
 
-    POWER_HILOGI(FEATURE_WAKEUP, "KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
@@ -346,31 +346,27 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     int32_t sourceType = pointerEvent->GetSourceType();
     if (deviceType == PointerEvent::TOOL_TYPE_PEN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
-        if (wakeupController->CheckEventReciveTime(wakeupType)) {
-            return;
+    } else {
+        switch (sourceType) {
+            case PointerEvent::SOURCE_TYPE_MOUSE:
+                wakeupType = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
+                break;
+            case PointerEvent::SOURCE_TYPE_TOUCHPAD:
+                wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD;
+                break;
+            case PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
+                wakeupType = WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
+                break;
+            default:
+                break;
         }
-        wakeupController->ExecWakeupMonitorByReason(wakeupType);
-        return;
-    }
-
-    switch (sourceType) {
-        case PointerEvent::SOURCE_TYPE_MOUSE:
-            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
-            break;
-        case PointerEvent::SOURCE_TYPE_TOUCHPAD:
-            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD;
-            break;
-        case PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
-            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
-            break;
-        default:
-            break;
     }
     if (wakeupController->CheckEventReciveTime(wakeupType)) {
         return;
     }
 
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PointerEvent wakeupType=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
 }
