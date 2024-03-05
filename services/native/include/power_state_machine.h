@@ -149,6 +149,7 @@ public:
     static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
+    void SetIgnoreScreenOnLock(bool Ingore);
 
 private:
     class StateController {
@@ -233,6 +234,7 @@ private:
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
+    std::atomic<bool> ignoreScreenOnLock_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS

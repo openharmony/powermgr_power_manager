@@ -1088,4 +1088,31 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
     EXPECT_EQ(ret, false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient045:End.");
 }
+
+/**
+ * @tc.name: PowerMgrClient047
+ * @tc.desc: test SetIgnoreScreenOnLock 
+ * @tc.type: FUNC
+ * @tc.require: issueI6FMHX
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
+{   
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
+    powerMgrClient.OverrideScreenOffTime(time);
+    runningLock->Lock();
+    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    auto ret = powerMgrClient.SetIgnoreScreenOnLock(true);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+    powerMgrClient.SetIgnoreScreenOnLock(false);
+    powerMgrClient.WakeupDevice();
+    usleep(TRANSFER_NS_TO_MS);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+}
 } // namespace
