@@ -93,7 +93,7 @@ void RunningLockMgr::InitLocksTypeScreen()
                 return;
             }
             if (active) {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN active");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_SCREEN active");
                 SystemSuspendController::GetInstance().Wakeup();
                 FFRTTask task = [this, stateMachine] {
                     stateMachine->SetState(PowerState::AWAKE,
@@ -105,7 +105,7 @@ void RunningLockMgr::InitLocksTypeScreen()
                 };
                 FFRTUtils::SubmitTask(task);
             } else {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_SCREEN inactive");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_SCREEN inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {
                     stateMachine->ResetInactiveTimer();
                 } else {
@@ -164,7 +164,7 @@ void RunningLockMgr::ProximityLockOn()
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
     proximityController_.Enable();
     if (proximityController_.IsClose()) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "INACTIVE when proximity is closed");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] INACTIVE when proximity is closed");
         bool ret = stateMachine->SetState(PowerState::INACTIVE,
             StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
         if (ret) {
@@ -172,7 +172,7 @@ void RunningLockMgr::ProximityLockOn()
                 static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
         }
     } else {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "AWAKE when proximity is away");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] AWAKE when proximity is away");
         PreprocessBeforeAwake();
         stateMachine->SetState(PowerState::AWAKE,
             StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
@@ -196,7 +196,7 @@ void RunningLockMgr::InitLocksTypeProximity()
             if (active) {
                 ProximityLockOn();
             } else {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
                 PreprocessBeforeAwake();
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
