@@ -162,6 +162,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SYNC_SLEEP_CALLBACK):
             ret = UnRegisterSyncSleepCallbackStub(data);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_IGNORE_SCREEN_ON_LOCK):
+            ret = SetIgnoreScreenOnLockStub(data, reply);
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -541,6 +544,15 @@ int32_t PowerMgrStub::IsStandbyStub(MessageParcel& data, MessageParcel& reply)
     PowerErrors ret = IsStandby(isStandby);
     WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     WRITE_PARCEL_WITH_RET(reply, Bool, isStandby, E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::SetIgnoreScreenOnLockStub(MessageParcel& data, MessageParcel& reply)
+{   
+    bool Ignore;
+    READ_PARCEL_WITH_RET(data, Bool, Ignore, E_READ_PARCEL_ERROR);
+    PowerErrors ret = SetIgnoreScreenOnLock(Ignore);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 } // namespace PowerMgr

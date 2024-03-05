@@ -67,6 +67,7 @@ private:
     int32_t GetDeviceModeStub(MessageParcel& reply);
     int32_t ShellDumpStub(MessageParcel& data, MessageParcel& reply);
     int32_t IsStandbyStub(MessageParcel& data, MessageParcel& reply);
+    int32_t SetIgnoreScreenOnLockStub(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace PowerMgr
 } // namespace OHOS

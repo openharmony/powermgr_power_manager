@@ -794,9 +794,16 @@ void PowerStateMachine::HandleSystemWakeup()
     }
 }
 
+void PowerStateMachine::SetIgnoreScreenOnLock(bool Ignore)
+{
+    ignoreScreenOnLock_ = Ignore;
+}
 bool PowerStateMachine::CheckRunningLock(PowerState state)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Enter, state = %{public}u", state);
+    if(state == PowerState::INACTIVE && ignoreScreenOnLock_.load()) {
+        return true;
+    }
     auto pms = pms_.promote();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Pms is nullptr");

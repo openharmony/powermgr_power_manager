@@ -1101,6 +1101,15 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 #endif
 }
 
+PowerErrors PowerMgrService::SetIgnoreScreenOnLock(bool ignore)
+{
+    powerStateMachine_->SetIgnoreScreenOnLock(ignore);
+    if (IsScreenOn()) {
+        powerStateMachine_->ResetInactiveTimer();
+    }
+    return PowerErrors::ERR_OK;
+}
+
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
