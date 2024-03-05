@@ -10,7 +10,7 @@
 
 1.  重启系统。
 2.  管理休眠运行锁。
-3.  系统电源状态查询。
+3.  系统电源状态查询。谢谢谢谢谢谢测试用
 
 **图 1**  电源管理服务组件架构图<a name="fig106301571239"></a><br> 
 ![](figures/power-management-subsystem-architecture.png "电源管理子系统架构图")
