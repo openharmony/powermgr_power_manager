@@ -363,7 +363,7 @@ bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo
     return proxy_->QueryRunningLockLists(runningLockLists);
 }
 
-PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled) 
+PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
     PowerErrors ret = proxy_->SetForceTimingOut(enabled);

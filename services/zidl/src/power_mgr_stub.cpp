@@ -551,7 +551,7 @@ int32_t PowerMgrStub::IsStandbyStub(MessageParcel& data, MessageParcel& reply)
 }
 
 int32_t PowerMgrStub::SetForceTimingOutStub(MessageParcel& data, MessageParcel& reply)
-{   
+{
     bool enabled;
     READ_PARCEL_WITH_RET(data, Bool, enabled, E_READ_PARCEL_ERROR);
     PowerErrors ret = SetForceTimingOut(enabled);
