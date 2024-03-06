@@ -794,10 +794,11 @@ void PowerStateMachine::HandleSystemWakeup()
     }
 }
 
-void PowerStateMachine::SetIgnoreScreenOnLock(bool Ignore)
+void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
-    ignoreScreenOnLock_ = Ignore;
+    ignoreScreenOnLock_ = enabled;
 }
+
 bool PowerStateMachine::CheckRunningLock(PowerState state)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Enter, state = %{public}u", state);

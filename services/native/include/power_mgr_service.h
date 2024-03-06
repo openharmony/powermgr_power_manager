@@ -87,7 +87,8 @@ public:
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
     virtual PowerErrors IsStandby(bool& isStandby) override;
-    virtual PowerErrors SetIgnoreScreenOnLock(bool ignore) override;
+    virtual PowerErrors SetForceTimingOut(bool enabled) override;
+    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool ignoreLock);
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;

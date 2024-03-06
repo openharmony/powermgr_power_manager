@@ -149,7 +149,7 @@ public:
     static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
-    void SetIgnoreScreenOnLock(bool Ingore);
+    void SetForceTimingOut(bool enabled);
 
 private:
     class StateController {

@@ -363,11 +363,19 @@ bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo
     return proxy_->QueryRunningLockLists(runningLockLists);
 }
 
-PowerErrors PowerMgrClient::SetIgnoreScreenOnLock(bool ignore) {
-    POWER_HILOGE(FEATURE_ACTIVITY, "testtag client start");
+PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled) 
+{
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->SetIgnoreScreenOnLock(ignore);
+    PowerErrors ret = proxy_->SetForceTimingOut(enabled);
     return ret;
 }
+
+PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool ignoreLock)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, ignoreLock);
+    return ret;
+}
+
 } // namespace PowerMgr
 } // namespace OHOS

@@ -1101,13 +1101,18 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 #endif
 }
 
-PowerErrors PowerMgrService::SetIgnoreScreenOnLock(bool ignore)
+PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
 {
-    powerStateMachine_->SetIgnoreScreenOnLock(ignore);
+    powerStateMachine_->SetForceTimingOut(enabled);
     if (IsScreenOn()) {
         powerStateMachine_->ResetInactiveTimer();
     }
     return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool ignoreLock)
+{
+
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART

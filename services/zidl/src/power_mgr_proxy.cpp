@@ -923,7 +923,7 @@ PowerErrors PowerMgrProxy::IsStandby(bool& isStandby)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::SetIgnoreScreenOnLock(bool ignore)
+PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -936,9 +936,35 @@ PowerErrors PowerMgrProxy::SetIgnoreScreenOnLock(bool ignore)
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(ignore), PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(enabled), PowerErrors::ERR_CONNECTION_FAIL);
     int32_t ret = remote->SendRequest(
-        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_IGNORE_SCREEN_ON_LOCK), data, reply, option);
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_FORCE_TIMING_OUT), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    return static_cast<PowerErrors>(error);
+}
+
+PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool ignoreLock)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(enabledLockScreen), PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(ignoreLock), PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
