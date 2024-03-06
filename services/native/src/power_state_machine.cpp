@@ -540,7 +540,10 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
             std::lock_guard lock(ffrtMutex_);
-            FFRTUtils::CancelTask(userActivityTimeoutHandle_, queue_);
+            // void* () is overloaded in ffrt::task_handle, so that it is convertible to bool
+            if (userActivityTimeoutHandle_) {
+                FFRTUtils::CancelTask(userActivityTimeoutHandle_, queue_);
+            }
             break;
         }
         case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
