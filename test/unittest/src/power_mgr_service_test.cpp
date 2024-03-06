@@ -343,11 +343,16 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrService019
+<<<<<<< HEAD
  * @tc.desc: Test Pre-light the screen.
+=======
+ * @tc.desc: Test PowerMgrService LockScreenAfterTimingOut.
+>>>>>>> 153aa30 (feat: added the second interface)
  * @tc.type: FUNC
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
 {
+<<<<<<< HEAD
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
@@ -398,4 +403,38 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 end.");
 }
 
+=======
+    if (false) {
+        auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService019 fail to get PowerMgrService";
+        ASSERT_TRUE(!pmsTest_->IsServiceReady()) << "SetUpTestCase pmsTest_ is ready";
+        pmsTest_->OnStart();
+        ASSERT_TRUE(pmsTest_->IsServiceReady()) << "SetUpTestCase pmsTest_ is not ready";
+        auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+        auto runningLockMgr = pmsTest_->GetRunningLockMgr();
+
+        sptr<IPowerMgr> ptr;
+        ptr.ForceSetRefPtr(static_cast<IPowerMgr*>(pmsTest_.GetRefPtr()));
+        pmsTest_.GetRefPtr()->IncStrongRef(pmsTest_.GetRefPtr());
+        RunningLock runninglock1(ptr, "runninglock_screen_on", RunningLockType::RUNNINGLOCK_SCREEN);
+        runninglock1.Init();
+        runninglock1.Lock();
+
+        EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+        stateMaschine_->LockScreenAfterTimingOut(true, true);
+        EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+        stateMaschine_->LockScreenAfterTimingOut(false, false);
+        EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
+        stateMaschine_->LockScreenAfterTimingOut(false, true);
+        EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+        runninglock1.UnLock();
+        EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
+    }
+}
+>>>>>>> 153aa30 (feat: added the second interface)
 }

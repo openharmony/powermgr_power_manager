@@ -397,10 +397,12 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     sleepDuration_ = delay;
     sleepType_ = action;
     if (delay == 0) {
-        HandleAction(reason, action);
+        stateMachine_->SetState(PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
+        //HandleAction(reason, action);
     } else {
         FFRTTask task = [this] {
-            HandleAction(GetLastReason(), GetLastAction());
+            stateMachine_->SetState(PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
+            //HandleAction(GetLastReason(), GetLastAction());
         };
         g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, queue_);
     }
@@ -434,61 +436,28 @@ void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
 void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
-
-    if (stateMachine_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return;
-    }
-    bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
-    if (ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
-        TriggerSyncSleepCallback(false);
-        SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
-    } else {
-        POWER_HILOGI(FEATURE_SUSPEND, "auto suspend: State change failed");
-    }
+    TriggerSyncSleepCallback(false);
+    SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
 }
 
 void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
-    if (stateMachine_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return;
-    }
-    bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason), true);
-    if (ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-        onForceSleep = true;
-        TriggerSyncSleepCallback(false);
+    POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
+    onForceSleep = true;
+    TriggerSyncSleepCallback(false);
 
-        FFRTTask task = [this] {
-            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
-            sleepTime_ = -1;
-            sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
-        };
-        g_forceSleepDelayHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, queue_);
-    } else {
-        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
-    }
+    FFRTTask task = [this] {
+        SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+        sleepTime_ = -1;
+        sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
+    };
+    g_forceSleepDelayHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, queue_);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
-    if (stateMachine_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return;
-    }
-    bool ret = stateMachine_->SetState(
-        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(reason), true);
-    if (ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "State changed, call hibernate");
-    } else {
-        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate: State change failed");
-    }
 }
 
 void SuspendController::HandleShutdown(SuspendDeviceType reason)
