@@ -1091,12 +1091,12 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrClient047
- * @tc.desc: test SetIgnoreScreenOnLock 
+ * @tc.desc: test SetIgnoreScreenOnLock
  * @tc.type: FUNC
  * @tc.require: issueI6FMHX
  */
 HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
-{   
+{
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
