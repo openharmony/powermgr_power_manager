@@ -91,6 +91,7 @@ public:
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
     void Reset();
+    int64_t GetSleepTime();
 
     PowerState GetState()
     {
@@ -196,7 +197,6 @@ private:
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
-    int64_t GetSleepTime();
     void HandleActivityTimeout();
     void HandleActivitySleepTimeout();
     void HandleSystemWakeup();
