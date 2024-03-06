@@ -198,6 +198,13 @@ void PowerStateMachine::EmplaceSleep()
     controllerMap_.emplace(PowerState::SLEEP,
         std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SLEEP lambda start");
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController == nullptr) {
+               POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, transit to SLEEP failed");
+               return  TransitResult::OTHER_ERR;
+            }
+            suspendController->HandleAction(suspendController->GetLastReason(), suspendController->GetLastAction());
             return TransitResult::SUCCESS;
         }));
 }
@@ -227,10 +234,6 @@ void PowerStateMachine::EmplaceDim()
     controllerMap_.emplace(PowerState::DIM,
         std::make_shared<StateController>(PowerState::DIM, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_DIM lambda start");
-            if (!CheckRunningLock(PowerState::INACTIVE)) {
-                POWER_HILOGI(FEATURE_ACTIVITY, "RunningLock is blocking to transit to INACTIVE");
-                return TransitResult::OTHER_ERR;
-            }
             if (GetDisplayOffTime() < 0) {
                 POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
                 return TransitResult::OTHER_ERR;
@@ -730,8 +733,8 @@ void PowerStateMachine::ResetInactiveTimer()
         return;
     }
 
-    if (this->CheckRunningLock(PowerState::INACTIVE)) {
-        const double DIMTIMERATE = 2.0/3;
+    if (forceTimingOut_.load(std::memory_order_relaxed) || this->CheckRunningLock(PowerState::INACTIVE)) {
+        const double DIMTIMERATE = 2.0 / 3;
         this->SetDelayTimer(
             this->GetDisplayOffTime() * DIMTIMERATE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     }
@@ -796,15 +799,18 @@ void PowerStateMachine::HandleSystemWakeup()
 
 void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
-    ignoreScreenOnLock_ = enabled;
+    forceTimingOut_.store(enabled, std::memory_order_relaxed);
+}
+
+void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock)
+{
+    enabledTimingOutLockScreen_.store(enabled, std::memory_order_relaxed);
+    enabledTimingOutLockScreenCheckLock_.store(checkScreenOnLock, std::memory_order_relaxed);
 }
 
 bool PowerStateMachine::CheckRunningLock(PowerState state)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Enter, state = %{public}u", state);
-    if(state == PowerState::INACTIVE && ignoreScreenOnLock_.load()) {
-        return true;
-    }
     auto pms = pms_.promote();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Pms is nullptr");
@@ -814,6 +820,9 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
     if (runningLockMgr == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockMgr is nullptr");
         return false;
+    }
+    if (state == PowerState::DIM) {
+        state = PowerState::INACTIVE;
     }
     auto iterator = lockMap_.find(state);
     if (iterator == lockMap_.end()) {
@@ -935,6 +944,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
         return false;
     }
+    if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
+            reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) &&
+        forceTimingOut_.load(std::memory_order_relaxed)) {
+        force = true;
+    }
     TransitResult ret = pController->TransitTo(reason, force);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
@@ -1053,7 +1067,11 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
             ret = StateChangeReason::STATE_CHANGE_REASON_REMOTE;
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT:
-            ret = StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
+            ret = (enabledTimingOutLockScreen_.load(std::memory_order_relaxed) &&
+                      (!enabledTimingOutLockScreenCheckLock_.load(std::memory_order_relaxed) ||
+                          CheckRunningLock(PowerState::INACTIVE))) ?
+                StateChangeReason::STATE_CHANGE_REASON_TIMEOUT :
+                StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK;
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID:
             ret = StateChangeReason::STATE_CHANGE_REASON_LID;

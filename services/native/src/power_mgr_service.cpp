@@ -1110,9 +1110,10 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool ignoreLock)
-{
-
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+{   
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    return PowerErrors::ERR_OK;
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART

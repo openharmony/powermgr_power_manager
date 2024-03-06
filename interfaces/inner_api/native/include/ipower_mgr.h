@@ -76,7 +76,7 @@ public:
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
     virtual PowerErrors IsStandby(bool& isStandby) = 0;
     virtual PowerErrors SetForceTimingOut(bool enabled) = 0;
-    //virtual PowerErrors LockScreenAfterTimingOut(bool lockScreen, bool ignoreLock) = 0;
+    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock) = 0;
 
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;

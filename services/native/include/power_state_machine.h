@@ -150,6 +150,7 @@ public:
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
     void SetForceTimingOut(bool enabled);
+    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock);
 
 private:
     class StateController {
@@ -234,7 +235,9 @@ private:
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
-    std::atomic<bool> ignoreScreenOnLock_ {false};
+    std::atomic<bool> forceTimingOut_ {false};
+    std::atomic<bool> enabledTimingOutLockScreen_ {true};
+    std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS
