@@ -1104,15 +1104,14 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
     runningLock->Lock();
     usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
-    auto ret = powerMgrClient.SetIgnoreScreenOnLock(true);
+    auto ret = powerMgrClient.SetForceTimingOut(true);
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
     usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
-    powerMgrClient.SetIgnoreScreenOnLock(false);
+    powerMgrClient.SetForceTimingOut(false);
     powerMgrClient.WakeupDevice();
-    usleep(TRANSFER_NS_TO_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
-    usleep(SLEEP_AFTER_LOCK_TIME_US);
+    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
 }
 } // namespace
