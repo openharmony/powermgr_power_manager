@@ -538,14 +538,15 @@ bool PowerKeySuspendMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Receive key on notify");
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
             }
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
             if (suspendController->GetPowerkeyDownWhenScreenOff()) {
-                POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] no action suspend");
+                POWER_HILOGI(FEATURE_SUSPEND,
+                    "[UL_POWER] Tht powerkey was pressed when screenoff, ignore this powerkey up event.");
                 return;
             }
             Notify();
