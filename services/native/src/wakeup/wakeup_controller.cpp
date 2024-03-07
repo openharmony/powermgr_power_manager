@@ -188,6 +188,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     }
 
     if (pms->IsScreenOn()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is On, ignore this powerkey down event.");
         return;
     }
 
@@ -473,7 +474,7 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] receive wakeup controller key down");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
