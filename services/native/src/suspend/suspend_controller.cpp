@@ -546,7 +546,7 @@ bool PowerKeySuspendMonitor::Init()
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
             if (suspendController->GetPowerkeyDownWhenScreenOff()) {
                 POWER_HILOGI(FEATURE_SUSPEND,
-                    "[UL_POWER] Tht powerkey was pressed when screenoff, ignore this powerkey up event.");
+                    "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");
                 return;
             }
             Notify();
