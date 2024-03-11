@@ -33,6 +33,7 @@ public:
     static napi_value SetPowerMode(napi_env env, napi_callback_info info);
     static napi_value GetPowerMode(napi_env env, napi_callback_info info);
     static napi_value IsStandby(napi_env env, napi_callback_info info);
+    static napi_value SetScreenOffTime(napi_env env, napi_callback_info info);
 
 private:
     static napi_value RebootOrShutdown(napi_env env, napi_callback_info info, bool isReboot);

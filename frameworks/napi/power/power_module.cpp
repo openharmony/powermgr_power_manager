@@ -87,7 +87,8 @@ static napi_value PowerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("suspend", PowerNapi::Suspend),
         DECLARE_NAPI_FUNCTION("setPowerMode", PowerNapi::SetPowerMode),
         DECLARE_NAPI_FUNCTION("getPowerMode", PowerNapi::GetPowerMode),
-        DECLARE_NAPI_FUNCTION("isStandby", PowerNapi::IsStandby)};
+        DECLARE_NAPI_FUNCTION("isStandby", PowerNapi::IsStandby),
+        DECLARE_NAPI_FUNCTION("setScreenOffTime", PowerNapi::SetScreenOffTime)};
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateDevicePowerMode(env, exports);
     POWER_HILOGD(COMP_FWK, "The initialization of the Power module is complete");

@@ -29,8 +29,10 @@ constexpr uint32_t WAKEUP_MAX_ARGC = 1;
 constexpr uint32_t SET_MODE_CALLBACK_MAX_ARGC = 2;
 constexpr uint32_t SET_MODE_PROMISE_MAX_ARGC = 1;
 constexpr uint32_t SUSPEND_MAX_ARGC = 1;
+constexpr uint32_t SET_SCREEN_OFFTIME_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
+constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 } // namespace
 napi_value PowerNapi::Shutdown(napi_env env, napi_callback_info info)
@@ -239,6 +241,42 @@ void PowerNapi::AsyncWork(napi_env& env, std::unique_ptr<AsyncCallbackInfo>& asy
         reinterpret_cast<void*>(asyncInfo.get()), &(asyncInfo->GetAsyncWork()));
     NAPI_CALL_RETURN_VOID(env, napi_queue_async_work_with_qos(env, asyncInfo->GetAsyncWork(), napi_qos_utility));
     asyncInfo.release();
+}
+
+napi_value PowerNapi::SetScreenOffTime(napi_env env, napi_callback_info info)
+{
+    size_t argc = SET_SCREEN_OFFTIME_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors error;
+    if (argc != SET_SCREEN_OFFTIME_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_number)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "check value type failed.");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    int64_t timeout;
+    if (napi_ok != napi_get_value_int64(env, argv[INDEX_0], &timeout)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "napi get int64 value failed.");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    if (timeout == 0 || (timeout < 0 && timeout != RESTORE_DEFAULT_SCREENOFF_TIME)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "timeout is not right.");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    bool ret;
+    if (timeout == RESTORE_DEFAULT_SCREENOFF_TIME) {
+        ret = g_powerMgrClient.RestoreScreenOffTime();
+    } else {
+        ret = g_powerMgrClient.OverrideScreenOffTime(timeout);
+    }
+    if (!ret) {
+        POWER_HILOGE(FEATURE_WAKEUP, "SetScreenOffTime failed.");
+        return error.ThrowError(env, PowerErrors::ERR_FAILURE);
+    }
+    return nullptr;
 }
 
 napi_value PowerNapi::IsStandby(napi_env env, napi_callback_info info)
