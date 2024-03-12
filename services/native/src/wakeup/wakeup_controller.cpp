@@ -188,7 +188,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     }
 
     if (pms->IsScreenOn()) {
-        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is On, ignore this powerkey down event.");
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this powerkey down event.");
         return;
     }
 
