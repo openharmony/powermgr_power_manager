@@ -17,8 +17,6 @@ ohos_executable("power-shell") {
   include_dirs = [
     "include",
     "${powermgr_inner_api}/native/include",
-    "${ability_runtime_services_path}/common/include",
-    "${ability_runtime_path}/tools/aa/include",
   ]
 
   sources = [
@@ -29,8 +27,6 @@ ohos_executable("power-shell") {
   deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
   configs = [
-    "${ability_runtime_path}/tools/aa:ability_command_config",
-    "${ability_runtime_services_path}/common:common_config",
     "${powermgr_utils_path}:coverage_flags",
   ]
 
