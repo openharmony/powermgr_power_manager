@@ -1056,7 +1056,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient021, TestSize.Level0)
 HWTEST_F(PowerMgrClientTest, PowerMgrClient044, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "fun is start");
-    PowerErrors error = PowerMgrClient::GetInstance().GetError();
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    PowerErrors error = powerMgrClient.GetError();
     POWER_HILOGD(LABEL_TEST, "get error %{public}d", static_cast<int32_t>(error));
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
 }
