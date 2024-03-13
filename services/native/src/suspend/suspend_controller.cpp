@@ -354,7 +354,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
+        "[UL_POWER] Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
         "delay=%{public}u" PRId32 "",
         pid, uid, reason, action, delay);
     bool force = true;
@@ -538,14 +538,15 @@ bool PowerKeySuspendMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_SUSPEND, "Receive key on notify");
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
             }
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
             if (suspendController->GetPowerkeyDownWhenScreenOff()) {
-                POWER_HILOGI(FEATURE_SUSPEND, "no action suspend");
+                POWER_HILOGI(FEATURE_SUSPEND,
+                    "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");
                 return;
             }
             Notify();

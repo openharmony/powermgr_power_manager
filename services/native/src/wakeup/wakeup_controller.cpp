@@ -188,12 +188,13 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     }
 
     if (pms->IsScreenOn()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this powerkey down event.");
         return;
     }
 
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_WAKEUP, "Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
 
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
@@ -225,10 +226,10 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         bool ret = stateMachine_->SetState(
             PowerState::AWAKE, stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true);
         if (ret != true) {
-            POWER_HILOGI(FEATURE_WAKEUP, "setstate wakeup error");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
     } else {
-        POWER_HILOGI(FEATURE_WAKEUP, "state=%{public}u no transitor", stateMachine_->GetState());
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] state=%{public}u no transitor", stateMachine_->GetState());
     }
 }
 
@@ -319,7 +320,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         }
     }
 
-    POWER_HILOGI(FEATURE_WAKEUP, "KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
@@ -346,31 +347,27 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     int32_t sourceType = pointerEvent->GetSourceType();
     if (deviceType == PointerEvent::TOOL_TYPE_PEN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
-        if (wakeupController->CheckEventReciveTime(wakeupType)) {
-            return;
+    } else {
+        switch (sourceType) {
+            case PointerEvent::SOURCE_TYPE_MOUSE:
+                wakeupType = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
+                break;
+            case PointerEvent::SOURCE_TYPE_TOUCHPAD:
+                wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD;
+                break;
+            case PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
+                wakeupType = WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
+                break;
+            default:
+                break;
         }
-        wakeupController->ExecWakeupMonitorByReason(wakeupType);
-        return;
-    }
-
-    switch (sourceType) {
-        case PointerEvent::SOURCE_TYPE_MOUSE:
-            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
-            break;
-        case PointerEvent::SOURCE_TYPE_TOUCHPAD:
-            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD;
-            break;
-        case PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
-            wakeupType = WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK;
-            break;
-        default:
-            break;
     }
     if (wakeupController->CheckEventReciveTime(wakeupType)) {
         return;
     }
 
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PointerEvent wakeupType=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }
 }
@@ -477,7 +474,7 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_WAKEUP, "receive wakeup controller key down");
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
