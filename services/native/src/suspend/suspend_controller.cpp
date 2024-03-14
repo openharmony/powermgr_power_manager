@@ -375,6 +375,10 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
 void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
     if (static_cast<SuspendAction>(action) == SuspendAction::ACTION_AUTO_SUSPEND) {
+        if (stateMachine_->GetSleepTime() < 0) {
+            POWER_HILOGI(FEATURE_SUSPEND, "sleeptime less than zero, no need suspend");
+            return;
+        }
         delay = delay + SLEEP_DELAY_MS;
     }
     const int64_t& tmpRef = delay;
