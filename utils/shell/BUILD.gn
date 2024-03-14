@@ -26,9 +26,7 @@ ohos_executable("power-shell") {
 
   deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
-  configs = [
-    "${powermgr_utils_path}:coverage_flags",
-  ]
+  configs = [ "${powermgr_utils_path}:coverage_flags" ]
 
   external_deps = [
     "ability_runtime:tools_aa_source_set",
