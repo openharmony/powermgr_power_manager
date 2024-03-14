@@ -100,10 +100,6 @@ void RunningLockMgr::InitLocksTypeScreen()
                 FFRTTask task = [this, stateMachine] {
                     stateMachine->SetState(PowerState::AWAKE,
                         StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
-                    stateMachine->CancelDelayTimer(
-                        PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
-                    stateMachine->CancelDelayTimer(
-                        PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
                 };
                 FFRTUtils::SubmitTask(task);
             } else {

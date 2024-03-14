@@ -429,7 +429,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
         EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
             StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
         EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
-            StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);  
+            StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
         stateMaschine_->LockScreenAfterTimingOut(false, true);
         EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
             StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
