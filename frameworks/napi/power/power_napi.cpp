@@ -20,6 +20,13 @@
 #include "power_common.h"
 #include "power_log.h"
 #include "power_mgr_client.h"
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+#define SHUT_STAGE_FRAMEWORK_START 1
+#define BOOT_DETECTOR_IOCTL_BASE 'B'
+#define SET_SHUT_STAGE _IOW(BOOT_DETECTOR_IOCTL_BASE, 106, int)
+#define SET_REBOOT _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
 
 namespace OHOS {
 namespace PowerMgr {
@@ -137,10 +144,32 @@ napi_value PowerNapi::GetPowerMode(napi_env env, napi_callback_info info)
     return napiValue;
 }
 
+static void SetFrameworkBootStage(bool isReboot)
+{
+    int fd = open("/dev/bbox", O_WRONLY);
+    if (fd < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "open /dev/bbox failed!");
+        return;
+    }
+    int rebootFlag = isReboot ? 1 : 0;
+    int ret = ioctl(fd, SET_REBOOT, &rebootFlag);
+    if (ret < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "set reboot flag failed!");
+        return;
+    }
+    int stage = SHUT_STAGE_FRAMEWORK_START;
+    ret = ioctl(fd, SET_SHUT_STAGE, &stage);
+    if (ret < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
+    }
+    return;
+}
+
 napi_value PowerNapi::RebootOrShutdown(napi_env env, napi_callback_info info, bool isReboot)
 {
     size_t argc = REBOOT_SHUTDOWN_MAX_ARGC;
     napi_value argv[argc];
+    SetFrameworkBootStage(isReboot);
     NapiUtils::GetCallbackInfo(env, info, argc, argv);
 
     NapiErrors error;
