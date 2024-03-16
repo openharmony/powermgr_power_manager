@@ -117,15 +117,22 @@ void PowerModePolicy::AddAction(uint32_t type, ModeAction& action)
 
 void PowerModePolicy::TriggerAllActions(bool isBoot)
 {
-    std::lock_guard<std::mutex> lock(actionMapMutex_);
-    for (auto iterator = actionMap.begin(); iterator != actionMap.end(); iterator++) {
-        POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", iterator->first);
-        iterator->second(isBoot);
+    std::vector<ModeAction> allActions;
+    {
+        std::lock_guard<std::mutex> lock(actionMapMutex_);
+        for (auto iterator = actionMap.begin(); iterator != actionMap.end(); iterator++) {
+            POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", iterator->first);
+            allActions.emplace_back(iterator->second);
+        }
+    }
+    for (const auto &actions : allActions) {
+        actions(isBoot);
     }
 }
 
 bool PowerModePolicy::IsValidType(uint32_t type)
 {
+    std::lock_guard<std::mutex> lock(actionMapMutex_);
     auto iterator = actionMap.find(type);
     if (iterator == actionMap.end()) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid type: %{public}d", type);
