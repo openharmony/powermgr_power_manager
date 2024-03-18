@@ -162,9 +162,7 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_POWER_DIALOG" ]
   }
 
-  version_mode = getenv("versionmode")
-
-  if (version_mode == "factory") {
+  if (factory == true) {
     defines += [ "CONFIG_FACTORY_MODE" ]
   }
 
