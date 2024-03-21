@@ -16,6 +16,9 @@
 #ifndef POWERMGR_DEVICE_STATE_ACTION_H
 #define POWERMGR_DEVICE_STATE_ACTION_H
 
+#include "dm_common.h"
+#include "display_manager.h"
+
 #include "actions/idevice_state_action.h"
 #include "display_power_callback_stub.h"
 
@@ -32,7 +35,7 @@ public:
     void RefreshActivity(const int64_t callTimeMs, UserActivityType type,
         const uint32_t flags) override {}
     DisplayState GetDisplayState() override;
-    uint32_t SetDisplayState(const DisplayState state,
+    uint32_t SetDisplayState(DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
     void SetCoordinated(bool coordinated) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
@@ -50,6 +53,7 @@ private:
         std::mutex notifyMutex_;
     };
     bool IsTimedOutWhileCoordinated(StateChangeReason reason);
+    Rosen::PowerStateChangeReason GetDmsReasonByPowerReason(StateChangeReason reason);
     bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};
     std::function<void(uint32_t)> actionCallback_ {nullptr};

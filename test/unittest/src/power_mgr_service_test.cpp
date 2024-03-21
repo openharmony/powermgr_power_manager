@@ -340,4 +340,62 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
     runningLock1->UnLock();
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 end.");
 }
+
+/**
+ * @tc.name: PowerMgrService019
+ * @tc.desc: Test Pre-light the screen.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 end.");
+}
+
+/**
+ * @tc.name: PowerMgrService020
+ * @tc.desc: Test if the authentication fails, the screen is on.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_on");
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 end.");
+}
+
+/**
+ * @tc.name: PowerMgrService021
+ * @tc.desc: Test if the authentication fails, the screen is off.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_off");
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 end.");
+}
+
 }
