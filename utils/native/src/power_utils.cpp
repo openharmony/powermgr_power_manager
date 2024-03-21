@@ -58,6 +58,14 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("KEYBOARD");
         case StateChangeReason::STATE_CHANGE_REASON_MOUSE:
             return std::string("MOUSE");
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
+            return std::string("PRE_BRIGHT");
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
+            return std::string("PRE_BRIGHT_ATUH_SUCCESS");
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
+            return std::string("PRE_BRIGHT_ATUH_FAIL_SCREEN_ON");
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
+            return std::string("PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF");
         case StateChangeReason::STATE_CHANGE_REASON_REMOTE:
             return std::string("REMOTE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:

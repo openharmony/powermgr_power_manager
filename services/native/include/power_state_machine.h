@@ -82,6 +82,8 @@ public:
         pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed, bool ignoreScreenState = false);
     void WakeupDeviceInner(
         pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName);
+    void HandlePreBrightWakeUp(
+        int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName);
     void RefreshActivityInner(pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
@@ -174,6 +176,7 @@ private:
         bool CheckState();
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
+        bool isReallyFailed(StateChangeReason reason);
         PowerState state_;
         std::weak_ptr<PowerStateMachine> owner_;
         std::function<TransitResult(StateChangeReason)> action_;
@@ -222,6 +225,8 @@ private:
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
     bool isCoordinatedOverride_ {false};
+    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
+    bool IsPreBrightWakeUp(WakeupDeviceType type);
 };
 } // namespace PowerMgr
 } // namespace OHOS
