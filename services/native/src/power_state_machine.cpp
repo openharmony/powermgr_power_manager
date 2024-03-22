@@ -94,14 +94,14 @@ void PowerStateMachine::InitTransitMap()
     std::vector<PowerState> sleep { PowerState::DIM };
     std::vector<PowerState> errSet { PowerState::DIM };
 
-    forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState(awake.begin(), awake.end()));
-    forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState(inactive.begin(), inactive.end()));
-    forbidMap_.emplace(PowerState::STAND_BY, std::set<PowerState(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::DOZE, std::set<PowerState(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::FREEZE, std::set<PowerState(errSet.begin(), errSet.end()));
-    forbidMap_.emplace(PowerState::UNKNOWN, std::set<PowerState(errSet.begin(), errSet.end()));
+    forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
+    forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
+    forbidMap_.emplace(PowerState::STAND_BY, std::set<PowerState>(sleep.begin(), sleep.end()));
+    forbidMap_.emplace(PowerState::DOZE, std::set<PowerState>(sleep.begin(), sleep.end()));
+    forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
+    forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(sleep.begin(), sleep.end()));
+    forbidMap_.emplace(PowerState::FREEZE, std::set<PowerState>(errSet.begin(), errSet.end()));
+    forbidMap_.emplace(PowerState::UNKNOWN, std::set<PowerState>(errSet.begin(), errSet.end()));
 }
 
 bool PowerStateMachine::CanTransitTo(PowerState to)
@@ -1037,7 +1037,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
     if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_)) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Block Transit from %{public}s to %{public}s",
             PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
-            PowerUtils::GetPowerStateString(state_).c_str())
+            PowerUtils::GetPowerStateString(state_).c_str());
         RecordFailure(owner->currentState_, reason, TransitResult::FORBID_TRANSIT);
         return TransitResult::FORBID_TRANSIT;
     }
