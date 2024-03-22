@@ -77,6 +77,7 @@ bool PowerStateMachine::Init()
         return false;
     }
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
+    InitTransitMap();
     InitStateMap();
 
     if (powerStateCBDeathRecipient_ == nullptr) {
@@ -84,6 +85,31 @@ bool PowerStateMachine::Init()
     }
     POWER_HILOGD(FEATURE_POWER_STATE, "Init success");
     return true;
+}
+
+void PowerStateMachine::InitTransitMap()
+{
+    std::vector<PowerState> awake { PowerState::DIM, PowerState::INACTIVE, PowerState::UNKNOWN, POwerState::FREEZE };
+    std::vector<PowerState> dim { PowerState::DIM, PowerState::INACTIVE, PowerState::UNKNOWN, POwerState::FREEZE };
+    std::vector<PowerState> inactiveSet { PowerState::INACTIVE, PowerState::STAND_BY, PowerState::DOZE,
+        PowerState::SLEEP, PowerState::HIBERNATE, PowerState::AWAKE, PowerState::UNKNOWN, PowerState::FREEZE };
+    std::vector<PowerState> errSet { PowerState::UNKNOWN, PowerState::FREEZE, PowerState::AWAKE,
+        PowerState::INACTIVEE, PowerState::STAND_BY, PowerState::DOZE, PowerState::SLEEP, PowerState::HIBERNATE }
+
+    transitMap_.emplace(PowerState::AWAKE, std::set<PowerState(awake.begin(), awake.end()));
+    transitMap_.emplace(PowerState::DIM, std::set<PowerState(dim.begin(), dim.end()));
+    transitMap_.emplace(PowerState::INACTIVE, std::set<PowerState(inactiveSet.begin(), inactiveSet.end()));
+    transitMap_.emplace(PowerState::STAND_BY, std::set<PowerState(inactiveSet.begin(), inactiveSet.end()));
+    transitMap_.emplace(PowerState::DOZE, std::set<PowerState(inactiveSet.begin(), inactiveSet.end()));
+    transitMap_.emplace(PowerState::SLEEP, std::set<PowerState(inactiveSet.begin(), inactiveSet.end()));
+    transitMap_.emplace(PowerState::HIBERNATE, std::set<PowerState(inactiveSet.begin(), inactiveSet.end()));
+    transitMap_.emplace(PowerState::FREEZE, std::set<PowerState(errSet.begin(), errSet.end()));
+    transitMap_.emplace(PowerState::UNKNOWN, std::set<PowerState(errSet.begin(), errSet.end()));
+}
+
+bool PowerStateMachine::CanTransitTo(PowerState to)
+{
+    return transitMap_[currentState_].count(to);
 }
 
 void PowerStateMachine::InitState()
@@ -193,6 +219,20 @@ void PowerStateMachine::EmplaceShutdown()
         }));
 }
 
+void PowerStateMachine::EmplaceDim()
+{
+    controllerMap_.emplace(PowerState::DIM,
+        std::make_shared<StateController>(PowerState::DIM, shared_from_this(), [this](StateChangeReason reason) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_DIM lambda start");
+            uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
+            if (ret != ActionResult::SUCCESS) {
+                POWER_HILOGE(FRATURE_POWER_STATE, "Failed to go to DIM, ret: %{public}u", ret);
+                return TransitResult::OTHER_ERR;
+            }
+            return TransitResult::SUCCESS;
+        }));
+}
+
 void PowerStateMachine::InitStateMap()
 {
     EmplaceAwake();
@@ -203,6 +243,7 @@ void PowerStateMachine::InitStateMap()
     EmplaceSleep();
     EmplaceHibernate();
     EmplaceShutdown();
+    EmplaceDim();
 }
 
 void PowerStateMachine::onSuspend()
@@ -606,31 +647,25 @@ void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
 
 void PowerStateMachine::HandleActivityTimeout()
 {
-    POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
     DisplayState dispState = stateAction_->GetDisplayState();
-    const uint32_t THREE = 3;
+    POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", dispState);
     if (!this->CheckRunningLock(PowerState::INACTIVE)) {
         POWER_HILOGI(FEATURE_ACTIVITY, "RunningLock is blocking to transit to INACTIVE");
         return;
     }
-    if (dispState == DisplayState::DISPLAY_ON) {
-        stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-        if (this->GetDisplayOffTime() < 0) {
-            POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
-            return;
-        } else {
-            SetDelayTimer(GetDisplayOffTime() / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-        }
-    } else {
-        if (this->GetDisplayOffTime() < 0) {
-            POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
-            return;
-        }
-        CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-        SetDelayTimer(GetDisplayOffTime() / THREE, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-    }
-}
 
+    if (dispState == DisplayState::DISPLAY_ON) {
+        SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    }
+
+    if (this->GetDisplayOffTime() < 0) {
+        POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
+        return;
+    }
+    const uint32_t OFF_TIMEOUT_FACTOR = 3;
+    SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+}
+ 
 void PowerStateMachine::HandleActivitySleepTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
@@ -775,7 +810,10 @@ int64_t PowerStateMachine::GetSleepTime()
 
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
-    POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}d, reason=%{public}d, force=%{public}d", state, reason, force);
+    POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
+        PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(state).c_str(), force);
+    std::lock_guard<std::mutex> lock(stateMutex_);
+
     auto iterator = controllerMap_.find(state);
     if (iterator == controllerMap_.end()) {
         return false;
@@ -793,6 +831,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
 void PowerStateMachine::SetDisplaySuspend(bool enable)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "enable: %{public}d", enable);
+    std::lock_guard<std::mutex> lock(stateMutex_);
     enableDisplaySuspend_ = enable;
     if (GetState() == PowerState::INACTIVE) {
         POWER_HILOGI(FEATURE_POWER_STATE, "Change display state");
@@ -990,11 +1029,20 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         PowerUtils::GetPowerStateString(this->state_).c_str(),
         PowerUtils::GetReasonTypeString(reason).c_str(), ignoreLock);
     MatchState(owner->currentState_, owner->stateAction_->GetDisplayState());
-    if (!CheckState()) {
+    if (owner->currentState_ == state_) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", owner->currentState_);
         RecordFailure(owner->currentState_, reason, TransitResult::ALREADY_IN_STATE);
         return TransitResult::ALREADY_IN_STATE;
     }
+
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !CanTransitTo(state_)) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "Block Transit from %{public}s to %{public}s",
+            PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
+            PowerUtils::GetPowerStateString(state_).c_str())
+        RecordFailure(owner->currentState_, reason, TransitResult::NOT_IN_TRANSIT_MAP);
+        return TransitResult::NOT_IN_TRANSIT_MAP;
+    }
+
     if (!ignoreLock && !owner->CheckRunningLock(GetState())) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Running lock block");
         RecordFailure(owner->currentState_, reason, TransitResult::LOCKING);
@@ -1029,7 +1077,7 @@ bool PowerStateMachine::StateController::CheckState()
 void PowerStateMachine::StateController::CorrectState(
     PowerState& currentState, PowerState correctState, DisplayState state)
 {
-    std::string msg = "Correct power state errors from";
+    std::string msg = "Correct power state errors from ";
     msg.append(PowerUtils::GetPowerStateString(currentState))
         .append(" to ")
         .append(PowerUtils::GetPowerStateString(correctState))
@@ -1097,6 +1145,9 @@ void PowerStateMachine::StateController::RecordFailure(
             break;
         case TransitResult::DISPLAY_OFF_ERR:
             failReasion_ = "SetDisplayState(OFF) error";
+            break;
+        case TransitResult::NOT_IN_TRANSIT_MAP:
+            failReasion_ = "Not in transit map";
             break;
         case TransitResult::OTHER_ERR:
         default:
