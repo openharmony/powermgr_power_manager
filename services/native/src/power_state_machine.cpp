@@ -1080,11 +1080,11 @@ bool PowerStateMachine::StateController::CheckState()
 void PowerStateMachine::StateController::CorrectState(
     PowerState& currentState, PowerState correctState, DisplayState state)
 {
-    std::string msg = "Correct power state errors from ";
+    std::string msg = "[UL_POWER] Correct power state errors from ";
     msg.append(PowerUtils::GetPowerStateString(currentState))
         .append(" to ")
         .append(PowerUtils::GetPowerStateString(correctState))
-        .append(" due to cuurent display state is ")
+        .append(" due to current display state is ")
         .append(PowerUtils::GetDisplayStateString(state));
     POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION", HiviewDFX::HiSysEvent::EventType::FAULT,

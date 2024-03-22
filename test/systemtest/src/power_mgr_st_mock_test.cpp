@@ -567,7 +567,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock083, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerMgrMock083: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock083:Start.");
 
-    vector<PowerState> sleepStates { PowerState::STAND_BY, PowerSTATE::DOZE, PowerState::SLEEP, PowerSTATE::HIBERNATE };
+    vector<PowerState> sleepStates { PowerState::STAND_BY, PowerState::DOZE, PowerState::SLEEP, PowerState::HIBERNATE };
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pms != nullptr);
