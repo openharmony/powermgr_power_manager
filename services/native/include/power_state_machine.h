@@ -60,7 +60,7 @@ enum class TransitResult {
     HDI_ERR = 3,
     DISPLAY_ON_ERR = 4,
     DISPLAY_OFF_ERR = 5,
-    NOT_IN_TRANSIT_MAP = 6,
+    FORBID_TRANSIT = 6,
     OTHER_ERR = 99
 };
 
@@ -212,6 +212,7 @@ private:
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
     std::mutex ffrtMutex_;
+    // all change to currentState_ should be inside stateMutex_
     std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
@@ -227,7 +228,7 @@ private:
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
     bool isCoordinatedOverride_ {false};
-    std::unordered_map<PowerState, std::set<PowerState>> transitMap_;
+    std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
