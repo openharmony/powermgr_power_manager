@@ -810,7 +810,7 @@ int64_t PowerStateMachine::GetSleepTime()
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
-        PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(state).c_str(), force);
+        PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
 
     auto iterator = controllerMap_.find(state);
@@ -1034,7 +1034,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::ALREADY_IN_STATE;
     }
 
-    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !CanTransitTo(state_)) {
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_)) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Block Transit from %{public}s to %{public}s",
             PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
             PowerUtils::GetPowerStateString(state_).c_str())
