@@ -491,7 +491,7 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 {
     std::lock_guard lock(mutex_);
-    std::lock_guard<std::mutex> lock(stateMutex_);
+    std::lock_guard<std::mutex> lockState(stateMutex_);
     // reset to awake state when mock and default off/sleep time
     currentState_ = PowerState::AWAKE;
     displayOffTime_ = DEFAULT_DISPLAY_OFF_TIME;

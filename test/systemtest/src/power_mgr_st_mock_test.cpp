@@ -585,7 +585,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock083, TestSize.Level2)
     for (auto targetState : sleepStates) {
         // Set the power state to target state
         auto ret = stateMachine->SetState(targetState, StateChangeReason::STATE_CHANGE_REASON_SYSTEM);
-        // Set State will block transit from AWAKE to these states, expect SetState fail
+        // SetState will block transit from AWAKE to these states, expect SetState fail
         EXPECT_FALSE(ret);
         EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
     }
