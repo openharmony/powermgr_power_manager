@@ -665,7 +665,7 @@ void PowerStateMachine::HandleActivityTimeout()
     const uint32_t OFF_TIMEOUT_FACTOR = 3;
     SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
 }
- 
+
 void PowerStateMachine::HandleActivitySleepTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());

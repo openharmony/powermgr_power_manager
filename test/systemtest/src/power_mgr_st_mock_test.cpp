@@ -560,7 +560,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock082, TestSize.Level2)
  * @tc.name: PowerMgrMock083
  * @tc.desc: test The display status and power status are inconsistent WakeupDevice
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI9AMZT
  */
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock083, TestSize.Level2)
 {
