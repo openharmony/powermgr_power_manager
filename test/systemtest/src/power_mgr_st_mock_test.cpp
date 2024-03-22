@@ -572,6 +572,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock083, TestSize.Level2)
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pms != nullptr);
     std::shared_ptr<PowerStateMachine> stateMachine = pms->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
 
     // Analog display return DISPLAY_ON
     EXPECT_CALL(*g_stateAction, GetDisplayState())
