@@ -89,24 +89,18 @@ bool PowerStateMachine::Init()
 
 void PowerStateMachine::InitTransitMap()
 {
-    std::vector<PowerState> awake { PowerState::STAND_BY, PowerState::DOZE, PowerState::SLEEP, PowerState::HIBERNATE };
+    std::vector<PowerState> awake { PowerState::SLEEP, PowerState::HIBERNATE };
     std::vector<PowerState> inactive { PowerState::DIM };
     std::vector<PowerState> sleep { PowerState::DIM };
-    std::vector<PowerState> errSet { PowerState::DIM };
 
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
-    forbidMap_.emplace(PowerState::STAND_BY, std::set<PowerState>(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::DOZE, std::set<PowerState>(sleep.begin(), sleep.end()));
     forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(sleep.begin(), sleep.end()));
-    forbidMap_.emplace(PowerState::FREEZE, std::set<PowerState>(errSet.begin(), errSet.end()));
-    forbidMap_.emplace(PowerState::UNKNOWN, std::set<PowerState>(errSet.begin(), errSet.end()));
 }
 
 bool PowerStateMachine::CanTransitTo(PowerState to)
 {
-    return !forbidMap_[currentState_].count(to);
+    return !forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to);
 }
 
 void PowerStateMachine::InitState()
@@ -493,9 +487,6 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 {
     std::lock_guard lock(mutex_);
-    std::lock_guard<std::mutex> lockState(stateMutex_);
-    // reset to awake state when mock and default off/sleep time
-    currentState_ = PowerState::AWAKE;
     displayOffTime_ = DEFAULT_DISPLAY_OFF_TIME;
     sleepTime_ = DEFAULT_SLEEP_TIME;
     ResetInactiveTimer();
@@ -1030,7 +1021,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         PowerUtils::GetPowerStateString(this->state_).c_str(),
         PowerUtils::GetReasonTypeString(reason).c_str(), ignoreLock);
     MatchState(owner->currentState_, owner->stateAction_->GetDisplayState());
-    if (owner->currentState_ == state_) {
+    if (!CheckState()) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", owner->currentState_);
         RecordFailure(owner->currentState_, reason, TransitResult::ALREADY_IN_STATE);
         return TransitResult::ALREADY_IN_STATE;

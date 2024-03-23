@@ -558,7 +558,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock082, TestSize.Level2)
 
 /**
  * @tc.name: PowerMgrMock083
- * @tc.desc: test SetState will block transit from AWAKE to STAND_BY/DOZE/SLEEP/HIBERNATE
+ * @tc.desc: test SetState will block transit from AWAKE to SLEEP/HIBERNATE
  * @tc.type: FUNC
  * @tc.require: issueI9AMZT
  */
@@ -567,7 +567,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock083, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerMgrMock083: start.";
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock083:Start.");
 
-    vector<PowerState> sleepStates { PowerState::STAND_BY, PowerState::DOZE, PowerState::SLEEP, PowerState::HIBERNATE };
+    vector<PowerState> sleepStates { PowerState::SLEEP, PowerState::HIBERNATE };
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pms != nullptr);
