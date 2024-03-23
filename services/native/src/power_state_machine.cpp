@@ -237,10 +237,12 @@ void PowerStateMachine::EmplaceDim()
                     // failed but not return, still need to set screen off
                     POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
                 }
-                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR,
+                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             } else {
                 CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR,
+                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             }
             return TransitResult::SUCCESS;
         }));
