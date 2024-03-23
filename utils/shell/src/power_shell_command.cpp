@@ -55,6 +55,14 @@ static const struct option TIME_OUT_OPTIONS[] = {
     {"override", required_argument, nullptr, 'o'},
 };
 
+static const struct option WAKE_UP_TYPES[] = {
+    {"pre_bright", no_argument, nullptr, 'a'},
+    {"pre_bright_auth_success", no_argument, nullptr, 'b'},
+    {"pre_bright_auth_fail_screen_on", no_argument, nullptr, 'c'},
+    {"pre_bright_auth_fail_screen_off", no_argument, nullptr, 'd'},
+    {"default", no_argument, nullptr, 'e'},
+};
+
 static const std::string HELP_MSG =
     "usage: power-shell\n"
     "command list:\n"
@@ -193,9 +201,32 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
 
 ErrCode PowerShellCommand::RunAsWakeupCommand()
 {
+    int ind = 0;
+    int option = getopt_long(argc_, argv_, "abcde", WAKE_UP_TYPES, &ind);
+    resultReceiver_.clear();
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     std::string detail = "shell";
-    client.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, detail);
+    if (option == 'a') {
+        detail = "pre_bright";
+        resultReceiver_.append("pre_bright is called\n");
+    }
+    if (option == 'b') {
+        detail = "pre_bright_auth_success";
+        resultReceiver_.append("pre_bright_auth_success is called\n");
+    }
+    if (option == 'c') {
+        detail = "pre_bright_auth_fail_screen_on";
+        resultReceiver_.append("pre_bright_auth_fail_screen_on is called\n");
+    }
+    if (option == 'd') {
+        detail = "pre_bright_auth_fail_screen_off";
+        resultReceiver_.append("pre_bright_auth_fail_screen_off is called\n");
+    }
+    if (option == 'e') {
+        resultReceiver_.append("default is called\n");
+        detail = "shell";
+    }
+    client.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail);
     resultReceiver_.append("WakeupDevice is called\n");
     return ERR_OK;
 }
