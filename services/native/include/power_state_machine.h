@@ -60,6 +60,7 @@ enum class TransitResult {
     HDI_ERR = 3,
     DISPLAY_ON_ERR = 4,
     DISPLAY_OFF_ERR = 5,
+    FORBID_TRANSIT = 6,
     OTHER_ERR = 99
 };
 
@@ -197,6 +198,9 @@ private:
     void EmplaceSleep();
     void EmplaceHibernate();
     void EmplaceShutdown();
+    void EmplaceDim();
+    void InitTransitMap();
+    bool CanTransitTo(PowerState to);
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
@@ -211,6 +215,8 @@ private:
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
     std::mutex ffrtMutex_;
+    // all change to currentState_ should be inside stateMutex_
+    std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
@@ -227,6 +233,7 @@ private:
     bool isCoordinatedOverride_ {false};
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
+    std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
