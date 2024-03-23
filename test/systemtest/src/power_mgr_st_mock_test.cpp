@@ -555,4 +555,43 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock082, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock082:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock082: end.";
 }
+
+/**
+ * @tc.name: PowerMgrMock083
+ * @tc.desc: test SetState will block transit from AWAKE to SLEEP/HIBERNATE
+ * @tc.type: FUNC
+ * @tc.require: issueI9AMZT
+ */
+HWTEST_F(PowerMgrSTMockTest, PowerMgrMock083, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerMgrMock083: start.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock083:Start.");
+
+    vector<PowerState> sleepStates { PowerState::SLEEP, PowerState::HIBERNATE };
+
+    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pms != nullptr);
+    std::shared_ptr<PowerStateMachine> stateMachine = pms->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+
+    // Analog display return DISPLAY_ON
+    EXPECT_CALL(*g_stateAction, GetDisplayState())
+    .Times(::testing::AtLeast(1))
+    .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
+
+    // Set the power state to AWAKE
+    auto ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT);
+    EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
+
+    for (auto targetState : sleepStates) {
+        // Set the power state to target state
+        auto ret = stateMachine->SetState(targetState, StateChangeReason::STATE_CHANGE_REASON_SYSTEM);
+        // SetState will block transit from AWAKE to these states, expect SetState fail
+        EXPECT_FALSE(ret);
+        EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
+    }
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock083:End.");
+    GTEST_LOG_(INFO) << "PowerMgrMock083: end.";
+}
 } // namespace

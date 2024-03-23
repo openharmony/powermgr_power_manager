@@ -95,6 +95,11 @@ enum class PowerState : uint32_t {
     SHUTDOWN,
 
     /**
+     * Power State: screen on and display dim
+     */
+    DIM,
+
+    /**
      * Power State: unknown.
      */
     UNKNOWN,
