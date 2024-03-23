@@ -87,6 +87,8 @@ const std::string PowerUtils::GetPowerStateString(PowerState state)
             return std::string("HIBERNATE");
         case PowerState::SHUTDOWN:
             return std::string("SHUTDOWN");
+        case PowerState::DIM:
+            return std::string("DIM");
         case PowerState::UNKNOWN:
             return std::string("UNKNOWN");
         default:
