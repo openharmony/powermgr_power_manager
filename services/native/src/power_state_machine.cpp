@@ -299,12 +299,105 @@ void PowerStateMachine::SuspendDeviceInner(
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
 }
 
+WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& details)
+{
+    WakeupDeviceType parsedType = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION;
+
+    if (strcmp(details.c_str(), "pre_bright") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT;
+    } else if (strcmp(details.c_str(), "pre_bright_auth_success") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS;
+    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_on") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON;
+    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_off") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "parsedType is %{public}d", static_cast<uint32_t>(parsedType));
+    return parsedType;
+}
+
+bool PowerStateMachine::IsPreBrightWakeUp(WakeupDeviceType type)
+{
+    bool ret = false;
+    switch (type) {
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
+            ret = true;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS:
+            ret = true;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON:
+            ret = true;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
+            ret = true;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+void PowerStateMachine::HandlePreBrightWakeUp (
+    int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "This wakeup event is trigged by %{public}s.", details.c_str());
+    
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Stop sleep ffrt task");
+        suspendController->StopSleep();
+    }
+    if (stateAction_ != nullptr) {
+        stateAction_->Wakeup(callTimeMs, type, details, pkgName);
+    }
+    mDeviceState_.lastWakeupDeviceTime = callTimeMs;
+
+    ResetInactiveTimer();
+    SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
+
+    switch (type) {
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON:
+            if (suspendController != nullptr) {
+                POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
+                suspendController->TriggerSyncSleepCallback(true);
+            } else {
+                POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceInner. suspendController is nullptr");
+            }
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
+            if (suspendController != nullptr) {
+                POWER_HILOGI(FEATURE_WAKEUP, "restore sleep ffrt task");
+                suspendController->StartSleepTimer(
+                    SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+                    static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+            }
+        default:
+            break;
+    }
+
+    return;
+}
+
 void PowerStateMachine::WakeupDeviceInner(
     pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
     PowerHitrace powerHitrace("WakeupDevice");
     if (type > WakeupDeviceType::WAKEUP_DEVICE_MAX) {
         POWER_HILOGW(FEATURE_WAKEUP, "Invalid type: %{public}d", type);
+        return;
+    }
+
+    if (type == WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
+        type = ParseWakeupDeviceType(details);
+    }
+
+    if (IsPreBrightWakeUp(type)) {
+        HandlePreBrightWakeUp(callTimeMs, type, details, pkgName);
         return;
     }
 
@@ -902,6 +995,18 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_SWITCH:
             ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
         default:
             break;
@@ -1050,7 +1155,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         lastTime_ = GetTickCount();
         owner->currentState_ = GetState();
         owner->NotifyPowerStateChanged(owner->currentState_);
-    } else {
+    } else if (isReallyFailed(reason)) {
         RecordFailure(owner->currentState_, reason, ret);
     }
 
@@ -1166,6 +1271,15 @@ void PowerStateMachine::StateController::RecordFailure(
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN", HiviewDFX::HiSysEvent::EventType::FAULT,
         "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
+}
+
+bool PowerStateMachine::StateController::isReallyFailed(StateChangeReason reason)
+{
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
+        reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        return false;
+    }
+    return true;
 }
 } // namespace PowerMgr
 } // namespace OHOS

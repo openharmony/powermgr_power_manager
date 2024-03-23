@@ -16,7 +16,6 @@
 #include "device_state_action.h"
 
 #include <ipc_skeleton.h>
-#include "display_manager.h"
 #include "display_power_mgr_client.h"
 #include "power_log.h"
 #include "power_state_machine_info.h"
@@ -83,31 +82,54 @@ DisplayState DeviceStateAction::GetDisplayState()
     return ret;
 }
 
-uint32_t DeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
+PowerStateChangeReason DeviceStateAction::GetDmsReasonByPowerReason(StateChangeReason reason)
 {
-    POWER_HILOGD(FEATURE_POWER_STATE, "Action: SetDisplayState: DisplayState=%{public}d, StateChangeReason=%{public}d,\
-        Coordinated=%{public}d", static_cast<uint32_t>(state), static_cast<uint32_t>(reason), coordinated_);
+    PowerStateChangeReason dmsReason = static_cast<PowerStateChangeReason>(reason);
+    switch (reason) {
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+            break;
+        default:
+            break;
+    }
+    POWER_HILOGI(FEATURE_POWER_STATE, "The reason to DMS is = %{public}d", static_cast<uint32_t>(dmsReason));
+    return dmsReason;
+}
 
+uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReason reason)
+{
     DisplayState currentState = GetDisplayState();
     if (state == currentState) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
-
     if (!isRegister_) {
         isRegister_ = DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
-        POWER_HILOGI(FEATURE_POWER_STATE, "Register Callback is %{public}d", isRegister_);
     }
-
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        state = DisplayState::DISPLAY_OFF;
+        currentState = DisplayState::DISPLAY_ON;
+    }
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
     PowerStateChangeReason dispReason = IsTimedOutWhileCoordinated(reason) ?
-        PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : static_cast<PowerStateChangeReason>(reason);
+        PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : GetDmsReasonByPowerReason(reason);
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
             if (currentState == DisplayState::DISPLAY_OFF) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
-                POWER_HILOGD(FEATURE_POWER_STATE, "dispReason=%{public}d", static_cast<uint32_t>(dispReason));
                 DisplayManager::GetInstance().WakeUpBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);
             }
