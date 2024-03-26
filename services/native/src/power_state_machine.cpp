@@ -201,8 +201,8 @@ void PowerStateMachine::EmplaceSleep()
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             auto suspendController = pms->GetSuspendController();
             if (suspendController == nullptr) {
-               POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, transit to SLEEP failed");
-               return  TransitResult::OTHER_ERR;
+                POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, transit to SLEEP failed");
+                return TransitResult::OTHER_ERR;
             }
             suspendController->HandleAction(suspendController->GetLastReason(), suspendController->GetLastAction());
             return TransitResult::SUCCESS;
