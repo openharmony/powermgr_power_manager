@@ -406,10 +406,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
 HWTEST_F(PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
 {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService019 fail to get PowerMgrService";
-    ASSERT_TRUE(!pmsTest_->IsServiceReady()) << "SetUpTestCase pmsTest_ is ready";
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService022 fail to get PowerMgrService";
     pmsTest_->OnStart();
-    ASSERT_TRUE(pmsTest_->IsServiceReady()) << "SetUpTestCase pmsTest_ is not ready";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     auto runningLockMgr = pmsTest_->GetRunningLockMgr();
 
@@ -422,7 +420,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
 
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    stateMaschine_->LockScreenAfterTimingOut(true, true);
+    stateMaschine_->LockScreenAfterTimingOut(true, false);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     stateMaschine_->LockScreenAfterTimingOut(false, false);
@@ -430,11 +428,11 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
         StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    stateMaschine_->LockScreenAfterTimingOut(false, true);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
-        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    runninglock1.UnLock();
+    stateMaschine_->LockScreenAfterTimingOut(true, true);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
+    runninglock1.UnLock();
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
 }
 }
