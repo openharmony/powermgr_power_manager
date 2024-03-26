@@ -124,8 +124,7 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
     }
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
     PowerStateChangeReason dispReason = (reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ?
-            PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION :
-            GetDmsReasonByPowerReason(reason));
+            PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : GetDmsReasonByPowerReason(reason));
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;

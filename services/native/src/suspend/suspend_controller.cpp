@@ -398,11 +398,9 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     sleepType_ = action;
     if (delay == 0) {
         stateMachine_->SetState(PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
-        //HandleAction(reason, action);
     } else {
-        FFRTTask task = [this] {
+        FFRTTask task = [this, reason] {
             stateMachine_->SetState(PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
-            //HandleAction(GetLastReason(), GetLastAction());
         };
         g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, queue_);
     }
