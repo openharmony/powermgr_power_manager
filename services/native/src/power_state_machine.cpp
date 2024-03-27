@@ -198,13 +198,6 @@ void PowerStateMachine::EmplaceSleep()
     controllerMap_.emplace(PowerState::SLEEP,
         std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SLEEP lambda start");
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            auto suspendController = pms->GetSuspendController();
-            if (suspendController == nullptr) {
-                POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, transit to SLEEP failed");
-                return TransitResult::OTHER_ERR;
-            }
-            suspendController->HandleAction(suspendController->GetLastReason(), suspendController->GetLastAction());
             return TransitResult::SUCCESS;
         }));
 }
