@@ -290,14 +290,14 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
+    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+        return;
+    }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
 
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
-        return;
-    }
-    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
         return;
     }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
@@ -332,10 +332,13 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (pms == nullptr) {
         return;
     }
+    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+        return;
+    }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
-    if (!NeedHandle(pointerEvent, pms)) {
+    if (!NonWindowEvent(pointerEvent, pms)) {
         return;
     }
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
@@ -372,15 +375,13 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     }
 }
 
-bool InputCallback::NeedHandle(std::shared_ptr<PointerEvent>& pointerEvent, sptr<PowerMgrService>& pms) const
+bool InputCallback::NonWindowEvent(std::shared_ptr<PointerEvent>& pointerEvent, sptr<PowerMgrService>& pms) const
 {
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
         return false;
     }
-    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
-        return false;
-    }
+
     if (pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_ENTER_WINDOW
         || pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
             return false;
