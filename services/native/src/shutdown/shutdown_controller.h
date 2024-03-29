@@ -32,10 +32,10 @@ namespace PowerMgr {
 class ShutdownController {
 public:
     ShutdownController();
-    ~ShutdownController() = default;
+    virtual ~ShutdownController() = default;
 
-    void Reboot(const std::string& reason);
-    void Shutdown(const std::string& reason);
+    virtual void Reboot(const std::string& reason);
+    virtual void Shutdown(const std::string& reason);
     bool IsShuttingDown();
     void EnableMock(IDevicePowerAction* mockPowerAction, IDeviceStateAction* mockStateAction)
     {

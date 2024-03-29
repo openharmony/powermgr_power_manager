@@ -59,7 +59,6 @@ public:
         return wakeupReason_;
     }
     bool CheckEventReciveTime(WakeupDeviceType wakeupType);
-    void Reset();
 
 private:
     void ControlListener(WakeupDeviceType reason);

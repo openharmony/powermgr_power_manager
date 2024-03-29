@@ -41,6 +41,14 @@ public:
     virtual void Shutdown([[maybe_unused]] const std::string& reason) {};
 };
 
+class FuzzShutdownAction : public ShutdownController {
+public:
+    FuzzShutdownAction() = default;
+    virtual ~FuzzShutdownAction() = default;
+    virtual void Reboot([[maybe_unused]] const std::string& reason) {};
+    virtual void Shutdown([[maybe_unused]] const std::string& reason) {};
+};
+
 class FuzzStateAction : public IDeviceStateAction {
 public:
     FuzzStateAction() = default;
@@ -84,15 +92,17 @@ PowerFuzzerTest::PowerFuzzerTest()
     auto powerState = new FuzzStateAction();
     auto shutdownState = new FuzzStateAction();
     auto lockAction = new RunningLockAction();
+    auto shutdownAction = new FuzzShutdownAction();
     service_->EnableMock(powerState, shutdownState, powerAction, lockAction);
+    service_->EnableShutdownMock(shutdownAction);
 }
 
 PowerFuzzerTest::~PowerFuzzerTest()
 {
     if (service_ != nullptr) {
         service_->OnStop();
-        service_->Reset();
     }
+    DelayedSpSingleton<PowerMgrService>::DestroyInstance();
     service_ = nullptr;
 }
 
