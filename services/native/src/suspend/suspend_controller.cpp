@@ -54,6 +54,9 @@ SuspendController::~SuspendController()
     if (g_suspendSourcesKeyObserver) {
         SettingHelper::UnregisterSettingSuspendSourcesObserver(g_suspendSourcesKeyObserver);
     }
+    if (queue_) {
+        queue_.reset();
+    }
 }
 
 void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
@@ -492,11 +495,6 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
     shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
-}
-
-void SuspendController::Reset()
-{
-    queue_.reset();
 }
 
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)

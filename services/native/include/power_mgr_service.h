@@ -114,7 +114,6 @@ public:
     void WakeupActionControllerInit();
 #endif
     void VibratorInit();
-    void Reset();
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
@@ -170,6 +169,15 @@ public:
         powerStateMachine_->EnableMock(powerState);
         shutdownController_->EnableMock(powerAction, shutdownState);
     }
+
+    void EnableShutdownMock(ShutdownController* shutdownAction)
+    {
+        POWER_HILOGI(LABEL_TEST, "need to mock shutdownController");
+        std::unique_ptr<ShutdownController> mock(shutdownAction);
+        shutdownController_.reset();
+        shutdownController_ = std::move(mock);
+    }
+
     void MockProximity(uint32_t status)
     {
         POWER_HILOGI(LABEL_TEST, "MockProximity: fun is start");
