@@ -93,7 +93,6 @@ public:
     void RestoreScreenOffTimeCoordinated();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
-    void Reset();
     int64_t GetSleepTime();
 
     PowerState GetState()

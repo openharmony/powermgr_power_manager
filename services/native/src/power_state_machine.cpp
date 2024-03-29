@@ -67,7 +67,12 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pm
     POWER_HILOGD(FEATURE_POWER_STATE, "Instance end");
 }
 
-PowerStateMachine::~PowerStateMachine() {}
+PowerStateMachine::~PowerStateMachine()
+{
+    if (queue_) {
+        queue_.reset();
+    }
+}
 
 bool PowerStateMachine::Init()
 {
@@ -1218,11 +1223,6 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
         default:
             break;
     }
-}
-
-void PowerStateMachine::Reset()
-{
-    queue_.reset();
 }
 
 void PowerStateMachine::StateController::RecordFailure(

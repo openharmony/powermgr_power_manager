@@ -74,6 +74,9 @@ WakeupController::~WakeupController()
     if (g_screenTimeoutHandle) {
         FFRTUtils::CancelTask(g_screenTimeoutHandle, queue_);
     }
+    if (queue_) {
+        queue_.reset();
+    }
 }
 
 void WakeupController::Init()
@@ -274,11 +277,6 @@ void WakeupController::HandleScreenOnTimeout()
     if (IsHandleSysfreeze()) {
         POWER_HILOGI(FEATURE_INPUT, "ScreenOnTimeout");
     }
-}
-
-void WakeupController::Reset()
-{
-    queue_.reset();
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
