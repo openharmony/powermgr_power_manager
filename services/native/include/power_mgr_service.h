@@ -114,6 +114,7 @@ public:
     void WakeupActionControllerInit();
 #endif
     void VibratorInit();
+    void Reset();
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {

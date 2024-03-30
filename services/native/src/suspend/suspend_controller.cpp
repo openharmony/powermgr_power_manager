@@ -497,6 +497,13 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
     shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
 }
 
+void SuspendController::Reset()
+{
+    if (queue_) {
+        queue_.reset();
+    }
+}
+
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
     SuspendDeviceType reason = source.GetReason();
