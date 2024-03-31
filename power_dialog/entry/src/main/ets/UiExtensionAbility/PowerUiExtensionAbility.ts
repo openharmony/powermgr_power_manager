@@ -15,11 +15,22 @@
 
 import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 
+
 export default class PowerUiExtensionAbility extends UIExtensionAbility {
   onSessionCreate(want, session): void {
     let storage: LocalStorage = new LocalStorage({
       'session': session
     });
+    
+    if("isInputDlg" in  want.parameters)
+    {
+      if(want.parameters.isInputDlg === true){
+        session.loadContent('pages/inputDialog', storage);
+        session.setWindowBackgroundColor('#00000000');
+        return;
+      }
+    }
+    
     session.loadContent('pages/powerDialog', storage);
     session.setWindowBackgroundColor('#00000000');
   }
