@@ -83,6 +83,14 @@
     {
       "name": "TEXT_LOW_TEMPERATURE_THERMALDIALOG_LOW",
       "value": "低温"
+    },
+    {
+      "name": "BUTTON_CONFIRM",
+      "value": "确定"
+    },
+    {
+      "name": "WARNING_TIP",
+      "value": "有远程设备想操控本设备，是否同意？"
     }
   ]
 }

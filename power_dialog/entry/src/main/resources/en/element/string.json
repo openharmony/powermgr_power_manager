@@ -75,6 +75,15 @@
     {
       "name": "TEXT_LOW_TEMPERATURE_THERMALDIALOG_LOW",
       "value": "LowerTemp"
+    },
+    {
+      "name": "BUTTON_CONFIRM",
+      "value": "confirm"
+    },
+    {
+      "name": "WARNING_TIP",
+      "value": "Do you agree to have a remote device that wants to control this device?"
     }
+   
   ]
 }
