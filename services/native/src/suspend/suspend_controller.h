@@ -73,6 +73,7 @@ public:
         return sleepAction_;
     }
     void StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay);
+    void Reset();
 
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);

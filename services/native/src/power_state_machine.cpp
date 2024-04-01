@@ -659,6 +659,9 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
         std::to_string(delayTime).c_str(), event);
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
+            if (!queue_) {
+                return;
+            }
             std::lock_guard lock(ffrtMutex_);
             FFRTTask task = std::bind(&PowerStateMachine::HandleActivityTimeout, this);
             userActivityTimeoutHandle_ = FFRTUtils::SubmitDelayTask(task, delayTime, queue_);
@@ -685,6 +688,9 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
     POWER_HILOGD(FEATURE_ACTIVITY, "Cancel delay timer, event: %{public}d", event);
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
+            if (!queue_) {
+                return;
+            }
             std::lock_guard lock(ffrtMutex_);
             // void* () is overloaded in ffrt::task_handle, so that it is convertible to bool
             if (userActivityTimeoutHandle_) {
@@ -1222,6 +1228,13 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
         case DisplayState::DISPLAY_UNKNOWN:
         default:
             break;
+    }
+}
+
+void PowerStateMachine::Reset()
+{
+    if (queue_) {
+        queue_.reset();
     }
 }
 
