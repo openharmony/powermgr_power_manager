@@ -430,6 +430,20 @@ void PowerMgrService::OnStop()
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
 }
 
+void PowerMgrService::Reset()
+{
+    POWER_HILOGW(COMP_SVC, "start destruct ffrt_queue");
+    if (powerStateMachine_) {
+        powerStateMachine_->Reset();
+    }
+    if (wakeupController_) {
+        wakeupController_->Reset();
+    }
+    if (suspendController_) {
+        suspendController_->Reset();
+    }
+}
+
 void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s", systemAbilityId, deviceId.c_str());

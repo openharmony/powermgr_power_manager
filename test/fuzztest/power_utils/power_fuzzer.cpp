@@ -101,8 +101,8 @@ PowerFuzzerTest::~PowerFuzzerTest()
 {
     if (service_ != nullptr) {
         service_->OnStop();
+        service_->Reset();
     }
-    DelayedSpSingleton<PowerMgrService>::DestroyInstance();
     service_ = nullptr;
 }
 

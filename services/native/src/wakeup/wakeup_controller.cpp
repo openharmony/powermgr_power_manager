@@ -279,6 +279,13 @@ void WakeupController::HandleScreenOnTimeout()
     }
 }
 
+void WakeupController::Reset()
+{
+    if (queue_) {
+        queue_.reset();
+    }
+}
+
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
