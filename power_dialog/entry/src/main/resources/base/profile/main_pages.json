@@ -2,6 +2,7 @@
   "src": [
     "pages/powerDialog",
     "pages/thermalHighDialog",
-    "pages/thermalLowDialog"
+    "pages/thermalLowDialog",
+    "pages/inputDialog"
   ]
 }
