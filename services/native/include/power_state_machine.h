@@ -68,7 +68,7 @@ class PowerStateMachine : public std::enable_shared_from_this<PowerStateMachine>
 public:
     explicit PowerStateMachine(const wptr<PowerMgrService>& pms);
     ~PowerStateMachine();
-    PowerStateMachine() = default;
+
     enum {
         CHECK_USER_ACTIVITY_TIMEOUT_MSG = 0,
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG,
@@ -95,7 +95,7 @@ public:
     bool IsScreenOn();
     void Reset();
     int64_t GetSleepTime();
-    void NotifyPowerStateChanged(PowerState state);
+
     PowerState GetState()
     {
         return currentState_;
@@ -201,6 +201,7 @@ private:
     void EmplaceDim();
     void InitTransitMap();
     bool CanTransitTo(PowerState to);
+    void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
     void HandleActivityTimeout();
