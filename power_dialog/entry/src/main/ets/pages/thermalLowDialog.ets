@@ -79,7 +79,7 @@ struct LowDialog {
 
   onCancel() {
     (GlobalContext.getContext().getObject('thermalLowWindow') as Record<string, Function>).destroy();
-    GlobalContext.getContext().setObject('g_thermalLowWindowFirst',undefined);
+    GlobalContext.getContext().setObject('g_thermalLowWindowFirst', undefined);
     (GlobalContext.getContext().getObject('extensionContext') as Record<string, Function>).terminateSelf();
   }
 

@@ -14,6 +14,7 @@
  */
 
 export default class Constants {
+public:
   static FULL_WIDTH = '100%';
   static FULL_HEIGHT = '100%';
 
