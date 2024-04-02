@@ -22,6 +22,7 @@
 #include "power_mgr_client.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 #define SHUT_STAGE_FRAMEWORK_START 1
 #define BOOT_DETECTOR_IOCTL_BASE 'B'
@@ -155,12 +156,14 @@ static void SetFrameworkBootStage(bool isReboot)
     int ret = ioctl(fd, SET_REBOOT, &rebootFlag);
     if (ret < 0) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "set reboot flag failed!");
+        close(fd);
         return;
     }
     int stage = SHUT_STAGE_FRAMEWORK_START;
     ret = ioctl(fd, SET_SHUT_STAGE, &stage);
     if (ret < 0) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
+        close(fd);
     }
     return;
 }
