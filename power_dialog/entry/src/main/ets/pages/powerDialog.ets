@@ -116,7 +116,7 @@ struct PowerDialog {
       if (session) {
         session.terminateSelf();
       }
-    } catch(err) {
+    } catch (err) {
       console.log('power dialog cancel failed: ' + JSON.stringify(err));
     }
   }
@@ -124,8 +124,8 @@ struct PowerDialog {
   onShutdown() {
     try {
       this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
-      power.shutdown("power_dialog");
-    } catch(err) {
+      power.shutdown('power_dialog');
+    } catch (err) {
       console.log('power dialog shutdown failed: ' + JSON.stringify(err));
     }
   }
@@ -133,8 +133,8 @@ struct PowerDialog {
   onReboot() {
     try {
       this.timeoutId = setTimeout(this.onCancel, this.timeoutMs);
-      power.reboot("power_dialog");
-    } catch(err) {
+      power.reboot('power_dialog');
+    } catch (err) {
       console.log('power dialog reboot failed: ' + JSON.stringify(err));
     }
   }
