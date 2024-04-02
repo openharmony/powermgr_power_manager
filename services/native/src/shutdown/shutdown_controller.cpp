@@ -54,6 +54,12 @@ ShutdownController::ShutdownController() : started_(false)
     syncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
 }
 
+void ShutdownController::Init()
+{
+    if (!powerStateMachine_) {
+        powerStateMachine_ = std::make_shared<PowerStateMachine>();
+    }
+}
 void ShutdownController::Reboot(const std::string& reason)
 {
     RebootOrShutdown(reason, true);
@@ -111,6 +117,9 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+    if (powerStateMachine_) {
+        powerStateMachine_->NotifyPowerStateChanged(PowerState::SHUTDOWN);
+    }
     PublishShutdownEvent();
     TriggerSyncShutdownCallback();
     TurnOffScreen();
