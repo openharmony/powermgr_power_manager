@@ -49,7 +49,6 @@ private:
     ErrCode RunAsDisplayCommandCancelBoost();
     ErrCode RunAsDisplayCommandSetValue();
     ErrCode RunAsDisplayCommandDiscount();
-    ErrCode RunAsDisplayCommandDelay();
     std::map<char, std::function<int32_t()>> commandDisplay_;
 #endif
     ErrCode RunAsTimeOutCommand();
