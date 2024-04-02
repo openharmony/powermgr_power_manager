@@ -30,6 +30,7 @@ namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
 constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
+static int64_t g_beforeOverrideTime {-1};
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -470,7 +471,7 @@ bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
     if (!isScreenOffTimeOverride_) {
         int64_t beforeOverrideTime = this->GetDisplayOffTime();
         isScreenOffTimeOverride_ = true;
-        beforeOverrideTime_ = beforeOverrideTime;
+        g_beforeOverrideTime = beforeOverrideTime;
     }
     this->SetDisplayOffTime(timeout, false);
     POWER_HILOGD(COMP_SVC, "Override screenOffTime finish");
@@ -483,7 +484,7 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
         POWER_HILOGD(COMP_SVC, "RestoreScreenOffTime is not override, no need to restore");
         return false;
     }
-    this->SetDisplayOffTime(beforeOverrideTime_, false);
+    this->SetDisplayOffTime(g_beforeOverrideTime, false);
     isScreenOffTimeOverride_ = false;
     POWER_HILOGD(COMP_SVC, "Restore screenOffTime finish");
     return true;
@@ -863,6 +864,7 @@ static void DisplayOffTimeUpdateFunc()
     }
     POWER_HILOGD(FEATURE_POWER_STATE, "setting update display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         systemTime, settingTime);
+    g_beforeOverrideTime = settingTime;
     stateMachine->SetDisplayOffTime(settingTime, false);
 }
 
@@ -1075,7 +1077,7 @@ void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason,
 
     result.append("ScreenOffTime: Timeout=");
     if (isScreenOffTimeOverride_) {
-        result.append((ToString(beforeOverrideTime_)))
+        result.append((ToString(g_beforeOverrideTime)))
             .append("ms  OverrideTimeout=")
             .append((ToString(GetDisplayOffTime())))
             .append("ms\n");

@@ -227,7 +227,6 @@ private:
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
-    int64_t beforeOverrideTime_ {-1};
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
     bool isCoordinatedOverride_ {false};
