@@ -510,6 +510,7 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
         suspendController_->StopSleep();
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
+    shutdownController_->Init();
     shutdownController_->Reboot(reason);
     return PowerErrors::ERR_OK;
 }
@@ -540,6 +541,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     }
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
+    shutdownController_->Init();
     shutdownController_->Shutdown(reason);
     return PowerErrors::ERR_OK;
 }

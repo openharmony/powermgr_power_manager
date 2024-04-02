@@ -22,6 +22,7 @@
 #include <atomic>
 #include <string>
 
+#include "power_state_machine.h"
 #include "shutdown/iasync_shutdown_callback.h"
 #include "shutdown/isync_shutdown_callback.h"
 #include "shutdown/itakeover_shutdown_callback.h"
@@ -37,6 +38,7 @@ public:
     virtual void Reboot(const std::string& reason);
     virtual void Shutdown(const std::string& reason);
     bool IsShuttingDown();
+    void Init();
     void EnableMock(IDevicePowerAction* mockPowerAction, IDeviceStateAction* mockStateAction)
     {
         std::unique_ptr<IDevicePowerAction> mockPower(mockPowerAction);
@@ -75,6 +77,7 @@ private:
     std::atomic<bool> started_;
     std::unique_ptr<IDevicePowerAction> devicePowerAction_;
     std::shared_ptr<IDeviceStateAction> deviceStateAction_;
+    std::shared_ptr<PowerStateMachine> powerStateMachine_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
