@@ -28,6 +28,7 @@
 #include <common_event_support.h>
 #include <datetime_ex.h>
 #include <future>
+#include <hisysevent.h>
 #include <thread>
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
@@ -54,12 +55,6 @@ ShutdownController::ShutdownController() : started_(false)
     syncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
 }
 
-void ShutdownController::Init()
-{
-    if (!powerStateMachine_) {
-        powerStateMachine_ = std::make_shared<PowerStateMachine>();
-    }
-}
 void ShutdownController::Reboot(const std::string& reason)
 {
     RebootOrShutdown(reason, true);
@@ -117,9 +112,8 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
-    if (powerStateMachine_) {
-        powerStateMachine_->NotifyPowerStateChanged(PowerState::SHUTDOWN);
-    }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
     PublishShutdownEvent();
     TriggerSyncShutdownCallback();
     TurnOffScreen();
