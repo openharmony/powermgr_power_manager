@@ -31,7 +31,9 @@
 #endif
 #include "wakeup_sources.h"
 #include "wakeup_source_parser.h"
+#ifdef SCREEN_ON_TIMEOUT_CHECK
 #include "ffrt_utils.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -49,7 +51,10 @@ public:
     void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
     void NotifyDisplayActionDone(uint32_t event);
+#ifdef SCREEN_ON_TIMEOUT_CHECK
     bool IsHandleSysfreeze();
+    void Reset();
+#endif
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;
@@ -59,12 +64,14 @@ public:
         return wakeupReason_;
     }
     bool CheckEventReciveTime(WakeupDeviceType wakeupType);
-    void Reset();
 
 private:
     void ControlListener(WakeupDeviceType reason);
+#ifdef SCREEN_ON_TIMEOUT_CHECK
     void StartWakeupTimer();
     void HandleScreenOnTimeout();
+    std::shared_ptr<FFRTQueue> queue_;
+#endif
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
     std::map<WakeupDeviceType, int64_t> eventHandleMap_;
@@ -74,7 +81,6 @@ private:
     std::mutex monitorMutex_;
     std::mutex eventHandleMutex_;
     int32_t monitorId_ {-1};
-    std::shared_ptr<FFRTQueue> queue_;
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
