@@ -436,9 +436,11 @@ void PowerMgrService::Reset()
     if (powerStateMachine_) {
         powerStateMachine_->Reset();
     }
+#ifdef SCREEN_ON_TIMEOUT_CHECK
     if (wakeupController_) {
         wakeupController_->Reset();
     }
+#endif
     if (suspendController_) {
         suspendController_->Reset();
     }
