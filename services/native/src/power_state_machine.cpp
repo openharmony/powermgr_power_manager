@@ -821,9 +821,6 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockMgr is nullptr");
         return false;
     }
-    if (state == PowerState::DIM) {
-        state = PowerState::INACTIVE;
-    }
     auto iterator = lockMap_.find(state);
     if (iterator == lockMap_.end()) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "No specific lock in lockMap_ for state: %{public}u", state);
@@ -1191,10 +1188,6 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::LOCKING;
     }
     TransitResult ret = action_(reason);
-    if (GetState() == PowerState::DIM) {
-        // power state DIM is not support now
-        return ret;
-    }
     if (ret == TransitResult::SUCCESS) {
         lastReason_ = reason;
         lastTime_ = GetTickCount();
