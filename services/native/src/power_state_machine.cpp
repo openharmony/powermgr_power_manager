@@ -449,8 +449,11 @@ void PowerStateMachine::RefreshActivityInner(
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
         }
-        // reset timer
-        ResetInactiveTimer();
+        if (GetState() == PowerState::DIM) {
+            SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
+        } else {
+            ResetInactiveTimer();
+        }
     } else {
         POWER_HILOGD(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
     }
@@ -793,6 +796,10 @@ void PowerStateMachine::HandleSystemWakeup()
 void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
     forceTimingOut_.store(enabled, std::memory_order_relaxed);
+    if (enabled) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "SetForceTimingOut: reset timer");
+        ResetInactiveTimer();
+    }
 }
 
 void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock)
