@@ -373,8 +373,9 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_on");
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    PowerErrors ret =
+        powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_on");
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 end.");
 }

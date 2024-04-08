@@ -70,43 +70,5 @@ void FFRTUtils::CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue)
 {
     queue->cancel(handle);
 }
-
-FFRTUtils::Mutex::Mutex()
-{
-    mutex_ = new ffrt::mutex();
-}
-
-FFRTUtils::Mutex::~Mutex()
-{
-    if (!mutex_) {
-        return;
-    }
-    mutex_ = nullptr;
-    delete mutex_;
-}
-
-void FFRTUtils::Mutex::Lock()
-{
-    if (!mutex_) {
-        return;
-    }
-    mutex_->lock();
-}
-
-bool FFRTUtils::Mutex::TryLock()
-{
-    if (!mutex_) {
-        return false;
-    }
-    return mutex_->try_lock();
-}
-
-void FFRTUtils::Mutex::Unlock()
-{
-    if (!mutex_) {
-        return;
-    }
-    mutex_->unlock();
-}
 } // namespace PowerMgr
 } // namespace OHOS

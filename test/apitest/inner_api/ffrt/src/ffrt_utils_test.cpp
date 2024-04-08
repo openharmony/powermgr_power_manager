@@ -173,34 +173,20 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest007, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsMutexTest001, TestSize.Level1)
 {
-    int x = 0;
-    auto mutex = FFRTUtils::Mutex();
-    FFRTTask task1 = [&]() {
-        mutex.Lock(); // mutex lock
-        ffrt::this_task::sleep_for(std::chrono::milliseconds(10)); // task sleep 10ms
-        x += 2;
-        mutex.Unlock(); // mutex unlock
+    auto mutex = FFRTMutex();
+    std::unique_lock lock(mutex);
+    FFRTTask task1 = [&mutex]() {
+        std::unique_lock lock(mutex, std::try_to_lock);
+        EXPECT_FALSE(lock.owns_lock());
     };
-    FFRTTask task2 = [&]() {
-        mutex.Lock();
-        ffrt::this_task::sleep_for(std::chrono::milliseconds(5)); // task sleep 5ms
-        x += 3;
-        mutex.Unlock();
+    FFRTTask task2 = [&mutex]() {
+        std::unique_lock lock(mutex, std::try_to_lock);
+        EXPECT_TRUE(lock.owns_lock());
     };
-    FFRTUtils::SubmitTask(task1); // submit task async
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(2)); // task sleep 2ms
-    FFRTUtils::SubmitTask(task2); // submit task async
-
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
-    EXPECT_EQ(x, 0); // task1 not finished, and task2 cannot access mutex block
-    EXPECT_FALSE(mutex.TryLock()); // mutex is locked by task1, try lock returns false
-
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(7));
-    EXPECT_EQ(x, 2); // task1 finished
-
-    ffrt::this_task::sleep_for(std::chrono::milliseconds(5));
-    EXPECT_EQ(x, 5); // task2 finished
-    EXPECT_TRUE(mutex.TryLock()); // mutex is unlocked, try lock returns true
+    FFRTUtils::SubmitTaskSync(task1);
+    lock.unlock();
+    FFRTUtils::SubmitTaskSync(task2);
+    EXPECT_TRUE(lock.try_lock());
 }
 } // namespace Test
 } // namespace PowerMgr
