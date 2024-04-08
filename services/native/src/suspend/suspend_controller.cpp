@@ -35,7 +35,7 @@ sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 FFRTHandle g_sleepTimeoutHandle;
 FFRTHandle g_forceSleepDelayHandle;
 FFRTHandle g_userActivityOffTimeoutHandle;
-FFRTUtils::Mutex g_monitorMutex;
+FFRTMutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
 } // namespace
 
@@ -150,9 +150,9 @@ void SuspendController::Init()
             POWER_HILOGI(FEATURE_SUSPEND, "register type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
-            g_monitorMutex.Lock();
+            g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
-            g_monitorMutex.Unlock();
+            g_monitorMutex.unlock();
         }
     }
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
@@ -166,17 +166,17 @@ void SuspendController::Init()
 
 void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
-    g_monitorMutex.Lock();
+    g_monitorMutex.lock();
     if (monitorMap_.find(reason) != monitorMap_.end()) {
         auto monitor = monitorMap_[reason];
         if (monitor == nullptr) {
             POWER_HILOGI(COMP_SVC, "get monitor fail");
-            g_monitorMutex.Unlock();
+            g_monitorMutex.unlock();
             return;
         }
         monitor->Notify();
     }
-    g_monitorMutex.Unlock();
+    g_monitorMutex.unlock();
 }
 
 void SuspendController::RegisterSettingsObserver()
@@ -202,9 +202,9 @@ void SuspendController::RegisterSettingsObserver()
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                     std::placeholders::_2, std::placeholders::_3));
-                g_monitorMutex.Lock();
+                g_monitorMutex.lock();
                 monitorMap_.emplace(monitor->GetReason(), monitor);
-                g_monitorMutex.Unlock();
+                g_monitorMutex.unlock();
             }
         }
     };
@@ -219,12 +219,12 @@ void SuspendController::Execute()
 
 void SuspendController::Cancel()
 {
-    g_monitorMutex.Lock();
+    g_monitorMutex.lock();
     for (auto monitor = monitorMap_.begin(); monitor != monitorMap_.end(); monitor++) {
         monitor->second->Cancel();
     }
     monitorMap_.clear();
-    g_monitorMutex.Unlock();
+    g_monitorMutex.unlock();
 }
 
 void SuspendController::StopSleep()
@@ -240,10 +240,10 @@ void SuspendController::StopSleep()
 void SuspendController::HandleEvent(int64_t delayTime)
 {
     FFRTTask task = [&]() {
-        g_monitorMutex.Lock();
+        g_monitorMutex.lock();
         auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
         if (timeoutSuspendMonitor == monitorMap_.end()) {
-            g_monitorMutex.Unlock();
+            g_monitorMutex.unlock();
             return;
         }
 
@@ -257,7 +257,7 @@ void SuspendController::HandleEvent(int64_t delayTime)
             int32_t timeout = stateMachine_->GetDisplayOffTime();
             POWER_HILOGI(FEATURE_INPUT, "This time of timeout is %{public}d ms", timeout);
         }
-        g_monitorMutex.Unlock();
+        g_monitorMutex.unlock();
         auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
     };

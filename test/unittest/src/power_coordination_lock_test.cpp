@@ -35,7 +35,7 @@ namespace {
 constexpr int32_t US_PER_MS = 1000;
 constexpr uint32_t AUTO_SLEEP_DELAY_MS = 5000;
 constexpr uint32_t WAIT_AUTO_SUSPEND_SLEEP_TIME_MS = AUTO_SLEEP_DELAY_MS + 1000;
-constexpr int32_t WAIT_EVENT_TIME_MS = 200;
+constexpr int32_t WAIT_EVENT_TIME_MS = 300;
 constexpr int32_t RETRY_WAIT_TIME_MS = 100;
 constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;

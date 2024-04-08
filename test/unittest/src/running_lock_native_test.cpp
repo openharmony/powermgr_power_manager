@@ -49,8 +49,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    EXPECT_TRUE(stateMachine->Init());
+    auto stateMachine = pmsTest->GetPowerStateMachine();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
 
@@ -92,8 +91,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    EXPECT_TRUE(stateMachine->Init());
+    auto stateMachine = pmsTest->GetPowerStateMachine();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
 
@@ -139,8 +137,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    EXPECT_TRUE(stateMachine->Init());
+    auto stateMachine = pmsTest->GetPowerStateMachine();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
 
@@ -172,8 +169,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    EXPECT_TRUE(stateMachine->Init());
+    auto stateMachine = pmsTest->GetPowerStateMachine();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
 
@@ -212,8 +208,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
 {
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    EXPECT_TRUE(stateMachine->Init());
+    auto stateMachine = pmsTest->GetPowerStateMachine();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
 

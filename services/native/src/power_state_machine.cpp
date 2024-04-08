@@ -729,7 +729,7 @@ void PowerStateMachine::ResetInactiveTimer()
         return;
     }
 
-    if (forceTimingOut_.load(std::memory_order_relaxed) || this->CheckRunningLock(PowerState::INACTIVE)) {
+    if (forceTimingOut_.load() || this->CheckRunningLock(PowerState::INACTIVE)) {
         const double DIMTIMERATE = 2.0 / 3;
         this->SetDelayTimer(
             this->GetDisplayOffTime() * DIMTIMERATE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
@@ -795,9 +795,8 @@ void PowerStateMachine::HandleSystemWakeup()
 
 void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
-    forceTimingOut_.store(enabled, std::memory_order_relaxed);
+    forceTimingOut_.store(enabled);
     if (enabled) {
-        POWER_HILOGI(FEATURE_ACTIVITY, "SetForceTimingOut: reset timer");
         ResetInactiveTimer();
     }
 }
@@ -946,7 +945,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     }
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
             reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) &&
-        forceTimingOut_.load(std::memory_order_relaxed)) {
+        forceTimingOut_.load()) {
         force = true;
     }
     TransitResult ret = pController->TransitTo(reason, force);
@@ -1067,8 +1066,8 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
             ret = StateChangeReason::STATE_CHANGE_REASON_REMOTE;
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT:
-            ret = (enabledTimingOutLockScreen_.load(std::memory_order_relaxed) &&
-                      (!enabledTimingOutLockScreenCheckLock_.load(std::memory_order_relaxed) ||
+            ret = (enabledTimingOutLockScreen_.load() &&
+                      (!enabledTimingOutLockScreenCheckLock_.load() ||
                           CheckRunningLock(PowerState::INACTIVE))) ?
                 StateChangeReason::STATE_CHANGE_REASON_TIMEOUT :
                 StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK;
