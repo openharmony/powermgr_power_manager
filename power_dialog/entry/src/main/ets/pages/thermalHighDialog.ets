@@ -81,7 +81,7 @@ struct HighDialog {
   onCancel() {
     (GlobalContext.getContext().getObject('thermalHighWindow') as Record<string, Function>).destroy();
     GlobalContext.getContext().setObject('g_thermalHighWindowFirst', undefined);
-   (GlobalContext.getContext().getObject('extensionContext') as Record<string, Function>).terminateSelf();
+    (GlobalContext.getContext().getObject('extensionContext') as Record<string, Function>).terminateSelf();
   }
 
   existApp() {

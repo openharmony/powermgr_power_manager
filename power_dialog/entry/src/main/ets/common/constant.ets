@@ -14,25 +14,25 @@
  */
 
 export default class Constants {
-  static FULL_WIDTH = '100%';
-  static FULL_HEIGHT = '100%';
+  public static FULL_WIDTH = '100%'
+  public static FULL_HEIGHT = '100%'
 
-  static DIALOG_WIDTH = 395;
-  static DIALOG_HEIGHT = 117;
-  static DIALOG_BORDER_RADIUS = 32;
+  public static DIALOG_WIDTH = 395
+  public static DIALOG_HEIGHT = 117
+  public static DIALOG_BORDER_RADIUS = 32
 
-  static DIALOG_TITLE_FONT_SIZE = 16;
-  static DIALOG_TITLE_FONT_WEIGHT = 400;
-  static DIALOG_TITLE_OPACITY = 1;
-  static DIALOG_TITLE_MARGIN_TOP = 24;
-  static DIALOG_TITLE_MARGIN_BOTTOM = 16;
-  static DIALOG_TITLE_LINE_HEIGHT = 22;
+  public static DIALOG_TITLE_FONT_SIZE = 16
+  public static DIALOG_TITLE_FONT_WEIGHT = 400
+  public static DIALOG_TITLE_OPACITY = 1
+  public static DIALOG_TITLE_MARGIN_TOP = 24
+  public static DIALOG_TITLE_MARGIN_BOTTOM = 16
+  public static DIALOG_TITLE_LINE_HEIGHT = 22
 
-  static BUTTON_HEIGHT = 40;
-  static BUTTON_WIDTH = 100;
-  static BUTTON_MARGIN = 7;
-  static BUTTON_TEXT_FONT_SIZE = 16;
-  static BUTTON_TEXT_FONT_WEIGHT = 500;
+  public static BUTTON_HEIGHT = 40
+  public static BUTTON_WIDTH = 100
+  public static BUTTON_MARGIN = 7
+  public static BUTTON_TEXT_FONT_SIZE = 16
+  public static BUTTON_TEXT_FONT_WEIGHT = 500
 
-  static SPLIT_FONT_SIZE = 24;
+  public static SPLIT_FONT_SIZE = 24
 }
