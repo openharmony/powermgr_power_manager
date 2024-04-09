@@ -21,7 +21,10 @@
 #include <common_event_subscriber.h>
 #include <common_event_support.h>
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include "input_manager.h"
+#include "pointer_event.h"
+#endif
 #include "power_log.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
@@ -568,6 +571,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
     POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_010 end");
 }
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /**
  * @tc.name: PowerCoordinationLockTest_011
  * @tc.desc: test entering DIM state while coordination
@@ -591,30 +595,55 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
 
     auto inputManager = MMI::InputManager::GetInstance();
 
-    std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_0);
-    keyEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
     inputManager->SimulateInputEvent(keyEvent);
 
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
-    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
-    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 
     powerMgrClient.WakeupDevice();
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
-    std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    auto pointerEvent = PointerEvent::Create();
+
+    PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetDisplayX(5);
+    item.SetDisplayY(5);
+    item.SetPressure(5);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    item.SetPointerId(1);
+    item.SetDisplayX(5);
+    item.SetDisplayY(10);
+    item.SetPressure(7);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    pointerEvent->SetPointerAction(PointerEvent::POINTER_ACTION_DOWN);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetSourceType(PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+
+    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
     inputManager->SimulateInputEvent(pointerEvent);
 
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
-    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
-    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 }
+#endif
 }
