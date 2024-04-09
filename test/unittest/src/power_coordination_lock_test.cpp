@@ -21,8 +21,10 @@
 #include <common_event_subscriber.h>
 #include <common_event_support.h>
 
+#include "input_manager.h"
 #include "power_log.h"
 #include "power_mgr_client.h"
+#include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 
 using namespace OHOS;
@@ -32,10 +34,11 @@ using namespace std;
 using namespace testing::ext;
 
 namespace {
+constexpr uint32_t SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS = 10000;
 constexpr int32_t US_PER_MS = 1000;
 constexpr uint32_t AUTO_SLEEP_DELAY_MS = 5000;
 constexpr uint32_t WAIT_AUTO_SUSPEND_SLEEP_TIME_MS = AUTO_SLEEP_DELAY_MS + 1000;
-constexpr int32_t WAIT_EVENT_TIME_MS = 300;
+constexpr int32_t WAIT_EVENT_TIME_MS = 400;
 constexpr int32_t RETRY_WAIT_TIME_MS = 100;
 constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
@@ -563,5 +566,55 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_010 end");
+}
+
+/**
+ * @tc.name: PowerCoordinationLockTest_011
+ * @tc.desc: test entering DIM state while coordination
+ * @tc.type: FUNC
+ * @tc.require: issueI8JBT4
+ */
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_011 start");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto runninglock =
+        powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_010", RunningLockType::RUNNINGLOCK_COORDINATION);
+    ASSERT_NE(runninglock, nullptr);
+    EXPECT_FALSE(runninglock->IsUsed());
+    powerMgrClient.WakeupDevice();
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    powerMgrClient.OverrideScreenOffTime(OVER_TIME_SCREEN_OFF_TIME_MS);
+    runninglock->Lock();
+    EXPECT_TRUE(runninglock->IsUsed());
+
+    auto inputManager = MMI::InputManager::GetInstance();
+
+    std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_0);
+    keyEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    inputManager->SimulateInputEvent(keyEvent);
+
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+
+    powerMgrClient.WakeupDevice();
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+
+    std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    inputManager->SimulateInputEvent(pointerEvent);
+
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 }
 }

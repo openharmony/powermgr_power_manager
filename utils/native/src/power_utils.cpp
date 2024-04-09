@@ -70,6 +70,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("REMOTE");
         case StateChangeReason::STATE_CHANGE_REASON_REFRESH:
             return std::string("REFRESH");
+        case StateChangeReason::STATE_CHANGE_REASON_COORDINATION:
+            return std::string("COORDINATION_OVERRIDE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:

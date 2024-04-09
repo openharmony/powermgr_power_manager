@@ -404,7 +404,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
  * @tc.desc: Test PowerMgrService LockScreenAfterTimingOut.
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
+HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
 {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService022 fail to get PowerMgrService";
@@ -435,5 +435,26 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     runninglock1.UnLock();
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+}
+
+/**
+ * @tc.name: PowerMgrService023
+ * @tc.desc: Test transition to DIM state for Timeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(4000));
+    sleep(3);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    EXPECT_TRUE(powerMgrClient.RefreshActivity());
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    sleep(3);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    sleep(2);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 }
 }

@@ -232,20 +232,18 @@ void PowerStateMachine::EmplaceDim()
                 return TransitResult::OTHER_ERR;
             }
             const uint32_t OFF_TIMEOUT_FACTOR = 3;
-            DisplayState dispState = stateAction_->GetDisplayState();
-            if (dispState == DisplayState::DISPLAY_ON) {
-                uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
-                if (ret != ActionResult::SUCCESS) {
-                    // failed but not return, still need to set screen off
-                    POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
-                }
-                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR,
-                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-            } else {
-                CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR,
-                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            int64_t displayOffTime = GetDisplayOffTime();
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
+                displayOffTime = OFF_TIMEOUT_FACTOR * COORDINATED_STATE_SCREEN_OFF_TIME_MS;
             }
+            DisplayState dispState = stateAction_->GetDisplayState();
+            uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
+            if (ret != ActionResult::SUCCESS) {
+                // failed but not return, still need to set screen off
+                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
+            }
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            SetDelayTimer(displayOffTime / OFF_TIMEOUT_FACTOR, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             return TransitResult::SUCCESS;
         }));
 }
@@ -1211,6 +1209,9 @@ bool PowerStateMachine::StateController::CheckState()
         return false;
     }
     auto state = GetState();
+    if (state == PowerState::DIM) {
+        return true;
+    }
     POWER_HILOGD(FEATURE_POWER_STATE, "state: %{public}u, currentState_: %{public}u", state, owner->currentState_);
     return state != owner->currentState_;
 }
@@ -1247,6 +1248,11 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
             }
             break;
         case DisplayState::DISPLAY_DIM:
+            if (currentState == PowerState::INACTIVE || currentState == PowerState::STAND_BY ||
+                currentState == PowerState::DOZE) {
+                CorrectState(currentState, PowerState::DIM, state);
+            }
+            break;
         case DisplayState::DISPLAY_ON:
             if (currentState == PowerState::INACTIVE || currentState == PowerState::STAND_BY ||
                 currentState == PowerState::DOZE) {

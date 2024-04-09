@@ -552,7 +552,7 @@ int32_t PowerMgrStub::IsStandbyStub(MessageParcel& data, MessageParcel& reply)
 
 int32_t PowerMgrStub::SetForceTimingOutStub(MessageParcel& data, MessageParcel& reply)
 {
-    bool enabled;
+    bool enabled = false;
     READ_PARCEL_WITH_RET(data, Bool, enabled, E_READ_PARCEL_ERROR);
     PowerErrors ret = SetForceTimingOut(enabled);
     WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
@@ -561,8 +561,8 @@ int32_t PowerMgrStub::SetForceTimingOutStub(MessageParcel& data, MessageParcel& 
 
 int32_t PowerMgrStub::LockScreenAfterTimingOutStub(MessageParcel& data, MessageParcel& reply)
 {
-    bool enabledLockScreen;
-    bool checkLock;
+    bool enabledLockScreen = true;
+    bool checkLock = false;
     READ_PARCEL_WITH_RET(data, Bool, enabledLockScreen, E_READ_PARCEL_ERROR);
     READ_PARCEL_WITH_RET(data, Bool, checkLock, E_READ_PARCEL_ERROR);
     PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock);
