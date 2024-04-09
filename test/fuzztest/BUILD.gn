@@ -40,6 +40,7 @@ group("fuzztest") {
     "releaserunninglock_fuzzer:ReleaseRunningLockFuzzTest",
     "resetrunninglocks_fuzzer:ResetRunningLocksFuzzTest",
     "setdisplaysuspend_fuzzer:SetDisplaySuspendFuzzTest",
+    "setforcetimingout_fuzzer:SetForceTimingOutFuzzTest",
     "shelldump_fuzzer:ShellDumpFuzzTest",
     "shutdowndevice_fuzzer:ShutDownDeviceFuzzTest",
     "suspenddevice_fuzzer:SuspendDeviceFuzzTest",

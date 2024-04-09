@@ -1093,7 +1093,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
  * @tc.name: PowerMgrClient047
  * @tc.desc: test SetIgnoreScreenOnLock
  * @tc.type: FUNC
- * @tc.require: issueI6FMHX
+ * @tc.require: issueI96FJ5
  */
 HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
 {
