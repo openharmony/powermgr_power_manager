@@ -52,6 +52,34 @@ bool g_screenOffEvent = false;
 bool g_awakeCallback = false;
 bool g_inactiveCallback = false;
 
+std::shared_ptr<PointerEvent> createDemoEvent()
+{
+    auto pointerEvent = PointerEvent::Create();
+
+    PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetDisplayX(5);
+    item.SetDisplayY(5);
+    item.SetPressure(5);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    item.SetPointerId(1);
+    item.SetDisplayX(5);
+    item.SetDisplayY(10);
+    item.SetPressure(7);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    pointerEvent->SetPointerAction(PointerEvent::POINTER_ACTION_DOWN);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetSourceType(PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+
+    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+
+    return pointerEvent;
+}
+
 void ResetTriggeredFlag()
 {
     g_screenOnEvent = false;
@@ -613,28 +641,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
-    auto pointerEvent = PointerEvent::Create();
-
-    PointerEvent::PointerItem item;
-    item.SetPointerId(0);
-    item.SetDisplayX(5);
-    item.SetDisplayY(5);
-    item.SetPressure(5);
-    item.SetDeviceId(1);
-    pointerEvent->AddPointerItem(item);
-
-    item.SetPointerId(1);
-    item.SetDisplayX(5);
-    item.SetDisplayY(10);
-    item.SetPressure(7);
-    item.SetDeviceId(1);
-    pointerEvent->AddPointerItem(item);
-
-    pointerEvent->SetPointerAction(PointerEvent::POINTER_ACTION_DOWN);
-    pointerEvent->SetPointerId(1);
-    pointerEvent->SetSourceType(PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-
-    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    std::shared_ptr<PointerEvent> pointerEvent = createDemoEvent();
     inputManager->SimulateInputEvent(pointerEvent);
 
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);

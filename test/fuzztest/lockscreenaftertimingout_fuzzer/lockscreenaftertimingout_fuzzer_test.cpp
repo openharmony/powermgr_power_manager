@@ -30,6 +30,7 @@ PowerFuzzerTest g_serviceTest;
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, size);
+    g_serviceTest.TestPowerServiceStub(
+        static_cast<uint32_t>(PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, size);
     return 0;
 }

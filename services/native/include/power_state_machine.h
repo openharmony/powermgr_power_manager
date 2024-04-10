@@ -147,7 +147,7 @@ public:
     int64_t GetDimTime(int64_t displayOffTime);
     static constexpr int64_t OFF_TIMEOUT_FACTOR = 4;
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
-    static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000; 
+    static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
     void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
