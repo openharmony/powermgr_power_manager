@@ -31,6 +31,8 @@ namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
 constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
 static int64_t g_beforeOverrideTime {-1};
+constexpr int32_t DISPLAY_OFF = 0;
+constexpr int32_t DISPLAY_ON = 2;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -113,8 +115,12 @@ void PowerStateMachine::InitState()
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Init power state");
     if (IsScreenOn()) {
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_ON);
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
     } else {
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_OFF);
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
     }
 }
