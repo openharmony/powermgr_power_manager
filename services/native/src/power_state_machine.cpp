@@ -1210,7 +1210,7 @@ bool PowerStateMachine::StateController::CheckState()
         return false;
     }
     auto state = GetState();
-    if (state == PowerState::DIM) {
+    if (state == PowerState::DIM || state == PowerState::AWAKE) {
         return true;
     }
     POWER_HILOGD(FEATURE_POWER_STATE, "state: %{public}u, currentState_: %{public}u", state, owner->currentState_);
