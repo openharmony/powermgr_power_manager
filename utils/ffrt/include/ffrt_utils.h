@@ -110,7 +110,7 @@ public:
      *
      * @param handle FFRT task.
      */
-    static void CancelTask(FFRTHandle& handle, FFRTQueue& queue);
+    static int CancelTask(FFRTHandle& handle, FFRTQueue& queue);
 
     /**
      * Cancel the FFRT task.
@@ -120,7 +120,7 @@ public:
      * @param handle FFRT task.
      * @param queue Shared_ptr of FFRT task cancel queue.
      */
-    static void CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
+    static int CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -15,6 +15,7 @@
 
 #include "power_state_machine.h"
 
+#include <algorithm>
 #include <cinttypes>
 #include <datetime_ex.h>
 #include <hisysevent.h>
@@ -29,7 +30,6 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
-constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
 static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
@@ -231,10 +231,9 @@ void PowerStateMachine::EmplaceDim()
                 POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
                 return TransitResult::OTHER_ERR;
             }
-            const uint32_t OFF_TIMEOUT_FACTOR = 3;
-            int64_t displayOffTime = GetDisplayOffTime();
+            int64_t dimTime = GetDimTime(GetDisplayOffTime());
             if (reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
-                displayOffTime = OFF_TIMEOUT_FACTOR * COORDINATED_STATE_SCREEN_OFF_TIME_MS;
+                dimTime = COORDINATED_STATE_SCREEN_OFF_TIME_MS;
             }
             DisplayState dispState = stateAction_->GetDisplayState();
             uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
@@ -242,9 +241,14 @@ void PowerStateMachine::EmplaceDim()
                 // failed but not return, still need to set screen off
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
+            if (!isSettingDim_.load()) {
+                stateAction_->SetDisplayState(
+                    DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
+                return TransitResult::OTHER_ERR;
+            }
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-            SetDelayTimer(displayOffTime / OFF_TIMEOUT_FACTOR, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             return TransitResult::SUCCESS;
         }));
 }
@@ -383,6 +387,7 @@ void PowerStateMachine::HandlePreBrightWakeUp (
                     SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
                     static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
             }
+            break;
         default:
             break;
     }
@@ -448,7 +453,7 @@ void PowerStateMachine::RefreshActivityInner(
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
         }
-        if (GetState() == PowerState::DIM) {
+        if (GetState() == PowerState::DIM || isSettingDim_.load()) {
             SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
         } else {
             ResetInactiveTimer();
@@ -721,6 +726,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 
 void PowerStateMachine::ResetInactiveTimer()
 {
+    isSettingDim_ = false;
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
@@ -729,9 +735,9 @@ void PowerStateMachine::ResetInactiveTimer()
     }
 
     if (forceTimingOut_.load() || this->CheckRunningLock(PowerState::INACTIVE)) {
-        const double DIMTIMERATE = 2.0 / 3;
+        int64_t displayOffTime = this->GetDisplayOffTime();
         this->SetDelayTimer(
-            this->GetDisplayOffTime() * DIMTIMERATE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     }
 }
 
@@ -764,7 +770,9 @@ void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
 void PowerStateMachine::HandleActivityTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
+    isSettingDim_ = true;
     SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    isSettingDim_ = false;
 }
 
 void PowerStateMachine::HandleActivitySleepTimeout()
@@ -870,6 +878,9 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
     }
+    if (currentState_ == PowerState::DIM || isSettingDim_.load()) {
+        SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
+    }
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
     }
@@ -920,6 +931,12 @@ void PowerStateMachine::SetSleepTime(int64_t time)
 int64_t PowerStateMachine::GetDisplayOffTime()
 {
     return displayOffTime_;
+}
+
+int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
+{
+    int64_t dimTime = displayOffTime / OFF_TIMEOUT_FACTOR;
+    return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
 }
 
 int64_t PowerStateMachine::GetSleepTime()

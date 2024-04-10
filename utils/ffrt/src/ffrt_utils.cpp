@@ -61,14 +61,14 @@ bool FFRTUtils::SubmitTimeoutTask(const FFRTTask& task, uint32_t timeoutMs)
     return status == ffrt::future_status::ready;
 }
 
-void FFRTUtils::CancelTask(FFRTHandle& handle, FFRTQueue& queue)
+int FFRTUtils::CancelTask(FFRTHandle& handle, FFRTQueue& queue)
 {
-    queue.cancel(handle);
+    return queue.cancel(handle);
 }
 
-void FFRTUtils::CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue)
+int FFRTUtils::CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue)
 {
-    queue->cancel(handle);
+    return queue->cancel(handle);
 }
 } // namespace PowerMgr
 } // namespace OHOS

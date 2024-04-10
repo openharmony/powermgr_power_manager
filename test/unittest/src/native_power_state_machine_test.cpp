@@ -308,4 +308,27 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine008: Suspend Device end.";
 }
+/**
+ * @tc.name: NativePowerStateMachine009
+ * @tc.desc: test duration of DIM state
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func started!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    stateMachine->OverrideScreenOffTimeInner(10 * 1000);
+    auto displayOffTime = stateMachine->GetDisplayOffTime();
+    EXPECT_EQ(displayOffTime, 10 * 1000);
+    EXPECT_EQ(stateMachine->GetDimTime(displayOffTime), displayOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR);
+
+    stateMachine->OverrideScreenOffTimeInner(60 * 1000);
+    displayOffTime = stateMachine->GetDisplayOffTime();
+    EXPECT_EQ(displayOffTime, 60 * 1000);
+    EXPECT_EQ(stateMachine->GetDimTime(displayOffTime), PowerStateMachine::MAX_DIM_TIME_MS);
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func ended!");
+}
 } // namespace
