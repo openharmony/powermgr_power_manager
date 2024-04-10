@@ -50,6 +50,8 @@ void PowerMgrServiceTest::TearDown(void)
 }
 
 namespace {
+constexpr const int64_t STATE_WAIT_TIME_MS = 100;
+constexpr const int64_t STATE_ON_OFF_WAIT_TIME_MS = 400;
 /**
  * @tc.name: PowerMgrService01
  * @tc.desc: Test PowerMgrService service ready.
@@ -435,6 +437,9 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     runninglock1.UnLock();
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    // wait runninglock async task to end, otherwise it will interfere with the next test case
+    pmsTest_->OnStop();
+    ffrt::wait();
 }
 
 /**
@@ -444,17 +449,23 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
 {
+    constexpr const int64_t screenOffTime = 4000;
+    constexpr const int64_t US_PER_MS = 1000;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
-    EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(4000));
-    sleep(3);
+    EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(screenOffTime));
+    // wait till going to DIM
+    usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     EXPECT_TRUE(powerMgrClient.RefreshActivity());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
-    sleep(3);
+    // wait till going to DIM
+    usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
-    sleep(2);
+    // wait till going to INACTIVE
+    usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_ON_OFF_WAIT_TIME_MS) *
+        US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
 }
 }
