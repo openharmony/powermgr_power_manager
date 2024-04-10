@@ -54,20 +54,23 @@ bool g_inactiveCallback = false;
 
 std::shared_ptr<PointerEvent> createDemoEvent()
 {
+    constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_SIX = 6;
+    constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_EIGHT = 8;
+    constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_TEN = 10;
     auto pointerEvent = PointerEvent::Create();
 
     PointerEvent::PointerItem item;
     item.SetPointerId(0);
-    item.SetDisplayX(5);
-    item.SetDisplayY(5);
-    item.SetPressure(5);
+    item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
     item.SetPointerId(1);
-    item.SetDisplayX(5);
-    item.SetDisplayY(10);
-    item.SetPressure(7);
+    item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_TEN);
+    item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_EIGHT);
     item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
