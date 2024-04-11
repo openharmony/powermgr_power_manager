@@ -207,7 +207,7 @@ private:
     void EmplaceShutdown();
     void EmplaceDim();
     void InitTransitMap();
-    bool CanTransitTo(PowerState to);
+    bool CanTransitTo(PowerState to, StateChangeReason reason);
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
@@ -240,6 +240,7 @@ private:
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
+    std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
