@@ -52,6 +52,7 @@ bool g_screenOffEvent = false;
 bool g_awakeCallback = false;
 bool g_inactiveCallback = false;
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 std::shared_ptr<PointerEvent> createDemoEvent()
 {
     constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_SIX = 6;
@@ -82,6 +83,7 @@ std::shared_ptr<PointerEvent> createDemoEvent()
 
     return pointerEvent;
 }
+#endif
 
 void ResetTriggeredFlag()
 {
