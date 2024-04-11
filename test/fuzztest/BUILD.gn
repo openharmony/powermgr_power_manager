@@ -28,6 +28,7 @@ group("fuzztest") {
     "isrunninglocktypesupported_fuzzer:IsRunningLockTypeSupportedFuzzTest",
     "isscreenon_fuzzer:IsScreenOnFuzzTest",
     "isstandby_fuzzer:IsStandbyFuzzTest",
+    "lockscreenaftertimingout_fuzzer:LockScreenAfterTimingOutFuzzTest",
     "lockunlockisused_fuzzer:LockUnLockIsUsedFuzzTest",
     "overridescreenofftime_fuzzer:OverrideScreenOffTimeFuzzTest",
     "powermodecallback_fuzzer:PowerModeCallbackFuzzTest",
