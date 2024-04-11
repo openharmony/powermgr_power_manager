@@ -103,7 +103,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
     stateMachine->RegisterPowerStateCallback(cb2);
     stateMachine->UnRegisterPowerStateCallback(cb2);
     stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
-    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true));
+    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device end.";
@@ -167,7 +167,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
     EXPECT_TRUE(stateMachine->Init());
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, static_cast<UserActivityType>(MAXTYPE), true);
-    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
+    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
     EXPECT_TRUE(ret);
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
     userActivityType = UserActivityType::USER_ACTIVITY_TYPE_TOUCH;

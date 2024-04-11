@@ -236,7 +236,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest009, TestSize.Level0)
 
     g_service->suspendController_->stateMachine_->EmplaceFreeze();
     bool ret = g_service->suspendController_->stateMachine_->SetState(
-        PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+        PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
     if (ret == false) {
         GTEST_LOG_(INFO) << "PowerSuspendTest009:  FREEZE set  Failed!";
     }
@@ -259,9 +259,9 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest011, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerSuspendTest011: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->HandleAction(
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, static_cast<uint32_t>(SuspendAction::ACTION_NONE));
-    g_service->suspendController_->HandleAction(
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, static_cast<uint32_t>(SuspendAction::ACTION_NONE));
+    g_service->suspendController_->HandleAction(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
     GTEST_LOG_(INFO) << "PowerSuspendTest011:  end";
 }
@@ -277,7 +277,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest012, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerSuspendTest012: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->stateMachine_->controllerMap_.clear();
-    g_service->suspendController_->HandleForceSleep(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    g_service->suspendController_->HandleForceSleep(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND);
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
     g_service->suspendController_->stateMachine_->InitStateMap();
     GTEST_LOG_(INFO) << "PowerSuspendTest012:  end";

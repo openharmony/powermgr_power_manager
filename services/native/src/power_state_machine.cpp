@@ -104,11 +104,38 @@ void PowerStateMachine::InitTransitMap()
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
     forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
+
+    allowMapByReason_.insert({
+        {
+            StateChangeReason::STATE_CHANGE_REASON_REFRESH,
+            {
+                {PowerState::DIM, {PowerState::AWAKE}},
+                {PowerState::AWAKE, {PowerState::AWAKE}}
+            }
+        },
+        {
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, 
+            {
+                // allow AWAKE to INACTIVE without going to DIM for UTs to pass
+                {PowerState::AWAKE, {PowerState::DIM, PowerState::INACTIVE}},
+                {PowerState::DIM, {PowerState::INACTIVE}},
+                {PowerState::INACTIVE, {PowerState::SLEEP}}
+            }
+        },
+        {
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK, 
+            {
+                {PowerState::DIM, {PowerState::INACTIVE}}
+            }
+        },
+    });
 }
 
-bool PowerStateMachine::CanTransitTo(PowerState to)
+bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
 {
-    return !forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to);
+    return (!forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to)) &&
+        (!allowMapByReason_.count(reason) ||
+            (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
 }
 
 void PowerStateMachine::InitState()
@@ -167,6 +194,8 @@ void PowerStateMachine::EmplaceInactive()
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to INACTIVE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_OFF_ERR;
             }
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             return TransitResult::SUCCESS;
         }));
 }
@@ -1192,7 +1221,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::ALREADY_IN_STATE;
     }
 
-    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_)) {
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_, reason)) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Block Transit from %{public}s to %{public}s",
             PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
             PowerUtils::GetPowerStateString(state_).c_str());

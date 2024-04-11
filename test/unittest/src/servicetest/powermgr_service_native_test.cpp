@@ -48,6 +48,8 @@ void PowerMgrServiceNativeTest::SetUpTestCase()
         g_powerMgrServiceProxy = std::make_shared<PowerMgrServiceTestProxy>(g_powerMgrService);
     }
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    // wait for "SetState for INIT" to be done
+    sleep(5);
 }
 
 void PowerMgrServiceNativeTest::TearDownTestCase()
