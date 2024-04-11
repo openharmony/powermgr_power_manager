@@ -114,7 +114,7 @@ void PowerStateMachine::InitTransitMap()
             }
         },
         {
-            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, 
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT,
             {
                 // allow AWAKE to INACTIVE without going to DIM for UTs to pass
                 {PowerState::AWAKE, {PowerState::DIM, PowerState::INACTIVE}},
@@ -123,7 +123,7 @@ void PowerStateMachine::InitTransitMap()
             }
         },
         {
-            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK, 
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK,
             {
                 {PowerState::DIM, {PowerState::INACTIVE}}
             }
@@ -833,7 +833,11 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
     forceTimingOut_.store(enabled);
     if (enabled) {
-        ResetInactiveTimer();
+        if (GetState() == PowerState::AWAKE) {
+            ResetInactiveTimer();
+        }
+    } else {
+        SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
     }
 }
 
