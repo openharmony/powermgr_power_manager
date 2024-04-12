@@ -475,9 +475,9 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
  * @tc.desc: Test multithread refreshing.
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
+HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
 {
-    constexpr const uint32_t TESTING_DURATION_S = 10; 
+    constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
     constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 1;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -486,14 +486,14 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
     std::vector<std::thread> refreshThreads;
     bool notified = false;
-    auto refreshTask = [&powerMgrClient, &notified](){
-        while(!notified) {
+    auto refreshTask = [&powerMgrClient, &notified]() {
+        while (!notified) {
             powerMgrClient.RefreshActivity();
             usleep(OPERATION_DELAY_US);
         }
     };
 
-    for(int i=0; i<100; i++) {
+    for (int i = 0; i < 100; i++) {
         refreshThreads.emplace_back(std::thread(refreshTask));
     }
 
