@@ -1111,7 +1111,7 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
 }
 
 PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
-{    
+{
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
