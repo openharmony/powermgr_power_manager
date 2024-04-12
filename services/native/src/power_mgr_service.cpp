@@ -1103,15 +1103,18 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 
 PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
 {
-    powerStateMachine_->SetForceTimingOut(enabled);
-    if (IsScreenOn()) {
-        powerStateMachine_->ResetInactiveTimer();
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
+    powerStateMachine_->SetForceTimingOut(enabled);
     return PowerErrors::ERR_OK;
 }
 
 PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
-{
+{    
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
     powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
     return PowerErrors::ERR_OK;
 }
@@ -1128,7 +1131,9 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
         return;
     }
     if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
-        stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
+        stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
+        !stateMachine->IsCoordinatedOverride()) {
+        stateMachine->SetCoordinatedOverride(true);
         stateMachine->isSettingDim_ = true;
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
         stateMachine->isSettingDim_ = false;
@@ -1147,7 +1152,9 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
         return;
     }
     if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
-        stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
+        stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
+        !stateMachine->IsCoordinatedOverride()) {
+        stateMachine->SetCoordinatedOverride(true);
         stateMachine->isSettingDim_ = true;
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
         stateMachine->isSettingDim_ = false;
