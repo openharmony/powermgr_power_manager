@@ -271,7 +271,7 @@ void PowerStateMachine::EmplaceDim()
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
             // in case a refresh action occurs, change display state back to on
-            if (!isSettingDim_.load()) {
+            if (!IsSettingState(PowerState::DIM)) {
                 stateAction_->SetDisplayState(
                     DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
                 return TransitResult::OTHER_ERR;
@@ -279,7 +279,7 @@ void PowerStateMachine::EmplaceDim()
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-            return TransitResult::SUCCESS;
+            return ret == ActionResult::SUCCESS ? TransitResult::SUCCESS : TransitResult::OTHER_ERR;
         }));
 }
 
@@ -483,7 +483,7 @@ void PowerStateMachine::RefreshActivityInner(
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
         }
-        if (GetState() == PowerState::DIM || isSettingDim_.load()) {
+        if (GetState() == PowerState::DIM || IsSettingState(PowerState::DIM)) {
             // Inactive to Awake will be blocked for this reason in CanTransitTo()
             SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
         } else {
@@ -748,7 +748,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 void PowerStateMachine::ResetInactiveTimer()
 {
     // change the flag to notify the thread which is setting DIM
-    isSettingDim_ = false;
+    settingStateFlag_ = -1;
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
@@ -792,10 +792,7 @@ void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
 void PowerStateMachine::HandleActivityTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
-    // flag for setting DIM state
-    isSettingDim_ = true;
     SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    isSettingDim_ = false;
 }
 
 void PowerStateMachine::HandleActivitySleepTimeout()
@@ -908,7 +905,7 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
         ResetInactiveTimer();
     }
     // need transition from DIM to ON
-    if (currentState_ == PowerState::DIM || isSettingDim_.load()) {
+    if (currentState_ == PowerState::DIM || IsSettingState(PowerState::DIM)) {
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
     }
     if (needUpdateSetting) {
@@ -969,6 +966,11 @@ int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
     return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
 }
 
+bool PowerStateMachine::IsSettingState(PowerState state)
+{
+    return settingStateFlag_.load() == static_cast<int64_t>(state);
+}
+
 int64_t PowerStateMachine::GetSleepTime()
 {
     return sleepTime_;
@@ -979,7 +981,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
-
+    SettingStateFlag flag(state, shared_from_this());
     auto iterator = controllerMap_.find(state);
     if (iterator == controllerMap_.end()) {
         return false;
@@ -1237,7 +1239,8 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
     }
     TransitResult ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
-        bool needNotify = (GetState() != owner->currentState_);
+        bool needNotify = (GetState() != owner->currentState_ &&
+            !(GetState() == PowerState::AWAKE && owner->currentState_ == PowerState::DIM));
         lastReason_ = reason;
         lastTime_ = GetTickCount();
         owner->currentState_ = GetState();
