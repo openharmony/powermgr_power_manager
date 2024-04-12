@@ -155,9 +155,29 @@ public:
     bool IsRunningLockEnabled(RunningLockType type);
     void SetForceTimingOut(bool enabled);
     void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock);
-    std::atomic<bool> isSettingDim_ {false};
+    bool IsSettingState(PowerState state);
 
 private:
+    class SettingStateFlag {
+    public:
+        SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner) : owner_(owner)
+        {
+            std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
+            stateMachine->settingStateFlag_ = static_cast<int64_t>(state);
+        }
+        SettingStateFlag(const SettingStateFlag&) = delete;
+        SettingStateFlag& operator=(const SettingStateFlag&) = delete;
+        SettingStateFlag(SettingStateFlag&&) = delete;
+        SettingStateFlag& operator=(SettingStateFlag&&) = delete;
+        ~SettingStateFlag()
+        {
+            std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
+            stateMachine->settingStateFlag_ = -1;
+        }
+
+    protected:
+        std::weak_ptr<PowerStateMachine> owner_;
+    };
     class StateController {
     public:
         StateController(PowerState state, std::shared_ptr<PowerStateMachine> owner,
@@ -244,6 +264,7 @@ private:
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
+    std::atomic<int64_t> settingStateFlag_ {-1};
 };
 } // namespace PowerMgr
 } // namespace OHOS
