@@ -484,7 +484,7 @@ void PowerStateMachine::RefreshActivityInner(
             mDeviceState_.screenState.lastOnTime = GetTickCount();
         }
         if (GetState() == PowerState::DIM || isSettingDim_.load()) {
-            // Inactive to Awake will be blocked for this reason in CanTransitTo() 
+            // Inactive to Awake will be blocked for this reason in CanTransitTo()
             SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
         } else {
             ResetInactiveTimer();
