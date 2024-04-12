@@ -270,6 +270,7 @@ void PowerStateMachine::EmplaceDim()
                 // failed but not return, still need to set screen off
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
+            // in case a refresh action occurs, change display state back to on
             if (!isSettingDim_.load()) {
                 stateAction_->SetDisplayState(
                     DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
@@ -483,6 +484,7 @@ void PowerStateMachine::RefreshActivityInner(
             mDeviceState_.screenState.lastOnTime = GetTickCount();
         }
         if (GetState() == PowerState::DIM || isSettingDim_.load()) {
+            // Inactive to Awake will be blocked for this reason in CanTransitTo() 
             SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
         } else {
             ResetInactiveTimer();
@@ -528,26 +530,15 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
     return true;
 }
 
-void PowerStateMachine::OverrideScreenOffTimeCoordinated()
+bool PowerStateMachine::IsCoordinatedOverride()
 {
-    if (isCoordinatedOverride_ || !IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
-        POWER_HILOGD(FEATURE_POWER_STATE,
-            "Coordianted state override screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
-        return;
-    }
-    OverrideScreenOffTimeInner(COORDINATED_STATE_SCREEN_OFF_TIME_MS);
-    isCoordinatedOverride_ = true;
+    return isCoordinatedOverride_.load();
 }
 
-void PowerStateMachine::RestoreScreenOffTimeCoordinated()
+void PowerStateMachine::SetCoordinatedOverride(bool isOverridden)
 {
-    if (!isCoordinatedOverride_) {
-        POWER_HILOGI(FEATURE_POWER_STATE,
-            "Coordianted state restore screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
-        return;
-    }
-    RestoreScreenOffTimeInner();
-    isCoordinatedOverride_ = false;
+    POWER_HILOGI(COMP_SVC, "SetCoordinatedOverride %{public}d", static_cast<int32_t>(isOverridden));
+    isCoordinatedOverride_ = isOverridden;
 }
 
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
@@ -755,6 +746,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 
 void PowerStateMachine::ResetInactiveTimer()
 {
+    // change the flag to notify the thread which is setting DIM
     isSettingDim_ = false;
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
@@ -799,6 +791,7 @@ void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
 void PowerStateMachine::HandleActivityTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
+    // flag for setting DIM state
     isSettingDim_ = true;
     SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     isSettingDim_ = false;
@@ -861,7 +854,9 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
         return false;
     }
     if (state == PowerState::DIM) {
+        // screen on lock need to block DIM state as well
         state = PowerState::INACTIVE;
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "check Screen on Lock for DIM state");
     }
     auto iterator = lockMap_.find(state);
     if (iterator == lockMap_.end()) {
@@ -911,6 +906,7 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
     }
+    // need transition from DIM to ON
     if (currentState_ == PowerState::DIM || isSettingDim_.load()) {
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
     }
@@ -1240,10 +1236,13 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
     }
     TransitResult ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
+        bool needNotify = (GetState() != owner->currentState_);
         lastReason_ = reason;
         lastTime_ = GetTickCount();
         owner->currentState_ = GetState();
-        owner->NotifyPowerStateChanged(owner->currentState_);
+        if (needNotify) {
+            owner->NotifyPowerStateChanged(owner->currentState_);
+        }
     } else if (isReallyFailed(reason)) {
         RecordFailure(owner->currentState_, reason, ret);
     }

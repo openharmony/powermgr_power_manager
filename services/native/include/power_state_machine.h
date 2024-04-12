@@ -89,8 +89,8 @@ public:
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
-    void OverrideScreenOffTimeCoordinated();
-    void RestoreScreenOffTimeCoordinated();
+    bool IsCoordinatedOverride();
+    void SetCoordinatedOverride(bool overridden);
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
     void Reset();
@@ -236,7 +236,7 @@ private:
     bool isScreenOffTimeOverride_ {false};
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
-    bool isCoordinatedOverride_ {false};
+    std::atomic<bool> isCoordinatedOverride_ {false};
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;

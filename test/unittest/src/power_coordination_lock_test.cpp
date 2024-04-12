@@ -646,6 +646,12 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
+    inputManager->SimulateInputEvent(keyEvent);
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+
+    runninglock->UnLock();
+    runninglock->Lock();
     std::shared_ptr<PointerEvent> pointerEvent = createDemoEvent();
     inputManager->SimulateInputEvent(pointerEvent);
 
