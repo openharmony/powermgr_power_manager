@@ -17,6 +17,7 @@
 
 #include <csignal>
 #include <iostream>
+#include <thread>
 
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
@@ -467,5 +468,52 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_ON_OFF_WAIT_TIME_MS) *
         US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+}
+
+/**
+ * @tc.name: PowerMgrService024
+ * @tc.desc: Test multithread refreshing.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
+{
+    constexpr const uint32_t TESTING_DURATION_S = 10; 
+    constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
+    constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 1;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.OverrideScreenOffTime(SHORT_SCREEN_OFF_TIME_MS);
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    std::vector<std::thread> refreshThreads;
+    bool notified = false;
+    auto refreshTask = [&powerMgrClient, &notified](){
+        while(!notified) {
+            powerMgrClient.RefreshActivity();
+            usleep(OPERATION_DELAY_US);
+        }
+    };
+
+    for(int i=0; i<100; i++) {
+        refreshThreads.emplace_back(std::thread(refreshTask));
+    }
+
+    auto checkingTask = [&powerMgrClient, &notified]() {
+        while (!notified) {
+            powerMgrClient.SuspendDevice();
+            EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+            usleep(OPERATION_DELAY_US);
+            powerMgrClient.WakeupDevice();
+            EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+            usleep(OPERATION_DELAY_US);
+        }
+    };
+    std::thread checkingThread(checkingTask);
+    sleep(10);
+    notified = true;
+    for (auto& thread : refreshThreads) {
+        thread.join();
+    }
+    checkingThread.join();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 end.");
 }
 }
