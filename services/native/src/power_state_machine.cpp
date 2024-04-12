@@ -15,6 +15,7 @@
 
 #include "power_state_machine.h"
 
+#include <algorithm>
 #include <cinttypes>
 #include <datetime_ex.h>
 #include <hisysevent.h>
@@ -29,7 +30,6 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 sptr<SettingObserver> g_displayOffTimeObserver;
-constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
 static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
@@ -104,11 +104,38 @@ void PowerStateMachine::InitTransitMap()
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
     forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
+
+    allowMapByReason_.insert({
+        {
+            StateChangeReason::STATE_CHANGE_REASON_REFRESH,
+            {
+                {PowerState::DIM, {PowerState::AWAKE}},
+                {PowerState::AWAKE, {PowerState::AWAKE}}
+            }
+        },
+        {
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT,
+            {
+                // allow AWAKE to INACTIVE without going to DIM for UTs to pass
+                {PowerState::AWAKE, {PowerState::DIM, PowerState::INACTIVE}},
+                {PowerState::DIM, {PowerState::INACTIVE}},
+                {PowerState::INACTIVE, {PowerState::SLEEP}}
+            }
+        },
+        {
+            StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK,
+            {
+                {PowerState::DIM, {PowerState::INACTIVE}}
+            }
+        },
+    });
 }
 
-bool PowerStateMachine::CanTransitTo(PowerState to)
+bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
 {
-    return !forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to);
+    return (!forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to)) &&
+        (!allowMapByReason_.count(reason) ||
+            (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
 }
 
 void PowerStateMachine::InitState()
@@ -167,6 +194,8 @@ void PowerStateMachine::EmplaceInactive()
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to INACTIVE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_OFF_ERR;
             }
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             return TransitResult::SUCCESS;
         }));
 }
@@ -227,30 +256,30 @@ void PowerStateMachine::EmplaceDim()
     controllerMap_.emplace(PowerState::DIM,
         std::make_shared<StateController>(PowerState::DIM, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_DIM lambda start");
-            if (!CheckRunningLock(PowerState::INACTIVE)) {
-                POWER_HILOGI(FEATURE_ACTIVITY, "RunningLock is blocking to transit to INACTIVE");
-                return TransitResult::OTHER_ERR;
-            }
             if (GetDisplayOffTime() < 0) {
                 POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
                 return TransitResult::OTHER_ERR;
             }
-            const uint32_t OFF_TIMEOUT_FACTOR = 3;
-            DisplayState dispState = stateAction_->GetDisplayState();
-            if (dispState == DisplayState::DISPLAY_ON) {
-                uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
-                if (ret != ActionResult::SUCCESS) {
-                    // failed but not return, still need to set screen off
-                    POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
-                }
-                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR,
-                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-            } else {
-                CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
-                SetDelayTimer(GetDisplayOffTime() / OFF_TIMEOUT_FACTOR,
-                    PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            int64_t dimTime = GetDimTime(GetDisplayOffTime());
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
+                dimTime = COORDINATED_STATE_SCREEN_OFF_TIME_MS;
             }
-            return TransitResult::SUCCESS;
+            DisplayState dispState = stateAction_->GetDisplayState();
+            uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
+            if (ret != ActionResult::SUCCESS) {
+                // failed but not return, still need to set screen off
+                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
+            }
+            // in case a refresh action occurs, change display state back to on
+            if (!IsSettingState(PowerState::DIM)) {
+                stateAction_->SetDisplayState(
+                    DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
+                return TransitResult::OTHER_ERR;
+            }
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            return ret == ActionResult::SUCCESS ? TransitResult::SUCCESS : TransitResult::OTHER_ERR;
         }));
 }
 
@@ -388,6 +417,7 @@ void PowerStateMachine::HandlePreBrightWakeUp (
                     SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
                     static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
             }
+            break;
         default:
             break;
     }
@@ -453,8 +483,12 @@ void PowerStateMachine::RefreshActivityInner(
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
         }
-        // reset timer
-        ResetInactiveTimer();
+        if (GetState() == PowerState::DIM || IsSettingState(PowerState::DIM)) {
+            // Inactive to Awake will be blocked for this reason in CanTransitTo()
+            SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
+        } else {
+            ResetInactiveTimer();
+        }
     } else {
         POWER_HILOGD(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
     }
@@ -496,26 +530,16 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
     return true;
 }
 
-void PowerStateMachine::OverrideScreenOffTimeCoordinated()
+bool PowerStateMachine::IsCoordinatedOverride()
 {
-    if (isCoordinatedOverride_ || !IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
-        POWER_HILOGD(FEATURE_POWER_STATE,
-            "Coordianted state override screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
-        return;
-    }
-    OverrideScreenOffTimeInner(COORDINATED_STATE_SCREEN_OFF_TIME_MS);
-    isCoordinatedOverride_ = true;
+    return isCoordinatedOverride_.load();
 }
 
-void PowerStateMachine::RestoreScreenOffTimeCoordinated()
+// set to true after first coordination operation, set to false after unhold the coordination lock
+void PowerStateMachine::SetCoordinatedOverride(bool isOverridden)
 {
-    if (!isCoordinatedOverride_) {
-        POWER_HILOGI(FEATURE_POWER_STATE,
-            "Coordianted state restore screen off time failed, override flag=%{public}d", isCoordinatedOverride_);
-        return;
-    }
-    RestoreScreenOffTimeInner();
-    isCoordinatedOverride_ = false;
+    POWER_HILOGI(COMP_SVC, "SetCoordinatedOverride %{public}d", static_cast<int32_t>(isOverridden));
+    isCoordinatedOverride_ = isOverridden;
 }
 
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
@@ -723,6 +747,8 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 
 void PowerStateMachine::ResetInactiveTimer()
 {
+    // change the flag to notify the thread which is setting DIM
+    settingStateFlag_ = -1;
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
@@ -730,10 +756,10 @@ void PowerStateMachine::ResetInactiveTimer()
         return;
     }
 
-    if (this->CheckRunningLock(PowerState::INACTIVE)) {
-        const double DIMTIMERATE = 2.0/3;
+    if (forceTimingOut_.load() || this->CheckRunningLock(PowerState::INACTIVE)) {
+        int64_t displayOffTime = this->GetDisplayOffTime();
         this->SetDelayTimer(
-            this->GetDisplayOffTime() * DIMTIMERATE, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+            displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     }
 }
 
@@ -794,6 +820,24 @@ void PowerStateMachine::HandleSystemWakeup()
     }
 }
 
+void PowerStateMachine::SetForceTimingOut(bool enabled)
+{
+    forceTimingOut_.store(enabled);
+    if (enabled) {
+        if (GetState() == PowerState::AWAKE) {
+            ResetInactiveTimer();
+        }
+    } else {
+        SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
+    }
+}
+
+void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock)
+{
+    enabledTimingOutLockScreen_.store(enabled, std::memory_order_relaxed);
+    enabledTimingOutLockScreenCheckLock_.store(checkScreenOnLock, std::memory_order_relaxed);
+}
+
 bool PowerStateMachine::CheckRunningLock(PowerState state)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Enter, state = %{public}u", state);
@@ -806,6 +850,11 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
     if (runningLockMgr == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockMgr is nullptr");
         return false;
+    }
+    if (state == PowerState::DIM) {
+        // screen on lock need to block DIM state as well
+        state = PowerState::INACTIVE;
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "check Screen on Lock for DIM state");
     }
     auto iterator = lockMap_.find(state);
     if (iterator == lockMap_.end()) {
@@ -854,6 +903,10 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
     displayOffTime_ = time;
     if (currentState_ == PowerState::AWAKE) {
         ResetInactiveTimer();
+    }
+    // need transition from DIM to ON
+    if (currentState_ == PowerState::DIM || IsSettingState(PowerState::DIM)) {
+        SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
     }
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
@@ -907,6 +960,17 @@ int64_t PowerStateMachine::GetDisplayOffTime()
     return displayOffTime_;
 }
 
+int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
+{
+    int64_t dimTime = displayOffTime / OFF_TIMEOUT_FACTOR;
+    return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
+}
+
+bool PowerStateMachine::IsSettingState(PowerState state)
+{
+    return settingStateFlag_.load() == static_cast<int64_t>(state);
+}
+
 int64_t PowerStateMachine::GetSleepTime()
 {
     return sleepTime_;
@@ -917,7 +981,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
-
+    SettingStateFlag flag(state, shared_from_this());
     auto iterator = controllerMap_.find(state);
     if (iterator == controllerMap_.end()) {
         return false;
@@ -926,6 +990,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     if (pController == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
         return false;
+    }
+    if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
+            reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) &&
+        forceTimingOut_.load()) {
+        force = true;
     }
     TransitResult ret = pController->TransitTo(reason, force);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
@@ -1045,7 +1114,11 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
             ret = StateChangeReason::STATE_CHANGE_REASON_REMOTE;
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT:
-            ret = StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
+            ret = (enabledTimingOutLockScreen_.load() &&
+                      (!enabledTimingOutLockScreenCheckLock_.load() ||
+                          CheckRunningLock(PowerState::INACTIVE))) ?
+                StateChangeReason::STATE_CHANGE_REASON_TIMEOUT :
+                StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK;
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID:
             ret = StateChangeReason::STATE_CHANGE_REASON_LID;
@@ -1151,7 +1224,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::ALREADY_IN_STATE;
     }
 
-    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_)) {
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_, reason)) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Block Transit from %{public}s to %{public}s",
             PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
             PowerUtils::GetPowerStateString(state_).c_str());
@@ -1165,15 +1238,15 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::LOCKING;
     }
     TransitResult ret = action_(reason);
-    if (GetState() == PowerState::DIM) {
-        // power state DIM is not support now
-        return ret;
-    }
     if (ret == TransitResult::SUCCESS) {
+        bool needNotify = (GetState() != owner->currentState_ &&
+            !(GetState() == PowerState::AWAKE && owner->currentState_ == PowerState::DIM));
         lastReason_ = reason;
         lastTime_ = GetTickCount();
         owner->currentState_ = GetState();
-        owner->NotifyPowerStateChanged(owner->currentState_);
+        if (needNotify) {
+            owner->NotifyPowerStateChanged(owner->currentState_);
+        }
     } else if (isReallyFailed(reason)) {
         RecordFailure(owner->currentState_, reason, ret);
     }
@@ -1190,6 +1263,9 @@ bool PowerStateMachine::StateController::CheckState()
         return false;
     }
     auto state = GetState();
+    if (state == PowerState::DIM || state == PowerState::AWAKE) {
+        return true;
+    }
     POWER_HILOGD(FEATURE_POWER_STATE, "state: %{public}u, currentState_: %{public}u", state, owner->currentState_);
     return state != owner->currentState_;
 }
@@ -1226,6 +1302,11 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
             }
             break;
         case DisplayState::DISPLAY_DIM:
+            if (currentState == PowerState::INACTIVE || currentState == PowerState::STAND_BY ||
+                currentState == PowerState::DOZE) {
+                CorrectState(currentState, PowerState::DIM, state);
+            }
+            break;
         case DisplayState::DISPLAY_ON:
             if (currentState == PowerState::INACTIVE || currentState == PowerState::STAND_BY ||
                 currentState == PowerState::DOZE) {

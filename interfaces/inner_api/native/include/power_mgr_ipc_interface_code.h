@@ -52,6 +52,8 @@ enum class PowerMgrInterfaceCode {
     IS_STANDBY,
     REG_SYNC_SLEEP_CALLBACK,
     UNREG_SYNC_SLEEP_CALLBACK,
+    SET_FORCE_TIMING_OUT,
+    LOCK_SCREEN_AFTER_TIMING_OUT,
 };
 } // space PowerMgr
 } // namespace OHOS

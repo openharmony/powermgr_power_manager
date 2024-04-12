@@ -923,6 +923,57 @@ PowerErrors PowerMgrProxy::IsStandby(bool& isStandby)
     return static_cast<PowerErrors>(error);
 }
 
+PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(enabled), PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_FORCE_TIMING_OUT), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    return static_cast<PowerErrors>(error);
+}
+
+PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(enabledLockScreen), PowerErrors::ERR_CONNECTION_FAIL);
+    WRITE_PARCEL_WITH_RET(data, Bool, static_cast<uint32_t>(checkLock), PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    int32_t error;
+    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    return static_cast<PowerErrors>(error);
+}
+
 void PowerMgrProxy::RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
 {
     auto delegator = std::make_unique<ShutdownProxyDelegator>(Remote(), PowerMgrProxy::GetDescriptor());

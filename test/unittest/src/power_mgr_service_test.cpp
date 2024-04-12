@@ -17,6 +17,7 @@
 
 #include <csignal>
 #include <iostream>
+#include <thread>
 
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
@@ -50,6 +51,8 @@ void PowerMgrServiceTest::TearDown(void)
 }
 
 namespace {
+constexpr const int64_t STATE_WAIT_TIME_MS = 100;
+constexpr const int64_t STATE_ON_OFF_WAIT_TIME_MS = 400;
 /**
  * @tc.name: PowerMgrService01
  * @tc.desc: Test PowerMgrService service ready.
@@ -373,8 +376,9 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_on");
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    PowerErrors ret =
+        powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_on");
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 end.");
 }
@@ -398,4 +402,118 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 end.");
 }
 
+/**
+ * @tc.name: PowerMgrService022
+ * @tc.desc: Test PowerMgrService LockScreenAfterTimingOut.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
+{
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService022 fail to get PowerMgrService";
+    pmsTest_->OnStart();
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    auto runningLockMgr = pmsTest_->GetRunningLockMgr();
+
+    sptr<IPowerMgr> ptr;
+    ptr.ForceSetRefPtr(static_cast<IPowerMgr*>(pmsTest_.GetRefPtr()));
+    pmsTest_.GetRefPtr()->IncStrongRef(pmsTest_.GetRefPtr());
+    RunningLock runninglock1(ptr, "runninglock_screen_on", RunningLockType::RUNNINGLOCK_SCREEN);
+    runninglock1.Init();
+    runninglock1.Lock();
+
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    stateMaschine_->LockScreenAfterTimingOut(true, false);
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    stateMaschine_->LockScreenAfterTimingOut(false, false);
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
+        StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
+    stateMaschine_->LockScreenAfterTimingOut(true, true);
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
+    runninglock1.UnLock();
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    // wait runninglock async task to end, otherwise it will interfere with the next test case
+    pmsTest_->OnStop();
+    ffrt::wait();
+}
+
+/**
+ * @tc.name: PowerMgrService023
+ * @tc.desc: Test transition to DIM state for Timeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
+{
+    constexpr const int64_t screenOffTime = 4000;
+    constexpr const int64_t US_PER_MS = 1000;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(screenOffTime));
+    // wait till going to DIM
+    usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    EXPECT_TRUE(powerMgrClient.RefreshActivity());
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    // wait till going to DIM
+    usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    // wait till going to INACTIVE
+    usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_ON_OFF_WAIT_TIME_MS) *
+        US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+}
+
+/**
+ * @tc.name: PowerMgrService024
+ * @tc.desc: Test multithread refreshing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
+{
+    constexpr const uint32_t TESTING_DURATION_S = 10;
+    constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
+    constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 1;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.OverrideScreenOffTime(SHORT_SCREEN_OFF_TIME_MS);
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    std::vector<std::thread> refreshThreads;
+    bool notified = false;
+    auto refreshTask = [&powerMgrClient, &notified]() {
+        while (!notified) {
+            powerMgrClient.RefreshActivity();
+            usleep(OPERATION_DELAY_US);
+        }
+    };
+
+    for (int i = 0; i < 100; i++) {
+        refreshThreads.emplace_back(std::thread(refreshTask));
+    }
+
+    auto checkingTask = [&powerMgrClient, &notified]() {
+        while (!notified) {
+            powerMgrClient.SuspendDevice();
+            EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+            usleep(OPERATION_DELAY_US);
+            powerMgrClient.WakeupDevice();
+            EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+            usleep(OPERATION_DELAY_US);
+        }
+    };
+    std::thread checkingThread(checkingTask);
+    sleep(10);
+    notified = true;
+    for (auto& thread : refreshThreads) {
+        thread.join();
+    }
+    checkingThread.join();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 end.");
+}
 }

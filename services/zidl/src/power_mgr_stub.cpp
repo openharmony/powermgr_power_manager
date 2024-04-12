@@ -162,6 +162,12 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SYNC_SLEEP_CALLBACK):
             ret = UnRegisterSyncSleepCallbackStub(data);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_FORCE_TIMING_OUT):
+            ret = SetForceTimingOutStub(data, reply);
+            break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT):
+            ret = LockScreenAfterTimingOutStub(data, reply);
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -541,6 +547,26 @@ int32_t PowerMgrStub::IsStandbyStub(MessageParcel& data, MessageParcel& reply)
     PowerErrors ret = IsStandby(isStandby);
     WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     WRITE_PARCEL_WITH_RET(reply, Bool, isStandby, E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::SetForceTimingOutStub(MessageParcel& data, MessageParcel& reply)
+{
+    bool enabled = false;
+    READ_PARCEL_WITH_RET(data, Bool, enabled, E_READ_PARCEL_ERROR);
+    PowerErrors ret = SetForceTimingOut(enabled);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::LockScreenAfterTimingOutStub(MessageParcel& data, MessageParcel& reply)
+{
+    bool enabledLockScreen = true;
+    bool checkLock = false;
+    READ_PARCEL_WITH_RET(data, Bool, enabledLockScreen, E_READ_PARCEL_ERROR);
+    READ_PARCEL_WITH_RET(data, Bool, checkLock, E_READ_PARCEL_ERROR);
+    PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    WRITE_PARCEL_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 } // namespace PowerMgr
