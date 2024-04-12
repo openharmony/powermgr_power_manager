@@ -132,6 +132,9 @@ public:
      */
     bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
 
+    PowerErrors SetForceTimingOut(bool enabled);
+    PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock);
+
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);

@@ -103,7 +103,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
     stateMachine->RegisterPowerStateCallback(cb2);
     stateMachine->UnRegisterPowerStateCallback(cb2);
     stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
-    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true));
+    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device end.";
@@ -167,7 +167,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
     EXPECT_TRUE(stateMachine->Init());
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, static_cast<UserActivityType>(MAXTYPE), true);
-    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
+    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
     EXPECT_TRUE(ret);
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
     userActivityType = UserActivityType::USER_ACTIVITY_TYPE_TOUCH;
@@ -307,5 +307,28 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
     EXPECT_EQ(pmsTest->IsUsed(token), false);
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine008: Suspend Device end.";
+}
+/**
+ * @tc.name: NativePowerStateMachine009
+ * @tc.desc: test duration of DIM state
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func started!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    stateMachine->OverrideScreenOffTimeInner(10 * 1000);
+    auto displayOffTime = stateMachine->GetDisplayOffTime();
+    EXPECT_EQ(displayOffTime, 10 * 1000);
+    EXPECT_EQ(stateMachine->GetDimTime(displayOffTime), displayOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR);
+
+    stateMachine->OverrideScreenOffTimeInner(60 * 1000);
+    displayOffTime = stateMachine->GetDisplayOffTime();
+    EXPECT_EQ(displayOffTime, 60 * 1000);
+    EXPECT_EQ(stateMachine->GetDimTime(displayOffTime), PowerStateMachine::MAX_DIM_TIME_MS);
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func ended!");
 }
 } // namespace

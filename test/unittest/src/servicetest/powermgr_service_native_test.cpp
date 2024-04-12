@@ -40,6 +40,7 @@ const std::string TEST_DEVICE_ID = "test_device_id";
 
 void PowerMgrServiceNativeTest::SetUpTestCase()
 {
+    constexpr const uint32_t WAIT_INIT_TIME_S = 5;
     g_powerMgrService = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_powerMgrService->OnStart();
     g_powerMgrService->OnAddSystemAbility(DISPLAY_POWER_MANAGER_ID, TEST_DEVICE_ID);
@@ -48,6 +49,8 @@ void PowerMgrServiceNativeTest::SetUpTestCase()
         g_powerMgrServiceProxy = std::make_shared<PowerMgrServiceTestProxy>(g_powerMgrService);
     }
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    // wait for "SetState for INIT" to be done
+    sleep(WAIT_INIT_TIME_S);
 }
 
 void PowerMgrServiceNativeTest::TearDownTestCase()

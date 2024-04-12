@@ -36,6 +36,12 @@ using FFRTHandle = ffrt::task_handle;
  * Defines the task queue of the FFRT.。
  */
 using FFRTQueue = ffrt::queue;
+
+/**
+ * The mutex for FFRT tasks.
+ */
+using FFRTMutex = ffrt::mutex;
+
 class FFRTUtils final {
 public:
     /**
@@ -104,7 +110,7 @@ public:
      *
      * @param handle FFRT task.
      */
-    static void CancelTask(FFRTHandle& handle, FFRTQueue& queue);
+    static int CancelTask(FFRTHandle& handle, FFRTQueue& queue);
 
     /**
      * Cancel the FFRT task.
@@ -114,22 +120,7 @@ public:
      * @param handle FFRT task.
      * @param queue Shared_ptr of FFRT task cancel queue.
      */
-    static void CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
-
-    /**
-     * The mutex for FFRT tasks.
-     */
-    class Mutex {
-    public:
-        Mutex();
-        ~Mutex();
-        void Lock();
-        bool TryLock();
-        void Unlock();
-
-    private:
-        ffrt::mutex* mutex_;
-    };
+    static int CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
 };
 } // namespace PowerMgr
 } // namespace OHOS
