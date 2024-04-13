@@ -80,8 +80,9 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
     pms->SetDisplaySuspend(true);
-    pms->Lock(token, 0);
+    pms->Lock(token);
     EXPECT_EQ(pms->IsUsed(token), true);
+    pms->UnLock(token);
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
     GTEST_LOG_(INFO) << "PowerMgrMock106: end";

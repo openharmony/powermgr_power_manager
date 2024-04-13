@@ -26,14 +26,14 @@
 
 namespace OHOS {
 namespace PowerMgr {
-class RunningLock {
+class RunningLock : public std::enable_shared_from_this<RunningLock> {
 public:
-    RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type);
+    RunningLock(const std::string& name, RunningLockType type);
     ~RunningLock();
     DISALLOW_COPY_AND_MOVE(RunningLock);
 
     PowerErrors Init();
-    PowerErrors Recover(const wptr<IPowerMgr>& proxy);
+    void Recover();
     bool IsUsed();
 
     /**
@@ -62,8 +62,8 @@ private:
     std::mutex mutex_;
     RunningLockInfo runningLockInfo_;
     sptr<IRemoteObject> token_;
-    wptr<IPowerMgr> proxy_;
-    bool CheckUsedNoLock();
+    std::atomic_bool state_ { false };
+    int32_t timeOutMs_ { -1 };
 };
 } // namespace PowerMgr
 } // namespace OHOS

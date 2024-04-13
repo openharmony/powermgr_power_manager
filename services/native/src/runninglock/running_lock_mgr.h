@@ -26,6 +26,7 @@
 #include "running_lock_proxy.h"
 #include "running_lock_token_stub.h"
 #include "running_lock_info.h"
+#include "ipower_runninglock_callback.h"
 #ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
 #endif
@@ -48,8 +49,10 @@ public:
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockParam& runningLockParam);
     bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
-    void Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS = -1);
-    void UnLock(const sptr<IRemoteObject> remoteObj);
+    bool Lock(const sptr<IRemoteObject>& remoteObj);
+    bool UnLock(const sptr<IRemoteObject> remoteObj);
+    void RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
+    void UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
@@ -69,7 +72,6 @@ public:
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
 private:
-    static constexpr const char * const RUNNINGLOCK_TAG_BACKGROUND = "OHOS.RunningLock.Background";
 
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
@@ -77,36 +79,13 @@ private:
     void InitLocksTypeCoordination();
     void ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid);
 
-    class SystemLock {
-    public:
-        SystemLock(std::shared_ptr<IRunningLockAction> action, RunningLockType type, const std::string& name);
-        ~SystemLock() = default;
-        void Lock();
-        void Unlock();
-        bool IsLocking()
-        {
-            return locking_;
-        };
-        void EnableMock(std::shared_ptr<IRunningLockAction>& mock)
-        {
-            locking_ = false;
-            action_ = mock;
-        }
-    private:
-        std::shared_ptr<IRunningLockAction> action_;
-        RunningLockParam param_;
-        bool locking_;
-    };
-
     class LockCounter {
     public:
-        LockCounter(RunningLockType type, std::function<void(bool)> activate)
+        LockCounter(RunningLockType type, std::function<int32_t(bool, RunningLockParam)> activate)
             : type_(type), activate_(activate), counter_(0) {}
         ~LockCounter() = default;
-        uint32_t Increase(const sptr<IRemoteObject>& remoteObj,
-            std::shared_ptr<RunningLockInner>& lockInner);
-        uint32_t Decrease(const sptr<IRemoteObject> remoteObj,
-            std::shared_ptr<RunningLockInner>& lockInner);
+        int32_t Increase(const RunningLockParam& lockInnerParam);
+        int32_t Decrease(const RunningLockParam& lockInnerParam);
         void Clear();
         uint32_t GetCount()
         {
@@ -119,7 +98,7 @@ private:
     private:
         const RunningLockType type_;
         std::shared_ptr<IRunningLockAction> action_;
-        std::function<void(bool)> activate_;
+        std::function<int32_t(bool, RunningLockParam)> activate_;
         uint32_t counter_;
     };
 
@@ -169,7 +148,7 @@ private:
     bool InitLocks();
     void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
-    bool IsSceneRunningLockType(RunningLockType type);
+    static bool IsSceneRunningLockType(RunningLockType type);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
     void ProximityLockOn();
@@ -180,19 +159,7 @@ private:
     std::shared_ptr<RunningLockProxy> runninglockProxy_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;
-    std::shared_ptr<SystemLock> backgroundLock_ = nullptr;
-    enum RunningLockChangedType {
-        NOTIFY_RUNNINGLOCK_ADD,
-        NOTIFY_RUNNINGLOCK_REMOVE,
-        NOTIFY_RUNNINGLOCK_OVERTIME,
-        RUNNINGLOCK_CHANGED_BUTT
-    };
-    const std::array<std::string, RUNNINGLOCK_CHANGED_BUTT> runninglockNotifyStr_ {
-        "DUBAI_TAG_RUNNINGLOCK_ADD", "DUBAI_TAG_RUNNINGLOCK_REMOVE", "DUBAI_TAG_RUNNINGLOCK_OVERTIME"
-    };
-    void NotifyRunningLockChanged(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
-        RunningLockChangedType changeType);
-    void NotifyHiView(RunningLockChangedType changeType, const RunningLockInner& lockInner) const;
+    static void NotifyRunningLockChanged(const RunningLockParam& lockInnerParam, const std::string &tag);
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
     std::map<std::string, RunningLockInfo> unSceneLockLists_;

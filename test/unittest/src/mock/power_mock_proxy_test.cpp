@@ -24,6 +24,7 @@
 #include "power_mgr_proxy.h"
 #include "power_mode_callback_proxy.h"
 #include "power_state_callback_proxy.h"
+#include "power_runninglock_callback_proxy.h"
 #include "power_state_machine_info.h"
 #include "running_lock.h"
 #include "running_lock_info.h"
@@ -44,6 +45,10 @@ void PowerMockProxyTest::PowerStateTestCallback::OnPowerStateChanged(PowerState 
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
 }
 
+void PowerMockProxyTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+}
 namespace {
 /**
  * @tc.name: PowerMockProxyTest001
@@ -61,7 +66,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
-    EXPECT_FALSE(sptrProxy->Lock(token, 0));
+    EXPECT_FALSE(sptrProxy->Lock(token));
     EXPECT_FALSE(sptrProxy->UnLock(token));
     EXPECT_FALSE(sptrProxy->IsUsed(token));
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, pid, uid));
@@ -108,6 +113,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest003, TestSize.Level2)
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
     sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
+    sptr<IPowerRunninglockCallback> cb5 =new PowerRunningLockTestCallback();
     EXPECT_FALSE(sptrProxy->RegisterPowerStateCallback(cb1));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerStateCallback(cb1));
     EXPECT_FALSE(sptrProxy->RegisterPowerStateCallback(nullptr));
@@ -116,6 +122,10 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest003, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(cb5));
+    EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(cb5));
+    EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(nullptr));
     EXPECT_EQ(sptrProxy->RebootDevice(" "), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(sptrProxy->ShutDownDevice(" "), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0));

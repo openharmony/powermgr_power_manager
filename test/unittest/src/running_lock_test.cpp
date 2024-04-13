@@ -384,11 +384,11 @@ HWTEST_F(RunningLockTest, RunningLockTest015, TestSize.Level1)
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pms->OnStart();
     auto runningLockMgr = pms->GetRunningLockMgr();
-    sptr<IPowerMgr> ptr;
-    ptr.ForceSetRefPtr(static_cast<IPowerMgr*>(pms.GetRefPtr()));
     pms.GetRefPtr()->IncStrongRef(pms.GetRefPtr());
-    RunningLock runninglock1(ptr, "runninglock_recover_test", RunningLockType::RUNNINGLOCK_SCREEN);
-    runninglock1.Init();
+    std::shared_ptr<RunningLock> runninglock1 =
+        std::make_shared<RunningLock>("runninglock_recover_test",
+            RunningLockType::RUNNINGLOCK_SCREEN);
+    runninglock1->Init();
     const auto& infos = runningLockMgr->GetRunningLockMap();
     const auto iter = std::find_if(infos.begin(), infos.end(), [](const auto& pair) {
         return pair.second->GetName() == "runninglock_recover_test";
@@ -397,7 +397,7 @@ HWTEST_F(RunningLockTest, RunningLockTest015, TestSize.Level1)
     const sptr<IRemoteObject> token = iter->first;
     runningLockMgr->ReleaseLock(token);
     EXPECT_TRUE(infos.count(token) == 0);
-    runninglock1.Recover(ptr);
+    runninglock1->Recover();
     EXPECT_TRUE(infos.count(token) > 0);
 }
 } // namespace

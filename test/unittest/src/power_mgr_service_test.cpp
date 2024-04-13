@@ -415,12 +415,13 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     auto runningLockMgr = pmsTest_->GetRunningLockMgr();
 
-    sptr<IPowerMgr> ptr;
-    ptr.ForceSetRefPtr(static_cast<IPowerMgr*>(pmsTest_.GetRefPtr()));
     pmsTest_.GetRefPtr()->IncStrongRef(pmsTest_.GetRefPtr());
-    RunningLock runninglock1(ptr, "runninglock_screen_on", RunningLockType::RUNNINGLOCK_SCREEN);
-    runninglock1.Init();
-    runninglock1.Lock();
+    RunningLockParam runningLockParam;
+    runningLockParam.name = "runninglock_screen_on";
+    runningLockParam.type = RunningLockType::RUNNINGLOCK_SCREEN;
+    sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObject, runningLockParam) != nullptr);
+    runningLockMgr->Lock(remoteObject);
 
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
@@ -435,7 +436,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     stateMaschine_->LockScreenAfterTimingOut(true, true);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
-    runninglock1.UnLock();
+    runningLockMgr->UnLock(remoteObject);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     // wait runninglock async task to end, otherwise it will interfere with the next test case

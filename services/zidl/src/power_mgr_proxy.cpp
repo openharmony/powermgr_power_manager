@@ -113,31 +113,35 @@ bool PowerMgrProxy::IsRunningLockTypeSupported(RunningLockType type)
     return result;
 }
 
-bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
+bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
 
+    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return false;
+        return result;
     }
 
     WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
-    WRITE_PARCEL_WITH_RET(data, Int32, timeOutMs, false);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
-        return false;
+        return result;
     }
-    return true;
+
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "ReadBool fail");
+    }
+    return result;
 }
 
 bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
@@ -145,13 +149,14 @@ bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
 
+    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return false;
+        return result;
     }
 
     WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
@@ -161,9 +166,13 @@ bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
-        return false;
+        return result;
     }
-    return true;
+
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "ReadBool fail");
+    }
+    return result;
 }
 
 bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
@@ -774,6 +783,57 @@ bool PowerMgrProxy::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& 
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_MODE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrProxy::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_RUNNINGLOCK_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrProxy::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_RUNNINGLOCK_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);

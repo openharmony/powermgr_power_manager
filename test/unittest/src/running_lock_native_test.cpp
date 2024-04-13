@@ -39,6 +39,11 @@ constexpr uint32_t MAXTYPE = 77;
 constexpr int32_t UNTYPE = -1;
 } //namespace
 
+void PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
+{
+    POWER_HILOGI(LABEL_TEST,
+        "PowerRunningLockTestCallback::HandleRunningLockMessage, %{public}s", message.c_str());
+}
 namespace {
 /**
  * @tc.name: RunningLockNative001
@@ -64,7 +69,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     EXPECT_FALSE(runningLockMgr->IsUsed(remoteObj));
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
+    runningLockMgr->Lock(remoteObj);
     EXPECT_TRUE(runningLockMgr->GetRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN) == LOCKNUM_B);
     EXPECT_TRUE(runningLockMgr->GetRunningLockNum(RunningLockType::RUNNINGLOCK_BUTT) == LOCKNUM_B);
     EXPECT_TRUE(runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN) == LOCKNUM_B);
@@ -72,7 +77,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->IsUsed(remoteObj));
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_FALSE(runningLockMgr->IsUsed(token));
-    runningLockMgr->Lock(token, TIMEOUTMS);
+    runningLockMgr->Lock(token);
     runningLockMgr->UnLock(remoteObj);
     runningLockMgr->UnLock(token);
 
@@ -105,7 +110,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     EXPECT_FALSE(runningLockMgr->ExistValidRunningLock());
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
+    runningLockMgr->Lock(remoteObj);
     EXPECT_TRUE(runningLockMgr->ExistValidRunningLock() == true);
 
     runningLockMgr->ProxyRunningLock(false, pid, uid);
@@ -153,7 +158,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level0)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
     runningLockMgr->DumpInfo(result);
-    runningLockMgr->Lock(token, TIMEOUTMS);
+    runningLockMgr->Lock(token);
     runningLockMgr->UnLock(token);
 
     EXPECT_FALSE(runningLockMgr->ReleaseLock(token));
@@ -183,7 +188,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
         "runninglockNativeTest", "", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
-    runningLockMgr->Lock(token, TIMEOUTMS);
+    runningLockMgr->Lock(token);
     runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_AWAY);
     runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_CLOSE);
     runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_CLOSE);
@@ -194,7 +199,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
         "runninglockNativeTest2", "", static_cast<RunningLockType>(7U), TIMEOUTMS, PID_A, UID_A};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam2) != nullptr);
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
+    runningLockMgr->Lock(remoteObj);
     runningLockMgr->UnLock(remoteObj);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative004 end");
 }
@@ -218,13 +223,13 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
     RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
+    runningLockMgr->Lock(remoteObj);
+    runningLockMgr->Lock(remoteObj);
     RunningLockParam runningLockParam1 {0,
         "runninglockNativeTest2", "", static_cast<RunningLockType>(MAXTYPE), TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam1) != nullptr);
-    runningLockMgr->Lock(token, TIMEOUTMS);
+    runningLockMgr->Lock(token);
     runningLockMgr->UnLock(token);
 
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
@@ -246,15 +251,11 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
+    runningLockMgr->Lock(remoteObj);
 
-    RunningLockMgr::RunningLockChangedType type = RunningLockMgr::RunningLockChangedType::NOTIFY_RUNNINGLOCK_OVERTIME;
-    auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockParam);
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
-    type = RunningLockMgr::RunningLockChangedType::RUNNINGLOCK_CHANGED_BUTT;
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
-    type = static_cast<RunningLockMgr::RunningLockChangedType>(UNTYPE);
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
 
     auto runningLockMgrController = std::make_shared<RunningLockMgr::ProximityController>();
     SensorEvent sensorEvent;
@@ -291,31 +292,37 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->Init());
     std::shared_ptr<RunningLockMgr::LockCounter> ptr1 =
         runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_SCREEN];
-    ptr1->activate_(true);
-    ptr1->activate_(false);
+    RunningLockParam runningLockParam1;
+    ptr1->activate_(true, runningLockParam1);
+    ptr1->activate_(false, runningLockParam1);
     EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
 
     pmsTest_->powerStateMachine_->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     std::shared_ptr<RunningLockMgr::LockCounter> ptr2 =
-        runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_BACKGROUND];
-    ptr2->activate_(true);
-    ptr2->activate_(false);
+        runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_BACKGROUND_TASK];
+    RunningLockParam runningLockParam2 {0,
+        "RunningLockNative007", "", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, -1, 0, 0};
+    ptr2->activate_(true, runningLockParam2);
+    ptr2->activate_(false, runningLockParam2);
     EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
 
     pmsTest_->powerStateMachine_->SetState(PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    ptr2->activate_(true);
-    ptr2->activate_(false);
+    RunningLockParam runningLockParam3;
+    ptr2->activate_(true, runningLockParam3);
+    ptr2->activate_(false, runningLockParam3);
     EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
 
     std::shared_ptr<RunningLockMgr::LockCounter> ptr3 =
         runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL];
-    ptr3->activate_(true);
-    ptr3->activate_(false);
+    RunningLockParam runningLockParam4;
+    ptr3->activate_(true, runningLockParam4);
+    ptr3->activate_(false, runningLockParam4);
     EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
 
     auto stateMachine = pmsTest_->GetPowerStateMachine();
     pmsTest_->powerStateMachine_ = nullptr;
-    ptr3->activate_(true);
+    RunningLockParam runningLockParam5;
+    ptr3->activate_(true, runningLockParam5);
     pmsTest_->powerStateMachine_ = stateMachine;
     EXPECT_TRUE(pmsTest_->powerStateMachine_ != nullptr);
 
@@ -334,8 +341,8 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative009, TestSize.Level0)
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
-    runningLockMgr->Lock(remoteObject, 0);
-    runningLockMgr->Lock(remoteObject, 1);
+    runningLockMgr->Lock(remoteObject);
+    runningLockMgr->UnLock(remoteObject);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative009 end");
 }
@@ -423,15 +430,8 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level0)
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
-    RunningLockMgr::RunningLockChangedType type = RunningLockMgr::RunningLockChangedType::RUNNINGLOCK_CHANGED_BUTT;
-    auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockParam);
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
-    type = RunningLockMgr::RunningLockChangedType::NOTIFY_RUNNINGLOCK_ADD;
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
-    type = RunningLockMgr::RunningLockChangedType::NOTIFY_RUNNINGLOCK_OVERTIME;
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
-    type = static_cast<RunningLockMgr::RunningLockChangedType>(UNTYPE);
-    runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative014 end");
 }
@@ -523,8 +523,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level0)
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    runningLockMgr->backgroundLock_->locking_ = false;
-    runningLockMgr->backgroundLock_->Lock();
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative018 end");
 }
@@ -540,8 +538,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative019, TestSize.Level0)
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    runningLockMgr->backgroundLock_->locking_ = true;
-    runningLockMgr->backgroundLock_->Unlock();
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative019 end");
 }
@@ -559,14 +555,47 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->Init());
     RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
-    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
-    auto lockInner = RunningLockInner::CreateRunningLockInner(runningLockParam);
     runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL]->Increase(
-        remoteObj, lockInner);
+        runningLockParam);
     EXPECT_TRUE(runningLockMgr != nullptr);
     runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL]->Decrease(
-        remoteObj, lockInner);
+        runningLockParam);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative020 end");
+}
+
+/**
+ * @tc.name: RunningLockNative021
+ * @tc.desc: test callback in NotifyRunningLockChanged
+ * @tc.type: FUNC
+ * @tc.require: issueI9C4GG
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative021::fun is start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IPowerRunninglockCallback> callback1 = new PowerRunningLockTestCallback();
+    runningLockMgr->RegisterRunningLockCallback(callback1);
+    RunningLockParam runningLockParam1 {0,
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam1, "DUBAI_TAG_RUNNINGLOCK_ADD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam1, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+
+    sptr<IPowerRunninglockCallback> callback2 =new PowerRunningLockTestCallback();
+    runningLockMgr->RegisterRunningLockCallback(callback2);
+    RunningLockParam runningLockParam2 {0, "runninglockNativeTest2", "",
+        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, UNPID, UNUID};
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam2, "DUBAI_TAG_RUNNINGLOCK_ADD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam2, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+
+    runningLockMgr->UnRegisterRunningLockCallback(callback2);
+    RunningLockParam runningLockParam3 {0, "runninglockNativeTest3", "",
+        RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, TIMEOUTMS, UNPID, UNUID};
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam3, "DUBAI_TAG_RUNNINGLOCK_ADD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam3, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    EXPECT_TRUE(runningLockMgr != nullptr);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative021::fun is end!");
 }
 } // namespace

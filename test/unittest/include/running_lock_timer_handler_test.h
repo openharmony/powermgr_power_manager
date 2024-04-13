@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,4 +13,23 @@
  * limitations under the License.
  */
 
-#include "running_lock_token_stub.h"
+#ifndef POWERMGR_RUNNING_LOCK_TIMER_HANDLER_TEST_H
+#define POWERMGR_RUNNING_LOCK_TIMER_HANDLER_TEST_H
+
+#ifdef THERMAL_GTEST
+#define private    public
+#define protected  public
+#endif
+
+#include <memory>
+
+#include <gtest/gtest.h>
+#include "running_lock_timer_handler.h"
+
+namespace OHOS {
+namespace PowerMgr {
+
+class RunningLockTimerHandlerTest : public testing::Test {};
+} // namespace PowerMgr
+} // namespace OHOS
+#endif // POWERMGR_RUNNING_LOCK_TIMER_HANDLER_TEST_H

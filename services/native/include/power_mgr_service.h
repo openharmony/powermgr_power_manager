@@ -65,7 +65,7 @@ public:
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS) override;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
@@ -82,6 +82,9 @@ public:
 
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+
+    virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
+    virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
@@ -223,7 +226,6 @@ private:
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
     bool Init();
     bool PowerStateMachineInit();
-    void NotifyRunningLockChanged(bool isUnLock);
     std::string GetBundleNameByUid(const int32_t uid);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid,
         int32_t timeOutMS = -1);

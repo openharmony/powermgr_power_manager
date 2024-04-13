@@ -28,6 +28,7 @@
 #include "iremote_object.h"
 #include "ipower_mode_callback.h"
 #include "ipower_state_callback.h"
+#include "ipower_runninglock_callback.h"
 #include "ipower_mgr.h"
 #include "running_lock_info.h"
 #include "power_state_machine_info.h"
@@ -46,7 +47,7 @@ public:
         const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) override;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
@@ -70,6 +71,8 @@ public:
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+    virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
+    virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;

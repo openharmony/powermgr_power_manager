@@ -69,6 +69,10 @@ void PowerMgrServiceNativeTest::PowerStateTestCallback::OnPowerStateChanged(Powe
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged");
 }
 
+void PowerMgrServiceNativeTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+}
 namespace {
 /**
  * @tc.name: PowerMgrServiceNativeTest001
@@ -286,7 +290,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     EXPECT_TRUE(g_powerMgrServiceProxy->ProxyRunningLocks(true, {std::make_pair(pid, uid)}));
     EXPECT_TRUE(g_powerMgrServiceProxy->ResetRunningLocks());
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
-    g_powerMgrServiceProxy->Lock(token, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S);
@@ -317,7 +321,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
 
-    g_powerMgrServiceProxy->Lock(token, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S * DOUBLE_TIMES);
@@ -349,7 +353,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     g_powerMgrServiceProxy->OverrideScreenOffTime(time);
 
-    g_powerMgrServiceProxy->Lock(token, timeOutMs);
+    g_powerMgrServiceProxy->Lock(token);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), true);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
@@ -803,11 +807,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
 {
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
+    sptr<IPowerRunninglockCallback> RunninglockCallback =new PowerRunningLockTestCallback();
 
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerStateCallback(stateCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(stateCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerModeCallback(modeCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCallback));
+    EXPECT_TRUE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCallback));
+    EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCallback));
 }
 
 /**
