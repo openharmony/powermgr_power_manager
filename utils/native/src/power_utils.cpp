@@ -66,6 +66,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("PRE_BRIGHT_ATUH_FAIL_SCREEN_ON");
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
             return std::string("PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF");
+        case StateChangeReason::STATE_CHANGE_REASON_AOD_SLIDING:
+            return std::string("AOD_SLIDING");
         case StateChangeReason::STATE_CHANGE_REASON_REMOTE:
             return std::string("REMOTE");
         case StateChangeReason::STATE_CHANGE_REASON_REFRESH:
