@@ -1095,6 +1095,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
             ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING:
+            ret = StateChangeReason::STATE_CHANGE_REASON_AOD_SLIDING;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
         default:
             break;
