@@ -74,6 +74,27 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");
 }
 
+HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative002, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient002::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    wptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
+    powerMgrClient.ResetProxy(remoteObject_);
+    powerMgrClient.~PowerMgrClient();
+    EXPECT_TRUE(powerMgrClient.Connect() == ERR_OK);
+    powerMgrClient.ResetProxy(remoteObject_);
+    powerMgrClient.ResetProxy(nullptr);
+    if (powerMgrClient.deathRecipient_ != nullptr) {
+        powerMgrClient.deathRecipient_->OnRemoteDied(remoteObject_);
+        powerMgrClient.deathRecipient_->OnRemoteDied(nullptr);
+    }
+    EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(nullptr));
+    powerMgrClient.~PowerMgrClient();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");
+}
+
 /**
  * @tc.name: RunningLockNative001
  * @tc.desc: test init in RunningLock
@@ -84,9 +105,9 @@ HWTEST_F(PowerMgrClientNativeTest, RunningLockNative002, TestSize.Level2)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002::fun is start!");
     std::shared_ptr<RunningLock> runningLock =
-        std::make_shared<RunningLock>(nullptr, "runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
-    EXPECT_TRUE(runningLock->UnLock() == E_GET_POWER_SERVICE_FAILED);
+        std::make_shared<RunningLock>("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     runningLock->Create();
+    EXPECT_TRUE(runningLock->UnLock() == ERR_OK);
     runningLock->Release();
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002::fun is end!");
 }

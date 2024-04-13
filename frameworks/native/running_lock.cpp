@@ -19,19 +19,20 @@
 #include <list>
 #include <iosfwd>
 #include <string>
+#include <timer.h>
 #include "errors.h"
 #include "new"
 #include "refbase.h"
 #include "power_log.h"
 #include "power_mgr_errors.h"
 #include "running_lock_token_stub.h"
-
-using std::lock_guard;
+#include "power_mgr_client.h"
+#include "running_lock_timer_handler.h"
 
 namespace OHOS {
 namespace PowerMgr {
-RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type)
-    : proxy_(proxy)
+constexpr int32_t DEFAULT_TIMEOUT = 3000;
+RunningLock::RunningLock(const std::string& name, RunningLockType type)
 {
     runningLockInfo_.name = name;
     runningLockInfo_.type = type;
@@ -40,6 +41,7 @@ RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, 
 RunningLock::~RunningLock()
 {
     if (token_ != nullptr) {
+        UnLock();
         Release();
     }
 }
@@ -51,81 +53,106 @@ PowerErrors RunningLock::Init()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create the RunningLockTokenStub");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    return Create();
+    PowerErrors ret = Create();
+    if (ret == PowerErrors::ERR_OK) {
+        PowerMgrClient::GetInstance().UpdateRunningLockSet(shared_from_this(), false);
+    }
+    return ret;
 }
 
 PowerErrors RunningLock::Create()
 {
-    sptr<IPowerMgr> proxy = proxy_.promote();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& pmc = PowerMgrClient::GetInstance();
+    sptr<IPowerMgr> proxy = pmc.GetProxy();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side CreateRunningLock call");
     return proxy->CreateRunningLock(token_, runningLockInfo_);
 }
 
-PowerErrors RunningLock::Recover(const wptr<IPowerMgr>& proxy)
+void RunningLock::Recover()
 {
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "recover running lock name %{public}s type %{public}d",
-        runningLockInfo_.name.c_str(), runningLockInfo_.type);
-    proxy_ = proxy;
-    return Create();
+    Create();
+    if (state_ == true) {
+        Lock(timeOutMs_);
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "recover runningLocks end");
 }
 
 ErrCode RunningLock::Lock(int32_t timeOutMs)
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock timeOutMs: %{public}u", timeOutMs);
-
-    sptr<IPowerMgr> proxy = proxy_.promote();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& pmc = PowerMgrClient::GetInstance();
+    sptr<IPowerMgr> proxy = pmc.GetProxy();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return E_GET_POWER_SERVICE_FAILED;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call");
-    proxy->Lock(token_, timeOutMs);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call, timeOutMs=%{public}d", timeOutMs);
+    if (!proxy->Lock(token_)) {
+        return E_INNER_ERR;
+    }
+    state_ = true;
+    if (timeOutMs == 0) {
+        timeOutMs = DEFAULT_TIMEOUT;
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "use default timeout");
+    }
+    if (timeOutMs > 0) {
+        std::function<void()> task = std::bind(&RunningLock::UnLock, this);
+        RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(token_, task, timeOutMs);
+    }
+    timeOutMs_ = timeOutMs;
     return ERR_OK;
 }
 
 ErrCode RunningLock::UnLock()
 {
-    sptr<IPowerMgr> proxy = proxy_.promote();
+    std::lock_guard<std::mutex> lock(mutex_);
+    RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(token_);
+    if (state_ == false) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunningLock is already UnLock");
+        return ERR_OK;
+    }
+    auto& pmc = PowerMgrClient::GetInstance();
+    sptr<IPowerMgr> proxy = pmc.GetProxy();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side UnLock call");
-    proxy->UnLock(token_);
+    if (!proxy->UnLock(token_)) {
+        return E_INNER_ERR;
+    }
+    state_ = false;
     return ERR_OK;
 }
 
-bool RunningLock::CheckUsedNoLock()
+bool RunningLock::IsUsed()
 {
-    sptr<IPowerMgr> proxy = proxy_.promote();
+    auto& pmc = PowerMgrClient::GetInstance();
+    sptr<IPowerMgr> proxy = pmc.GetProxy();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return false;
     }
     bool ret = proxy->IsUsed(token_);
-
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Is Used: %{public}d", ret);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Is Used: %{public}d", ret);
     return ret;
-}
-
-bool RunningLock::IsUsed()
-{
-    return CheckUsedNoLock();
 }
 
 void RunningLock::Release()
 {
-    sptr<IPowerMgr> proxy = proxy_.promote();
+    auto& pmc = PowerMgrClient::GetInstance();
+    sptr<IPowerMgr> proxy = pmc.GetProxy();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
     proxy->ReleaseRunningLock(token_);
+    pmc.UpdateRunningLockSet(shared_from_this(), true);
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -296,7 +296,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo infoInactive("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     pmsTest->CreateRunningLock(token, infoInactive);
-    pmsTest->Lock(token, 0);
+    pmsTest->Lock(token);
     EXPECT_EQ(pmsTest->IsUsed(token), true);
     stateMachine->HandleActivityTimeout();
 
