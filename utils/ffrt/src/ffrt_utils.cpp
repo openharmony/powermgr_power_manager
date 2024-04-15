@@ -82,7 +82,7 @@ void FFRTMutexMap::Unlock(uint32_t mutexId)
     mutexMap_[mutexId].unlock();
 }
 
-FFRTTimer::FFRTTimer(): queue_("ffrt timer")
+FFRTTimer::FFRTTimer(): queue_("ffrt_timer")
 {
 }
 
