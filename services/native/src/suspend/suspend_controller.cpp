@@ -125,7 +125,7 @@ private:
 void SuspendController::Init()
 {
     std::lock_guard lock(mutex_);
-    ffrtTimer = std::make_shared<FFRTTimer>("suspend_controller_timer");
+    ffrtTimer_ = std::make_shared<FFRTTimer>("suspend_controller_timer");
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -256,7 +256,7 @@ void SuspendController::HandleEvent(int64_t delayTime)
 
 void SuspendController::CancelEvent()
 {
-    ffrtTimer_->CancelTask(TIMER_ID_USER_ACTIVITY_OFF);
+    ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_OFF);
 }
 
 void SuspendController::RecordPowerKeyDown()
