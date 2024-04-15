@@ -51,7 +51,7 @@ SuspendController::~SuspendController()
     if (g_suspendSourcesKeyObserver) {
         SettingHelper::UnregisterSettingSuspendSourcesObserver(g_suspendSourcesKeyObserver);
     }
-    ffrtTimer_.Clear();
+    ffrtTimer_.reset();
 }
 
 void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
@@ -493,7 +493,7 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
 
 void SuspendController::Reset()
 {
-    ffrtTimer_.Clear();
+    ffrtTimer_.reset();
 }
 
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
