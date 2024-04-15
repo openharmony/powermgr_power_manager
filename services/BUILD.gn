@@ -140,10 +140,7 @@ ohos_shared_library("powermgrservice") {
   }
 
   if (power_manager_feature_poweroff_charge) {
-    external_deps += [
-      "battery_manager:batterysrv_client",
-      "drivers_interface_factory:libfactory_proxy_1.0",
-    ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
 
     defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
   }
