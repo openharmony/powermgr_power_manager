@@ -71,6 +71,7 @@ enum PowerManagerLogLabel {
     FEATURE_POWER_MODE,
     FEATURE_SHUTDOWN,
     FEATURE_INPUT,
+    FEATURE_UTIL,
     // Test label
     LABEL_TEST,
     // The end of labels, max to the domain id range length 32
@@ -95,6 +96,7 @@ enum PowerManagerLogDomain {
     DOMAIN_FEATURE_POWER_MODE,
     DOMAIN_FEATURE_SHUTDOWN,
     DOMAIN_FEATURE_INPUT,
+    DOMAIN_FEATURE_UTIL,
     DOMAIN_TEST = TEST_DOMAIN_ID, // 0xD000F00
     DOMAIN_END = POWER_DOMAIN_ID_END, // Max to 0xD002920, keep the sequence and length same as PowerManagerLogLabel
 };
@@ -123,6 +125,7 @@ static const PowerManagerLogLabelDomain POWER_LABEL[LABEL_END] = {
     {DOMAIN_FEATURE_POWER_MODE,   "PowerMode"},
     {DOMAIN_FEATURE_SHUTDOWN,     "PowerShutdown"},
     {DOMAIN_FEATURE_INPUT,        "PowerInput"},
+    {DOMAIN_FEATURE_UTIL,         "PowerUtil"},
     {DOMAIN_TEST,                 "PowerTest"},
 };
 
