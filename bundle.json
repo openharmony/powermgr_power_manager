@@ -30,7 +30,6 @@
             "power_manager_feature_power_dialog"
         ],
         "adapted_system_type": [
-            "small",
             "standard"
         ],
         "rom": "1024KB",
@@ -49,7 +48,6 @@
                 "c_utils",
                 "data_share",
                 "display_manager",
-                "drivers_interface_factory",
                 "drivers_interface_power",
                 "ffrt",
                 "hdf_core",
