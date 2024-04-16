@@ -135,6 +135,14 @@ public:
     {
         return mDeviceState_.lastWakeupEventTime;
     }
+    void SetSwitchState(bool switchOpen)
+    {
+        switchOpen_ = switchOpen;
+    }
+    bool IsSwitchOpen() const
+    {
+        return switchOpen_;
+    }
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         PowerStateCallbackDeathRecipient() = default;
@@ -260,6 +268,7 @@ private:
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
+    std::atomic<bool> switchOpen_ {true};
     std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
