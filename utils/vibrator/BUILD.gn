@@ -34,12 +34,11 @@ ohos_shared_library("power_vibrator") {
 
   public_configs = [ ":public_config" ]
 
-  deps = [ "//third_party/jsoncpp:jsoncpp" ]
-
   external_deps = [
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "hilog:libhilog",
+    "jsoncpp:jsoncpp",
   ]
   if (defined(global_parts_info) &&
       defined(global_parts_info.sensors_miscdevice)) {
