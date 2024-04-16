@@ -434,6 +434,11 @@ void PowerStateMachine::WakeupDeviceInner(
         return;
     }
 
+    if (!IsSwitchOpen()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed, wakeup device do nothing.");
+        return;
+    }
+
     if (type == WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
         type = ParseWakeupDeviceType(details);
     }

@@ -319,10 +319,12 @@ void PowerMgrService::SwitchSubscriberInit()
             }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
                 POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Switch close event received, begin to suspend");
+                powerStateMachine_->SetSwitchState(false);
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
                 POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch open event received, begin to wakeup");
+                powerStateMachine_->SetSwitchState(true);
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
