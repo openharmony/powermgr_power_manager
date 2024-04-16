@@ -23,13 +23,13 @@
 using namespace OHOS::PowerMgr;
 
 namespace {
-PowerFuzzerTest g_serviceTest;
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
+    PowerFuzzerTest g_serviceTest;
     g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(PowerMgrInterfaceCode::RUNNINGLOCK_QUERY), data, size);
     return 0;
 }
