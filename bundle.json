@@ -60,6 +60,8 @@
                 "input",
                 "ipc",
                 "image_framework",
+                "jsoncpp",
+                "libxml2",
                 "napi",
                 "safwk",
                 "samgr",
@@ -68,10 +70,6 @@
                 "window_manager",
                 "miscdevice",
                 "bundle_framework"
-            ],
-            "third_party": [
-                "jsoncpp",
-                "libxml2"
             ]
         },
         "build": {
