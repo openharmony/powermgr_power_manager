@@ -424,15 +424,15 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
 
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    stateMaschine_->LockScreenAfterTimingOut(true, false);
+    pmsTest_->LockScreenAfterTimingOut(true, false);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    stateMaschine_->LockScreenAfterTimingOut(false, false);
+    pmsTest_->LockScreenAfterTimingOut(false, false);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
         StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    stateMaschine_->LockScreenAfterTimingOut(true, true);
+    pmsTest_->LockScreenAfterTimingOut(true, true);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     runninglock1.UnLock();
@@ -479,7 +479,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
 {
     constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
-    constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 1;
+    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 200;
+    constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 800;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SHORT_SCREEN_OFF_TIME_MS);
     powerMgrClient.WakeupDevice();
@@ -489,7 +490,6 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     auto refreshTask = [&powerMgrClient, &notified]() {
         while (!notified) {
             powerMgrClient.RefreshActivity();
-            usleep(OPERATION_DELAY_US);
         }
     };
 
@@ -507,6 +507,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
             usleep(OPERATION_DELAY_US);
         }
     };
+    // checks whether refresh tasks may unexpectly turn screen on
     std::thread checkingThread(checkingTask);
     sleep(10);
     notified = true;

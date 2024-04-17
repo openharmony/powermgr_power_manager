@@ -1129,6 +1129,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     auto ret = powerMgrClient.SetForceTimingOut(true);
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    ret = powerMgrClient.LockScreenAfterTimingOut(true, false);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
     usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     powerMgrClient.SetForceTimingOut(false);
