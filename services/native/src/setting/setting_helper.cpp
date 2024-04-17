@@ -53,24 +53,26 @@ sptr<SettingObserver> SettingHelper::RegisterSettingDisplayOffTimeObserver(Setti
     auto observer = provider.CreateObserver(SETTING_DISPLAY_OFF_TIME_KEY, func);
     ErrCode ret = provider.RegisterObserver(observer);
     if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "register setting brightness observer failed, ret=%{public}d", ret);
+        POWER_HILOGW(COMP_UTILS, "register setting display off time observer failed, ret=%{public}d", ret);
         return nullptr;
     }
     return observer;
 }
 
-void SettingHelper::UnregisterSettingDisplayOffTimeObserver(sptr<SettingObserver>& observer)
-{
-    if (observer == nullptr) {
-        return;
-    }
-    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    provider.UnregisterObserver(observer);
-}
-
 bool SettingHelper::IsAutoAdjustBrightnessSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY);
+}
+
+void SettingHelper::GetSettingAutoAdjustBrightness(int64_t defaultVal)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int64_t value = defaultVal;
+    ErrCode ret = provider.GetIntValue(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting auto adjust brightness failed, ret=%{public}d", ret);
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingAutoAdjustBrightness(SwitchStatus status)
@@ -83,9 +85,32 @@ void SettingHelper::SetSettingAutoAdjustBrightness(SwitchStatus status)
     }
 }
 
+sptr<SettingObserver> SettingHelper::RegisterSettingAutoAdjustBrightnessObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto observer = provider.CreateObserver(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY, func);
+    ErrCode ret = provider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting auto adjust brightness observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return observer;
+}
+
 bool SettingHelper::IsBrightnessSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_BRIGHTNESS_KEY);
+}
+
+int64_t SettingHelper::GetSettingBrightness(int64_t defaultVal)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int64_t value = defaultVal;
+    ErrCode ret = provider.GetIntValue(SETTING_BRIGHTNESS_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting lcd brightness failed, ret=%{public}d", ret);
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingBrightness(int32_t brightness)
@@ -98,9 +123,32 @@ void SettingHelper::SetSettingBrightness(int32_t brightness)
     }
 }
 
+sptr<SettingObserver> SettingHelper::RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto observer = provider.CreateObserver(SETTING_BRIGHTNESS_KEY, func);
+    ErrCode ret = provider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting lcd brightness observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return observer;
+}
+
 bool SettingHelper::IsVibrationSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_VIBRATION_KEY);
+}
+
+int64_t SettingHelper::GetSettingVibration(int64_t defaultVal)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int64_t value = defaultVal;
+    ErrCode ret = provider.GetIntValue(SETTING_VIBRATION_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting vibration failed, ret=%{public}d", ret);
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingVibration(SwitchStatus status)
@@ -112,9 +160,32 @@ void SettingHelper::SetSettingVibration(SwitchStatus status)
     }
 }
 
+sptr<SettingObserver> SettingHelper::RegisterSettingVibrationObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto observer = provider.CreateObserver(SETTING_VIBRATION_KEY, func);
+    ErrCode ret = provider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting vibration observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return observer;
+}
+
 bool SettingHelper::IsWindowRotationSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_WINDOW_ROTATION_KEY);
+}
+
+int64_t SettingHelper::GetSettingWindowRotation(int64_t defaultVal)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int64_t value = defaultVal;
+    ErrCode ret = provider.GetIntValue(SETTING_WINDOW_ROTATION_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting window rotation failed, ret=%{public}d", ret);
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingWindowRotation(SwitchStatus status)
@@ -124,6 +195,18 @@ void SettingHelper::SetSettingWindowRotation(SwitchStatus status)
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "set setting window rotation failed, status=%{public}d, ret=%{public}d", status, ret);
     }
+}
+
+sptr<SettingObserver> SettingHelper::RegisterSettingWindowRotationObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto observer = provider.CreateObserver(SETTING_WINDOW_ROTATION_KEY, func);
+    ErrCode ret = provider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting window rotation observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return observer;
 }
 
 sptr<SettingObserver> SettingHelper::RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func)
@@ -136,15 +219,6 @@ sptr<SettingObserver> SettingHelper::RegisterSettingSuspendSourcesObserver(Setti
         return nullptr;
     }
     return observer;
-}
-
-void SettingHelper::UnregisterSettingSuspendSourcesObserver(sptr<SettingObserver>& observer)
-{
-    if (observer == nullptr) {
-        return;
-    }
-    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    provider.UnregisterObserver(observer);
 }
 
 bool SettingHelper::IsSuspendSourcesSettingValid()
@@ -218,6 +292,15 @@ void SettingHelper::SetSettingWakeupSources(const std::string& jsonConfig)
         POWER_HILOGE(COMP_UTILS, "set setting power Wakeup sources key failed, jsonConfig=%{public}s ret=%{public}d",
             jsonConfig.c_str(), ret);
     }
+}
+
+void SettingHelper::UnregisterSettingObserver(sptr<SettingObserver>& observer)
+{
+    if (observer == nullptr) {
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    provider.UnregisterObserver(observer);
 }
 } // namespace PowerMgr
 } // namespace OHOS
