@@ -95,15 +95,11 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest003, TestSize.Leve
 {
     PowerModePolicy *powerModePolicyTest = new PowerModePolicy();
     EXPECT_TRUE(powerModePolicyTest->GetPowerModeValuePolicy(MODEITEM) == INIT_VALUE_FALSE);
-    EXPECT_TRUE(powerModePolicyTest->GetPolicyFromMap(MODEITEM) == INIT_VALUE_FALSE);
-    EXPECT_TRUE(powerModePolicyTest->GetRecoverPolicyFromMap(MODEITEM) == INIT_VALUE_FALSE);
-    EXPECT_TRUE(powerModePolicyTest->GetPowerModeRecoverPolicy(MODEITEM) == INIT_VALUE_FALSE);
-    powerModePolicyTest->ReadRecoverPolicy(READODE);
-    powerModePolicyTest->CompareModeItem(MODEITEM, MODEITEM);
+    EXPECT_TRUE(powerModePolicyTest->GetPolicyFromSwitchMap(MODEITEM) == INIT_VALUE_FALSE);
+    powerModePolicyTest->ReadPowerModePolicy(READODE);
+    powerModePolicyTest->ComparePowerModePolicy();
     ModeActionPolicy action;
     powerModePolicyTest->AddAction(MODEITEM, action);
-    EXPECT_TRUE(powerModePolicyTest->GetPowerModeRecoverPolicy(MODEITEM) == INIT_VALUE_FALSE);
-    EXPECT_TRUE(powerModePolicyTest->GetRecoverPolicyFromMap(MODEITEM) == INIT_VALUE_FALSE);
 
     POWER_HILOGI(LABEL_TEST, "PowerModePolicyNativeTest003 end.");
 }
