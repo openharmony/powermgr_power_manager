@@ -49,7 +49,7 @@ SuspendController::SuspendController(
 SuspendController::~SuspendController()
 {
     if (g_suspendSourcesKeyObserver) {
-        SettingHelper::UnregisterSettingSuspendSourcesObserver(g_suspendSourcesKeyObserver);
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyObserver);
     }
     ffrtTimer_.reset();
 }
