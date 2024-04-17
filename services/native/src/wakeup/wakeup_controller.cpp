@@ -181,15 +181,17 @@ void WakeupController::Wakeup()
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
-
     if (!Permission::IsSystem()) {
+        return;
+    }
+    if (!stateMachine_->IsSwitchOpen()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed, wakeup control listerner do nothing.");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;
     }
-
     if (pms->IsScreenOn()) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this powerkey down event.");
         return;
@@ -201,9 +203,6 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
-        if (IsHandleSysfreeze()) {
-            StartWakeupTimer();
-        }
         SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
 
