@@ -202,6 +202,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     if (count == 0) {
         POWER_HILOGW(COMP_UTILS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
+        resultSet->Close();
         return ERR_NAME_NOT_FOUND;
     }
     const int32_t INDEX = 0;
@@ -210,6 +211,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     if (ret != NativeRdb::E_OK) {
         POWER_HILOGW(COMP_UTILS, "resultSet->GetString return not ok, ret=%{public}d", ret);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
+        resultSet->Close();
         return ERR_INVALID_VALUE;
     }
     resultSet->Close();
