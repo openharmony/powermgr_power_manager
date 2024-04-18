@@ -79,9 +79,11 @@ bool PowerSaveMode::StartXMlParse(std::string path)
         for (auto policyNodePtr = nodePtr->xmlChildrenNode;
             policyNodePtr != nullptr; policyNodePtr = policyNodePtr->next) {
             ModePolicy pmp;
-            StrToInt(TrimStr(GetProp(policyNodePtr, "id")), pmp.id);
+            int32_t switchId;
+            StrToInt(TrimStr(GetProp(policyNodePtr, "id")), switchId);
             StrToInt(TrimStr(GetProp(policyNodePtr, "recover_flag")), pmp.recover_flag);
             StrToInt(TrimStr(GetProp(policyNodePtr, "value")), pmp.value);
+            pmp.id = static_cast<uint32_t>(switchId);
             listPolicy.push_back(pmp);
             POWER_HILOGD(FEATURE_POWER_MODE, "id=%{public}d, value=%{public}d, recover_flag=%{public}d", pmp.id,
                 pmp.value, pmp.recover_flag);
