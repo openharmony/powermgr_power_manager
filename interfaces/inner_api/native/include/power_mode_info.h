@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-enum PowerMode : uint32_t {
+enum class PowerMode : uint32_t {
     POWER_MODE_MIN = 600,
     NORMAL_MODE = POWER_MODE_MIN,
     POWER_SAVE_MODE,
