@@ -19,7 +19,7 @@
 #include <getopt.h>
 #include <string_ex.h>
 #include <sstream>
-
+#include "parameters.h"
 #include "power_mgr_client.h"
 #ifdef HAS_DISPLAY_MANAGER_PART
 #include "display_power_mgr_client.h"
@@ -29,6 +29,11 @@ extern char *optarg;
 
 namespace OHOS {
 namespace PowerMgr {
+
+bool PowerShellCommand::IsDeveloperMode()
+{
+    return OHOS::system::GetBoolParameter("const.security.developermode.state", true);
+}
 
 static const struct option SET_MODE_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -148,6 +153,9 @@ ErrCode PowerShellCommand::CreateCommandMap()
 
 ErrCode PowerShellCommand::RunAsForceTimeOutCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     bool enabled = argList_[0][0] - '0';
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     client.SetForceTimingOut(enabled);
@@ -156,6 +164,9 @@ ErrCode PowerShellCommand::RunAsForceTimeOutCommand()
 
 ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     bool enableLockScreen = argList_[0][0] - '0';
     bool checkScreenOnLock = argList_[1][0] - '0';
     PowerMgrClient& client = PowerMgrClient::GetInstance();
@@ -177,6 +188,9 @@ ErrCode PowerShellCommand::init()
 
 ErrCode PowerShellCommand::RunAsHelpCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     resultReceiver_.clear();
     resultReceiver_.append(HELP_MSG);
     return ERR_OK;
@@ -184,6 +198,9 @@ ErrCode PowerShellCommand::RunAsHelpCommand()
 
 ErrCode PowerShellCommand::RunAsSetModeCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     int ind = 0;
     int option = getopt_long(argc_, argv_, "h", SET_MODE_OPTIONS, &ind);
     resultReceiver_.clear();
@@ -217,6 +234,9 @@ ErrCode PowerShellCommand::RunAsSetModeCommand()
 
 ErrCode PowerShellCommand::RunAsWakeupCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     int ind = 0;
     int option = getopt_long(argc_, argv_, "abcde", WAKE_UP_TYPES, &ind);
     resultReceiver_.clear();
@@ -249,6 +269,9 @@ ErrCode PowerShellCommand::RunAsWakeupCommand()
 
 ErrCode PowerShellCommand::RunAsSuspendCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     resultReceiver_.append("SuspendDevice is called\n");
@@ -288,6 +311,9 @@ static const std::string GetBundleRunningLockTypeString(RunningLockType type)
 
 ErrCode PowerShellCommand::RunAsQueryLockCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     std::map<std::string, RunningLockInfo> runningLockLists;
     bool ret = client.QueryRunningLockLists(runningLockLists);
@@ -330,6 +356,9 @@ extern "C" void PrintDumpFileError(std::string& receiver, const char* path)
 
 ErrCode PowerShellCommand::RunAsDumpCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     resultReceiver_.clear();
 
     PowerMgrClient& client = PowerMgrClient::GetInstance();
@@ -354,12 +383,18 @@ bool PowerShellCommand::DisplayOptargEmpty()
 
 ErrCode PowerShellCommand::RunAsDisplayCommandHelp()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     resultReceiver_.append(DISPLAY_HELP_MSG);
     return ERR_OK;
 }
 
 ErrCode PowerShellCommand::RunAsDisplayCommandOverride()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     if (DisplayOptargEmpty()) {
         return ERR_OK;
     }
@@ -377,6 +412,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommandOverride()
 
 ErrCode PowerShellCommand::RunAsDisplayCommandRestore()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     bool ret = DisplayPowerMgrClient::GetInstance().RestoreBrightness();
     resultReceiver_.append("Restore brightness");
     if (!ret) {
@@ -388,6 +426,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommandRestore()
 
 ErrCode PowerShellCommand::RunAsDisplayCommandBoost()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     if (DisplayOptargEmpty()) {
         return ERR_OK;
     }
@@ -405,6 +446,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommandBoost()
 
 ErrCode PowerShellCommand::RunAsDisplayCommandCancelBoost()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     bool ret = DisplayPowerMgrClient::GetInstance().CancelBoostBrightness();
     resultReceiver_.append("Cancel boost brightness");
     if (!ret) {
@@ -416,6 +460,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommandCancelBoost()
 
 ErrCode PowerShellCommand::RunAsDisplayCommandSetValue()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     if (DisplayOptargEmpty()) {
         return ERR_OK;
     }
@@ -433,6 +480,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommandSetValue()
 
 ErrCode PowerShellCommand::RunAsDisplayCommandDiscount()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     if (DisplayOptargEmpty()) {
         return ERR_OK;
     }
@@ -451,6 +501,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommandDiscount()
 
 ErrCode PowerShellCommand::RunAsDisplayCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     int ind = 0;
     int option = getopt_long(argc_, argv_, "hrcs:o:b:d:", DISPLAY_OPTIONS, &ind);
     resultReceiver_.clear();
@@ -466,6 +519,9 @@ ErrCode PowerShellCommand::RunAsDisplayCommand()
 
 ErrCode PowerShellCommand::RunAsTimeOutCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
     int ind = 0;
     int option = getopt_long(argc_, argv_, "hro:", TIME_OUT_OPTIONS, &ind);
     resultReceiver_.clear();
