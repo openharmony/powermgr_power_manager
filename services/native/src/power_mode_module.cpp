@@ -126,8 +126,8 @@ void PowerModeModule::RegisterSaveModeObserver()
 sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string) {
-        DelayedSpSingleton<PowerModePolicy>::GetInstance()->RemoveBackupMapSettingSwitch(switchId);
-    }
+        DelayedSingleton<PowerModePolicy>::GetInstance()->RemoveBackupMapSettingSwitch(switchId);
+    };
 
     switch (switchId) {
         case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
@@ -142,6 +142,7 @@ sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
             POWER_HILOGW(FEATURE_POWER_MODE, "register unknown switch id: %{public}d", switchId);
             break;
     }
+    return nullptr;
 }
 
 void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
