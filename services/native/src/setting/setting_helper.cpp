@@ -64,10 +64,10 @@ bool SettingHelper::IsAutoAdjustBrightnessSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY);
 }
 
-void SettingHelper::GetSettingAutoAdjustBrightness(int64_t defaultVal)
+int32_t SettingHelper::GetSettingAutoAdjustBrightness(int32_t defaultVal)
 {
     SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int64_t value = defaultVal;
+    int32_t value = defaultVal;
     ErrCode ret = provider.GetIntValue(SETTING_AUTO_ADJUST_BRIGHTNESS_KEY, value);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "get setting auto adjust brightness failed, ret=%{public}d", ret);
@@ -102,10 +102,10 @@ bool SettingHelper::IsBrightnessSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_BRIGHTNESS_KEY);
 }
 
-int64_t SettingHelper::GetSettingBrightness(int64_t defaultVal)
+int32_t SettingHelper::GetSettingBrightness(int32_t defaultVal)
 {
     SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int64_t value = defaultVal;
+    int32_t value = defaultVal;
     ErrCode ret = provider.GetIntValue(SETTING_BRIGHTNESS_KEY, value);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "get setting lcd brightness failed, ret=%{public}d", ret);
@@ -140,10 +140,10 @@ bool SettingHelper::IsVibrationSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_VIBRATION_KEY);
 }
 
-int64_t SettingHelper::GetSettingVibration(int64_t defaultVal)
+int32_t SettingHelper::GetSettingVibration(int32_t defaultVal)
 {
     SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int64_t value = defaultVal;
+    int32_t value = defaultVal;
     ErrCode ret = provider.GetIntValue(SETTING_VIBRATION_KEY, value);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "get setting vibration failed, ret=%{public}d", ret);
@@ -177,10 +177,10 @@ bool SettingHelper::IsWindowRotationSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_WINDOW_ROTATION_KEY);
 }
 
-int64_t SettingHelper::GetSettingWindowRotation(int64_t defaultVal)
+int32_t SettingHelper::GetSettingWindowRotation(int32_t defaultVal)
 {
     SettingProvider& provider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int64_t value = defaultVal;
+    int32_t value = defaultVal;
     ErrCode ret = provider.GetIntValue(SETTING_WINDOW_ROTATION_KEY, value);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "get setting window rotation failed, ret=%{public}d", ret);

@@ -55,7 +55,7 @@ void PowerModePolicy::ComparePowerModePolicy()
 {
     std::lock_guard<std::mutex> lock(policyMutex_);
     for (auto [id, value] : recoverMap_) {
-        if (swtichMap_.find(id) != switchMap_.end()) {
+        if (switchMap_.find(id) != switchMap_.end()) {
             backupMap_[id] = value;
         }
         switchMap_.emplace(id, value);
@@ -77,14 +77,14 @@ void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
         switchMap_[id] = value;
         POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, value: %{public}d", mode, value);
         if (flag == ValueProp::recover) {
-            GetSettingSwitchState(id, backupMap[id]);
+            GetSettingSwitchState(id, backupMap_[id]);
         }
     }
 }
 
 void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
 {
-    int64_t defaultVal = INIT_VALUE_FALSE;
+    int32_t defaultVal = INIT_VALUE_FALSE;
     switch (switchId) {
         case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
             defaultVal = SettingHelper::GetSettingAutoAdjustBrightness(defaultVal);
