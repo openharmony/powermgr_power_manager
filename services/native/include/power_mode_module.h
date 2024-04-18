@@ -65,7 +65,7 @@ private:
     void PublishPowerModeEvent();
     void UnregisterSaveModeObserver();
     void RegisterSaveModeObserver();
-    sptr<SettingObserver> CreateSettingObserver(uint32_t switchId)
+    sptr<SettingObserver> CreateSettingObserver(uint32_t switchId);
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
