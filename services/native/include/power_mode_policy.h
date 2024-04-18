@@ -29,23 +29,24 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerModePolicy {
 public:
-    enum ServiceType : uint32_t {
-        DISPLAY_OFFTIME = 101;
-        SLEEPTIME = 102;
-        AUTO_ADJUST_BRIGHTNESS = 103;
-        AUTO_WINDOWN_RORATION = 107;
-        LCD_BRIGHTNESS = 115;
-        VIBRATORS_STATE = 120;
+    class ServiceType {
+    public:
+        static constexpr uint32_t DISPLAY_OFFTIME = 101;
+        static constexpr uint32_t SLEEPTIME = 102;
+        static constexpr uint32_t AUTO_ADJUST_BRIGHTNESS = 103;
+        static constexpr uint32_t AUTO_WINDOWN_RORATION = 107;
+        static constexpr uint32_t LCD_BRIGHTNESS = 115;
+        static constexpr uint32_t VIBRATORS_STATE = 120;
     };
 
     ~PowerModePolicy() = default;
-    int32_t GetPowerModeValuePolicy(uint32_t type);
+    int32_t GetPowerModeValuePolicy(uint32_t type); // from switchMap_
     void UpdatePowerModePolicy(uint32_t mode);
+    void RemoveBackupMapSettingSwitch(uint32_t switchId);
     typedef std::function<void(bool)> ModeAction;
     void AddAction(uint32_t type, ModeAction& action);
     void TriggerAllActions(bool isBoot);
     bool IsValidType(uint32_t type);
-    void RemoveBackupMapSettingSwitch(uint32_t switchId);
 
 private:
     std::map<uint32_t, ModeAction> actionMap_;
@@ -55,8 +56,8 @@ private:
 
     void ReadPowerModePolicy(uint32_t mode);
     void ComparePowerModePolicy();
-    void GetSettingSwitchState(uint32_t& switchId, int32_t& value);
-    int32_t GetPolicyFromSwitchMap(uint32_t type);
+    void GetSettingSwitchState(uint32_t& switchId, int32_t& value); // from setting
+    int32_t GetPolicyFromMap(uint32_t type);
     std::mutex policyMutex_;
     std::mutex actionMapMutex_;
 };

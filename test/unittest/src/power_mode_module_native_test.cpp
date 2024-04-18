@@ -95,7 +95,7 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest003, TestSize.Leve
 {
     PowerModePolicy *powerModePolicyTest = new PowerModePolicy();
     EXPECT_TRUE(powerModePolicyTest->GetPowerModeValuePolicy(MODEITEM) == INIT_VALUE_FALSE);
-    EXPECT_TRUE(powerModePolicyTest->GetPolicyFromSwitchMap(MODEITEM) == INIT_VALUE_FALSE);
+    EXPECT_TRUE(powerModePolicyTest->GetPolicyFromMap(MODEITEM) == INIT_VALUE_FALSE);
     powerModePolicyTest->ReadPowerModePolicy(READODE);
     powerModePolicyTest->ComparePowerModePolicy();
     ModeActionPolicy action;

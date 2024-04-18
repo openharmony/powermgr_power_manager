@@ -86,7 +86,7 @@ bool PowerSaveMode::StartXMlParse(std::string path)
             POWER_HILOGD(FEATURE_POWER_MODE, "id=%{public}d, value=%{public}d, recover_flag=%{public}d", pmp.id,
                 pmp.value, pmp.recover_flag);
         }
-        std::pair<int32_t, std::list<ModePolicy>> policyPair(policyId, listPolicy);
+        std::pair<uint32_t, std::list<ModePolicy>> policyPair(policyId, listPolicy);
         this->policyCache_.insert(policyPair);
     }
     return true;
@@ -101,30 +101,6 @@ std::string PowerSaveMode::GetProp(const xmlNodePtr& nodePtr, const std::string&
     std::string value = reinterpret_cast<char*>(prop);
     xmlFree(prop);
     return value;
-}
-
-bool PowerSaveMode::GetValuePolicy(std::list<ModePolicy> &openPolicy, int32_t mode)
-{
-    bool result = GetFilterPolicy(openPolicy, mode, ValueProp::value);
-    return result;
-}
-
-bool PowerSaveMode::GetRecoverPolicy(std::list<ModePolicy> &recoverPolicy, int32_t mode)
-{
-    bool result = GetFilterPolicy(recoverPolicy, mode, ValueProp::recover);
-    return result;
-}
-
-bool PowerSaveMode::GetFilterPolicy(std::list<ModePolicy> &policyList, int32_t mode, int32_t value)
-{
-    if (this->policyCache_.size() == 0) {
-        return false;
-    }
-    policyList = policyCache_[mode];
-    if (ValueProp::recover == value) {
-        policyList.remove_if([&](ModePolicy mp) {return mp.recover_flag != ValueProp::recover;});
-    }
-    return true;
 }
 
 int32_t PowerSaveMode::GetSleepTime(int32_t mode)
