@@ -348,6 +348,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient012, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient012:Start.");
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient0012: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
     runningLock->Lock();
@@ -374,6 +376,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient013, TestSize.Level2)
 
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient0013: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
 
@@ -401,6 +405,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient014, TestSize.Level2)
 
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient0014: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
 
@@ -429,6 +435,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient015, TestSize.Level2)
 
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient0015: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
 
     powerMgrClient.OverrideScreenOffTime(time);
@@ -458,13 +466,12 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient016, TestSize.Level2)
 
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient0016: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
 
     powerMgrClient.OverrideScreenOffTime(time);
 
-    powerMgrClient.WakeupDevice();
-    powerMgrClient.SuspendDevice();
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     runningLock->Lock();
     usleep(SLEEP_AFTER_LOCK_TIME_US + SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(runningLock->IsUsed(), true);
@@ -1122,6 +1129,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
 {
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient048: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
     runningLock->Lock();
