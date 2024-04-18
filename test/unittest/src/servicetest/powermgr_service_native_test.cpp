@@ -272,6 +272,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest009, TestSize.Level
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest010:Start");
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     int32_t time = SLEEP_WAIT_TIME_MS;
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo runningLockInfo;
@@ -307,6 +309,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest011:Start");
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     int32_t time = SLEEP_WAIT_TIME_MS;
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo runningLockInfo;
@@ -339,6 +343,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest012:Start");
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     int32_t time = SLEEP_WAIT_TIME_MS;
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo runningLockInfo;
