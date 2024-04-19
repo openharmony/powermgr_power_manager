@@ -127,7 +127,7 @@ sptr<SettingObserver> SettingHelper::RegisterSettingBrightnessObserver(SettingOb
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     auto settingObserver = settingProvider.CreateObserver(SETTING_BRIGHTNESS_KEY, func);
-    ErrCode ret = provider.RegisterObserver(settingObserver);
+    ErrCode ret = settingProvider.RegisterObserver(settingObserver);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "register setting lcd brightness observer failed, ret=%{public}d", ret);
         return nullptr;

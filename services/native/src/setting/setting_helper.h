@@ -41,7 +41,7 @@ public:
     static bool IsBrightnessSettingValid();
     static int32_t GetSettingBrightness(int32_t defaultVal);
     static void SetSettingBrightness(int32_t brightness);
-    static sptr<SettingObserver> RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func); 
+    static sptr<SettingObserver> RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func);
     static bool IsVibrationSettingValid();
     static int32_t GetSettingVibration(int32_t defaultVal);
     static void SetSettingVibration(SwitchStatus status);
