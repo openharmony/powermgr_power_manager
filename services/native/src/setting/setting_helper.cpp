@@ -164,7 +164,7 @@ sptr<SettingObserver> SettingHelper::RegisterSettingVibrationObserver(SettingObs
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     auto settingObserver = settingProvider.CreateObserver(SETTING_VIBRATION_KEY, func);
-    ErrCode ret = settingProvider.RegisterObserver(observer);
+    ErrCode ret = settingProvider.RegisterObserver(settingObserver);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "register setting vibration observer failed, ret=%{public}d", ret);
         return nullptr;
