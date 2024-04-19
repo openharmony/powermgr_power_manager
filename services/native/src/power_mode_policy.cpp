@@ -147,7 +147,7 @@ void PowerModePolicy::RemoveBackupMapSettingSwitch(uint32_t switchId)
 {
     auto iter = recoverMap_.find(switchId);
     if (iter != recoverMap_.end()) {
-        recoverMap_.erase(switchId);
+        recoverMap_.erase(iter);
         POWER_HILOGW(FEATURE_POWER_MODE, "remove backup switch: %{public}d", switchId);
     }
 }

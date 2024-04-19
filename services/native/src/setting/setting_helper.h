@@ -37,11 +37,11 @@ public:
     static bool IsAutoAdjustBrightnessSettingValid();
     static int32_t GetSettingAutoAdjustBrightness(int32_t defaultVal);
     static void SetSettingAutoAdjustBrightness(SwitchStatus status);
-    static sptr<SettingObserver> RegisterSettingAutoAdjustBrightnessObserver(SettingObserver::UpdateFunc& func);  
+    static sptr<SettingObserver> RegisterSettingAutoAdjustBrightnessObserver(SettingObserver::UpdateFunc& func);
     static bool IsBrightnessSettingValid();
     static int32_t GetSettingBrightness(int32_t defaultVal);
     static void SetSettingBrightness(int32_t brightness);
-    static sptr<SettingObserver> RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func);  
+    static sptr<SettingObserver> RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func); 
     static bool IsVibrationSettingValid();
     static int32_t GetSettingVibration(int32_t defaultVal);
     static void SetSettingVibration(SwitchStatus status);
@@ -55,7 +55,6 @@ public:
     static const std::string GetSettingSuspendSources();
     static void SetSettingSuspendSources(const std::string& jsonConfig);
     static sptr<SettingObserver> RegisterSettingWakeupSourcesObserver(SettingObserver::UpdateFunc& func);
-    static void UnregisterSettingWakeupSourcesObserver(sptr<SettingObserver>& observer);
     static bool IsWakeupSourcesSettingValid();
     static const std::string GetSettingWakeupSources();
     static void SetSettingWakeupSources(const std::string& jsonConfig);
