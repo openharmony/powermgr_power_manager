@@ -77,10 +77,8 @@ ohos_shared_library("powermgrservice") {
 
   public_configs = [ ":powermgr_public_config" ]
 
-  public_deps = [
-    "${powermgr_utils_path}/setting:power_setting",
-  ]
-  
+  public_deps = [ "${powermgr_utils_path}/setting:power_setting" ]
+
   deps = [
     ":powermgr_stub",
     "${powermgr_inner_api}:powermgr_client",
