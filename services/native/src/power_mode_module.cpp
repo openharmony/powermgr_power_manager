@@ -122,7 +122,6 @@ void PowerModeModule::RegisterSaveModeObserver()
     }
 }
 
-
 sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string) {
