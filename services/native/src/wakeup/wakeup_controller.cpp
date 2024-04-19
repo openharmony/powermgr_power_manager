@@ -69,7 +69,7 @@ WakeupController::~WakeupController()
 #endif
 
     if (g_wakeupSourcesKeyObserver) {
-        SettingHelper::UnregisterSettingWakeupSourcesObserver(g_wakeupSourcesKeyObserver);
+        SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
     }
     if (g_screenTimeoutHandle) {
         FFRTUtils::CancelTask(g_screenTimeoutHandle, queue_);
