@@ -1115,6 +1115,12 @@ ohos_unittest("test_power_coordination_lock") {
 
   sources = [ "src/power_coordination_lock_test.cpp" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
