@@ -75,6 +75,7 @@
         "build": {
             "group_type": {
                 "base_group": [
+                    "//base/powermgr/power_manager/etc/init:powermgr_cfg",
                     "//base/powermgr/power_manager/utils/shell:power-shell",
                     "//base/powermgr/power_manager/utils/param:power_sysparam",
                     "//base/powermgr/power_manager/utils/permission:power_permission",
