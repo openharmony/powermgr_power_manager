@@ -21,7 +21,6 @@
 #include "power_log.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
-#include "setting_helper.h"
 
 #include "singleton.h"
 

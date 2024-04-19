@@ -22,7 +22,7 @@
 #include <common_event_support.h>
 
 #include "ipower_mode_callback.h"
-#include "setting_observer.h"
+#include "setting_helper.h"
 
 #define FLAG_FALSE (-1)
 #define LAST_MODE_FLAG 0
