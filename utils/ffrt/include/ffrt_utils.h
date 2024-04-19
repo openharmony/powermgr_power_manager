@@ -36,6 +36,12 @@ using FFRTHandle = ffrt::task_handle;
  * Defines the task queue of the FFRT.。
  */
 using FFRTQueue = ffrt::queue;
+
+/**
+ * The mutex for FFRT tasks.
+ */
+using FFRTMutex = ffrt::mutex;
+
 class FFRTUtils final {
 public:
     /**
@@ -104,7 +110,7 @@ public:
      *
      * @param handle FFRT task.
      */
-    static void CancelTask(FFRTHandle& handle, FFRTQueue& queue);
+    static int CancelTask(FFRTHandle& handle, FFRTQueue& queue);
 
     /**
      * Cancel the FFRT task.
@@ -114,22 +120,44 @@ public:
      * @param handle FFRT task.
      * @param queue Shared_ptr of FFRT task cancel queue.
      */
-    static void CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
+    static int CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
+};
 
-    /**
-     * The mutex for FFRT tasks.
-     */
-    class Mutex {
-    public:
-        Mutex();
-        ~Mutex();
-        void Lock();
-        bool TryLock();
-        void Unlock();
+enum FFRTTimerId {
+    TIMER_ID_SLEEP,
+    TIMER_ID_USER_ACTIVITY_OFF,
+};
 
-    private:
-        ffrt::mutex* mutex_;
-    };
+class FFRTMutexMap {
+public:
+    FFRTMutexMap() = default;
+    ~FFRTMutexMap() = default;
+    void Lock(uint32_t mutexId);
+    void Unlock(uint32_t mutexId);
+private:
+    std::unordered_map<uint32_t, FFRTMutex> mutexMap_;
+};
+
+class FFRTTimer {
+public:
+    FFRTTimer();
+    FFRTTimer(const char *timer_name);
+    ~FFRTTimer();
+    void Clear();
+    void CancelAllTimer();
+    void CancelTimer(uint32_t timerId);
+    void SetTimer(uint32_t timerId, FFRTTask& task);
+    void SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs);
+    uint32_t GetTaskId(uint32_t timerId);
+private:
+    /* inner functions must be called when mutex_ is locked */
+    void CancelAllTimerInner();
+    void CancelTimerInner(uint32_t timerId);
+
+    FFRTMutex mutex_;
+    FFRTQueue queue_;
+    std::unordered_map<uint32_t, FFRTHandle> handleMap_;
+    std::unordered_map<uint32_t, uint32_t> taskId_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

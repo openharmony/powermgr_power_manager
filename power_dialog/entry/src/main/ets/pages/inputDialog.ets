@@ -19,7 +19,7 @@ import Constants from '../common/constant';
 
 @Extend(Button) function customizeButton() {
   .backgroundColor(Color.Transparent)
-  .fontColor("#0D81F2")
+  .fontColor('#0D81F2')
   .fontSize(Constants.BUTTON_TEXT_FONT_SIZE)
   .fontWeight(Constants.BUTTON_TEXT_FONT_WEIGHT)
   .height(Constants.BUTTON_HEIGHT)
@@ -59,7 +59,7 @@ struct InputCustomDialog{
               
             })
             .customizeButton()
-          Button($r("app.string.BUTTON_CONFIRM"))
+          Button($r('app.string.BUTTON_CONFIRM'))
             .onClick(() => {
               if (this.controller) {
                 this.controller.close();
@@ -90,56 +90,56 @@ struct InputDialog {
   });
 
   aboutToAppear() {
-    console.log("aboutToAppear");
+    console.log('aboutToAppear');
   }
   aboutToDisappear() {
-    console.log("aboutToDisappear");
+    console.log('aboutToDisappear');
     this.dialogController = null;
   }
 
   onCancel() {
     try {
-      console.log("cancel input");
+      console.log('cancel input');
       inputEventClient.permitInjection(false);
       let storage = LocalStorage.GetShared()
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
-        console.log("cancel terminateSelf session end");
+        console.log('cancel terminateSelf session end');
         session.terminateSelf();
       }
-      console.log("cancel end");
-    } catch(err) {
-      console.error("cancel failed:%{public}s", JSON.stringify(err));
+      console.log('cancel end');
+    } catch (err) {
+      console.error('cancel failed:%{public}s', JSON.stringify(err));
     }
   }
 
   onConfirm() {
     try {
-      console.info("confirm input");
+      console.info('confirm input');
       inputEventClient.permitInjection(true);
       let storage = LocalStorage.GetShared()
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
-        console.log("confirm terminateSelf session end");
+        console.log('confirm terminateSelf session end');
         session.terminateSelf();
       }
-      console.log("confirm end");
-    } catch(err) {
-      console.error("confirm failed:%{public}s", JSON.stringify(err));
+      console.log('confirm end');
+    } catch (err) {
+      console.error('confirm failed:%{public}s', JSON.stringify(err));
     }
   }
 
   existApp() {
     try {
-      console.log("existApp input");
+      console.log('existApp input');
       let storage = LocalStorage.GetShared()
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
-        console.log("existApp terminateSelf session");
+        console.log('existApp terminateSelf session');
         session.terminateSelf();
       }
-    } catch(err) {
-      console.error("existApp failed:%{public}s", JSON.stringify(err));
+    } catch (err) {
+      console.error('existApp failed:%{public}s', JSON.stringify(err));
     }
   }
 

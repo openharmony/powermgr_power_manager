@@ -96,7 +96,8 @@ private:
     uint32_t sleepType_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
     std::mutex mutex_;
-    std::shared_ptr<FFRTQueue> queue_;
+    std::shared_ptr<FFRTTimer> ffrtTimer_;
+    FFRTMutexMap ffrtMutexMap_;
 };
 
 class SuspendMonitor {

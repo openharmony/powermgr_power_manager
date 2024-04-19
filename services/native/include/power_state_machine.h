@@ -89,8 +89,8 @@ public:
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
-    void OverrideScreenOffTimeCoordinated();
-    void RestoreScreenOffTimeCoordinated();
+    bool IsCoordinatedOverride();
+    void SetCoordinatedOverride(bool overridden);
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
     void Reset();
@@ -135,6 +135,14 @@ public:
     {
         return mDeviceState_.lastWakeupEventTime;
     }
+    void SetSwitchState(bool switchOpen)
+    {
+        switchOpen_ = switchOpen;
+    }
+    bool IsSwitchOpen() const
+    {
+        return switchOpen_;
+    }
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         PowerStateCallbackDeathRecipient() = default;
@@ -144,13 +152,40 @@ public:
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
     int64_t GetDisplayOffTime();
+    int64_t GetDimTime(int64_t displayOffTime);
+    static constexpr int64_t OFF_TIMEOUT_FACTOR = 4;
+    static constexpr int64_t MAX_DIM_TIME_MS = 7500;
+    static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
     void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
+    void SetForceTimingOut(bool enabled);
+    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock);
+    bool IsSettingState(PowerState state);
 
 private:
+    class SettingStateFlag {
+    public:
+        SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner) : owner_(owner)
+        {
+            std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
+            stateMachine->settingStateFlag_ = static_cast<int64_t>(state);
+        }
+        SettingStateFlag(const SettingStateFlag&) = delete;
+        SettingStateFlag& operator=(const SettingStateFlag&) = delete;
+        SettingStateFlag(SettingStateFlag&&) = delete;
+        SettingStateFlag& operator=(SettingStateFlag&&) = delete;
+        ~SettingStateFlag()
+        {
+            std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
+            stateMachine->settingStateFlag_ = -1;
+        }
+
+    protected:
+        std::weak_ptr<PowerStateMachine> owner_;
+    };
     class StateController {
     public:
         StateController(PowerState state, std::shared_ptr<PowerStateMachine> owner,
@@ -200,7 +235,7 @@ private:
     void EmplaceShutdown();
     void EmplaceDim();
     void InitTransitMap();
-    bool CanTransitTo(PowerState to);
+    bool CanTransitTo(PowerState to, StateChangeReason reason);
     void NotifyPowerStateChanged(PowerState state);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
@@ -229,10 +264,16 @@ private:
     bool isScreenOffTimeOverride_ {false};
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle userActivityTimeoutHandle_ {nullptr};
-    bool isCoordinatedOverride_ {false};
+    std::atomic<bool> isCoordinatedOverride_ {false};
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
+    std::atomic<bool> switchOpen_ {true};
+    std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
+    std::atomic<bool> forceTimingOut_ {false};
+    std::atomic<bool> enabledTimingOutLockScreen_ {true};
+    std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
+    std::atomic<int64_t> settingStateFlag_ {-1};
 };
 } // namespace PowerMgr
 } // namespace OHOS

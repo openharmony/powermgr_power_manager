@@ -40,6 +40,7 @@ const std::string TEST_DEVICE_ID = "test_device_id";
 
 void PowerMgrServiceNativeTest::SetUpTestCase()
 {
+    constexpr const uint32_t WAIT_INIT_TIME_S = 5;
     g_powerMgrService = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_powerMgrService->OnStart();
     g_powerMgrService->OnAddSystemAbility(DISPLAY_POWER_MANAGER_ID, TEST_DEVICE_ID);
@@ -48,6 +49,8 @@ void PowerMgrServiceNativeTest::SetUpTestCase()
         g_powerMgrServiceProxy = std::make_shared<PowerMgrServiceTestProxy>(g_powerMgrService);
     }
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    // wait for "SetState for INIT" to be done
+    sleep(WAIT_INIT_TIME_S);
 }
 
 void PowerMgrServiceNativeTest::TearDownTestCase()
@@ -845,5 +848,23 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level
     auto error = g_powerMgrServiceProxy->IsStandby(standby);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is end");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNativeTest042
+ * @tc.desc: test WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: #I9G5XH
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is start");
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
+
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING);
+    EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is end");
 }
 } // namespace

@@ -319,10 +319,12 @@ void PowerMgrService::SwitchSubscriberInit()
             }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
                 POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Switch close event received, begin to suspend");
+                powerStateMachine_->SetSwitchState(false);
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
                 POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch open event received, begin to wakeup");
+                powerStateMachine_->SetSwitchState(true);
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
@@ -1103,6 +1105,24 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 #endif
 }
 
+PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
+{
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    powerStateMachine_->SetForceTimingOut(enabled);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+{
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    return PowerErrors::ERR_OK;
+}
+
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
@@ -1114,8 +1134,11 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
     if (stateMachine == nullptr) {
         return;
     }
-    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE)) {
-        stateMachine->OverrideScreenOffTimeCoordinated();
+    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
+        stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
+        !stateMachine->IsCoordinatedOverride()) {
+        stateMachine->SetCoordinatedOverride(true);
+        stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
         POWER_HILOGD(FEATURE_INPUT, "Key event has simulate flag in coordinated state, override screen off time");
     }
 }
@@ -1130,8 +1153,11 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
     if (stateMachine == nullptr) {
         return;
     }
-    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE)) {
-        stateMachine->OverrideScreenOffTimeCoordinated();
+    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
+        stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
+        !stateMachine->IsCoordinatedOverride()) {
+        stateMachine->SetCoordinatedOverride(true);
+        stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
         POWER_HILOGD(FEATURE_INPUT, "Pointer event has simulate flag in coordinated state, override screen off time");
     }
 }

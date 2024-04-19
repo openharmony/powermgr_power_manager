@@ -28,11 +28,12 @@
 #include <common_event_support.h>
 #include <datetime_ex.h>
 #include <future>
+#include <hisysevent.h>
 #include <thread>
+#include <dlfcn.h>
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
 #include "battery_srv_client.h"
-#include "v1_0/ifactory_interface.h"
 #endif
 
 using namespace OHOS::AAFwk;
@@ -80,21 +81,27 @@ static bool IsNeedWritePoweroffChargeFlag()
         (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS);
 }
 
-static const unsigned int OEMINFO_REUSED_ID_204_8K_VALID_SIZE_64_BYTE = 204;
-static const unsigned int OEMINFO_SHUTFLAG_SUBID = 4;
-static const char POWEROFF_CHARGE_FLAG[] = {0xAA, 0x55, 0x00, 0x00};
+static const char* POWER_CHARGE_EXTENSION_PATH = "/system/lib64/libpower_charge_ext.z.so";
+static const char* WRITE_POWER_OFF_CHARGE_FLAG_FUNC = "WritePoweroffChargeFlag";
+typedef void(*Func)();
 
 static void WritePoweroffChargeFlag()
 {
-    auto factoryInterfaceImpl = OHOS::HDI::Factory::V1_0::IFactoryInterface::Get("factory_interface_service", false);
-    if (factoryInterfaceImpl == nullptr) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "get factory_interface_service failed");
+    POWER_HILOGI(FEATURE_SHUTDOWN, "enter WritePoweroffChargeFlag");
+    void *handler = dlopen(POWER_CHARGE_EXTENSION_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Dlopen failed, reason : %{public}s", dlerror());
         return;
     }
 
-    int ret = factoryInterfaceImpl->OeminfoWriteReused(OEMINFO_REUSED_ID_204_8K_VALID_SIZE_64_BYTE,
-        OEMINFO_SHUTFLAG_SUBID, sizeof(POWEROFF_CHARGE_FLAG), POWEROFF_CHARGE_FLAG);
-    POWER_HILOGI(FEATURE_SHUTDOWN, "write oem flag:0x55AA, result:%{public}d", ret);
+    Func writePoweroffChargeFlag = (Func)dlsym(handler, WRITE_POWER_OFF_CHARGE_FLAG_FUNC);
+    if (writePoweroffChargeFlag == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "find function failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return;
+    }
+    writePoweroffChargeFlag();
+    dlclose(handler);
 }
 #endif
 
@@ -111,6 +118,8 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
     PublishShutdownEvent();
     TriggerSyncShutdownCallback();
     TurnOffScreen();

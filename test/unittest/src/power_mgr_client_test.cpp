@@ -767,29 +767,6 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient033, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerMgrClient046
- * @tc.desc: test WakeupDevice
- * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
- */
-HWTEST_F(PowerMgrClientTest, PowerMgrClient046, TestSize.Level0)
-{
-    POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    powerMgrClient.WakeupDevice();
-    // Suspend Device before test
-    powerMgrClient.SuspendDevice();
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient046: Prepare Fail, Screen is On.";
-
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient046: Wakeup Device Fail, Screen is Off";
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is end!");
-}
-
-/**
  * @tc.name: PowerMgrClient034
  * @tc.desc: test WakeupDevice
  * @tc.type: FUNC
@@ -1087,5 +1064,79 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
     ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_EQ(ret, false);
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient045:End.");
+}
+
+/**
+ * @tc.name: PowerMgrClient046
+ * @tc.desc: test WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient046, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.WakeupDevice();
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient046: Prepare Fail, Screen is On.";
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient046: Wakeup Device Fail, Screen is Off";
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient046::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient047
+ * @tc.desc: test WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: #I9G5XH
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient047::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.WakeupDevice();
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient047: Prepare Fail, Screen is On.";
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient047: Wakeup Device Fail, Screen is Off";
+
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient047::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient048
+ * @tc.desc: test SetIgnoreScreenOnLock
+ * @tc.type: FUNC
+ * @tc.require: issueI96FJ5
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
+{
+    int32_t time = SET_DISPLAY_OFF_TIME_MS;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
+    powerMgrClient.OverrideScreenOffTime(time);
+    runningLock->Lock();
+    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    auto ret = powerMgrClient.SetForceTimingOut(true);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    ret = powerMgrClient.LockScreenAfterTimingOut(true, false);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+    powerMgrClient.SetForceTimingOut(false);
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
 }
 } // namespace

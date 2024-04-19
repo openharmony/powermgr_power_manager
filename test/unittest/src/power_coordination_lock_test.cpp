@@ -21,8 +21,13 @@
 #include <common_event_subscriber.h>
 #include <common_event_support.h>
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+#include "input_manager.h"
+#include "pointer_event.h"
+#endif
 #include "power_log.h"
 #include "power_mgr_client.h"
+#include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 
 using namespace OHOS;
@@ -32,10 +37,11 @@ using namespace std;
 using namespace testing::ext;
 
 namespace {
+constexpr uint32_t SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS = 10000;
 constexpr int32_t US_PER_MS = 1000;
 constexpr uint32_t AUTO_SLEEP_DELAY_MS = 5000;
 constexpr uint32_t WAIT_AUTO_SUSPEND_SLEEP_TIME_MS = AUTO_SLEEP_DELAY_MS + 1000;
-constexpr int32_t WAIT_EVENT_TIME_MS = 200;
+constexpr int32_t WAIT_EVENT_TIME_MS = 400;
 constexpr int32_t RETRY_WAIT_TIME_MS = 100;
 constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
@@ -45,6 +51,39 @@ bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
 bool g_awakeCallback = false;
 bool g_inactiveCallback = false;
+
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+std::shared_ptr<PointerEvent> createDemoEvent()
+{
+    constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_SIX = 6;
+    constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_EIGHT = 8;
+    constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_TEN = 10;
+    auto pointerEvent = PointerEvent::Create();
+
+    PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    item.SetPointerId(1);
+    item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
+    item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_TEN);
+    item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_EIGHT);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    pointerEvent->SetPointerAction(PointerEvent::POINTER_ACTION_DOWN);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetSourceType(PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+
+    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+
+    return pointerEvent;
+}
+#endif
 
 void ResetTriggeredFlag()
 {
@@ -564,4 +603,73 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_010 end");
 }
+
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+/**
+ * @tc.name: PowerCoordinationLockTest_011
+ * @tc.desc: test entering DIM state while coordination
+ * @tc.type: FUNC
+ * @tc.require: issueI8JBT4
+ */
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_011 start");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    shared_ptr<PowerStateCommonEventSubscriber> subscriber = PowerStateCommonEventSubscriber::RegisterEvent();
+    EXPECT_FALSE(subscriber == nullptr);
+    auto runninglock =
+        powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_010", RunningLockType::RUNNINGLOCK_COORDINATION);
+    ASSERT_NE(runninglock, nullptr);
+    EXPECT_FALSE(runninglock->IsUsed());
+    powerMgrClient.WakeupDevice();
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    powerMgrClient.OverrideScreenOffTime(OVER_TIME_SCREEN_OFF_TIME_MS);
+    runninglock->Lock();
+    EXPECT_TRUE(runninglock->IsUsed());
+
+    auto inputManager = MMI::InputManager::GetInstance();
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    inputManager->SimulateInputEvent(keyEvent);
+
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    ResetTriggeredFlag();
+    powerMgrClient.WakeupDevice();
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+    // DIM to AWAKE, no event
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_FALSE(g_screenOnEvent);
+    //AWAKE to AWAKE, no event
+    powerMgrClient.WakeupDevice();
+    EXPECT_FALSE(g_screenOnEvent);
+
+    inputManager->SimulateInputEvent(keyEvent);
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+
+    runninglock->UnLock();
+    runninglock->Lock();
+    std::shared_ptr<PointerEvent> pointerEvent = createDemoEvent();
+    inputManager->SimulateInputEvent(pointerEvent);
+
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+
+    powerMgrClient.RestoreScreenOffTime();
+    CommonEventManager::UnSubscribeCommonEvent(subscriber);
+}
+#endif
 }

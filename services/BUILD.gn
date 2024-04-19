@@ -87,8 +87,6 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_utils_path}/setting:power_setting",
     "${powermgr_utils_path}/vibrator:power_vibrator",
     "native/src/actions:powermgr_actions",
-    "//third_party/jsoncpp:jsoncpp",
-    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
@@ -110,6 +108,8 @@ ohos_shared_library("powermgrservice") {
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
+    "libxml2:libxml2",
     "safwk:system_ability_fwk",
   ]
 
@@ -144,10 +144,7 @@ ohos_shared_library("powermgrservice") {
   }
 
   if (power_manager_feature_poweroff_charge) {
-    external_deps += [
-      "battery_manager:batterysrv_client",
-      "drivers_interface_factory:libfactory_proxy_1.0",
-    ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
 
     defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
   }

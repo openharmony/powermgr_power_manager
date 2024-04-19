@@ -14,6 +14,7 @@
  */
 
 #include "ffrt_utils.h"
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -61,52 +62,116 @@ bool FFRTUtils::SubmitTimeoutTask(const FFRTTask& task, uint32_t timeoutMs)
     return status == ffrt::future_status::ready;
 }
 
-void FFRTUtils::CancelTask(FFRTHandle& handle, FFRTQueue& queue)
+int FFRTUtils::CancelTask(FFRTHandle& handle, FFRTQueue& queue)
 {
-    queue.cancel(handle);
+    return queue.cancel(handle);
 }
 
-void FFRTUtils::CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue)
+int FFRTUtils::CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue)
 {
-    queue->cancel(handle);
+    return queue->cancel(handle);
 }
 
-FFRTUtils::Mutex::Mutex()
+void FFRTMutexMap::Lock(uint32_t mutexId)
 {
-    mutex_ = new ffrt::mutex();
+    mutexMap_[mutexId].lock();
 }
 
-FFRTUtils::Mutex::~Mutex()
+void FFRTMutexMap::Unlock(uint32_t mutexId)
 {
-    if (!mutex_) {
-        return;
+    mutexMap_[mutexId].unlock();
+}
+
+FFRTTimer::FFRTTimer(): queue_("ffrt_timer")
+{
+}
+
+FFRTTimer::FFRTTimer(const char *timer_name): queue_(timer_name)
+{
+}
+
+FFRTTimer::~FFRTTimer()
+{
+    Clear();
+}
+
+void FFRTTimer::Clear()
+{
+    mutex_.lock();
+    POWER_HILOGD(FEATURE_UTIL, "FFRT Timer Clear");
+    CancelAllTimerInner();
+    handleMap_.clear();
+    taskId_.clear();
+    mutex_.unlock();
+}
+
+void FFRTTimer::CancelAllTimer()
+{
+    mutex_.lock();
+    CancelAllTimerInner();
+    mutex_.unlock();
+}
+
+void FFRTTimer::CancelTimer(uint32_t timerId)
+{
+    mutex_.lock();
+    CancelTimerInner(timerId);
+    mutex_.unlock();
+}
+
+void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task)
+{
+    mutex_.lock();
+    CancelTimerInner(timerId);
+    ++taskId_[timerId];
+    POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Add Task[%{public}u]", timerId, taskId_[timerId]);
+    FFRTUtils::SubmitTask(task);
+    mutex_.unlock();
+}
+
+void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs)
+{
+    if (delayMs == 0) {
+        return SetTimer(timerId, task);
     }
-    mutex_ = nullptr;
-    delete mutex_;
+
+    mutex_.lock();
+    CancelTimerInner(timerId);
+    ++taskId_[timerId];
+    POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Add Task[%{public}u] with delay = %{public}u",
+        timerId, taskId_[timerId], delayMs);
+    handleMap_[timerId] = FFRTUtils::SubmitDelayTask(task, delayMs, queue_);
+    mutex_.unlock();
 }
 
-void FFRTUtils::Mutex::Lock()
+uint32_t FFRTTimer::GetTaskId(uint32_t timerId)
 {
-    if (!mutex_) {
-        return;
-    }
-    mutex_->lock();
+    mutex_.lock();
+    uint32_t id = taskId_[timerId];
+    mutex_.unlock();
+    return id;
 }
 
-bool FFRTUtils::Mutex::TryLock()
+/* inner functions must be called when mutex_ is locked */
+void FFRTTimer::CancelAllTimerInner()
 {
-    if (!mutex_) {
-        return false;
+    for (auto &p : handleMap_) {
+        if (p.second != nullptr) {
+            POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Cancel Task[%{public}u]", p.first, taskId_[p.first]);
+            FFRTUtils::CancelTask(p.second, queue_);
+            p.second = nullptr;
+        }
     }
-    return mutex_->try_lock();
 }
 
-void FFRTUtils::Mutex::Unlock()
+void FFRTTimer::CancelTimerInner(uint32_t timerId)
 {
-    if (!mutex_) {
-        return;
+    if (handleMap_[timerId] != nullptr) {
+        POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Cancel Task[%{public}u]", timerId, taskId_[timerId]);
+        FFRTUtils::CancelTask(handleMap_[timerId], queue_);
+        handleMap_[timerId] = nullptr;
     }
-    mutex_->unlock();
 }
+
 } // namespace PowerMgr
 } // namespace OHOS
