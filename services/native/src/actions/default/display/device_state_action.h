@@ -52,7 +52,6 @@ private:
         std::function<void(uint32_t)> notify_ {nullptr};
         std::mutex notifyMutex_;
     };
-    bool IsTimedOutWhileCoordinated(StateChangeReason reason);
     Rosen::PowerStateChangeReason GetDmsReasonByPowerReason(StateChangeReason reason);
     bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};

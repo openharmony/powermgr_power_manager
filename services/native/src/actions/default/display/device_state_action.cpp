@@ -123,8 +123,8 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
         currentState = DisplayState::DISPLAY_ON;
     }
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-    PowerStateChangeReason dispReason = IsTimedOutWhileCoordinated(reason) ?
-        PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : GetDmsReasonByPowerReason(reason);
+    PowerStateChangeReason dispReason = (reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ?
+            PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : GetDmsReasonByPowerReason(reason));
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
@@ -165,11 +165,6 @@ void DeviceStateAction::SetCoordinated(bool coordinated)
     coordinated_ = coordinated;
     bool ret = DisplayPowerMgrClient::GetInstance().SetCoordinated(coordinated_);
     POWER_HILOGI(FEATURE_POWER_STATE, "Set coordinated=%{public}d, ret=%{public}d", coordinated_, ret);
-}
-
-bool DeviceStateAction::IsTimedOutWhileCoordinated(StateChangeReason reason)
-{
-    return coordinated_ && reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
 }
 
 uint32_t DeviceStateAction::GoToSleep(const std::function<void()> onSuspend,

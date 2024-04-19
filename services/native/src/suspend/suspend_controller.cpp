@@ -32,10 +32,7 @@ namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
-FFRTHandle g_sleepTimeoutHandle;
-FFRTHandle g_forceSleepDelayHandle;
-FFRTHandle g_userActivityOffTimeoutHandle;
-FFRTUtils::Mutex g_monitorMutex;
+FFRTMutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
 } // namespace
 
@@ -54,9 +51,7 @@ SuspendController::~SuspendController()
     if (g_suspendSourcesKeyObserver) {
         SettingHelper::UnregisterSettingSuspendSourcesObserver(g_suspendSourcesKeyObserver);
     }
-    if (queue_) {
-        queue_.reset();
-    }
+    ffrtTimer_.reset();
 }
 
 void SuspendController::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
@@ -130,11 +125,7 @@ private:
 void SuspendController::Init()
 {
     std::lock_guard lock(mutex_);
-    queue_ = std::make_shared<FFRTQueue>("power_suspend_controller");
-    if (queue_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "suspendQueue_ is null");
-        return;
-    }
+    ffrtTimer_ = std::make_shared<FFRTTimer>("suspend_controller_timer");
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -150,9 +141,9 @@ void SuspendController::Init()
             POWER_HILOGI(FEATURE_SUSPEND, "register type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
-            g_monitorMutex.Lock();
+            g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
-            g_monitorMutex.Unlock();
+            g_monitorMutex.unlock();
         }
     }
     sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
@@ -166,17 +157,17 @@ void SuspendController::Init()
 
 void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
-    g_monitorMutex.Lock();
+    g_monitorMutex.lock();
     if (monitorMap_.find(reason) != monitorMap_.end()) {
         auto monitor = monitorMap_[reason];
         if (monitor == nullptr) {
             POWER_HILOGI(COMP_SVC, "get monitor fail");
-            g_monitorMutex.Unlock();
+            g_monitorMutex.unlock();
             return;
         }
         monitor->Notify();
     }
-    g_monitorMutex.Unlock();
+    g_monitorMutex.unlock();
 }
 
 void SuspendController::RegisterSettingsObserver()
@@ -202,9 +193,9 @@ void SuspendController::RegisterSettingsObserver()
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                     std::placeholders::_2, std::placeholders::_3));
-                g_monitorMutex.Lock();
+                g_monitorMutex.lock();
                 monitorMap_.emplace(monitor->GetReason(), monitor);
-                g_monitorMutex.Unlock();
+                g_monitorMutex.unlock();
             }
         }
     };
@@ -219,31 +210,30 @@ void SuspendController::Execute()
 
 void SuspendController::Cancel()
 {
-    g_monitorMutex.Lock();
+    g_monitorMutex.lock();
     for (auto monitor = monitorMap_.begin(); monitor != monitorMap_.end(); monitor++) {
         monitor->second->Cancel();
     }
     monitorMap_.clear();
-    g_monitorMutex.Unlock();
+    g_monitorMutex.unlock();
 }
 
 void SuspendController::StopSleep()
 {
-    if (sleepAction_ != static_cast<uint32_t>(SuspendAction::ACTION_NONE)) {
-        FFRTUtils::CancelTask(g_sleepTimeoutHandle, queue_);
-        FFRTUtils::CancelTask(g_forceSleepDelayHandle, queue_);
-        sleepTime_ = -1;
-        sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
-    }
+    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
+    ffrtTimer_->CancelTimer(TIMER_ID_SLEEP);
+    sleepTime_ = -1;
+    sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
+    ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
 }
 
 void SuspendController::HandleEvent(int64_t delayTime)
 {
     FFRTTask task = [&]() {
-        g_monitorMutex.Lock();
+        g_monitorMutex.lock();
         auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
         if (timeoutSuspendMonitor == monitorMap_.end()) {
-            g_monitorMutex.Unlock();
+            g_monitorMutex.unlock();
             return;
         }
 
@@ -257,16 +247,16 @@ void SuspendController::HandleEvent(int64_t delayTime)
             int32_t timeout = stateMachine_->GetDisplayOffTime();
             POWER_HILOGI(FEATURE_INPUT, "This time of timeout is %{public}d ms", timeout);
         }
-        g_monitorMutex.Unlock();
+        g_monitorMutex.unlock();
         auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
     };
-    g_userActivityOffTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delayTime, queue_);
+    ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
 }
 
 void SuspendController::CancelEvent()
 {
-    FFRTUtils::CancelTask(g_userActivityOffTimeoutHandle, queue_);
+    ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_OFF);
 }
 
 void SuspendController::RecordPowerKeyDown()
@@ -384,11 +374,20 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
         }
         delay = delay + SLEEP_DELAY_MS;
     }
-    const int64_t& tmpRef = delay;
-    int64_t timeout = GetTickCount() + tmpRef;
+
+    int64_t tick = GetTickCount();
+    int64_t timeout = tick + static_cast<int64_t>(delay);
+    if (timeout < tick) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Sleep timer overflow with tick = %{public}s, delay = %{public}u",
+            std::to_string(tick).c_str(), delay);
+        return;
+    }
+
+    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
         POWER_HILOGI(FEATURE_SUSPEND, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")", timeout,
             sleepTime_);
+        ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
         return;
     }
     sleepTime_ = timeout;
@@ -396,14 +395,11 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     sleepAction_ = action;
     sleepDuration_ = delay;
     sleepType_ = action;
-    if (delay == 0) {
+    FFRTTask task = [this, reason, action] {
         HandleAction(reason, action);
-    } else {
-        FFRTTask task = [this] {
-            HandleAction(GetLastReason(), GetLastAction());
-        };
-        g_sleepTimeoutHandle = FFRTUtils::SubmitDelayTask(task, delay, queue_);
-    }
+    };
+    ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, delay);
+    ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
 }
 
 void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
@@ -425,10 +421,10 @@ void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
         default:
             break;
     }
-    if (static_cast<SuspendAction>(action) != SuspendAction::ACTION_FORCE_SUSPEND) {
-        sleepTime_ = -1;
-        sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
-    }
+    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
+    sleepTime_ = -1;
+    sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
+    ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
 }
 
 void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
@@ -457,22 +453,20 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
-    bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason), true);
-    if (ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-        onForceSleep = true;
-        TriggerSyncSleepCallback(false);
 
-        FFRTTask task = [this] {
+    FFRTTask task = [this, reason] {
+        bool ret = stateMachine_->SetState(PowerState::SLEEP,
+            stateMachine_->GetReasionBySuspendType(reason), true);
+        if (ret) {
+            POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
+            onForceSleep = true;
+            TriggerSyncSleepCallback(false);
             SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
-            sleepTime_ = -1;
-            sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
-        };
-        g_forceSleepDelayHandle = FFRTUtils::SubmitDelayTask(task, FORCE_SLEEP_DELAY_MS, queue_);
-    } else {
-        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
-    }
+        } else {
+            POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
+        }
+    };
+    ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
@@ -499,9 +493,7 @@ void SuspendController::HandleShutdown(SuspendDeviceType reason)
 
 void SuspendController::Reset()
 {
-    if (queue_) {
-        queue_.reset();
-    }
+    ffrtTimer_.reset();
 }
 
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)

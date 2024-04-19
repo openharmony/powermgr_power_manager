@@ -362,5 +362,20 @@ bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Query running lock lists by client");
     return proxy_->QueryRunningLockLists(runningLockLists);
 }
+
+PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->SetForceTimingOut(enabled);
+    return ret;
+}
+
+PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    return ret;
+}
+
 } // namespace PowerMgr
 } // namespace OHOS

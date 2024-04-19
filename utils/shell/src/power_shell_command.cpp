@@ -125,6 +125,8 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
 #endif
         {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
+        {"forcetimeout", std::bind(&PowerShellCommand::RunAsForceTimeOutCommand, this)},
+        {"timeoutscreenlock", std::bind(&PowerShellCommand::RunAsTimeOutScreenLockCommand, this)},
     };
 
 #ifndef POWER_SHELL_USER
@@ -141,6 +143,23 @@ ErrCode PowerShellCommand::CreateCommandMap()
 #endif
 #endif
 
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsForceTimeOutCommand()
+{
+    bool enabled = argList_[0][0] - '0';
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
+    client.SetForceTimingOut(enabled);
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
+{
+    bool enableLockScreen = argList_[0][0] - '0';
+    bool checkScreenOnLock = argList_[1][0] - '0';
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
+    client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock);
     return ERR_OK;
 }
 

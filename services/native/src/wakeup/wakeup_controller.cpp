@@ -194,6 +194,10 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     if (!Permission::IsSystem()) {
         return;
     }
+    if (!stateMachine_->IsSwitchOpen()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed, wakeup control listerner do nothing.");
+        return;
+    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr || pms->IsScreenOn()) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this powerkey down event.");
