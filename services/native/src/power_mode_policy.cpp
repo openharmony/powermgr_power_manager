@@ -75,7 +75,7 @@ void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
     backupMap_.clear();
     for (auto [id, value, flag] : policyCache[mode]) {
         switchMap_[id] = value;
-        POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, value: %{public}d", mode, value);
+        POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, value: %{public}d", id, value);
         if (flag == ValueProp::recover) {
             GetSettingSwitchState(id, backupMap_[id]);
         }
@@ -107,7 +107,7 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
     }
 
     value = static_cast<int32_t>(defaultVal);
-    POWER_HILOGW(FEATURE_POWER_MODE, "read switch id: %{public}d, switch value: %{public}d", switchId, value);
+    POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, switch value: %{public}d", switchId, value);
 }
 
 void PowerModePolicy::AddAction(uint32_t type, ModeAction& action)

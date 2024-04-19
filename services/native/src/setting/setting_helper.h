@@ -67,7 +67,7 @@ private:
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
     static constexpr const char* SETTING_VIBRATION_KEY {"settings.sound.vibrate_status"};
-    static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.general.accelerometer_roration_status"};
+    static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.general.accelerometer_rotation_status"};
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
 };
