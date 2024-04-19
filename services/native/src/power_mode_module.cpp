@@ -105,8 +105,8 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_lcdBrightnessObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
-    g_vibratorsStateObserver = nullptr; 
-    g_lcdBrightnessObserver = nullptr; 
+    g_vibratorsStateObserver = nullptr;
+    g_lcdBrightnessObserver = nullptr;
     observerRegisted_ = false;
 }
 
