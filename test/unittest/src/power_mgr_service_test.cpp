@@ -458,6 +458,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(screenOffTime));
     // wait till going to DIM
     usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
+    // waiting for GetDimState time
+    usleep(200000);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     EXPECT_TRUE(powerMgrClient.RefreshActivity());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
