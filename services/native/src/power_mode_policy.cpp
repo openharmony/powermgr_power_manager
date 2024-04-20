@@ -104,6 +104,7 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
 
     if (INIT_VALUE_FALSE == defaultVal) {
         POWER_HILOGW(FEATURE_POWER_MODE, "get setting state invalid, switch id: %{public}d", switchId);
+        return;
     }
 
     value = static_cast<int32_t>(defaultVal);
