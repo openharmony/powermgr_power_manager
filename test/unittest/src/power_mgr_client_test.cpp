@@ -248,6 +248,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient008, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient008: Prepare Fail, Screen is OFF.";
     usleep(time * TRANSFER_MS_TO_S * DIM_RATE);
     auto ret = displayMgrClient.GetDisplayState();
+    // waiting for GetDimState time
+    usleep(200000);
     EXPECT_EQ(ret, DisplayPowerMgr::DisplayState::DISPLAY_DIM);
 
     powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
@@ -325,6 +327,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient011::1!");
     usleep(time * TRANSFER_MS_TO_S * DIM_RATE);
     auto ret = displayMgrClient.GetDisplayState();
+    // waiting for GetDimState time
+    usleep(200000);
     EXPECT_EQ(ret, DisplayPowerMgr::DisplayState::DISPLAY_DIM);
     POWER_HILOGD(LABEL_TEST, "PowerMgrClient011::3!");
     usleep(time * TRANSFER_MS_TO_S * DIM_RATE);
