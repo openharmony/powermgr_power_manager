@@ -24,6 +24,7 @@
 #include <iremote_object.h>
 
 #include "ipower_mode_callback.h"
+#include "ipower_runninglock_callback.h"
 #include "ipower_state_callback.h"
 #include "power_errors.h"
 #include "power_state_machine_info.h"
@@ -39,7 +40,7 @@ public:
         const RunningLockInfo& runningLockInfo) = 0;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) = 0;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs) = 0;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
@@ -88,6 +89,9 @@ public:
     virtual void RegisterShutdownCallback(
         const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) = 0;
     virtual void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) = 0;
+
+    virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) = 0;
+    virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgr");
 };

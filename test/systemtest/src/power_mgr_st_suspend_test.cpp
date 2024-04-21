@@ -99,7 +99,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
-    pms->Lock(token, 0);
+    pms->Lock(token);
     EXPECT_EQ(pms->IsUsed(token), true);
     sleep(SLEEP_WAIT_TIME_S);
 
@@ -131,7 +131,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock03, TestSize.Level2)
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     pms->CreateRunningLock(token, info);
 
-    pms->Lock(token, 0);
+    pms->Lock(token);
     usleep(SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(pms->IsUsed(token), true);
 

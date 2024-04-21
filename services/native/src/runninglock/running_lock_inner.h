@@ -33,7 +33,7 @@ enum class RunningLockState : uint32_t {
 
 class RunningLockInner {
 public:
-    RunningLockInner(const RunningLockParam& runningLockParam);
+    explicit RunningLockInner(const RunningLockParam& runningLockParam);
     ~RunningLockInner() = default;
 
     static std::shared_ptr<RunningLockInner> CreateRunningLockInner(const RunningLockParam& runningLockParam);

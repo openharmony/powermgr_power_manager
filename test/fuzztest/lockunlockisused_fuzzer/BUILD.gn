@@ -23,6 +23,7 @@ ohos_fuzztest("LockUnLockIsUsedFuzzTest") {
       "${powermgr_root_path}/test/fuzztest/lockunlockisused_fuzzer"
 
   include_dirs = [
+    "${powermgr_service_path}/native/src/runninglock",
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",

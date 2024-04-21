@@ -60,7 +60,8 @@ void PowerMgrServiceNativeTest::SetUp()
     RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
-    runningLockMgr->Lock(remoteObj, TIMEOUTMS);
+    runningLockMgr->Lock(remoteObj);
+    runningLockMgr->UnLock(remoteObj);
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
 }
 

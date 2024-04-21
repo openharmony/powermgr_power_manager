@@ -30,6 +30,7 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/",
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
+    "${powermgr_service_path}/native/src/runninglock",
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
@@ -1132,6 +1133,27 @@ ohos_unittest("test_power_coordination_lock") {
   external_deps = deps_ex
 }
 
+##############################running_lock_timer_handler_test#############################
+ohos_unittest("test_running_lock_timer_handler") {
+  module_out_path = module_output_path
+
+  sources = [ "src/running_lock_timer_handler_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -1168,5 +1190,6 @@ group("unittest") {
     ":test_running_lock_hub_native",
     ":test_running_lock_mock",
     ":test_running_lock_native",
+    ":test_running_lock_timer_handler",
   ]
 }

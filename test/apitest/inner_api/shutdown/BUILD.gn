@@ -26,6 +26,7 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/",
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
+    "${powermgr_service_path}/native/src/runninglock",
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
