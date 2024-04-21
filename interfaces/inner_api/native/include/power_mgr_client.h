@@ -17,6 +17,7 @@
 #define POWERMGR_POWER_MGR_CLIENT_H
 
 #include <string>
+#include <set>
 
 #include <singleton.h>
 
@@ -145,9 +146,12 @@ public:
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
-    void RecoverRunningLocks();
+    bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
+    bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     std::string Dump(const std::vector<std::string>& args);
     PowerErrors GetError();
+    sptr<IPowerMgr> GetProxy();
+    void UpdateRunningLockSet(const std::shared_ptr<RunningLock>& runningLock = nullptr, bool isDelete = false);
 
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:
@@ -165,12 +169,13 @@ private:
 
     ErrCode Connect();
     void ResetProxy(const wptr<IRemoteObject>& remote);
+    void RecoverRunningLocks();
     sptr<IPowerMgr> proxy_ {nullptr};
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
     std::mutex mutex_;
-    static std::vector<std::weak_ptr<RunningLock>> runningLocks_;
-    static std::mutex runningLocksMutex_;
     PowerErrors error_ = PowerErrors::ERR_OK;
+    std::set<std::shared_ptr<RunningLock>> runninglocks_;
+    std::mutex runningLocksMutex_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

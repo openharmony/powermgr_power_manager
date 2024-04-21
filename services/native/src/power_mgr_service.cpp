@@ -674,6 +674,9 @@ RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& in
     filledParam.lockid = lockid;
     filledParam.name = info.name;
     filledParam.type = info.type;
+    if (filledParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
+        filledParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+    }
     filledParam.timeoutMs = timeOutMS;
     filledParam.pid = IPCSkeleton::GetCallingPid();
     filledParam.uid = IPCSkeleton::GetCallingUid();
@@ -698,10 +701,6 @@ PowerErrors PowerMgrService::CreateRunningLock(
     uintptr_t remoteObjPtr = reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr());
     uint64_t lockid = std::hash<uintptr_t>()(remoteObjPtr);
     RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo, lockid);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "Service CreateRunningLock name: %{public}s, type: %{public}d, bundleName: %{public}s",
-        runningLockParam.name.c_str(), runningLockParam.type, runningLockParam.bundleName.c_str());
-
     runningLockMgr_->CreateRunningLock(remoteObj, runningLockParam);
     return PowerErrors::ERR_OK;
 }
@@ -735,15 +734,13 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
-bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMS)
+bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-
-    runningLockMgr_->Lock(remoteObj, timeOutMS);
-    return true;
+    return runningLockMgr_->Lock(remoteObj);
 }
 
 bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
@@ -752,8 +749,7 @@ bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-    runningLockMgr_->UnLock(remoteObj);
-    return true;
+    return runningLockMgr_->UnLock(remoteObj);
 }
 
 bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
@@ -763,6 +759,32 @@ bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInf
         return false;
     }
     runningLockMgr_->QueryRunningLockLists(runningLockLists);
+    return true;
+}
+
+bool PowerMgrService::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    std::lock_guard lock(lockMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid: %{public}d, uid: %{public}d", pid, uid);
+    runningLockMgr_->RegisterRunningLockCallback(callback);
+    return true;
+}
+
+bool PowerMgrService::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    std::lock_guard lock(lockMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid: %{public}d, uid: %{public}d", pid, uid);
+    runningLockMgr_->RegisterRunningLockCallback(callback);
     return true;
 }
 
@@ -779,20 +801,6 @@ bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
     auto isUsed = runningLockMgr_->IsUsed(remoteObj);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLock is Used: %{public}d", isUsed);
     return isUsed;
-}
-
-void PowerMgrService::NotifyRunningLockChanged(bool isUnLock)
-{
-    if (isUnLock) {
-        // When unlock we try to suspend
-        if (!runningLockMgr_->ExistValidRunningLock() && !powerStateMachine_->IsScreenOn()) {
-            // runninglock is empty and Screen is off,
-            // so we try to suspend device from Z side.
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "RunningLock is empty, try to suspend");
-            powerStateMachine_->SuspendDeviceInner(
-                getpid(), GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN, true, true);
-        }
-    }
 }
 
 bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
@@ -1032,7 +1040,7 @@ void PowerMgrService::WakeupRunningLock::Lock()
     if (!token_) {
         return;
     }
-    pms->Lock(token_->AsObject(), TIMEOUT);
+    pms->Lock(token_->AsObject());
 }
 
 void PowerMgrService::WakeupRunningLock::Unlock()

@@ -20,6 +20,7 @@
 
 #include "power_mode_callback_stub.h"
 #include "power_state_callback_stub.h"
+#include "power_runninglock_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -36,6 +37,12 @@ public:
         PowerStateTestCallback() {};
         virtual ~PowerStateTestCallback() {};
         virtual void OnPowerStateChanged(PowerState state) override;
+    };
+    class PowerRunningLockTestCallback : public PowerRunningLockCallbackStub {
+    public:
+        PowerRunningLockTestCallback() {};
+        virtual ~PowerRunningLockTestCallback() {};
+        virtual void HandleRunningLockMessage(std::string message) override;
     };
 };
 } // namespace PowerMgr

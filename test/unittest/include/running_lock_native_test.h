@@ -32,10 +32,17 @@
 #include "running_lock_action.h"
 #include "sensor_agent.h"
 #include "power_mgr_factory.h"
+#include "power_runninglock_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
 class RunningLockNativeTest : public testing::Test {};
+class PowerRunningLockTestCallback : public PowerRunningLockCallbackStub {
+public:
+    PowerRunningLockTestCallback() {};
+    virtual ~PowerRunningLockTestCallback() {};
+    virtual void HandleRunningLockMessage(std::string message) override;
+};
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_RUNNING_LOCK_NATIVE_TEST_H

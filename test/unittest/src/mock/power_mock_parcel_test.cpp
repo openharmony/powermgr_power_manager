@@ -25,6 +25,7 @@
 #include "power_mgr_proxy.h"
 #include "power_mode_callback_proxy.h"
 #include "power_state_callback_proxy.h"
+#include "power_runninglock_callback_proxy.h"
 #include "power_state_machine_info.h"
 #include "running_lock.h"
 #include "running_lock_info.h"
@@ -43,6 +44,11 @@ void MockParcelTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 void MockParcelTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
     POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
+}
+
+void MockParcelTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**
@@ -87,11 +93,14 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest002, TestSize.Level2)
     powerMgrClient.GetDeviceMode();
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
+    sptr<IPowerRunninglockCallback> runninglockCallback = new PowerRunningLockTestCallback();
 
     EXPECT_FALSE(powerMgrClient.RegisterPowerStateCallback(stateCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(stateCallback));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
+    EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
+    EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
     std::string errCode = "can't connect service";
@@ -132,7 +141,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
     sptrProxy->ReleaseRunningLock(token);
     sptrProxy->ProxyRunningLock(true, pid, uid);
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
-    sptrProxy->Lock(token, 0);
+    sptrProxy->Lock(token);
     sptrProxy->UnLock(token);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 }
@@ -150,6 +159,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
     sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
+    sptr<IPowerRunninglockCallback> cb5 =new PowerRunningLockTestCallback();
     ret = sptrProxy->RegisterPowerStateCallback(cb1);
     EXPECT_EQ(ret, false);
     sptrProxy->UnRegisterPowerStateCallback(cb1);
@@ -159,6 +169,10 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
     EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(cb5));
+    EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(cb5));
+    EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(nullptr));
 }
 
 /**
