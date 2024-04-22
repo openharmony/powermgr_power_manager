@@ -54,17 +54,17 @@ void PowerMgrServiceMockParcelTest::TearDownTestCase()
 
 void PowerMgrServiceMockParcelTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
 void PowerMgrServiceMockParcelTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
 }
 
 void PowerMgrServiceMockParcelTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+    POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**

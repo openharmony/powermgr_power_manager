@@ -48,7 +48,7 @@ HWTEST_F (RunningLockTest, RunningLockTest001, TestSize.Level0)
 
     runningLock1->UnLock();
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit01 end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit01 end");
 }
 
 /**
@@ -66,18 +66,18 @@ HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     runningLock1->UnLock();
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 1");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 1");
     // lock 50ms
     runningLock1->Lock(50);
     usleep(4000);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 2");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 2");
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     usleep(1000);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 3");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 3");
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     // wait 100ms
     usleep(100000);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit003 end");
 }
 
 /**
@@ -96,28 +96,28 @@ HWTEST_F (RunningLockTest, RunningLockTest003, TestSize.Level1)
         // after 8ms unlock
         runningLock1->Lock(30);
         runningLock1->Lock(80);
-        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 1");
+        POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 1");
         usleep(50000);
         ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
         usleep(50000);
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         // no unlock
-        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 2");
+        POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 2");
         runningLock1->Lock(2);
         runningLock1->Lock(3);
         runningLock1->Lock();
-        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 3");
+        POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 3");
         usleep(8000);
         ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
         // after 3ms unlock
         runningLock1->Lock(30);
-        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 4");
+        POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 4");
         usleep(50000);
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         runningLock1->Lock(5);
         runningLock1->UnLock();
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-        POWER_HILOGD(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 5");
+        POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 5");
     }
 }
 
