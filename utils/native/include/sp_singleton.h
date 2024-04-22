@@ -23,11 +23,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
-#define DECLARE_DELAYED_SP_SINGLETON(MyClass)\
-public:\
-    ~MyClass();\
-private:\
-    friend DelayedSpSingleton<MyClass>;\
+#define DECLARE_DELAYED_SP_SINGLETON(MyClass) \
+public: \
+    ~MyClass(); \
+private: \
+    friend DelayedSpSingleton<MyClass>; \
     MyClass();
 
 template<typename T>
