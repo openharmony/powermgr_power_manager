@@ -19,8 +19,8 @@
 #include <getopt.h>
 #include <string_ex.h>
 #include <sstream>
+#include <unistd.h>
 
-#include "getopt_core.h"
 #include "power_mgr_client.h"
 #ifdef HAS_DISPLAY_MANAGER_PART
 #include "display_power_mgr_client.h"
