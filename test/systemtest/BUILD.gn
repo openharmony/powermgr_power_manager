@@ -27,7 +27,6 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
 
   if (power_manager_feature_wakeup_action) {
@@ -46,6 +45,7 @@ deps_ex = [
   "ffrt:libffrt",
   "hilog:libhilog",
   "hisysevent:libhisysevent",
+  "input:libmmi-client",
   "ipc:ipc_core",
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
@@ -94,6 +94,13 @@ ohos_systemtest("test_power_mgr_powersavemode") {
   module_out_path = module_output_path
 
   sources = [ "src/power_mgr_powersavemode_test.cpp" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -148,6 +155,13 @@ ohos_systemtest("test_power_mgr_shutdown_fast") {
 
   sources = [ "src/power_mgr_shutdown_fast_test.cpp" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
@@ -173,6 +187,13 @@ ohos_systemtest("test_power_level_event_system_test_off") {
 
   sources = [ "src/power_level_event_system_test_off.cpp" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
@@ -197,6 +218,13 @@ ohos_systemtest("test_power_level_event_system_test_on") {
   module_out_path = module_output_path
 
   sources = [ "src/power_level_event_system_test_on.cpp" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
 
   configs = [
     "${powermgr_utils_path}:utils_config",
