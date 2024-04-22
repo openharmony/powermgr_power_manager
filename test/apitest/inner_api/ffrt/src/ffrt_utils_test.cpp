@@ -167,11 +167,11 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: FFRTUtilsMutexTest001
+ * @tc.name: FFRTMutexTest001
  * @tc.desc: test submit tasks with mutex
  * @tc.type: FUNC
  */
-HWTEST_F(FFRTUtilsTest, FFRTUtilsMutexTest001, TestSize.Level1)
+HWTEST_F(FFRTUtilsTest, FFRTMutexTest001, TestSize.Level1)
 {
     auto mutex = FFRTMutex();
     std::unique_lock lock(mutex);
@@ -187,6 +187,143 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsMutexTest001, TestSize.Level1)
     lock.unlock();
     FFRTUtils::SubmitTaskSync(task2);
     EXPECT_TRUE(lock.try_lock());
+}
+
+/**
+ * @tc.name: FFRTMutexTest002
+ * @tc.desc: test mutex map
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTMutexTest002, TestSize.Level1)
+{
+    constexpr uint32_t MUTEX_ID_A = 1;
+    FFRTMutexMap mutexMap;
+    int data = 0;
+    FFRTTask taskA = [&mutexMap, &data]() {
+        mutexMap.Lock(MUTEX_ID_A);
+        data = 1;
+        mutexMap.Unlock(MUTEX_ID_A);
+    };
+
+    mutexMap.Lock(MUTEX_ID_A);
+    FFRTUtils::SubmitTask(taskA);
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(50));
+    // taskA is waiting for lock, data is not changed
+    EXPECT_EQ(data, 0);
+    mutexMap.Unlock(MUTEX_ID_A);
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(50));
+    // tanskA changed data to 1
+    EXPECT_EQ(data, 1);
+}
+
+/**
+ * @tc.name: FFRTMutexTest003
+ * @tc.desc: test mutex map, different mutex are independent
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTMutexTest003, TestSize.Level1)
+{
+    constexpr uint32_t MUTEX_ID_A = 1;
+    constexpr uint32_t MUTEX_ID_B = 2;
+    FFRTMutexMap mutexMap;
+    int data = 0;
+
+    FFRTTask taskA = [&mutexMap, &data]() {
+        mutexMap.Lock(MUTEX_ID_A);
+        data = 1;
+        mutexMap.Unlock(MUTEX_ID_A);
+    };
+
+    mutexMap.Lock(MUTEX_ID_B);
+    FFRTUtils::SubmitTask(taskA);
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(50));
+    // tanskA changed data to 1
+    EXPECT_EQ(data, 1);
+    mutexMap.Unlock(MUTEX_ID_B);
+}
+
+/**
+ * @tc.name: FFRTTimerTest001
+ * @tc.desc: test FFRTTimer CancelTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTTimerTest001, TestSize.Level1)
+{
+    constexpr uint32_t TIMER_ID_A = 1;
+    constexpr uint32_t TIMER_ID_B = 2;
+    constexpr uint32_t TIMER_ID_C = 3;
+    FFRTTimer timer;
+    int data = 0;
+
+    FFRTTask taskA = [&data]() {
+        data = 1;
+    };
+
+    FFRTTask taskB = [&data]() {
+        data = 2;
+    };
+
+    FFRTTask taskC = [&data]() {
+        data = 3;
+    };
+
+    timer.SetTimer(TIMER_ID_A, taskA, 50);
+    timer.SetTimer(TIMER_ID_B, taskB, 60);
+    timer.SetTimer(TIMER_ID_C, taskC, 70);
+    timer.CancelAllTimer();
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(100));
+    // data is not changed
+    EXPECT_EQ(data, 0);
+
+    timer.SetTimer(TIMER_ID_A, taskA, 50);
+    timer.SetTimer(TIMER_ID_B, taskB, 60);
+    timer.SetTimer(TIMER_ID_C, taskC, 70);
+    timer.Clear();
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(100));
+    // data is not changed
+    EXPECT_EQ(data, 0);
+
+    timer.SetTimer(TIMER_ID_A, taskA, 50);
+    timer.SetTimer(TIMER_ID_B, taskB, 60);
+    timer.SetTimer(TIMER_ID_C, taskC, 70);
+    timer.CancelTimer(TIMER_ID_B);
+    timer.CancelTimer(TIMER_ID_C);
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(100));
+    // taskA changed data to 1, taskB and taskC are canceled
+    EXPECT_EQ(data, 1);
+}
+
+/**
+ * @tc.name: FFRTTimerTest002
+ * @tc.desc: test FFRTTimer GetTaskId
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTTimerTest002, TestSize.Level1)
+{
+    FFRTMutexMap mutexMap;
+    FFRTTimer timer;
+
+    constexpr uint32_t TIMER_ID_A = 1;
+    constexpr uint32_t TIMER_COUNT = 10;
+    int count = 0;
+
+    FFRTTask taskA = [&count, &mutexMap]() {
+        mutexMap.Lock(TIMER_ID_A);
+        count++;
+        mutexMap.Unlock(TIMER_ID_A);
+    };
+
+    for (int i = 0; i < TIMER_COUNT; i++) {
+        timer.SetTimer(TIMER_ID_A, taskA, 50);
+    }
+    ffrt::this_task::sleep_for(std::chrono::milliseconds(100));
+    // only the last timer is run, count should be 1
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(timer.GetTaskId(TIMER_ID_A), TIMER_COUNT);
+
+    timer.Clear();
+    // task id is set to 0 in Clear()
+    EXPECT_EQ(timer.GetTaskId(TIMER_ID_A), 0);
 }
 } // namespace Test
 } // namespace PowerMgr
