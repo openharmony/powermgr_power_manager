@@ -203,7 +203,7 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest002, TestSize.Level1)
         mutexMap.Lock(MUTEX_ID_A);
         data = 1;
         mutexMap.Unlock(MUTEX_ID_A);
-    }
+    };
 
     mutexMap.Lock(MUTEX_ID_A);
     FFRTUtils::SubmitTask(taskA);
@@ -232,7 +232,7 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest003, TestSize.Level1)
         mutexMap.Lock(MUTEX_ID_A);
         data = 1;
         mutexMap.Unlock(MUTEX_ID_A);
-    }
+    };
 
     mutexMap.Lock(MUTEX_ID_B);
     FFRTUtils::SubmitTask(taskA);
@@ -257,15 +257,15 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest001, TestSize.Level1)
 
     FFRTTask taskA = [&data]() {
         data = 1;
-    }
+    };
 
     FFRTTask taskB = [&data]() {
         data = 2;
-    }
+    };
 
     FFRTTask taskC = [&data]() {
         data = 3;
-    }
+    };
 
     timer.SetTimer(TIMER_ID_A, taskA, 50);
     timer.SetTimer(TIMER_ID_B, taskB, 60);
@@ -312,13 +312,17 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest002, TestSize.Level1)
         count++;
         mutexMap.Unlock(TIMER_ID_A);
     };
+
+    for (int i = 0; i < TIMER_COUNT; i++) {
+        timer.SetTimer(TIMER_ID_A, taskA, 50);
+    }
     ffrt::this_task::sleep_for(std::chrono::milliseconds(100));
     // only the last timer is run, count should be 1
     EXPECT_EQ(count, 1);
     EXPECT_EQ(timer.GetTaskId(TIMER_ID_A), TIMER_COUNT);
 
     timer.Clear();
-    // Task id is set to 0 in Clear()
+    // task id is set to 0 in Clear()
     EXPECT_EQ(timer.GetTaskId(TIMER_ID_A), 0);
 }
 } // namespace Test
