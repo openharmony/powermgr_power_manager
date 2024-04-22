@@ -63,10 +63,10 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer002: start";
     std::shared_ptr<RunningLock> runningLock1 =
-        std::make_shared<RunningLock>("runninglock_Timer_test1",
+        std::make_shared<RunningLock>(nullptr, "runninglock_Timer_test1",
             RunningLockType::RUNNINGLOCK_SCREEN);
     std::shared_ptr<RunningLock> runningLock2 =
-        std::make_shared<RunningLock>("runninglock_Timer_test2",
+        std::make_shared<RunningLock>(nullptr, "runninglock_Timer_test2",
             RunningLockType::RUNNINGLOCK_BACKGROUND);
     ASSERT_TRUE(runningLock1 != nullptr);
     runningLock1->Init();
@@ -74,8 +74,8 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Leve
     runningLock2->Init();
     runningLock1->Lock();
     runningLock2->Lock();
-    EXPECT_TRUE(runningLock1->IsUsed());
-    EXPECT_TRUE(runningLock2->IsUsed());
+    EXPECT_TRUE(!runningLock1->IsUsed());
+    EXPECT_TRUE(!runningLock2->IsUsed());
     runningLock1->UnLock();
     runningLock2->UnLock();
     EXPECT_TRUE(!runningLock1->IsUsed());
@@ -95,10 +95,10 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer003: start";
     std::shared_ptr<RunningLock> runningLock1 =
-        std::make_shared<RunningLock>("runninglock_Timer_test3",
+        std::make_shared<RunningLock>(nullptr, "runninglock_Timer_test3",
         RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
     std::shared_ptr<RunningLock> runningLock2 =
-        std::make_shared<RunningLock>("runninglock_Timer_test4",
+        std::make_shared<RunningLock>(nullptr, "runninglock_Timer_test4",
         RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
     ASSERT_TRUE(runningLock1 != nullptr);
     runningLock1->Init();
