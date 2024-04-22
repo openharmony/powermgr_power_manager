@@ -73,7 +73,7 @@ WakeupController::~WakeupController()
 #endif
 
     if (g_wakeupSourcesKeyObserver) {
-        SettingHelper::UnregisterSettingWakeupSourcesObserver(g_wakeupSourcesKeyObserver);
+        SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
     }
 #ifdef SCREEN_ON_TIMEOUT_CHECK
     if (g_screenTimeoutHandle) {

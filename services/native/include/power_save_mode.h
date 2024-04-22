@@ -31,7 +31,7 @@
 namespace OHOS {
 namespace PowerMgr {
 struct ModePolicy {
-    int32_t id;
+    uint32_t id;
     int32_t value;
     int32_t recover_flag;
 };
@@ -44,12 +44,7 @@ class PowerSaveMode : public RefBase {
 public:
     PowerSaveMode();
     ~PowerSaveMode()=default;
-    bool GetValuePolicy(std::list<ModePolicy> &openPolicy, int32_t mode);
-    bool GetRecoverPolicy(std::list<ModePolicy> &recoverPolicy, int32_t mode);
-    bool GetFilterPolicy(std::list<ModePolicy> &policy, int32_t mode, int32_t value);
     int32_t GetSleepTime(int32_t mode);
-    std::list<ModePolicy> GetLastMode();
-    std::list<ModePolicy> SetLastMode(std::list<ModePolicy>& policy);
     std::map<int32_t, std::list<ModePolicy>> GetPolicyCache()
     {
         return policyCache_;

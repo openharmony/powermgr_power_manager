@@ -951,7 +951,7 @@ void PowerStateMachine::UnregisterDisplayOffTimeObserver()
         POWER_HILOGD(FEATURE_POWER_STATE, "g_displayOffTimeObserver is nullptr, no need to unregister");
         return;
     }
-    SettingHelper::UnregisterSettingDisplayOffTimeObserver(g_displayOffTimeObserver);
+    SettingHelper::UnregisterSettingObserver(g_displayOffTimeObserver);
     g_displayOffTimeObserver = nullptr;
 }
 

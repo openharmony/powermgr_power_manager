@@ -18,7 +18,7 @@
 #include "power_log.h"
 #include "power_save_mode.h"
 #include "singleton.h"
-
+#include "setting_helper.h"
 using namespace std;
 
 namespace OHOS {
@@ -37,82 +37,85 @@ int32_t PowerModePolicy::GetPolicyFromMap(uint32_t type)
 {
     int32_t ret = INIT_VALUE_FALSE;
     std::lock_guard<std::mutex> lock(policyMutex_);
-    valueiter = valueModePolicy.find(type);
-    if (valueiter != valueModePolicy.end()) {
-        ret = valueiter->second;
+    auto iter = switchMap_.find(type);
+    if (iter != switchMap_.end()) {
+        ret = iter->second;
     }
     return ret;
 }
 
-int32_t PowerModePolicy::GetRecoverPolicyFromMap(uint32_t type)
+void PowerModePolicy::UpdatePowerModePolicy(uint32_t mode)
 {
-    int32_t ret = INIT_VALUE_FALSE;
-    std::lock_guard<std::mutex> lock(policyMutex_);
-    recoveriter = recoverModePolicy.find(type);
-    if (recoveriter != recoverModePolicy.end()) {
-        ret = recoveriter->second;
-        POWER_HILOGD(FEATURE_POWER_MODE, "Recover value: %{public}d", ret);
-    }
-    return ret;
+    POWER_HILOGD(FEATURE_POWER_MODE, "update mode policy, mode=%{public}d", mode);
+    ReadPowerModePolicy(mode);
+    ComparePowerModePolicy();
 }
 
-int32_t PowerModePolicy::GetPowerModeRecoverPolicy(uint32_t type)
-{
-    int32_t ret = INIT_VALUE_FALSE;
-    if (IsValidType(type)) {
-        ret = GetRecoverPolicyFromMap(type);
-    }
-
-    return ret;
-}
-
-void PowerModePolicy::SetPowerModePolicy(uint32_t mode, uint32_t lastMode)
-{
-    POWER_HILOGD(FEATURE_POWER_MODE, "mode=%{public}d, lastMode=%{public}d", mode, lastMode);
-    if (lastMode != LAST_MODE_FLAG) {
-        ReadRecoverPolicy(lastMode);
-    }
-
-    ReadOpenPolicy(mode);
-
-    CompareModeItem(mode, lastMode);
-}
-
-void PowerModePolicy::ReadOpenPolicy(uint32_t mode)
-{
-    DelayedSpSingleton<PowerSaveMode>::GetInstance()->GetValuePolicy(openPolicy, mode);
-}
-
-void PowerModePolicy::ReadRecoverPolicy(uint32_t mode)
-{
-    DelayedSpSingleton<PowerSaveMode>::GetInstance()->GetRecoverPolicy(recoverPolicy, mode);
-}
-
-void PowerModePolicy::CompareModeItem(uint32_t mode, uint32_t lastMode)
+void PowerModePolicy::ComparePowerModePolicy()
 {
     std::lock_guard<std::mutex> lock(policyMutex_);
-    recoverModePolicy.clear();
-    valueModePolicy.clear();
+    for (auto [id, value] : recoverMap_) {
+        if (switchMap_.find(id) != switchMap_.end()) {
+            backupMap_[id] = value;
+        }
+        switchMap_.emplace(id, value);
+    }
+    recoverMap_ = backupMap_;
+}
 
-    for (auto openlit = openPolicy.begin(); openlit != openPolicy.end(); openlit++) {
-        valueModePolicy[(*openlit).id] = (*openlit).value;
+void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
+{
+    auto policyCache = DelayedSpSingleton<PowerSaveMode>::GetInstance()->GetPolicyCache();
+    if (policyCache.empty()) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "config policy cache is empty");
+        return;
     }
 
-    for (recoverlit = recoverPolicy.begin(); recoverlit != recoverPolicy.end(); recoverlit++) {
-        recoverModePolicy[(*recoverlit).id] = (*recoverlit).value;
-        POWER_HILOGD(FEATURE_POWER_MODE,
-            "(*recoverlit).id=%{public}d, (*recoverlit).value=%{public}d", (*recoverlit).id, (*recoverlit).value);
+    switchMap_.clear();
+    backupMap_.clear();
+    for (auto [id, value, flag] : policyCache[mode]) {
+        switchMap_[id] = value;
+        POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, value: %{public}d", id, value);
+        if (flag == ValueProp::recover) {
+            GetSettingSwitchState(id, backupMap_[id]);
+        }
+    }
+}
+
+void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
+{
+    int32_t defaultVal = INIT_VALUE_FALSE;
+    switch (switchId) {
+        case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
+            defaultVal = SettingHelper::GetSettingAutoAdjustBrightness(defaultVal);
+            break;
+        case PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION:
+            defaultVal = SettingHelper::GetSettingWindowRotation(defaultVal);
+            break;
+        case PowerModePolicy::ServiceType::VIBRATORS_STATE:
+            defaultVal = SettingHelper::GetSettingVibration(defaultVal);
+            break;
+        case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
+            defaultVal = SettingHelper::GetSettingBrightness(defaultVal);
+            break;
+        default:
+            break;
     }
 
-    openPolicy.clear();
-    recoverPolicy.clear();
+    if (INIT_VALUE_FALSE == defaultVal) {
+        POWER_HILOGW(FEATURE_POWER_MODE, "get setting state invalid, switch id: %{public}d", switchId);
+        return;
+    }
+
+    value = static_cast<int32_t>(defaultVal);
+    POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, switch value: %{public}d", switchId, value);
 }
 
 void PowerModePolicy::AddAction(uint32_t type, ModeAction& action)
 {
-    POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", type);
+    POWER_HILOGD(FEATURE_POWER_MODE, "add action, type=%{public}d", type);
     std::lock_guard<std::mutex> lock(actionMapMutex_);
-    actionMap.emplace(type, action);
+    actionMap_.emplace(type, action);
 }
 
 void PowerModePolicy::TriggerAllActions(bool isBoot)
@@ -120,8 +123,8 @@ void PowerModePolicy::TriggerAllActions(bool isBoot)
     std::vector<ModeAction> allActions;
     {
         std::lock_guard<std::mutex> lock(actionMapMutex_);
-        for (auto iterator = actionMap.begin(); iterator != actionMap.end(); iterator++) {
-            POWER_HILOGD(FEATURE_POWER_MODE, "type=%{public}d", iterator->first);
+        for (auto iterator = actionMap_.begin(); iterator != actionMap_.end(); iterator++) {
+            POWER_HILOGD(FEATURE_POWER_MODE, "trigger action, type=%{public}d", iterator->first);
             allActions.emplace_back(iterator->second);
         }
     }
@@ -133,12 +136,21 @@ void PowerModePolicy::TriggerAllActions(bool isBoot)
 bool PowerModePolicy::IsValidType(uint32_t type)
 {
     std::lock_guard<std::mutex> lock(actionMapMutex_);
-    auto iterator = actionMap.find(type);
-    if (iterator == actionMap.end()) {
+    auto iterator = actionMap_.find(type);
+    if (iterator == actionMap_.end()) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid type: %{public}d", type);
         return false;
     }
     return true;
+}
+
+void PowerModePolicy::RemoveBackupMapSettingSwitch(uint32_t switchId)
+{
+    auto iter = recoverMap_.find(switchId);
+    if (iter != recoverMap_.end()) {
+        recoverMap_.erase(iter);
+        POWER_HILOGW(FEATURE_POWER_MODE, "remove backup switch: %{public}d", switchId);
+    }
 }
 } // namespace PowerMgr
 } // namespace OHOS

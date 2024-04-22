@@ -32,6 +32,13 @@ using namespace OHOS::EventFwk;
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+sptr<SettingObserver> g_autoAdjustBrightnessObserver;
+sptr<SettingObserver> g_autoWindowRotationObserver;
+sptr<SettingObserver> g_vibratorsStateObserver;
+sptr<SettingObserver> g_lcdBrightnessObserver;
+}
+
 PowerModeModule::PowerModeModule()
     : mode_(PowerMode::NORMAL_MODE), lastMode_(LAST_MODE_FLAG), started_(false)
 {
@@ -45,7 +52,7 @@ PowerModeModule::PowerModeModule()
     PowerModePolicy::ModeAction autoAdjustBrightnessAction = [&](bool isInit) { SetAutoAdjustBrightness(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS, autoAdjustBrightnessAction);
     PowerModePolicy::ModeAction lcdBrightnessAction = [&](bool isInit) { SetLcdBrightness(isInit); };
-    policy->AddAction(PowerModePolicy::ServiceType::SMART_BACKLIGHT, lcdBrightnessAction);
+    policy->AddAction(PowerModePolicy::ServiceType::LCD_BRIGHTNESS, lcdBrightnessAction);
     PowerModePolicy::ModeAction vibrationAction = [&](bool isInit) { SetVibration(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::VIBRATORS_STATE, vibrationAction);
     PowerModePolicy::ModeAction onOffRotationAction = [&](bool isInit) { SetWindowRotation(isInit); };
@@ -67,8 +74,14 @@ void PowerModeModule::SetModeItem(PowerMode mode)
         return;
     }
 
+    /* unregister setting observer for current mode */
+    UnregisterSaveModeObserver();
+
     /* start set mode thread */
     EnableMode(mode);
+
+    /* register setting observer for save mode */
+    RegisterSaveModeObserver();
 }
 
 PowerMode PowerModeModule::GetModeItem()
@@ -76,6 +89,59 @@ PowerMode PowerModeModule::GetModeItem()
     POWER_HILOGD(FEATURE_POWER_MODE, "mode_: %{public}u", mode_);
     /* get power mode */
     return mode_;
+}
+
+void PowerModeModule::UnregisterSaveModeObserver()
+{
+    if (!this->observerRegisted_) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "current power mode is normal mode");
+        return;
+    }
+
+    POWER_HILOGI(FEATURE_POWER_MODE, "unregister setting observer for save mode");
+    SettingHelper::UnregisterSettingObserver(g_autoAdjustBrightnessObserver);
+    SettingHelper::UnregisterSettingObserver(g_autoWindowRotationObserver);
+    SettingHelper::UnregisterSettingObserver(g_vibratorsStateObserver);
+    SettingHelper::UnregisterSettingObserver(g_lcdBrightnessObserver);
+    g_autoAdjustBrightnessObserver = nullptr;
+    g_autoWindowRotationObserver = nullptr;
+    g_vibratorsStateObserver = nullptr;
+    g_lcdBrightnessObserver = nullptr;
+    observerRegisted_ = false;
+}
+
+void PowerModeModule::RegisterSaveModeObserver()
+{
+    if (this->mode_ == PowerMode::POWER_SAVE_MODE || this->mode_ == PowerMode::EXTREME_POWER_SAVE_MODE) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "register setting observer in save mode");
+        g_autoAdjustBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
+        g_autoWindowRotationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+        g_vibratorsStateObserver = CreateSettingObserver(PowerModePolicy::ServiceType::VIBRATORS_STATE);
+        g_lcdBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
+        observerRegisted_ = true;
+    }
+}
+
+sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string) {
+        DelayedSingleton<PowerModePolicy>::GetInstance()->RemoveBackupMapSettingSwitch(switchId);
+    };
+
+    switch (switchId) {
+        case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
+            return SettingHelper::RegisterSettingAutoAdjustBrightnessObserver(updateFunc);
+        case PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION:
+            return SettingHelper::RegisterSettingWindowRotationObserver(updateFunc);
+        case PowerModePolicy::ServiceType::VIBRATORS_STATE:
+            return SettingHelper::RegisterSettingVibrationObserver(updateFunc);
+        case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
+            return SettingHelper::RegisterSettingBrightnessObserver(updateFunc);
+        default:
+            POWER_HILOGW(FEATURE_POWER_MODE, "register unknown switch id: %{public}d", switchId);
+            break;
+    }
+    return nullptr;
 }
 
 void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
@@ -104,8 +170,7 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 void PowerModeModule::UpdateModepolicy()
 {
     /* update policy */
-    DelayedSingleton<PowerModePolicy>::GetInstance()->SetPowerModePolicy(static_cast<uint32_t>(this->mode_),
-        this->lastMode_);
+    DelayedSingleton<PowerModePolicy>::GetInstance()->UpdatePowerModePolicy(static_cast<uint32_t>(this->mode_));
 }
 
 void PowerModeModule::AddPowerModeCallback(const sptr<IPowerModeCallback>& callback)
@@ -239,6 +304,9 @@ void PowerModeModule::SetDisplayOffTime(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set display off timeout: %{public}d", time);
+    if (time == INIT_VALUE_FALSE) {
+        return;
+    }
     bool needUpdateSetting = time > 0;
     pms->GetPowerStateMachine()->SetDisplayOffTime(static_cast<int64_t>(time), needUpdateSetting);
 }
@@ -249,6 +317,9 @@ void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SLEEPTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set sleep timeout: %{public}d", time);
+    if (time == INIT_VALUE_FALSE) {
+        return;
+    }
     pms->GetPowerStateMachine()->SetSleepTime(static_cast<int64_t>(time));
 }
 
@@ -260,7 +331,10 @@ void PowerModeModule::SetAutoAdjustBrightness(bool isBoot)
     int32_t value = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
     auto status = static_cast<SettingHelper::SwitchStatus>(value);
-    POWER_HILOGI(FEATURE_POWER_MODE, "status: %{public}d", status);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set auto adjust brightness status: %{public}d", status);
+    if (value == INIT_VALUE_FALSE) {
+        return;
+    }
     SettingHelper::SetSettingAutoAdjustBrightness(status);
 }
 
@@ -270,8 +344,11 @@ void PowerModeModule::SetLcdBrightness(bool isBoot)
         return;
     }
     int32_t lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SMART_BACKLIGHT);
-    POWER_HILOGD(FEATURE_POWER_MODE, "lcdBrightness: %{public}d", lcdBrightness);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set lcd Brightness: %{public}d", lcdBrightness);
+    if (lcdBrightness == INIT_VALUE_FALSE) {
+        return;
+    }
     SettingHelper::SetSettingBrightness(lcdBrightness);
 #ifdef HAS_DISPLAY_MANAGER
     OHOS::DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(lcdBrightness);
@@ -285,7 +362,10 @@ void PowerModeModule::SetVibration(bool isBoot)
     }
     int32_t vibration = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
-    POWER_HILOGD(FEATURE_POWER_MODE, "GetPowerModeValuePolicy vibrate=%{public}d", vibration);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set vibrate state %{public}d", vibration);
+    if (vibration == INIT_VALUE_FALSE) {
+        return;
+    }
     SettingHelper::SetSettingVibration(static_cast<SettingHelper::SwitchStatus>(vibration));
 }
 
@@ -296,7 +376,10 @@ void PowerModeModule::SetWindowRotation(bool isBoot)
     }
     int32_t rotation = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
-    POWER_HILOGD(FEATURE_POWER_MODE, "GetPowerModeValuePolicy rotation=%{public}d", rotation);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set window rotation state %{public}d", rotation);
+    if (rotation == INIT_VALUE_FALSE) {
+        return;
+    }
     SettingHelper::SetSettingWindowRotation(static_cast<SettingHelper::SwitchStatus>(rotation));
 }
 } // namespace PowerMgr

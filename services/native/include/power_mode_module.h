@@ -22,6 +22,7 @@
 #include <common_event_support.h>
 
 #include "ipower_mode_callback.h"
+#include "setting_observer.h"
 
 #define FLAG_FALSE (-1)
 #define LAST_MODE_FLAG 0
@@ -58,9 +59,13 @@ private:
 
     PowerMode mode_;
     uint32_t lastMode_;
+    bool observerRegisted_ = false;
 
     void Prepare();
     void PublishPowerModeEvent();
+    void UnregisterSaveModeObserver();
+    void RegisterSaveModeObserver();
+    sptr<SettingObserver> CreateSettingObserver(uint32_t switchId);
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
@@ -73,8 +78,6 @@ private:
     static void SetWindowRotation(bool isBoot);
 
     std::atomic<bool> started_;
-    std::map<uint32_t, int32_t> recoverValue;
-    std::map<uint32_t, int32_t>::iterator recoverValueiter;
     std::mutex mutex_;
 };
 } // namespace PowerMgr
