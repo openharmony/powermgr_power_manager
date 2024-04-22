@@ -29,7 +29,7 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
     g_powerState = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
@@ -69,7 +69,7 @@ namespace {
 HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock106: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock106:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -84,7 +84,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->UnLock(token);
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock106:End");
     GTEST_LOG_(INFO) << "PowerMgrMock106: end";
 }
 }

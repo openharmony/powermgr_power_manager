@@ -111,6 +111,6 @@ HWTEST_F(PowerLevelEventSystemTestOn, PowerSavemode_001, TestSize.Level0)
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_ON, g_action);
-    POWER_HILOGD(LABEL_TEST, "PowerScreenOn_001_end");
+    POWER_HILOGI(LABEL_TEST, "PowerScreenOn_001_end");
 }
 } // namespace

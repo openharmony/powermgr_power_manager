@@ -37,17 +37,17 @@ using namespace std;
 
 void PowerMockProxyTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
 void PowerMockProxyTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
 }
 
 void PowerMockProxyTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+    POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**
