@@ -62,9 +62,6 @@ bool RunningLockTimerHandler::UnregisterRunningLockTimer(const sptr<IRemoteObjec
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Running lock timer is exist, unregister timerId=%{public}d", timerId);
         UnregisterTimer(timerId);
         RemoveRunningLockTimerMap(token);
-        if (handlerTimer_ != nullptr && runninglockTimerMap_.empty()) {
-            handlerTimer_->Shutdown();
-        }
     }
     return true;
 }
