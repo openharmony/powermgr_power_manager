@@ -35,38 +35,29 @@ public:
         static constexpr uint32_t SLEEPTIME = 102;
         static constexpr uint32_t AUTO_ADJUST_BRIGHTNESS = 103;
         static constexpr uint32_t AUTO_WINDOWN_RORATION = 107;
-        static constexpr uint32_t SMART_BACKLIGHT = 115;
+        static constexpr uint32_t LCD_BRIGHTNESS = 115;
         static constexpr uint32_t VIBRATORS_STATE = 120;
     };
 
     ~PowerModePolicy() = default;
-    int32_t GetPowerModeValuePolicy(uint32_t type);
-    int32_t GetPowerModeRecoverPolicy(uint32_t type);
-    void SetPowerModePolicy(uint32_t mode, uint32_t lastMode);
+    int32_t GetPowerModeValuePolicy(uint32_t type); // from switchMap_
+    void UpdatePowerModePolicy(uint32_t mode);
+    void RemoveBackupMapSettingSwitch(uint32_t switchId);
     typedef std::function<void(bool)> ModeAction;
     void AddAction(uint32_t type, ModeAction& action);
     void TriggerAllActions(bool isBoot);
     bool IsValidType(uint32_t type);
 
 private:
-    std::list<ModePolicy> openPolicy;
-    std::list<ModePolicy> closePolicy;
-    std::list<ModePolicy> recoverPolicy;
+    std::map<uint32_t, ModeAction> actionMap_;
+    std::map<uint32_t, int32_t> switchMap_;
+    std::map<uint32_t, int32_t> recoverMap_;
+    std::map<uint32_t, int32_t> backupMap_;
 
-    std::map<uint32_t, ModeAction> actionMap;
-    std::map<uint32_t, int32_t> valueModePolicy;
-    std::map<uint32_t, int32_t> recoverModePolicy;
-    std::map<uint32_t, int32_t>::iterator valueiter;
-    std::map<uint32_t, int32_t>::iterator recoveriter;
-
-    std::list<ModePolicy>::iterator openlit;
-    std::list<ModePolicy>::iterator closelit;
-    std::list<ModePolicy>::iterator recoverlit;
-    void ReadOpenPolicy(uint32_t mode);
-    void ReadRecoverPolicy(uint32_t lastMode);
-    void CompareModeItem(uint32_t mode, uint32_t lastMode);
+    void ReadPowerModePolicy(uint32_t mode);
+    void ComparePowerModePolicy();
+    void GetSettingSwitchState(uint32_t& switchId, int32_t& value); // from setting
     int32_t GetPolicyFromMap(uint32_t type);
-    int32_t GetRecoverPolicyFromMap(uint32_t type);
     std::mutex policyMutex_;
     std::mutex actionMapMutex_;
 };
