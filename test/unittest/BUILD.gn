@@ -46,8 +46,6 @@ config("module_mock_private_config") {
   include_dirs = [
     "include/mock",
     "mock",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include/",
-    "//commonlibrary/c_utils/base/include/",
     "${powermgr_service_zidl}/include",
     "${powermgr_service_path}/test/mock/action",
   ]
@@ -65,6 +63,7 @@ deps_ex = [
   "hisysevent:libhisysevent",
   "input:libmmi-client",
   "ipc:ipc_core",
+  "jsoncpp:jsoncpp",
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
@@ -876,7 +875,6 @@ ohos_unittest("test_power_suspend") {
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -916,7 +914,6 @@ ohos_unittest("test_power_wakeup") {
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -976,7 +973,6 @@ ohos_unittest("test_power_getcontroller_mock") {
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -1016,7 +1012,6 @@ ohos_unittest("test_power_screenon_mock") {
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -1054,7 +1049,6 @@ ohos_unittest("test_power_parsesources_mock") {
     "${powermgr_utils_path}/setting:power_setting",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -1114,6 +1108,13 @@ ohos_unittest("test_power_coordination_lock") {
   module_out_path = module_output_path
 
   sources = [ "src/power_coordination_lock_test.cpp" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
 
   configs = [
     "${powermgr_utils_path}:utils_config",
