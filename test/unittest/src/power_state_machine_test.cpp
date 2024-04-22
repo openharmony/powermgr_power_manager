@@ -185,23 +185,23 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateMachine007::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine007::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime());
-    POWER_HILOGD(LABEL_TEST, "PowerStateMachine007::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine007::fun is end!");
 }
 }
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
         static_cast<uint32_t>(state));
 }
 
 void PowerStateMachineTest::PowerStateTest2Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %u.",
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %u.",
         static_cast<uint32_t>(state));
 }
 
@@ -216,18 +216,18 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> cb1 = new PowerStateTest1Callback();
     powerMgrClient.RegisterPowerStateCallback(cb1);
-    POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 1.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 1.");
     {
         sptr<IPowerStateCallback> cb2 = new PowerStateTest2Callback();
         powerMgrClient.UnRegisterPowerStateCallback(cb2);
-        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 2.");
+        POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 2.");
         powerMgrClient.RegisterPowerStateCallback(cb2);
-        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 3.");
+        POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 3.");
         powerMgrClient.RegisterPowerStateCallback(cb2);
-        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 4.");
+        POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 4.");
     }
     EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(cb1));
-    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
 }
 }
 

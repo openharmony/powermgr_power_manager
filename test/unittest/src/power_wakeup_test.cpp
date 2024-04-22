@@ -379,7 +379,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest011, TestSize.Level0)
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest012, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest012: start");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest012: start");
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
     g_service->WakeupDevice(
@@ -392,7 +392,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest012, TestSize.Level0)
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest012: end");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest012: end");
 }
 
 /**
@@ -402,7 +402,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest012, TestSize.Level0)
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest013, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest013: start");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest013: start");
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
     g_service->WakeupDevice(
@@ -415,7 +415,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest013, TestSize.Level0)
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest013: end");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest013: end");
 }
 
 /**
@@ -425,7 +425,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest013, TestSize.Level0)
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest014, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest014: start");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest014: start");
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
     g_service->WakeupDevice(
@@ -438,6 +438,6 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest014, TestSize.Level0)
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest014: end");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest014: end");
 }
 } // namespace

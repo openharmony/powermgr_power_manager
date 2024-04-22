@@ -149,7 +149,7 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedInvalid, TestSize.Level0
  */
 HWTEST_F (PowerMgrUtilTest, SettingObserver001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "SettingObserver001::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "SettingObserver001::fun is start!");
     std::shared_ptr<SettingObserver> settingObserver = std::make_shared<SettingObserver>();
     settingObserver->OnChange();
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
@@ -157,7 +157,7 @@ HWTEST_F (PowerMgrUtilTest, SettingObserver001, TestSize.Level0)
     settingObserver->SetKey("settings.power.wakeup_sources");
     std::string key = settingObserver->GetKey();
     EXPECT_EQ(key, "settings.power.wakeup_sources");
-    POWER_HILOGD(LABEL_TEST, "SettingObserver001::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "SettingObserver001::fun is end!");
 }
 
 /**
@@ -167,7 +167,7 @@ HWTEST_F (PowerMgrUtilTest, SettingObserver001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrUtilTest, SettingProvider001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "SettingProvider001::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider001::fun is start!");
     auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
     std::string valueStr;
     settingProvider.GetStringValue("settings.power.wakeup_sources", valueStr);
@@ -177,7 +177,7 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider001, TestSize.Level0)
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = settingProvider.CreateObserver("settings.power.suspend_sources", updateFunc);
     EXPECT_TRUE(observer != nullptr);
-    POWER_HILOGD(LABEL_TEST, "SettingProvider001::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider001::fun is end!");
 }
 
 /**
@@ -187,7 +187,7 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrUtilTest, SettingProvider002, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "SettingProvider002::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider002::fun is start!");
     auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
     int32_t putValue = 10;
     int32_t getValue;
@@ -196,7 +196,7 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider002, TestSize.Level0)
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = settingProvider.CreateObserver("settings.power.suspend_sources", updateFunc);
     EXPECT_EQ(OHOS::ERR_OK, settingProvider.RegisterObserver(observer));
-    POWER_HILOGD(LABEL_TEST, "SettingProvider002::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider002::fun is end!");
 }
 
 /**
@@ -206,7 +206,7 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider002, TestSize.Level0)
  */
 HWTEST_F (PowerMgrUtilTest, SettingProvider003, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "SettingProvider003::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider003::fun is start!");
     auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
     int64_t value;
     settingProvider.GetLongValue("settings.display.screen_off_timeout", value);
@@ -216,7 +216,7 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider003, TestSize.Level0)
     OHOS::ErrCode ret = settingProvider.RegisterObserver(observer);
     ret = settingProvider.UnregisterObserver(observer);
     EXPECT_EQ(OHOS::ERR_OK, ret);
-    POWER_HILOGD(LABEL_TEST, "SettingProvider003::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider003::fun is end!");
 }
 
 /**
@@ -226,13 +226,13 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider003, TestSize.Level0)
  */
 HWTEST_F(PowerMgrUtilTest, SettingProvider004, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "SettingProvider004::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider004::fun is start!");
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
     int64_t value = 0;
     OHOS::ErrCode ret = settingProvider.PutLongValue(SETTING_DISPLAY_OFF_TIME_KEY, value);
     EXPECT_EQ(OHOS::ERR_OK, ret);
-    POWER_HILOGD(LABEL_TEST, "SettingProvider004::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "SettingProvider004::fun is end!");
 }
 
 /**
@@ -242,11 +242,11 @@ HWTEST_F(PowerMgrUtilTest, SettingProvider004, TestSize.Level0)
  */
 HWTEST_F (PowerMgrUtilTest, Sysparam001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "Sysparam001::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "Sysparam001::fun is start!");
     std::shared_ptr<SysParam> sysParam = std::make_shared<SysParam>();
     int32_t def = 0;
     EXPECT_EQ(OHOS::ERR_OK, sysParam->GetIntValue("settings.power.suspend_sources", def));
-    POWER_HILOGD(LABEL_TEST, "Sysparam001::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "Sysparam001::fun is end!");
 }
 
 /**
