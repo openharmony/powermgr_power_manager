@@ -96,7 +96,7 @@ void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCa
             int64_t start = GetTickCount();
             isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
-            POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sync sleep callback success, cost=%{public}" PRId64 "", cost);
+            POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sync sleep callback success, cost=%{public}" PRId64, cost);
         }
     }
 }
@@ -302,7 +302,7 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
 
     POWER_HILOGI(FEATURE_SUSPEND,
         "Suspend when screen off, reason=%{public}d, action=%{public}u, "
-        "delay=%{public}u" PRId32 " ,state=%{public}d, type=%{public}u",
+        "delay=%{public}u, state=%{public}d, type=%{public}u",
         reason, action, delay, stateMachine_->GetState(), sleepType_);
     switch (stateMachine_->GetState()) {
         case PowerState::INACTIVE:
@@ -348,7 +348,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
-        "delay=%{public}u" PRId32 "",
+        "delay=%{public}u",
         pid, uid, reason, action, delay);
     bool force = true;
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
