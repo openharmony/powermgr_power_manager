@@ -40,8 +40,9 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int32_t RECOVER_CONNECT_INTERVAL = 800;
-constexpr int32_t RECOVER_CONNECT_TIMES = 5;
+std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
+std::mutex PowerMgrClient::runningLocksMutex_;
+
 PowerMgrClient::PowerMgrClient() {}
 PowerMgrClient::~PowerMgrClient()
 {
@@ -91,7 +92,40 @@ void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObje
 {
     POWER_HILOGW(COMP_FWK, "Recv death notice, PowerMgr Death");
     client_.ResetProxy(remote);
+
+    // wait for powermgr service restart
+    ErrCode ret = E_GET_POWER_SERVICE_FAILED;
+    uint32_t retryCount = 0;
+    while (++retryCount <= CONNECT_RETRY_COUNT) {
+        usleep(CONNECT_RETRY_MS);
+        ret = client_.Connect();
+        if (ret == ERR_OK) {
+            POWER_HILOGI(COMP_FWK, "retry connect success, count %{public}d", retryCount);
+            break;
+        }
+        POWER_HILOGI(COMP_FWK, "retry connect failed, count %{public}d", retryCount);
+    }
+    if (ret != ERR_OK) {
+        return;
+    }
+
+    // recover running lock info
     client_.RecoverRunningLocks();
+}
+
+void PowerMgrClient::RecoverRunningLocks()
+{
+    POWER_HILOGI(COMP_FWK, "start to recover running locks");
+    std::lock_guard<std::mutex> lock(runningLocksMutex_);
+    for (auto runningLock : runningLocks_) {
+        if (runningLock.expired()) {
+            continue;
+        }
+        std::shared_ptr<RunningLock> lock = runningLock.lock();
+        if (lock != nullptr) {
+            lock->Recover(proxy_);
+        }
+    }
 }
 
 void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
@@ -109,44 +143,6 @@ void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
         serviceRemote->RemoveDeathRecipient(deathRecipient_);
         proxy_ = nullptr;
     }
-}
-
-void PowerMgrClient::RecoverRunningLocks()
-{
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Power recover runningLocks");
-    int32_t tryTimes = 0;
-    while (tryTimes < RECOVER_CONNECT_TIMES) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(RECOVER_CONNECT_INTERVAL));
-        if (Connect() == ERR_OK) {
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Power recover connect ok");
-            break;
-        }
-        tryTimes++;
-    }
-    std::lock_guard<std::mutex> lock(runningLocksMutex_);
-    for (const auto& runningLock : runninglocks_) {
-        if (runningLock != nullptr) {
-            runningLock->Recover();
-        }
-    }
-}
-
-void PowerMgrClient::UpdateRunningLockSet(const std::shared_ptr<RunningLock>& runningLock, bool isDelete)
-{
-    std::lock_guard<std::mutex> lock(runningLocksMutex_);
-    if (runningLock == nullptr) {
-        return;
-    }
-    auto iter = runninglocks_.find(runningLock);
-    if (iter != runninglocks_.end() && isDelete) {
-        runninglocks_.erase(iter);
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "erase RunningLock size=%{public}d",
-            static_cast<int32_t>(runninglocks_.size()));
-        return;
-    }
-    runninglocks_.insert(runningLock);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "add RunningLock size=%{public}d",
-        static_cast<int32_t>(runninglocks_.size()));
 }
 
 PowerErrors PowerMgrClient::RebootDevice(const std::string& reason)
@@ -244,7 +240,7 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     RETURN_IF_WITH_RET(Connect() != ERR_OK, nullptr);
 
     uint32_t nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
-    std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(name.substr(0, nameLen), type);
+    std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy_, name.substr(0, nameLen), type);
     if (runningLock == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create RunningLock record");
         return nullptr;
@@ -257,6 +253,9 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
         error_ = error;
         return nullptr;
     }
+
+    std::lock_guard<std::mutex> lock(runningLocksMutex_);
+    runningLocks_.push_back(std::weak_ptr<RunningLock>(runningLock));
     return runningLock;
 }
 
@@ -367,12 +366,6 @@ PowerErrors PowerMgrClient::GetError()
     auto temp = error_;
     error_ = PowerErrors::ERR_OK;
     return temp;
-}
-
-sptr<IPowerMgr> PowerMgrClient::GetProxy()
-{
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, nullptr);
-    return proxy_;
 }
 
 PowerErrors PowerMgrClient::IsStandby(bool& isStandby)
