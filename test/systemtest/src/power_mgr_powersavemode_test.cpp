@@ -49,7 +49,7 @@ constexpr int64_t TIME_OUT = 1;
 
 void PowerMgrPowerSavemodeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
 }
 
 void PowerMgrPowerSavemodeTest::SetUpTestCase(void)
@@ -212,7 +212,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_032, TestSize.Level0)
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_032 fail to PowerModeCallback";
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_032 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_032 end.");
 }
 
 /**
@@ -226,7 +226,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_033, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerSavemode_033: RegisterPowerModeCallback start.";
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_033 Start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_033 Start.");
     const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
 
@@ -236,7 +236,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_033, TestSize.Level0)
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_NE(mode, mode1) << "PowerSavemode_033 fail to PowerModeCallback";
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_033 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_033 end.");
 }
 
 /**
@@ -260,7 +260,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_035, TestSize.Level0)
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_035 fail to PowerModeCallback";
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_035 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_035 end.");
 }
 
 /**
@@ -282,7 +282,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_036, TestSize.Level0)
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_036 fail to PowerModeCallback";
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_036 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_036 end.");
 }
 
 /**
@@ -304,7 +304,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_037, TestSize.Level0)
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_NE(mode, mode1) << "PowerSavemode_037 fail to PowerModeCallback";
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_037 UnRegisterPowerModeCallback end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_037 UnRegisterPowerModeCallback end.");
 }
 
 /**
@@ -329,14 +329,14 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_039, TestSize.Level0)
     mode = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode, mode1) << "PowerSavemode_036 fail to PowerModeCallback";
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_039 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_039 end.");
 }
 } // namespace
 
 PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::CommonEventServiCesSystemTest(
     const CommonEventSubscribeInfo& subscriberInfo) : CommonEventSubscriber(subscriberInfo)
 {
-    POWER_HILOGD(LABEL_TEST, "subscribe.");
+    POWER_HILOGI(LABEL_TEST, "subscribe.");
 }
 
 static uint32_t g_i = 0;
@@ -346,12 +346,12 @@ void PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::OnReceiveEvent(co
 {
     std::string action = data.GetWant().GetAction();
     if (action == CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED) {
-        POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
+        POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
         g_i = g_judgeNum;
     }
     uint32_t j = 2;
     EXPECT_EQ(g_i, j) << "PowerSavemode_022 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
+    POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
 }
 
 class CommonEventSaveModeTest : public EventFwk::CommonEventSubscriber {
@@ -414,7 +414,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_022, TestSize.Level0)
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_022 UnRegisterPowerModeCallback end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_022 UnRegisterPowerModeCallback end.");
 }
 
 /**
@@ -439,7 +439,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_023, TestSize.Level0)
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_023");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_023");
 }
 
 /**
@@ -458,6 +458,6 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_40, TestSize.Level0)
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED, g_action);
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_024");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_024");
 }
 } // namespace

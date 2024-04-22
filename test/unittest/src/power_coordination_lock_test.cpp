@@ -124,7 +124,7 @@ public:
     void OnReceiveEvent(const CommonEventData &data) override
     {
         std::string action = data.GetWant().GetAction();
-        POWER_HILOGD(LABEL_TEST, "On receive common event=%{public}s", action.c_str());
+        POWER_HILOGI(LABEL_TEST, "On receive common event=%{public}s", action.c_str());
         MatchCommonEventTriggered(action);
     }
     static shared_ptr<PowerStateCommonEventSubscriber> RegisterEvent();
@@ -132,7 +132,7 @@ public:
 
 shared_ptr<PowerStateCommonEventSubscriber> PowerStateCommonEventSubscriber::RegisterEvent()
 {
-    POWER_HILOGD(LABEL_TEST, "Regist subscriber screen off event");
+    POWER_HILOGI(LABEL_TEST, "Regist subscriber screen off event");
     int32_t retryTimes = 2;
     bool succeed = false;
     MatchingSkills matchingSkills;
@@ -148,7 +148,7 @@ shared_ptr<PowerStateCommonEventSubscriber> PowerStateCommonEventSubscriber::Reg
         usleep(RETRY_WAIT_TIME_MS * US_PER_MS);
     }
     if (!succeed) {
-        POWER_HILOGD(LABEL_TEST, "Failed to register subscriber");
+        POWER_HILOGI(LABEL_TEST, "Failed to register subscriber");
         return nullptr;
     }
     return subscriberPtr;
@@ -160,7 +160,7 @@ public:
     virtual ~PowerStateTestCallback() = default;
     void OnPowerStateChanged(PowerState state) override
     {
-        POWER_HILOGD(LABEL_TEST, "On power state=%{public}d changed callback", state);
+        POWER_HILOGI(LABEL_TEST, "On power state=%{public}d changed callback", state);
         MatchPowerStateTriggered(state);
     }
 };
@@ -180,7 +180,7 @@ namespace {
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_001 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_001 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_TRUE(powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_COORDINATION));
     auto runninglock =
@@ -203,7 +203,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Lev
     EXPECT_TRUE(runninglock->IsUsed());
     runninglock->UnLock();
     EXPECT_FALSE(runninglock->IsUsed());
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_001 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_001 end");
 }
 
 /**
@@ -214,7 +214,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_002 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_002 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglock =
         powerMgrClient.CreateRunningLock("CoordinationRunninglock002", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -238,7 +238,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Lev
     EXPECT_FALSE(runninglock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     EXPECT_TRUE(runninglock->IsUsed());
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_002 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_002 end");
 }
 
 
@@ -250,7 +250,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_003 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_003 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglock =
         powerMgrClient.CreateRunningLock("CoordinationRunninglock003", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -273,7 +273,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Lev
     EXPECT_TRUE(runninglock->IsUsed());
     usleep(timeoutMs * US_PER_MS);
     EXPECT_TRUE(runninglock->IsUsed());
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_003 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_003 end");
 }
 
 /**
@@ -284,7 +284,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_004 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_004 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     powerMgrClient.WakeupDevice();
@@ -302,7 +302,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Lev
     EXPECT_FALSE(runninglock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     EXPECT_FALSE(runninglock->IsUsed());
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_004 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_004 end");
 }
 
 /**
@@ -313,7 +313,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_005 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_005 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglock =
         powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_005", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -329,7 +329,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Lev
     EXPECT_FALSE(runninglock->IsUsed());
     runninglock->UnLock();
     EXPECT_FALSE(runninglock->IsUsed());
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_005 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_005 end");
 }
 
 /**
@@ -340,7 +340,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_006 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_006 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglock =
         powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_006", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -388,7 +388,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
 
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_006 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_006 end");
 }
 
 /**
@@ -399,7 +399,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_007 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_007 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(OVER_TIME_SCREEN_OFF_TIME_MS);
     auto runninglock =
@@ -440,7 +440,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     powerMgrClient.RestoreScreenOffTime();
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_007 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_007 end");
 }
 
 /**
@@ -451,7 +451,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_008 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_008 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglock =
         powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_008", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -494,7 +494,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Lev
 
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_008 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_008 end");
 }
 
 /**
@@ -505,7 +505,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_009 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_009 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglockOne =
         powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_009_1", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -550,7 +550,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Lev
 
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_009 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_009 end");
 }
 
 /**
@@ -561,7 +561,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_010 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_010 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runninglock =
         powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_010", RunningLockType::RUNNINGLOCK_COORDINATION);
@@ -601,7 +601,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
 
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_010 end");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_010 end");
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -613,7 +613,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
  */
 HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerCoordinationLockTest_011 start");
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_011 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     shared_ptr<PowerStateCommonEventSubscriber> subscriber = PowerStateCommonEventSubscriber::RegisterEvent();
     EXPECT_FALSE(subscriber == nullptr);
