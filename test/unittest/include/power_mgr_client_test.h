@@ -29,19 +29,19 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr int NEXT_WAIT_TIME_S = 1;
-constexpr int ASYNC_WAIT_TIME_S = 3;
-constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
-int32_t SCREEN_OFF_WAIT_TIME_MS = 1000;
-int32_t SCREEN_OFF_WAIT_TIME_S = 1;
-int32_t SCREEN_DIM_WAIT_TIME_S = (SCREEN_OFF_WAIT_TIME_S / 2);
-constexpr int SLEEP_WAIT_TIME_S = 1;
-constexpr int SLEEP_WAIT_TIME_MS = 100;
-constexpr int SET_DISPLAY_OFF_TIME_MS = 1000;
-constexpr int TRANSFER_NS_TO_MS = 1000000;
-constexpr int TRANSFER_MS_TO_S = 1000;
+constexpr uint32_t NEXT_WAIT_TIME_S = 1;
+constexpr uint32_t ASYNC_WAIT_TIME_S = 3;
+constexpr uint32_t REFRESHACTIVITY_WAIT_TIME_S = 8;
+constexpr uint32_t SCREEN_OFF_WAIT_TIME_MS = 2000;
+constexpr uint32_t SCREEN_OFF_WAIT_TIME_S = 2;
+constexpr uint32_t DIM_STATE_WAIT_TIME_MS = 300;
+constexpr uint32_t SLEEP_WAIT_TIME_S = 1;
+constexpr uint32_t SLEEP_WAIT_TIME_MS = 100;
+constexpr uint32_t SET_DISPLAY_OFF_TIME_MS = 1000;
+constexpr uint32_t TRANSFER_NS_TO_MS = 1000000;
+constexpr uint32_t TRANSFER_MS_TO_S = 1000;
 constexpr float DIM_RATE = 0.8;
-constexpr int DOUBLE_TIMES = 2;
+constexpr uint32_t DOUBLE_TIMES = 2;
 
 class PowerMgrClientTest : public testing::Test {
 };
