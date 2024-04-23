@@ -26,7 +26,8 @@
 #include "display_power_mgr_client.h"
 #endif
 
-char *optArg;
+extern char *optArg;
+char *optArg = nullptr;
 
 namespace OHOS {
 namespace PowerMgr {
