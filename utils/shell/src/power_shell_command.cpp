@@ -25,7 +25,7 @@
 #include "display_power_mgr_client.h"
 #endif
 
-char *optarg = nullptr;
+char *g_optArg = nullptr;
 
 namespace OHOS {
 namespace PowerMgr {
@@ -344,7 +344,7 @@ ErrCode PowerShellCommand::RunAsDumpCommand()
 using namespace OHOS::DisplayPowerMgr;
 bool PowerShellCommand::DisplayOptargEmpty()
 {
-    if (!optarg) {
+    if (!g_optArg) {
         resultReceiver_.append("Error! please input your brightness value.\n");
         resultReceiver_.append(DISPLAY_HELP_MSG);
         return true;
@@ -364,7 +364,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommandOverride()
         return ERR_OK;
     }
     int32_t value = 0;
-    StrToInt(optarg, value);
+    StrToInt(g_optArg, value);
     bool ret = DisplayPowerMgrClient::GetInstance().OverrideBrightness(static_cast<uint32_t>(value));
     resultReceiver_.append("Override brightness to ");
     resultReceiver_.append(std::to_string(value));
@@ -392,7 +392,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommandBoost()
         return ERR_OK;
     }
     int32_t value = 0;
-    StrToInt(optarg, value);
+    StrToInt(g_optArg, value);
     bool ret = DisplayPowerMgrClient::GetInstance().BoostBrightness(static_cast<uint32_t>(value));
     resultReceiver_.append("Boost brightness timeout ");
     resultReceiver_.append(std::to_string(value)).append("ms");
@@ -420,7 +420,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommandSetValue()
         return ERR_OK;
     }
     int32_t value = 0;
-    StrToInt(optarg, value);
+    StrToInt(g_optArg, value);
     bool ret = DisplayPowerMgrClient::GetInstance().SetBrightness(static_cast<uint32_t>(value));
     resultReceiver_.append("Set brightness to ");
     resultReceiver_.append(std::to_string(value));
@@ -436,7 +436,7 @@ ErrCode PowerShellCommand::RunAsDisplayCommandDiscount()
     if (DisplayOptargEmpty()) {
         return ERR_OK;
     }
-    std::stringstream fstr(optarg);
+    std::stringstream fstr(g_optArg);
     double discount = 0;
     fstr >> discount;
     bool ret = DisplayPowerMgrClient::GetInstance().DiscountBrightness(discount);
@@ -482,14 +482,14 @@ ErrCode PowerShellCommand::RunAsTimeOutCommand()
         resultReceiver_.append("\n");
         return ERR_OK;
     }
-    if (!optarg) {
+    if (!g_optArg) {
         resultReceiver_.append("Error! please input your screen off time.\n");
         resultReceiver_.append(TIME_OUT_HELP_MSG);
         return ERR_OK;
     }
     if (option == 'o') {
         int32_t timeout = 0;
-        StrToInt(optarg, timeout);
+        StrToInt(g_optArg, timeout);
         bool ret = PowerMgrClient::GetInstance().OverrideScreenOffTime(static_cast<int64_t>(timeout));
         resultReceiver_.append("Override screen off time to ");
         resultReceiver_.append(std::to_string(timeout));
