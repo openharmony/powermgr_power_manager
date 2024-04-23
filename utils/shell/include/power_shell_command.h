@@ -22,7 +22,7 @@
 
 #include "power_mgr_client.h"
 
-extern char *optarg;
+extern char *g_optArg;
 
 namespace OHOS {
 namespace PowerMgr {
