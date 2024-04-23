@@ -22,6 +22,8 @@
 
 #include "power_mgr_client.h"
 
+extern char *optarg;
+
 namespace OHOS {
 namespace PowerMgr {
 class PowerShellCommand : public OHOS::AAFwk::ShellCommand {
