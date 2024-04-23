@@ -105,7 +105,7 @@ HWTEST_F(PowerMgrClientNativeTest, RunningLockNative002, TestSize.Level2)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002::fun is start!");
     std::shared_ptr<RunningLock> runningLock =
-        std::make_shared<RunningLock>("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
+        std::make_shared<RunningLock>(nullptr, "runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     runningLock->Create();
     EXPECT_TRUE(runningLock->UnLock() == ERR_OK);
     runningLock->Release();
