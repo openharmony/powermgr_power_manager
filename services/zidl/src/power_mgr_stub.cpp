@@ -167,6 +167,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT):
             ret = LockScreenAfterTimingOutStub(data, reply);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_RUNNINGLOCK_CALLBACK):
             ret = RegisterRunningLockCallbackStub(data);
             break;
