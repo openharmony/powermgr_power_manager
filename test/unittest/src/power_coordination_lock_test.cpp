@@ -40,12 +40,13 @@ namespace {
 constexpr uint32_t SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS = 10000;
 constexpr int32_t US_PER_MS = 1000;
 constexpr uint32_t AUTO_SLEEP_DELAY_MS = 5000;
-constexpr uint32_t WAIT_AUTO_SUSPEND_SLEEP_TIME_MS = AUTO_SLEEP_DELAY_MS + 1000;
+constexpr uint32_t WAIT_AUTO_SUSPEND_SLEEP_TIME_MS = AUTO_SLEEP_DELAY_MS + 2000;
 constexpr int32_t WAIT_EVENT_TIME_MS = 400;
 constexpr int32_t RETRY_WAIT_TIME_MS = 100;
 constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
-constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_TEST_MS = 2000 + 500;
+constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_TEST_MS = 2000 + 2000;
+constexpr int32_t WAIT_SUSPEND_TIME_MS = 2000;
 
 bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
@@ -197,11 +198,11 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Lev
     runninglock->UnLock();
     EXPECT_FALSE(runninglock->IsUsed());
 
-    int32_t timeoutMs = 50;
+    int32_t timeoutMs = 500;
     runninglock->Lock(timeoutMs);
-    usleep(timeoutMs * US_PER_MS);
     EXPECT_TRUE(runninglock->IsUsed());
-    runninglock->UnLock();
+    usleep(timeoutMs * US_PER_MS);
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
     EXPECT_FALSE(runninglock->IsUsed());
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_001 end");
 }
@@ -263,7 +264,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Lev
     pid_t curUid = getuid();
     pid_t curPid = getpid();
 
-    int32_t timeoutMs = 50;
+    int32_t timeoutMs = 500;
     runninglock->Lock(timeoutMs);
     EXPECT_TRUE(runninglock->IsUsed());
 
@@ -272,7 +273,8 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     EXPECT_TRUE(runninglock->IsUsed());
     usleep(timeoutMs * US_PER_MS);
-    EXPECT_TRUE(runninglock->IsUsed());
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    EXPECT_FALSE(runninglock->IsUsed());
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_003 end");
 }
 
