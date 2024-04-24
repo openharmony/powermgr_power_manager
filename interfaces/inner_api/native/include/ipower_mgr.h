@@ -72,6 +72,7 @@ public:
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
 
     virtual bool SetDisplaySuspend(bool enable) = 0;
+    virtual bool Hibernate(bool clearMemory) = 0;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) = 0;
     virtual PowerMode GetDeviceMode() = 0;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;

@@ -38,6 +38,7 @@ constexpr uint32_t SET_MODE_CALLBACK_MAX_ARGC = 2;
 constexpr uint32_t SET_MODE_PROMISE_MAX_ARGC = 1;
 constexpr uint32_t SUSPEND_MAX_ARGC = 1;
 constexpr uint32_t SET_SCREEN_OFFTIME_ARGC = 1;
+constexpr uint32_t HIBERNATE_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
@@ -109,6 +110,32 @@ napi_value PowerNapi::Suspend(napi_env env, napi_callback_info info)
         if (code != PowerErrors::ERR_OK) {
             error.ThrowError(env, code);
         }
+    }
+    return nullptr;
+}
+
+napi_value PowerNapi::Hibernate(napi_env env, napi_callback_info info)
+{
+    size_t argc = HIBERNATE_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors error;
+    if (argc != HIBERNATE_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_boolean)) {
+        if (!NapiUtils::CheckValueType(env, argv[INDEX_0], napi_undefined)) {
+            std::string detail = NapiUtils::GetStringFromNapi(env, argv[INDEX_0]);
+            if (!detail.empty()) {
+                return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+            }
+        }
+    }
+    bool clearMemory = false;
+    napi_get_value_bool(env, argv[0], &clearMemory);
+
+    bool ret = g_powerMgrClient.Hibernate(clearMemory);
+    if (!ret) {
+        POWER_HILOGE(FEATURE_WAKEUP, "Hibernate failed.");
+        error.ThrowError(env, PowerErrors::ERR_FAILURE);
     }
     return nullptr;
 }

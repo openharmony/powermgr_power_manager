@@ -564,6 +564,19 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
     return true;
 }
 
+bool PowerStateMachine::HibernateInner(bool clearMemory)
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto hibernateController = pms->GetHibernateController();
+    if (hibernateController == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
+        return false;
+    }
+
+    return hibernateController->Hibernate(clearMemory);
+}
+
 bool PowerStateMachine::IsScreenOn()
 {
     DisplayState state = stateAction_->GetDisplayState();

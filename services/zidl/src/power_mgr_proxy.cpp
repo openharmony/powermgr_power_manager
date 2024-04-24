@@ -868,6 +868,32 @@ bool PowerMgrProxy::SetDisplaySuspend(bool enable)
     return true;
 }
 
+bool PowerMgrProxy::Hibernate(bool clearMemory)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, Bool, clearMemory, false);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::HIBERNATE),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 PowerErrors PowerMgrProxy::SetDeviceMode(const PowerMode& mode)
 {
     sptr<IRemoteObject> remote = Remote();

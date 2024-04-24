@@ -342,6 +342,13 @@ bool PowerMgrClient::SetDisplaySuspend(bool enable)
     return ret;
 }
 
+bool PowerMgrClient::Hibernate(bool clearMemory)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = proxy_->Hibernate(clearMemory);
+    return ret;
+}
+
 PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
