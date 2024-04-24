@@ -1152,4 +1152,32 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
     usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
 }
+
+/**
+ * @tc.name: PowerMgrClient049
+ * @tc.desc: test hibernate
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient049, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_EQ(powerMgrClient.Hibernate(true), true);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient049::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient050
+ * @tc.desc: test hibernate
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient050, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_EQ(powerMgrClient.Hibernate(false), true);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is end!");
+}
 } // namespace

@@ -29,6 +29,7 @@ config("powermgr_private_config") {
     "native/src/shutdown",
     "native/src/suspend",
     "native/src/wakeup",
+    "native/src/hibernate",
   ]
 
   if (power_manager_feature_wakeup_action) {
@@ -45,6 +46,7 @@ ohos_shared_library("powermgrservice") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "native/src/hibernate/hibernate_controller.cpp",
     "native/src/power_hdi_callback.cpp",
     "native/src/power_mgr_dumper.cpp",
     "native/src/power_mgr_factory.cpp",

@@ -144,6 +144,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_DISPLAY_SUSPEND):
             ret = SetDisplaySuspendStub(data);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::HIBERNATE):
+            ret = HibernateStub(data);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SETMODE_DEVICE):
             ret = SetDeviceModeStub(data, reply);
             break;
@@ -514,6 +517,14 @@ int32_t PowerMgrStub::SetDisplaySuspendStub(MessageParcel& data)
     bool enable = false;
     READ_PARCEL_WITH_RET(data, Bool, enable, E_READ_PARCEL_ERROR);
     SetDisplaySuspend(enable);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::HibernateStub(MessageParcel& data)
+{
+    bool clearMemory = false;
+    READ_PARCEL_WITH_RET(data, Bool, clearMemory, E_READ_PARCEL_ERROR);
+    Hibernate(clearMemory);
     return ERR_OK;
 }
 

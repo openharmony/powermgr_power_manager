@@ -145,6 +145,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+        power->HibernateControllerInit();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
@@ -648,6 +649,24 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
     return powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
 }
 
+bool PowerMgrService::Hibernate(bool clearMemory)
+{
+    std::lock_guard lock(hibernateMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    if (shutdownController_->IsShuttingDown()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't hibernate");
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
+        pid, uid, static_cast<int>(clearMemory));
+    return powerStateMachine_->HibernateInner(clearMemory);
+}
+
 std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
 {
     std::string tempBundleName = "";
@@ -1065,6 +1084,13 @@ void PowerMgrService::WakeupControllerInit()
         wakeupController_ = std::make_shared<WakeupController>(powerStateMachine_);
     }
     wakeupController_->Init();
+}
+
+void PowerMgrService::HibernateControllerInit()
+{
+    if (!hibernateController_) {
+        hibernateController_ = std::make_shared<HibernateController>();
+    }
 }
 
 bool PowerMgrService::IsCollaborationState()

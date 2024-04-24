@@ -22,6 +22,7 @@ ohos_fuzztest("ShellDumpFuzzTest") {
   fuzz_config_file = "${powermgr_root_path}/test/fuzztest/shelldump_fuzzer"
 
   include_dirs = [
+    "${powermgr_service_path}/native/src/hibernate",
     "${powermgr_service_path}/native/src/runninglock",
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",

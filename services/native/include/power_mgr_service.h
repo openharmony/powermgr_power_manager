@@ -61,6 +61,7 @@ public:
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
+    virtual bool Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
@@ -114,6 +115,7 @@ public:
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
+    void HibernateControllerInit();
     bool IsCollaborationState();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
@@ -139,6 +141,10 @@ public:
     std::shared_ptr<SuspendController> GetSuspendController() const
     {
         return suspendController_;
+    }
+    std::shared_ptr<HibernateController> GetHibernateController() const
+    {
+        return hibernateController_;
     }
     std::shared_ptr<WakeupController> GetWakeupController() const
     {
@@ -201,6 +207,7 @@ public:
 
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
+    std::shared_ptr<HibernateController> hibernateController_ = nullptr;
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
 #endif
@@ -246,6 +253,7 @@ private:
     static std::atomic_bool isBootCompleted_;
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
+    std::mutex hibernateMutex_;
     std::mutex stateMutex_;
     std::mutex shutdownMutex_;
     std::mutex modeMutex_;

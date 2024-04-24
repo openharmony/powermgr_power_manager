@@ -26,6 +26,7 @@
 #include "power_common.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
+#include "hibernate_controller.h"
 
 #define DEFAULT_DISPLAY_OFF_TIME 30000
 #define DEFAULT_SLEEP_TIME       5000
@@ -105,6 +106,7 @@ public:
         return stateAction_;
     };
     bool ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs);
+    bool HibernateInner(bool clearMemory);
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
