@@ -221,7 +221,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient007, TestSize.Level2)
     usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient007: Prepare Fail, Screen is OFF.";
     powerMgrClient.RefreshActivity(abnormaltype);
-    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2 + TRANSFER_NS_TO_MS);
+    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2 + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient007: RefreshActivity Device Fail, Screen is OFF";
     powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient007::fun is end!");
@@ -331,7 +331,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
     auto ret = displayMgrClient.GetDisplayState();
     EXPECT_EQ(ret, DisplayPowerMgr::DisplayState::DISPLAY_DIM);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient011::3!");
-    usleep(time * TRANSFER_MS_TO_S * DIM_RATE);
+    usleep(time * TRANSFER_MS_TO_S * DIM_RATE + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient011::8!");
     ret = displayMgrClient.GetDisplayState();
     EXPECT_EQ(ret, DisplayPowerMgr::DisplayState::DISPLAY_OFF);
@@ -391,7 +391,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient013, TestSize.Level2)
 
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
-    usleep(time * TRANSFER_MS_TO_S * DOUBLE_TIMES);
+    usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient013:End.");
@@ -1138,18 +1138,18 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     powerMgrClient.OverrideScreenOffTime(time);
     runningLock->Lock();
-    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     auto ret = powerMgrClient.SetForceTimingOut(true);
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
     ret = powerMgrClient.LockScreenAfterTimingOut(true, false);
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
-    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     powerMgrClient.SetForceTimingOut(false);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
-    usleep(DOUBLE_TIMES * SLEEP_AFTER_LOCK_TIME_US);
+    usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
 }
 } // namespace
