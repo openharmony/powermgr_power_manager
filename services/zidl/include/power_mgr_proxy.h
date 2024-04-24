@@ -74,6 +74,7 @@ public:
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
+    virtual bool Hibernate(bool clearMemory) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;

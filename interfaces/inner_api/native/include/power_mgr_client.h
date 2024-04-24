@@ -109,6 +109,12 @@ public:
      */
     bool SetDisplaySuspend(bool enable);
 
+    /**
+     * Hibernate the device.
+     * @param clearMemory Indicates whether to clear the memory before the device hibernates.
+     */
+    bool Hibernate(bool clearMemory);
+
     /* Set the device mode.
      *
      * @param set The mode the device.

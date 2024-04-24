@@ -123,6 +123,16 @@ void SystemSuspendController::Wakeup()
     powerInterface_->StopSuspend();
 }
 
+void SystemSuspendController::Hibernate()
+{
+    POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate begin.");
+    if (powerInterface_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate end.");
+}
+
 OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
 {
     OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo {};
