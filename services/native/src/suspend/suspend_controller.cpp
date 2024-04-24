@@ -453,20 +453,20 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
+    bool ret = stateMachine_->SetState(PowerState::SLEEP,
+        stateMachine_->GetReasionBySuspendType(reason), true);
+    if (ret) {
+        POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
+        onForceSleep = true;
+        TriggerSyncSleepCallback(false);
 
-    FFRTTask task = [this, reason] {
-        bool ret = stateMachine_->SetState(PowerState::SLEEP,
-            stateMachine_->GetReasionBySuspendType(reason), true);
-        if (ret) {
-            POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-            onForceSleep = true;
-            TriggerSyncSleepCallback(false);
+        FFRTTask task = [this, reason] {
             SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
-        } else {
-            POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
-        }
-    };
-    ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
+        };
+        ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
+    } else {
+        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
+    }
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
