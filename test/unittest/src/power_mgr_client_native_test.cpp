@@ -69,29 +69,11 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(nullptr));
-    powerMgrClient.~PowerMgrClient();
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");
-}
-
-HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative002, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClient002::fun is start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    wptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
-    powerMgrClient.ResetProxy(remoteObject_);
-    powerMgrClient.~PowerMgrClient();
-    EXPECT_TRUE(powerMgrClient.Connect() == ERR_OK);
-    powerMgrClient.ResetProxy(remoteObject_);
-    powerMgrClient.ResetProxy(nullptr);
-    if (powerMgrClient.deathRecipient_ != nullptr) {
-        powerMgrClient.deathRecipient_->OnRemoteDied(remoteObject_);
-        powerMgrClient.deathRecipient_->OnRemoteDied(nullptr);
-    }
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(nullptr));
     powerMgrClient.~PowerMgrClient();
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");
 }
 

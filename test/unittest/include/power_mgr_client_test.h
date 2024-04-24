@@ -35,6 +35,7 @@ constexpr uint32_t REFRESHACTIVITY_WAIT_TIME_S = 8;
 constexpr uint32_t SCREEN_OFF_WAIT_TIME_MS = 2000;
 constexpr uint32_t SCREEN_OFF_WAIT_TIME_S = 2;
 constexpr uint32_t DIM_STATE_WAIT_TIME_MS = 300;
+constexpr uint32_t WAIT_SUSPEND_TIME_MS = 2000;
 constexpr uint32_t SLEEP_WAIT_TIME_S = 1;
 constexpr uint32_t SLEEP_WAIT_TIME_MS = 100;
 constexpr uint32_t SET_DISPLAY_OFF_TIME_MS = 1000;
