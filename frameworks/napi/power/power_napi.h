@@ -30,6 +30,7 @@ public:
     static napi_value IsActive(napi_env env, napi_callback_info info);
     static napi_value Wakeup(napi_env env, napi_callback_info info);
     static napi_value Suspend(napi_env env, napi_callback_info info);
+    static napi_value Hibernate(napi_env env, napi_callback_info info);
     static napi_value SetPowerMode(napi_env env, napi_callback_info info);
     static napi_value GetPowerMode(napi_env env, napi_callback_info info);
     static napi_value IsStandby(napi_env env, napi_callback_info info);
