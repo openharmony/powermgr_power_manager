@@ -214,7 +214,7 @@ private:
         bool CheckState();
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
-        bool isReallyFailed(StateChangeReason reason);
+        bool IsReallyFailed(StateChangeReason reason);
         PowerState state_;
         std::weak_ptr<PowerStateMachine> owner_;
         std::function<TransitResult(StateChangeReason)> action_;
