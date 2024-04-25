@@ -379,7 +379,7 @@ bool PowerStateMachine::IsPreBrightWakeUp(WakeupDeviceType type)
     return ret;
 }
 
-void PowerStateMachine::HandlePreBrightWakeUp (
+void PowerStateMachine::HandlePreBrightWakeUp(
     int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
     POWER_HILOGI(FEATURE_WAKEUP, "This wakeup event is trigged by %{public}s.", details.c_str());
@@ -1268,7 +1268,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         if (needNotify) {
             owner->NotifyPowerStateChanged(owner->currentState_);
         }
-    } else if (isReallyFailed(reason)) {
+    } else if (IsReallyFailed(reason)) {
         RecordFailure(owner->currentState_, reason, ret);
     }
 
@@ -1396,7 +1396,7 @@ void PowerStateMachine::StateController::RecordFailure(
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
 }
 
-bool PowerStateMachine::StateController::isReallyFailed(StateChangeReason reason)
+bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason)
 {
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
         reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
