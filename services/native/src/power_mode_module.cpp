@@ -304,9 +304,6 @@ void PowerModeModule::SetDisplayOffTime(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set display off timeout: %{public}d", time);
-    if (time == INIT_VALUE_FALSE) {
-        return;
-    }
     bool needUpdateSetting = time > 0;
     pms->GetPowerStateMachine()->SetDisplayOffTime(static_cast<int64_t>(time), needUpdateSetting);
 }
@@ -317,9 +314,6 @@ void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SLEEPTIME);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set sleep timeout: %{public}d", time);
-    if (time == INIT_VALUE_FALSE) {
-        return;
-    }
     pms->GetPowerStateMachine()->SetSleepTime(static_cast<int64_t>(time));
 }
 
