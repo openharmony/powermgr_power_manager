@@ -1180,4 +1180,29 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient050, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.Hibernate(false), true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient051
+ * @tc.desc: test for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient051, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient051::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::shared_ptr<RunningLock> testLock =
+        powerMgrClient.CreateRunningLock("testLock", RunningLockType::RUNNINGLOCK_SCREEN);
+    ASSERT_TRUE(!testLock->IsUsed());
+    testLock->Lock();
+    ASSERT_TRUE(testLock->IsUsed());
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
+    ASSERT_TRUE(!testLock->IsUsed());
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
+    ASSERT_TRUE(testLock->IsUsed());
+    testLock->UnLock();
+    testLock->Recover(nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is end!");
+}
 } // namespace
