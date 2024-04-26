@@ -554,7 +554,7 @@ bool PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs)
     bool result = false;
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
