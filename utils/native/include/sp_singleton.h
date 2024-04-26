@@ -28,7 +28,7 @@ public: \
     ~MyClass(); \
 private: \
     friend DelayedSpSingleton<MyClass>; \
-    MyClass();
+    MyClass()
 
 template<typename T>
 class DelayedSpSingleton : public NoCopyable {
