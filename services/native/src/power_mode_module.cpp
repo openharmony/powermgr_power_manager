@@ -37,6 +37,8 @@ sptr<SettingObserver> g_autoAdjustBrightnessObserver;
 sptr<SettingObserver> g_autoWindowRotationObserver;
 sptr<SettingObserver> g_vibratorsStateObserver;
 sptr<SettingObserver> g_lcdBrightnessObserver;
+sptr<SettingObserver> g_intellVoiceObserver;
+sptr<SettingObserver> g_alwaysOnDisplayObserver;
 }
 
 PowerModeModule::PowerModeModule()
@@ -57,6 +59,10 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::VIBRATORS_STATE, vibrationAction);
     PowerModePolicy::ModeAction onOffRotationAction = [&](bool isInit) { SetWindowRotation(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION, onOffRotationAction);
+    PowerModePolicy::ModeAction intellVoiceAction = [&](bool isInit) { SetIntellVoiceState(isInit); };
+    policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
+    PowerModePolicy::ModeAction aodAction = [&](bool isInit) { SetAlwaysOnDisplay(isInit); };
+    policy->AddAction(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY, aodAction);
 }
 
 void PowerModeModule::SetModeItem(PowerMode mode)
@@ -74,14 +80,8 @@ void PowerModeModule::SetModeItem(PowerMode mode)
         return;
     }
 
-    /* unregister setting observer for current mode */
-    UnregisterSaveModeObserver();
-
     /* start set mode thread */
     EnableMode(mode);
-
-    /* register setting observer for save mode */
-    RegisterSaveModeObserver();
 }
 
 PowerMode PowerModeModule::GetModeItem()
@@ -103,10 +103,14 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_autoWindowRotationObserver);
     SettingHelper::UnregisterSettingObserver(g_vibratorsStateObserver);
     SettingHelper::UnregisterSettingObserver(g_lcdBrightnessObserver);
+    SettingHelper::UnregisterSettingObserver(g_intellVoiceObserver);
+    SettingHelper::UnregisterSettingObserver(g_alwaysOnDisplayObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
     g_vibratorsStateObserver = nullptr;
     g_lcdBrightnessObserver = nullptr;
+    g_intellVoiceObserver = nullptr;
+    g_alwaysOnDisplayObserver = nullptr;
     observerRegisted_ = false;
 }
 
@@ -118,6 +122,8 @@ void PowerModeModule::RegisterSaveModeObserver()
         g_autoWindowRotationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
         g_vibratorsStateObserver = CreateSettingObserver(PowerModePolicy::ServiceType::VIBRATORS_STATE);
         g_lcdBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
+        g_intellVoiceObserver = CreateSettingObserver(PowerModePolicy::ServiceType::INTELL_VOICE);
+        g_alwaysOnDisplayObserver = CreateSettingObserver(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
         observerRegisted_ = true;
     }
 }
@@ -137,11 +143,23 @@ sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
             return SettingHelper::RegisterSettingVibrationObserver(updateFunc);
         case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
             return SettingHelper::RegisterSettingBrightnessObserver(updateFunc);
+        case PowerModePolicy::ServiceType::INTELL_VOICE:
+            return SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
+        case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
+            return SettingHelper::RegisterSettingAlwaysOnDisplayObserver(updateFunc);
         default:
             POWER_HILOGW(FEATURE_POWER_MODE, "register unknown switch id: %{public}d", switchId);
             break;
     }
     return nullptr;
+}
+
+void PowerModeModule::InitPowerMode() {
+    PowerMode powerMode = static_cast<PowerMode>(SettingHelper::GetCurrentPowerMode(INIT_VALUE_FALSE));
+    if (powerMode != this->mode_) {
+        EnableMode(powerMode, true);
+        POWER_HILOGI(FEATURE_POWER_MODE, "init power mode: %{public}d", powerMode);
+    }
 }
 
 void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
@@ -153,6 +171,11 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 
     started_ = true;
     mode_ = mode;
+    /* unregister setting observer for current mode */
+    UnregisterSaveModeObserver();
+
+    /* Save mode_ to setting data*/
+    SaveCurrentMode();
 
     /* Update power mode policy */
     UpdateModepolicy();
@@ -163,8 +186,16 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
     /* Set action */
     RunAction(isBoot);
 
+    /* register setting observer for save mode */
+    RegisterSaveModeObserver();
+
     this->lastMode_ = static_cast<uint32_t>(mode);
     started_ = false;
+}
+
+void PowerModeModule::SaveCurrentMode()
+{
+    SettingHelper::SaveCurrentPowerMode(static_cast<int32_t>(this->mode_));
 }
 
 void PowerModeModule::UpdateModepolicy()
@@ -375,6 +406,34 @@ void PowerModeModule::SetWindowRotation(bool isBoot)
         return;
     }
     SettingHelper::SetSettingWindowRotation(static_cast<SettingHelper::SwitchStatus>(rotation));
+}
+
+void PowerModeModule::SetIntellVoiceState(bool isBoot)
+{
+    if (isBoot && SettingHelper::IsIntellVoiceSettingValid()) {
+        return;
+    }
+    int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
+    if (state == INIT_VALUE_FALSE) {
+        return;
+    }
+    SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
+}
+
+void PowerModeModule::SetAlwaysOnDisplay(bool isBoot)
+{
+    if (isBoot && SettingHelper::IsAlwaysOnDisplaySettingValid()) {
+        return;
+    }
+    int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set always on display state %{public}d", state);
+    if (state == INIT_VALUE_FALSE) {
+        return;
+    }
+    SettingHelper::SetSettingAlwaysOnDisplay(static_cast<SettingHelper::SwitchStatus>(state));
 }
 } // namespace PowerMgr
 } // namespace OHOS
