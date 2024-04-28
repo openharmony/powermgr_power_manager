@@ -16,7 +16,7 @@
 #include "power_hdi_callback.h"
 #include "hdf_base.h"
 
-using namespace OHOS::HDI::Power::V1_1;
+using namespace OHOS::HDI::Power::V1_2;
 
 namespace OHOS {
 namespace PowerMgr {

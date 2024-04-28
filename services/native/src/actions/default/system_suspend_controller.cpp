@@ -26,7 +26,7 @@ namespace {
 const std::string HDI_SERVICE_NAME = "power_interface_service";
 constexpr uint32_t RETRY_TIME = 1000;
 } // namespace
-using namespace OHOS::HDI::Power::V1_1;
+using namespace OHOS::HDI::Power::V1_2;
 
 SystemSuspendController::SystemSuspendController() {}
 
@@ -130,14 +130,15 @@ void SystemSuspendController::Hibernate()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+    powerInterface_->Hibernate();
     POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate end.");
 }
 
-OHOS::HDI::Power::V1_1::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
+OHOS::HDI::Power::V1_2::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
 {
-    OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo {};
+    OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo {};
     filledInfo.name = param.name;
-    filledInfo.type = static_cast<OHOS::HDI::Power::V1_1::RunningLockType>(param.type);
+    filledInfo.type = static_cast<OHOS::HDI::Power::V1_2::RunningLockType>(param.type);
     filledInfo.timeoutMs = param.timeoutMs;
     filledInfo.uid = param.uid;
     filledInfo.pid = param.pid;
@@ -151,7 +152,7 @@ int32_t SystemSuspendController::AcquireRunningLock(const RunningLockParam& para
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return status;
     }
-    OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(param);
+    OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo = FillRunningLockInfo(param);
     status = powerInterface_->HoldRunningLockExt(filledInfo,
         param.lockid, param.bundleName);
     return status;
@@ -164,7 +165,7 @@ int32_t SystemSuspendController::ReleaseRunningLock(const RunningLockParam& para
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return status;
     }
-    OHOS::HDI::Power::V1_1::RunningLockInfo filledInfo = FillRunningLockInfo(param);
+    OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo = FillRunningLockInfo(param);
     status = powerInterface_->UnholdRunningLockExt(filledInfo,
         param.lockid, param.bundleName);
     return status;
