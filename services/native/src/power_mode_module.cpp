@@ -39,6 +39,7 @@ sptr<SettingObserver> g_vibratorsStateObserver;
 sptr<SettingObserver> g_lcdBrightnessObserver;
 sptr<SettingObserver> g_intellVoiceObserver;
 sptr<SettingObserver> g_alwaysOnDisplayObserver;
+sptr<SettingObserver> g_locationObserver;
 }
 
 PowerModeModule::PowerModeModule()
@@ -63,6 +64,8 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
     PowerModePolicy::ModeAction aodAction = [&](bool isInit) { SetAlwaysOnDisplay(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY, aodAction);
+    PowerModePolicy::ModeAction locationAction = [&](bool isInit) { SetLocationState(isInit); };
+    policy->AddAction(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY, locationAction);
 }
 
 void PowerModeModule::SetModeItem(PowerMode mode)
@@ -105,12 +108,14 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_lcdBrightnessObserver);
     SettingHelper::UnregisterSettingObserver(g_intellVoiceObserver);
     SettingHelper::UnregisterSettingObserver(g_alwaysOnDisplayObserver);
+    SettingHelper::UnregisterSettingObserver(g_locationObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
     g_vibratorsStateObserver = nullptr;
     g_lcdBrightnessObserver = nullptr;
     g_intellVoiceObserver = nullptr;
     g_alwaysOnDisplayObserver = nullptr;
+    g_locationObserver = nullptr;
     observerRegisted_ = false;
 }
 
@@ -124,6 +129,7 @@ void PowerModeModule::RegisterSaveModeObserver()
         g_lcdBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
         g_intellVoiceObserver = CreateSettingObserver(PowerModePolicy::ServiceType::INTELL_VOICE);
         g_alwaysOnDisplayObserver = CreateSettingObserver(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
+        g_locationObserverr = CreateSettingObserver(PowerModePolicy::ServiceType::LOCATION_STATE);
         observerRegisted_ = true;
     }
 }
@@ -147,6 +153,8 @@ sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
             return SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
         case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
             return SettingHelper::RegisterSettingAlwaysOnDisplayObserver(updateFunc);
+        case PowerModePolicy::ServiceType::LOCATION_STATE:
+            return SettingHelper::RegisterSettingLocationObserver(updateFunc);
         default:
             POWER_HILOGW(FEATURE_POWER_MODE, "register unknown switch id: %{public}d", switchId);
             break;
@@ -434,6 +442,20 @@ void PowerModeModule::SetAlwaysOnDisplay(bool isBoot)
         return;
     }
     SettingHelper::SetSettingAlwaysOnDisplay(static_cast<SettingHelper::SwitchStatus>(state));
+}
+
+void PowerModeModule::SetLocationState(bool isBoot)
+{
+    if (isBoot && SettingHelper::IsLocationSettingValid()) {
+        return;
+    }
+    int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType:LOCATION_STATE);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set location working state %{public}d", state);
+    if (state == INIT_VALUE_FALSE) {
+        return;
+    }
+    SettingHelper::SetSettingLocation(static_cast<SettingHelper::SwitchStatus>(state));
 }
 } // namespace PowerMgr
 } // namespace OHOS

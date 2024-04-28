@@ -284,6 +284,43 @@ sptr<SettingObserver> SettingHelper::RegisterSettingAlwaysOnDisplayObserver(Sett
     return settingObserver;
 }
 
+bool SettingHelper::IsLocationSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_LOCATION_KEY);
+}
+
+int32_t SettingHelper::GetSettingLocation(int32_t defaultVal)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = defaultVal;
+    ErrCode ret = settingProvider.GetIntValue(SETTING_LOCATION_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting location failed, ret=%{public}d", ret);
+    }
+    return value;
+}
+
+void SettingHelper::SetSettingLocation(SwitchStatus status)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    ErrCode ret = settingProvider.PutIntValue(SETTING_LOCATION_KEY, static_cast<int32_t>(status));
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "set setting location failed, status=%{public}d, ret=%{public}d", status, ret);
+    }
+}
+
+sptr<SettingObserver> SettingHelper::RegisterSettingLocationObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto settingObserver = settingProvider.CreateObserver(SETTING_LOCATION_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(settingObserver);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting location observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return settingObserver;
+}
+
 sptr<SettingObserver> SettingHelper::RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
