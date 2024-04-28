@@ -80,6 +80,8 @@ private:
     static void SetIntellVoiceState(bool isBoot);
     static void SetAlwaysOnDisplay(bool isBoot);
     static void SetLocationState(bool isBoot);
+    static void SaveCurrentMode();
+    static int32_t GetCurrentPowerMode(int32_t defaultValue);
 
     std::atomic<bool> started_;
     std::mutex mutex_;

@@ -129,7 +129,7 @@ void PowerModeModule::RegisterSaveModeObserver()
         g_lcdBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
         g_intellVoiceObserver = CreateSettingObserver(PowerModePolicy::ServiceType::INTELL_VOICE);
         g_alwaysOnDisplayObserver = CreateSettingObserver(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
-        g_locationObserverr = CreateSettingObserver(PowerModePolicy::ServiceType::LOCATION_STATE);
+        g_locationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LOCATION_STATE);
         observerRegisted_ = true;
     }
 }
@@ -162,7 +162,8 @@ sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
     return nullptr;
 }
 
-void PowerModeModule::InitPowerMode() {
+void PowerModeModule::InitPowerMode()
+{
     PowerMode powerMode = static_cast<PowerMode>(SettingHelper::GetCurrentPowerMode(INIT_VALUE_FALSE));
     if (powerMode != this->mode_) {
         EnableMode(powerMode, true);
@@ -450,7 +451,7 @@ void PowerModeModule::SetLocationState(bool isBoot)
         return;
     }
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType:LOCATION_STATE);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LOCATION_STATE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set location working state %{public}d", state);
     if (state == INIT_VALUE_FALSE) {
         return;
