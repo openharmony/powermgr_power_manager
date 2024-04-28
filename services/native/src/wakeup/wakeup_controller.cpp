@@ -21,11 +21,6 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-#include "app_mgr_client.h"
-#include "bundle_mgr_client.h"
-#include "window_manager.h"
-#endif
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
@@ -34,15 +29,13 @@
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
+#include "power_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-FFRTHandle g_screenTimeoutHandle;
-#endif
 }
 
 /** WakeupController Implement */
@@ -75,26 +68,11 @@ WakeupController::~WakeupController()
     if (g_wakeupSourcesKeyObserver) {
         SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
     }
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-    if (g_screenTimeoutHandle) {
-        FFRTUtils::CancelTask(g_screenTimeoutHandle, queue_);
-    }
-    if (queue_) {
-        queue_.reset();
-    }
-#endif
 }
 
 void WakeupController::Init()
 {
     std::lock_guard lock(monitorMutex_);
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-    queue_ = std::make_shared<FFRTQueue>("power_wakeup_controller");
-    if (queue_ == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "wakeupQueue_ is null");
-        return;
-    }
-#endif
     std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -112,18 +90,6 @@ void WakeupController::Init()
         }
     }
     RegisterSettingsObserver();
-
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-    std::function<void(uint32_t)> callback = [&](uint32_t event) {
-        POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone: %{public}d", event);
-        FFRTUtils::CancelTask(g_screenTimeoutHandle, queue_);
-    };
-    auto stateAction = stateMachine_->GetStateAction();
-    if (stateAction != nullptr) {
-        stateAction->RegisterCallback(callback);
-        POWER_HILOGI(COMP_SVC, "NotifyDisplayActionDone callback registered");
-    }
-#endif
 }
 
 void WakeupController::Cancel()
@@ -208,13 +174,8 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-        if (IsHandleSysfreeze()) {
-            StartWakeupTimer();
-        }
-#endif
         SystemSuspendController::GetInstance().Wakeup();
-        POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
+        POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}s", PowerUtils::GetWakeupDeviceTypeString(reason));
         if (stateMachine_->GetState() == PowerState::SLEEP) {
             auto suspendController = pms->GetSuspendController();
             if (suspendController != nullptr) {
@@ -231,67 +192,13 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         }
 #endif
         if (!stateMachine_->SetState(PowerState::AWAKE,
-            stateMachine_->GetReasonByWakeType(static_cast<WakeupDeviceType>(reason)), true)) {
+            stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
     } else {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] state=%{public}u no transitor", stateMachine_->GetState());
     }
 }
-
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-void WakeupController::StartWakeupTimer()
-{
-    FFRTTask task = [this] {
-        HandleScreenOnTimeout();
-    };
-    g_screenTimeoutHandle = FFRTUtils::SubmitDelayTask(task, WakeupMonitor::POWER_KEY_PRESS_DELAY_MS, queue_);
-}
-
-bool WakeupController::IsHandleSysfreeze()
-{
-    Rosen::FocusChangeInfo focusChangeInfo;
-    Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
-    int uid = focusChangeInfo.uid_;
-    POWER_HILOGD(FEATURE_WAKEUP, "focusChangeInfo.uid_ %{public}d.", uid);
-    std::string bundleName;
-    AppExecFwk::BundleMgrClient client;
-    if (client.GetNameForUid(uid, bundleName) != ERR_OK) {
-        POWER_HILOGW(FEATURE_WAKEUP, "Failed to query bundleName from bms, uid:%{public}d.", uid);
-        return true;
-    } else {
-        POWER_HILOGD(FEATURE_WAKEUP, "bundleName of uid:%{public}d is %{public}s", uid, bundleName.c_str());
-    }
-
-    if (bundleName.empty()) {
-        return true;
-    }
-
-    bool ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsAttachDebug(bundleName);
-    if (ret) {
-        POWER_HILOGI(FEATURE_WAKEUP, "sysfreeze filtration %{public}s.", bundleName.c_str());
-        return false;
-    }
-
-    return true;
-}
-#endif
-
-#ifdef SCREEN_ON_TIMEOUT_CHECK
-void WakeupController::HandleScreenOnTimeout()
-{
-    if (IsHandleSysfreeze()) {
-        POWER_HILOGI(FEATURE_INPUT, "ScreenOnTimeout");
-    }
-}
-
-void WakeupController::Reset()
-{
-    if (queue_) {
-        queue_.reset();
-    }
-}
-#endif
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */

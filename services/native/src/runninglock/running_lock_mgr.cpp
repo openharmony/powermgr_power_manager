@@ -150,7 +150,7 @@ void RunningLockMgr::ProximityLockOn()
     if (proximityController_.IsClose()) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] INACTIVE when proximity is closed");
         bool ret = stateMachine->SetState(PowerState::INACTIVE,
-            StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+            StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
         if (ret) {
             suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
                 static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
@@ -159,7 +159,7 @@ void RunningLockMgr::ProximityLockOn()
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] AWAKE when proximity is away");
         PreprocessBeforeAwake();
         stateMachine->SetState(PowerState::AWAKE,
-            StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+            StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
     }
 }
 
@@ -869,7 +869,7 @@ void RunningLockMgr::ProximityController::OnClose()
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
-        bool ret = stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+        bool ret = stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
         if (ret) {
             suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
                 static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
@@ -900,7 +900,7 @@ void RunningLockMgr::ProximityController::OnAway()
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
         runningLock->PreprocessBeforeAwake();
-        stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SENSOR, true);
+        stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
     }
 }
 

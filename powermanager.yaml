@@ -37,6 +37,16 @@ SCREEN_ON_TIMEOUT:
   PACKAGE_NAME: {type: STRING, desc: call package name}
   PROCESS_NAME: {type: STRING, desc: call process name}
   MSG: {type: STRING, desc: screen on timeout message}
+  REASON: {type: STRING, desc: screen on reason}
+
+SCREEN_OFF_TIMEOUT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: timeout screen off information}
+  PID: {type: INT32, desc: session pid}
+  UID: {type: INT32, desc: session uid}
+  PACKAGE_NAME: {type: STRING, desc: call package name}
+  PROCESS_NAME: {type: STRING, desc: call process name}
+  MSG: {type: STRING, desc: screen off timeout message}
+  REASON: {type: STRING, desc: screen off reason}
 
 STATE:
   __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: power state}

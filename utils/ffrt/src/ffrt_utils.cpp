@@ -147,7 +147,7 @@ void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs)
 uint32_t FFRTTimer::GetTaskId(uint32_t timerId)
 {
     mutex_.lock();
-    uint32_t id = taskId_[timerId];
+    uint32_t id = taskId.count(timerId) ? taskId_[timerId] : 0;
     mutex_.unlock();
     return id;
 }
@@ -155,21 +155,37 @@ uint32_t FFRTTimer::GetTaskId(uint32_t timerId)
 /* inner functions must be called when mutex_ is locked */
 void FFRTTimer::CancelAllTimerInner()
 {
+    std::vector<uint32_t> privateIds;
     for (auto &p : handleMap_) {
         if (p.second != nullptr) {
             POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Cancel Task[%{public}u]", p.first, taskId_[p.first]);
             FFRTUtils::CancelTask(p.second, queue_);
             p.second = nullptr;
+            if (p.first >= TIMER_ID_PRIVATE_START) {
+                privateIds.push_back(p.first);
+            }
         }
+    }
+
+    // delete private ids in std::map
+    for (auto id : privateIds) {
+        handleMap_.erase(id);
+        taskId_.erase(id);
     }
 }
 
 void FFRTTimer::CancelTimerInner(uint32_t timerId)
 {
-    if (handleMap_[timerId] != nullptr) {
+    if (handleMap_.count(timerId) && handleMap_[timerId] != nullptr) {
         POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Cancel Task[%{public}u]", timerId, taskId_[timerId]);
         FFRTUtils::CancelTask(handleMap_[timerId], queue_);
         handleMap_[timerId] = nullptr;
+    }
+
+    // delete private ids in std::map
+    if (timerId >= TIMER_ID_PRIVATE_START) {
+        handleMap_.erase(timerId);
+        taskId_.erase(timerId);
     }
 }
 

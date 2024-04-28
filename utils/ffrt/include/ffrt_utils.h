@@ -123,9 +123,15 @@ public:
     static int CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
 };
 
+/**
+ * id 0-99 : public use for all FFRTTimer class
+ * id 100+ : private use for each FFRTTimer class
+ */
 enum FFRTTimerId {
     TIMER_ID_SLEEP,
     TIMER_ID_USER_ACTIVITY_OFF,
+    TIMER_ID_USER_ACTIVITY_TIMEOUT,
+    TIMER_ID_USER_PRIVATE_START = 100,
 };
 
 class FFRTMutexMap {

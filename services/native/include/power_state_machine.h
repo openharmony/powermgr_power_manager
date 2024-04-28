@@ -251,7 +251,6 @@ private:
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
-    std::mutex ffrtMutex_;
     // all change to currentState_ should be inside stateMutex_
     std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
@@ -264,8 +263,6 @@ private:
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
-    std::shared_ptr<FFRTQueue> queue_;
-    FFRTHandle userActivityTimeoutHandle_ {nullptr};
     std::atomic<bool> isCoordinatedOverride_ {false};
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
@@ -276,6 +273,15 @@ private:
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
     std::atomic<int64_t> settingStateFlag_ {-1};
+    // screen on/off timeout check
+    static constexpr int32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
+    FFRTMutex screenTimeoutMutex_;
+    uint32_t screenTimeoutId_;
+    std::shared_ptr<FFRTTimer> ffrtTimer_;
+    void InitScreenTimeoutCheck();
+    uint32_t GetScreenTimeoutId();
+    uint32_t StartScreenTimeoutCheck(PowerState state, StateChangeReason reason);
+    void EndScreenTimeoutCheck(uint32_t id);
 };
 } // namespace PowerMgr
 } // namespace OHOS
