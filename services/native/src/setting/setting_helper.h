@@ -58,6 +58,10 @@ public:
     static int32_t GetSettingAlwaysOnDisplay(int32_t defaultVal);
     static void SetSettingAlwaysOnDisplay(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingAlwaysOnDisplayObserver(SettingObserver::UpdateFunc& func);
+    static bool IsLocationSettingValid();
+    static int32_t GetSettingLocation(int32_t defaultVal);
+    static void SetSettingLocation(SwitchStatus status);
+    static sptr<SettingObserver> RegisterSettingLocationObserver(SettingObserver::UpdateFunc& func);
     static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
     static bool IsSuspendSourcesSettingValid();
     static const std::string GetSettingSuspendSources();
@@ -82,6 +86,7 @@ private:
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
     static constexpr const char* SETTING_ALWAYS_ON_DISPLAY_KEY {"settings.sceneboard.aod.state"};
+    static constexpr const char* SETTING_LOCATION_KEY {"location_working_state"};
 
     static constexpr const char* SETTING_POWER_MODE_KEY {"settings.power.smart_mode_status"};
 };
