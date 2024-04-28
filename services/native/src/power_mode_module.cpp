@@ -65,7 +65,7 @@ PowerModeModule::PowerModeModule()
     PowerModePolicy::ModeAction aodAction = [&](bool isInit) { SetAlwaysOnDisplay(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY, aodAction);
     PowerModePolicy::ModeAction locationAction = [&](bool isInit) { SetLocationState(isInit); };
-    policy->AddAction(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY, locationAction);
+    policy->AddAction(PowerModePolicy::ServiceType::LOCATION_STATE, locationAction);
 }
 
 void PowerModeModule::SetModeItem(PowerMode mode)
@@ -422,7 +422,7 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
         return;
     }
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
     if (state == INIT_VALUE_FALSE) {
         return;
