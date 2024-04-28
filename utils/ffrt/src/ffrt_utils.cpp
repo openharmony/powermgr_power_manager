@@ -121,10 +121,6 @@ void FFRTTimer::CancelTimer(uint32_t timerId)
 
 void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs)
 {
-    if (delayMs == 0) {
-        return SetTimer(timerId, task);
-    }
-
     mutex_.lock();
     CancelTimerInner(timerId);
     ++taskId_[timerId];
@@ -137,7 +133,7 @@ void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs)
 uint32_t FFRTTimer::GetTaskId(uint32_t timerId)
 {
     mutex_.lock();
-    uint32_t id = taskId.count(timerId) ? taskId_[timerId] : 0;
+    uint32_t id = taskId_.count(timerId) ? taskId_[timerId] : 0;
     mutex_.unlock();
     return id;
 }
