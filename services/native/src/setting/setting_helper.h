@@ -50,6 +50,14 @@ public:
     static int32_t GetSettingWindowRotation(int32_t defaultVal);
     static void SetSettingWindowRotation(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingWindowRotationObserver(SettingObserver::UpdateFunc& func);
+    static bool IsIntellVoiceSettingValid();
+    static int32_t GetSettingIntellVoice(int32_t defaultVal);
+    static void SetSettingIntellVoice(SwitchStatus status);
+    static sptr<SettingObserver> RegisterSettingIntellVoiceObserver(SettingObserver::UpdateFunc& func);
+    static bool IsAlwaysOnDisplaySettingValid();
+    static int32_t GetSettingAlwaysOnDisplay(int32_t defaultVal);
+    static void SetSettingAlwaysOnDisplay(SwitchStatus status);
+    static sptr<SettingObserver> RegisterSettingAlwaysOnDisplayObserver(SettingObserver::UpdateFunc& func);
     static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
     static bool IsSuspendSourcesSettingValid();
     static const std::string GetSettingSuspendSources();
@@ -61,14 +69,21 @@ public:
 
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
 
+    static void SaveCurrentPowerMode(int32_t powerMode);
+    static int32_t GetCurrentPowerMode(int32_t defaultVal);
+
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
-    static constexpr const char* SETTING_VIBRATION_KEY {"settings.sound.vibrate_status"};
+    static constexpr const char* SETTING_VIBRATION_KEY {"physic_navi_haptic_feedback_enabled"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.general.accelerometer_rotation_status"};
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
+    static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
+    static constexpr const char* SETTING_ALWAYS_ON_DISPLAY_KEY {"settings.sceneboard.aod.state"};
+
+    static constexpr const char* SETTING_POWER_MODE_KEY {"settings.power.smart_mode_status"};
 };
 } // namespace PowerMgr
 } // namespace OHOS

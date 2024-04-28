@@ -98,6 +98,12 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
         case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
             defaultVal = SettingHelper::GetSettingBrightness(defaultVal);
             break;
+        case PowerModePolicy::ServiceType::INTELL_VOICE:
+            defaultVal = SettingHelper::GetSettingIntellVoice(defaultVal);
+            break;
+        case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
+            defaultVal = SettingHelper::GetSettingAlwaysOnDisplay(defaultVal);
+            break;
         default:
             break;
     }
@@ -106,8 +112,6 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
         POWER_HILOGW(FEATURE_POWER_MODE, "get setting state invalid, switch id: %{public}d", switchId);
         return;
     }
-
-    value = static_cast<int32_t>(defaultVal);
     POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, switch value: %{public}d", switchId, value);
 }
 
