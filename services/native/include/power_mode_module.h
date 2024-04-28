@@ -79,6 +79,7 @@ private:
     static void SetWindowRotation(bool isBoot);
     static void SetIntellVoiceState(bool isBoot);
     static void SetAlwaysOnDisplay(bool isBoot);
+    static void SetLocationState(bool isBoot);
 
     std::atomic<bool> started_;
     std::mutex mutex_;
