@@ -66,6 +66,7 @@ private:
     void PublishPowerModeEvent();
     void UnregisterSaveModeObserver();
     void RegisterSaveModeObserver();
+    void SaveCurrentMode();
     sptr<SettingObserver> CreateSettingObserver(uint32_t switchId);
 
     sptr<CallbackManager> callbackMgr_;
@@ -80,7 +81,6 @@ private:
     static void SetIntellVoiceState(bool isBoot);
     static void SetAlwaysOnDisplay(bool isBoot);
     static void SetLocationState(bool isBoot);
-    static void SaveCurrentMode();
 
     std::atomic<bool> started_;
     std::mutex mutex_;
