@@ -104,6 +104,9 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
         case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
             defaultVal = SettingHelper::GetSettingAlwaysOnDisplay(defaultVal);
             break;
+        case PowerModePolicy::ServiceType::LOCATION_STATE:
+            defaultVal = SettingHelper::GetSettingLocation(defaultVal);
+            break;
         default:
             break;
     }
