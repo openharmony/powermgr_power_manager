@@ -175,7 +175,7 @@ const char* PowerUtils::GetRunningLockTypeString(RunningLockType type)
     return "UNKNOWN";
 }
 
-const char* PowerUtils::GetSuspendDeviceTypeString(SuspendDeviceType type);
+const char* PowerUtils::GetSuspendDeviceTypeString(SuspendDeviceType type)
 {
     switch (type) {
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION:
@@ -210,7 +210,7 @@ const char* PowerUtils::GetSuspendDeviceTypeString(SuspendDeviceType type);
     return "UNKNOWN";
 }
 
-const char* PowerUtils::GetWakeupDeviceTypeString(WakeupDeviceType type);
+const char* PowerUtils::GetWakeupDeviceTypeString(WakeupDeviceType type)
 {
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN:

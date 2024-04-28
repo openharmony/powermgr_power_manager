@@ -741,7 +741,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
             if (!ffrtTimer_) {
                 return;
             }
-            ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT)
+            ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT);
             break;
         }
         case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
@@ -993,9 +993,9 @@ int64_t PowerStateMachine::GetSleepTime()
 
 void PowerStateMachine::InitScreenTimeoutCheck()
 {
-    screenTimeoutMutex.lock();
+    screenTimeoutMutex_.lock();
     screenTimeoutId_ = TIMER_ID_PRIVATE_START;
-    screenTimeoutMutex.unlock();
+    screenTimeoutMutex_.unlock();
 }
 
 uint32_t PowerStateMachine::GetScreenTimeoutId()
@@ -1020,7 +1020,7 @@ uint32_t PowerStateMachine::StartScreenTimeoutCheck(PowerState state, StateChang
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
             "PID", IPCSkeleton::GetCallingPid(), "UID", IPCSkeleton::GetCallingUid(), "PACKAGE_NAME", "",
             "PROCESS_NAME", "", "MSG", "", "REASON", PowerUtils::GetReasonTypeString(reason));
-    }
+    };
     uint32_t id = GetScreenTimeoutId();
     ffrtTimer_->SetTimer(id, task, SCREEN_CHANGE_TIMEOUT_MS);
     return id;
@@ -1161,7 +1161,7 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             ret = StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_SHELL:
-            ret = StateChangeReason::WAKEUP_DEVICE_SHELL;
+            ret = StateChangeReason::STATE_CHANGE_REASON_SHELL;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
