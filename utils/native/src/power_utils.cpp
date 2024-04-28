@@ -84,9 +84,9 @@ const char* PowerUtils::GetReasonTypeString(StateChangeReason type)
             return "PROXIMITY";
         case StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL:
             return "INCOMING_CALL";
-        case StateChangeReason::STATE_CHANGE_REASON_COORDINATION:
-            return "SHELL";
         case StateChangeReason::STATE_CHANGE_REASON_SHELL:
+            return "SHELL";
+        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
             return "TIMEOUT_NO_SCREEN_LOCK";
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return "UNKNOWN";

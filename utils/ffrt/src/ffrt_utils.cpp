@@ -119,16 +119,6 @@ void FFRTTimer::CancelTimer(uint32_t timerId)
     mutex_.unlock();
 }
 
-void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task)
-{
-    mutex_.lock();
-    CancelTimerInner(timerId);
-    ++taskId_[timerId];
-    POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Add Task[%{public}u]", timerId, taskId_[timerId]);
-    FFRTUtils::SubmitTask(task);
-    mutex_.unlock();
-}
-
 void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs)
 {
     if (delayMs == 0) {
@@ -176,7 +166,11 @@ void FFRTTimer::CancelAllTimerInner()
 
 void FFRTTimer::CancelTimerInner(uint32_t timerId)
 {
-    if (handleMap_.count(timerId) && handleMap_[timerId] != nullptr) {
+    if (!handleMap_.count(timerId)) {
+        return;
+    }
+
+    if (handleMap_[timerId] != nullptr) {
         POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Cancel Task[%{public}u]", timerId, taskId_[timerId]);
         FFRTUtils::CancelTask(handleMap_[timerId], queue_);
         handleMap_[timerId] = nullptr;
