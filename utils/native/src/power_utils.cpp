@@ -17,122 +17,134 @@
 
 namespace OHOS {
 namespace PowerMgr {
-const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
+const char* PowerUtils::GetReasonTypeString(StateChangeReason type)
 {
     switch (type) {
         case StateChangeReason::STATE_CHANGE_REASON_INIT:
-            return std::string("INIT");
+            return "INIT";
         case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT:
-            return std::string("TIMEOUT");
+            return "TIMEOUT";
         case StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK:
-            return std::string("RUNNING_LOCK");
+            return "RUNNING_LOCK";
         case StateChangeReason::STATE_CHANGE_REASON_BATTERY:
-            return std::string("BATTERY");
+            return "BATTERY";
         case StateChangeReason::STATE_CHANGE_REASON_THERMAL:
-            return std::string("THERMAL");
+            return "THERMAL";
         case StateChangeReason::STATE_CHANGE_REASON_WORK:
-            return std::string("WORK");
+            return "WORK";
         case StateChangeReason::STATE_CHANGE_REASON_SYSTEM:
-            return std::string("SYSTEM");
+            return "SYSTEM";
         case StateChangeReason::STATE_CHANGE_REASON_APPLICATION:
-            return std::string("APPLICATION");
+            return "APPLICATION";
         case StateChangeReason::STATE_CHANGE_REASON_SETTINGS:
-            return std::string("SETTINGS");
+            return "SETTINGS";
         case StateChangeReason::STATE_CHANGE_REASON_HARD_KEY:
-            return std::string("HARD_KEY");
+            return "HARD_KEY";
         case StateChangeReason::STATE_CHANGE_REASON_TOUCH:
-            return std::string("TOUCH");
+            return "TOUCH";
         case StateChangeReason::STATE_CHANGE_REASON_CABLE:
-            return std::string("CABLE");
+            return "CABLE";
         case StateChangeReason::STATE_CHANGE_REASON_SENSOR:
-            return std::string("SENSOR");
+            return "SENSOR";
         case StateChangeReason::STATE_CHANGE_REASON_LID:
-            return std::string("LID");
+            return "LID";
         case StateChangeReason::STATE_CHANGE_REASON_CAMERA:
-            return std::string("CAMERA");
+            return "CAMERA";
         case StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY:
-            return std::string("ACCESS");
+            return "ACCESS";
+        case StateChangeReason::STATE_CHANGE_REASON_RESET:
+            return "RESET";
         case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
-            return std::string("POWER_KEY");
+            return "POWER_KEY";
         case StateChangeReason::STATE_CHANGE_REASON_KEYBOARD:
-            return std::string("KEYBOARD");
+            return "KEYBOARD";
         case StateChangeReason::STATE_CHANGE_REASON_MOUSE:
-            return std::string("MOUSE");
+            return "MOUSE";
+        case StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK:
+            return "DOUBLE_CLICK";
+        case StateChangeReason::STATE_CHANGE_REASON_SWITCH:
+            return "SWITCH";
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
-            return std::string("PRE_BRIGHT");
+            return "PRE_BRIGHT";
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
-            return std::string("PRE_BRIGHT_ATUH_SUCCESS");
+            return "PRE_BRIGHT_ATUH_SUCCESS";
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
-            return std::string("PRE_BRIGHT_ATUH_FAIL_SCREEN_ON");
+            return "PRE_BRIGHT_ATUH_FAIL_SCREEN_ON";
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
-            return std::string("PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF");
+            return "PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF";
         case StateChangeReason::STATE_CHANGE_REASON_AOD_SLIDING:
-            return std::string("AOD_SLIDING");
+            return "AOD_SLIDING";
         case StateChangeReason::STATE_CHANGE_REASON_REMOTE:
-            return std::string("REMOTE");
+            return "REMOTE";
         case StateChangeReason::STATE_CHANGE_REASON_REFRESH:
-            return std::string("REFRESH");
+            return "REFRESH";
         case StateChangeReason::STATE_CHANGE_REASON_COORDINATION:
-            return std::string("COORDINATION_OVERRIDE");
-        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
-            return std::string("TIMEOUT_NO_SCREEN_LOCK");
+            return "COORDINATION_OVERRIDE";
+        case StateChangeReason::STATE_CHANGE_REASON_PROXIMITY:
+            return "PROXIMITY";
+        case StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL:
+            return "INCOMING_CALL";
+        case StateChangeReason::STATE_CHANGE_REASON_COORDINATION:
+            return "SHELL";
+        case StateChangeReason::STATE_CHANGE_REASON_SHELL:
+            return "TIMEOUT_NO_SCREEN_LOCK";
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
-            return std::string("UNKNOWN");
+            return "UNKNOWN";
         default:
             break;
     }
-    return std::string("UNKNOWN");
+    return "UNKNOWN";
 }
 
-const std::string PowerUtils::GetPowerStateString(PowerState state)
+const char* PowerUtils::GetPowerStateString(PowerState state)
 {
     switch (state) {
         case PowerState::AWAKE:
-            return std::string("AWAKE");
+            return "AWAKE";
         case PowerState::FREEZE:
-            return std::string("FREEZE");
+            return "FREEZE";
         case PowerState::INACTIVE:
-            return std::string("INACTIVE");
+            return "INACTIVE";
         case PowerState::STAND_BY:
-            return std::string("STAND_BY");
+            return "STAND_BY";
         case PowerState::DOZE:
-            return std::string("DOZE");
+            return "DOZE";
         case PowerState::SLEEP:
-            return std::string("SLEEP");
+            return "SLEEP";
         case PowerState::HIBERNATE:
-            return std::string("HIBERNATE");
+            return "HIBERNATE";
         case PowerState::SHUTDOWN:
-            return std::string("SHUTDOWN");
+            return "SHUTDOWN";
         case PowerState::DIM:
-            return std::string("DIM");
+            return "DIM";
         case PowerState::UNKNOWN:
-            return std::string("UNKNOWN");
+            return "UNKNOWN";
         default:
             break;
     }
-    return std::string("UNKNOWN");
+    return "UNKNOWN";
 }
 
-const std::string PowerUtils::GetDisplayStateString(DisplayState state)
+const char* PowerUtils::GetDisplayStateString(DisplayState state)
 {
     switch (state) {
         case DisplayState::DISPLAY_OFF:
-            return std::string("DISPLAY_OFF");
+            return "DISPLAY_OFF";
         case DisplayState::DISPLAY_DIM:
-            return std::string("DISPLAY_DIM");
+            return "DISPLAY_DIM";
         case DisplayState::DISPLAY_ON:
-            return std::string("DISPLAY_ON");
+            return "DISPLAY_ON";
         case DisplayState::DISPLAY_SUSPEND:
-            return std::string("DISPLAY_SUSPEND");
+            return "DISPLAY_SUSPEND";
         case DisplayState::DISPLAY_UNKNOWN:
-            return std::string("DISPLAY_UNKNOWN");
+            return "DISPLAY_UNKNOWN";
         default:
             break;
     }
-    return std::string("DISPLAY_UNKNOWN");
+    return "DISPLAY_UNKNOWN";
 }
 
-const std::string PowerUtils::GetRunningLockTypeString(RunningLockType type)
+const char* PowerUtils::GetRunningLockTypeString(RunningLockType type)
 {
     switch (type) {
         case RunningLockType::RUNNINGLOCK_SCREEN:
@@ -161,6 +173,99 @@ const std::string PowerUtils::GetRunningLockTypeString(RunningLockType type)
             break;
     }
     return "UNKNOWN";
+}
+
+const char* PowerUtils::GetSuspendDeviceTypeString(SuspendDeviceType type);
+{
+    switch (type) {
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION:
+            return "APPLICATION";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN:
+            return "DEVICE_ADMIN";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT:
+            return "TIMEOUT";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID:
+            return "LID";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
+            return "POWER_KEY";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI:
+            return "HDMI";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY:
+            return "SLEEP_KEY";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_ACCESSIBILITY:
+            return "ACCESSIBILITY";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND:
+            return "FORCE_SUSPEND";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_STR:
+            return "STR";
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH:
+            return "SWITCH";
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_LOW_CAPACITY:
+            return "LOW_CAPACITY";
+#endif
+        default:
+            break;
+    }
+    return "UNKNOWN";
+}
+
+const char* PowerUtils::GetWakeupDeviceTypeString(WakeupDeviceType type);
+{
+    switch (type) {
+        case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN:
+            return "UNKNOWN";
+        case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
+            return "POWER_BUTTON";
+        case WakeupDeviceType::WAKEUP_DEVICE_APPLICATION:
+            return "APPLICATION";
+        case WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN:
+            return "PLUGGED_IN";
+        case WakeupDeviceType::WAKEUP_DEVICE_GESTURE:
+            return "GESTURE";
+        case WakeupDeviceType::WAKEUP_DEVICE_CAMERA_LAUNCH:
+            return "CAMERA_LAUNCH";
+        case WakeupDeviceType::WAKEUP_DEVICE_WAKE_KEY:
+            return "WAKE_KEY";
+        case WakeupDeviceType::WAKEUP_DEVICE_WAKE_MOTION:
+            return "WAKE_MOTION";
+        case WakeupDeviceType::WAKEUP_DEVICE_HDMI:
+            return "HDMI";
+        case WakeupDeviceType::WAKEUP_DEVICE_LID:
+            return "LID";
+        case WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK:
+            return "DOUBLE_CLICK";
+        case WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD:
+            return "KEYBOARD";
+        case WakeupDeviceType::WAKEUP_DEVICE_MOUSE:
+            return "MOUSE";
+        case WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD:
+            return "TOUCHPAD";
+        case WakeupDeviceType::WAKEUP_DEVICE_PEN:
+            return "PEN";
+        case WakeupDeviceType::WAKEUP_DEVICE_TOUCH_SCREEN:
+            return "TOUCH_SCREEN";
+        case WakeupDeviceType::WAKEUP_DEVICE_SWITCH:
+            return "SWITCH";
+        case WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK:
+            return "SINGLE_CLICK";
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
+            return "PRE_BRIGHT";
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS:
+            return "PRE_BRIGHT_AUTH_SUCCESS";
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
+            return "PRE_BRIGHT_AUTH_FAIL_SCREEN_ON";
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
+            return "PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF";
+        case WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING:
+            return "AOD_SLIDING";
+        case WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL:
+            return "INCOMING_CALL";
+        case WakeupDeviceType::WAKEUP_DEVICE_SHELL:
+            return "SHELL";
+        default:
+            break;
+    }
 }
 } // namespace PowerMgr
 } // namespace OHOS
