@@ -59,7 +59,7 @@ private:
 
     void ReadPowerModePolicy(uint32_t mode);
     void ComparePowerModePolicy();
-    void GetSettingSwitchState(uint32_t& switchId, int32_t& value); // from setting
+    void GetSettingSwitchState(uint32_t switchId, int32_t& value); // from setting
     int32_t GetPolicyFromMap(uint32_t type);
     std::mutex policyMutex_;
     std::mutex actionMapMutex_;

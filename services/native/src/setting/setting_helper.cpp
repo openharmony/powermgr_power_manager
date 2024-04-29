@@ -102,17 +102,6 @@ bool SettingHelper::IsBrightnessSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_BRIGHTNESS_KEY);
 }
 
-int32_t SettingHelper::GetSettingBrightness(int32_t defaultVal)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value = defaultVal;
-    ErrCode ret = settingProvider.GetIntValue(SETTING_BRIGHTNESS_KEY, value);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "get setting lcd brightness failed, ret=%{public}d", ret);
-    }
-    return value;
-}
-
 void SettingHelper::SetSettingBrightness(int32_t brightness)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
@@ -121,18 +110,6 @@ void SettingHelper::SetSettingBrightness(int32_t brightness)
         POWER_HILOGW(
             COMP_UTILS, "set setting brightness failed, brightness=%{public}d, ret=%{public}d", brightness, ret);
     }
-}
-
-sptr<SettingObserver> SettingHelper::RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    auto settingObserver = settingProvider.CreateObserver(SETTING_BRIGHTNESS_KEY, func);
-    ErrCode ret = settingProvider.RegisterObserver(settingObserver);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "register setting lcd brightness observer failed, ret=%{public}d", ret);
-        return nullptr;
-    }
-    return settingObserver;
 }
 
 bool SettingHelper::IsVibrationSettingValid()
