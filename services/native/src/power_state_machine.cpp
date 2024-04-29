@@ -990,7 +990,6 @@ int64_t PowerStateMachine::GetSleepTime()
     return sleepTime_;
 }
 
-
 PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state,
     StateChangeReason reason): ffrtTimer_(ffrtTimer), state_(state), reason_(reason), timerOn_(false)
 {
