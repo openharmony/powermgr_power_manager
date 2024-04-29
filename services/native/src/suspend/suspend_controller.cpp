@@ -294,8 +294,7 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
     if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-        POWER_HILOGI(FEATURE_SUSPEND, "Do nothing for reason %{public}s",
-            PowerUtils::GetSuspendDeviceTypeString(reason));
+        POWER_HILOGI(FEATURE_SUSPEND, "Do nothing for reason %{public}d", reason);
         return;
     }
     if (stateMachine_ == nullptr) {
@@ -349,8 +348,9 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SUSPEND,
-        "[UL_POWER] Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}s, action=%{public}u, "
-        "delay=%{public}u", pid, uid, PowerUtils::GetSuspendDeviceTypeString(reason), action, delay);
+        "[UL_POWER] Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
+        "delay=%{public}u",
+        pid, uid, reason, action, delay);
     bool force = true;
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         force = false;
@@ -430,7 +430,7 @@ void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
 
 void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}s", PowerUtils::GetSuspendDeviceTypeString(reason));
+    POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
@@ -449,7 +449,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 
 void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}s", PowerUtils::GetSuspendDeviceTypeString(reason));
+    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
@@ -472,7 +472,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}s", PowerUtils::GetSuspendDeviceTypeString(reason));
+    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
@@ -488,7 +488,7 @@ void SuspendController::HandleHibernate(SuspendDeviceType reason)
 
 void SuspendController::HandleShutdown(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}s", PowerUtils::GetSuspendDeviceTypeString(reason));
+    POWER_HILOGI(FEATURE_SUSPEND, "shutdown by reason=%{public}d", reason);
     shutdownController_->Shutdown(std::to_string(static_cast<uint32_t>(reason)));
 }
 

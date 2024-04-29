@@ -23,12 +23,10 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerUtils {
 public:
-    static const char* GetReasonTypeString(StateChangeReason type);
-    static const char* GetPowerStateString(PowerState state);
-    static const char* GetDisplayStateString(DisplayState state);
-    static const char* GetRunningLockTypeString(RunningLockType type);
-    static const char* GetSuspendDeviceTypeString(SuspendDeviceType type);
-    static const char* GetWakeupDeviceTypeString(WakeupDeviceType type);
+    static const std::string GetReasonTypeString(StateChangeReason type);
+    static const std::string GetPowerStateString(PowerState state);
+    static const std::string GetDisplayStateString(DisplayState state);
+    static const std::string GetRunningLockTypeString(RunningLockType type);
 };
 } // namespace PowerMgr
 } // namespace OHOS

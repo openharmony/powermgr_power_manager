@@ -175,7 +175,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     if (stateMachine_->GetState() != PowerState::AWAKE) {
         Wakeup();
         SystemSuspendController::GetInstance().Wakeup();
-        POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}s", PowerUtils::GetWakeupDeviceTypeString(reason));
+        POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (stateMachine_->GetState() == PowerState::SLEEP) {
             auto suspendController = pms->GetSuspendController();
             if (suspendController != nullptr) {
