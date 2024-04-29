@@ -159,6 +159,7 @@ public:
     static constexpr int64_t OFF_TIMEOUT_FACTOR = 4;
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
     static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
     void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
@@ -286,15 +287,6 @@ private:
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
     std::atomic<int64_t> settingStateFlag_ {-1};
-    // screen on/off timeout check
-    static constexpr int32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
-    FFRTMutex screenTimeoutMutex_;
-    uint32_t screenTimeoutId_;
-    std::shared_ptr<FFRTTimer> ffrtTimer_;
-    void InitScreenTimeoutCheck();
-    uint32_t GetScreenTimeoutId();
-    uint32_t StartScreenTimeoutCheck(PowerState state, StateChangeReason reason);
-    void EndScreenTimeoutCheck(uint32_t id);
 };
 } // namespace PowerMgr
 } // namespace OHOS
