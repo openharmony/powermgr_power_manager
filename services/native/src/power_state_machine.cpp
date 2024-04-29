@@ -882,8 +882,8 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
         if (count > 0) {
             POWER_HILOGD(FEATURE_POWER_STATE,
                 "RunningLock %{public}s is locking (count=%{public}d), blocking %{public}s",
-                PowerUtils::GetRunningLockTypeString(*iter), count,
-                PowerUtils::GetPowerStateString(state));
+                PowerUtils::GetRunningLockTypeString(*iter).c_str(), count,
+                PowerUtils::GetPowerStateString(state).c_str());
             return false;
         }
     }
@@ -1241,12 +1241,12 @@ void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason,
         result.append("State: ")
             .append(PowerUtils::GetPowerStateString(it->second->GetState()))
             .append("   Reason: ")
-            .append(PowerUtils::GetReasonTypeString(it->second->lastReason_))
+            .append(PowerUtils::GetReasonTypeString(it->second->lastReason_).c_str())
             .append("   Time: ")
             .append(ToString(it->second->lastTime_))
             .append("\n")
             .append("   Failure: ")
-            .append(PowerUtils::GetReasonTypeString(it->second->failTrigger_))
+            .append(PowerUtils::GetReasonTypeString(it->second->failTrigger_).c_str())
             .append("   Reason: ")
             .append(it->second->failReasion_)
             .append("   From: ")
@@ -1425,7 +1425,7 @@ void PowerStateMachine::StateController::RecordFailure(
         .append(" to ")
         .append(PowerUtils::GetPowerStateString(GetState()))
         .append(" by ")
-        .append(PowerUtils::GetReasonTypeString(failTrigger_))
+        .append(PowerUtils::GetReasonTypeString(failTrigger_).c_str())
         .append("   Reason:")
         .append(failReasion_)
         .append("   Time:")
