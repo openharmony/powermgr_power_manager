@@ -29,7 +29,6 @@
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
-#include "power_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
