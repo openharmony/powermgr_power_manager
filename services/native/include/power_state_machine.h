@@ -119,6 +119,7 @@ public:
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
+    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
 
     // only use for test
     int64_t GetLastSuspendDeviceTime() const
@@ -264,7 +265,6 @@ private:
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
     std::atomic<bool> isCoordinatedOverride_ {false};
-    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     std::atomic<bool> switchOpen_ {true};
