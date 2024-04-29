@@ -21,7 +21,6 @@
 #include <securec.h>
 #include <ipc_skeleton.h>
 #include "power_log.h"
-#include "power_utils.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "setting_helper.h"
