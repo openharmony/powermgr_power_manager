@@ -36,7 +36,6 @@ namespace {
 sptr<SettingObserver> g_autoAdjustBrightnessObserver;
 sptr<SettingObserver> g_autoWindowRotationObserver;
 sptr<SettingObserver> g_vibratorsStateObserver;
-sptr<SettingObserver> g_lcdBrightnessObserver;
 sptr<SettingObserver> g_intellVoiceObserver;
 sptr<SettingObserver> g_alwaysOnDisplayObserver;
 sptr<SettingObserver> g_locationObserver;
@@ -105,14 +104,12 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_autoAdjustBrightnessObserver);
     SettingHelper::UnregisterSettingObserver(g_autoWindowRotationObserver);
     SettingHelper::UnregisterSettingObserver(g_vibratorsStateObserver);
-    SettingHelper::UnregisterSettingObserver(g_lcdBrightnessObserver);
     SettingHelper::UnregisterSettingObserver(g_intellVoiceObserver);
     SettingHelper::UnregisterSettingObserver(g_alwaysOnDisplayObserver);
     SettingHelper::UnregisterSettingObserver(g_locationObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
     g_vibratorsStateObserver = nullptr;
-    g_lcdBrightnessObserver = nullptr;
     g_intellVoiceObserver = nullptr;
     g_alwaysOnDisplayObserver = nullptr;
     g_locationObserver = nullptr;
@@ -126,7 +123,6 @@ void PowerModeModule::RegisterSaveModeObserver()
         g_autoAdjustBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
         g_autoWindowRotationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
         g_vibratorsStateObserver = CreateSettingObserver(PowerModePolicy::ServiceType::VIBRATORS_STATE);
-        g_lcdBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
         g_intellVoiceObserver = CreateSettingObserver(PowerModePolicy::ServiceType::INTELL_VOICE);
         g_alwaysOnDisplayObserver = CreateSettingObserver(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
         g_locationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LOCATION_STATE);
@@ -147,8 +143,6 @@ sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
             return SettingHelper::RegisterSettingWindowRotationObserver(updateFunc);
         case PowerModePolicy::ServiceType::VIBRATORS_STATE:
             return SettingHelper::RegisterSettingVibrationObserver(updateFunc);
-        case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
-            return SettingHelper::RegisterSettingBrightnessObserver(updateFunc);
         case PowerModePolicy::ServiceType::INTELL_VOICE:
             return SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
         case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
@@ -164,7 +158,7 @@ sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
 
 void PowerModeModule::InitPowerMode()
 {
-    PowerMode powerMode = static_cast<PowerMode>(SettingHelper::GetCurrentPowerMode(INIT_VALUE_FALSE));
+    PowerMode powerMode = static_cast<PowerMode>(SettingHelper::GetCurrentPowerMode(INT32_MAX));
     if (powerMode != this->mode_) {
         EnableMode(powerMode, true);
         POWER_HILOGI(FEATURE_POWER_MODE, "init power mode: %{public}d", powerMode);
@@ -183,7 +177,7 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
     /* unregister setting observer for current mode */
     UnregisterSaveModeObserver();
 
-    /* Save mode_ to setting data*/
+    /* Save mode_ to setting data */
     SaveCurrentMode();
 
     /* Update power mode policy */
@@ -366,7 +360,7 @@ void PowerModeModule::SetAutoAdjustBrightness(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
     auto status = static_cast<SettingHelper::SwitchStatus>(value);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set auto adjust brightness status: %{public}d", status);
-    if (value == INIT_VALUE_FALSE) {
+    if (value == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingAutoAdjustBrightness(status);
@@ -380,7 +374,7 @@ void PowerModeModule::SetLcdBrightness(bool isBoot)
     int32_t lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set lcd Brightness: %{public}d", lcdBrightness);
-    if (lcdBrightness == INIT_VALUE_FALSE) {
+    if (lcdBrightness == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingBrightness(lcdBrightness);
@@ -397,7 +391,7 @@ void PowerModeModule::SetVibration(bool isBoot)
     int32_t vibration = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set vibrate state %{public}d", vibration);
-    if (vibration == INIT_VALUE_FALSE) {
+    if (vibration == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingVibration(static_cast<SettingHelper::SwitchStatus>(vibration));
@@ -411,7 +405,7 @@ void PowerModeModule::SetWindowRotation(bool isBoot)
     int32_t rotation = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set window rotation state %{public}d", rotation);
-    if (rotation == INIT_VALUE_FALSE) {
+    if (rotation == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingWindowRotation(static_cast<SettingHelper::SwitchStatus>(rotation));
@@ -425,7 +419,7 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
-    if (state == INIT_VALUE_FALSE) {
+    if (state == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
@@ -439,7 +433,7 @@ void PowerModeModule::SetAlwaysOnDisplay(bool isBoot)
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set always on display state %{public}d", state);
-    if (state == INIT_VALUE_FALSE) {
+    if (state == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingAlwaysOnDisplay(static_cast<SettingHelper::SwitchStatus>(state));
@@ -453,7 +447,7 @@ void PowerModeModule::SetLocationState(bool isBoot)
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LOCATION_STATE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set location working state %{public}d", state);
-    if (state == INIT_VALUE_FALSE) {
+    if (state == INT32_MAX) {
         return;
     }
     SettingHelper::SetSettingLocation(static_cast<SettingHelper::SwitchStatus>(state));
