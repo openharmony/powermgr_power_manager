@@ -995,7 +995,7 @@ PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTi
     StateChangeReason reason): ffrtTimer_(ffrtTimer), state_(state), reason_(reason), timerOn_(false)
 {
     if (state != PowerState::INACTIVE && state != PowerState::AWAKE) {
-        return 0;
+        return;
     }
 
     if (!ffrtTimer_) {
@@ -1016,7 +1016,7 @@ PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTi
     };
 
     timerOn_ = true;
-    ffrtTimer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, 0);
+    ffrtTimer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
 }
 
 PowerStateMachine::ScreenTimeoutCheck::~ScreenTimeoutCheck()

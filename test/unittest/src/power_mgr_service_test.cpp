@@ -546,9 +546,9 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
         StateChangeReason::STATE_CHANGE_REASON_SWITCH);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON),
         StateChangeReason::STATE_CHANGE_REASON_POWER_KEY);
-    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_REASON_INCOMING_CALL),
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL),
         StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL);
-    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_REASON_SHELL),
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_SHELL),
         StateChangeReason::STATE_CHANGE_REASON_SHELL);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 end.");
