@@ -227,6 +227,19 @@ private:
             return l->AsObject() < r->AsObject();
         }
     };
+
+    std::shared_ptr<FFRTTimer> ffrtTimer_;
+    class ScreenTimeoutCheck {
+    public:
+        ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
+        ~ScreenTimeoutCheck();
+    private:
+        std::shared_ptr<FFRTTimer> ffrtTimer_;
+        PowerState state_;
+        StateChangeReason reason_;
+        bool timerOn_;
+    };
+
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();

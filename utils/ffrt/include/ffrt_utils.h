@@ -123,15 +123,11 @@ public:
     static int CancelTask(FFRTHandle& handle, std::shared_ptr<FFRTQueue> queue);
 };
 
-/**
- * id 0-99 : public use for all FFRTTimer class
- * id 100+ : private use for each FFRTTimer class
- */
 enum FFRTTimerId {
     TIMER_ID_SLEEP,
     TIMER_ID_USER_ACTIVITY_OFF,
     TIMER_ID_USER_ACTIVITY_TIMEOUT,
-    TIMER_ID_PRIVATE_START = 100,
+    TIMER_ID_SCREEN_TIMEOUT_CHECK,
 };
 
 class FFRTMutexMap {
@@ -152,6 +148,7 @@ public:
     void Clear();
     void CancelAllTimer();
     void CancelTimer(uint32_t timerId);
+    void SetTimer(uint32_t timerId, FFRTTask& task);
     void SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs);
     uint32_t GetTaskId(uint32_t timerId);
 private:
