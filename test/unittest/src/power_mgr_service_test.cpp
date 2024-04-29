@@ -434,7 +434,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
-        StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
+        StateChangeReason::STATE_CHANGE_REASON_POWER_KEY);
     pmsTest_->LockScreenAfterTimingOut(true, true);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
@@ -519,5 +519,65 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     }
     checkingThread.join();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 end.");
+}
+
+/**
+ * @tc.name: PowerMgrService025
+ * @tc.desc: Test StateChangeReason Get
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
+{
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService025 failed to get PowerMgrService";
+    pmsTest_->OnStart();
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService025 failed to get PowerStateMachine";
+
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID),
+        StateChangeReason::STATE_CHANGE_REASON_LID);
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH),
+        StateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
+        StateChangeReason::STATE_CHANGE_REASON_POWER_KEY);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_LID),
+        StateChangeReason::STATE_CHANGE_REASON_LID);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_SWITCH),
+        StateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_REASON_INCOMING_CALL),
+        StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON),
+        StateChangeReason::STATE_CHANGE_REASON_POWER_KEY);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_REASON_SHELL),
+        StateChangeReason::STATE_CHANGE_REASON_SHELL);
+    pmsTest_->OnStop();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 end.");
+}
+
+/**
+ * @tc.name: PowerMgrService026
+ * @tc.desc: Test ParseWakeupDeviceType
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
+{
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService026 failed to get PowerMgrService";
+    pmsTest_->OnStart();
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService026 failed to get PowerStateMachine";
+
+    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("incoming call"), WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL);
+    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("shell"), WakeupDeviceType::WAKEUP_DEVICE_SHELL);
+    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright"), WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT);
+    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright_auth_success"),
+        WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS);
+    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright_auth_fail_screen_on"),
+        WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON);
+    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright_auth_fail_screen_off"),
+        WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
+
+    pmsTest_->OnStop();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 end.");
 }
 }
