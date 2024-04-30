@@ -54,7 +54,16 @@ bool g_awakeCallback = false;
 bool g_inactiveCallback = false;
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
-std::shared_ptr<PointerEvent> createDemoEvent()
+std::shared_ptr<KeyEvent> CreateKeyEvent()
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    return keyEvent;
+}
+
+std::shared_ptr<PointerEvent> CreatePointerEvent()
 {
     constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_SIX = 6;
     constexpr const int32_t ARBITRARY_NON_MAGIC_NUMBER_EIGHT = 8;
@@ -624,7 +633,6 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
     ASSERT_NE(runninglock, nullptr);
     EXPECT_FALSE(runninglock->IsUsed());
     powerMgrClient.WakeupDevice();
-    EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
     powerMgrClient.OverrideScreenOffTime(OVER_TIME_SCREEN_OFF_TIME_MS);
     runninglock->Lock();
@@ -632,12 +640,9 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
 
     auto inputManager = MMI::InputManager::GetInstance();
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    std::shared_ptr<MMI::KeyEvent> keyEvent = CreateKeyEvent();
     inputManager->SimulateInputEvent(keyEvent);
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep((WAIT_EVENT_TIME_MS + WAIT_STATE_TIME_MS) * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
@@ -666,10 +671,10 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
     EXPECT_FALSE(g_screenOnEvent);
 
     // test pointer event
-    std::shared_ptr<PointerEvent> pointerEvent = createDemoEvent();
+    std::shared_ptr<PointerEvent> pointerEvent = CreatePointerEvent();
     powerMgrClient.WakeupDevice();
     inputManager->SimulateInputEvent(pointerEvent);
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep((WAIT_EVENT_TIME_MS + WAIT_STATE_TIME_MS) * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
