@@ -58,6 +58,8 @@ private:
     int32_t SetSuspendTagStub(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterPowerStateCallbackStub(MessageParcel& data);
 
+    int32_t RegisterSyncHibernateCallbackStub(MessageParcel& data);
+    int32_t UnRegisterSyncHibernateCallbackStub(MessageParcel& data);
     int32_t RegisterSyncSleepCallbackStub(MessageParcel& data);
     int32_t UnRegisterSyncSleepCallbackStub(MessageParcel& data);
 

@@ -162,6 +162,12 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_STANDBY):
             ret = IsStandbyStub(data, reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SYNC_HIBERNATE_CALLBACK):
+            ret = RegisterSyncHibernateCallbackStub(data);
+            break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SYNC_HIBERNATE_CALLBACK):
+            ret = UnRegisterSyncHibernateCallbackStub(data);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SYNC_SLEEP_CALLBACK):
             ret = RegisterSyncSleepCallbackStub(data);
             break;
@@ -477,6 +483,26 @@ int32_t PowerMgrStub::UnRegisterPowerStateCallbackStub(MessageParcel& data)
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
     UnRegisterPowerStateCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::RegisterSyncHibernateCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<ISyncHibernateCallback> callback = iface_cast<ISyncHibernateCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    RegisterSyncHibernateCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::UnRegisterSyncHibernateCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<ISyncHibernateCallback> callback = iface_cast<ISyncHibernateCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    UnRegisterSyncHibernateCallback(callback);
     return ERR_OK;
 }
 
