@@ -637,33 +637,39 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
     keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
     inputManager->SimulateInputEvent(keyEvent);
-
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
-
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    // already in DIM, not resetting 10s timer
+    inputManager->SimulateInputEvent(keyEvent);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS / 2 * US_PER_MS);
+    // already in DIM, not resetting 10s timer
+    inputManager->SimulateInputEvent(keyEvent);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS / 2 * US_PER_MS);
+    // screen should be off now
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
+
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    inputManager->SimulateInputEvent(keyEvent);
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     ResetTriggeredFlag();
     powerMgrClient.WakeupDevice();
-    EXPECT_TRUE(powerMgrClient.IsScreenOn());
     // DIM to AWAKE, no event
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
     EXPECT_FALSE(g_screenOnEvent);
-    //AWAKE to AWAKE, no event
+    // AWAKE to AWAKE, no event
     powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
     EXPECT_FALSE(g_screenOnEvent);
 
-    inputManager->SimulateInputEvent(keyEvent);
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
-
-    runninglock->UnLock();
-    runninglock->Lock();
+    // test pointer event
     std::shared_ptr<PointerEvent> pointerEvent = createDemoEvent();
+    powerMgrClient.WakeupDevice();
     inputManager->SimulateInputEvent(pointerEvent);
-
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
-
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
     usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
