@@ -536,18 +536,6 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
     return true;
 }
 
-bool PowerStateMachine::IsCoordinatedOverride()
-{
-    return isCoordinatedOverride_.load();
-}
-
-// set to true after first coordination operation, set to false after unhold the coordination lock
-void PowerStateMachine::SetCoordinatedOverride(bool isOverridden)
-{
-    POWER_HILOGI(COMP_SVC, "SetCoordinatedOverride %{public}d", static_cast<int32_t>(isOverridden));
-    isCoordinatedOverride_ = isOverridden;
-}
-
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
     SetState(
