@@ -1061,6 +1061,18 @@ bool PowerMgrService::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>
     return true;
 }
 
+bool PowerMgrService::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "RegisterSyncHibernateCallback begin.");
+    return true;
+}
+
+bool PowerMgrService::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "UnRegisterSyncHibernateCallback begin.");
+    return true;
+}
+
 bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(modeMutex_);

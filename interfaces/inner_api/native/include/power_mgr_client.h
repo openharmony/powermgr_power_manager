@@ -157,6 +157,8 @@ public:
     bool ResetRunningLocks();
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
+    bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
     bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
