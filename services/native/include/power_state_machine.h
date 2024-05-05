@@ -62,6 +62,7 @@ enum class TransitResult {
     DISPLAY_ON_ERR = 4,
     DISPLAY_OFF_ERR = 5,
     FORBID_TRANSIT = 6,
+    INTERNAL_ERR = 7,
     OTHER_ERR = 99
 };
 
@@ -170,6 +171,7 @@ public:
     bool IsSettingState(PowerState state);
 
 private:
+    static std::string GetTransitResultString(TransitResult result);
     class SettingStateFlag {
     public:
         SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner) : owner_(owner)
@@ -205,18 +207,18 @@ private:
         }
         TransitResult TransitTo(StateChangeReason reason, bool ignoreLock = false);
         void RecordFailure(PowerState from, StateChangeReason trigger, TransitResult failReason);
+        static bool IsReallyFailed(StateChangeReason reason);
         StateChangeReason lastReason_;
         int64_t lastTime_ {0};
         PowerState failFrom_;
         StateChangeReason failTrigger_;
-        std::string failReasion_;
+        std::string failReason_;
         int64_t failTime_ {0};
 
     protected:
         bool CheckState();
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
-        bool IsReallyFailed(StateChangeReason reason);
         PowerState state_;
         std::weak_ptr<PowerStateMachine> owner_;
         std::function<TransitResult(StateChangeReason)> action_;
@@ -233,12 +235,21 @@ private:
     class ScreenTimeoutCheck {
     public:
         ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
-        ~ScreenTimeoutCheck();
+        void Finish(TransitResult result);
     private:
-        std::shared_ptr<FFRTTimer> ffrtTimer_;
+        void Report();
+        enum ScreenTimeoutState {
+            INVALID,
+            TIMER_ON,
+            TIMER_DONE,
+            FINISH,
+        } timeoutState_;
+        std::shared_ptr<FFRTTimer> timer_;
+        pid_t pid_;
+        pit_t uid_;
         PowerState state_;
         StateChangeReason reason_;
-        bool timerOn_;
+        std::string msg_;
     };
 
     void InitStateMap();
@@ -260,6 +271,7 @@ private:
     void HandleActivitySleepTimeout();
     void HandleSystemWakeup();
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
+    std::shared_ptr<StateController> GetStateController(PowerState state);
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;

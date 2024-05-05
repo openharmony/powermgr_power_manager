@@ -526,7 +526,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
  * @tc.desc: Test StateChangeReason Get
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
+HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
 {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService025 failed to get PowerMgrService";
@@ -559,7 +559,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
  * @tc.desc: Test ParseWakeupDeviceType
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
+HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
 {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService026 failed to get PowerMgrService";

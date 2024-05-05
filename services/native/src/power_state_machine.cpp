@@ -991,38 +991,77 @@ int64_t PowerStateMachine::GetSleepTime()
 }
 
 PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state,
-    StateChangeReason reason): ffrtTimer_(ffrtTimer), state_(state), reason_(reason), timerOn_(false)
+    StateChangeReason reason): timeoutState_(ScreenTimeoutState::INVALID), timer_(ffrtTimer), state_(state),
+        reason_(reason)
 {
+    // only check for screen on/off event
     if (state != PowerState::INACTIVE && state != PowerState::AWAKE) {
         return;
     }
 
-    if (!ffrtTimer_) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "ScreenTimeoutCheck failed: timer is invalid");
+    if (!timer_) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "ScreenTimeoutCheck failed: invalid timer");
         return;
     }
 
     auto pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
 
-    FFRTTask task = [state, reason, pid, uid]() {
-        const char* eventName = (state == PowerState::INACTIVE) ? "SCREEN_OFF_TIMEOUT" : "SCREEN_ON_TIMEOUT";
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
-            "PID", pid, "UID", uid, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", "",
-            "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
-        POWER_HILOGE(FEATURE_POWER_STATE, "event=%{public}s, reason=%{public}s, pid=%{public}d, uid=%{public}d",
-            eventName, PowerUtils::GetReasonTypeString(reason).c_str(), pid, uid);
+    FFRTTask task = [this]() {
+        mutex_.lock();
+        if (timeoutState_ == ScreenTimeoutState::TIMER_ON) {
+            msg_ = "TIMEOUT";
+            Report();
+            timeoutState_ = ScreenTimeoutState::TIMER_DONE;
+        }
+        mutex_.unlock();
     };
 
-    timerOn_ = true;
+    mutex_.lock();
     ffrtTimer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
+    timeoutState_ = ScreenTimeoutState::TIMER_ON;
+    mutex_.unlock();
 }
 
-PowerStateMachine::ScreenTimeoutCheck::~ScreenTimeoutCheck()
-{
-    if (timerOn_) {
-        ffrtTimer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
+void PowerStateMachine::ScreenTimeoutCheck::Finish(TransitResult result) {
+    mutex_.lock();
+    // do nothing if not in TIMER_ON state
+    if (timeoutState_ != ScreenTimeoutState::TIMER_ON) {
+        mutex_.unlock();
+        return;
     }
+    timer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
+    timeoutState_ = ScreenTimeoutState::FINISH;
+
+    bool transitSucess = (result == TransitResult::SUCCESS) || (result == TransitResultl::ALREADY_IN_STATE);
+    bool skipReport = (result == TransitResult::LOCKING) || !StateController::IsReallyFailed(reason_);
+    if (transitSuccess || skipReport) {
+        mutex_.unlock();
+        return;
+    }
+
+    msg_ = std::string("Transit failed with: ") + GetTransitResultString(result);
+    Report();
+    mutex_.unlock();
+}
+
+void PowerStateMachine::ScreenTimeoutCheck::Report()
+{
+    const char* eventName = (state == PowerState::INACTIVE) ? "SCREEN_OFF_TIMEOUT" : "SCREEN_ON_TIMEOUT";
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg_.c_str(),
+        "REASON", PowerUtils::GetReasonTypeString(reason_).c_str());
+    POWER_HILOGE(FEATURE_POWER_STATE, "event=%{public}s, reason=%{public}s, msg=%{public}s, pid=%{public}d, uid=%{public}d",
+        eventName, PowerUtils::GetReasonTypeString(reason).c_str(), msg_.c_str(), pid_, uid_);
+}
+
+std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateController(PowerState state)
+{
+    auto iterator = controllerMap_.find(state);
+    if (iterator == controllerMap_.end()) {
+        return nullptr;
+    }
+    return iterator->second;
 }
 
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
@@ -1032,13 +1071,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     std::lock_guard<std::mutex> lock(stateMutex_);
     ScreenTimeoutCheck timeoutCheck(ffrtTimer_, state, reason);
     SettingStateFlag flag(state, shared_from_this());
-    auto iterator = controllerMap_.find(state);
-    if (iterator == controllerMap_.end()) {
-        return false;
-    }
-    std::shared_ptr<StateController> pController = iterator->second;
+
+    std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
+        timeoutCheck.Finish(TransitResult::INTERNAL_ERR);
         return false;
     }
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
@@ -1047,6 +1084,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         force = true;
     }
     TransitResult ret = pController->TransitTo(reason, force);
+    timeoutCheck.Finish(ret);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
@@ -1247,7 +1285,7 @@ void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason,
             .append("   Failure: ")
             .append(PowerUtils::GetReasonTypeString(it->second->failTrigger_).c_str())
             .append("   Reason: ")
-            .append(it->second->failReasion_)
+            .append(it->second->failReason_)
             .append("   From: ")
             .append(PowerUtils::GetPowerStateString(it->second->failFrom_))
             .append("   Time: ")
@@ -1389,36 +1427,45 @@ void PowerStateMachine::Reset()
     ffrtTimer_.reset();
 }
 
+std::string PowerStateMachine::GetTransitResultString(TransitResult result)
+{
+    switch (result) {
+        case TransitResult::ALREADY_IN_STATE:
+            return "Already in the state";
+        case TransitResult::LOCKING:
+            failReason_ = "Blocked by running lock";
+            break;
+        case TransitResult::HDI_ERR:
+            failReason_ = "Power HDI error";
+            break;
+        case TransitResult::DISPLAY_ON_ERR:
+            failReason_ = "SetDisplayState(ON) error";
+            break;
+        case TransitResult::DISPLAY_OFF_ERR:
+            failReason_ = "SetDisplayState(OFF) error";
+            break;
+        case TransitResult::FORBID_TRANSIT:
+            failReason_ = "Forbid transit";
+            break;
+        case TransitResult::INTERNAL_ERR:
+            failReason_ = "Internal error";
+            break;
+        case TransitResult::OTHER_ERR:
+            failReason_ = "Other error";
+            break;
+        default:
+            break;
+    }
+    return "Unknown error";
+}
+
 void PowerStateMachine::StateController::RecordFailure(
     PowerState from, StateChangeReason trigger, TransitResult failReason)
 {
     failFrom_ = from;
     failTrigger_ = trigger;
     failTime_ = GetTickCount();
-    switch (failReason) {
-        case TransitResult::ALREADY_IN_STATE:
-            failReasion_ = "Already in the state";
-            break;
-        case TransitResult::LOCKING:
-            failReasion_ = "Blocked by running lock";
-            break;
-        case TransitResult::HDI_ERR:
-            failReasion_ = "Power HDI error";
-            break;
-        case TransitResult::DISPLAY_ON_ERR:
-            failReasion_ = "SetDisplayState(ON) error";
-            break;
-        case TransitResult::DISPLAY_OFF_ERR:
-            failReasion_ = "SetDisplayState(OFF) error";
-            break;
-        case TransitResult::FORBID_TRANSIT:
-            failReasion_ = "Forbid transit";
-            break;
-        case TransitResult::OTHER_ERR:
-        default:
-            failReasion_ = "Unknown Error";
-            break;
-    }
+    failReason_ = GetTransitResultString(failReason);
     std::string message = "State Transit Failed from ";
     message.append(PowerUtils::GetPowerStateString(failFrom_))
         .append(" to ")
@@ -1426,7 +1473,7 @@ void PowerStateMachine::StateController::RecordFailure(
         .append(" by ")
         .append(PowerUtils::GetReasonTypeString(failTrigger_).c_str())
         .append("   Reason:")
-        .append(failReasion_)
+        .append(failReason_)
         .append("   Time:")
         .append(ToString(failTime_))
         .append("\n");
