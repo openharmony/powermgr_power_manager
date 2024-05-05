@@ -892,7 +892,7 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
         }
     }
 
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "No specific lock for state: %{public}u", state);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "No specific lock for state: %{public}u", state);
     return true;
 }
 
