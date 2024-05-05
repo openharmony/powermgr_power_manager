@@ -1028,7 +1028,6 @@ void PowerStateMachine::ScreenChangeCheck::Finish(TransitResult result)
     }
 
     std::string msg = std::string("Transit failed with: ") + GetTransitResultString(result);
-    Report(msg);
 }
 
 void PowerStateMachine::ScreenChangeCheck::Report(const std::string &msg)
