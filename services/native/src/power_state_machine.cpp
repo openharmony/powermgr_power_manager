@@ -1018,7 +1018,7 @@ PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTi
     };
 
     mutex_.lock();
-    ffrtTimer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
+    timer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
     timeoutState_ = ScreenTimeoutState::TIMER_ON;
     mutex_.unlock();
 }
@@ -1033,7 +1033,7 @@ void PowerStateMachine::ScreenTimeoutCheck::Finish(TransitResult result) {
     timer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
     timeoutState_ = ScreenTimeoutState::FINISH;
 
-    bool transitSucess = (result == TransitResult::SUCCESS) || (result == TransitResultl::ALREADY_IN_STATE);
+    bool transitSuccess = (result == TransitResult::SUCCESS) || (result == TransitResultl::ALREADY_IN_STATE);
     bool skipReport = (result == TransitResult::LOCKING) || !StateController::IsReallyFailed(reason_);
     if (transitSuccess || skipReport) {
         mutex_.unlock();
