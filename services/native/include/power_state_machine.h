@@ -244,9 +244,10 @@ private:
             TIMER_DONE,
             FINISH,
         } timeoutState_;
+        FFRTMutex mutex_;
         std::shared_ptr<FFRTTimer> timer_;
         pid_t pid_;
-        pit_t uid_;
+        pid_t uid_;
         PowerState state_;
         StateChangeReason reason_;
         std::string msg_;
