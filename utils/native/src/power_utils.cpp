@@ -52,12 +52,18 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("CAMERA");
         case StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY:
             return std::string("ACCESS");
+        case StateChangeReason::STATE_CHANGE_REASON_RESET:
+            return std::string("RESET");
         case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
             return std::string("POWER_KEY");
         case StateChangeReason::STATE_CHANGE_REASON_KEYBOARD:
             return std::string("KEYBOARD");
         case StateChangeReason::STATE_CHANGE_REASON_MOUSE:
             return std::string("MOUSE");
+        case StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK:
+            return std::string("DOUBLE_CLICK");
+        case StateChangeReason::STATE_CHANGE_REASON_SWITCH:
+            return std::string("SWITCH");
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
             return std::string("PRE_BRIGHT");
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
@@ -74,6 +80,12 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("REFRESH");
         case StateChangeReason::STATE_CHANGE_REASON_COORDINATION:
             return std::string("COORDINATION_OVERRIDE");
+        case StateChangeReason::STATE_CHANGE_REASON_PROXIMITY:
+            return std::string("PROXIMITY");
+        case StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL:
+            return std::string("INCOMING_CALL");
+        case StateChangeReason::STATE_CHANGE_REASON_SHELL:
+            return std::string("SHELL");
         case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
             return std::string("TIMEOUT_NO_SCREEN_LOCK");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:

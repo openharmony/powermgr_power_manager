@@ -119,6 +119,7 @@ public:
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
+    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
 
     // only use for test
     int64_t GetLastSuspendDeviceTime() const
@@ -158,6 +159,8 @@ public:
     static constexpr int64_t OFF_TIMEOUT_FACTOR = 4;
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
     static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_REPORT_INTERVAL_MS = 600000;
     void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
@@ -168,6 +171,7 @@ public:
     bool IsSettingState(PowerState state);
 
 private:
+    static std::string GetTransitResultString(TransitResult result);
     class SettingStateFlag {
     public:
         SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner) : owner_(owner)
@@ -203,18 +207,18 @@ private:
         }
         TransitResult TransitTo(StateChangeReason reason, bool ignoreLock = false);
         void RecordFailure(PowerState from, StateChangeReason trigger, TransitResult failReason);
+        static bool IsReallyFailed(StateChangeReason reason);
         StateChangeReason lastReason_;
         int64_t lastTime_ {0};
         PowerState failFrom_;
         StateChangeReason failTrigger_;
-        std::string failReasion_;
+        std::string failReason_;
         int64_t failTime_ {0};
 
     protected:
         bool CheckState();
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
-        bool IsReallyFailed(StateChangeReason reason);
         PowerState state_;
         std::weak_ptr<PowerStateMachine> owner_;
         std::function<TransitResult(StateChangeReason)> action_;
@@ -226,6 +230,21 @@ private:
             return l->AsObject() < r->AsObject();
         }
     };
+
+    std::shared_ptr<FFRTTimer> ffrtTimer_;
+    class ScreenChangeCheck {
+    public:
+        ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
+        void Finish(TransitResult result);
+    private:
+        void Report(const std::string &msg);
+        std::shared_ptr<FFRTTimer> timer_;
+        pid_t pid_;
+        pid_t uid_;
+        PowerState state_;
+        StateChangeReason reason_;
+    };
+
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();
@@ -245,13 +264,13 @@ private:
     void HandleActivitySleepTimeout();
     void HandleSystemWakeup();
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
+    std::shared_ptr<StateController> GetStateController(PowerState state);
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
-    std::mutex ffrtMutex_;
     // all change to currentState_ should be inside stateMutex_
     std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
@@ -264,10 +283,7 @@ private:
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
-    std::shared_ptr<FFRTQueue> queue_;
-    FFRTHandle userActivityTimeoutHandle_ {nullptr};
     std::atomic<bool> isCoordinatedOverride_ {false};
-    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     std::atomic<bool> switchOpen_ {true};

@@ -19,6 +19,7 @@
 #include <cinttypes>
 #include <datetime_ex.h>
 #include <hisysevent.h>
+#include <ipc_skeleton.h>
 
 #include "power_hitrace.h"
 #include "power_mgr_factory.h"
@@ -72,18 +73,13 @@ PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pm
 
 PowerStateMachine::~PowerStateMachine()
 {
-    if (queue_) {
-        queue_.reset();
-    }
+    ffrtTimer_.reset();
 }
 
 bool PowerStateMachine::Init()
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Start init");
-    queue_ = std::make_shared<FFRTQueue>("power_state_machine");
-    if (queue_ == nullptr) {
-        return false;
-    }
+    ffrtTimer_ = std::make_shared<FFRTTimer>("power_state_machine_timer");
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
     InitTransitMap();
     InitStateMap();
@@ -347,12 +343,17 @@ WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& det
     if (strcmp(details.c_str(), "pre_bright") == 0) {
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT;
     } else if (strcmp(details.c_str(), "pre_bright_auth_success") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS;
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS;
     } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_on") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON;
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
     } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_off") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF;
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    } else if (strcmp(details.c_str(), "incoming call") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL;
+    } else if (strcmp(details.c_str(), "shell") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
     }
+
     POWER_HILOGI(FEATURE_SUSPEND, "parsedType is %{public}d", static_cast<uint32_t>(parsedType));
     return parsedType;
 }
@@ -364,13 +365,13 @@ bool PowerStateMachine::IsPreBrightWakeUp(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
             ret = true;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS:
             ret = true;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
             ret = true;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
             ret = true;
             break;
         default:
@@ -401,16 +402,16 @@ void PowerStateMachine::HandlePreBrightWakeUp(
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS:
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS: // fall through
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
             if (suspendController != nullptr) {
-                POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
+                POWER_HILOGI(FEATURE_WAKEUP, "HandlePreBrightWakeUp. TriggerSyncSleepCallback start.");
                 suspendController->TriggerSyncSleepCallback(true);
             } else {
-                POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceInner. suspendController is nullptr");
+                POWER_HILOGD(FEATURE_WAKEUP, "HandlePreBrightWakeUp. suspendController is nullptr");
             }
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
             if (suspendController != nullptr) {
                 POWER_HILOGI(FEATURE_WAKEUP, "restore sleep ffrt task");
                 suspendController->StartSleepTimer(
@@ -708,12 +709,11 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
         std::to_string(delayTime).c_str(), event);
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
-            if (!queue_) {
+            if (!ffrtTimer_) {
                 return;
             }
-            std::lock_guard lock(ffrtMutex_);
             FFRTTask task = std::bind(&PowerStateMachine::HandleActivityTimeout, this);
-            userActivityTimeoutHandle_ = FFRTUtils::SubmitDelayTask(task, delayTime, queue_);
+            ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT, task, delayTime);
             break;
         }
         case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
@@ -737,14 +737,10 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
     POWER_HILOGD(FEATURE_ACTIVITY, "Cancel delay timer, event: %{public}d", event);
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
-            if (!queue_) {
+            if (!ffrtTimer_) {
                 return;
             }
-            std::lock_guard lock(ffrtMutex_);
-            // void* () is overloaded in ffrt::task_handle, so that it is convertible to bool
-            if (userActivityTimeoutHandle_) {
-                FFRTUtils::CancelTask(userActivityTimeoutHandle_, queue_);
-            }
+            ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT);
             break;
         }
         case CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG: {
@@ -994,19 +990,88 @@ int64_t PowerStateMachine::GetSleepTime()
     return sleepTime_;
 }
 
+PowerStateMachine::ScreenChangeCheck::ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer,
+    PowerState state, StateChangeReason reason): timer_(ffrtTimer), state_(state), reason_(reason)
+{
+    // only check for screen on/off event
+    if (state != PowerState::INACTIVE && state != PowerState::AWAKE) {
+        return;
+    }
+
+    if (!timer_) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "ScreenChangeCheck failed: invalid timer");
+        return;
+    }
+
+    pid_ = IPCSkeleton::GetCallingPid();
+    uid_ = IPCSkeleton::GetCallingUid();
+
+    FFRTTask task = [this]() {
+        Report("TIMEOUT");
+    };
+
+    timer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
+}
+
+void PowerStateMachine::ScreenChangeCheck::Finish(TransitResult result)
+{
+    if (!timer_) {
+        return;
+    }
+    timer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
+
+    bool transitSuccess = (result == TransitResult::SUCCESS) || (result == TransitResult::ALREADY_IN_STATE);
+    bool skipReport = (result == TransitResult::LOCKING) || (result == TransitResult::FORBID_TRANSIT) ||
+        !StateController::IsReallyFailed(reason_);
+    if (transitSuccess || skipReport) {
+        return;
+    }
+
+    std::string msg = std::string("Transit failed with: ") + GetTransitResultString(result);
+}
+
+void PowerStateMachine::ScreenChangeCheck::Report(const std::string &msg)
+{
+    const char* eventName = (state_ == PowerState::INACTIVE) ? "SCREEN_OFF_TIMEOUT" : "SCREEN_ON_TIMEOUT";
+    POWER_HILOGE(FEATURE_POWER_STATE, "event=%{public}s, reason=%{public}s, msg=%{public}s, pid=%{public}d,"
+        " uid=%{public}d", eventName, PowerUtils::GetReasonTypeString(reason_).c_str(), msg.c_str(), pid_, uid_);
+
+    static int64_t lastReportTime = -1;
+    int64_t now = GetTickCount();
+    int64_t nextReportTime = lastReportTime + SCREEN_CHANGE_REPORT_INTERVAL_MS;
+    if (nextReportTime > SCREEN_CHANGE_REPORT_INTERVAL_MS && now < nextReportTime) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "Will skip report for another %{public}s ms",
+            std::to_string(nextReportTime - now).c_str());
+        return;
+    }
+    lastReportTime = now;
+    
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg.c_str(),
+        "REASON", PowerUtils::GetReasonTypeString(reason_).c_str());
+}
+
+std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateController(PowerState state)
+{
+    auto iterator = controllerMap_.find(state);
+    if (iterator == controllerMap_.end()) {
+        return nullptr;
+    }
+    return iterator->second;
+}
+
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
+    ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
     SettingStateFlag flag(state, shared_from_this());
-    auto iterator = controllerMap_.find(state);
-    if (iterator == controllerMap_.end()) {
-        return false;
-    }
-    std::shared_ptr<StateController> pController = iterator->second;
+
+    std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
+        timeoutCheck.Finish(TransitResult::OTHER_ERR);
         return false;
     }
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
@@ -1015,6 +1080,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         force = true;
     }
     TransitResult ret = pController->TransitTo(reason, force);
+    timeoutCheck.Finish(ret);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
@@ -1052,8 +1118,8 @@ StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType ty
         case UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE:
             ret = StateChangeReason::STATE_CHANGE_REASON_APPLICATION;
             break;
-        case UserActivityType::USER_ACTIVITY_TYPE_ATTENTION: // fail through
-        case UserActivityType::USER_ACTIVITY_TYPE_OTHER:     // fail through
+        case UserActivityType::USER_ACTIVITY_TYPE_ATTENTION: // fall through
+        case UserActivityType::USER_ACTIVITY_TYPE_OTHER:     // fall through
         default:
             break;
     }
@@ -1104,19 +1170,25 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
             ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_SUCCESS:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS:
             ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_ON:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
             ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_ATUH_FAIL_SCREEN_OFF:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
             ret = StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING:
             ret = StateChangeReason::STATE_CHANGE_REASON_AOD_SLIDING;
             break;
-        case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fail through
+        case WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL:
+            ret = StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_SHELL:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SHELL;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;
     }
@@ -1144,7 +1216,12 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID:
             ret = StateChangeReason::STATE_CHANGE_REASON_LID;
             break;
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY: // fall through
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
+            ret = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+            break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
             break;
@@ -1204,7 +1281,7 @@ void PowerStateMachine::AppendDumpInfo(std::string& result, std::string& reason,
             .append("   Failure: ")
             .append(PowerUtils::GetReasonTypeString(it->second->failTrigger_).c_str())
             .append("   Reason: ")
-            .append(it->second->failReasion_)
+            .append(it->second->failReason_)
             .append("   From: ")
             .append(PowerUtils::GetPowerStateString(it->second->failFrom_))
             .append("   Time: ")
@@ -1343,9 +1420,30 @@ void PowerStateMachine::StateController::MatchState(PowerState& currentState, Di
 
 void PowerStateMachine::Reset()
 {
-    if (queue_) {
-        queue_.reset();
+    ffrtTimer_.reset();
+}
+
+std::string PowerStateMachine::GetTransitResultString(TransitResult result)
+{
+    switch (result) {
+        case TransitResult::ALREADY_IN_STATE:
+            return "Already in the state";
+        case TransitResult::LOCKING:
+            return "Blocked by running lock";
+        case TransitResult::HDI_ERR:
+            return "Power HDI error";
+        case TransitResult::DISPLAY_ON_ERR:
+            return "SetDisplayState(ON) error";
+        case TransitResult::DISPLAY_OFF_ERR:
+            return "SetDisplayState(OFF) error";
+        case TransitResult::FORBID_TRANSIT:
+            return "Forbid transit";
+        case TransitResult::OTHER_ERR:
+            return "Other error";
+        default:
+            break;
     }
+    return "Unknown error";
 }
 
 void PowerStateMachine::StateController::RecordFailure(
@@ -1354,30 +1452,7 @@ void PowerStateMachine::StateController::RecordFailure(
     failFrom_ = from;
     failTrigger_ = trigger;
     failTime_ = GetTickCount();
-    switch (failReason) {
-        case TransitResult::ALREADY_IN_STATE:
-            failReasion_ = "Already in the state";
-            break;
-        case TransitResult::LOCKING:
-            failReasion_ = "Blocked by running lock";
-            break;
-        case TransitResult::HDI_ERR:
-            failReasion_ = "Power HDI error";
-            break;
-        case TransitResult::DISPLAY_ON_ERR:
-            failReasion_ = "SetDisplayState(ON) error";
-            break;
-        case TransitResult::DISPLAY_OFF_ERR:
-            failReasion_ = "SetDisplayState(OFF) error";
-            break;
-        case TransitResult::FORBID_TRANSIT:
-            failReasion_ = "Forbid transit";
-            break;
-        case TransitResult::OTHER_ERR:
-        default:
-            failReasion_ = "Unknown Error";
-            break;
-    }
+    failReason_ = GetTransitResultString(failReason);
     std::string message = "State Transit Failed from ";
     message.append(PowerUtils::GetPowerStateString(failFrom_))
         .append(" to ")
@@ -1385,7 +1460,7 @@ void PowerStateMachine::StateController::RecordFailure(
         .append(" by ")
         .append(PowerUtils::GetReasonTypeString(failTrigger_).c_str())
         .append("   Reason:")
-        .append(failReasion_)
+        .append(failReason_)
         .append("   Time:")
         .append(ToString(failTime_))
         .append("\n");
