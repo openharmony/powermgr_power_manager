@@ -992,7 +992,7 @@ int64_t PowerStateMachine::GetSleepTime()
 
 PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state,
     StateChangeReason reason): timeoutState_(ScreenTimeoutState::INVALID), timer_(ffrtTimer), state_(state),
-        reason_(reason)
+    reason_(reason)
 {
     // only check for screen on/off event
     if (state != PowerState::INACTIVE && state != PowerState::AWAKE) {
