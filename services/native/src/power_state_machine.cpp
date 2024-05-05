@@ -1004,8 +1004,8 @@ PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTi
         return;
     }
 
-    auto pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
+    pid_ = IPCSkeleton::GetCallingPid();
+    uid_ = IPCSkeleton::GetCallingUid();
 
     FFRTTask task = [this]() {
         mutex_.lock();
@@ -1033,7 +1033,7 @@ void PowerStateMachine::ScreenTimeoutCheck::Finish(TransitResult result) {
     timer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
     timeoutState_ = ScreenTimeoutState::FINISH;
 
-    bool transitSuccess = (result == TransitResult::SUCCESS) || (result == TransitResultl::ALREADY_IN_STATE);
+    bool transitSuccess = (result == TransitResult::SUCCESS) || (result == TransitResult::ALREADY_IN_STATE);
     bool skipReport = (result == TransitResult::LOCKING) || !StateController::IsReallyFailed(reason_);
     if (transitSuccess || skipReport) {
         mutex_.unlock();
@@ -1047,12 +1047,12 @@ void PowerStateMachine::ScreenTimeoutCheck::Finish(TransitResult result) {
 
 void PowerStateMachine::ScreenTimeoutCheck::Report()
 {
-    const char* eventName = (state == PowerState::INACTIVE) ? "SCREEN_OFF_TIMEOUT" : "SCREEN_ON_TIMEOUT";
+    const char* eventName = (state_ == PowerState::INACTIVE) ? "SCREEN_OFF_TIMEOUT" : "SCREEN_ON_TIMEOUT";
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
         "PID", pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg_.c_str(),
         "REASON", PowerUtils::GetReasonTypeString(reason_).c_str());
     POWER_HILOGE(FEATURE_POWER_STATE, "event=%{public}s, reason=%{public}s, msg=%{public}s, pid=%{public}d, uid=%{public}d",
-        eventName, PowerUtils::GetReasonTypeString(reason).c_str(), msg_.c_str(), pid_, uid_);
+        eventName, PowerUtils::GetReasonTypeString(reason_).c_str(), msg_.c_str(), pid_, uid_);
 }
 
 std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateController(PowerState state)
@@ -1433,26 +1433,19 @@ std::string PowerStateMachine::GetTransitResultString(TransitResult result)
         case TransitResult::ALREADY_IN_STATE:
             return "Already in the state";
         case TransitResult::LOCKING:
-            failReason_ = "Blocked by running lock";
-            break;
+            return "Blocked by running lock";
         case TransitResult::HDI_ERR:
-            failReason_ = "Power HDI error";
-            break;
+            return "Power HDI error";
         case TransitResult::DISPLAY_ON_ERR:
-            failReason_ = "SetDisplayState(ON) error";
-            break;
+            return "SetDisplayState(ON) error";
         case TransitResult::DISPLAY_OFF_ERR:
-            failReason_ = "SetDisplayState(OFF) error";
-            break;
+            return "SetDisplayState(OFF) error";
         case TransitResult::FORBID_TRANSIT:
-            failReason_ = "Forbid transit";
-            break;
+            return "Forbid transit";
         case TransitResult::INTERNAL_ERR:
-            failReason_ = "Internal error";
-            break;
+            return "Internal error";
         case TransitResult::OTHER_ERR:
-            failReason_ = "Other error";
-            break;
+            return "Other error";
         default:
             break;
     }
