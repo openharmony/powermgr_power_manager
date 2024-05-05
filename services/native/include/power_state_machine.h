@@ -62,7 +62,6 @@ enum class TransitResult {
     DISPLAY_ON_ERR = 4,
     DISPLAY_OFF_ERR = 5,
     FORBID_TRANSIT = 6,
-    INTERNAL_ERR = 7,
     OTHER_ERR = 99
 };
 
@@ -161,6 +160,7 @@ public:
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
     static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
     static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_REPORT_INTERVAL_MS = 600000;
     void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
     static void RegisterDisplayOffTimeObserver();
     static void UnregisterDisplayOffTimeObserver();
@@ -232,25 +232,17 @@ private:
     };
 
     std::shared_ptr<FFRTTimer> ffrtTimer_;
-    class ScreenTimeoutCheck {
+    class ScreenChangeCheck {
     public:
-        ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
+        ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
         void Finish(TransitResult result);
     private:
-        void Report();
-        enum ScreenTimeoutState {
-            INVALID,
-            TIMER_ON,
-            TIMER_DONE,
-            FINISH,
-        } timeoutState_;
-        FFRTMutex mutex_;
+        void Report(const std::string &msg);
         std::shared_ptr<FFRTTimer> timer_;
         pid_t pid_;
         pid_t uid_;
         PowerState state_;
         StateChangeReason reason_;
-        std::string msg_;
     };
 
     void InitStateMap();
