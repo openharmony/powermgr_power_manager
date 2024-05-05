@@ -990,9 +990,8 @@ int64_t PowerStateMachine::GetSleepTime()
     return sleepTime_;
 }
 
-PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state,
-    StateChangeReason reason): timeoutState_(ScreenTimeoutState::INVALID), timer_(ffrtTimer), state_(state),
-    reason_(reason)
+PowerStateMachine::ScreenChangeCheck::ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer,
+    PowerState state, StateChangeReason reason): timer_(ffrtTimer), state_(state), reason_(reason)
 {
     // only check for screen on/off event
     if (state != PowerState::INACTIVE && state != PowerState::AWAKE) {
@@ -1000,7 +999,7 @@ PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTi
     }
 
     if (!timer_) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "ScreenTimeoutCheck failed: invalid timer");
+        POWER_HILOGE(FEATURE_POWER_STATE, "ScreenChangeCheck failed: invalid timer");
         return;
     }
 
@@ -1008,51 +1007,49 @@ PowerStateMachine::ScreenTimeoutCheck::ScreenTimeoutCheck(std::shared_ptr<FFRTTi
     uid_ = IPCSkeleton::GetCallingUid();
 
     FFRTTask task = [this]() {
-        mutex_.lock();
-        if (timeoutState_ == ScreenTimeoutState::TIMER_ON) {
-            msg_ = "TIMEOUT";
-            Report();
-            timeoutState_ = ScreenTimeoutState::TIMER_DONE;
-        }
-        mutex_.unlock();
+        Report("TIMEOUT");
     };
 
-    mutex_.lock();
     timer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
-    timeoutState_ = ScreenTimeoutState::TIMER_ON;
-    mutex_.unlock();
 }
 
-void PowerStateMachine::ScreenTimeoutCheck::Finish(TransitResult result) {
-    mutex_.lock();
-    // do nothing if not in TIMER_ON state
-    if (timeoutState_ != ScreenTimeoutState::TIMER_ON) {
-        mutex_.unlock();
+void PowerStateMachine::ScreenChangeCheck::Finish(TransitResult result)
+{
+    if (!timer_) {
         return;
     }
     timer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
-    timeoutState_ = ScreenTimeoutState::FINISH;
 
     bool transitSuccess = (result == TransitResult::SUCCESS) || (result == TransitResult::ALREADY_IN_STATE);
-    bool skipReport = (result == TransitResult::LOCKING) || !StateController::IsReallyFailed(reason_);
+    bool skipReport = (result == TransitResult::LOCKING) || (result == TransitResult::FORBID_TRANSIT) ||
+        !StateController::IsReallyFailed(reason_);
     if (transitSuccess || skipReport) {
-        mutex_.unlock();
         return;
     }
 
-    msg_ = std::string("Transit failed with: ") + GetTransitResultString(result);
-    Report();
-    mutex_.unlock();
+    std::string msg = std::string("Transit failed with: ") + GetTransitResultString(result);
+    Report(msg);
 }
 
-void PowerStateMachine::ScreenTimeoutCheck::Report()
+void PowerStateMachine::ScreenChangeCheck::Report(const std::string &msg)
 {
     const char* eventName = (state_ == PowerState::INACTIVE) ? "SCREEN_OFF_TIMEOUT" : "SCREEN_ON_TIMEOUT";
+    POWER_HILOGE(FEATURE_POWER_STATE, "event=%{public}s, reason=%{public}s, msg=%{public}s, pid=%{public}d,"
+        " uid=%{public}d", eventName, PowerUtils::GetReasonTypeString(reason_).c_str(), msg.c_str(), pid_, uid_);
+
+    static int64_t lastReportTime = -1;
+    int64_t now = GetTickCount();
+    int64_t nextReportTime = lastReportTime + SCREEN_CHANGE_REPORT_INTERVAL_MS;
+    if (nextReportTime > SCREEN_CHANGE_REPORT_INTERVAL_MS && now < nextReportTime) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "Will skip report for another %{public}s ms",
+            std::to_string(nextReportTime - now).c_str());
+        return;
+    }
+    lastReportTime = now;
+    
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
-        "PID", pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg_.c_str(),
+        "PID", pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg.c_str(),
         "REASON", PowerUtils::GetReasonTypeString(reason_).c_str());
-    POWER_HILOGE(FEATURE_POWER_STATE, "event=%{public}s, reason=%{public}s, msg=%{public}s, pid=%{public}d, uid=%{public}d",
-        eventName, PowerUtils::GetReasonTypeString(reason_).c_str(), msg_.c_str(), pid_, uid_);
 }
 
 std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateController(PowerState state)
@@ -1069,13 +1066,13 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
-    ScreenTimeoutCheck timeoutCheck(ffrtTimer_, state, reason);
+    ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
     SettingStateFlag flag(state, shared_from_this());
 
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
-        timeoutCheck.Finish(TransitResult::INTERNAL_ERR);
+        timeoutCheck.Finish(TransitResult::OTHER_ERR);
         return false;
     }
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
@@ -1442,8 +1439,6 @@ std::string PowerStateMachine::GetTransitResultString(TransitResult result)
             return "SetDisplayState(OFF) error";
         case TransitResult::FORBID_TRANSIT:
             return "Forbid transit";
-        case TransitResult::INTERNAL_ERR:
-            return "Internal error";
         case TransitResult::OTHER_ERR:
             return "Other error";
         default:
