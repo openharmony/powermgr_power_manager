@@ -17,6 +17,7 @@
 #define POWER_SHELL_COMMAND_H
 
 #include <functional>
+#include <getopt.h>
 #include <map>
 #include "shell_command.h"
 
