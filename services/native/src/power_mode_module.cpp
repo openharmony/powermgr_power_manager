@@ -120,40 +120,152 @@ void PowerModeModule::RegisterSaveModeObserver()
 {
     if (this->mode_ == PowerMode::POWER_SAVE_MODE || this->mode_ == PowerMode::EXTREME_POWER_SAVE_MODE) {
         POWER_HILOGD(FEATURE_POWER_MODE, "register setting observer in save mode");
-        g_autoAdjustBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
-        g_autoWindowRotationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
-        g_vibratorsStateObserver = CreateSettingObserver(PowerModePolicy::ServiceType::VIBRATORS_STATE);
-        g_intellVoiceObserver = CreateSettingObserver(PowerModePolicy::ServiceType::INTELL_VOICE);
-        g_alwaysOnDisplayObserver = CreateSettingObserver(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
-        g_locationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LOCATION_STATE);
+        RegisterAutoAdjustBrightnessObserver();
+        RegisterAutoWindowRotationObserver();
+        RegisterVibrateStateObserver();
+        RegisterIntellVoiceObserver();
+        RegisterAlwaysOnDisplayObserver();
+        RegisterLocationStateObserver();
         observerRegisted_ = true;
     }
 }
 
-sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
+static void AutoAdjustBrightnessUpdateFunc()
 {
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string) {
-        DelayedSingleton<PowerModePolicy>::GetInstance()->RemoveBackupMapSettingSwitch(switchId);
-    };
-
-    switch (switchId) {
-        case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
-            return SettingHelper::RegisterSettingAutoAdjustBrightnessObserver(updateFunc);
-        case PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION:
-            return SettingHelper::RegisterSettingWindowRotationObserver(updateFunc);
-        case PowerModePolicy::ServiceType::VIBRATORS_STATE:
-            return SettingHelper::RegisterSettingVibrationObserver(updateFunc);
-        case PowerModePolicy::ServiceType::INTELL_VOICE:
-            return SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
-        case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
-            return SettingHelper::RegisterSettingAlwaysOnDisplayObserver(updateFunc);
-        case PowerModePolicy::ServiceType::LOCATION_STATE:
-            return SettingHelper::RegisterSettingLocationObserver(updateFunc);
-        default:
-            POWER_HILOGW(FEATURE_POWER_MODE, "register unknown switch id: %{public}d", switchId);
-            break;
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
+    auto setVal = SettingHelper::GetSettingAutoAdjustBrightness(switchVal);
+    if (setVal == switchVal) {
+        return;
     }
-    return nullptr;
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
+}
+
+void PowerModeModule::RegisterAutoAdjustBrightnessObserver()
+{
+    if (g_autoAdjustBrightnessObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "auto adjust brightness observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        AutoAdjustBrightnessUpdateFunc();
+    };
+    g_autoAdjustBrightnessObserver = SettingHelper::RegisterSettingAutoAdjustBrightnessObserver(updateFunc);
+}
+
+static void WindowRotationUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+    auto setVal = SettingHelper::GetSettingWindowRotation(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+}
+
+void PowerModeModule::RegisterAutoWindowRotationObserver()
+{
+    if (g_autoWindowRotationObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "auto window rotation observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        WindowRotationUpdateFunc();
+    };
+    g_autoWindowRotationObserver = SettingHelper::RegisterSettingWindowRotationObserver(updateFunc);
+}
+
+static void VibrateStateUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
+    auto setVal = SettingHelper::GetSettingVibration(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::VIBRATORS_STATE);
+}
+
+void PowerModeModule::RegisterVibrateStateObserver()
+{
+    if (g_vibratorsStateObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "vibrate state observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        VibrateStateUpdateFunc();
+    };
+    g_vibratorsStateObserver = SettingHelper::RegisterSettingVibrationObserver(updateFunc);
+}
+
+static void IntellVoiceUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
+    auto setVal = SettingHelper::GetSettingIntellVoice(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::INTELL_VOICE);
+}
+
+void PowerModeModule::RegisterIntellVoiceObserver()
+{
+    if (g_autoAdjustBrightnessObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "intell voice observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        IntellVoiceUpdateFunc();
+    };
+    g_autoAdjustBrightnessObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
+}
+
+static void AlwaysOnDisplayUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
+    auto setVal = SettingHelper::GetSettingAlwaysOnDisplay(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
+}
+
+void PowerModeModule::RegisterAlwaysOnDisplayObserver()
+{
+    if (g_alwaysOnDisplayObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "always on display observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        AlwaysOnDisplayUpdateFunc();
+    };
+    g_alwaysOnDisplayObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
+}
+
+static void LocationStateUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LOCATION_STATE);
+    auto setVal = SettingHelper::GetSettingLocation(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::LOCATION_STATE);
+}
+
+void PowerModeModule::RegisterLocationStateObserver()
+{
+    if (g_locationObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "location state observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        LocationStateUpdateFunc();
+    };
+    g_locationObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
 }
 
 void PowerModeModule::InitPowerMode()

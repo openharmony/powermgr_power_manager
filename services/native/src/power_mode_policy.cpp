@@ -112,6 +112,7 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t switchId, int32_t& value)
         POWER_HILOGW(FEATURE_POWER_MODE, "get setting state invalid, switch id: %{public}d", switchId);
         return;
     }
+    value = defaultVal;
     POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, switch value: %{public}d", switchId, value);
 }
 
@@ -150,12 +151,6 @@ bool PowerModePolicy::IsValidType(uint32_t type)
 
 void PowerModePolicy::RemoveBackupMapSettingSwitch(uint32_t switchId)
 {
-    int32_t setVal = INT32_MAX;
-    GetSettingSwitchState(switchId, setVal);
-    if (setVal == GetPowerModeValuePolicy(switchId)) {
-        POWER_HILOGD(FEATURE_POWER_MODE, "same switch: %{public}d", switchId);
-        return;
-    }
     auto iter = recoverMap_.find(switchId);
     if (iter != recoverMap_.end()) {
         recoverMap_.erase(iter);
