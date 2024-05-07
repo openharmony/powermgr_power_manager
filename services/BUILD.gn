@@ -115,6 +115,7 @@ ohos_shared_library("powermgrservice") {
     "jsoncpp:jsoncpp",
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
+    "location:location_sdk",
   ]
 
   defines = []
