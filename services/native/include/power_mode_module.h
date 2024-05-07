@@ -67,7 +67,12 @@ private:
     void UnregisterSaveModeObserver();
     void RegisterSaveModeObserver();
     void SaveCurrentMode();
-    sptr<SettingObserver> CreateSettingObserver(uint32_t switchId);
+    void RegisterAutoAdjustBrightnessObserver()
+    void RegisterAutoWindowRotationObserver()
+    void RegisterVibrateStateObserver()
+    void RegisterIntellVoiceObserver()
+    void RegisterAlwaysOnDisplayObserver()
+    void RegisterLocationStateObserver()
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
