@@ -69,7 +69,8 @@
                 "device_standby",
                 "window_manager",
                 "miscdevice",
-                "bundle_framework"
+                "bundle_framework",
+                "location"
             ]
         },
         "build": {

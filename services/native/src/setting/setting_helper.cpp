@@ -261,11 +261,6 @@ sptr<SettingObserver> SettingHelper::RegisterSettingAlwaysOnDisplayObserver(Sett
     return settingObserver;
 }
 
-bool SettingHelper::IsLocationSettingValid()
-{
-    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_LOCATION_KEY);
-}
-
 int32_t SettingHelper::GetSettingLocation(int32_t defaultVal)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);

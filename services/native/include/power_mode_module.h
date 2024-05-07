@@ -67,12 +67,12 @@ private:
     void UnregisterSaveModeObserver();
     void RegisterSaveModeObserver();
     void SaveCurrentMode();
-    void RegisterAutoAdjustBrightnessObserver()
-    void RegisterAutoWindowRotationObserver()
-    void RegisterVibrateStateObserver()
-    void RegisterIntellVoiceObserver()
-    void RegisterAlwaysOnDisplayObserver()
-    void RegisterLocationStateObserver()
+    void RegisterAutoAdjustBrightnessObserver();
+    void RegisterAutoWindowRotationObserver();
+    void RegisterVibrateStateObserver();
+    void RegisterIntellVoiceObserver();
+    void RegisterAlwaysOnDisplayObserver();
+    void RegisterLocationStateObserver();
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();

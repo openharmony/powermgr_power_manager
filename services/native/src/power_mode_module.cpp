@@ -22,6 +22,7 @@
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
 #include "setting_helper.h"
+#include "locator_impl.h"
 
 #include "singleton.h"
 
@@ -448,6 +449,9 @@ void PowerModeModule::SetDisplayOffTime(bool isBoot)
     }
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
+    if (time == INT32_MAX) {
+        return;
+    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set display off timeout: %{public}d", time);
     bool needUpdateSetting = time > 0;
@@ -458,6 +462,9 @@ void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
 {
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SLEEPTIME);
+    if (time == INT32_MAX) {
+        return;
+    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set sleep timeout: %{public}d", time);
     pms->GetPowerStateMachine()->SetSleepTime(static_cast<int64_t>(time));
@@ -562,7 +569,7 @@ void PowerModeModule::SetLocationState(bool isBoot)
     if (state == INT32_MAX) {
         return;
     }
-    SettingHelper::SetSettingLocation(static_cast<SettingHelper::SwitchStatus>(state));
+    Location::LocatorImpl::GetInstance()->EnableAbilityV9(state);
 }
 } // namespace PowerMgr
 } // namespace OHOS
