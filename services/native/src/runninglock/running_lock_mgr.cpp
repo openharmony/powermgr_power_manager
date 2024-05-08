@@ -228,7 +228,6 @@ void RunningLockMgr::InitLocksTypeCoordination()
                 stateAction->SetCoordinated(true);
             } else {
                 stateAction->SetCoordinated(false);
-                stateMachine->SetCoordinatedOverride(false);
                 stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 stateMachine->ResetInactiveTimer();
                 result = counter->Decrease(backgroundLockParam);
