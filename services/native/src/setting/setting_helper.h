@@ -65,9 +65,6 @@ public:
 
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
 
-    static void SaveCurrentPowerMode(int32_t powerMode);
-    static int32_t GetCurrentPowerMode(int32_t defaultVal);
-
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
