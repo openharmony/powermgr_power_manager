@@ -52,8 +52,6 @@ public:
     static int32_t GetSettingIntellVoice(int32_t defaultVal);
     static void SetSettingIntellVoice(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingIntellVoiceObserver(SettingObserver::UpdateFunc& func);
-    static int32_t GetSettingLocation(int32_t defaultVal);
-    static sptr<SettingObserver> RegisterSettingLocationObserver(SettingObserver::UpdateFunc& func);
     static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
     static bool IsSuspendSourcesSettingValid();
     static const std::string GetSettingSuspendSources();
