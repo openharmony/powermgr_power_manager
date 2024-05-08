@@ -760,8 +760,22 @@ void PowerStateMachine::ResetInactiveTimer()
 
     if (forceTimingOut_.load() || this->CheckRunningLock(PowerState::INACTIVE)) {
         int64_t displayOffTime = this->GetDisplayOffTime();
+        ResetScreenOffPreTimeForSwing(displayOffTime);
         this->SetDelayTimer(
             displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    }
+}
+
+void PowerStateMachine::ResetScreenOffPreTimeForSwing(int64_t displayOffTime)
+{
+    int64_t now = GetTickCount();
+    int64_t nextTimeOut = now + displayOffTime;
+    POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
+        "now=%{public}ld,displayOffTime=%{public}ld,nextTimeOut=%{public}ld", now, displayOffTime, nextTimeOut);
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto screenOffPreController = pms->GetScreenOffPreController();
+    if (screenOffPreController != nullptr && screenOffPreController->IsRegistered()) {
+        screenOffPreController->SchedulEyeDetectTimeout(nextTimeOut, now);
     }
 }
 

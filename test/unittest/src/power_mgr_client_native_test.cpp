@@ -72,6 +72,8 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
 
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(powerMgrClient.RegisterScreenStateCallback(0, nullptr));
+    EXPECT_FALSE(powerMgrClient.UnRegisterScreenStateCallback(nullptr));
     powerMgrClient.~PowerMgrClient();
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");

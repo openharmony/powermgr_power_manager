@@ -21,6 +21,7 @@
 #include "power_mode_callback_stub.h"
 #include "power_state_callback_stub.h"
 #include "power_runninglock_callback_stub.h"
+#include "screen_off_pre_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -60,6 +61,12 @@ public:
         PowerRunningLockTestCallback() {};
         virtual ~PowerRunningLockTestCallback() {};
         virtual void HandleRunningLockMessage(std::string message) override;
+    };
+    class ScreenOffPreTestCallback : public ScreenOffPreCallbackStub {
+    public:
+        ScreenOffPreTestCallback() {};
+        virtual ~ScreenOffPreTestCallback() {};
+        virtual void OnScreenStateChanged(uint32_t state) override;
     };
 };
 } // namespace PowerMgr
