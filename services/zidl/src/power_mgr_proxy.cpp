@@ -113,35 +113,31 @@ bool PowerMgrProxy::IsRunningLockTypeSupported(RunningLockType type)
     return result;
 }
 
-bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return result;
+        return false;
     }
 
     WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
+    WRITE_PARCEL_WITH_RET(data, Int32, timeOutMs, false);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
-        return result;
+        return false;
     }
-
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "ReadBool fail");
-    }
-    return result;
+    return true;
 }
 
 bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
@@ -149,14 +145,13 @@ bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return result;
+        return false;
     }
 
     WRITE_PARCEL_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
@@ -166,13 +161,9 @@ bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
-        return result;
+        return false;
     }
-
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "ReadBool fail");
-    }
-    return result;
+    return true;
 }
 
 bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
