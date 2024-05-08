@@ -39,7 +39,6 @@ public:
     void SetModeItem(PowerMode mode);
     PowerMode GetModeItem();
     void EnableMode(PowerMode mode, bool isBoot = false);
-    void InitPowerMode();
     void AddPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void DelPowerModeCallback(const sptr<IPowerModeCallback>& callback);
 
@@ -66,12 +65,10 @@ private:
     void PublishPowerModeEvent();
     void UnregisterSaveModeObserver();
     void RegisterSaveModeObserver();
-    void SaveCurrentMode();
     void RegisterAutoAdjustBrightnessObserver();
     void RegisterAutoWindowRotationObserver();
     void RegisterVibrateStateObserver();
     void RegisterIntellVoiceObserver();
-    void RegisterAlwaysOnDisplayObserver();
     void RegisterLocationStateObserver();
 
     sptr<CallbackManager> callbackMgr_;
@@ -84,7 +81,6 @@ private:
     static void SetVibration(bool isBoot);
     static void SetWindowRotation(bool isBoot);
     static void SetIntellVoiceState(bool isBoot);
-    static void SetAlwaysOnDisplay(bool isBoot);
     static void SetLocationState(bool isBoot);
 
     std::atomic<bool> started_;

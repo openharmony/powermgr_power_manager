@@ -38,7 +38,6 @@ sptr<SettingObserver> g_autoAdjustBrightnessObserver;
 sptr<SettingObserver> g_autoWindowRotationObserver;
 sptr<SettingObserver> g_vibratorsStateObserver;
 sptr<SettingObserver> g_intellVoiceObserver;
-sptr<SettingObserver> g_alwaysOnDisplayObserver;
 sptr<SettingObserver> g_locationObserver;
 }
 
@@ -62,8 +61,6 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION, onOffRotationAction);
     PowerModePolicy::ModeAction intellVoiceAction = [&](bool isInit) { SetIntellVoiceState(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
-    PowerModePolicy::ModeAction aodAction = [&](bool isInit) { SetAlwaysOnDisplay(isInit); };
-    policy->AddAction(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY, aodAction);
     PowerModePolicy::ModeAction locationAction = [&](bool isInit) { SetLocationState(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::LOCATION_STATE, locationAction);
 }
@@ -106,13 +103,11 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_autoWindowRotationObserver);
     SettingHelper::UnregisterSettingObserver(g_vibratorsStateObserver);
     SettingHelper::UnregisterSettingObserver(g_intellVoiceObserver);
-    SettingHelper::UnregisterSettingObserver(g_alwaysOnDisplayObserver);
     SettingHelper::UnregisterSettingObserver(g_locationObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
     g_vibratorsStateObserver = nullptr;
     g_intellVoiceObserver = nullptr;
-    g_alwaysOnDisplayObserver = nullptr;
     g_locationObserver = nullptr;
     observerRegisted_ = false;
 }
@@ -125,7 +120,6 @@ void PowerModeModule::RegisterSaveModeObserver()
         RegisterAutoWindowRotationObserver();
         RegisterVibrateStateObserver();
         RegisterIntellVoiceObserver();
-        RegisterAlwaysOnDisplayObserver();
         RegisterLocationStateObserver();
         observerRegisted_ = true;
     }
@@ -223,29 +217,6 @@ void PowerModeModule::RegisterIntellVoiceObserver()
     g_autoAdjustBrightnessObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
 }
 
-static void AlwaysOnDisplayUpdateFunc()
-{
-    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
-    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
-    auto setVal = SettingHelper::GetSettingAlwaysOnDisplay(switchVal);
-    if (setVal == switchVal) {
-        return;
-    }
-    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
-}
-
-void PowerModeModule::RegisterAlwaysOnDisplayObserver()
-{
-    if (g_alwaysOnDisplayObserver) {
-        POWER_HILOGD(FEATURE_POWER_MODE, "always on display observer already registed");
-        return;
-    }
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
-        AlwaysOnDisplayUpdateFunc();
-    };
-    g_alwaysOnDisplayObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
-}
-
 static void LocationStateUpdateFunc()
 {
     auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
@@ -290,9 +261,6 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
     /* unregister setting observer for current mode */
     UnregisterSaveModeObserver();
 
-    /* Save mode_ to setting data */
-    SaveCurrentMode();
-
     /* Update power mode policy */
     UpdateModepolicy();
 
@@ -307,11 +275,6 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 
     this->lastMode_ = static_cast<uint32_t>(mode);
     started_ = false;
-}
-
-void PowerModeModule::SaveCurrentMode()
-{
-    SettingHelper::SaveCurrentPowerMode(static_cast<int32_t>(this->mode_));
 }
 
 void PowerModeModule::UpdateModepolicy()
@@ -544,23 +507,9 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
 }
 
-void PowerModeModule::SetAlwaysOnDisplay(bool isBoot)
-{
-    if (isBoot && SettingHelper::IsAlwaysOnDisplaySettingValid()) {
-        return;
-    }
-    int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
-        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY);
-    POWER_HILOGD(FEATURE_POWER_MODE, "Set always on display state %{public}d", state);
-    if (state == INT32_MAX) {
-        return;
-    }
-    SettingHelper::SetSettingAlwaysOnDisplay(static_cast<SettingHelper::SwitchStatus>(state));
-}
-
 void PowerModeModule::SetLocationState(bool isBoot)
 {
-    if (isBoot && SettingHelper::IsLocationSettingValid()) {
+    if (isBoot) {
         return;
     }
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
