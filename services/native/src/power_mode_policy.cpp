@@ -82,7 +82,7 @@ void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
     }
 }
 
-void PowerModePolicy::GetSettingSwitchState(uint32_t switchId, int32_t& value)
+void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
 {
     int32_t defaultVal = INT32_MAX;
     switch (switchId) {
@@ -98,11 +98,10 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t switchId, int32_t& value)
         case PowerModePolicy::ServiceType::INTELL_VOICE:
             defaultVal = SettingHelper::GetSettingIntellVoice(defaultVal);
             break;
-        case PowerModePolicy::ServiceType::ALWAYS_ON_DISPLAY:
-            defaultVal = SettingHelper::GetSettingAlwaysOnDisplay(defaultVal);
-            break;
         case PowerModePolicy::ServiceType::LOCATION_STATE:
-            defaultVal = SettingHelper::GetSettingLocation(defaultVal);
+            bool isEnable;
+            Location::LocatorImpl::GetInstance()->IsLocationEnabledV9(isEnable);
+            defaultVal = isEnable ? 1 : 0;
             break;
         default:
             break;

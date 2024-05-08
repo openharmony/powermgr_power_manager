@@ -34,7 +34,6 @@ public:
         static constexpr uint32_t DISPLAY_OFFTIME = 101;
         static constexpr uint32_t SLEEPTIME = 102;
         static constexpr uint32_t AUTO_ADJUST_BRIGHTNESS = 103;
-        static constexpr uint32_t ALWAYS_ON_DISPLAY = 104;
         static constexpr uint32_t INTELL_VOICE = 105;
         static constexpr uint32_t LOCATION_STATE = 106;
         static constexpr uint32_t AUTO_WINDOWN_RORATION = 107;
@@ -59,7 +58,7 @@ private:
 
     void ReadPowerModePolicy(uint32_t mode);
     void ComparePowerModePolicy();
-    void GetSettingSwitchState(uint32_t switchId, int32_t& value); // from setting
+    void GetSettingSwitchState(uint32_t& switchId, int32_t& value); // from setting
     int32_t GetPolicyFromMap(uint32_t type);
     std::mutex policyMutex_;
     std::mutex actionMapMutex_;

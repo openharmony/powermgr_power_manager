@@ -52,11 +52,6 @@ public:
     static int32_t GetSettingIntellVoice(int32_t defaultVal);
     static void SetSettingIntellVoice(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingIntellVoiceObserver(SettingObserver::UpdateFunc& func);
-    static bool IsAlwaysOnDisplaySettingValid();
-    static int32_t GetSettingAlwaysOnDisplay(int32_t defaultVal);
-    static void SetSettingAlwaysOnDisplay(SwitchStatus status);
-    static sptr<SettingObserver> RegisterSettingAlwaysOnDisplayObserver(SettingObserver::UpdateFunc& func);
-    static bool IsLocationSettingValid();
     static int32_t GetSettingLocation(int32_t defaultVal);
     static sptr<SettingObserver> RegisterSettingLocationObserver(SettingObserver::UpdateFunc& func);
     static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
@@ -67,6 +62,7 @@ public:
     static bool IsWakeupSourcesSettingValid();
     static const std::string GetSettingWakeupSources();
     static void SetSettingWakeupSources(const std::string& jsonConfig);
+
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
 
     static void SaveCurrentPowerMode(int32_t powerMode);
@@ -81,8 +77,6 @@ private:
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
-    static constexpr const char* SETTING_ALWAYS_ON_DISPLAY_KEY {"settings.sceneboard.aod_state"};
-    static constexpr const char* SETTING_LOCATION_KEY {"location_enable"};
     static constexpr const char* SETTING_POWER_MODE_KEY {"settings.power.smart_mode_status"};
 };
 } // namespace PowerMgr
