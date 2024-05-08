@@ -317,25 +317,5 @@ void SettingHelper::UnregisterSettingObserver(sptr<SettingObserver>& observer)
     }
     SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(observer);
 }
-
-void SettingHelper::SaveCurrentPowerMode(int32_t powerMode)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_MODE_KEY, powerMode);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "save power mode failed, status=%{public}d, ret=%{public}d", powerMode, ret);
-    }
-}
-
-int32_t SettingHelper::GetCurrentPowerMode(int32_t defaultVal)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value = defaultVal;
-    ErrCode ret = settingProvider.GetIntValue(SETTING_POWER_MODE_KEY, value);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "get power mode failed, ret=%{public}d", ret);
-    }
-    return value;
-}
 } // namespace PowerMgr
 } // namespace OHOS
