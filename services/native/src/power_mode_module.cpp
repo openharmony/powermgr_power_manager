@@ -80,8 +80,14 @@ void PowerModeModule::SetModeItem(PowerMode mode)
         return;
     }
 
+    /* unregister setting observer for current mode */
+    UnregisterSaveModeObserver();
+
     /* start set mode thread */
     EnableMode(mode);
+
+    /* register setting observer for save mode */
+    RegisterSaveModeObserver();
 }
 
 PowerMode PowerModeModule::GetModeItem()
@@ -217,38 +223,6 @@ void PowerModeModule::RegisterIntellVoiceObserver()
     g_autoAdjustBrightnessObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
 }
 
-static void LocationStateUpdateFunc()
-{
-    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
-    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LOCATION_STATE);
-    auto setVal = SettingHelper::GetSettingLocation(switchVal);
-    if (setVal == switchVal) {
-        return;
-    }
-    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::LOCATION_STATE);
-}
-
-void PowerModeModule::RegisterLocationStateObserver()
-{
-    if (g_locationObserver) {
-        POWER_HILOGD(FEATURE_POWER_MODE, "location state observer already registed");
-        return;
-    }
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
-        LocationStateUpdateFunc();
-    };
-    g_locationObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
-}
-
-void PowerModeModule::InitPowerMode()
-{
-    PowerMode powerMode = static_cast<PowerMode>(SettingHelper::GetCurrentPowerMode(INT32_MAX));
-    if (powerMode != this->mode_) {
-        EnableMode(powerMode, true);
-        POWER_HILOGI(FEATURE_POWER_MODE, "init power mode: %{public}d", powerMode);
-    }
-}
-
 void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 {
     if (started_) {
@@ -258,8 +232,6 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 
     started_ = true;
     mode_ = mode;
-    /* unregister setting observer for current mode */
-    UnregisterSaveModeObserver();
 
     /* Update power mode policy */
     UpdateModepolicy();
@@ -269,9 +241,6 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 
     /* Set action */
     RunAction(isBoot);
-
-    /* register setting observer for save mode */
-    RegisterSaveModeObserver();
 
     this->lastMode_ = static_cast<uint32_t>(mode);
     started_ = false;
