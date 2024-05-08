@@ -144,6 +144,10 @@ public:
     {
         return switchOpen_;
     }
+    int64_t GetLastOnTime() const
+    {
+        return mDeviceState_.screenState.lastOnTime;
+    }
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         PowerStateCallbackDeathRecipient() = default;
@@ -263,6 +267,7 @@ private:
     void HandleSystemWakeup();
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
     std::shared_ptr<StateController> GetStateController(PowerState state);
+    void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;

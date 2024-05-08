@@ -26,6 +26,7 @@
 #include "ipower_mode_callback.h"
 #include "ipower_runninglock_callback.h"
 #include "ipower_state_callback.h"
+#include "iscreen_off_pre_callback.h"
 #include "power_errors.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
@@ -70,6 +71,9 @@ public:
     // Used for callback registration upon power mode.
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
+
+    virtual bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback) = 0;
+    virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) = 0;
 
     virtual bool SetDisplaySuspend(bool enable) = 0;
     virtual bool Hibernate(bool clearMemory) = 0;
