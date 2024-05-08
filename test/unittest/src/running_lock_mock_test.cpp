@@ -710,7 +710,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
     EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
-    EXPECT_EQ(lockActionCount, 2);
+    EXPECT_EQ(lockActionCount, 1);
     EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
     g_powerService->UnLock(naviToken);

@@ -63,8 +63,6 @@ private:
     RunningLockInfo runningLockInfo_;
     sptr<IRemoteObject> token_;
     wptr<IPowerMgr> proxy_;
-    std::atomic_bool state_ { false };
-    int32_t timeOutMs_ { -1 };
 };
 } // namespace PowerMgr
 } // namespace OHOS
