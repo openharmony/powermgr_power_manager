@@ -110,6 +110,10 @@ bool PowerMgrService::Init()
     if (!PowerStateMachineInit()) {
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
+    if (!screenOffPreController_) {
+        screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
+        screenOffPreController_->Init();
+    }
 
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
@@ -921,6 +925,32 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerModeModule_.DelPowerModeCallback(callback);
+    return true;
+}
+
+bool PowerMgrService::RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback)
+{
+    std::lock_guard lock(screenOffPreMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    screenOffPreController_->AddScreenStateCallback(remainTime, callback);
+    return true;
+}
+
+bool PowerMgrService::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    std::lock_guard lock(screenOffPreMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    screenOffPreController_->DelScreenStateCallback(callback);
     return true;
 }
 
