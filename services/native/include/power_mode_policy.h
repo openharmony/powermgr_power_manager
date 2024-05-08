@@ -21,6 +21,7 @@
 #include <mutex>
 #include <list>
 #include "power_save_mode.h"
+#include "locator_impl.h"
 
 #define INIT_VALUE_FALSE (-1)
 #define LAST_MODE_FLAG 0
