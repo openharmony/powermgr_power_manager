@@ -27,6 +27,7 @@
 #include "power_save_mode.h"
 #include "power_state_machine.h"
 #include "running_lock_mgr.h"
+#include "screen_off_pre_controller.h"
 #include "shutdown_controller.h"
 #include "shutdown_dialog.h"
 #include "sp_singleton.h"
@@ -83,6 +84,9 @@ public:
 
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+
+    virtual bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback) override;
+    virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) override;
 
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
@@ -150,6 +154,10 @@ public:
     {
         return wakeupController_;
     }
+    std::shared_ptr<ScreenOffPreController> GetScreenOffPreController() const
+    {
+        return screenOffPreController_;
+    }
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> GetWakeupActionController() const
     {
@@ -208,6 +216,7 @@ public:
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
     std::shared_ptr<HibernateController> hibernateController_ = nullptr;
+    std::shared_ptr<ScreenOffPreController> screenOffPreController_ = nullptr;
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
 #endif
@@ -257,6 +266,7 @@ private:
     std::mutex stateMutex_;
     std::mutex shutdownMutex_;
     std::mutex modeMutex_;
+    std::mutex screenOffPreMutex_;
     std::mutex screenMutex_;
     std::mutex dumpMutex_;
     std::mutex lockMutex_;
