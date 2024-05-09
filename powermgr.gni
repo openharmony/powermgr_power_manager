@@ -23,8 +23,6 @@ declare_args() {
   power_manager_feature_wakeup_action = false
   power_manager_feature_power_dialog = true
   power_manager_feature_screen_on_timeout_check = false
-  power_manager_feature_location_enable = true
-}
 
 cflags_cc = []
 if (!defined(global_parts_info) ||
