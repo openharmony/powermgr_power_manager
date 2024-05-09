@@ -446,6 +446,9 @@ void PowerMgrService::Reset()
     if (suspendController_) {
         suspendController_->Reset();
     }
+    if (screenOffPreController_) {
+        screenOffPreController_->Reset();
+    }
 }
 
 void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)

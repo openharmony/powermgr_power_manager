@@ -72,6 +72,13 @@ void ScreenOffPreController::DelScreenStateCallback(const sptr<IScreenOffPreCall
     }
 }
 
+void ScreenOffPreController::Reset()
+{
+    if (queue_) {
+        queue_.reset();
+    }
+}
+
 void ScreenOffPreController::CallbackMgr::AddCallback(const sptr<IScreenOffPreCallback>& callback)
 {
     std::unique_lock lock(mutex_);
@@ -149,12 +156,20 @@ void ScreenOffPreController::HandleEyeDetectTimeout(int64_t delayTime)
         "HandleEyeDetectTimeout delayTime=%{public}lld", static_cast<long long>(delayTime));
     std::lock_guard lock(ffrtMutex_);
     FFRTTask handletask = std::bind(&ScreenOffPreController::TriggerCallback, this);
+    if (!queue_) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "queue_ is nullptr");
+        return;
+    }
     eyeDetectTimeOutHandle_ = FFRTUtils::SubmitDelayTask(handletask, delayTime, queue_);
 }
 
 void ScreenOffPreController::CancelEyeDetectTimeout()
 {
     std::lock_guard lock(ffrtMutex_);
+    if (!queue_) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "queue_ is nullptr");
+        return;
+    }
     FFRTUtils::CancelTask(eyeDetectTimeOutHandle_, queue_);
 }
 

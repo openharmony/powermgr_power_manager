@@ -35,6 +35,7 @@ public:
     void SchedulEyeDetectTimeout(int64_t nextTimeOut, int64_t now);
     void AddScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
     void DelScreenStateCallback(const sptr<IScreenOffPreCallback>& callback);
+    void Reset();
 
 private:
     class CallbackMgr : public IRemoteObject::DeathRecipient {
