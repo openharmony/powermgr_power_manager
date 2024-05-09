@@ -90,8 +90,6 @@ public:
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
-    bool IsCoordinatedOverride();
-    void SetCoordinatedOverride(bool overridden);
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
     void Reset();
@@ -145,6 +143,10 @@ public:
     bool IsSwitchOpen() const
     {
         return switchOpen_;
+    }
+    int64_t GetLastOnTime() const
+    {
+        return mDeviceState_.screenState.lastOnTime;
     }
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -265,6 +267,7 @@ private:
     void HandleSystemWakeup();
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
     std::shared_ptr<StateController> GetStateController(PowerState state);
+    void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;
@@ -283,7 +286,6 @@ private:
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
-    std::atomic<bool> isCoordinatedOverride_ {false};
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     std::atomic<bool> switchOpen_ {true};

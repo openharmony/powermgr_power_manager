@@ -111,6 +111,10 @@ bool PowerMgrService::Init()
     if (!PowerStateMachineInit()) {
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
+    if (!screenOffPreController_) {
+        screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
+        screenOffPreController_->Init();
+    }
 
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
@@ -442,6 +446,9 @@ void PowerMgrService::Reset()
     }
     if (suspendController_) {
         suspendController_->Reset();
+    }
+    if (screenOffPreController_) {
+        screenOffPreController_->Reset();
     }
 }
 
@@ -936,6 +943,32 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
     return true;
 }
 
+bool PowerMgrService::RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback)
+{
+    std::lock_guard lock(screenOffPreMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    screenOffPreController_->AddScreenStateCallback(remainTime, callback);
+    return true;
+}
+
+bool PowerMgrService::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    std::lock_guard lock(screenOffPreMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    screenOffPreController_->DelScreenStateCallback(callback);
+    return true;
+}
+
 bool PowerMgrService::SetDisplaySuspend(bool enable)
 {
     std::lock_guard lock(screenMutex_);
@@ -1177,8 +1210,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
     }
     if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
-        !stateMachine->IsCoordinatedOverride()) {
-        stateMachine->SetCoordinatedOverride(true);
+        stateMachine->GetState() == PowerState::AWAKE) {
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
         POWER_HILOGD(FEATURE_INPUT, "Key event has simulate flag in coordinated state, override screen off time");
     }
@@ -1196,8 +1228,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
     }
     if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
-        !stateMachine->IsCoordinatedOverride()) {
-        stateMachine->SetCoordinatedOverride(true);
+        stateMachine->GetState() == PowerState::AWAKE) {
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
         POWER_HILOGD(FEATURE_INPUT, "Pointer event has simulate flag in coordinated state, override screen off time");
     }
