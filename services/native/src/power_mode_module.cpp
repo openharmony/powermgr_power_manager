@@ -471,7 +471,7 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
     if (state == INT32_MAX) {
-        return; ·
+        return;
     }
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
 }
