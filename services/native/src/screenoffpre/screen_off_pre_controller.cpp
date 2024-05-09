@@ -145,7 +145,8 @@ bool ScreenOffPreController::NeedEyeDetectLocked(int64_t nextEyeDetectTime)
 
 void ScreenOffPreController::HandleEyeDetectTimeout(int64_t delayTime)
 {
-    POWER_HILOGD(FEATURE_SCREEN_OFF_PRE, "HandleEyeDetectTimeout delayTime=%{public}lld", static_cast<long long>(delayTime));
+    POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
+        "HandleEyeDetectTimeout delayTime=%{public}lld", static_cast<long long>(delayTime));
     std::lock_guard lock(ffrtMutex_);
     FFRTTask handletask = std::bind(&ScreenOffPreController::TriggerCallback, this);
     eyeDetectTimeOutHandle_ = FFRTUtils::SubmitDelayTask(handletask, delayTime, queue_);
