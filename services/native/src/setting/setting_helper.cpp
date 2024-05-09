@@ -223,17 +223,6 @@ sptr<SettingObserver> SettingHelper::RegisterSettingIntellVoiceObserver(SettingO
     return settingObserver;
 }
 
-int32_t SettingHelper::GetSettingLocation(int32_t defaultVal)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value = defaultVal;
-    ErrCode ret = settingProvider.GetIntValue(SETTING_LOCATION_KEY, value);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "get setting location failed, ret=%{public}d", ret);
-    }
-    return value;
-}
-
 sptr<SettingObserver> SettingHelper::RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
