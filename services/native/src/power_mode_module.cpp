@@ -38,7 +38,6 @@ sptr<SettingObserver> g_autoAdjustBrightnessObserver;
 sptr<SettingObserver> g_autoWindowRotationObserver;
 sptr<SettingObserver> g_vibratorsStateObserver;
 sptr<SettingObserver> g_intellVoiceObserver;
-sptr<SettingObserver> g_locationObserver;
 }
 
 PowerModeModule::PowerModeModule()
@@ -109,12 +108,10 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_autoWindowRotationObserver);
     SettingHelper::UnregisterSettingObserver(g_vibratorsStateObserver);
     SettingHelper::UnregisterSettingObserver(g_intellVoiceObserver);
-    SettingHelper::UnregisterSettingObserver(g_locationObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
     g_vibratorsStateObserver = nullptr;
     g_intellVoiceObserver = nullptr;
-    g_locationObserver = nullptr;
     observerRegisted_ = false;
 }
 
@@ -126,7 +123,6 @@ void PowerModeModule::RegisterSaveModeObserver()
         RegisterAutoWindowRotationObserver();
         RegisterVibrateStateObserver();
         RegisterIntellVoiceObserver();
-        RegisterLocationStateObserver();
         observerRegisted_ = true;
     }
 }
@@ -471,7 +467,7 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
     if (state == INT32_MAX) {
-        return;
+        return; ·
     }
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
 }

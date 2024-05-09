@@ -69,7 +69,6 @@ private:
     void RegisterAutoWindowRotationObserver();
     void RegisterVibrateStateObserver();
     void RegisterIntellVoiceObserver();
-    void RegisterLocationStateObserver();
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
