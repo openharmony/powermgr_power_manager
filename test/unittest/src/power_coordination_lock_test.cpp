@@ -52,6 +52,7 @@ bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
 bool g_awakeCallback = false;
 bool g_inactiveCallback = false;
+PowerMode g_modeBeforeTest = PowerMode::NORMAL_MODE;
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 std::shared_ptr<KeyEvent> CreateKeyEvent()
@@ -174,6 +175,19 @@ public:
         MatchPowerStateTriggered(state);
     }
 };
+}
+
+void PowerCoordinationLockTest::SetUpTestCase(void)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    g_modeBeforeTest = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE), PowerErrors::ERR_OK);
+}
+
+void PowerCoordinationLockTest::TearDownTestCase(void)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SetDeviceMode(g_modeBeforeTest);
 }
 
 void PowerCoordinationLockTest::TearDown(void)
