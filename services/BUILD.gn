@@ -115,7 +115,6 @@ ohos_shared_library("powermgrservice") {
     "jsoncpp:jsoncpp",
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
-    "location:locator_sdk",
   ]
 
   defines = []
@@ -133,6 +132,13 @@ ohos_shared_library("powermgrservice") {
     external_deps += [
       "display_manager:displaymgr",
       "window_manager:libdm",
+    ]
+  }
+
+  if (has_location_location_part) {
+    defines += [ "HAS_LOCATION_LOCATION" ]
+    external_deps += [
+      "location:locator_sdk",
     ]
   }
 
