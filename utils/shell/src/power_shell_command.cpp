@@ -16,7 +16,6 @@
 #include "power_shell_command.h"
 
 #include <cerrno>
-#include <getopt.h>
 #include <string_ex.h>
 #include <sstream>
 
@@ -24,8 +23,6 @@
 #ifdef HAS_DISPLAY_MANAGER_PART
 #include "display_power_mgr_client.h"
 #endif
-
-extern char *optarg;
 
 namespace OHOS {
 namespace PowerMgr {
