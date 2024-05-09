@@ -209,14 +209,14 @@ static void IntellVoiceUpdateFunc()
 
 void PowerModeModule::RegisterIntellVoiceObserver()
 {
-    if (g_autoAdjustBrightnessObserver) {
+    if (g_intellVoiceObserver) {
         POWER_HILOGD(FEATURE_POWER_MODE, "intell voice observer already registed");
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
         IntellVoiceUpdateFunc();
     };
-    g_autoAdjustBrightnessObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
+    g_intellVoiceObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
 }
 
 void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
