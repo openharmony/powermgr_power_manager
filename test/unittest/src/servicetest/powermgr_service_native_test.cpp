@@ -73,6 +73,11 @@ void PowerMgrServiceNativeTest::PowerRunningLockTestCallback::HandleRunningLockM
 {
     POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
+
+void PowerMgrServiceNativeTest::ScreenOffPreTestCallback::OnScreenStateChanged(uint32_t state)
+{
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreTestCallback::OnScreenStateChanged.");
+}
 namespace {
 /**
  * @tc.name: PowerMgrServiceNativeTest001
@@ -814,6 +819,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
     sptr<IPowerRunninglockCallback> RunninglockCallback =new PowerRunningLockTestCallback();
+    sptr<IScreenOffPreCallback> screenOffPreCallback = new ScreenOffPreTestCallback();
 
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerStateCallback(stateCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(stateCallback));
@@ -821,6 +827,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCallback));
+    EXPECT_TRUE(g_powerMgrServiceProxy->RegisterScreenStateCallback(4000, screenOffPreCallback));
+    EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterScreenStateCallback(screenOffPreCallback));
 }
 
 /**
