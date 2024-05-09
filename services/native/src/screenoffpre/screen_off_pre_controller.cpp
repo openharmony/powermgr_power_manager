@@ -56,7 +56,8 @@ void ScreenOffPreController::AddScreenStateCallback(int32_t remainTime, const sp
             int64_t systemTime = powerStateMachine_->GetDisplayOffTime();
             auto settingTime = SettingHelper::GetSettingDisplayOffTime(systemTime);
             POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
-                "systemTime=%{public}lld,settingTime=%{public}lld", systemTime, settingTime);
+                "systemTime=%{public}lld,settingTime=%{public}lld",
+                static_cast<long long>(systemTime), static_cast<long long>(settingTime));
             SchedulEyeDetectTimeout(powerStateMachine_->GetLastOnTime() + settingTime, GetTickCount());
         }
     }
@@ -144,7 +145,7 @@ bool ScreenOffPreController::NeedEyeDetectLocked(int64_t nextEyeDetectTime)
 
 void ScreenOffPreController::HandleEyeDetectTimeout(int64_t delayTime)
 {
-    POWER_HILOGD(FEATURE_SCREEN_OFF_PRE, "HandleEyeDetectTimeout delayTime=%{public}lld", delayTime);
+    POWER_HILOGD(FEATURE_SCREEN_OFF_PRE, "HandleEyeDetectTimeout delayTime=%{public}lld", static_cast<long long>(delayTime));
     std::lock_guard lock(ffrtMutex_);
     FFRTTask handletask = std::bind(&ScreenOffPreController::TriggerCallback, this);
     eyeDetectTimeOutHandle_ = FFRTUtils::SubmitDelayTask(handletask, delayTime, queue_);

@@ -771,7 +771,8 @@ void PowerStateMachine::ResetScreenOffPreTimeForSwing(int64_t displayOffTime)
     int64_t now = GetTickCount();
     int64_t nextTimeOut = now + displayOffTime;
     POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
-        "now=%{public}lld,displayOffTime=%{public}lld,nextTimeOut=%{public}lld", now, displayOffTime, nextTimeOut);
+        "now=%{public}lld,displayOffTime=%{public}lld,nextTimeOut=%{public}lld",
+        static_cast<long long>(now), static_cast<long long>(displayOffTime), static_cast<long long>(nextTimeOut));
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto screenOffPreController = pms->GetScreenOffPreController();
     if (screenOffPreController != nullptr && screenOffPreController->IsRegistered()) {
