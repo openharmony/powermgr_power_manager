@@ -177,6 +177,12 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_RUNNINGLOCK_CALLBACK):
             ret = UnRegisterRunningLockCallbackStub(data);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SCREEN_OFF_PRE_CALLBACK):
+            ret = RegisterScreenStateCallbackStub(data);
+            break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK):
+            ret = UnRegisterScreenStateCallbackStub(data);
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -501,6 +507,29 @@ int32_t PowerMgrStub::UnRegisterRunningLockCallbackStub(MessageParcel& data)
     sptr<IPowerRunninglockCallback> callback = iface_cast<IPowerRunninglockCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
     UnRegisterRunningLockCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::RegisterScreenStateCallbackStub(MessageParcel& data)
+{
+    int32_t remainTime = 0;
+    READ_PARCEL_WITH_RET(data, Int32, remainTime, E_READ_PARCEL_ERROR);
+
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IScreenOffPreCallback> callback = iface_cast<IScreenOffPreCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    RegisterScreenStateCallback(remainTime, callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::UnRegisterScreenStateCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IScreenOffPreCallback> callback = iface_cast<IScreenOffPreCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    UnRegisterScreenStateCallback(callback);
     return ERR_OK;
 }
 

@@ -30,6 +30,7 @@ config("powermgr_private_config") {
     "native/src/suspend",
     "native/src/wakeup",
     "native/src/hibernate",
+    "native/src/screenoffpre",
   ]
 
   if (power_manager_feature_wakeup_action) {
@@ -60,6 +61,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/runninglock/running_lock_mgr.cpp",
     "native/src/runninglock/running_lock_proxy.cpp",
     "native/src/runninglock/running_lock_timer_handler.cpp",
+    "native/src/screenoffpre/screen_off_pre_controller.cpp",
     "native/src/setting/setting_helper.cpp",
     "native/src/shutdown/shutdown_callback_holer.cpp",
     "native/src/shutdown/shutdown_controller.cpp",
@@ -103,7 +105,7 @@ ohos_shared_library("powermgrservice") {
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
-    "drivers_interface_power:libpower_proxy_1.1",
+    "drivers_interface_power:libpower_proxy_1.2",
     "ffrt:libffrt",
     "hdf_core:libhdi",
     "hdf_core:libpub_utils",
@@ -186,6 +188,7 @@ ohos_shared_library("powermgr_stub") {
     "zidl/src/power_mode_callback_stub.cpp",
     "zidl/src/power_runninglock_callback_stub.cpp",
     "zidl/src/power_state_callback_stub.cpp",
+    "zidl/src/screen_off_pre_callback_stub.cpp",
     "zidl/src/shutdown/shutdown_stub_delegator.cpp",
     "zidl/src/sync_sleep_callback_stub.cpp",
   ]

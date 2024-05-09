@@ -64,6 +64,8 @@ private:
     int32_t UnRegisterPowerModeCallbackStub(MessageParcel& data);
     int32_t RegisterRunningLockCallbackStub(MessageParcel& data);
     int32_t UnRegisterRunningLockCallbackStub(MessageParcel& data);
+    int32_t RegisterScreenStateCallbackStub(MessageParcel& data);
+    int32_t UnRegisterScreenStateCallbackStub(MessageParcel& data);
     int32_t SetDisplaySuspendStub(MessageParcel& data);
     int32_t HibernateStub(MessageParcel& data);
     int32_t SetDeviceModeStub(MessageParcel& data, MessageParcel& reply);

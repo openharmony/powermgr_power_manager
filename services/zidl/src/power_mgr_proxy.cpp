@@ -833,6 +833,58 @@ bool PowerMgrProxy::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCa
     return true;
 }
 
+bool PowerMgrProxy::RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET((remote == nullptr) || (remainTime <= 0) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, Int32, remainTime, false);
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrProxy::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+
+    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 bool PowerMgrProxy::SetDisplaySuspend(bool enable)
 {
     sptr<IRemoteObject> remote = Remote();

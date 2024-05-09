@@ -711,6 +711,57 @@ bool PowerMgrServiceTestProxy::UnRegisterRunningLockCallback(const sptr<IPowerRu
     return true;
 }
 
+bool PowerMgrServiceTestProxy::RegisterScreenStateCallback(int32_t remainTime,
+    const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (remainTime <= 0) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+    data.WriteInt32(remainTime);
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 bool PowerMgrServiceTestProxy::SetDisplaySuspend(bool enable)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#include "power_hdi_callback.h"
-#include "hdf_base.h"
+#ifndef ISCREEN_OFF_PRE_CALLBACK_H
+#define ISCREEN_OFF_PRE_CALLBACK_H
 
-using namespace OHOS::HDI::Power::V1_2;
+#include <iremote_broker.h>
+#include <iremote_object.h>
+
+#include "power_state_machine_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
-int32_t PowerHdiCallback::OnSuspend()
-{
-    return HDF_SUCCESS;
-}
+class IScreenOffPreCallback : public IRemoteBroker {
+public:
+    virtual void OnScreenStateChanged(uint32_t state) = 0;
 
-int32_t PowerHdiCallback::OnWakeup()
-{
-    return HDF_SUCCESS;
-}
-} // OHOS
-} // PowerMgr
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IScreenOffPreCallback");
+};
+} // namespace PowerMgr
+} // namespace OHOS
+#endif // ISCREEN_OFF_PRE_CALLBACK_H
