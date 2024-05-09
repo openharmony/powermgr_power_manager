@@ -22,7 +22,9 @@
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
 #include "setting_helper.h"
+#ifdef HAS_LOCATION_LOCATION
 #include "locator_impl.h"
+#endif
 
 #include "singleton.h"
 
@@ -60,8 +62,10 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION, onOffRotationAction);
     PowerModePolicy::ModeAction intellVoiceAction = [&](bool isInit) { SetIntellVoiceState(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
+#ifdef HAS_LOCATION_LOCATION
     PowerModePolicy::ModeAction locationAction = [&](bool isInit) { SetLocationState(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::LOCATION_STATE, locationAction);
+#endif
 }
 
 void PowerModeModule::SetModeItem(PowerMode mode)
@@ -472,6 +476,7 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
 }
 
+#ifdef HAS_LOCATION_LOCATION
 void PowerModeModule::SetLocationState(bool isBoot)
 {
     if (isBoot) {
@@ -485,5 +490,6 @@ void PowerModeModule::SetLocationState(bool isBoot)
     }
     Location::LocatorImpl::GetInstance()->EnableAbilityV9(state);
 }
+#endif
 } // namespace PowerMgr
 } // namespace OHOS

@@ -21,7 +21,6 @@
 #include <mutex>
 #include <list>
 #include "power_save_mode.h"
-#include "locator_impl.h"
 
 #define INIT_VALUE_FALSE (-1)
 #define LAST_MODE_FLAG 0
@@ -36,7 +35,9 @@ public:
         static constexpr uint32_t SLEEPTIME = 102;
         static constexpr uint32_t AUTO_ADJUST_BRIGHTNESS = 103;
         static constexpr uint32_t INTELL_VOICE = 105;
+#ifdef HAS_LOCATION_LOCATION
         static constexpr uint32_t LOCATION_STATE = 106;
+#endif
         static constexpr uint32_t AUTO_WINDOWN_RORATION = 107;
         static constexpr uint32_t LCD_BRIGHTNESS = 115;
         static constexpr uint32_t VIBRATORS_STATE = 120;

@@ -19,6 +19,9 @@
 #include "power_save_mode.h"
 #include "singleton.h"
 #include "setting_helper.h"
+#ifdef HAS_LOCATION_LOCATION
+#include "locator_impl.h"
+#endif
 using namespace std;
 
 namespace OHOS {
@@ -98,11 +101,13 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
         case PowerModePolicy::ServiceType::INTELL_VOICE:
             defaultVal = SettingHelper::GetSettingIntellVoice(defaultVal);
             break;
+#ifdef HAS_LOCATION_LOCATION
         case PowerModePolicy::ServiceType::LOCATION_STATE:
             bool isEnable;
             Location::LocatorImpl::GetInstance()->IsLocationEnabledV9(isEnable);
             defaultVal = isEnable ? 1 : 0;
             break;
+#endif
         default:
             break;
     }
