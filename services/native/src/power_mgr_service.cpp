@@ -38,6 +38,7 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
+#include "running_lock_timer_handler.h"
 #include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
@@ -755,22 +756,33 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
-bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
-    std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-    return runningLockMgr_->Lock(remoteObj);
+    std::lock_guard lock(lockMutex_);
+    runningLockMgr_->Lock(remoteObj);
+    if (timeOutMs > 0) {
+        std::function<void()> task = [this, remoteObj, timeOutMs]() {
+            std::lock_guard lock(lockMutex_);
+            RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
+            runningLockMgr_->UnLock(remoteObj);
+        };
+        RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(remoteObj, task, timeOutMs);
+    }
+    return true;
 }
 
 bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-    return runningLockMgr_->UnLock(remoteObj);
+    std::lock_guard lock(lockMutex_);
+    RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
+    runningLockMgr_->UnLock(remoteObj);
+    return true;
 }
 
 bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)

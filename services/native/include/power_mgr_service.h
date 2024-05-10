@@ -67,7 +67,7 @@ public:
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);

@@ -26,7 +26,6 @@
 #include "power_log.h"
 #include "power_mgr_errors.h"
 #include "running_lock_token_stub.h"
-#include "running_lock_timer_handler.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -76,38 +75,24 @@ PowerErrors RunningLock::Recover(const wptr<IPowerMgr>& proxy)
 
 ErrCode RunningLock::Lock(int32_t timeOutMs)
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Lock timeOutMs: %{public}u", timeOutMs);
-    std::lock_guard<std::mutex> lock(mutex_);
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call, timeOutMs=%{public}d", timeOutMs);
-    if (!proxy->Lock(token_)) {
-        return E_INNER_ERR;
-    }
-    state_ = true;
     if (timeOutMs == 0) {
         timeOutMs = DEFAULT_TIMEOUT;
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "use default timeout");
     }
-    if (timeOutMs > 0) {
-        std::function<void()> task = std::bind(&RunningLock::UnLock, this);
-        RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(token_, task, timeOutMs);
+    if (!proxy->Lock(token_, timeOutMs)) {
+        return E_INNER_ERR;
     }
-    timeOutMs_ = timeOutMs;
     return ERR_OK;
 }
 
 ErrCode RunningLock::UnLock()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(token_);
-    if (state_ == false) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunningLock is already UnLock");
-        return ERR_OK;
-    }
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
@@ -117,7 +102,6 @@ ErrCode RunningLock::UnLock()
     if (!proxy->UnLock(token_)) {
         return E_INNER_ERR;
     }
-    state_ = false;
     return ERR_OK;
 }
 
