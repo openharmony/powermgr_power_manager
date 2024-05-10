@@ -135,11 +135,6 @@ ohos_shared_library("powermgrservice") {
     ]
   }
 
-  if (has_location_location_part) {
-    defines += [ "HAS_LOCATION_LOCATION" ]
-    external_deps += [ "location:locator_sdk" ]
-  }
-
   if (has_device_standby_part) {
     external_deps += [ "device_standby:standby_innerkits" ]
   }

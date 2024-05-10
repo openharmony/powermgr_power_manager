@@ -80,7 +80,6 @@ private:
     static void SetVibration(bool isBoot);
     static void SetWindowRotation(bool isBoot);
     static void SetIntellVoiceState(bool isBoot);
-    static void SetLocationState(bool isBoot);
 
     std::atomic<bool> started_;
     std::mutex mutex_;
