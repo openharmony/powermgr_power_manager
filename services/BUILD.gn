@@ -60,6 +60,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/runninglock/running_lock_inner.cpp",
     "native/src/runninglock/running_lock_mgr.cpp",
     "native/src/runninglock/running_lock_proxy.cpp",
+    "native/src/runninglock/running_lock_timer_handler.cpp",
     "native/src/screenoffpre/screen_off_pre_controller.cpp",
     "native/src/setting/setting_helper.cpp",
     "native/src/shutdown/shutdown_callback_holer.cpp",

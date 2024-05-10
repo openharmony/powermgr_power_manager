@@ -43,7 +43,7 @@ public:
     PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo);
     bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj);
     bool IsRunningLockTypeSupported(RunningLockType type);
-    bool Lock(const sptr<IRemoteObject>& remoteObj);
+    bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1);
     bool UnLock(const sptr<IRemoteObject>& remoteObj);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied,

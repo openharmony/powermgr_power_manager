@@ -1140,7 +1140,10 @@ ohos_unittest("test_power_coordination_lock") {
 ohos_unittest("test_running_lock_timer_handler") {
   module_out_path = module_output_path
 
-  sources = [ "src/running_lock_timer_handler_test.cpp" ]
+  sources = [
+    "${powermgr_service_path}/native/src/runninglock/running_lock_timer_handler.cpp",
+    "src/running_lock_timer_handler_test.cpp",
+  ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
