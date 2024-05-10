@@ -1146,6 +1146,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK:
             ret = StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PEN:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PEN;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD:
             ret = StateChangeReason::STATE_CHANGE_REASON_KEYBOARD;
             break;
