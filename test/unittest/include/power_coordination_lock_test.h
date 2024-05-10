@@ -22,6 +22,8 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerCoordinationLockTest : public testing::Test {
 public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
     void TearDown(void);
 };
 } // namespace PowerMgr
