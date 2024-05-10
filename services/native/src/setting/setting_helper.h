@@ -72,7 +72,6 @@ private:
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
-    static constexpr const char* SETTING_POWER_MODE_KEY {"settings.power.smart_mode_status"};
 };
 } // namespace PowerMgr
 } // namespace OHOS
