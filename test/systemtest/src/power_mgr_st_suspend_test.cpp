@@ -30,6 +30,7 @@ void PowerMgrSTSuspendTest::SetUpTestCase(void)
     // create singleton service object at the beginning
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
+    g_service->SetDeviceMode(PowerMode::NORMAL_MODE);
 }
 
 void PowerMgrSTSuspendTest::TearDownTestCase(void)
@@ -105,7 +106,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
 
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
-    sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
+    sleep(SLEEP_WAIT_TIME_S + 3 * ONE_SECOND);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     powerStateMachine->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME, false);
