@@ -36,7 +36,7 @@ namespace {
 sptr<SettingObserver> g_autoAdjustBrightnessObserver;
 sptr<SettingObserver> g_autoWindowRotationObserver;
 sptr<SettingObserver> g_vibratorsStateObserver;
-sptr<SettingObserver> g_lcdBrightnessObserver;
+sptr<SettingObserver> g_intellVoiceObserver;
 }
 
 PowerModeModule::PowerModeModule()
@@ -57,6 +57,8 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::VIBRATORS_STATE, vibrationAction);
     PowerModePolicy::ModeAction onOffRotationAction = [&](bool isInit) { SetWindowRotation(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION, onOffRotationAction);
+    PowerModePolicy::ModeAction intellVoiceAction = [&](bool isInit) { SetIntellVoiceState(isInit); };
+    policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
 }
 
 void PowerModeModule::SetModeItem(PowerMode mode)
@@ -102,11 +104,11 @@ void PowerModeModule::UnregisterSaveModeObserver()
     SettingHelper::UnregisterSettingObserver(g_autoAdjustBrightnessObserver);
     SettingHelper::UnregisterSettingObserver(g_autoWindowRotationObserver);
     SettingHelper::UnregisterSettingObserver(g_vibratorsStateObserver);
-    SettingHelper::UnregisterSettingObserver(g_lcdBrightnessObserver);
+    SettingHelper::UnregisterSettingObserver(g_intellVoiceObserver);
     g_autoAdjustBrightnessObserver = nullptr;
     g_autoWindowRotationObserver = nullptr;
     g_vibratorsStateObserver = nullptr;
-    g_lcdBrightnessObserver = nullptr;
+    g_intellVoiceObserver = nullptr;
     observerRegisted_ = false;
 }
 
@@ -114,34 +116,104 @@ void PowerModeModule::RegisterSaveModeObserver()
 {
     if (this->mode_ == PowerMode::POWER_SAVE_MODE || this->mode_ == PowerMode::EXTREME_POWER_SAVE_MODE) {
         POWER_HILOGD(FEATURE_POWER_MODE, "register setting observer in save mode");
-        g_autoAdjustBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
-        g_autoWindowRotationObserver = CreateSettingObserver(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
-        g_vibratorsStateObserver = CreateSettingObserver(PowerModePolicy::ServiceType::VIBRATORS_STATE);
-        g_lcdBrightnessObserver = CreateSettingObserver(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
+        RegisterAutoAdjustBrightnessObserver();
+        RegisterAutoWindowRotationObserver();
+        RegisterVibrateStateObserver();
+        RegisterIntellVoiceObserver();
         observerRegisted_ = true;
     }
 }
 
-sptr<SettingObserver> PowerModeModule::CreateSettingObserver(uint32_t switchId)
+static void AutoAdjustBrightnessUpdateFunc()
 {
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string) {
-        DelayedSingleton<PowerModePolicy>::GetInstance()->RemoveBackupMapSettingSwitch(switchId);
-    };
-
-    switch (switchId) {
-        case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
-            return SettingHelper::RegisterSettingAutoAdjustBrightnessObserver(updateFunc);
-        case PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION:
-            return SettingHelper::RegisterSettingWindowRotationObserver(updateFunc);
-        case PowerModePolicy::ServiceType::VIBRATORS_STATE:
-            return SettingHelper::RegisterSettingVibrationObserver(updateFunc);
-        case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
-            return SettingHelper::RegisterSettingBrightnessObserver(updateFunc);
-        default:
-            POWER_HILOGW(FEATURE_POWER_MODE, "register unknown switch id: %{public}d", switchId);
-            break;
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
+    auto setVal = SettingHelper::GetSettingAutoAdjustBrightness(switchVal);
+    if (setVal == switchVal) {
+        return;
     }
-    return nullptr;
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
+}
+
+void PowerModeModule::RegisterAutoAdjustBrightnessObserver()
+{
+    if (g_autoAdjustBrightnessObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "auto adjust brightness observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        AutoAdjustBrightnessUpdateFunc();
+    };
+    g_autoAdjustBrightnessObserver = SettingHelper::RegisterSettingAutoAdjustBrightnessObserver(updateFunc);
+}
+
+static void WindowRotationUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+    auto setVal = SettingHelper::GetSettingWindowRotation(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
+}
+
+void PowerModeModule::RegisterAutoWindowRotationObserver()
+{
+    if (g_autoWindowRotationObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "auto window rotation observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        WindowRotationUpdateFunc();
+    };
+    g_autoWindowRotationObserver = SettingHelper::RegisterSettingWindowRotationObserver(updateFunc);
+}
+
+static void VibrateStateUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
+    auto setVal = SettingHelper::GetSettingVibration(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::VIBRATORS_STATE);
+}
+
+void PowerModeModule::RegisterVibrateStateObserver()
+{
+    if (g_vibratorsStateObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "vibrate state observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        VibrateStateUpdateFunc();
+    };
+    g_vibratorsStateObserver = SettingHelper::RegisterSettingVibrationObserver(updateFunc);
+}
+
+static void IntellVoiceUpdateFunc()
+{
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    int32_t switchVal = policy->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
+    auto setVal = SettingHelper::GetSettingIntellVoice(switchVal);
+    if (setVal == switchVal) {
+        return;
+    }
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::INTELL_VOICE);
+}
+
+void PowerModeModule::RegisterIntellVoiceObserver()
+{
+    if (g_intellVoiceObserver) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "intell voice observer already registed");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
+        IntellVoiceUpdateFunc();
+    };
+    g_intellVoiceObserver = SettingHelper::RegisterSettingIntellVoiceObserver(updateFunc);
 }
 
 void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
@@ -302,6 +374,9 @@ void PowerModeModule::SetDisplayOffTime(bool isBoot)
     }
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
+    if (time == INIT_VALUE_FALSE) {
+        return;
+    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set display off timeout: %{public}d", time);
     bool needUpdateSetting = time > 0;
@@ -312,6 +387,9 @@ void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
 {
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SLEEPTIME);
+    if (time == INIT_VALUE_FALSE) {
+        return;
+    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     POWER_HILOGD(FEATURE_POWER_MODE, "Set sleep timeout: %{public}d", time);
     pms->GetPowerStateMachine()->SetSleepTime(static_cast<int64_t>(time));
@@ -375,6 +453,20 @@ void PowerModeModule::SetWindowRotation(bool isBoot)
         return;
     }
     SettingHelper::SetSettingWindowRotation(static_cast<SettingHelper::SwitchStatus>(rotation));
+}
+
+void PowerModeModule::SetIntellVoiceState(bool isBoot)
+{
+    if (isBoot && SettingHelper::IsIntellVoiceSettingValid()) {
+        return;
+    }
+    int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
+    if (state == INIT_VALUE_FALSE) {
+        return;
+    }
+    SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
 }
 } // namespace PowerMgr
 } // namespace OHOS

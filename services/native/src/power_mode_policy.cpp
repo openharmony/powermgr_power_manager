@@ -95,19 +95,18 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
         case PowerModePolicy::ServiceType::VIBRATORS_STATE:
             defaultVal = SettingHelper::GetSettingVibration(defaultVal);
             break;
-        case PowerModePolicy::ServiceType::LCD_BRIGHTNESS:
-            defaultVal = SettingHelper::GetSettingBrightness(defaultVal);
+        case PowerModePolicy::ServiceType::INTELL_VOICE:
+            defaultVal = SettingHelper::GetSettingIntellVoice(defaultVal);
             break;
         default:
             break;
     }
 
-    if (INIT_VALUE_FALSE == defaultVal) {
+    if (defaultVal == INIT_VALUE_FALSE) {
         POWER_HILOGW(FEATURE_POWER_MODE, "get setting state invalid, switch id: %{public}d", switchId);
         return;
     }
-
-    value = static_cast<int32_t>(defaultVal);
+    value = defaultVal;
     POWER_HILOGD(FEATURE_POWER_MODE, "read switch id: %{public}d, switch value: %{public}d", switchId, value);
 }
 
