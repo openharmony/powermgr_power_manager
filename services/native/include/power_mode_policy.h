@@ -22,7 +22,7 @@
 #include <list>
 #include "power_save_mode.h"
 
-#define INIT_VALUE_FALSE (-1)
+#define INIT_VALUE_FALSE (-2)
 #define LAST_MODE_FLAG 0
 
 namespace OHOS {
