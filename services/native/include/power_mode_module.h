@@ -65,7 +65,10 @@ private:
     void PublishPowerModeEvent();
     void UnregisterSaveModeObserver();
     void RegisterSaveModeObserver();
-    sptr<SettingObserver> CreateSettingObserver(uint32_t switchId);
+    void RegisterAutoAdjustBrightnessObserver();
+    void RegisterAutoWindowRotationObserver();
+    void RegisterVibrateStateObserver();
+    void RegisterIntellVoiceObserver();
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
@@ -76,6 +79,7 @@ private:
     static void SetLcdBrightness(bool isBoot);
     static void SetVibration(bool isBoot);
     static void SetWindowRotation(bool isBoot);
+    static void SetIntellVoiceState(bool isBoot);
 
     std::atomic<bool> started_;
     std::mutex mutex_;
