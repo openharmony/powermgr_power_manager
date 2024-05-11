@@ -374,7 +374,7 @@ void PowerModeModule::SetDisplayOffTime(bool isBoot)
     }
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
-    if (time == INT32_MIN) {
+    if (time == INIT_VALUE_FALSE) {
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -387,7 +387,7 @@ void PowerModeModule::SetSleepTime([[maybe_unused]] bool isBoot)
 {
     int32_t time = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SLEEPTIME);
-    if (time == INT32_MIN) {
+    if (time == INIT_VALUE_FALSE) {
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -404,7 +404,7 @@ void PowerModeModule::SetAutoAdjustBrightness(bool isBoot)
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS);
     auto status = static_cast<SettingHelper::SwitchStatus>(value);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set auto adjust brightness status: %{public}d", status);
-    if (value == INT32_MIN) {
+    if (value == INIT_VALUE_FALSE) {
         return;
     }
     SettingHelper::SetSettingAutoAdjustBrightness(status);
@@ -418,7 +418,7 @@ void PowerModeModule::SetLcdBrightness(bool isBoot)
     int32_t lcdBrightness = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::LCD_BRIGHTNESS);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set lcd Brightness: %{public}d", lcdBrightness);
-    if (lcdBrightness == INT32_MIN) {
+    if (lcdBrightness == INIT_VALUE_FALSE) {
         return;
     }
     SettingHelper::SetSettingBrightness(lcdBrightness);
@@ -435,7 +435,7 @@ void PowerModeModule::SetVibration(bool isBoot)
     int32_t vibration = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::VIBRATORS_STATE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set vibrate state %{public}d", vibration);
-    if (vibration == INT32_MIN) {
+    if (vibration == INIT_VALUE_FALSE) {
         return;
     }
     SettingHelper::SetSettingVibration(static_cast<SettingHelper::SwitchStatus>(vibration));
@@ -449,7 +449,7 @@ void PowerModeModule::SetWindowRotation(bool isBoot)
     int32_t rotation = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set window rotation state %{public}d", rotation);
-    if (rotation == INT32_MIN) {
+    if (rotation == INIT_VALUE_FALSE) {
         return;
     }
     SettingHelper::SetSettingWindowRotation(static_cast<SettingHelper::SwitchStatus>(rotation));
@@ -463,7 +463,7 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
     int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
         ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::INTELL_VOICE);
     POWER_HILOGD(FEATURE_POWER_MODE, "Set intell voice state %{public}d", state);
-    if (state == INT32_MIN) {
+    if (state == INIT_VALUE_FALSE) {
         return;
     }
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));

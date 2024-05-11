@@ -25,7 +25,7 @@ namespace OHOS {
 namespace PowerMgr {
 int32_t PowerModePolicy::GetPowerModeValuePolicy(uint32_t type)
 {
-    int32_t ret = INT32_MIN;
+    int32_t ret = INIT_VALUE_FALSE;
     if (IsValidType(type)) {
         ret = GetPolicyFromMap(type);
     }
@@ -35,7 +35,7 @@ int32_t PowerModePolicy::GetPowerModeValuePolicy(uint32_t type)
 
 int32_t PowerModePolicy::GetPolicyFromMap(uint32_t type)
 {
-    int32_t ret = INT32_MIN;
+    int32_t ret = INIT_VALUE_FALSE;
     std::lock_guard<std::mutex> lock(policyMutex_);
     auto iter = switchMap_.find(type);
     if (iter != switchMap_.end()) {
@@ -84,7 +84,7 @@ void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
 
 void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
 {
-    int32_t defaultVal = INT32_MIN;
+    int32_t defaultVal = INIT_VALUE_FALSE;
     switch (switchId) {
         case PowerModePolicy::ServiceType::AUTO_ADJUST_BRIGHTNESS:
             defaultVal = SettingHelper::GetSettingAutoAdjustBrightness(defaultVal);
@@ -102,7 +102,7 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
             break;
     }
 
-    if (defaultVal == INT32_MIN) {
+    if (defaultVal == INIT_VALUE_FALSE) {
         POWER_HILOGW(FEATURE_POWER_MODE, "get setting state invalid, switch id: %{public}d", switchId);
         return;
     }
