@@ -38,7 +38,7 @@ void ScreenOffPreCallbackProxy::OnScreenStateChanged(uint32_t state)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(state));
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Uint32, static_cast<uint32_t>(state));
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::ScreenOffPreCallbackInterfaceCode::SCREEN_OFF_PRE_CHANGED),

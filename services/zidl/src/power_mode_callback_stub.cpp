@@ -54,7 +54,7 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
 int32_t PowerModeCallbackStub::OnPowerModeCallbackStub(MessageParcel& data)
 {
     uint32_t mode;
-    READ_PARCEL_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
     OnPowerModeChanged(static_cast<PowerMode>(mode));
     return ERR_OK;
 }

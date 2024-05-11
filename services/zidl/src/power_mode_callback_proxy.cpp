@@ -38,7 +38,7 @@ void PowerModeCallbackProxy::OnPowerModeChanged(PowerMode mode)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerModeCallbackInterfaceCode::POWER_MODE_CHANGED),

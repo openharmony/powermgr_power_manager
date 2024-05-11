@@ -59,7 +59,7 @@ PowerErrors PowerMgrServiceTestProxy::CreateRunningLock(const sptr<IRemoteObject
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -192,7 +192,7 @@ bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
         return false;
     }
     bool used = false;
-    READ_PARCEL_WITH_RET(reply, Bool, used, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, used, false);
     return used;
 }
 
@@ -221,7 +221,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t
         return false;
     }
     bool succ = false;
-    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
     return succ;
 }
 
@@ -255,7 +255,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
         return false;
     }
     bool succ = false;
-    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
     return succ;
 }
 
@@ -279,7 +279,7 @@ bool PowerMgrServiceTestProxy::ResetRunningLocks()
         return false;
     }
     bool succ = false;
-    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
     return succ;
 }
 
@@ -305,7 +305,7 @@ PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -331,7 +331,7 @@ PowerErrors PowerMgrServiceTestProxy::ShutDownDevice(const std::string& reason)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -359,7 +359,7 @@ PowerErrors PowerMgrServiceTestProxy::SuspendDevice(int64_t callTimeMs, SuspendD
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -388,7 +388,7 @@ PowerErrors PowerMgrServiceTestProxy::WakeupDevice(int64_t callTimeMs, WakeupDev
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -808,7 +808,7 @@ PowerErrors PowerMgrServiceTestProxy::SetDeviceMode(const PowerMode& mode)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -892,8 +892,8 @@ PowerErrors PowerMgrServiceTestProxy::IsStandby(bool& isStandby)
 
     int32_t error;
 
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
-    READ_PARCEL_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
 
     return static_cast<PowerErrors>(error);
 }
