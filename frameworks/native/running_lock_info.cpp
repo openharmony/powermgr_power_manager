@@ -57,11 +57,11 @@ RunningLockInfo* RunningLockInfo::Unmarshalling(Parcel& parcel)
 
 bool RunningLockInfo::Marshalling(Parcel& parcel) const
 {
-    WRITE_PARCEL_FAILED_WITH_RET(parcel, String16, Str8ToStr16(name), false);
-    WRITE_PARCEL_FAILED_WITH_RET(parcel, Uint32, static_cast<uint32_t>(type), false);
-    WRITE_PARCEL_FAILED_WITH_RET(parcel, String16, Str8ToStr16(bundleName), false);
-    WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(pid), false);
-    WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(uid), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, String16, Str8ToStr16(name), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Uint32, static_cast<uint32_t>(type), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, String16, Str8ToStr16(bundleName), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(pid), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(uid), false);
     return true;
 }
 } // namespace PowerMgr
