@@ -74,7 +74,7 @@ bool ShutdownController::IsShuttingDown()
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
 static bool IsNeedWritePoweroffChargeFlag(const std::string& reason)
 {
-    if (resaon == REASON_POWEROFF_CHARGE_DISABLE) {
+    if (reason == REASON_POWEROFF_CHARGE_DISABLE) {
         return false;
     }
     auto& batterySvcClient = BatterySrvClient::GetInstance();
