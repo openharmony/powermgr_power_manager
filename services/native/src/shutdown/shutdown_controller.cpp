@@ -44,7 +44,7 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 const time_t MAX_TIMEOUT_SEC = 30;
-const std::string SHUTDOWN_REASON = "POWEROFF_CHARGE_DISABLE";
+const std::string REASON_POWEROFF_CHARGE_DISABLE = "POWEROFF_CHARGE_DISABLE";
 }
 ShutdownController::ShutdownController() : started_(false)
 {
@@ -74,7 +74,7 @@ bool ShutdownController::IsShuttingDown()
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
 static bool IsNeedWritePoweroffChargeFlag(const std::string& reason)
 {
-    if (resaon == SHUTDOWN_REASON) {
+    if (resaon == REASON_POWEROFF_CHARGE_DISABLE) {
         return false;
     }
     auto& batterySvcClient = BatterySrvClient::GetInstance();
