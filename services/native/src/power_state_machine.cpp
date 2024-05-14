@@ -1222,9 +1222,7 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH:
             ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
             break;
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
-            ret = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
-            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY: // fall through
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
             break;
