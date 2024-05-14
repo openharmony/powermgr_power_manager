@@ -434,7 +434,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
-        StateChangeReason::STATE_CHANGE_REASON_POWER_KEY);
+        StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     pmsTest_->LockScreenAfterTimingOut(true, true);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
@@ -539,7 +539,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH),
         StateChangeReason::STATE_CHANGE_REASON_SWITCH);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
-        StateChangeReason::STATE_CHANGE_REASON_POWER_KEY);
+        StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_LID),
         StateChangeReason::STATE_CHANGE_REASON_LID);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_SWITCH),
