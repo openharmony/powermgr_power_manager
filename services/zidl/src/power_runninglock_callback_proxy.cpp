@@ -38,7 +38,7 @@ void PowerRunningLockCallbackProxy::HandleRunningLockMessage(std::string message
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, String, message);
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, String, message);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerRunningLockCallbackInterfaceCode::POWER_RUNNINGLOCK_CHANGED),
