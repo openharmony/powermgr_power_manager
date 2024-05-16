@@ -552,6 +552,19 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     return PowerErrors::ERR_OK;
 }
 
+PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
+{
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, tag: %{public}s", pid, uid, tag.c_str());
+    SystemSuspendController::GetInstance().SetSuspendTag(tag);
+    return PowerErrors::ERR_OK;
+}
+
 PowerErrors PowerMgrService::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
     std::lock_guard lock(suspendMutex_);
