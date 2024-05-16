@@ -392,6 +392,33 @@ PowerErrors PowerMgrProxy::ShutDownDevice(const std::string& reason)
     return static_cast<PowerErrors>(error);
 }
 
+PowerErrors PowerMgrProxy::SetSuspendTag(const std::string& tag)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String16, Str8ToStr16(tag), PowerErrors::ERR_CONNECTION_FAIL);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_SUSPEND_TAG), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
+}
+
 PowerErrors PowerMgrProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
     sptr<IRemoteObject> remote = Remote();
