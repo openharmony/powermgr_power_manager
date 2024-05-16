@@ -742,8 +742,7 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
 bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 {
     if (Permission::IsHap()) {
-        return type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
-        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+        return type <= RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
     }
     return type == RunningLockType::RUNNINGLOCK_SCREEN ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
