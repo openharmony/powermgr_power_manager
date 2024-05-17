@@ -156,6 +156,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
   }
 
+  if (power_manager_feature_doubleclick_or_pickup) {
+    defines += [ "POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE" ]
+  }
+
   if (power_manager_feature_wakeup_action) {
     sources += [
       "native/src/wakeup_action/wakeup_action_controller.cpp",

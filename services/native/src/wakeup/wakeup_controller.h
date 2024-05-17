@@ -48,6 +48,9 @@ public:
     void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
     void NotifyDisplayActionDone(uint32_t event);
+    void SetOriginSettingValue(WakeupSource& source);
+    static int32_t SetWakeupDoubleClickSensor(bool enable);
+    static void ChangeWakeupSourceConfig(bool updateEnable);
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;

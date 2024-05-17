@@ -20,7 +20,10 @@
 #include <input_manager.h>
 #include <ipc_skeleton.h>
 #include <securec.h>
-
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#include <dlfcn.h>
+#include "json/json.h"
+#endif
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
@@ -35,6 +38,7 @@ namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
+const int32_t ERR_FAILED = -1;
 }
 
 /** WakeupController Implement */
@@ -81,6 +85,9 @@ void WakeupController::Init()
 
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
         POWER_HILOGI(FEATURE_WAKEUP, "registered type=%{public}u", (*source).GetReason());
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+            SetOriginSettingValue((*source));
+#endif
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_WAKEUP, "register type=%{public}u", (*source).GetReason());
@@ -128,6 +135,67 @@ void WakeupController::RegisterSettingsObserver()
     g_wakeupSourcesKeyObserver = SettingHelper::RegisterSettingWakeupSourcesObserver(updateFunc);
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
 }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+void WakeupController::SetOriginSettingValue(WakeupSource& source)
+{
+    if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
+        POWER_HILOGI(COMP_SVC, "the origin doubleClick_enable is: %{public}d", source.IsEnable());
+        if (SettingHelper::IsWakeupDoubleSettingValid() == false) {
+            SettingHelper::SetSettingWakeupDouble(false);
+            SetWakeupDoubleClickSensor(false);
+            return;
+        }
+        SettingHelper::SetSettingWakeupDouble(source.IsEnable());
+        SetWakeupDoubleClickSensor(source.IsEnable());
+    }
+}
+
+void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
+{
+    std::string jsonStr = SettingHelper::GetSettingWakeupSources();
+    POWER_HILOGI(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
+    Json::Value root;
+    Json::Reader reader;
+    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
+        POWER_HILOGE(COMP_SVC, "json parse error");
+        return;
+    }
+
+    bool originEnable = root["touchscreen"]["enable"].asBool();
+    if (originEnable == updateEnable) {
+        POWER_HILOGI(COMP_SVC, "no need change jsonConfig value");
+        return;
+    }
+
+    root["touchscreen"]["enable"] = updateEnable;
+    POWER_HILOGI(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
+    SettingHelper::SetSettingWakeupSources(root.toStyledString());
+}
+
+static const char* SET_WAKEUP_DOUBLE_CLICK_SENSOR = "SetWakeupDoubleClickSensor";
+static const char* POWER_DOUBLE_CLICK_PATH = "/system/lib64/libpower_manager_ext.z.so";
+typedef int32_t(*Func)(bool);
+int32_t WakeupController::SetWakeupDoubleClickSensor(bool enable)
+{
+    POWER_HILOGI(COMP_SVC, "enter SetWakeupDoubleClickSensor");
+    void *handler = dlopen(POWER_DOUBLE_CLICK_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Dlopen failed, reason : %{public}s", dlerror());
+        return ERR_FAILED;
+    }
+
+    Func PowerDoubleClickFlag = (Func)dlsym(handler, SET_WAKEUP_DOUBLE_CLICK_SENSOR);
+    if (PowerDoubleClickFlag == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "find function failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return ERR_FAILED;
+    }
+    auto resCode = PowerDoubleClickFlag(enable);
+    dlclose(handler);
+    return resCode;
+}
+#endif
 
 void WakeupController::ExecWakeupMonitorByReason(WakeupDeviceType reason)
 {
@@ -230,7 +298,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     }
 
-    if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN) {
+    if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN
+        && keyCode != KeyEvent::KEYCODE_F1) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
         if (wakeupController->CheckEventReciveTime(wakeupType) ||
             keyEvent->GetKeyAction() == KeyEvent::KEY_ACTION_UP) {
