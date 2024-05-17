@@ -84,6 +84,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHUTDOWN_DEVICE):
             ret = ShutDownDeviceStub(data, reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_SUSPEND_TAG):
+            ret = SetSuspendTagStub(data, reply);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME):
             ret = OverrideScreenOffTimeStub(data, reply);
             break;
@@ -321,6 +324,14 @@ int32_t PowerMgrStub::ShutDownDeviceStub(MessageParcel& data, MessageParcel& rep
 {
     std::string reason = Str16ToStr8(data.ReadString16());
     PowerErrors error = ShutDownDevice(reason);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::SetSuspendTagStub(MessageParcel& data, MessageParcel& reply)
+{
+    std::string tag = Str16ToStr8(data.ReadString16());
+    PowerErrors error = SetSuspendTag(tag);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }

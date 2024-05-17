@@ -43,6 +43,7 @@ public:
     void RegisterHdiStatusListener();
     void RegisterPowerHdiCallback();
     void UnRegisterPowerHdiCallback();
+    void SetSuspendTag(const std::string& tag);
     
 private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);

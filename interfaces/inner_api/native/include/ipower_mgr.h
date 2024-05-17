@@ -53,6 +53,7 @@ public:
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) = 0;
     virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
+    virtual PowerErrors SetSuspendTag(const std::string& tag) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
