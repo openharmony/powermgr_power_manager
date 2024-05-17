@@ -21,6 +21,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+constexpr int32_t WAKEUP_DOUBLE_OPEN = 1;
+constexpr int32_t WAKEUP_DOUBLE_CLOSE = 0;
+}
+sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 bool SettingHelper::IsDisplayOffTimeSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_DISPLAY_OFF_TIME_KEY);
@@ -297,6 +302,62 @@ void SettingHelper::SetSettingWakeupSources(const std::string& jsonConfig)
         POWER_HILOGE(COMP_UTILS, "set setting power Wakeup sources key failed, jsonConfig=%{public}s ret=%{public}d",
             jsonConfig.c_str(), ret);
     }
+}
+
+bool SettingHelper::IsWakeupDoubleSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_DOUBLE_KEY);
+}
+
+bool SettingHelper::GetSettingWakeupDouble(const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value;
+    ErrCode ret = settingProvider.GetIntValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power Wakeup double key failed, ret=%{public}d", ret);
+    }
+    return (value == WAKEUP_DOUBLE_OPEN);
+}
+
+void SettingHelper::SetSettingWakeupDouble(bool enable)
+{
+    POWER_HILOGI(COMP_UTILS, "SetSettingWakeupDouble switch, enable=%{public}d", enable);
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = enable ? WAKEUP_DOUBLE_OPEN : WAKEUP_DOUBLE_CLOSE;
+    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power Wakeup double key failed, enable=%{public}d, ret=%{public}d",
+            enable, ret);
+    }
+}
+
+void SettingHelper::RegisterSettingWakeupDoubleObserver(SettingObserver::UpdateFunc& func)
+{
+    if (doubleClickObserver_) {
+        POWER_HILOGI(COMP_UTILS, "setting wakeup double click observer is already registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    doubleClickObserver_ = settingProvider.CreateObserver(SETTING_POWER_WAKEUP_DOUBLE_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(doubleClickObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting wakeup double click failed, ret=%{public}d", ret);
+        doubleClickObserver_ = nullptr;
+    }
+}
+
+void SettingHelper::UnregisterSettingWakeupDoubleObserver()
+{
+    if (!doubleClickObserver_) {
+        POWER_HILOGI(COMP_UTILS, "doubleClickObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(doubleClickObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting wakeup double click observer failed, ret=%{public}d", ret);
+    }
+    doubleClickObserver_ = nullptr;
 }
 
 void SettingHelper::UnregisterSettingObserver(sptr<SettingObserver>& observer)

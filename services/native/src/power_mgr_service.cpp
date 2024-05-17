@@ -30,7 +30,6 @@
 #include <sys_mgr_client.h>
 #include <bundle_mgr_client.h>
 #include <unistd.h>
-
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
 #include "ffrt_utils.h"
@@ -42,7 +41,7 @@
 #include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
-
+#include "setting_helper.h"
 #include "errors.h"
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
@@ -50,7 +49,6 @@
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
-
 namespace OHOS {
 namespace PowerMgr {
 namespace {
@@ -66,6 +64,7 @@ SysParam::BootCompletedCallback g_bootCompletedCallback;
 bool g_inLidMode = false;
 } // namespace
 
+static bool g_wakeupDoubleClick = true;
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 using namespace MMI;
 
@@ -115,7 +114,6 @@ bool PowerMgrService::Init()
         screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
         screenOffPreController_->Init();
     }
-
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
 }
@@ -155,11 +153,52 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->WakeupActionControllerInit();
 #endif
         power->VibratorInit();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        power->RegisterSettingObservers();
+#endif
         isBootCompleted_ = true;
     };
     WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+void PowerMgrService::RegisterSettingObservers()
+{
+    RegisterSettingWakeupDoubleClickObservers();
+}
+
+void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupDoubleClickSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingWakeupDoubleObserver(updateFunc);
+}
+
+void PowerMgrService::WakeupDoubleClickSettingUpdateFunc(const std::string& key)
+{
+    bool isSettingEnable = GetSettingWakeupDoubleClick(key);
+    bool originEnable = IsEnableWakeupDoubleClick();
+    if (isSettingEnable == originEnable) {
+        POWER_HILOGE(COMP_SVC, "no need change wakeupDoubleClick switch, the settingEnable is: %{public}d",
+            isSettingEnable);
+        return;
+    }
+    g_wakeupDoubleClick = isSettingEnable;
+    WakeupController::ChangeWakeupSourceConfig(isSettingEnable);
+    WakeupController::SetWakeupDoubleClickSensor(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "WakeupDoubleClickSettingUpdateFunc isSettingEnable=%{public}d", isSettingEnable);
+}
+
+bool PowerMgrService::GetSettingWakeupDoubleClick(const std::string& key)
+{
+    return SettingHelper::GetSettingWakeupDouble(key);
+}
+
+bool PowerMgrService::IsEnableWakeupDoubleClick()
+{
+    return g_wakeupDoubleClick;
+}
+#endif
 
 bool PowerMgrService::PowerStateMachineInit()
 {
@@ -436,6 +475,8 @@ void PowerMgrService::OnStop()
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+
+    SettingHelper::UnregisterSettingWakeupDoubleObserver();
 }
 
 void PowerMgrService::Reset()

@@ -122,6 +122,11 @@ public:
     void WakeupControllerInit();
     void HibernateControllerInit();
     bool IsCollaborationState();
+    static void RegisterSettingObservers();
+    static void RegisterSettingWakeupDoubleClickObservers();
+    static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
+    static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
+    static bool IsEnableWakeupDoubleClick();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif
@@ -241,6 +246,7 @@ private:
     static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
     static constexpr int32_t HALL_REPORT_INTERVAL = 0;
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
+    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
     bool Init();
     bool PowerStateMachineInit();
     std::string GetBundleNameByUid(const int32_t uid);

@@ -60,6 +60,11 @@ public:
     static bool IsWakeupSourcesSettingValid();
     static const std::string GetSettingWakeupSources();
     static void SetSettingWakeupSources(const std::string& jsonConfig);
+    static bool IsWakeupDoubleSettingValid();
+    static bool GetSettingWakeupDouble(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
+    static void SetSettingWakeupDouble(bool enable);
+    static void RegisterSettingWakeupDoubleObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingWakeupDoubleObserver();
 
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
 
@@ -72,6 +77,8 @@ private:
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
+    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
+    static sptr<SettingObserver> doubleClickObserver_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
