@@ -1191,6 +1191,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_SHELL:
             ret = StateChangeReason::STATE_CHANGE_REASON_SHELL;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PICKUP:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PICKUP;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;

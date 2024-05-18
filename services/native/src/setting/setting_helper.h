@@ -65,7 +65,11 @@ public:
     static void SetSettingWakeupDouble(bool enable);
     static void RegisterSettingWakeupDoubleObserver(SettingObserver::UpdateFunc& func);
     static void UnregisterSettingWakeupDoubleObserver();
-
+    static bool IsWakeupPickupSettingValid();
+    static bool GetSettingWakeupPickup(const std::string& key = SETTING_POWER_WAKEUP_PICKUP_KEY);
+    static void SetSettingWakeupPickup(bool enable);
+    static void RegisterSettingWakeupPickupObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingWakeupPickupObserver();
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
 
 private:
@@ -78,7 +82,9 @@ private:
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
     static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
+    static constexpr const char* SETTING_POWER_WAKEUP_PICKUP_KEY {"settings.power.wakeup_pick_up"};
     static sptr<SettingObserver> doubleClickObserver_;
+    static sptr<SettingObserver> pickUpObserver_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
