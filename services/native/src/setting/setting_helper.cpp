@@ -24,8 +24,68 @@ namespace PowerMgr {
 namespace {
 constexpr int32_t WAKEUP_DOUBLE_OPEN = 1;
 constexpr int32_t WAKEUP_DOUBLE_CLOSE = 0;
+constexpr int32_t WAKEUP_PICKUP_OPEN = 1;
+constexpr int32_t WAKEUP_PICKUP_CLOSE = 0;
 }
 sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
+sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
+
+bool SettingHelper::IsWakeupPickupSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY);
+}
+
+bool SettingHelper::GetSettingWakeupPickup(const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value;
+    ErrCode ret = settingProvider.GetIntValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power wakeup pickup key failed, ret=%{public}d", ret);
+    }
+    return (value == WAKEUP_PICKUP_OPEN);
+}
+
+void SettingHelper::SetSettingWakeupPickup(bool enable)
+{
+    POWER_HILOGI(COMP_UTILS, "SetSettingWakeupPickup switch, enable=%{public}d", enable);
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = enable ? WAKEUP_PICKUP_OPEN : WAKEUP_PICKUP_CLOSE;
+    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power wakeup pickup key failed, enable=%{public}d, ret=%{public}d",
+            enable, ret);
+    }
+}
+
+void SettingHelper::RegisterSettingWakeupPickupObserver(SettingObserver::UpdateFunc& func)
+{
+    if (pickUpObserver_) {
+        POWER_HILOGI(COMP_UTILS, "setting wakeup pickup observer is already registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    pickUpObserver_ = settingProvider.CreateObserver(SETTING_POWER_WAKEUP_PICKUP_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(pickUpObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting wakeup pickup failed, ret=%{public}d", ret);
+        pickUpObserver_ = nullptr;
+    }
+}
+
+void SettingHelper::UnregisterSettingWakeupPickupObserver()
+{
+    if (!pickUpObserver_) {
+        POWER_HILOGI(COMP_UTILS, "pickUpObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(pickUpObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting wakeup pickup observer failed, ret=%{public}d", ret);
+    }
+    pickUpObserver_ = nullptr;
+}
+
 bool SettingHelper::IsDisplayOffTimeSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_DISPLAY_OFF_TIME_KEY);

@@ -23,5 +23,8 @@
     },
     "switch": {
         "enable": true
+    },
+    "pickup": {
+        "enable": true
     }
 }

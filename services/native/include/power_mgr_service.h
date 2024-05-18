@@ -122,6 +122,10 @@ public:
     void WakeupControllerInit();
     void HibernateControllerInit();
     bool IsCollaborationState();
+    static void RegisterSettingWakeupPickupGestureObserver();
+    static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
+    static bool IsEnableWakeupPickupGesture();
+    bool WakeupPickupGesture(bool enable);
     static void RegisterSettingObservers();
     static void RegisterSettingWakeupDoubleClickObservers();
     static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
