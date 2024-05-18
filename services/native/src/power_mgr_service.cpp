@@ -65,6 +65,7 @@ bool g_inLidMode = false;
 } // namespace
 
 static bool g_wakeupDoubleClick = true;
+static bool g_wakeupPickup = true;
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 using namespace MMI;
 
@@ -155,6 +156,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->VibratorInit();
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
         power->RegisterSettingObservers();
+        power->RegisterSettingWakeupPickupGestureObserver();
 #endif
         isBootCompleted_ = true;
     };
@@ -197,6 +199,32 @@ bool PowerMgrService::GetSettingWakeupDoubleClick(const std::string& key)
 bool PowerMgrService::IsEnableWakeupDoubleClick()
 {
     return g_wakeupDoubleClick;
+}
+
+void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupPickupGestureSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingWakeupPickupObserver(updateFunc);
+}
+
+void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
+{
+    bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
+    bool originEnable = IsEnableWakeupPickupGesture();
+    if (isSettingEnable == originEnable) {
+        POWER_HILOGE(COMP_SVC, "no need change wakeup pickup switch,isSettingEnable=%{public}d", isSettingEnable);
+        return;
+    }
+    WakeupController::PickupConnectMotionConfig(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
+    g_wakeupPickup = isSettingEnable;
+    WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "ChangePickupWakeupSourceConfig done");
+}
+
+bool PowerMgrService::IsEnableWakeupPickupGesture()
+{
+    return g_wakeupPickup;
 }
 #endif
 
@@ -475,8 +503,10 @@ void PowerMgrService::OnStop()
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
-
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
+    SettingHelper::UnregisterSettingWakeupPickupObserver();
+#endif
 }
 
 void PowerMgrService::Reset()
