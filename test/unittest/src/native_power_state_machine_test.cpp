@@ -195,6 +195,8 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     type = WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
+    type = WakeupDeviceType::WAKEUP_DEVICE_PEN;
+    stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     type = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     type = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
