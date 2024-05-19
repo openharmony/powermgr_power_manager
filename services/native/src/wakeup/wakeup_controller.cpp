@@ -378,6 +378,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     if (keyCode == KeyEvent::KEYCODE_F1) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
+    } else if (keyCode == KeyEvent::KEYCODE_STYLUS_SCREEN) {
+        wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
     }
 
     if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN

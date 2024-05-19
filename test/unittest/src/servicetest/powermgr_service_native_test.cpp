@@ -888,4 +888,22 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is end");
 }
+
+/**
+ * @tc.name: PowerMgrServiceNativeTest043
+ * @tc.desc: test WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: #I9O7I2
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest043, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest043::fun is start");
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
+
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PEN);
+    EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest043::fun is end");
+}
 } // namespace
