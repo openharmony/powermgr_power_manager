@@ -141,7 +141,7 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
         case DisplayState::DISPLAY_OFF: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
             if ((currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) &&
-                reason != StateChangeReason::STATE_CHANGE_REASON_SENSOR) {
+                reason != StateChangeReason::STATE_CHANGE_REASON_PROXIMITY) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManager::GetInstance().SuspendBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);

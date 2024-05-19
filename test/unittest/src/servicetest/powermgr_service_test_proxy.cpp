@@ -59,7 +59,7 @@ PowerErrors PowerMgrServiceTestProxy::CreateRunningLock(const sptr<IRemoteObject
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -119,7 +119,7 @@ bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(RunningLockType type)
     return result;
 }
 
-bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
@@ -133,6 +133,7 @@ bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj)
     }
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
+    data.WriteInt32(timeOutMs);
 
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
@@ -191,7 +192,7 @@ bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
         return false;
     }
     bool used = false;
-    READ_PARCEL_WITH_RET(reply, Bool, used, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, used, false);
     return used;
 }
 
@@ -220,7 +221,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t
         return false;
     }
     bool succ = false;
-    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
     return succ;
 }
 
@@ -254,7 +255,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
         return false;
     }
     bool succ = false;
-    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
     return succ;
 }
 
@@ -278,7 +279,7 @@ bool PowerMgrServiceTestProxy::ResetRunningLocks()
         return false;
     }
     bool succ = false;
-    READ_PARCEL_WITH_RET(reply, Bool, succ, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
     return succ;
 }
 
@@ -304,7 +305,7 @@ PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -330,7 +331,7 @@ PowerErrors PowerMgrServiceTestProxy::ShutDownDevice(const std::string& reason)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -358,7 +359,7 @@ PowerErrors PowerMgrServiceTestProxy::SuspendDevice(int64_t callTimeMs, SuspendD
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -387,7 +388,7 @@ PowerErrors PowerMgrServiceTestProxy::WakeupDevice(int64_t callTimeMs, WakeupDev
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -710,6 +711,57 @@ bool PowerMgrServiceTestProxy::UnRegisterRunningLockCallback(const sptr<IPowerRu
     return true;
 }
 
+bool PowerMgrServiceTestProxy::RegisterScreenStateCallback(int32_t remainTime,
+    const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (remainTime <= 0) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+    data.WriteInt32(remainTime);
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 bool PowerMgrServiceTestProxy::SetDisplaySuspend(bool enable)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
@@ -756,7 +808,7 @@ PowerErrors PowerMgrServiceTestProxy::SetDeviceMode(const PowerMode& mode)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
 
@@ -840,8 +892,8 @@ PowerErrors PowerMgrServiceTestProxy::IsStandby(bool& isStandby)
 
     int32_t error;
 
-    READ_PARCEL_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
-    READ_PARCEL_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
 
     return static_cast<PowerErrors>(error);
 }

@@ -30,7 +30,6 @@
 #include <sys_mgr_client.h>
 #include <bundle_mgr_client.h>
 #include <unistd.h>
-
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
 #include "ffrt_utils.h"
@@ -38,10 +37,11 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
+#include "running_lock_timer_handler.h"
 #include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
-
+#include "setting_helper.h"
 #include "errors.h"
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
@@ -49,7 +49,6 @@
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
-
 namespace OHOS {
 namespace PowerMgr {
 namespace {
@@ -65,6 +64,8 @@ SysParam::BootCompletedCallback g_bootCompletedCallback;
 bool g_inLidMode = false;
 } // namespace
 
+static bool g_wakeupDoubleClick = true;
+static bool g_wakeupPickup = true;
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 using namespace MMI;
 
@@ -110,7 +111,10 @@ bool PowerMgrService::Init()
     if (!PowerStateMachineInit()) {
         POWER_HILOGE(COMP_SVC, "Power state machine init fail");
     }
-
+    if (!screenOffPreController_) {
+        screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
+        screenOffPreController_->Init();
+    }
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
 }
@@ -150,11 +154,79 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->WakeupActionControllerInit();
 #endif
         power->VibratorInit();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        power->RegisterSettingObservers();
+        power->RegisterSettingWakeupPickupGestureObserver();
+#endif
         isBootCompleted_ = true;
     };
     WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+void PowerMgrService::RegisterSettingObservers()
+{
+    RegisterSettingWakeupDoubleClickObservers();
+}
+
+void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupDoubleClickSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingWakeupDoubleObserver(updateFunc);
+}
+
+void PowerMgrService::WakeupDoubleClickSettingUpdateFunc(const std::string& key)
+{
+    bool isSettingEnable = GetSettingWakeupDoubleClick(key);
+    bool originEnable = IsEnableWakeupDoubleClick();
+    if (isSettingEnable == originEnable) {
+        POWER_HILOGE(COMP_SVC, "no need change wakeupDoubleClick switch, the settingEnable is: %{public}d",
+            isSettingEnable);
+        return;
+    }
+    g_wakeupDoubleClick = isSettingEnable;
+    WakeupController::ChangeWakeupSourceConfig(isSettingEnable);
+    WakeupController::SetWakeupDoubleClickSensor(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "WakeupDoubleClickSettingUpdateFunc isSettingEnable=%{public}d", isSettingEnable);
+}
+
+bool PowerMgrService::GetSettingWakeupDoubleClick(const std::string& key)
+{
+    return SettingHelper::GetSettingWakeupDouble(key);
+}
+
+bool PowerMgrService::IsEnableWakeupDoubleClick()
+{
+    return g_wakeupDoubleClick;
+}
+
+void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupPickupGestureSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingWakeupPickupObserver(updateFunc);
+}
+
+void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
+{
+    bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
+    bool originEnable = IsEnableWakeupPickupGesture();
+    if (isSettingEnable == originEnable) {
+        POWER_HILOGE(COMP_SVC, "no need change wakeup pickup switch,isSettingEnable=%{public}d", isSettingEnable);
+        return;
+    }
+    WakeupController::PickupConnectMotionConfig(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
+    g_wakeupPickup = isSettingEnable;
+    WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "ChangePickupWakeupSourceConfig done");
+}
+
+bool PowerMgrService::IsEnableWakeupPickupGesture()
+{
+    return g_wakeupPickup;
+}
+#endif
 
 bool PowerMgrService::PowerStateMachineInit()
 {
@@ -431,6 +503,10 @@ void PowerMgrService::OnStop()
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    SettingHelper::UnregisterSettingWakeupDoubleObserver();
+    SettingHelper::UnregisterSettingWakeupPickupObserver();
+#endif
 }
 
 void PowerMgrService::Reset()
@@ -441,6 +517,9 @@ void PowerMgrService::Reset()
     }
     if (suspendController_) {
         suspendController_->Reset();
+    }
+    if (screenOffPreController_) {
+        screenOffPreController_->Reset();
     }
 }
 
@@ -541,6 +620,19 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Shutdown(reason);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
+{
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, tag: %{public}s", pid, uid, tag.c_str());
+    SystemSuspendController::GetInstance().SetSuspendTag(tag);
     return PowerErrors::ERR_OK;
 }
 
@@ -748,22 +840,33 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
-bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
-    std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-    return runningLockMgr_->Lock(remoteObj);
+    std::lock_guard lock(lockMutex_);
+    runningLockMgr_->Lock(remoteObj);
+    if (timeOutMs > 0) {
+        std::function<void()> task = [this, remoteObj, timeOutMs]() {
+            std::lock_guard lock(lockMutex_);
+            RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
+            runningLockMgr_->UnLock(remoteObj);
+        };
+        RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(remoteObj, task, timeOutMs);
+    }
+    return true;
 }
 
 bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-    return runningLockMgr_->UnLock(remoteObj);
+    std::lock_guard lock(lockMutex_);
+    RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
+    runningLockMgr_->UnLock(remoteObj);
+    return true;
 }
 
 bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
@@ -921,6 +1024,32 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
     powerModeModule_.DelPowerModeCallback(callback);
+    return true;
+}
+
+bool PowerMgrService::RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback)
+{
+    std::lock_guard lock(screenOffPreMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    screenOffPreController_->AddScreenStateCallback(remainTime, callback);
+    return true;
+}
+
+bool PowerMgrService::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    std::lock_guard lock(screenOffPreMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    screenOffPreController_->DelScreenStateCallback(callback);
     return true;
 }
 

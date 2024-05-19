@@ -41,7 +41,7 @@ int PowerRunningLockCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     int ret = ERR_OK;
     if (code == static_cast<uint32_t>(PowerMgr::PowerRunningLockCallbackInterfaceCode::POWER_RUNNINGLOCK_CHANGED)) {
         std::string message;
-        READ_PARCEL_WITH_RET(data, String, message, E_READ_PARCEL_ERROR);
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, String, message, E_READ_PARCEL_ERROR);
         HandleRunningLockMessage(message);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);

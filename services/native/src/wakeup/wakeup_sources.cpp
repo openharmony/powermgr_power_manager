@@ -57,6 +57,10 @@ WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint
         return WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     }
 
+    if (key == WakeupSources::PICKUP_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_PICKUP;
+    }
+
     return WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
 }
 
@@ -72,6 +76,7 @@ std::vector<std::string> WakeupSources::getSourceKeys()
     sourceKeys.push_back(WakeupSources::PEN_KEY);
     sourceKeys.push_back(WakeupSources::LID_KEY);
     sourceKeys.push_back(WakeupSources::SWITCH_KEY);
+    sourceKeys.push_back(WakeupSources::PICKUP_KEY);
     return sourceKeys;
 }
 

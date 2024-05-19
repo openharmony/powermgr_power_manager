@@ -34,6 +34,7 @@
 #include "ipower_runninglock_callback.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
+#include "iscreen_off_pre_callback.h"
 #include "power_log.h"
 #include "power_common.h"
 #include "running_lock_info.h"
@@ -161,6 +162,13 @@ PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
     return proxy_->ShutDownDevice(reason);
+}
+
+PowerErrors PowerMgrClient::SetSuspendTag(const std::string &tag)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    POWER_HILOGI(FEATURE_SUSPEND, "Set suspend tag: %{public}s", tag.c_str());
+    return proxy_->SetSuspendTag(tag);
 }
 
 PowerErrors PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
@@ -332,6 +340,22 @@ bool PowerMgrClient::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockC
     RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Unregister running lock Callback by client");
     bool ret = proxy_->UnRegisterRunningLockCallback(callback);
+    return ret;
+}
+
+bool PowerMgrClient::RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((remainTime <= 0) || (callback == nullptr) || (Connect() != ERR_OK), false);
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "Register screen off pre Callback by client");
+    bool ret = proxy_->RegisterScreenStateCallback(remainTime, callback);
+    return ret;
+}
+
+bool PowerMgrClient::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "Unregister screen off pre Callback by client");
+    bool ret = proxy_->UnRegisterScreenStateCallback(callback);
     return ret;
 }
 

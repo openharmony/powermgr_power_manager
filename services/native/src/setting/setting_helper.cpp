@@ -21,6 +21,71 @@
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+constexpr int32_t WAKEUP_DOUBLE_OPEN = 1;
+constexpr int32_t WAKEUP_DOUBLE_CLOSE = 0;
+constexpr int32_t WAKEUP_PICKUP_OPEN = 1;
+constexpr int32_t WAKEUP_PICKUP_CLOSE = 0;
+}
+sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
+sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
+
+bool SettingHelper::IsWakeupPickupSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY);
+}
+
+bool SettingHelper::GetSettingWakeupPickup(const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value;
+    ErrCode ret = settingProvider.GetIntValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power wakeup pickup key failed, ret=%{public}d", ret);
+    }
+    return (value == WAKEUP_PICKUP_OPEN);
+}
+
+void SettingHelper::SetSettingWakeupPickup(bool enable)
+{
+    POWER_HILOGI(COMP_UTILS, "SetSettingWakeupPickup switch, enable=%{public}d", enable);
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = enable ? WAKEUP_PICKUP_OPEN : WAKEUP_PICKUP_CLOSE;
+    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power wakeup pickup key failed, enable=%{public}d, ret=%{public}d",
+            enable, ret);
+    }
+}
+
+void SettingHelper::RegisterSettingWakeupPickupObserver(SettingObserver::UpdateFunc& func)
+{
+    if (pickUpObserver_) {
+        POWER_HILOGI(COMP_UTILS, "setting wakeup pickup observer is already registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    pickUpObserver_ = settingProvider.CreateObserver(SETTING_POWER_WAKEUP_PICKUP_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(pickUpObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting wakeup pickup failed, ret=%{public}d", ret);
+        pickUpObserver_ = nullptr;
+    }
+}
+
+void SettingHelper::UnregisterSettingWakeupPickupObserver()
+{
+    if (!pickUpObserver_) {
+        POWER_HILOGI(COMP_UTILS, "pickUpObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(pickUpObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting wakeup pickup observer failed, ret=%{public}d", ret);
+    }
+    pickUpObserver_ = nullptr;
+}
+
 bool SettingHelper::IsDisplayOffTimeSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_DISPLAY_OFF_TIME_KEY);
@@ -102,17 +167,6 @@ bool SettingHelper::IsBrightnessSettingValid()
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_BRIGHTNESS_KEY);
 }
 
-int32_t SettingHelper::GetSettingBrightness(int32_t defaultVal)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value = defaultVal;
-    ErrCode ret = settingProvider.GetIntValue(SETTING_BRIGHTNESS_KEY, value);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "get setting lcd brightness failed, ret=%{public}d", ret);
-    }
-    return value;
-}
-
 void SettingHelper::SetSettingBrightness(int32_t brightness)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
@@ -121,18 +175,6 @@ void SettingHelper::SetSettingBrightness(int32_t brightness)
         POWER_HILOGW(
             COMP_UTILS, "set setting brightness failed, brightness=%{public}d, ret=%{public}d", brightness, ret);
     }
-}
-
-sptr<SettingObserver> SettingHelper::RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func)
-{
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    auto settingObserver = settingProvider.CreateObserver(SETTING_BRIGHTNESS_KEY, func);
-    ErrCode ret = settingProvider.RegisterObserver(settingObserver);
-    if (ret != ERR_OK) {
-        POWER_HILOGW(COMP_UTILS, "register setting lcd brightness observer failed, ret=%{public}d", ret);
-        return nullptr;
-    }
-    return settingObserver;
 }
 
 bool SettingHelper::IsVibrationSettingValid()
@@ -204,6 +246,43 @@ sptr<SettingObserver> SettingHelper::RegisterSettingWindowRotationObserver(Setti
     ErrCode ret = settingProvider.RegisterObserver(settingObserver);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "register setting window rotation observer failed, ret=%{public}d", ret);
+        return nullptr;
+    }
+    return settingObserver;
+}
+
+bool SettingHelper::IsIntellVoiceSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_INTELL_VOICE_KEY);
+}
+
+int32_t SettingHelper::GetSettingIntellVoice(int32_t defaultVal)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = defaultVal;
+    ErrCode ret = settingProvider.GetIntValue(SETTING_INTELL_VOICE_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting intell voice failed, ret=%{public}d", ret);
+    }
+    return value;
+}
+
+void SettingHelper::SetSettingIntellVoice(SwitchStatus status)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    ErrCode ret = settingProvider.PutIntValue(SETTING_INTELL_VOICE_KEY, static_cast<int32_t>(status));
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "set setting intell voice failed, status=%{public}d, ret=%{public}d", status, ret);
+    }
+}
+
+sptr<SettingObserver> SettingHelper::RegisterSettingIntellVoiceObserver(SettingObserver::UpdateFunc& func)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    auto settingObserver = settingProvider.CreateObserver(SETTING_INTELL_VOICE_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(settingObserver);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "register setting intell voice observer failed, ret=%{public}d", ret);
         return nullptr;
     }
     return settingObserver;
@@ -283,6 +362,62 @@ void SettingHelper::SetSettingWakeupSources(const std::string& jsonConfig)
         POWER_HILOGE(COMP_UTILS, "set setting power Wakeup sources key failed, jsonConfig=%{public}s ret=%{public}d",
             jsonConfig.c_str(), ret);
     }
+}
+
+bool SettingHelper::IsWakeupDoubleSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_DOUBLE_KEY);
+}
+
+bool SettingHelper::GetSettingWakeupDouble(const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value;
+    ErrCode ret = settingProvider.GetIntValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power Wakeup double key failed, ret=%{public}d", ret);
+    }
+    return (value == WAKEUP_DOUBLE_OPEN);
+}
+
+void SettingHelper::SetSettingWakeupDouble(bool enable)
+{
+    POWER_HILOGI(COMP_UTILS, "SetSettingWakeupDouble switch, enable=%{public}d", enable);
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = enable ? WAKEUP_DOUBLE_OPEN : WAKEUP_DOUBLE_CLOSE;
+    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power Wakeup double key failed, enable=%{public}d, ret=%{public}d",
+            enable, ret);
+    }
+}
+
+void SettingHelper::RegisterSettingWakeupDoubleObserver(SettingObserver::UpdateFunc& func)
+{
+    if (doubleClickObserver_) {
+        POWER_HILOGI(COMP_UTILS, "setting wakeup double click observer is already registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    doubleClickObserver_ = settingProvider.CreateObserver(SETTING_POWER_WAKEUP_DOUBLE_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(doubleClickObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting wakeup double click failed, ret=%{public}d", ret);
+        doubleClickObserver_ = nullptr;
+    }
+}
+
+void SettingHelper::UnregisterSettingWakeupDoubleObserver()
+{
+    if (!doubleClickObserver_) {
+        POWER_HILOGI(COMP_UTILS, "doubleClickObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(doubleClickObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting wakeup double click observer failed, ret=%{public}d", ret);
+    }
+    doubleClickObserver_ = nullptr;
 }
 
 void SettingHelper::UnregisterSettingObserver(sptr<SettingObserver>& observer)

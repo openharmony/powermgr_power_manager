@@ -63,6 +63,10 @@ void AsyncShutdownCallbackTest::SetUp()
     g_mockPowerAction = new MockPowerAction();
     g_mockStateAction = new MockStateAction();
     auto shutdownController = g_service->GetShutdownController();
+    if (shutdownController->IsShuttingDown()) {
+        // wait for detached threads to finish before next testcase
+        sleep(1);
+    }
     shutdownController->EnableMock(g_mockPowerAction, g_mockStateAction);
 }
 
@@ -202,6 +206,9 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level0)
 
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_shutdown"))).Times(1);
     g_service->ShutDownDevice("test_shutdown");
+
+    // wait for detached threads to finish
+    sleep(1);
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 end");
 }
 } // namespace UnitTest

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_COORDINATION_LOCK_TEST_H
-#define POWERMGR_COORDINATION_LOCK_TEST_H
+#ifndef ISCREEN_OFF_PRE_CALLBACK_H
+#define ISCREEN_OFF_PRE_CALLBACK_H
 
-#include <gtest/gtest.h>
+#include <iremote_broker.h>
+#include <iremote_object.h>
+
+#include "power_state_machine_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerCoordinationLockTest : public testing::Test {
+class IScreenOffPreCallback : public IRemoteBroker {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void TearDown(void);
+    virtual void OnScreenStateChanged(uint32_t state) = 0;
+
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IScreenOffPreCallback");
 };
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_COORDINATION_LOCK_TEST_H
+#endif // ISCREEN_OFF_PRE_CALLBACK_H

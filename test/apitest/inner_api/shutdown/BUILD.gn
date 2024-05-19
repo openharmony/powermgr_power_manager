@@ -31,6 +31,7 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/screenoffpre",
     "${powermgr_test_path}/mock/action",
   ]
 

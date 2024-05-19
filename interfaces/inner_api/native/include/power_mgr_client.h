@@ -49,6 +49,16 @@ public:
     PowerErrors ShutDownDevice(const std::string& reason);
 
     /**
+     * @brief Set suspend tag before suspend.
+     * The special sleep mode supported by the kernel and hardware is triggered by setting a special
+     * suspend tag and then triggering suspend. If the suspend tag is not set, the standard S3 sleep
+     * mode is triggered when suspend.
+     *
+     * @param tag Suspend tag.
+     */
+    PowerErrors SetSuspendTag(const std::string& tag);
+
+    /**
      * Suspend device and set screen off.
      *
      * @param reason The reason why will you suspend the device, such as timeout/powerkey/forcesuspend and so on.
@@ -151,6 +161,8 @@ public:
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
+    bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback);
     bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void RecoverRunningLocks();

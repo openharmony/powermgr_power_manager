@@ -710,6 +710,9 @@ int32_t RunningLockMgr::LockCounter::Increase(const RunningLockParam& lockInnerP
     int32_t result = RUNNINGLOCK_SUCCESS;
     if (counter_ == 1) {
         result = activate_(true, lockInnerParam);
+        if (result != RUNNINGLOCK_SUCCESS) {
+            --counter_;
+        }
     }
     if (result == RUNNINGLOCK_SUCCESS  && IsSceneRunningLockType(lockInnerParam.type)) {
         NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
@@ -723,6 +726,9 @@ int32_t RunningLockMgr::LockCounter::Decrease(const RunningLockParam& lockInnerP
     int32_t result = RUNNINGLOCK_SUCCESS;
     if (counter_ == 0) {
         result = activate_(false, lockInnerParam);
+        if (result != RUNNINGLOCK_SUCCESS) {
+            ++counter_;
+        }
     }
     if (result == RUNNINGLOCK_SUCCESS && IsSceneRunningLockType(lockInnerParam.type)) {
         NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
