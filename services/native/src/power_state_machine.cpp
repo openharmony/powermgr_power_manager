@@ -760,8 +760,23 @@ void PowerStateMachine::ResetInactiveTimer()
 
     if (forceTimingOut_.load() || this->CheckRunningLock(PowerState::INACTIVE)) {
         int64_t displayOffTime = this->GetDisplayOffTime();
+        ResetScreenOffPreTimeForSwing(displayOffTime);
         this->SetDelayTimer(
             displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    }
+}
+
+void PowerStateMachine::ResetScreenOffPreTimeForSwing(int64_t displayOffTime)
+{
+    int64_t now = GetTickCount();
+    int64_t nextTimeOut = now + displayOffTime;
+    POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
+        "now=%{public}lld,displayOffTime=%{public}lld,nextTimeOut=%{public}lld",
+        static_cast<long long>(now), static_cast<long long>(displayOffTime), static_cast<long long>(nextTimeOut));
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto screenOffPreController = pms->GetScreenOffPreController();
+    if (screenOffPreController != nullptr && screenOffPreController->IsRegistered()) {
+        screenOffPreController->SchedulEyeDetectTimeout(nextTimeOut, now);
     }
 }
 
@@ -1179,6 +1194,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_SHELL:
             ret = StateChangeReason::STATE_CHANGE_REASON_SHELL;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PICKUP:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PICKUP;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;
@@ -1210,9 +1228,7 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH:
             ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
             break;
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
-            ret = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
-            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY: // fall through
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
             break;

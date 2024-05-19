@@ -27,6 +27,7 @@
 #include "ipower_state_callback.h"
 #include "ipower_runninglock_callback.h"
 #include "ipower_mgr.h"
+#include "iscreen_off_pre_callback.h"
 #include "running_lock_info.h"
 #include "power_errors.h"
 #include "power_mgr_service.h"
@@ -42,7 +43,7 @@ public:
     PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo);
     bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj);
     bool IsRunningLockTypeSupported(RunningLockType type);
-    bool Lock(const sptr<IRemoteObject>& remoteObj);
+    bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1);
     bool UnLock(const sptr<IRemoteObject>& remoteObj);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied,
@@ -70,6 +71,8 @@ public:
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
+    bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
+    bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback);
     bool SetDisplaySuspend(bool enable);
     PowerErrors SetDeviceMode(const PowerMode& mode);
     PowerMode GetDeviceMode();

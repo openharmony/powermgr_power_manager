@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,25 @@
  * limitations under the License.
  */
 
-#include "power_mode_callback_stub.h"
+#include "screen_off_pre_callback_stub.h"
 
 #include <message_parcel.h>
-#include "errors.h"
-#include "ipc_object_stub.h"
+
 #include "power_common.h"
-#include "power_log.h"
-#include "power_mgr_errors.h"
-#include "power_mode_callback_ipc_interface_code.h"
+#include "screen_off_pre_callback_ipc_interface_code.h"
+#include "screen_off_pre_callback_proxy.h"
 #include "xcollie/xcollie.h"
-#include "xcollie/xcollie_define.h"
 
 namespace OHOS {
 namespace PowerMgr {
-int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
-    {
+int ScreenOffPreCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
     POWER_HILOGD(COMP_SVC, "cmd = %{public}d, flags= %{public}d", code, option.GetFlags());
     const int DFX_DELAY_MS = 10000;
-    int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerModeCallbackStub", DFX_DELAY_MS, nullptr, nullptr,
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("ScreenOffPreCallbackStub", DFX_DELAY_MS, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_NOOP);
-    std::u16string descripter = PowerModeCallbackStub::GetDescriptor();
+    std::u16string descripter = ScreenOffPreCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
         POWER_HILOGE(COMP_SVC, "Descriptor is not match");
@@ -42,8 +39,8 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
     }
 
     int ret = ERR_OK;
-    if (code == static_cast<uint32_t>(PowerMgr::PowerModeCallbackInterfaceCode::POWER_MODE_CHANGED)) {
-        ret = OnPowerModeCallbackStub(data);
+    if (code == static_cast<uint32_t>(PowerMgr::ScreenOffPreCallbackInterfaceCode::SCREEN_OFF_PRE_CHANGED)) {
+        ret = OnScreenStateChangedStub(data);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -51,12 +48,13 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
     return ret;
 }
 
-int32_t PowerModeCallbackStub::OnPowerModeCallbackStub(MessageParcel& data)
+int32_t ScreenOffPreCallbackStub::OnScreenStateChangedStub(MessageParcel& data)
 {
-    uint32_t mode;
-    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, mode, E_READ_PARCEL_ERROR);
-    OnPowerModeChanged(static_cast<PowerMode>(mode));
+    uint32_t type;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
+    OnScreenStateChanged(static_cast<uint32_t>(type));
     return ERR_OK;
 }
+
 } // namespace PowerMgr
 } // namespace OHOS

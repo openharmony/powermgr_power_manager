@@ -27,6 +27,7 @@
 #include "power_save_mode.h"
 #include "power_state_machine.h"
 #include "running_lock_mgr.h"
+#include "screen_off_pre_controller.h"
 #include "shutdown_controller.h"
 #include "shutdown_dialog.h"
 #include "sp_singleton.h"
@@ -53,6 +54,7 @@ public:
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
+    virtual PowerErrors SetSuspendTag(const std::string& tag) override;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
@@ -66,7 +68,7 @@ public:
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
@@ -83,6 +85,9 @@ public:
 
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
+
+    virtual bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback) override;
+    virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) override;
 
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
@@ -117,6 +122,15 @@ public:
     void WakeupControllerInit();
     void HibernateControllerInit();
     bool IsCollaborationState();
+    static void RegisterSettingWakeupPickupGestureObserver();
+    static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
+    static bool IsEnableWakeupPickupGesture();
+    bool WakeupPickupGesture(bool enable);
+    static void RegisterSettingObservers();
+    static void RegisterSettingWakeupDoubleClickObservers();
+    static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
+    static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
+    static bool IsEnableWakeupDoubleClick();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif
@@ -149,6 +163,10 @@ public:
     std::shared_ptr<WakeupController> GetWakeupController() const
     {
         return wakeupController_;
+    }
+    std::shared_ptr<ScreenOffPreController> GetScreenOffPreController() const
+    {
+        return screenOffPreController_;
     }
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> GetWakeupActionController() const
@@ -208,6 +226,7 @@ public:
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
     std::shared_ptr<HibernateController> hibernateController_ = nullptr;
+    std::shared_ptr<ScreenOffPreController> screenOffPreController_ = nullptr;
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
 #endif
@@ -231,6 +250,7 @@ private:
     static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
     static constexpr int32_t HALL_REPORT_INTERVAL = 0;
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
+    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
     bool Init();
     bool PowerStateMachineInit();
     std::string GetBundleNameByUid(const int32_t uid);
@@ -257,6 +277,7 @@ private:
     std::mutex stateMutex_;
     std::mutex shutdownMutex_;
     std::mutex modeMutex_;
+    std::mutex screenOffPreMutex_;
     std::mutex screenMutex_;
     std::mutex dumpMutex_;
     std::mutex lockMutex_;

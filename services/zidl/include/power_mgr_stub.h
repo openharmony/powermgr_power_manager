@@ -47,13 +47,14 @@ private:
     int32_t CreateRunningLockStub(MessageParcel& data, MessageParcel& reply);
     int32_t ReleaseRunningLockStub(MessageParcel& data);
     int32_t IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply);
-    int32_t LockStub(MessageParcel& data, MessageParcel& reply);
-    int32_t UnLockStub(MessageParcel& data, MessageParcel& reply);
+    int32_t LockStub(MessageParcel& data);
+    int32_t UnLockStub(MessageParcel& data);
     int32_t QueryRunningLockListsStub(MessageParcel& data, MessageParcel& reply);
     int32_t IsUsedStub(MessageParcel& data, MessageParcel& reply);
     int32_t RebootDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RebootDeviceForDeprecatedStub(MessageParcel& data, MessageParcel& reply);
     int32_t ShutDownDeviceStub(MessageParcel& data, MessageParcel& reply);
+    int32_t SetSuspendTagStub(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterPowerStateCallbackStub(MessageParcel& data);
 
     int32_t RegisterSyncSleepCallbackStub(MessageParcel& data);
@@ -64,6 +65,8 @@ private:
     int32_t UnRegisterPowerModeCallbackStub(MessageParcel& data);
     int32_t RegisterRunningLockCallbackStub(MessageParcel& data);
     int32_t UnRegisterRunningLockCallbackStub(MessageParcel& data);
+    int32_t RegisterScreenStateCallbackStub(MessageParcel& data);
+    int32_t UnRegisterScreenStateCallbackStub(MessageParcel& data);
     int32_t SetDisplaySuspendStub(MessageParcel& data);
     int32_t HibernateStub(MessageParcel& data);
     int32_t SetDeviceModeStub(MessageParcel& data, MessageParcel& reply);

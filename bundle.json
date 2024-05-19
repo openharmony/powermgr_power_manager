@@ -27,7 +27,8 @@
             "power_manager_feature_power_state",
             "power_manager_feature_power_mode",
             "power_manager_feature_wakeup_action",
-            "power_manager_feature_power_dialog"
+            "power_manager_feature_power_dialog",
+            "power_manager_feature_doubleclick_or_pickup"
         ],
         "adapted_system_type": [
             "standard"
@@ -97,6 +98,7 @@
                       "header_files": [
                         "ipower_mgr.h",
                         "ipower_state_callback.h",
+                        "iscreen_off_pre_callback.h",
                         "power_errors.h",
                         "power_mgr_client.h",
                         "power_state_machine_info.h",

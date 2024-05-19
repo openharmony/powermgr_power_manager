@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "power_mode_callback_proxy.h"
+#include "screen_off_pre_callback_proxy.h"
 
 #include <message_parcel.h>
 #include "errors.h"
 #include "message_option.h"
 #include "power_log.h"
 #include "power_common.h"
-#include "power_mode_callback_ipc_interface_code.h"
+#include "screen_off_pre_callback_ipc_interface_code.h"
 
 namespace OHOS {
 namespace PowerMgr {
-void PowerModeCallbackProxy::OnPowerModeChanged(PowerMode mode)
+void ScreenOffPreCallbackProxy::OnScreenStateChanged(uint32_t state)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -33,18 +33,18 @@ void PowerModeCallbackProxy::OnPowerModeChanged(PowerMode mode)
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(PowerModeCallbackProxy::GetDescriptor())) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+    if (!data.WriteInterfaceToken(ScreenOffPreCallbackProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
         return;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Uint32, static_cast<uint32_t>(mode));
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Uint32, static_cast<uint32_t>(state));
 
     int ret = remote->SendRequest(
-        static_cast<int>(PowerMgr::PowerModeCallbackInterfaceCode::POWER_MODE_CHANGED),
+        static_cast<int>(PowerMgr::ScreenOffPreCallbackInterfaceCode::SCREEN_OFF_PRE_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
     }
 }
 } // namespace PowerMgr

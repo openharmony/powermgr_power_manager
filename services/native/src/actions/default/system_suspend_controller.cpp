@@ -95,6 +95,17 @@ void SystemSuspendController::UnRegisterPowerHdiCallback()
     POWER_HILOGD(COMP_SVC, "unregister power hdi callback end");
 }
 
+void SystemSuspendController::SetSuspendTag(const std::string& tag)
+{
+    if (powerInterface_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return;
+    }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SET_SUSPEND_TAG", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "TAG", tag);
+    powerInterface_->SetSuspendTag(tag);
+}
+
 void SystemSuspendController::Suspend(
     const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force)
 {

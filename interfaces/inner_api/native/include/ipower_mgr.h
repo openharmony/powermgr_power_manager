@@ -26,6 +26,7 @@
 #include "ipower_mode_callback.h"
 #include "ipower_runninglock_callback.h"
 #include "ipower_state_callback.h"
+#include "iscreen_off_pre_callback.h"
 #include "power_errors.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
@@ -40,7 +41,7 @@ public:
         const RunningLockInfo& runningLockInfo) = 0;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) = 0;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
     virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
@@ -52,6 +53,7 @@ public:
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) = 0;
     virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
+    virtual PowerErrors SetSuspendTag(const std::string& tag) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
@@ -70,6 +72,9 @@ public:
     // Used for callback registration upon power mode.
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
+
+    virtual bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback) = 0;
+    virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) = 0;
 
     virtual bool SetDisplaySuspend(bool enable) = 0;
     virtual bool Hibernate(bool clearMemory) = 0;

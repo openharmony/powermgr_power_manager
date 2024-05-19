@@ -35,6 +35,7 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/screenoffpre",
     "${powermgr_test_path}/mock/action",
   ]
 
@@ -1139,7 +1140,10 @@ ohos_unittest("test_power_coordination_lock") {
 ohos_unittest("test_running_lock_timer_handler") {
   module_out_path = module_output_path
 
-  sources = [ "src/running_lock_timer_handler_test.cpp" ]
+  sources = [
+    "${powermgr_service_path}/native/src/runninglock/running_lock_timer_handler.cpp",
+    "src/running_lock_timer_handler_test.cpp",
+  ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",

@@ -72,6 +72,8 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
 
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(powerMgrClient.RegisterScreenStateCallback(0, nullptr));
+    EXPECT_FALSE(powerMgrClient.UnRegisterScreenStateCallback(nullptr));
     powerMgrClient.~PowerMgrClient();
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");
@@ -89,7 +91,7 @@ HWTEST_F(PowerMgrClientNativeTest, RunningLockNative002, TestSize.Level2)
     std::shared_ptr<RunningLock> runningLock =
         std::make_shared<RunningLock>(nullptr, "runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     runningLock->Create();
-    EXPECT_TRUE(runningLock->UnLock() == ERR_OK);
+    EXPECT_TRUE(runningLock->UnLock() != ERR_OK);
     runningLock->Release();
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002::fun is end!");
 }

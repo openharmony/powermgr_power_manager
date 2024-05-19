@@ -28,6 +28,7 @@ ohos_fuzztest("SetForceTimingOutFuzzTest") {
     "${powermgr_service_path}/native/src/shutdown",
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/screenoffpre",
     "../power_utils",
   ]
 
