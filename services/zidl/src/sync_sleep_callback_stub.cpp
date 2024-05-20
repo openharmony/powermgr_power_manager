@@ -53,7 +53,7 @@ int SyncSleepCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
 int32_t SyncSleepCallbackStub::OnSyncSleepStub(MessageParcel& data)
 {
     bool onForceSleep;
-    READ_PARCEL_WITH_RET(data, Bool, onForceSleep, E_READ_PARCEL_ERROR);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, onForceSleep, E_READ_PARCEL_ERROR);
     OnSyncSleep(static_cast<bool>(onForceSleep));
     return ERR_OK;
 }
@@ -61,7 +61,7 @@ int32_t SyncSleepCallbackStub::OnSyncSleepStub(MessageParcel& data)
 int32_t SyncSleepCallbackStub::OnSyncWakeupStub(MessageParcel& data)
 {
     bool onForceSleep;
-    READ_PARCEL_WITH_RET(data, Bool, onForceSleep, E_READ_PARCEL_ERROR);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, onForceSleep, E_READ_PARCEL_ERROR);
     OnSyncWakeup(static_cast<bool>(onForceSleep));
     return ERR_OK;
 }

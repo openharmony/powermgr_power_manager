@@ -54,6 +54,7 @@ public:
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
+    virtual PowerErrors SetSuspendTag(const std::string& tag) override;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
@@ -121,6 +122,15 @@ public:
     void WakeupControllerInit();
     void HibernateControllerInit();
     bool IsCollaborationState();
+    static void RegisterSettingWakeupPickupGestureObserver();
+    static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
+    static bool IsEnableWakeupPickupGesture();
+    bool WakeupPickupGesture(bool enable);
+    static void RegisterSettingObservers();
+    static void RegisterSettingWakeupDoubleClickObservers();
+    static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
+    static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
+    static bool IsEnableWakeupDoubleClick();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif
@@ -240,6 +250,7 @@ private:
     static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
     static constexpr int32_t HALL_REPORT_INTERVAL = 0;
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
+    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
     bool Init();
     bool PowerStateMachineInit();
     std::string GetBundleNameByUid(const int32_t uid);

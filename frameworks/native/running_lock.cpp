@@ -30,6 +30,7 @@
 namespace OHOS {
 namespace PowerMgr {
 constexpr int32_t DEFAULT_TIMEOUT = 3000;
+constexpr int32_t NOT_USE_TIMEOUT = -1;
 RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type)
     : proxy_(proxy)
 {
@@ -81,6 +82,10 @@ ErrCode RunningLock::Lock(int32_t timeOutMs)
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call, timeOutMs=%{public}d", timeOutMs);
+    if (runningLockInfo_.type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
+        timeOutMs = NOT_USE_TIMEOUT;
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "PROXIMITY not use timeout");
+    }
     if (timeOutMs == 0) {
         timeOutMs = DEFAULT_TIMEOUT;
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "use default timeout");

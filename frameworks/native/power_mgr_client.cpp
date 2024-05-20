@@ -164,6 +164,13 @@ PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)
     return proxy_->ShutDownDevice(reason);
 }
 
+PowerErrors PowerMgrClient::SetSuspendTag(const std::string &tag)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    POWER_HILOGI(FEATURE_SUSPEND, "Set suspend tag: %{public}s", tag.c_str());
+    return proxy_->SetSuspendTag(tag);
+}
+
 PowerErrors PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);

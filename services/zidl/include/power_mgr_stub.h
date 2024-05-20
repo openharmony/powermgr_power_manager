@@ -54,6 +54,7 @@ private:
     int32_t RebootDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t RebootDeviceForDeprecatedStub(MessageParcel& data, MessageParcel& reply);
     int32_t ShutDownDeviceStub(MessageParcel& data, MessageParcel& reply);
+    int32_t SetSuspendTagStub(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterPowerStateCallbackStub(MessageParcel& data);
 
     int32_t RegisterSyncSleepCallbackStub(MessageParcel& data);
