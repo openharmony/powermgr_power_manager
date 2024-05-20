@@ -598,4 +598,46 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative021::fun is end!");
 }
+
+/**
+ * @tc.name: RunningLockNative022
+ * @tc.desc: test the activation of screen-on-lock
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative022 func started!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    RunningLockParam runningLockParam {0,
+        "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, -1, pid, uid};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
+    EXPECT_FALSE(runningLockMgr->IsUsed(remoteObj));
+
+    pmsTest->OverrideScreenOffTime(5000);
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+
+    stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+    EXPECT_EQ(stateMachine->GetState(), PowerState::INACTIVE);
+    runningLockMgr->Lock(remoteObj);
+    // screen on lock should not turn screen on if it is already off
+    EXPECT_EQ(stateMachine->GetState(), PowerState::INACTIVE);
+    runningLockMgr->UnLock(remoteObj);
+
+
+    stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+    EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
+    stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+    EXPECT_EQ(stateMachine->GetState(), PowerState::DIM);
+    runningLockMgr->Lock(remoteObj);
+    // after the activation of screen-on lock the screen should no longer be in DIM state
+    EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
+    
+    pmsTest->RestoreScreenOffTime();
+}
 } // namespace
