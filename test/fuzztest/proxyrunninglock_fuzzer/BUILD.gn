@@ -17,7 +17,7 @@ import("../../../powermgr.gni")
 module_output_path = "power_manager/power_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("ProxyRunningLocksFuzzTest") {
+ohos_fuzztest("ProxyRunningLockFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
       "${powermgr_root_path}/test/fuzztest/proxyrunninglock_fuzzer"
