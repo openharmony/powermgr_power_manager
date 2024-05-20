@@ -48,6 +48,11 @@ public:
     void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
     void NotifyDisplayActionDone(uint32_t event);
+    void SetOriginSettingValue(WakeupSource& source);
+    static int32_t SetWakeupDoubleClickSensor(bool enable);
+    static void ChangeWakeupSourceConfig(bool updateEnable);
+    static void ChangePickupWakeupSourceConfig(bool updataEnable);
+    static void PickupConnectMotionConfig(bool databaseSwitchValue);
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;
@@ -190,6 +195,14 @@ class SwitchWakeupMonitor : public WakeupMonitor {
 public:
     explicit SwitchWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
     ~SwitchWakeupMonitor() override = default;
+    bool Init() override;
+    void Cancel() override;
+};
+
+class PickupWakeupMonitor : public WakeupMonitor {
+public:
+    explicit PickupWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~PickupWakeupMonitor() override = default;
     bool Init() override;
     void Cancel() override;
 };

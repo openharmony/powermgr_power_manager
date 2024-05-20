@@ -39,9 +39,7 @@ public:
     static void SetSettingAutoAdjustBrightness(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingAutoAdjustBrightnessObserver(SettingObserver::UpdateFunc& func);
     static bool IsBrightnessSettingValid();
-    static int32_t GetSettingBrightness(int32_t defaultVal);
     static void SetSettingBrightness(int32_t brightness);
-    static sptr<SettingObserver> RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc& func);
     static bool IsVibrationSettingValid();
     static int32_t GetSettingVibration(int32_t defaultVal);
     static void SetSettingVibration(SwitchStatus status);
@@ -50,6 +48,10 @@ public:
     static int32_t GetSettingWindowRotation(int32_t defaultVal);
     static void SetSettingWindowRotation(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingWindowRotationObserver(SettingObserver::UpdateFunc& func);
+    static bool IsIntellVoiceSettingValid();
+    static int32_t GetSettingIntellVoice(int32_t defaultVal);
+    static void SetSettingIntellVoice(SwitchStatus status);
+    static sptr<SettingObserver> RegisterSettingIntellVoiceObserver(SettingObserver::UpdateFunc& func);
     static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
     static bool IsSuspendSourcesSettingValid();
     static const std::string GetSettingSuspendSources();
@@ -58,17 +60,31 @@ public:
     static bool IsWakeupSourcesSettingValid();
     static const std::string GetSettingWakeupSources();
     static void SetSettingWakeupSources(const std::string& jsonConfig);
-
+    static bool IsWakeupDoubleSettingValid();
+    static bool GetSettingWakeupDouble(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
+    static void SetSettingWakeupDouble(bool enable);
+    static void RegisterSettingWakeupDoubleObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingWakeupDoubleObserver();
+    static bool IsWakeupPickupSettingValid();
+    static bool GetSettingWakeupPickup(const std::string& key = SETTING_POWER_WAKEUP_PICKUP_KEY);
+    static void SetSettingWakeupPickup(bool enable);
+    static void RegisterSettingWakeupPickupObserver(SettingObserver::UpdateFunc& func);
+    static void UnregisterSettingWakeupPickupObserver();
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
 
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
-    static constexpr const char* SETTING_VIBRATION_KEY {"settings.sound.vibrate_status"};
+    static constexpr const char* SETTING_VIBRATION_KEY {"physic_navi_haptic_feedback_enabled"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.general.accelerometer_rotation_status"};
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
+    static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
+    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
+    static constexpr const char* SETTING_POWER_WAKEUP_PICKUP_KEY {"settings.power.wakeup_pick_up"};
+    static sptr<SettingObserver> doubleClickObserver_;
+    static sptr<SettingObserver> pickUpObserver_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

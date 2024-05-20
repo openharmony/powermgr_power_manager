@@ -30,7 +30,6 @@
 #include <sys_mgr_client.h>
 #include <bundle_mgr_client.h>
 #include <unistd.h>
-
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
 #include "ffrt_utils.h"
@@ -42,7 +41,7 @@
 #include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
-
+#include "setting_helper.h"
 #include "errors.h"
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
@@ -50,7 +49,6 @@
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
-
 namespace OHOS {
 namespace PowerMgr {
 namespace {
@@ -66,6 +64,8 @@ SysParam::BootCompletedCallback g_bootCompletedCallback;
 bool g_inLidMode = false;
 } // namespace
 
+static bool g_wakeupDoubleClick = true;
+static bool g_wakeupPickup = true;
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 using namespace MMI;
 
@@ -115,7 +115,6 @@ bool PowerMgrService::Init()
         screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
         screenOffPreController_->Init();
     }
-
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
 }
@@ -155,11 +154,79 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->WakeupActionControllerInit();
 #endif
         power->VibratorInit();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        power->RegisterSettingObservers();
+        power->RegisterSettingWakeupPickupGestureObserver();
+#endif
         isBootCompleted_ = true;
     };
     WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+void PowerMgrService::RegisterSettingObservers()
+{
+    RegisterSettingWakeupDoubleClickObservers();
+}
+
+void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupDoubleClickSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingWakeupDoubleObserver(updateFunc);
+}
+
+void PowerMgrService::WakeupDoubleClickSettingUpdateFunc(const std::string& key)
+{
+    bool isSettingEnable = GetSettingWakeupDoubleClick(key);
+    bool originEnable = IsEnableWakeupDoubleClick();
+    if (isSettingEnable == originEnable) {
+        POWER_HILOGE(COMP_SVC, "no need change wakeupDoubleClick switch, the settingEnable is: %{public}d",
+            isSettingEnable);
+        return;
+    }
+    g_wakeupDoubleClick = isSettingEnable;
+    WakeupController::ChangeWakeupSourceConfig(isSettingEnable);
+    WakeupController::SetWakeupDoubleClickSensor(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "WakeupDoubleClickSettingUpdateFunc isSettingEnable=%{public}d", isSettingEnable);
+}
+
+bool PowerMgrService::GetSettingWakeupDoubleClick(const std::string& key)
+{
+    return SettingHelper::GetSettingWakeupDouble(key);
+}
+
+bool PowerMgrService::IsEnableWakeupDoubleClick()
+{
+    return g_wakeupDoubleClick;
+}
+
+void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupPickupGestureSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingWakeupPickupObserver(updateFunc);
+}
+
+void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
+{
+    bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
+    bool originEnable = IsEnableWakeupPickupGesture();
+    if (isSettingEnable == originEnable) {
+        POWER_HILOGE(COMP_SVC, "no need change wakeup pickup switch,isSettingEnable=%{public}d", isSettingEnable);
+        return;
+    }
+    WakeupController::PickupConnectMotionConfig(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
+    g_wakeupPickup = isSettingEnable;
+    WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
+    POWER_HILOGI(COMP_SVC, "ChangePickupWakeupSourceConfig done");
+}
+
+bool PowerMgrService::IsEnableWakeupPickupGesture()
+{
+    return g_wakeupPickup;
+}
+#endif
 
 bool PowerMgrService::PowerStateMachineInit()
 {
@@ -436,6 +503,10 @@ void PowerMgrService::OnStop()
     isBootCompleted_ = false;
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    SettingHelper::UnregisterSettingWakeupDoubleObserver();
+    SettingHelper::UnregisterSettingWakeupPickupObserver();
+#endif
 }
 
 void PowerMgrService::Reset()
@@ -549,6 +620,19 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Shutdown(reason);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
+{
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, tag: %{public}s", pid, uid, tag.c_str());
+    SystemSuspendController::GetInstance().SetSuspendTag(tag);
     return PowerErrors::ERR_OK;
 }
 

@@ -34,7 +34,7 @@ namespace PowerMgr {
         }                                                                               \
     } while (0)                                                                         \
 
-#define READ_PARCEL_NO_RET(parcel, type, out)                                           \
+#define RETURN_IF_READ_PARCEL_FAILED_NO_RET(parcel, type, out)                                           \
     do {                                                                                \
         if (!(parcel).Read##type(out)) {                                                \
             POWER_HILOGE(COMP_FWK, "read "#out" failed");                          \
@@ -42,7 +42,7 @@ namespace PowerMgr {
         }                                                                               \
     } while (0)                                                                         \
 
-#define WRITE_PARCEL_NO_RET(parcel, type, data)                                         \
+#define RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(parcel, type, data)                                         \
     do {                                                                                \
         if (!(parcel).Write##type(data)) {                                              \
             POWER_HILOGE(COMP_FWK, "write "#data" failed");                        \
@@ -50,7 +50,7 @@ namespace PowerMgr {
         }                                                                               \
     } while (0)                                                                         \
 
-#define READ_PARCEL_WITH_RET(parcel, type, out, retval)                                \
+#define RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, type, out, retval)                                \
     do {                                                                               \
         if (!(parcel).Read##type(out)) {                                               \
             POWER_HILOGE(COMP_FWK, "read "#out" failed");                         \
@@ -58,7 +58,7 @@ namespace PowerMgr {
         }                                                                              \
     } while (0)                                                                        \
 
-#define WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                              \
+#define RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, type, data, retval)                              \
     do {                                                                               \
         if (!(parcel).Write##type(data)) {                                             \
             POWER_HILOGE(COMP_FWK, "write data failed");                       \

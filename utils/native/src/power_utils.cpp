@@ -62,6 +62,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("MOUSE");
         case StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK:
             return std::string("DOUBLE_CLICK");
+        case StateChangeReason::STATE_CHANGE_REASON_PEN:
+            return std::string("PEN");
         case StateChangeReason::STATE_CHANGE_REASON_SWITCH:
             return std::string("SWITCH");
         case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
@@ -88,6 +90,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("SHELL");
         case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
             return std::string("TIMEOUT_NO_SCREEN_LOCK");
+        case StateChangeReason::STATE_CHANGE_REASON_PICKUP:
+            return std::string("PICKUP");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:

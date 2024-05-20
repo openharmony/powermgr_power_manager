@@ -1161,6 +1161,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK:
             ret = StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PEN:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PEN;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD:
             ret = StateChangeReason::STATE_CHANGE_REASON_KEYBOARD;
             break;
@@ -1190,6 +1193,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_SHELL:
             ret = StateChangeReason::STATE_CHANGE_REASON_SHELL;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PICKUP:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PICKUP;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
@@ -1222,9 +1228,7 @@ StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType t
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH:
             ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
             break;
-        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
-            ret = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
-            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY: // fall through
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY:
             ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
             break;
