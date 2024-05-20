@@ -85,7 +85,7 @@ ErrCode PowerMgrClient::Connect()
 
     proxy_ = iface_cast<IPowerMgr>(remoteObject_);
     deathRecipient_ = drt;
-    POWER_HILOGI(COMP_FWK, "Connecting PowerMgrService success");
+    POWER_HILOGD(COMP_FWK, "Connecting PowerMgrService success");
     return ERR_OK;
 }
 

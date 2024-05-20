@@ -67,7 +67,7 @@ ErrCode ClientLifeCycle::Connect()
     }
 
     proxy_ = iface_cast<IPowerMgr>(remoteObject_);
-    POWER_HILOGI(COMP_FWK, "Connecting PowerMgrService success");
+    POWER_HILOGD(COMP_FWK, "Connecting PowerMgrService success");
     return ERR_OK;
 }
 
