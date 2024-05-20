@@ -716,7 +716,7 @@ bool PowerMgrService::IsScreenOn()
 {
     std::lock_guard lock(stateMutex_);
     auto isScreenOn = powerStateMachine_->IsScreenOn();
-    POWER_HILOGI(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
+    POWER_HILOGD(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
     return isScreenOn;
 }
 
