@@ -176,7 +176,7 @@ private:
     static std::string GetTransitResultString(TransitResult result);
     class SettingStateFlag {
     public:
-        SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner, StateChangeReason reason) 
+        SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner, StateChangeReason reason)
             : owner_(owner)
         {
             std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
