@@ -38,7 +38,7 @@ bool SettingHelper::IsWakeupPickupSettingValid()
 bool SettingHelper::GetSettingWakeupPickup(const std::string& key)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value;
+    int32_t value = 0;
     ErrCode ret = settingProvider.GetIntValue(key, value);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "get setting power wakeup pickup key failed, ret=%{public}d", ret);

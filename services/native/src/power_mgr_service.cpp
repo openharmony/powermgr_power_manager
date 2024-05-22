@@ -203,7 +203,7 @@ bool PowerMgrService::IsEnableWakeupDoubleClick()
 
 void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
 {
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupPickupGestureSettingUpdateFunc(key); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupPickupGestureSettingUpdateFunc(key);};
     SettingHelper::RegisterSettingWakeupPickupObserver(updateFunc);
 }
 
