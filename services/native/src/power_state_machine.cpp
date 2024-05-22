@@ -268,6 +268,8 @@ void PowerStateMachine::EmplaceDim()
             }
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            // Set a timer without checking runninglock, but the actual timeout event can still be blocked.
+            // Theoretically, this timer is always cancelable before the current task is finished. 
             SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             // in case a refresh action occurs, change display state back to on
             if (settingStateFlag_.load() ==
@@ -847,31 +849,25 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
     bool isScreenOnLockActive = IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN);
     bool currentValue = forceTimingOut_.exchange(enabled);
+    PowerState curState = GetState();
     POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, currentValue=%{public}u",
-        currentValue ? "TRUE" : "FALSE", enabled ? "TRUE" : "FALSE", isScreenOnLockActive ? "TRUE" : "FALSE",
-        currentValue);
+        "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, PowerState=%{public}u",
+        currentValue ? "TRUE" : "FALSE", enabled ? "TRUE" : "FALSE", isScreenOnLockActive ? "TRUE" : "FALSE", curState);
     if (currentValue == enabled || !isScreenOnLockActive || IsSettingState(PowerState::DIM)) {
         // no need to interact with screen state or timer
         return;
     }
     if (enabled) {
-        // SetForceTimingOut from FALSE to TRUE, with screen-on-lock active.
-        // In this situation, there are two cases where the current PowerState may be DIM.
-        // 1. ResetInactiveTimer is invoked after forceTimingOut_ being set, with very short screen off time.
-        // 2. The DIM state is manually set(e.g by Multi-screen collaboration)
-        // Either way, we dont need to do anything here
-        if (GetState() == PowerState::DIM) {
-            return;
-        }
         // In case the PowerState is AWAKE, we need to reset the timer since there is no existing one.
         // Only reset the timer if no SetState operation is currently in progress, and if any,
         // make sure this ResetInactiveTimer operation does not interfere with it.
         // Because the goal here is to ensure that there exist some Timer, regardless who sets the timer.
         // I call it "weak" ResetInactiveTimer to distinguish it from the "strong" one invoked by RefreshActivity,
         // which (should) invalidates any time-out timer previously set.
-        if (stateMutex_.try_lock() && GetState() == PowerState::AWAKE) {
-            ResetInactiveTimer();
+        if (stateMutex_.try_lock()) {
+            if (GetState() == PowerState::AWAKE) {
+                ResetInactiveTimer();
+            }
             stateMutex_.unlock();
         }
     } else {

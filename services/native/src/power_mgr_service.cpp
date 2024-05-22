@@ -1295,7 +1295,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
     if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
-        stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
+        stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION, true);
         POWER_HILOGD(FEATURE_INPUT, "Key event has simulate flag in coordinated state, override screen off time");
     }
 }
@@ -1313,7 +1313,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
     if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
-        stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
+        stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION, true);
         POWER_HILOGD(FEATURE_INPUT, "Pointer event has simulate flag in coordinated state, override screen off time");
     }
 }
