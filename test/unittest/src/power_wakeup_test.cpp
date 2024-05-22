@@ -440,4 +440,39 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest014, TestSize.Level0)
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest014: end");
 }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+/**
+ * @tc.name: PowerWakeupTest015
+ * @tc.desc: test switch to turn on the screen by double click
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest015, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest015: start");
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    EXPECT_TRUE(wakeupController_ != nullptr);
+    wakeupController_->ChangeWakeupSourceConfig(true);
+    auto resCode = wakeupController_->SetWakeupDoubleClickSensor(true);
+    EXPECT_TRUE(resCode != -1);
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest015: end");
+}
+
+/**
+ * @tc.name: PowerWakeupTest016
+ * @tc.desc: test switch to turn on the screen by raising your hand
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest016, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest016: start");
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    EXPECT_TRUE(wakeupController_ != nullptr);
+    wakeupController_->ChangePickupWakeupSourceConfig(true);
+    wakeupController_->PickupConnectMotionConfig(true);
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest016: end");
+}
+#endif
 } // namespace
