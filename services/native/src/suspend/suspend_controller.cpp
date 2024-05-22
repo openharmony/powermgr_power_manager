@@ -157,17 +157,19 @@ void SuspendController::Init()
 
 void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
-    g_monitorMutex.lock();
-    if (monitorMap_.find(reason) != monitorMap_.end()) {
-        auto monitor = monitorMap_[reason];
-        if (monitor == nullptr) {
-            POWER_HILOGI(COMP_SVC, "get monitor fail");
-            g_monitorMutex.unlock();
-            return;
+    FFRTUtils::SubmitTask([this, reason] {
+        g_monitorMutex.lock();
+        if (monitorMap_.find(reason) != monitorMap_.end()) {
+            auto monitor = monitorMap_[reason];
+            if (monitor == nullptr) {
+                POWER_HILOGI(COMP_SVC, "get monitor fail");
+                g_monitorMutex.unlock();
+                return;
+            }
+            monitor->Notify();
         }
-        monitor->Notify();
-    }
-    g_monitorMutex.unlock();
+        g_monitorMutex.unlock();
+    });
 }
 
 void SuspendController::RegisterSettingsObserver()
