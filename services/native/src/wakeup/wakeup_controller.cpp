@@ -225,8 +225,8 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
             POWER_HILOGE(COMP_SVC, "Dlopen failed, reason : %{public}s", dlerror());
             return;
         }
-        FuncSubscriber powerPickupMotionSubscriberFlag = (FuncSubscriber)dlsym(subscriberHandler,
-            SET_WAKEUP_MOTION_SUBSCRIBER_CONFIG);
+        FuncSubscriber powerPickupMotionSubscriberFlag = reinterpret_cast<FuncSubscriber>(dlsym(subscriberHandler,
+            SET_WAKEUP_MOTION_SUBSCRIBER_CONFIG));
         if (powerPickupMotionSubscriberFlag == nullptr) {
             POWER_HILOGE(COMP_SVC, "find Subscriber function failed, reason : %{public}s", dlerror());
             dlclose(subscriberHandler);
@@ -243,8 +243,8 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
             POWER_HILOGE(COMP_SVC, "Dlopen failed, reason : %{public}s", dlerror());
             return;
         }
-        FuncUnsubscriber powerPickupMotionUnsubscriberFlag = (FuncUnsubscriber)dlsym(unsubscriberHandler,
-            SET_WAKEUP_MOTION_UNSUBSCRIBER_CONFIG);
+        FuncUnsubscriber powerPickupMotionUnsubscriberFlag = reinterpret_cast<FuncUnsubscriber>(dlsym(
+            unsubscriberHandler, SET_WAKEUP_MOTION_UNSUBSCRIBER_CONFIG));
         if (powerPickupMotionUnsubscriberFlag == nullptr) {
             POWER_HILOGE(COMP_SVC, "find Unsubscriber function failed, reason : %{public}s", dlerror());
             dlclose(unsubscriberHandler);
