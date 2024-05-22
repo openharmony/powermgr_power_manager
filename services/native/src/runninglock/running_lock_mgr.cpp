@@ -185,7 +185,6 @@ void RunningLockMgr::InitLocksTypeProximity()
                 PreprocessBeforeAwake();
                 stateMachine->SetState(PowerState::AWAKE,
                     StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
-                stateMachine->ResetInactiveTimer();
                 proximityController_.Disable();
                 proximityController_.Clear();
             }
@@ -230,7 +229,6 @@ void RunningLockMgr::InitLocksTypeCoordination()
             } else {
                 stateAction->SetCoordinated(false);
                 stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
-                stateMachine->ResetInactiveTimer();
                 result = counter->Decrease(backgroundLockParam);
             }
             return result;

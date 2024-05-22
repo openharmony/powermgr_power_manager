@@ -266,15 +266,17 @@ void PowerStateMachine::EmplaceDim()
                 // failed but not return, still need to set screen off
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
-            // in case a refresh action occurs, change display state back to on
-            if (!IsSettingState(PowerState::DIM)) {
-                stateAction_->SetDisplayState(
-                    DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
-                return TransitResult::OTHER_ERR;
-            }
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            // in case a refresh action occurs, change display state back to on
+            if (settingStateFlag_.load() ==
+                static_cast<int64_t>(SettingStateFlag::StateFlag::SETTING_DIM_INTERRUPTED)) {
+                stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
+                ResetInactiveTimer();
+                POWER_HILOGW(FEATURE_POWER_STATE, "Setting DIM interrupted!");
+                return TransitResult::OTHER_ERR;
+            }
             return ret == ActionResult::SUCCESS ? TransitResult::SUCCESS : TransitResult::OTHER_ERR;
         }));
 }
@@ -462,7 +464,6 @@ void PowerStateMachine::WakeupDeviceInner(
     }
     mDeviceState_.lastWakeupDeviceTime = callTimeMs;
 
-    ResetInactiveTimer();
     SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
 
     if (suspendController != nullptr) {
@@ -493,6 +494,9 @@ void PowerStateMachine::RefreshActivityInner(
             // Inactive to Awake will be blocked for this reason in CanTransitTo()
             SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
         } else {
+            // There is a small chance that the last "if" statement occurs before the (already started) ffrt task
+            // is actually trying to set DIM state.
+            // In that case we may still (not guaranteed) interrupt it.
             ResetInactiveTimer();
         }
     } else {
@@ -750,7 +754,9 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 void PowerStateMachine::ResetInactiveTimer()
 {
     // change the flag to notify the thread which is setting DIM
-    settingStateFlag_ = -1;
+    int64_t expectedFlag = static_cast<int64_t>(PowerState::DIM);
+    settingStateFlag_.compare_exchange_strong(
+        expectedFlag, static_cast<int64_t>(SettingStateFlag::StateFlag::SETTING_DIM_INTERRUPTED));
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
@@ -839,18 +845,46 @@ void PowerStateMachine::HandleSystemWakeup()
 
 void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
-    forceTimingOut_.store(enabled);
+    bool isScreenOnLockActive = IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN);
+    bool currentValue = forceTimingOut_.exchange(enabled);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK,
+        "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, currentValue=%{public}u",
+        currentValue ? "TRUE" : "FALSE", enabled ? "TRUE" : "FALSE", isScreenOnLockActive ? "TRUE" : "FALSE",
+        currentValue);
+    if (currentValue == enabled || !isScreenOnLockActive || IsSettingState(PowerState::DIM)) {
+        // no need to interact with screen state or timer
+        return;
+    }
     if (enabled) {
-        if (GetState() == PowerState::AWAKE) {
+        // SetForceTimingOut from FALSE to TRUE, with screen-on-lock active.
+        // In this situation, there are two cases where the current PowerState may be DIM.
+        // 1. ResetInactiveTimer is invoked after forceTimingOut_ being set, with very short screen off time.
+        // 2. The DIM state is manually set(e.g by Multi-screen collaboration)
+        // Either way, we dont need to do anything here
+        if (GetState() == PowerState::DIM) {
+            return;
+        }
+        // In case the PowerState is AWAKE, we need to reset the timer since there is no existing one.
+        // Only reset the timer if no SetState operation is currently in progress, and if any,
+        // make sure this ResetInactiveTimer operation does not interfere with it.
+        // Because the goal here is to ensure that there exist some Timer, regardless who sets the timer.
+        // I call it "weak" ResetInactiveTimer to distinguish it from the "strong" one invoked by RefreshActivity,
+        // which (should) invalidates any time-out timer previously set.
+        if (stateMutex_.try_lock() && GetState() == PowerState::AWAKE) {
             ResetInactiveTimer();
+            stateMutex_.unlock();
         }
     } else {
+        // SetForceTimingOut from TRUE to FALSE, with screen-on-lock active.
+        // Need to exit DIM and/or reset(cancel) timer
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
     }
 }
 
 void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock)
 {
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockScreenAfterTimingOut: %{public}u, %{public}u",
+        static_cast<uint32_t>(enabled), static_cast<uint32_t>(checkScreenOnLock));
     enabledTimingOutLockScreen_.store(enabled, std::memory_order_relaxed);
     enabledTimingOutLockScreenCheckLock_.store(checkScreenOnLock, std::memory_order_relaxed);
 }
@@ -918,13 +952,8 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
     POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         displayOffTime_.load(), time);
     displayOffTime_ = time;
-    if (currentState_ == PowerState::AWAKE) {
-        ResetInactiveTimer();
-    }
-    // need transition from DIM to ON
-    if (currentState_ == PowerState::DIM || IsSettingState(PowerState::DIM)) {
-        SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
-    }
+    // refresh activity once, invalidates existing timer
+    SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
     }
@@ -985,7 +1014,14 @@ int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
 
 bool PowerStateMachine::IsSettingState(PowerState state)
 {
-    return settingStateFlag_.load() == static_cast<int64_t>(state);
+    int64_t flag = settingStateFlag_.load();
+    bool matched = flag == static_cast<int64_t>(state);
+    if (matched) {
+        return true;
+    } else {
+        return (
+            state == PowerState::DIM && flag == static_cast<int64_t>(SettingStateFlag::StateFlag::FORCE_SETTING_DIM));
+    }
 }
 
 int64_t PowerStateMachine::GetSleepTime()
@@ -1069,7 +1105,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
     ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
-    SettingStateFlag flag(state, shared_from_this());
+    SettingStateFlag flag(state, shared_from_this(), reason);
 
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {

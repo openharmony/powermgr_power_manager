@@ -643,7 +643,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
     shared_ptr<PowerStateCommonEventSubscriber> subscriber = PowerStateCommonEventSubscriber::RegisterEvent();
     EXPECT_FALSE(subscriber == nullptr);
     auto runninglock =
-        powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_010", RunningLockType::RUNNINGLOCK_COORDINATION);
+        powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_011", RunningLockType::RUNNINGLOCK_COORDINATION);
     ASSERT_NE(runninglock, nullptr);
     EXPECT_FALSE(runninglock->IsUsed());
     powerMgrClient.WakeupDevice();
@@ -697,6 +697,46 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
 
     powerMgrClient.RestoreScreenOffTime();
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
+}
+/**
+ * @tc.name: PowerCoordinationLockTest_012
+ * @tc.desc: test entering DIM state while coordination with SetForceTimingOut set to true at the same time
+ * @tc.type: FUNC
+ * @tc.require: issueI8JBT4
+ */
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_012, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_012 start");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    shared_ptr<PowerStateCommonEventSubscriber> subscriber = PowerStateCommonEventSubscriber::RegisterEvent();
+    EXPECT_FALSE(subscriber == nullptr);
+    auto runninglock =
+        powerMgrClient.CreateRunningLock("PowerCoordinationLockTest_012", RunningLockType::RUNNINGLOCK_COORDINATION);
+    ASSERT_NE(runninglock, nullptr);
+    EXPECT_FALSE(runninglock->IsUsed());
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    powerMgrClient.OverrideScreenOffTime(OVER_TIME_SCREEN_OFF_TIME_MS);
+    runninglock->Lock();
+    EXPECT_TRUE(runninglock->IsUsed());
+
+    auto inputManager = MMI::InputManager::GetInstance();
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = CreateKeyEvent();
+    FFRTUtils::SubmitTask([&inputManager, &keyEvent] {
+        inputManager->SimulateInputEvent(keyEvent);
+    });
+    FFRTTask callingInterface = [&powerMgrClient] {
+        usleep(100000);
+        powerMgrClient.SetForceTimingOut(true);
+    };
+    FFRTUtils::SubmitTask(callingInterface);
+    ffrt::wait();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep((OVER_TIME_SCREEN_OFF_TIME_MS + WAIT_SUSPEND_TIME_MS) * US_PER_MS);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+    usleep(SCREEN_OFF_TIME_OVERRIDE_COORDINATION_MS * US_PER_MS);
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
 }
 #endif
 }
