@@ -31,6 +31,7 @@ public:
     ~PowerShellCommand() override {};
 
 private:
+    static bool IsDeveloperMode();
     ErrCode CreateCommandMap() override;
     ErrCode CreateMessageMap() override;
     ErrCode init() override;
