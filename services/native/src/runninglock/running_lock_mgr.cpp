@@ -540,10 +540,9 @@ void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerP
 
 bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
-    bool isSuccess = false;
     if (pid < VALID_PID_LIMIT) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Proxy runninglock failed, pid=%{public}d is invalid", pid);
-        return isSuccess;
+        return false;
     }
 
     if (isProxied) {
