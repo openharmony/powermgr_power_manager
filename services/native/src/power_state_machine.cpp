@@ -269,7 +269,7 @@ void PowerStateMachine::EmplaceDim()
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             // Set a timer without checking runninglock, but the actual timeout event can still be blocked.
-            // Theoretically, this timer is always cancelable before the current task is finished. 
+            // Theoretically, this timer is always cancelable before the current task is finished.
             SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             // in case a refresh action occurs, change display state back to on
             if (settingStateFlag_.load() ==
@@ -948,7 +948,7 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
     POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         displayOffTime_.load(), time);
     displayOffTime_ = time;
-    // refresh activity once, invalidates existing timer
+    // refresh once, invalidates existing timer
     SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
