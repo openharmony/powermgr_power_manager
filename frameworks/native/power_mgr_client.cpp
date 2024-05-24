@@ -43,6 +43,7 @@ namespace OHOS {
 namespace PowerMgr {
 std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
+static std::recursive_mutex g_instanceMutex;
 
 PowerMgrClient::PowerMgrClient() {}
 PowerMgrClient::~PowerMgrClient()
@@ -53,6 +54,18 @@ PowerMgrClient::~PowerMgrClient()
             remoteObject->RemoveDeathRecipient(deathRecipient_);
         }
     }
+}
+
+PowerMgrClient& PowerMgrClient::GetInstance()
+{
+    static PowerMgrClient* instance = nullptr;
+    if (instance == nullptr) {
+        std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
+        if (instance == nullptr) {
+            instance = new PowerMgrClient();
+        }
+    }
+    return *instance;
 }
 
 ErrCode PowerMgrClient::Connect()
