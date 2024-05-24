@@ -43,7 +43,7 @@ namespace OHOS {
 namespace PowerMgr {
 std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
-static std::recursive_mutex g_instanceMutex;
+std::mutex g_instanceMutex;
 
 PowerMgrClient::PowerMgrClient() {}
 PowerMgrClient::~PowerMgrClient()
@@ -60,7 +60,7 @@ PowerMgrClient& PowerMgrClient::GetInstance()
 {
     static PowerMgrClient* instance = nullptr;
     if (instance == nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
+        std::lock_guard<std::mutex> lock(g_instanceMutex);
         if (instance == nullptr) {
             instance = new PowerMgrClient();
         }
