@@ -176,10 +176,17 @@ private:
     static std::string GetTransitResultString(TransitResult result);
     class SettingStateFlag {
     public:
-        SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner) : owner_(owner)
+        SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner, StateChangeReason reason)
+            : owner_(owner)
         {
             std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
-            stateMachine->settingStateFlag_ = static_cast<int64_t>(state);
+            int64_t flag;
+            if (state == PowerState::DIM && reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
+                flag = static_cast<int64_t>(StateFlag::FORCE_SETTING_DIM);
+            } else {
+                flag = static_cast<int64_t>(state);
+            }
+            stateMachine->settingStateFlag_ = flag;
         }
         SettingStateFlag(const SettingStateFlag&) = delete;
         SettingStateFlag& operator=(const SettingStateFlag&) = delete;
@@ -188,9 +195,13 @@ private:
         ~SettingStateFlag()
         {
             std::shared_ptr<PowerStateMachine> stateMachine = owner_.lock();
-            stateMachine->settingStateFlag_ = -1;
+            stateMachine->settingStateFlag_ = static_cast<int64_t>(StateFlag::NONE);
         }
-
+        enum class StateFlag : int64_t {
+            FORCE_SETTING_DIM = -3,
+            SETTING_DIM_INTERRUPTED = -2,
+            NONE = -1
+        };
     protected:
         std::weak_ptr<PowerStateMachine> owner_;
     };
