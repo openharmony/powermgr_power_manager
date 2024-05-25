@@ -281,11 +281,13 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 
 void WakeupController::ExecWakeupMonitorByReason(WakeupDeviceType reason)
 {
-    std::lock_guard lock(monitorMutex_);
-    if (monitorMap_.find(reason) != monitorMap_.end()) {
-        auto monitor = monitorMap_[reason];
-        monitor->Notify();
-    }
+    FFRTUtils::SubmitTask([this, reason] {
+        std::lock_guard lock(monitorMutex_);
+        if (monitorMap_.find(reason) != monitorMap_.end()) {
+            auto monitor = monitorMap_[reason];
+            monitor->Notify();
+        }
+    });
 }
 
 void WakeupController::Wakeup()
