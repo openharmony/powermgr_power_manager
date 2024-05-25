@@ -552,7 +552,7 @@ int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& arg
     std::vector<std::string> argsInStr;
     std::transform(args.begin(), args.end(), std::back_inserter(argsInStr), [](const std::u16string& arg) {
         std::string ret = Str16ToStr8(arg);
-        POWER_HILOGI(COMP_SVC, "arg: %{public}s", ret.c_str());
+        POWER_HILOGD(COMP_SVC, "arg: %{public}s", ret.c_str());
         return ret;
     });
     std::string result;
@@ -716,7 +716,7 @@ bool PowerMgrService::IsScreenOn()
 {
     std::lock_guard lock(stateMutex_);
     auto isScreenOn = powerStateMachine_->IsScreenOn();
-    POWER_HILOGI(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
+    POWER_HILOGD(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
     return isScreenOn;
 }
 
