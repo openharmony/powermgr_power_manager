@@ -646,8 +646,11 @@ bool PowerMgrProxy::IsScreenOn()
         POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
         return result;
     }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(COMP_FWK, "ReadBool fail");
+
+    if (reply.ReadBool(result)) {
+        POWER_HILOGI(COMP_FWK, "IsScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
+    } else {
+        POWER_HILOGE(COMP_FWK, "Read IsScreenOn failed");
     }
 
     return result;

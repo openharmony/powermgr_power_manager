@@ -85,7 +85,7 @@ ErrCode PowerMgrClient::Connect()
 
     proxy_ = iface_cast<IPowerMgr>(remoteObject_);
     deathRecipient_ = drt;
-    POWER_HILOGD(COMP_FWK, "Connecting PowerMgrService success");
+    POWER_HILOGI(COMP_FWK, "Connecting PowerMgrService success, pid=%{public}d", getpid());
     return ERR_OK;
 }
 
@@ -233,7 +233,7 @@ bool PowerMgrClient::IsScreenOn()
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
     bool ret = false;
     ret = proxy_->IsScreenOn();
-    POWER_HILOGD(COMP_FWK, "Calling IsScreenOn Success");
+    POWER_HILOGI(COMP_FWK, "IsScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
     return ret;
 }
 
