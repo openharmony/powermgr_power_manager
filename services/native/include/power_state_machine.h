@@ -279,6 +279,7 @@ private:
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
+    void ShowCurrentScrrenLocks();
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;

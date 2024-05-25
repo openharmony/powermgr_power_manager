@@ -814,9 +814,38 @@ void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
     POWER_HILOGD(FEATURE_SUSPEND, "Set auto suspend finish");
 }
 
+void PowerStateMachine::ShowCurrentScrrenLocks()
+{
+    auto pms = pms_.promote();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Pms is nullptr");
+        return false;
+    }
+    std::map<std::string, RunningLockInfo> screenOnLockLists;
+    bool ret = pms_->QueryRunningLockLists(screenOnLockLists);
+    if (ret) {
+        std::string message;
+        uint32_t mapSize = screenOnLockLists.size();
+        uint32_t counter = 0;
+        for (auto it : screenOnLockLists) {
+            counter++;
+            message.append(std::to_string(counter)).append(". ")
+                    .append("bundleName=").append(it.first)
+                    .append(" name=").append(it.second.name)
+                    .append(" pid=").append(std::to_string(it.second.pid))
+                    .append(" uid=").append(std::to_string(it.second.uid))
+                    .append(". ");
+        }
+        POWER_HILOGI(FEATURE_RUNNING_LOCK,
+            "The screen on runninglock information total number is %{public}d and as follows: %{public}s",
+            mapSize, message.c_str());
+    }
+}
+
 void PowerStateMachine::HandleActivityTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
+    ShowCurrentScrrenLocks();
     SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
 }
 
@@ -1102,6 +1131,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     std::lock_guard<std::mutex> lock(stateMutex_);
     ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
     SettingStateFlag flag(state, shared_from_this(), reason);
+
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) {
+        //If it is a timeout screen extinction, it has already been displayed before
+        ShowCurrentScrrenLocks();
+    }
 
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
