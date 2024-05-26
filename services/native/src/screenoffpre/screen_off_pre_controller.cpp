@@ -55,10 +55,12 @@ void ScreenOffPreController::AddScreenStateCallback(int32_t remainTime, const sp
         if (powerStateMachine_ != nullptr) {
             int64_t systemTime = powerStateMachine_->GetDisplayOffTime();
             auto settingTime = SettingHelper::GetSettingDisplayOffTime(systemTime);
+            int64_t dimTime = powerStateMachine_->GetDimTime(systemTime);
             POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
-                "systemTime=%{public}lld,settingTime=%{public}lld",
-                static_cast<long long>(systemTime), static_cast<long long>(settingTime));
-            SchedulEyeDetectTimeout(powerStateMachine_->GetLastOnTime() + settingTime, GetTickCount());
+                "systemTime=%{public}lld,settingTime=%{public}lld,dimTime=%{public}lld",
+                static_cast<long long>(systemTime), static_cast<long long>(settingTime),
+                static_cast<long long>(dimTime));
+            SchedulEyeDetectTimeout(powerStateMachine_->GetLastOnTime() + settingTime - dimTime, GetTickCount());
         }
     }
 }
