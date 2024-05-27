@@ -883,6 +883,13 @@ bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInf
     return true;
 }
 
+void PowerMgrService::QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists)
+{
+    std::lock_guard lock(lockMutex_);
+
+    runningLockMgr_->QueryRuningLockLists(runningLocklists);
+}
+
 bool PowerMgrService::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
 {
     std::lock_guard lock(lockMutex_);
