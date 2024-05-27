@@ -48,6 +48,13 @@
         "label": "$string:ThermalServiceExtAbility_low_label",
         "visible": false,
         "type": "service"
+      },
+      {
+        "name": "InjectNoticeAbility",
+        "srcEntry": "./ets/ServiceExtAbility/InjectNoticeAbility.ts",
+        "icon": "$media:icon",
+        "visible": true,
+        "type": "service"
       }
     ],
     "requestPermissions": [
