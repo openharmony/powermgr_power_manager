@@ -838,9 +838,7 @@ void PowerStateMachine::ShowCurrentScreenLocks()
             .append(" uid=").append(std::to_string(it.second.uid))
             .append(". ");
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "%{public}d and as follows: %{public}s", mapSize,
-        message.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}d screen on locks as follows: %{public}s", mapSize, message.c_str());
 }
 
 void PowerStateMachine::HandleActivityTimeout()
