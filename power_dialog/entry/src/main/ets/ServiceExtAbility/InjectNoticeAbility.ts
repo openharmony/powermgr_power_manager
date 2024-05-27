@@ -17,6 +17,7 @@ import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import type { Permissions } from '@ohos.abilityAccessCtrl';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import rpc from '@ohos.rpc';
+import GlobalContext from '../common/GlobalContext';
 import * as notice_sub from '../InjectNotice/InjectNoticeStub';
 import { injectNoticeUtil } from '../InjectNotice/InjectNoticeUtil';
 
@@ -32,6 +33,7 @@ export default class InjectNoticeAbility extends extension {
    */
   onCreate(want) {
     console.info(TAG, 'InjectNoticeAbility onCreate' + want.abilityName);
+    GlobalContext.getContext().setObject("appcontext", this.context.getApplicationContext());
     try {
       injectNoticeUtil.init();
     } catch (e) {

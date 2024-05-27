@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import rpc from '@ohos.rpc';
 import { injectNoticeUtil } from './InjectNoticeUtil';
-//import log from '../common/Log';
 
 const TAG = "InjectNotice";
 const getConnectId = (...args) => {
@@ -54,7 +54,7 @@ export class InjectNoticeStub extends rpc.RemoteObject {
                     console.debug(TAG, `SendNotice() code:${code} pid: ${pid}`);
                 } catch (e) {
                     ret = -1;
-                    console.error(TAG, `send notice  failed:${e}`);
+                    console.error(TAG, `send notice failed:${e}`);
                     retStr = "failed"
                 }
 

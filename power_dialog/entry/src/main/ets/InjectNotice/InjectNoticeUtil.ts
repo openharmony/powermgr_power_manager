@@ -16,8 +16,8 @@ import notificationManager from '@ohos.notificationManager';
 import notificationSubscribe from '@ohos.notificationSubscribe';
 import Base from '@ohos.base';
 import type context from '@ohos.app.ability.common';
+import GlobalContext from '../common/GlobalContext';
 
-type Context = context.Context;
 const TAG: string = "InjectNotice";
 const LABEL: string = "inject notice";
 
@@ -74,24 +74,17 @@ class InjectNoticeUtil {
     this.enableNotification();
     console.debug(TAG, 'sendNotice enableNotification end');
     let ret = false;
-    try {
-      let context: Context = getContext(this) as Context;
-      let applicationContext = context.getApplicationContext();
-      let imagePixelMap = applicationContext.resourceManager
-        .getDrawableDescriptor($r('app.media.icon_notice')).getPixelMap();
-    } catch (err) {
-      console.error(TAG, `read icon fail: ${JSON.stringify(err)}`);
-    }
-
+    let applicationContext = ( GlobalContext.getContext().getObject("appcontext") ) as common.ApplicationContext; 
+    let resourceManager = applicationContext.resourceManager;
+    let imagePixelMap = resourceManager.getDrawableDescriptor($r('app.media.icon_notice')).getPixelMap();
     let notificationRequest: notificationManager.NotificationRequest = {
       id: 100,
       label: LABEL,
       content: {
         notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT, // 普通文本类型通知
         normal: {
-          title: '注入提示',
-          text: '注入已经授权',
-          additionalText: '注入',
+          title: resourceManager.getStringSync($r('app.string.notice_title')),
+          text: resourceManager.getStringSync($r('app.string.notice_text')),
         }
 
       },
