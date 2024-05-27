@@ -279,7 +279,7 @@ private:
     void AppendDumpInfo(std::string& result, std::string& reason, std::string& time);
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
-    void ShowCurrentScrrenLocks();
+    void ShowCurrentScreenLocks();
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;
@@ -299,6 +299,7 @@ private:
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
     bool IsPreBrightWakeUp(WakeupDeviceType type);
+    bool NeedShowScreenLocks(PowerState state);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     std::atomic<bool> switchOpen_ {true};
     std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
