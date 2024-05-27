@@ -1315,7 +1315,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
         return;
     }
     auto action = pointerEvent->GetPointerAction();
-    if (action == PointerEvent::POINTER_ACTION_ENTER_WINDOW || 
+    if (action == PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         action == PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         action == PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
         action == PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
