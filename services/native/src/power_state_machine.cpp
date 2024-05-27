@@ -499,7 +499,7 @@ void PowerStateMachine::RefreshActivityInner(
             // There is a small chance that the last "if" statement occurs before the (already started) ffrt task
             // is actually trying to set DIM state.
             // In that case we may still (not guaranteed) interrupt it.
-            ResetInactiveTimer();
+            ResetInactiveTimer(false);
         }
     } else {
         POWER_HILOGD(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
@@ -753,7 +753,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
     }
 }
 
-void PowerStateMachine::ResetInactiveTimer()
+void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
 {
     // change the flag to notify the thread which is setting DIM
     int64_t expectedFlag = static_cast<int64_t>(PowerState::DIM);
@@ -762,7 +762,9 @@ void PowerStateMachine::ResetInactiveTimer()
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
-        POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
+        if (needPrintLog) {
+            POWER_HILOGI(FEATURE_ACTIVITY, "Auto display off is disabled");
+        }
         return;
     }
 
@@ -770,6 +772,9 @@ void PowerStateMachine::ResetInactiveTimer()
     ResetScreenOffPreTimeForSwing(displayOffTime);
     this->SetDelayTimer(
         displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    if (needPrintLog) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}ld", displayOffTime);
+    }
 }
 
 void PowerStateMachine::ResetScreenOffPreTimeForSwing(int64_t displayOffTime)
@@ -832,9 +837,9 @@ void PowerStateMachine::ShowCurrentScreenLocks()
             .append(" pid=").append(std::to_string(it.second.pid))
             .append(" uid=").append(std::to_string(it.second.uid))
             .append(". ");
-        }
+    }
     POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "The screen on runninglock information total number is %{public}d and as follows: %{public}s", mapSize,
+        "%{public}d and as follows: %{public}s", mapSize,
         message.c_str());
 }
 
