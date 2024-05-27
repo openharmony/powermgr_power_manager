@@ -109,7 +109,7 @@ public:
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
     void CancelDelayTimer(int32_t event);
-    void ResetInactiveTimer();
+    void ResetInactiveTimer(bool needPrintLog = true);
     void ResetSleepTimer();
     void SetAutoSuspend(SuspendDeviceType type, uint32_t delay);
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
