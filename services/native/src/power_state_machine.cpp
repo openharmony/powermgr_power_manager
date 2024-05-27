@@ -773,7 +773,7 @@ void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
     this->SetDelayTimer(
         displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     if (needPrintLog) {
-        POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}ld", displayOffTime);
+        POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}lld", displayOffTime);
     }
 }
 

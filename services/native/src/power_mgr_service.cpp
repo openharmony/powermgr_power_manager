@@ -676,8 +676,7 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type,
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
-    RefreshActivityInner(callTimeMs, type, needChangeBacklight);
-    return true;
+    return RefreshActivityInner(callTimeMs, type, needChangeBacklight);
 }
 
 bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
@@ -688,6 +687,7 @@ bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType 
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     powerStateMachine_->RefreshActivityInner(pid, callTimeMs, type, needChangeBacklight);
+    return true;
 }
 
 bool PowerMgrService::OverrideScreenOffTime(int64_t timeout)
@@ -892,7 +892,7 @@ bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInf
 void PowerMgrService::QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists)
 {
     std::lock_guard lock(lockMutex_);
-    runningLockMgr_->QueryRuningLockLists(runningLocklists);
+    runningLockMgr_->QueryRunningLockLists(runningLockLists);
 }
 
 bool PowerMgrService::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
