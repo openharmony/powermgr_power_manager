@@ -123,7 +123,7 @@ public:
     void WakeupControllerInit();
     void HibernateControllerInit();
     bool IsCollaborationState();
-    Void QueryRunningLockListsInner();
+    void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
     static void RegisterSettingWakeupPickupGestureObserver();
     static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
     static bool IsEnableWakeupPickupGesture();
