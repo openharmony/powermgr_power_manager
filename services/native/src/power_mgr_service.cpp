@@ -1314,6 +1314,13 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
     if (stateMachine == nullptr) {
         return;
     }
+    auto action = pointerEvent->GetPointerAction();
+    if (action == PointerEvent::POINTER_ACTION_ENTER_WINDOW || 
+        action == PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
+        action == PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        action == PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
+        return;
+    }
     if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
