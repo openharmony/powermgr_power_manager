@@ -405,15 +405,15 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (pms == nullptr) {
         return;
     }
+    if (!NonWindowEvent(pointerEvent, pms)) {
+        return;
+    }
     if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
-    if (!NonWindowEvent(pointerEvent, pms)) {
-        return;
-    }
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
@@ -454,10 +454,12 @@ bool InputCallback::NonWindowEvent(std::shared_ptr<PointerEvent>& pointerEvent, 
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
         return false;
     }
-
-    if (pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_ENTER_WINDOW
-        || pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
-            return false;
+    auto action = pointerEvent->GetPointerAction();
+    if (action == PointerEvent::POINTER_ACTION_ENTER_WINDOW || 
+        action == PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
+        action == PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        action == PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
+        return false;
     }
     return true;
 }
