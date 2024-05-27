@@ -777,7 +777,7 @@ void PowerStateMachine::ResetInactiveTimer()
 void PowerStateMachine::ResetScreenOffPreTimeForSwing(int64_t displayOffTime)
 {
     int64_t now = GetTickCount();
-    int64_t nextTimeOut = now + displayOffTime;
+    int64_t nextTimeOut = now + displayOffTime - this->GetDimTime(displayOffTime);
     POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
         "now=%{public}lld,displayOffTime=%{public}lld,nextTimeOut=%{public}lld",
         static_cast<long long>(now), static_cast<long long>(displayOffTime), static_cast<long long>(nextTimeOut));
