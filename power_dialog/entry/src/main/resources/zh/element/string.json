@@ -83,6 +83,14 @@
     {
       "name": "WARNING_TIP",
       "value": "有远程设备想操控本设备，是否同意？"
+    },
+    {
+      "name": "notice_title",
+      "value": "安全提示"
+    },
+    {
+      "name": "notice_text",
+      "value": "注入权限已经授权。"
     }
   ]
 }
