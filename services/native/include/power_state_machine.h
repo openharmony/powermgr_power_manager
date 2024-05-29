@@ -252,8 +252,8 @@ private:
     private:
         void Report(const std::string &msg);
         std::shared_ptr<FFRTTimer> timer_;
-        pid_t pid_;
-        pid_t uid_;
+        pid_t pid_ {-1};
+        pid_t uid_ {-1};
         PowerState state_;
         StateChangeReason reason_;
     };
