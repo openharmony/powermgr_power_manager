@@ -215,7 +215,7 @@ void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
         if (pms == nullptr) {
             return;
         }
-        pms->RefreshActivityInner(
+        pms->RefreshActivity(
             static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
     });
 }
