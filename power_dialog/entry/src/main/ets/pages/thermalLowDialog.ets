@@ -16,7 +16,8 @@
 import Constants from '../common/constant';
 import GlobalContext from '../common/GlobalContext';
 
-@Extend(Button) function customizeButton() {
+@Extend(Button)
+function customizeButton() {
   .backgroundColor(Color.Transparent)
   .fontColor($r('app.color.button_text_color'))
   .fontSize(Constants.BUTTON_TEXT_FONT_SIZE)
