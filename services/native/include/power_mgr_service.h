@@ -58,7 +58,6 @@ public:
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
-    bool RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
     virtual bool OverrideScreenOffTime(int64_t timeout) override;
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
@@ -123,7 +122,6 @@ public:
     void WakeupControllerInit();
     void HibernateControllerInit();
     bool IsCollaborationState();
-    void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
     static void RegisterSettingWakeupPickupGestureObserver();
     static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
     static bool IsEnableWakeupPickupGesture();
