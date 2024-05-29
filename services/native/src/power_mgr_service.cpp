@@ -446,7 +446,7 @@ void PowerMgrService::HandleKeyEvent(int32_t keyCode)
     POWER_HILOGD(FEATURE_INPUT, "keyCode: %{public}d", keyCode);
     int64_t now = static_cast<int64_t>(time(nullptr));
     if (IsScreenOn()) {
-        this->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+        this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
     } else {
         if (keyCode == KeyEvent::KEYCODE_F1) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Wakeup by double click");
@@ -469,7 +469,7 @@ void PowerMgrService::HandlePointEvent(int32_t type)
     POWER_HILOGD(FEATURE_INPUT, "type: %{public}d", type);
     int64_t now = static_cast<int64_t>(time(nullptr));
     if (this->IsScreenOn()) {
-        this->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
+        this->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, false);
     } else {
         if (type == PointerEvent::SOURCE_TYPE_MOUSE) {
             std::string reason = "mouse click";
@@ -670,22 +670,16 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
 
 bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
 {
+    std::lock_guard lock(screenMutex_);
+    if (powerStateMachine_->CheckRefreshTime()) {
+        return false;
+    }
     if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION") || !Permission::IsSystem()) {
         return false;
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
-    return RefreshActivityInner(callTimeMs, type, needChangeBacklight);
-}
-
-bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
-{
-    std::lock_guard lock(screenMutex_);
-    if (powerStateMachine_->CheckRefreshTime()) {
-        return false;
-    }
-    pid_t pid = IPCSkeleton::GetCallingPid();
+    POWER_HILOGD(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->RefreshActivityInner(pid, callTimeMs, type, needChangeBacklight);
     return true;
 }
@@ -887,12 +881,6 @@ bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInf
     }
     runningLockMgr_->QueryRunningLockLists(runningLockLists);
     return true;
-}
-
-void PowerMgrService::QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists)
-{
-    std::lock_guard lock(lockMutex_);
-    runningLockMgr_->QueryRunningLockLists(runningLockLists);
 }
 
 bool PowerMgrService::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)

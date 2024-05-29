@@ -290,8 +290,7 @@ bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK ||
-        type == RunningLockType::RUNNINGLOCK_SCREEN;
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
 void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
