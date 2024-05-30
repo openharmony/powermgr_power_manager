@@ -17,7 +17,8 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 import inputEventClient from '@ohos.multimodalInput.inputEventClient';
 import Constants from '../common/constant';
 
-@Extend(Button) function customizeButton() {
+@Extend(Button)
+function customizeButton() {
   .backgroundColor(Color.Transparent)
   .fontColor('#0D81F2')
   .fontSize(Constants.BUTTON_TEXT_FONT_SIZE)
@@ -37,7 +38,7 @@ struct InputCustomDialog{
     Column() {
       Column() {
         Row() {
-          Text($r("app.string.WARNING_TIP"))
+          Text($r('app.string.WARNING_TIP'))
             .fontSize(Constants.DIALOG_TITLE_FONT_SIZE)
             .fontColor(Color.Black)
             .fontWeight(Constants.DIALOG_TITLE_FONT_WEIGHT)
