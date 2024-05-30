@@ -1228,4 +1228,18 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient052, TestSize.Level0)
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient052::fun is end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient053
+ * @tc.desc: test SetSuspendTag
+ * @tc.type: FUNC
+ * @tc.require: #I9TKSX
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient053, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient053::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_EQ(powerMgrClient.SetSuspendTag("ulsr"), PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient053::fun is end!");
+}
 } // namespace
