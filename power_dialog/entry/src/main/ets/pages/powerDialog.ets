@@ -17,7 +17,8 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 import power from '@ohos.power';
 import Constants from '../common/constant';
 
-@Extend(Button) function customizeButton() {
+@Extend(Button)
+function customizeButton() {
   .backgroundColor(Color.Transparent)
   .fontColor($r('app.color.button_text_color'))
   .fontSize(Constants.BUTTON_TEXT_FONT_SIZE)
