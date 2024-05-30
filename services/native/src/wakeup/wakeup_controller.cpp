@@ -148,8 +148,8 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
             SetWakeupDoubleClickSensor(false);
             return;
         }
-        SettingHelper::SetSettingWakeupDouble(source.IsEnable());
-        SetWakeupDoubleClickSensor(source.IsEnable());
+        auto enable = SettingHelper::GetSettingWakeupDouble();
+        SetWakeupDoubleClickSensor(enable);
     } else if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
         POWER_HILOGI(FEATURE_WAKEUP, "GetReason_WAKEUP_DEVICE_PICKUP,source enable=%{public}d", source.IsEnable());
         if (!SettingHelper::IsWakeupPickupSettingValid()) {
@@ -159,9 +159,8 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
             POWER_HILOGI(COMP_SVC, "WAKEUP_DEVICE_PICKUP inValid done");
             return;
         }
-        SettingHelper::SetSettingWakeupPickup(source.IsEnable());
-        PickupConnectMotionConfig(source.IsEnable());
-        POWER_HILOGI(COMP_SVC, "SetOriginSettingValue done");
+        auto enable = SettingHelper::GetSettingWakeupPickup();
+        PickupConnectMotionConfig(enable);
     }
 }
 
