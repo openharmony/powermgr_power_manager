@@ -149,11 +149,13 @@ private:
     void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     static bool IsSceneRunningLockType(RunningLockType type);
+    static bool NeedNotify(RunningLockType type);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
     void ProximityLockOn();
     const wptr<PowerMgrService> pms_;
     std::mutex mutex_;
+    std::mutex screenLockListsMutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
     std::shared_ptr<RunningLockProxy> runninglockProxy_;
