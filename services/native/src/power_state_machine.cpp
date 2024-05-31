@@ -499,7 +499,7 @@ void PowerStateMachine::RefreshActivityInner(
             // There is a small chance that the last "if" statement occurs before the (already started) ffrt task
             // is actually trying to set DIM state.
             // In that case we may still (not guaranteed) interrupt it.
-            ResetInactiveTimer();
+            ResetInactiveTimer(false);
         }
     } else {
         POWER_HILOGD(FEATURE_ACTIVITY, "Ignore refresh activity, screen is off");
@@ -753,7 +753,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
     }
 }
 
-void PowerStateMachine::ResetInactiveTimer()
+void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
 {
     // change the flag to notify the thread which is setting DIM
     int64_t expectedFlag = static_cast<int64_t>(PowerState::DIM);
@@ -762,15 +762,18 @@ void PowerStateMachine::ResetInactiveTimer()
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     if (this->GetDisplayOffTime() < 0) {
-        POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
+        if (needPrintLog) {
+            POWER_HILOGI(FEATURE_ACTIVITY, "Auto display off is disabled");
+        }
         return;
     }
 
-    if (forceTimingOut_.load() || this->CheckRunningLock(PowerState::INACTIVE)) {
-        int64_t displayOffTime = this->GetDisplayOffTime();
-        ResetScreenOffPreTimeForSwing(displayOffTime);
-        this->SetDelayTimer(
-            displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    int64_t displayOffTime = this->GetDisplayOffTime();
+    ResetScreenOffPreTimeForSwing(displayOffTime);
+    this->SetDelayTimer(
+        displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+    if (needPrintLog) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}" PRId64, displayOffTime);
     }
 }
 
@@ -812,6 +815,32 @@ void PowerStateMachine::SetAutoSuspend(SuspendDeviceType type, uint32_t delay)
     }
     suspendController->StartSleepTimer(type, static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), delay);
     POWER_HILOGD(FEATURE_SUSPEND, "Set auto suspend finish");
+}
+
+void PowerStateMachine::ShowCurrentScreenLocks()
+{
+    auto pms = pms_.promote();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Pms is nullptr");
+        return;
+    }
+    std::map<std::string, RunningLockInfo> screenOnLockLists;
+    pms_->QueryRunningLockListsInner(screenOnLockLists);
+    std::string message;
+    uint32_t mapSize = screenOnLockLists.size();
+    uint32_t counter = 0;
+    for (auto it : screenOnLockLists) {
+        counter++;
+        message.append(std::to_string(counter)).append(". ")
+            .append("bundleName=").append(it.first)
+            .append(" name=").append(it.second.name)
+            .append(" pid=").append(std::to_string(it.second.pid))
+            .append(". ");
+    }
+    if (counter == 0) {
+        return;
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}d screen on locks as follows: %{public}s", mapSize, message.c_str());
 }
 
 void PowerStateMachine::HandleActivityTimeout()
@@ -1095,6 +1124,12 @@ std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateC
     return iterator->second;
 }
 
+bool PowerStateMachine::NeedShowScreenLocks(PowerState state)
+{
+    return state == PowerState::AWAKE ||
+        state == PowerState::INACTIVE || state == PowerState::DIM;
+}
+
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
@@ -1102,6 +1137,10 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     std::lock_guard<std::mutex> lock(stateMutex_);
     ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
     SettingStateFlag flag(state, shared_from_this(), reason);
+
+    if (NeedShowScreenLocks(state)) {
+        ShowCurrentScreenLocks();
+    }
 
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
