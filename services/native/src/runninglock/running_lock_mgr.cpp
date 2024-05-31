@@ -293,8 +293,15 @@ bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
+bool RunningLockMgr::NeedNotify(RunningLockType type)
+{
+    return IsSceneRunningLockType(type) ||
+        type == RunningLockType::RUNNINGLOCK_SCREEN;
+}
+
 void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
 {
+    std::lock_guard<std::mutex> lock(screenLockListsMutex_);
     auto iterator = unSceneLockLists_.find(singleLockParam.bundleName);
     if (fill) {
         if (iterator == unSceneLockLists_.end()) {
@@ -461,6 +468,7 @@ void RunningLockMgr::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockC
 
 void RunningLockMgr::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
 {
+    std::lock_guard<std::mutex> lock(screenLockListsMutex_);
     for (auto &iter : unSceneLockLists_) {
         runningLockLists.insert(std::pair<std::string, RunningLockInfo>(iter.first, iter.second));
     }
@@ -712,7 +720,7 @@ int32_t RunningLockMgr::LockCounter::Increase(const RunningLockParam& lockInnerP
             --counter_;
         }
     }
-    if (result == RUNNINGLOCK_SUCCESS  && IsSceneRunningLockType(lockInnerParam.type)) {
+    if (result == RUNNINGLOCK_SUCCESS  && NeedNotify(lockInnerParam.type)) {
         NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
     }
     return result;
@@ -728,7 +736,7 @@ int32_t RunningLockMgr::LockCounter::Decrease(const RunningLockParam& lockInnerP
             ++counter_;
         }
     }
-    if (result == RUNNINGLOCK_SUCCESS && IsSceneRunningLockType(lockInnerParam.type)) {
+    if (result == RUNNINGLOCK_SUCCESS && NeedNotify(lockInnerParam.type)) {
         NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
     }
     return result;
