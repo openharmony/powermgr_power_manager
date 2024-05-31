@@ -844,6 +844,17 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
         type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
 }
 
+bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
+    const std::map<int32_t, std::string>& workSources)
+{
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
+        return false;
+    }
+    std::lock_guard lock(lockMutex_);
+    runningLockMgr_->UpdateWorkSource(remoteObj, workSources);
+    return true;
+}
+
 bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
@@ -855,6 +866,7 @@ bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOut
         std::function<void()> task = [this, remoteObj, timeOutMs]() {
             std::lock_guard lock(lockMutex_);
             RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
+            runningLockMgr_->UpdateWorkSource(remoteObj, {});
             runningLockMgr_->UnLock(remoteObj);
         };
         RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(remoteObj, task, timeOutMs);
@@ -869,6 +881,7 @@ bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
     }
     std::lock_guard lock(lockMutex_);
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
+    runningLockMgr_->UpdateWorkSource(remoteObj, {});
     runningLockMgr_->UnLock(remoteObj);
     return true;
 }

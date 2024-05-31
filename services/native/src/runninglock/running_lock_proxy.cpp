@@ -14,6 +14,7 @@
  */
 
 #include "running_lock_proxy.h"
+#include "power_mgr_service.h"
 
 #include <cmath>
 #include "power_log.h"
@@ -24,19 +25,21 @@ void RunningLockProxy::AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteOb
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
     auto proxyIter = proxyMap_.find(proxyKey);
+    std::map<int32_t, bool> wksMap;
     if (proxyIter == proxyMap_.end()) {
-        std::vector<sptr<IRemoteObject>> tmpLockList {};
-        tmpLockList.push_back(remoteObj);
-        std::tie(proxyIter, std::ignore) = proxyMap_.emplace(proxyKey, std::make_pair(tmpLockList, 0));
+        TokenWorkSourceMap tokenWksMap;
+        tokenWksMap.emplace(remoteObj, std::make_pair(wksMap, 0));
+        proxyMap_.emplace(proxyKey, tokenWksMap);
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add runninglock proxy, proxyKey=%{public}s", proxyKey.c_str());
     } else {
-        auto& remoteObjList = proxyIter->second.first;
-        if (std::find(remoteObjList.begin(), remoteObjList.end(), remoteObj) != remoteObjList.end()) {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock is existed, proxyKey=%{public}s", proxyKey.c_str());
-            return;
+        auto& tokenWksMap = proxyIter->second;
+        auto tokenIter = tokenWksMap.find(remoteObj);
+        if (tokenIter == tokenWksMap.end()) {
+            tokenWksMap.emplace(remoteObj, std::make_pair(wksMap, 0));
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Insert runninglock, proxyKey=%{public}s", proxyKey.c_str());
+        } else {
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Already add runninglock, proxyKey=%{public}s", proxyKey.c_str());
         }
-        remoteObjList.push_back(remoteObj);
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Insert runninglock, proxyKey=%{public}s", proxyKey.c_str());
     }
 }
 
@@ -49,74 +52,145 @@ void RunningLockProxy::RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemot
             "Runninglock proxyKey is not existed, proxyKey=%{public}s", proxyKey.c_str());
         return;
     }
-    auto& remoteObjList = proxyIter->second.first;
-    auto remoteObjIter = std::find(remoteObjList.begin(), remoteObjList.end(), remoteObj);
-    if (remoteObjIter == remoteObjList.end()) {
+    TokenWorkSourceMap& tokenWksMap = proxyIter->second;
+    auto tokenIter = tokenWksMap.find(remoteObj);
+    if (tokenIter == tokenWksMap.end()) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock is not existed, proxyKey=%{public}s", proxyKey.c_str());
         return;
+    } else {
+        tokenWksMap.erase(tokenIter);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglocklist empty, earse proxyKey=%{public}s", proxyKey.c_str());
     }
-    remoteObjList.erase(remoteObjIter);
-    if (remoteObjList.empty()) {
-        proxyMap_.erase(proxyKey);
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglock list is empty, earse proxyKey=%{public}s", proxyKey.c_str());
+    if (proxyIter->second.empty()) {
+        proxyMap_.erase(proxyIter);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Runninglocklist empty, earse proxyKey=%{public}s", proxyKey.c_str());
     }
 }
 
-std::vector<sptr<IRemoteObject>> RunningLockProxy::GetRemoteObjectList(pid_t pid, pid_t uid)
-{
-    std::string proxyKey = AssembleProxyKey(pid, uid);
-    auto proxyIter = proxyMap_.find(proxyKey);
-    if (proxyIter != proxyMap_.end()) {
-        return proxyIter->second.first;
-    }
-    return std::vector<sptr<IRemoteObject>>();
-}
-
-bool RunningLockProxy::IsProxied(pid_t pid, pid_t uid)
+bool RunningLockProxy::UpdateWorkSource(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj,
+    std::map<int32_t, bool> workSourcesState)
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
     auto proxyIter = proxyMap_.find(proxyKey);
     if (proxyIter == proxyMap_.end()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UpdateWorkSource failed, proxyKey=%{public}s not existed",
+            proxyKey.c_str());
         return false;
     }
-    return proxyIter->second.second != 0;
-}
-
-bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid, const std::function<void(void)>& proxyRunningLock)
-{
-    std::string proxyKey = AssembleProxyKey(pid, uid);
-    auto proxyIter = proxyMap_.find(proxyKey);
-    if (proxyIter == proxyMap_.end()) {
-        std::tie(proxyIter, std::ignore) = proxyMap_.emplace(proxyKey,
-            std::make_pair<std::vector<sptr<IRemoteObject>>, int32_t>({}, 0));
+    auto& tokenWksMap = proxyIter->second;
+    auto tokenWksMapIter = tokenWksMap.find(remoteObj);
+    if (tokenWksMapIter == tokenWksMap.end()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UpdateWorkSource failed, runninglock not existed");
+            return false;
     }
-    proxyIter->second.second++;
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "IncreaseProxyCnt proxykey=%{public}s proxycnt=%{public}d",
-        proxyKey.c_str(), proxyIter->second.second);
-    if (proxyIter->second.second > 1) {
-        return false;
+    auto& workSourceMap = tokenWksMapIter->second.first;
+    int32_t proxyCount = 0;
+    for (const auto& wks : workSourceMap) {
+        if (workSourcesState.find(wks.first) != workSourcesState.end() && wks.second == true) {
+            workSourcesState[wks.first] = true;
+            proxyCount++;
+        }
     }
-    proxyRunningLock();
+    bool isProxyed = tokenWksMapIter->second.second != 0 &&
+        tokenWksMapIter->second.second == static_cast<int32_t>(workSourceMap.size());
+    if (isProxyed && (workSourcesState.size() == 0 ||
+        static_cast<int32_t>(workSourcesState.size()) > proxyCount)) {
+        ProxyInner(remoteObj, false);
+        tokenWksMapIter->second.second = proxyCount;
+    }
+    tokenWksMapIter->second.first = std::move(workSourcesState);
     return true;
 }
 
-bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid, const std::function<void(void)>& unProxyRunningLock)
+void RunningLockProxy::ProxyInner(const sptr<IRemoteObject>& remoteObj, bool isProxy)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+        return;
+    }
+    auto rlmgr = pms->GetRunningLockMgr();
+    if (rlmgr == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockMgr is nullptr");
+        return;
+    }
+    auto lockInner = rlmgr->GetRunningLockInner(remoteObj);
+    if (lockInner == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockMgr is nullptr");
+        return;
+    }
+    if (isProxy) {
+        rlmgr->UnlockInnerByProxy(remoteObj, lockInner);
+    } else {
+        rlmgr->LockInnerByProxy(remoteObj, lockInner);
+    }
+}
+
+bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "IncreaseProxyCnt proxykey=%{public}s", proxyKey.c_str());
     auto proxyIter = proxyMap_.find(proxyKey);
-    if (proxyIter == proxyMap_.end()) {
-        return false;
+    if (proxyIter != proxyMap_.end()) {
+        auto& tokenWksMap = proxyIter->second;
+        for (auto& tokenWksItem : tokenWksMap) {
+            for (auto& wks : tokenWksItem.second.first) {
+                wks.second = true;
+            }
+            tokenWksItem.second.second = tokenWksItem.second.first.size();
+            ProxyInner(tokenWksItem.first, true);
+        }
+        return true;
     }
-    proxyIter->second.second = std::max(0, proxyIter->second.second - 1);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "DecreaseProxyCnt proxykey=%{public}s proxycnt=%{public}d",
-        proxyKey.c_str(), proxyIter->second.second);
-    if (proxyIter->second.second > 0) {
-        return false;
+    for (auto& proxyItem : proxyMap_) {
+        auto& tokenWksMap = proxyItem.second;
+        for (auto& tokenWksItem : tokenWksMap) {
+            auto& wksMap = tokenWksItem.second.first;
+            if (wksMap.find(uid) != wksMap.end() && !wksMap[uid]) {
+                wksMap[uid] = true;
+                tokenWksItem.second.second++;
+            } else {
+                continue;
+            }
+            if (tokenWksItem.second.second == static_cast<int32_t>(wksMap.size())) {
+                ProxyInner(tokenWksItem.first, true);
+            }
+        }
     }
-    if (proxyIter->second.first.empty()) {
-        proxyMap_.erase(proxyIter);
+    return true;
+}
+
+bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
+{
+    std::string proxyKey = AssembleProxyKey(pid, uid);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "DecreaseProxyCnt proxykey=%{public}s", proxyKey.c_str());
+    auto proxyIter = proxyMap_.find(proxyKey);
+    if (proxyIter != proxyMap_.end()) {
+        auto& tokenWksMap = proxyIter->second;
+        for (auto& tokenWksItem : tokenWksMap) {
+            for (auto& wks : tokenWksItem.second.first) {
+                wks.second = false;
+            }
+            tokenWksItem.second.second = 0;
+            ProxyInner(tokenWksItem.first, false);
+        }
+        return true;
     }
-    unProxyRunningLock();
+    for (auto& proxyItem : proxyMap_) {
+        auto& tokenWksMap = proxyItem.second;
+        for (auto& tokenWksItem : tokenWksMap) {
+            auto& wksMap = tokenWksItem.second.first;
+            if (wksMap.find(uid) != wksMap.end() && wksMap[uid]) {
+                wksMap[uid] = false;
+                tokenWksItem.second.second = std::max(0, tokenWksItem.second.second - 1);
+            } else {
+                continue;
+            }
+            if (tokenWksItem.second.second == 0) {
+                ProxyInner(tokenWksItem.first, false);
+            }
+        }
+    }
     return true;
 }
 
@@ -126,10 +200,24 @@ std::string RunningLockProxy::DumpProxyInfo()
     int index = 0;
     for (const auto& [key, value] : proxyMap_) {
         index++;
-        result.append("  index=").append(std::to_string(index))
+        result.append("  ProcessIndex=").append(std::to_string(index))
             .append(" pid_uid=").append(key)
-            .append(" lock_cnt=").append(std::to_string(value.first.size()))
-            .append(" proxy_cnt=").append(std::to_string(value.second)).append("\n");
+            .append(" lock_cnt=").append(std::to_string(value.size())).append("\n");
+        int lockIndex = 0;
+        for (const auto& [token, tokenWksMap] : value) {
+            lockIndex++;
+            result.append("****lockIndex=").append(std::to_string(lockIndex))
+                .append("****workSourceSize=").append(std::to_string(tokenWksMap.first.size()))
+                .append("****proxyCount=").append(std::to_string(tokenWksMap.second))
+                .append("\n");
+            int appIndex = 0;
+            for (const auto& wks : tokenWksMap.first) {
+                result.append("********workSourceIndex=").append(std::to_string(appIndex))
+                    .append("********appuid=").append(std::to_string(wks.first))
+                    .append("********proxyState=").append(std::to_string(wks.second))
+                    .append("\n");
+            }
+        }
     }
     return result;
 }
@@ -137,12 +225,13 @@ std::string RunningLockProxy::DumpProxyInfo()
 void RunningLockProxy::ResetRunningLocks()
 {
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "reset proxycnt");
-    for (auto proxyIter = proxyMap_.begin(); proxyIter != proxyMap_.end();) {
-        proxyIter->second.second = 0;
-        if (proxyIter->second.first.empty()) {
-            proxyMap_.erase(proxyIter++);
-        } else {
-            proxyIter++;
+    for (auto &proxyItem : proxyMap_) {
+        auto& tokenWksMap = proxyItem.second;
+        for (auto &tokenWksItem : tokenWksMap) {
+            for (auto &wks : tokenWksItem.second.first) {
+                wks.second = false;
+            }
+            tokenWksItem.second.second = 0;
         }
     }
 }

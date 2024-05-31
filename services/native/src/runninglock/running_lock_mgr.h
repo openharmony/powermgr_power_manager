@@ -49,6 +49,8 @@ public:
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockParam& runningLockParam);
     bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
+    bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
+        const std::map<int32_t, std::string>& workSources);
     bool Lock(const sptr<IRemoteObject>& remoteObj);
     bool UnLock(const sptr<IRemoteObject> remoteObj);
     void RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
@@ -65,6 +67,8 @@ public:
     }
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     void ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
+    void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
+    void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
@@ -77,7 +81,6 @@ private:
     void InitLocksTypeBackground();
     void InitLocksTypeProximity();
     void InitLocksTypeCoordination();
-    void ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid);
 
     class LockCounter {
     public:
@@ -146,8 +149,6 @@ private:
         virtual ~RunningLockDeathRecipient() = default;
     };
     bool InitLocks();
-    void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
-    void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     static bool IsSceneRunningLockType(RunningLockType type);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();

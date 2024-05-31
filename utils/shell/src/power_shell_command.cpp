@@ -48,6 +48,13 @@ static const struct option DISPLAY_OPTIONS[] = {
     {"discount", required_argument, nullptr, 'd'},
 };
 #endif
+
+static const struct option PROXYLOCK_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"proxy", required_argument, nullptr, 'p'},
+    {"uproxy", required_argument, nullptr, 'u'},
+};
+
 #endif
 
 static const struct option TIME_OUT_OPTIONS[] = {
@@ -72,6 +79,7 @@ static const std::string HELP_MSG =
     "  suspend :    Suspend system and turn screen off. \n"
 #ifndef POWER_SHELL_USER
     "  lock    :    Query running lock lists by bundle app. \n"
+    "  proxylock :    Proxy running lock by app uid. \n"
 #ifdef HAS_DISPLAY_MANAGER_PART
     "  display :    Update or Override display brightness. \n"
 #endif
@@ -101,6 +109,13 @@ static const std::string DISPLAY_HELP_MSG =
     "  -c  :  cancel the timing maximum brightness\n"
     "  -d  :  discount brightness\n";
 #endif
+
+static const std::string PROXYLOCK_HELP_MSG =
+    "usage: power-shell proxylock [<options>] 20020041\n"
+    "proxylock <options are as below> \n"
+    "  -p  :  proxy runninglock\n"
+    "  -u  :  unproxy runninglock\n";
+
 #endif
 
 static const std::string TIME_OUT_HELP_MSG =
@@ -121,6 +136,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
 #ifndef POWER_SHELL_USER
         {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
+        {"proxylock", std::bind(&PowerShellCommand::RunAsProxyLockCommand, this)},
 #ifdef HAS_DISPLAY_MANAGER_PART
         {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
 #endif
@@ -338,6 +354,48 @@ ErrCode PowerShellCommand::RunAsQueryLockCommand()
         resultReceiver_.append(" uid=");
         resultReceiver_.append(std::to_string(it.second.uid));
         resultReceiver_.append(".\n");
+    }
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsProxyLockCommand()
+{
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
+    int ind = 0;
+    int option = getopt_long(argc_, argv_, "hp:u:", PROXYLOCK_OPTIONS, &ind);
+    resultReceiver_.clear();
+    if (option == 'h') {
+        resultReceiver_.append(PROXYLOCK_HELP_MSG);
+        return ERR_OK;
+    }
+    if (!optarg) {
+        resultReceiver_.append("Error! please input your app uid.\n");
+        resultReceiver_.append(PROXYLOCK_HELP_MSG);
+        return ERR_OK;
+    }
+    int32_t uid = 0;
+    StrToInt(optarg, uid);
+    if (option == 'p') {
+        bool ret = PowerMgrClient::GetInstance().ProxyRunningLock(true, INT32_MAX, uid);
+        resultReceiver_.append("proxy runninglock for");
+        resultReceiver_.append(std::to_string(uid));
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
+    }
+    if (option == 'u') {
+        bool ret = PowerMgrClient::GetInstance().ProxyRunningLock(false, INT32_MAX, uid);
+        resultReceiver_.append("unproxy runninglock for");
+        resultReceiver_.append(std::to_string(uid));
+        if (!ret) {
+            resultReceiver_.append(" failed");
+        }
+        resultReceiver_.append("\n");
+        return ERR_OK;
     }
     return ERR_OK;
 }

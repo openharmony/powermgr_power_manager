@@ -24,23 +24,25 @@
 
 namespace OHOS {
 namespace PowerMgr {
-using RunningLockProxyMap = std::map<std::string, std::pair<std::vector<sptr<IRemoteObject>>, int32_t>>;
 class RunningLockProxy {
 public:
+    using TokenWorkSourceMap = std::map<const sptr<IRemoteObject>, std::pair<std::map<int32_t, bool>, int32_t>>;
+    using RunningLockProxyMap = std::map<std::string, TokenWorkSourceMap>;
     RunningLockProxy() = default;
     ~RunningLockProxy() = default;
 
     void AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     void RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
-    std::vector<sptr<IRemoteObject>> GetRemoteObjectList(pid_t pid, pid_t uid);
-    bool IsProxied(pid_t pid, pid_t uid);
-    bool IncreaseProxyCnt(pid_t pid, pid_t uid, const std::function<void(void)>& proxyRunningLock);
-    bool DecreaseProxyCnt(pid_t pid, pid_t uid, const std::function<void(void)>& unProxyRunningLock);
+    bool UpdateWorkSource(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj,
+        std::map<int32_t, bool> workSourcesState);
+    bool IncreaseProxyCnt(pid_t pid, pid_t uid);
+    bool DecreaseProxyCnt(pid_t pid, pid_t uid);
     void Clear();
     std::string DumpProxyInfo();
     void ResetRunningLocks();
 private:
     std::string AssembleProxyKey(pid_t pid, pid_t uid);
+    void ProxyInner(const sptr<IRemoteObject>& remoteObj, bool isProxy);
     RunningLockProxyMap proxyMap_;
 };
 } // namespace PowerMgr
