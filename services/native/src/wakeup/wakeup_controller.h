@@ -53,6 +53,7 @@ public:
     static void ChangeWakeupSourceConfig(bool updateEnable);
     static void ChangePickupWakeupSourceConfig(bool updataEnable);
     static void PickupConnectMotionConfig(bool databaseSwitchValue);
+    static void ChangeLidWakeupSourceConfig(bool updataEnable);
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;

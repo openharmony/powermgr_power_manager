@@ -278,6 +278,33 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 }
 #endif
 
+void WakeupController::ChangeLidWakeupSourceConfig(bool updataEnable)
+{
+    std::string jsonStr = SettingHelper::GetSettingWakeupSources();
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
+    Json::Value root;
+    Json::Reader reader;
+    reader.parse(jsonStr, root);
+    if (!reader.parse(jsonStr, root)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Failed to parse json string");
+        return;
+    }
+    bool originEnable = true;
+    if (root["lid"]["enable"].isBool()) {
+        originEnable = root["lid"]["enable"].asBool();
+    }
+
+    if (originEnable == updataEnable) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "no need change jsonConfig value");
+        return;
+    }
+    if (root["lid"]["enable"].isBool()) {
+        root["lid"]["enable"] = updataEnable;
+    }
+    SettingHelper::SetSettingWakeupSources(root.toStyledString());
+}
+
+
 void WakeupController::ExecWakeupMonitorByReason(WakeupDeviceType reason)
 {
     FFRTUtils::SubmitTask([this, reason] {
