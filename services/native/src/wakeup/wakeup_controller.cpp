@@ -363,7 +363,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
 
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
@@ -411,7 +411,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
@@ -471,7 +471,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivity(now, UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY, false);
+    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY, false);
 }
 #endif
 
@@ -557,7 +557,7 @@ bool PowerkeyWakeupMonitor::Init()
             if (pms == nullptr) {
                 return;
             }
-            pms->RefreshActivity(
+            pms->RefreshActivityInner(
                 static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
             suspendController->RecordPowerKeyDown();
