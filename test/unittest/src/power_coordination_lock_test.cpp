@@ -251,9 +251,9 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Lev
     pid_t curUid = getuid();
     pid_t curPid = getpid();
 
-    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     runninglock->Lock();
-    EXPECT_FALSE(runninglock->IsUsed());
+    EXPECT_TRUE(runninglock->IsUsed());
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
 
     runninglock->Lock();
@@ -262,6 +262,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Lev
     EXPECT_FALSE(runninglock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     EXPECT_TRUE(runninglock->IsUsed());
+    runninglock->UnLock();
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_002 end");
 }
 
@@ -318,15 +319,15 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Lev
 
     pid_t curUid = getuid();
     pid_t curPid = getpid();
-    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
 
     auto runninglock =
         powerMgrClient.CreateRunningLock("CoordinationRunninglock004", RunningLockType::RUNNINGLOCK_COORDINATION);
     ASSERT_NE(runninglock, nullptr);
     runninglock->Lock();
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_FALSE(runninglock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
-    EXPECT_FALSE(runninglock->IsUsed());
+    EXPECT_TRUE(runninglock->IsUsed());
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_004 end");
 }
 
