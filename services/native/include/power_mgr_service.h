@@ -131,6 +131,8 @@ public:
     static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
     static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
     static bool IsEnableWakeupDoubleClick();
+    static void RegisterSettingWakeUpLidObserver();
+    static void WakeupLidSettingUpdateFunc(const std::string& key);
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif

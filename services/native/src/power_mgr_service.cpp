@@ -37,11 +37,11 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
+#include "setting_helper.h"
 #include "running_lock_timer_handler.h"
 #include "sysparam.h"
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
-#include "setting_helper.h"
 #include "errors.h"
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
@@ -140,10 +140,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->GetShutdownDialog().KeyMonitorInit();
 #endif
 #ifndef CONFIG_FACTORY_MODE
-        power->HallSensorSubscriberInit();
-        POWER_HILOGI(COMP_SVC, "Subscribe Hall sensor");
+        power->RegisterSettingWakeUpLidObserver();
+        POWER_HILOGI(COMP_SVC, "Allow subscribe Hall sensor");
 #else
-        POWER_HILOGI(COMP_SVC, "Disabled Hall sensor");
+        POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
 #endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
@@ -263,9 +263,40 @@ void PowerMgrService::KeyMonitorCancel()
 #endif
 }
 
+void PowerMgrService::WakeupLidSettingUpdateFunc(const std::string& key)
+{
+    POWER_HILOGI(COMP_SVC, "Receive lid wakeup setting update.");
+    bool enable = SettingHelper::GetSettingWakeupLid(key);
+    if (enable) {
+        pms->HallSensorSubscriberInit();
+    } else {
+        pms->HallSensorSubscriberCancel();
+    }
+    std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    if (wakeupController == nullptr) {
+        POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
+        return;
+    }
+    wakeupController->ChangeLidWakeupSourceConfig(enable);
+    POWER_HILOGI(COMP_SVC, "ChangeLidWakeupSourceConfig done");
+}
+
+void PowerMgrService::RegisterSettingWakeUpLidObserver()
+{
+    pms->HallSensorSubscriberInit();
+    POWER_HILOGI(COMP_SVC, "Start to registerSettingWakeUpLidObserver");
+    if (!SettingHelper::IsWakeupLidSettingValid()) {
+        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
+        return;
+    }
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupLidSettingUpdateFunc(key);};
+    SettingHelper::RegisterSettingWakeupLidObserver(updateFunc);
+}
+
 void PowerMgrService::HallSensorSubscriberInit()
 {
 #ifdef HAS_SENSORS_SENSOR_PART
+    POWER_HILOGI(COMP_SVC, "Start to subscribe hall sensor");
     if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
         POWER_HILOGW(FEATURE_INPUT, "SENSOR_TYPE_ID_HALL sensor not support");
         return;
@@ -344,6 +375,7 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
 void PowerMgrService::HallSensorSubscriberCancel()
 {
 #ifdef HAS_SENSORS_SENSOR_PART
+    POWER_HILOGI(COMP_SVC, "Start to cancel the subscribe of hall sensor");
     if (IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
         DeactivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
         UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
@@ -494,7 +526,6 @@ void PowerMgrService::OnStop()
     }
 
     SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
-
     KeyMonitorCancel();
     HallSensorSubscriberCancel();
     SwitchSubscriberCancel();
@@ -507,6 +538,7 @@ void PowerMgrService::OnStop()
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
+    SettingHelper::UnRegisterSettingWakeupLidObserver();
 }
 
 void PowerMgrService::Reset()
