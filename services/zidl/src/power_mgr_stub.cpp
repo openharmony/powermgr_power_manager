@@ -186,6 +186,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK):
             ret = UnRegisterScreenStateCallbackStub(data);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UPDATE_WORK_SOURCE):
+            ret = UpdateWorkSourceStub(data);
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -222,6 +225,24 @@ int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data, Messag
         POWER_HILOGE(FEATURE_SUSPEND, "WriteBool fail");
         return E_WRITE_PARCEL_ERROR;
     }
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::UpdateWorkSourceStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
+    uint32_t size = 0;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, size, E_READ_PARCEL_ERROR);
+    std::map<int32_t, std::string> workSources;
+    for (uint32_t i = 0; i < size; ++i) {
+        int32_t uid = 0;
+        std::string bundleName;
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int32, uid, E_READ_PARCEL_ERROR);
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, String, bundleName, E_READ_PARCEL_ERROR);
+        workSources[uid] = bundleName;
+    }
+    UpdateWorkSource(remoteObj, workSources);
     return ERR_OK;
 }
 

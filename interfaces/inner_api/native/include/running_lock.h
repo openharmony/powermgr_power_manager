@@ -36,6 +36,8 @@ public:
     PowerErrors Recover(const wptr<IPowerMgr>& proxy);
     bool IsUsed();
 
+    ErrCode UpdateWorkSource(const std::vector<int32_t>& workSources);
+
     /**
      * Acquires a runninglock.
      * The parameter of last called will replace that of the previous called, and the effective parameter will
@@ -59,6 +61,7 @@ public:
 private:
     PowerErrors Create();
     void Release();
+    std::string GetBundleNameByUid(const int32_t uid);
     std::mutex mutex_;
     RunningLockInfo runningLockInfo_;
     sptr<IRemoteObject> token_;

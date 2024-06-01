@@ -41,6 +41,7 @@ private:
     ErrCode RunAsWakeupCommand();
     ErrCode RunAsSuspendCommand();
     ErrCode RunAsQueryLockCommand();
+    ErrCode RunAsProxyLockCommand();
     ErrCode RunAsForceTimeOutCommand();
     ErrCode RunAsTimeOutScreenLockCommand();
 #ifdef HAS_DISPLAY_MANAGER_PART

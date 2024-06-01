@@ -65,6 +65,7 @@ ohos_shared_library("powermgr_client") {
   ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hicollie:libhicollie",
     "hilog:libhilog",
