@@ -113,6 +113,39 @@ bool PowerMgrProxy::IsRunningLockTypeSupported(RunningLockType type)
     return result;
 }
 
+bool PowerMgrProxy::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
+    const std::map<int32_t, std::string>& workSources)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
+    uint32_t size = workSources.size();
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Uint32, size, false);
+    for (const auto& wks : workSources) {
+        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, wks.first, false);
+        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, wks.second, false);
+    }
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UPDATE_WORK_SOURCE),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     sptr<IRemoteObject> remote = Remote();

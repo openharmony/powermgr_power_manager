@@ -26,6 +26,7 @@
 #include "power_log.h"
 #include "power_mgr_errors.h"
 #include "running_lock_token_stub.h"
+#include <bundle_mgr_client.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -72,6 +73,24 @@ PowerErrors RunningLock::Recover(const wptr<IPowerMgr>& proxy)
         runningLockInfo_.name.c_str(), runningLockInfo_.type);
     proxy_ = proxy;
     return Create();
+}
+
+ErrCode RunningLock::UpdateWorkSource(const std::vector<int32_t>& workSources)
+{
+    sptr<IPowerMgr> proxy = proxy_.promote();
+    if (proxy == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        return E_GET_POWER_SERVICE_FAILED;
+    }
+    std::map<int32_t, std::string> wks;
+    for (const auto& uid : workSources) {
+        std::string bundleName = GetBundleNameByUid(uid);
+        wks.emplace(std::make_pair(uid, bundleName));
+    }
+    if (!proxy->UpdateWorkSource(token_, wks)) {
+        return E_INNER_ERR;
+    }
+    return ERR_OK;
 }
 
 ErrCode RunningLock::Lock(int32_t timeOutMs)
@@ -131,6 +150,20 @@ void RunningLock::Release()
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
     proxy->ReleaseRunningLock(token_);
+}
+
+std::string RunningLock::GetBundleNameByUid(const int32_t uid)
+{
+    std::string bundleName;
+    AppExecFwk::BundleMgrClient bundleObj;
+    ErrCode res = bundleObj.GetNameForUid(uid, bundleName);
+    if (res != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "GetBundleNameByUid failed for uid=%{public}d, ErrCode=%{public}d",
+            uid, static_cast<int32_t>(res));
+    }
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "GetBundleNameByUid for uid=%{public}d, name=%{public}s",
+        uid, bundleName.c_str());
+    return bundleName;
 }
 } // namespace PowerMgr
 } // namespace OHOS

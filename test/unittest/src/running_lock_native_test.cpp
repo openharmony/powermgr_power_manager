@@ -121,13 +121,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
     runningLockMgr->ProxyRunningLock(false, pid, uid);
     runningLockMgr->ProxyRunningLock(false, UNPID, UID);
 
-    runningLockMgr->ProxyRunningLockInner(false, pid, uid);
-    runningLockMgr->ProxyRunningLockInner(true, pid, uid);
-    runningLockMgr->ProxyRunningLockInner(true, pid, uid);
-    runningLockMgr->ProxyRunningLockInner(true, UNPID, UID);
-    runningLockMgr->ProxyRunningLockInner(true, UNPID, UID);
-    runningLockMgr->ProxyRunningLockInner(false, pid, uid);
-    runningLockMgr->ProxyRunningLockInner(false, UNPID, UID);
     runningLockMgr->UnLock(remoteObj);
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002 end");
@@ -470,19 +463,15 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
 
     pid_t pid = 0;
     pid_t uid = 0;
-    runningLockMgr->ProxyRunningLockInner(true, pid, uid);
     EXPECT_TRUE(runningLockMgr != nullptr);
 
     RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
-    runningLockMgr->ProxyRunningLockInner(false, pid, uid);
     EXPECT_TRUE(runningLockMgr != nullptr);
-    runningLockMgr->ProxyRunningLockInner(true, pid, uid);
     EXPECT_TRUE(runningLockMgr != nullptr);
     runningLockMgr->runninglockProxy_->AddRunningLock(pid, uid, nullptr);
-    runningLockMgr->ProxyRunningLockInner(true, pid, uid);
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative016 end");
 }
@@ -639,5 +628,38 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
     EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
     
     pmsTest->RestoreScreenOffTime();
+}
+
+/**
+ * @tc.name: RunningLockNative023
+ * @tc.desc: test enableMock and dumpInfo in runningLockMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level0)
+{
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
+    stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
+
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    IRunningLockAction *runLockAction = new RunningLockAction();
+    runningLockMgr->EnableMock(runLockAction);
+    std::string result;
+    runningLockMgr->DumpInfo(result);
+
+    RunningLockParam runningLockParam {0,
+        "runninglockNativeTest023", "", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO, TIMEOUTMS, PID, UID};
+    sptr<IRemoteObject> token = new RunningLockTokenStub();
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
+    runningLockMgr->Lock(token);
+    runningLockMgr->UpdateWorkSource(token, {{0, ""}});
+    runningLockMgr->DumpInfo(result);
+    runningLockMgr->UnLock(token);
+
+    EXPECT_FALSE(runningLockMgr->ReleaseLock(token));
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative023 end");
 }
 } // namespace
