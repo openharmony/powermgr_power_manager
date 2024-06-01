@@ -167,7 +167,7 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
 void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
 {
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGI(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
+    POWER_HILOGD(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
     Json::Value root;
     Json::Reader reader;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
@@ -182,7 +182,7 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
     }
 
     root["touchscreen"]["enable"] = updateEnable;
-    POWER_HILOGI(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
+    POWER_HILOGD(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 
