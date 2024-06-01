@@ -127,9 +127,9 @@ bool SuspendSourceParser::ParseSourcesProc(
         Json::Value delayValue = valueObj[SuspendSource::DELAY_KEY];
         if (actionValue.isUInt() && delayValue.isUInt()) {
             action = actionValue.asUInt();
-            POWER_HILOGI(FEATURE_SUSPEND, "action=%{public}u", action);
             delayMs = delayValue.asUInt();
-            POWER_HILOGI(FEATURE_SUSPEND, "delayMs=%{public}u", delayMs);
+            POWER_HILOGI(FEATURE_SUSPEND, "key=%{public}u, action=%{public}u, delayMs=%{public}u",
+                suspendDeviceType, action, delayMs);
             if (action >= ILLEGAL_ACTION) {
                 action = 0;
             }
