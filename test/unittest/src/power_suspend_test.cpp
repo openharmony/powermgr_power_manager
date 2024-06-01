@@ -37,6 +37,7 @@ using namespace OHOS;
 using namespace std;
 static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
+static constexpr int SLEEP_WAIT_TIME_US = 500 * 1000;
 
 void PowerSuspendTest::SetUpTestCase(void)
 {
@@ -328,5 +329,55 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest016, TestSize.Level0)
     std::vector<std::string> tmp = sources->getSourceKeys();
     EXPECT_TRUE(tmp.size() != 0);
     GTEST_LOG_(INFO) << "PowerSuspendTest016:  end";
+}
+
+/**
+ * @tc.name: PowerSuspendTest017
+ * @tc.desc: test wakeup lid source
+ * @tc.type: FUNC
+ * @tc.require: issueI9U4BF
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest017, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSuspendTest017: start";
+    g_service->SuspendControllerInit();
+    g_service->WakeupControllerInit();
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest017");
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::AWAKE);
+    g_service->wakeupController_->ChangeLidWakeupSourceConfig(false);
+    usleep(SLEEP_WAIT_TIME_US);
+    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType ::SUSPEND_DEVICE_REASON_LID);
+    EXPECT_FALSE(g_service->suspendController_->stateMachine_->GetState() == PowerState::INACTIVE);
+    g_service->wakeupController_->ChangeLidWakeupSourceConfig(true);
+    usleep(SLEEP_WAIT_TIME_US);
+    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType ::SUSPEND_DEVICE_REASON_LID);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::INACTIVE);
+    GTEST_LOG_(INFO) << "PowerSuspendTest017:  end";
+}
+
+/**
+ * @tc.name: PowerSuspendTest018
+ * @tc.desc: test wakeup lid source
+ * @tc.type: FUNC
+ * @tc.require: issueI9U4BF
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest018, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSuspendTest018: start";
+    g_service->SuspendControllerInit();
+    g_service->WakeupControllerInit();
+    g_service->SuspendDevice(
+        static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::INACTIVE);
+    g_service->wakeupController_->ChangeLidWakeupSourceConfig(false);
+    usleep(SLEEP_WAIT_TIME_US);
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_LID);
+    EXPECT_FALSE(g_service->suspendController_->stateMachine_->GetState() == PowerState::AWAKE);
+    g_service->wakeupController_->ChangeLidWakeupSourceConfig(true);
+    usleep(SLEEP_WAIT_TIME_US);
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_LID);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::AWAKE);
+    GTEST_LOG_(INFO) << "PowerSuspendTest018:  end";
 }
 } // namespace
