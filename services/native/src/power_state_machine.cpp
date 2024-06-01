@@ -976,9 +976,15 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         displayOffTime_.load(), time);
-    displayOffTime_ = time;
-    // refresh once, invalidates existing timer
-    SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
+    // If the value to be set is less equal than zero, we should keep the screen on forever.
+    // Does not update the settings so that the value is not affected by database restrictions
+    // set isScreenOffTimeOverride_ and g_beforeOverrideTime so that the negative value can be restored after
+    // being overriden (e.g by screenlock).
+    if (time <= 0) {
+        isScreenOffTimeOverride_ = true;
+        g_beforeOverrideTime = -1;
+    }
+    displayOffTime_ = -1;
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
     }
