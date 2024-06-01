@@ -64,6 +64,12 @@ PowerModeModule::PowerModeModule()
 void PowerModeModule::SetModeItem(PowerMode mode)
 {
     POWER_HILOGI(FEATURE_POWER_MODE, "mode_: %{public}u, mode: %{public}u", mode_, mode);
+
+    /* Same as the previous mode */
+    if (this->mode_ == mode) {
+        return;
+    }
+
     /* If it's a valid mode */
     if (mode < PowerMode::POWER_MODE_MIN || mode > PowerMode::POWER_MODE_MAX) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid mode %{public}d", mode);
