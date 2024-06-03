@@ -807,7 +807,7 @@ bool PowerMgrProxy::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallb
         return false;
     }
 
-    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, callback->AsObject(), false);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SYNC_HIBERNATE_CALLBACK),
@@ -834,7 +834,7 @@ bool PowerMgrProxy::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCal
         return false;
     }
 
-    WRITE_PARCEL_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, callback->AsObject(), false);
  
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SYNC_HIBERNATE_CALLBACK),

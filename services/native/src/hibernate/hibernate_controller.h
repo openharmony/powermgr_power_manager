@@ -16,6 +16,10 @@
 #ifndef POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
 #define POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
 
+#include <set>
+
+#include "hibernate/isync_hibernate_callback.h"
+
 namespace OHOS {
 namespace PowerMgr {
 class HibernateController {
@@ -24,6 +28,14 @@ public:
     virtual ~HibernateController() = default;
 
     virtual bool Hibernate(bool clearMemory);
+    virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
+    virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
+    virtual void PreHibernate() const;
+    virtual void PostHibernate() const;
+
+private:
+    std::mutex mutex_;
+    std::set<sptr<ISyncHibernateCallback>> callbacks_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
