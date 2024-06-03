@@ -977,8 +977,6 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
     POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         displayOffTime_.load(), time);
     displayOffTime_ = time;
-    // refresh once, invalidates existing timer
-    SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH, true);
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
     }
