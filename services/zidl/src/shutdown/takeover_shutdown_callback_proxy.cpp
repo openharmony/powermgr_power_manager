@@ -37,7 +37,7 @@ bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(bool isReboot)
         return false;
     }
 
-    WRITE_PARCEL_WITH_RET(data, Bool, isReboot, false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, isReboot, false);
 
     int ret = remote->SendRequest(
         static_cast<int32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_SHUTDOWN),
@@ -48,7 +48,7 @@ bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(bool isReboot)
     }
 
     bool isTakeOver = false;
-    READ_PARCEL_WITH_RET(reply, Bool, isTakeOver, false);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, isTakeOver, false);
     return isTakeOver;
 }
 
