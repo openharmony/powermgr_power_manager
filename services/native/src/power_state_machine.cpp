@@ -93,7 +93,7 @@ bool PowerStateMachine::Init()
 
 void PowerStateMachine::InitTransitMap()
 {
-    std::vector<PowerState> awake { PowerState::SLEEP, PowerState::HIBERNATE };
+    std::vector<PowerState> awake { PowerState::SLEEP };
     std::vector<PowerState> inactive { PowerState::DIM };
     std::vector<PowerState> sleep { PowerState::DIM };
 
@@ -231,8 +231,18 @@ void PowerStateMachine::EmplaceHibernate()
 {
     controllerMap_.emplace(PowerState::HIBERNATE,
         std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "StateController_HIBERNATE lambda start");
-            // Subsequent added functions
+            POWER_HILOGI(FEATURE_POWER_STATE, " StateController_HIBERNATE lambda start");
+            mDeviceState_.screenState.lastOffTime = GetTickCount();
+            DisplayState state = DisplayState::DISPLAY_OFF;
+            if (enableDisplaySuspend_) {
+                POWER_HILOGI(FEATURE_POWER_STATE, "Display suspend enabled");
+                state = DisplayState::DISPLAY_SUSPEND;
+            }
+            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
+            if (ret != ActionResult::SUCCESS) {
+                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to hibernate, display error, ret: %{public}u", ret);
+                return TransitResult::DISPLAY_OFF_ERR;
+            }
             return TransitResult::SUCCESS;
         }));
 }
@@ -569,7 +579,16 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         return false;
     }
 
-    return hibernateController->Hibernate(clearMemory);
+    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+    }
+
+    hibernateController->Hibernate(clearMemory);
+    if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
+        return false;
+    }
+    return true;
 }
 
 bool PowerStateMachine::IsScreenOn()

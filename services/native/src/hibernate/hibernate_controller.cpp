@@ -23,5 +23,31 @@ bool HibernateController::Hibernate(bool clearMemory)
     SystemSuspendController::GetInstance().Hibernate();
     return true;
 }
+
+void HibernateController::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    callbacks_.insert(cb);
+}
+
+void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    callbacks_.erase(cb);
+}
+
+void HibernateController::PreHibernate() const
+{
+    for (const auto &cb : callbacks_) {
+        cb->OnSyncHibernate();
+    }
+}
+
+void HibernateController::PostHibernate() const
+{
+    for (const auto &cb : callbacks_) {
+        cb->OnSyncWakeup();
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

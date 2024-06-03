@@ -174,6 +174,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_POWER_DIALOG" ]
   }
 
+  if (power_manager_feature_enable_s4) {
+    defines += [ "POWER_MANAGER_POWER_ENABLE_S4" ]
+  }
+
   if (factory == true) {
     defines += [ "CONFIG_FACTORY_MODE" ]
   }

@@ -134,6 +134,7 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
+        {"hibernate", std::bind(&PowerShellCommand::RunAsHibernateCommand, this)},
 #ifndef POWER_SHELL_USER
         {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
         {"proxylock", std::bind(&PowerShellCommand::RunAsProxyLockCommand, this)},
@@ -288,6 +289,14 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     client.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     resultReceiver_.append("SuspendDevice is called\n");
+    return ERR_OK;
+}
+
+ErrCode PowerShellCommand::RunAsHibernateCommand()
+{
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
+    client.Hibernate(true);
+    resultReceiver_.append("Hibernate is called\n");
     return ERR_OK;
 }
 
