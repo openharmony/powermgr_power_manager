@@ -42,7 +42,6 @@ RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, 
 RunningLock::~RunningLock()
 {
     if (token_ != nullptr) {
-        UnLock();
         Release();
     }
 }
