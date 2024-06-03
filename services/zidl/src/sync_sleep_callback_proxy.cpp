@@ -38,7 +38,7 @@ void SyncSleepCallbackProxy::OnSyncSleep(bool onForceSleep)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, Bool, onForceSleep);
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Bool, onForceSleep);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::SyncSleepCallbackInterfaceCode::CMD_ON_SYNC_SLEEP),
@@ -62,7 +62,7 @@ void SyncSleepCallbackProxy::OnSyncWakeup(bool onForceSleep)
         return;
     }
 
-    WRITE_PARCEL_NO_RET(data, Bool, onForceSleep);
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Bool, onForceSleep);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::SyncSleepCallbackInterfaceCode::CMD_ON_SYNC_WAKEUP),
