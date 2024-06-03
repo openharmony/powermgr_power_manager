@@ -274,6 +274,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "ReleaseLock name:%{public}s, type:%{public}d, bundleName:%{public}s",
         lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
+    UnLock(remoteObj);
     {
         std::lock_guard<std::mutex> lock(mutex_);
         runningLocks_.erase(remoteObj);
