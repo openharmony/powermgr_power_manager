@@ -51,7 +51,7 @@ int ScreenOffPreCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
 int32_t ScreenOffPreCallbackStub::OnScreenStateChangedStub(MessageParcel& data)
 {
     uint32_t type;
-    READ_PARCEL_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
     OnScreenStateChanged(static_cast<uint32_t>(type));
     return ERR_OK;
 }
