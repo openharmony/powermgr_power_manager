@@ -758,6 +758,14 @@ bool PowerMgrService::IsScreenOn()
     return isScreenOn;
 }
 
+bool PowerMgrService::IsFoldScreenOn()
+{
+    std::lock_guard lock(stateMutex_);
+    auto isFoldScreenOn = powerStateMachine_->IsFoldScreenOn();
+    POWER_HILOGI(COMP_SVC, "isFoldScreenOn: %{public}d", isFoldScreenOn);
+    return isFoldScreenOn;
+}
+
 bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);
