@@ -39,14 +39,18 @@ void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibern
 void HibernateController::PreHibernate() const
 {
     for (const auto &cb : callbacks_) {
-        cb->OnSyncHibernate();
+        if (cb != nullptr) {
+            cb->OnSyncHibernate();
+        }
     }
 }
 
 void HibernateController::PostHibernate() const
 {
     for (const auto &cb : callbacks_) {
-        cb->OnSyncWakeup();
+        if (cb != nullptr) {
+            cb->OnSyncWakeup();
+        }
     }
 }
 } // namespace PowerMgr

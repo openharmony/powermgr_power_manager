@@ -1154,6 +1154,34 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PowerMgrClient049
+ * @tc.desc: test hibernate
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient049, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.Hibernate(true);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient049::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient050
+ * @tc.desc: test hibernate
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient050, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.Hibernate(false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is end!");
+}
+
+/**
  * @tc.name: PowerMgrClient051
  * @tc.desc: test for coverage
  * @tc.type: FUNC
@@ -1213,5 +1241,33 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient053, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_EQ(powerMgrClient.SetSuspendTag("ulsr"), PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient053::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient054
+ * @tc.desc: test RegisterSyncHibernateCallback
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient054, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient054::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient054::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient055
+ * @tc.desc: test unRegisterSyncHibernateCallback
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient055, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient055::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient055::fun is end!");
 }
 } // namespace

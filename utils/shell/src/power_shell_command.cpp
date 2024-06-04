@@ -134,8 +134,8 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
         {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
         {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
-        {"hibernate", std::bind(&PowerShellCommand::RunAsHibernateCommand, this)},
 #ifndef POWER_SHELL_USER
+        {"hibernate", std::bind(&PowerShellCommand::RunAsHibernateCommand, this)},
         {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
         {"proxylock", std::bind(&PowerShellCommand::RunAsProxyLockCommand, this)},
 #ifdef HAS_DISPLAY_MANAGER_PART
@@ -292,6 +292,7 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
     return ERR_OK;
 }
 
+#ifndef POWER_SHELL_USER
 ErrCode PowerShellCommand::RunAsHibernateCommand()
 {
     PowerMgrClient& client = PowerMgrClient::GetInstance();
@@ -300,7 +301,6 @@ ErrCode PowerShellCommand::RunAsHibernateCommand()
     return ERR_OK;
 }
 
-#ifndef POWER_SHELL_USER
 static const std::string GetBundleRunningLockTypeString(RunningLockType type)
 {
     switch (type) {
