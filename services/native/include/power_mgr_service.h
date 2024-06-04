@@ -63,6 +63,7 @@ public:
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
+    virtual bool IsFoldScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
     virtual bool Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(

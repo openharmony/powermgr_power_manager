@@ -583,6 +583,18 @@ bool PowerStateMachine::IsScreenOn()
     return false;
 }
 
+bool PowerStateMachine::IsFoldScreenOn()
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "IsFoldScreenOn settingOnStateFlag_ is %{public}d", settingOnStateFlag_.load());
+    DisplayState state = stateAction_->GetDisplayState();
+    if (settingOnStateFlag_ == true || state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Current fold screen is on or going on");
+        return true;
+    }
+    POWER_HILOGI(FEATURE_POWER_STATE, "Current fold screen state is off, state: %{public}u", state);
+    return false;
+}
+
 void PowerStateMachine::ReceiveScreenEvent(bool isScreenOn)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Enter");
@@ -1151,9 +1163,13 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         forceTimingOut_.load()) {
         force = true;
     }
+    settingOnStateFlag_ = (state == PowerState::AWAKE);
+    settingOffStateFlag_ = (state == PowerState::INACTIVE);
     TransitResult ret = pController->TransitTo(reason, force);
     timeoutCheck.Finish(ret);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
+    settingOnStateFlag_ = false;
+    settingOffStateFlag_ = false;
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 

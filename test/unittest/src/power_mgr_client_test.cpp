@@ -1242,4 +1242,27 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient053, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.SetSuspendTag("ulsr"), PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient053::fun is end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient054
+ * @tc.desc: test IsFoldScreenOn
+ * @tc.type: FUNC
+ * @tc.require: #I9UWD0
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient054, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient054::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.WakeupDevice();
+
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsFoldScreenOn(), false) << "PowerMgrClient054: Screen is Off";
+
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsFoldScreenOn(), true) << "PowerMgrClient054: Screen is On";
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient054::fun is end!");
+}
 } // namespace
