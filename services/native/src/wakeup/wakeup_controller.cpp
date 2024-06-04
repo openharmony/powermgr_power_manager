@@ -431,7 +431,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (pms == nullptr) {
         return;
     }
-    if (!NonWindowEvent(pointerEvent, pms)) {
+    if (!NonWindowEvent(pointerEvent)) {
         return;
     }
     if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
@@ -439,6 +439,11 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+
+    PowerState state = pms->GetState();
+    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+        return;
+    }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     PointerEvent::PointerItem pointerItem;
@@ -474,12 +479,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     }
 }
 
-bool InputCallback::NonWindowEvent(std::shared_ptr<PointerEvent>& pointerEvent, sptr<PowerMgrService>& pms) const
+bool InputCallback::NonWindowEvent(const std::shared_ptr<PointerEvent>& pointerEvent) const
 {
-    PowerState state = pms->GetState();
-    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
-        return false;
-    }
     auto action = pointerEvent->GetPointerAction();
     if (action == PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         action == PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
