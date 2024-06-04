@@ -100,6 +100,11 @@ public:
     bool IsScreenOn();
 
     /**
+     * Check whether the fold device screen is on. The result may be true or false, depending on the system state.
+     */
+    bool IsFoldScreenOn();
+
+    /**
      * Get Power state. The result is PowerState type.
      */
     PowerState GetState();
