@@ -1245,21 +1245,30 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient053, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrClient054
- * @tc.desc: test RegisterSyncHibernateCallback
+ * @tc.desc: test IsFoldScreenOn
  * @tc.type: FUNC
- * @tc.require: issueI5MJZJ
+ * @tc.require: #I9UWD0
  */
 HWTEST_F(PowerMgrClientTest, PowerMgrClient054, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient054::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+
+    powerMgrClient.WakeupDevice();
+
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsFoldScreenOn(), false) << "PowerMgrClient054: Screen is Off";
+
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsFoldScreenOn(), true) << "PowerMgrClient054: Screen is On";
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient054::fun is end!");
 }
 
 /**
  * @tc.name: PowerMgrClient055
- * @tc.desc: test unRegisterSyncHibernateCallback
+ * @tc.desc: test RegisterSyncHibernateCallback
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
@@ -1267,7 +1276,21 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient055, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient055::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
+    powerMgrClient.RegisterSyncHibernateCallback(nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient055::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient056
+ * @tc.desc: test unRegisterSyncHibernateCallback
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient056, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient056::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient056::fun is end!");
 }
 } // namespace

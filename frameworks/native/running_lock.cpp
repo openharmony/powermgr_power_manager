@@ -42,7 +42,6 @@ RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, 
 RunningLock::~RunningLock()
 {
     if (token_ != nullptr) {
-        UnLock();
         Release();
     }
 }
@@ -148,7 +147,7 @@ void RunningLock::Release()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
     proxy->ReleaseRunningLock(token_);
 }
 

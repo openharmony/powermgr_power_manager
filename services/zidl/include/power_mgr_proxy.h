@@ -66,6 +66,7 @@ public:
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
+    virtual bool IsFoldScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;

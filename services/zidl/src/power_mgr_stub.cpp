@@ -99,6 +99,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON):
             ret = IsScreenOnStub(reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_FOLD_SCREEN_ON):
+            ret = IsFoldScreenOnStub(reply);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND):
             ret = ForceSuspendDeviceStub(data, reply);
             break;
@@ -450,6 +453,17 @@ int32_t PowerMgrStub::GetStateStub(MessageParcel& reply)
     PowerState ret = GetState();
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
         POWER_HILOGE(FEATURE_POWER_STATE, "WriteUint32 fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::IsFoldScreenOnStub(MessageParcel& reply)
+{
+    bool ret = false;
+    ret = IsFoldScreenOn();
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
