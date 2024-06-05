@@ -149,7 +149,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
-        power->HibernateControllerInit();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
@@ -784,6 +783,8 @@ bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 
 bool PowerMgrService::Hibernate(bool clearMemory)
 {
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate begin.");
     std::lock_guard lock(hibernateMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
@@ -797,7 +798,16 @@ bool PowerMgrService::Hibernate(bool clearMemory)
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
-    return powerStateMachine_->HibernateInner(clearMemory);
+    HibernateControllerInit();
+    hibernateController_->PreHibernate();
+    bool ret = powerStateMachine_->HibernateInner(clearMemory);
+    hibernateController_->PostHibernate();
+    POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate end.");
+    return ret;
+#else
+    POWER_HILOGI(FEATURE_SUSPEND, "Hibernate interface not supported.");
+    return false;
+#endif
 }
 
 std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
@@ -1069,6 +1079,32 @@ bool PowerMgrService::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>
     return true;
 }
 
+bool PowerMgrService::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+{
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    POWER_HILOGI(FEATURE_SUSPEND, "RegisterSyncHibernateCallback begin.");
+    HibernateControllerInit();
+    hibernateController_->RegisterSyncHibernateCallback(callback);
+    return true;
+#else
+    POWER_HILOGI(FEATURE_SUSPEND, "RegisterSyncHibernateCallback interface not supported.");
+    return false;
+#endif
+}
+
+bool PowerMgrService::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+{
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    POWER_HILOGI(FEATURE_SUSPEND, "UnRegisterSyncHibernateCallback begin.");
+    HibernateControllerInit();
+    hibernateController_->UnregisterSyncHibernateCallback(callback);
+    return true;
+#else
+    POWER_HILOGI(FEATURE_SUSPEND, "UnRegisterSyncHibernateCallback interface not supported.");
+    return false;
+#endif
+}
+
 bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(modeMutex_);
@@ -1278,12 +1314,14 @@ void PowerMgrService::WakeupControllerInit()
     wakeupController_->Init();
 }
 
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 void PowerMgrService::HibernateControllerInit()
 {
     if (!hibernateController_) {
         hibernateController_ = std::make_shared<HibernateController>();
     }
 }
+#endif
 
 bool PowerMgrService::IsCollaborationState()
 {

@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
-#define POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
+#ifndef POWERMGR_POWER_MANAGER_SYNC_HIBERNATE_CALLBACK_PROXY_H
+#define POWERMGR_POWER_MANAGER_SYNC_HIBERNATE_CALLBACK_PROXY_H
 
-#include <set>
+#include <iremote_proxy.h>
+#include <nocopyable.h>
+#include <functional>
+#include "refbase.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
 
 #include "hibernate/isync_hibernate_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class HibernateController {
+class SyncHibernateCallbackProxy : public IRemoteProxy<ISyncHibernateCallback> {
 public:
-    HibernateController(){};
-    virtual ~HibernateController() = default;
-
-    virtual bool Hibernate(bool clearMemory);
-    virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
-    virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
-    virtual void PreHibernate() const;
-    virtual void PostHibernate() const;
+    explicit SyncHibernateCallbackProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<ISyncHibernateCallback>(impl) {}
+    ~SyncHibernateCallbackProxy() = default;
+    virtual void OnSyncHibernate() override;
+    virtual void OnSyncWakeup() override;
 
 private:
-    std::mutex mutex_;
-    std::set<sptr<ISyncHibernateCallback>> callbacks_;
+    static inline BrokerDelegator<SyncHibernateCallbackProxy> delegator_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
-
-#endif // POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
+#endif // POWERMGR_POWER_MANAGER_SYNC_HIBERNATE_CALLBACK_PROXY_H

@@ -26,7 +26,9 @@
 #include "power_common.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 #include "hibernate_controller.h"
+#endif
 
 #define DEFAULT_DISPLAY_OFF_TIME 30000
 #define DEFAULT_SLEEP_TIME       5000
