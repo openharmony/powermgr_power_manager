@@ -61,6 +61,14 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
 }
 
+void PowerModeModule::InitPowerMode()
+{
+    int32_t saveMode = SettingHelper::ReadCurrentMode(static_cast<int32_t>(this->mode_));
+    this->mode_ = static_cast<PowerMode>(saveMode);
+    Prepare();
+    DelayedSingleton<PowerModePolicy>::GetInstance()->InitRecoverMap();
+}
+
 void PowerModeModule::SetModeItem(PowerMode mode)
 {
     POWER_HILOGI(FEATURE_POWER_MODE, "mode_: %{public}u, mode: %{public}u", mode_, mode);
@@ -234,6 +242,9 @@ void PowerModeModule::EnableMode(PowerMode mode, bool isBoot)
 
     /* Set action */
     RunAction(isBoot);
+
+    /* Save power mode status to setting data*/
+    SettingHelper::SaveCurrentMode(static_cast<int32_t>(mode));
 
     this->lastMode_ = static_cast<uint32_t>(mode);
     started_ = false;
