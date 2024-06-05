@@ -86,6 +86,8 @@ public:
 
     virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
     virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) override;
+    virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
+    virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
 
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
@@ -124,7 +126,9 @@ public:
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
     void HibernateControllerInit();
+#endif
     bool IsCollaborationState();
     void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
     static void RegisterSettingWakeupPickupGestureObserver();
@@ -163,10 +167,12 @@ public:
     {
         return suspendController_;
     }
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::shared_ptr<HibernateController> GetHibernateController() const
     {
         return hibernateController_;
     }
+#endif
     std::shared_ptr<WakeupController> GetWakeupController() const
     {
         return wakeupController_;
@@ -232,7 +238,9 @@ public:
 
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::shared_ptr<HibernateController> hibernateController_ = nullptr;
+#endif
     std::shared_ptr<ScreenOffPreController> screenOffPreController_ = nullptr;
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
@@ -280,7 +288,9 @@ private:
     static std::atomic_bool isBootCompleted_;
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::mutex hibernateMutex_;
+#endif
     std::mutex stateMutex_;
     std::mutex shutdownMutex_;
     std::mutex modeMutex_;

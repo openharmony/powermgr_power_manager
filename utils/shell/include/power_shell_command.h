@@ -40,6 +40,7 @@ private:
     ErrCode RunAsSetModeCommand();
     ErrCode RunAsWakeupCommand();
     ErrCode RunAsSuspendCommand();
+    ErrCode RunAsHibernateCommand();
     ErrCode RunAsQueryLockCommand();
     ErrCode RunAsProxyLockCommand();
     ErrCode RunAsForceTimeOutCommand();

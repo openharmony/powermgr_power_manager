@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
-#define POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
+#ifndef POWERMGR_POWER_MANAGER_SYNC_HIBERNATE_CALLBACK_STUB_H
+#define POWERMGR_POWER_MANAGER_SYNC_HIBERNATE_CALLBACK_STUB_H
 
-#include <set>
+#include <iremote_stub.h>
+#include <nocopyable.h>
 
 #include "hibernate/isync_hibernate_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class HibernateController {
+class SyncHibernateCallbackStub : public IRemoteStub<ISyncHibernateCallback> {
 public:
-    HibernateController(){};
-    virtual ~HibernateController() = default;
+    DISALLOW_COPY_AND_MOVE(SyncHibernateCallbackStub);
+    SyncHibernateCallbackStub() = default;
+    virtual ~SyncHibernateCallbackStub() = default;
 
-    virtual bool Hibernate(bool clearMemory);
-    virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
-    virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
-    virtual void PreHibernate() const;
-    virtual void PostHibernate() const;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    void OnSyncHibernate() override {}
+    void OnSyncWakeup() override {}
 
 private:
-    std::mutex mutex_;
-    std::set<sptr<ISyncHibernateCallback>> callbacks_;
+    int32_t OnSyncHibernateStub(MessageParcel& data);
+    int32_t OnSyncWakeupStub(MessageParcel& data);
 };
 } // namespace PowerMgr
 } // namespace OHOS
+#endif // POWERMGR_POWER_MANAGER_SYNC_HIBERNATE_CALLBACK_STUB_H
 
-#endif // POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
