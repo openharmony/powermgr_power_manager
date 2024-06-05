@@ -112,10 +112,12 @@ void RunningLockMgr::InitLocksTypeBackground()
     std::function<int32_t(bool, RunningLockParam)> activate =
         [this](bool active, RunningLockParam lockInnerParam) -> int32_t {
         if (active) {
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Background runningLock active");
+            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Background runningLock active, type=%{public}d name=%{public}s",
+                lockInnerParam.type, lockInnerParam.name.c_str());
             return runningLockAction_->Lock(lockInnerParam);
         } else {
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Background runningLock inactive");
+            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Background runningLock inactive, type=%{public}d name=%{public}s",
+                lockInnerParam.type, lockInnerParam.name.c_str());
             return runningLockAction_->Unlock(lockInnerParam);
         }
     };
@@ -274,6 +276,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "ReleaseLock name:%{public}s, type:%{public}d, bundleName:%{public}s",
         lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
+    UnLock(remoteObj);
     {
         std::lock_guard<std::mutex> lock(mutex_);
         runningLocks_.erase(remoteObj);
@@ -420,7 +423,8 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
         return false;
     }
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock is already enabled");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock is already enabled name=%{public}s",
+            lockInner->GetName().c_str());
         return false;
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
@@ -433,7 +437,8 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     if (counter->Increase(lockInnerParam) != RUNNINGLOCK_SUCCESS) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockCounter increase failed");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockCounter increase failed, type=%{public}d, count=%{public}d",
+            counter->GetType(), counter->GetCount());
         return false;
     }
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
@@ -469,7 +474,8 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     if (counter->Decrease(lockInnerParam)) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockCounter decrease failed");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockCounter decrease failed, type=%{public}d, count=%{public}d",
+            counter->GetType(), counter->GetCount());
         return false;
     }
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);

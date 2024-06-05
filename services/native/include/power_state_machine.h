@@ -94,6 +94,7 @@ public:
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn();
+    bool IsFoldScreenOn();
     void Reset();
     int64_t GetSleepTime();
 
@@ -309,6 +310,8 @@ private:
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
     std::atomic<int64_t> settingStateFlag_ {-1};
+    std::atomic<bool> settingOnStateFlag_ {false};
+    std::atomic<bool> settingOffStateFlag_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS

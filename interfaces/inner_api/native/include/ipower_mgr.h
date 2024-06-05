@@ -64,6 +64,7 @@ public:
     virtual bool RestoreScreenOffTime() = 0;
     virtual PowerState GetState() = 0;
     virtual bool IsScreenOn() = 0;
+    virtual bool IsFoldScreenOn() = 0;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
