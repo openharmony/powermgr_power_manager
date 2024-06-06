@@ -129,8 +129,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
             return;
         }
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            auto& powerModeModule = power->GetPowerModeModule();
-            powerModeModule.EnableMode(powerModeModule.GetModeItem(), true);
+            power->GetPowerModeModule().InitPowerMode();
         }
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();

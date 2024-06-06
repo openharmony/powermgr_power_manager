@@ -48,6 +48,7 @@ public:
     void AddAction(uint32_t type, ModeAction& action);
     void TriggerAllActions(bool isBoot);
     bool IsValidType(uint32_t type);
+    void InitRecoverMap();
 
 private:
     std::map<uint32_t, ModeAction> actionMap_;
@@ -59,6 +60,7 @@ private:
     void ComparePowerModePolicy();
     void GetSettingSwitchState(uint32_t& switchId, int32_t& value); // from setting
     int32_t GetPolicyFromMap(uint32_t type);
+    void SavePowerModeRecoverMap();
     std::mutex policyMutex_;
     std::mutex actionMapMutex_;
 };
