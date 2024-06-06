@@ -22,6 +22,7 @@
 #include <ipc_skeleton.h>
 
 #include "power_hitrace.h"
+#include "power_mode_policy.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
 #include "power_utils.h"
@@ -1036,6 +1037,8 @@ static void DisplayOffTimeUpdateFunc()
     POWER_HILOGD(FEATURE_POWER_STATE, "setting update display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         systemTime, settingTime);
     g_beforeOverrideTime = settingTime;
+    auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
     stateMachine->SetDisplayOffTime(settingTime, false);
 }
 

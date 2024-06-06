@@ -19,6 +19,7 @@
 #include "power_save_mode.h"
 #include "singleton.h"
 #include "setting_helper.h"
+#include "json/json.h"
 using namespace std;
 
 namespace OHOS {
@@ -61,6 +62,27 @@ void PowerModePolicy::ComparePowerModePolicy()
         switchMap_.emplace(id, value);
     }
     recoverMap_ = backupMap_;
+    SavePowerModeRecoverMap();
+}
+
+void PowerModePolicy::InitRecoverMap()
+{
+    std::string jsonStr = SettingHelper::ReadPowerModeRecoverMap();
+    Json::Value recoverJson;
+    Json::Reader reader;
+    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), recoverJson)) {
+        POWER_HILOGD(FEATURE_POWER_MODE, "parse recover json str error");
+        return;
+    }
+    for (const auto &member : recoverJson.getMemberNames()) {
+        int32_t key = std::stoi(member);
+        if (!recoverJson[member].isInt()) {
+            continue;
+        }
+        int32_t value = recoverJson[member].asInt();
+        recoverMap_[key] = value;
+    }
+    POWER_HILOGI(FEATURE_POWER_MODE, "init recover map succeed");
 }
 
 void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
@@ -98,6 +120,12 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
         case PowerModePolicy::ServiceType::INTELL_VOICE:
             defaultVal = SettingHelper::GetSettingIntellVoice(defaultVal);
             break;
+        case PowerModePolicy::ServiceType::DISPLAY_OFFTIME: {
+            int64_t displayOfftime = INIT_VALUE_FALSE;
+            displayOfftime = SettingHelper::GetSettingDisplayOffTime(INIT_VALUE_FALSE);
+            defaultVal = static_cast<int32_t>(displayOfftime);
+            break;
+        }
         default:
             break;
     }
@@ -148,8 +176,18 @@ void PowerModePolicy::RemoveBackupMapSettingSwitch(uint32_t switchId)
     auto iter = recoverMap_.find(switchId);
     if (iter != recoverMap_.end()) {
         recoverMap_.erase(iter);
+        SavePowerModeRecoverMap();
         POWER_HILOGW(FEATURE_POWER_MODE, "remove backup switch: %{public}d", switchId);
     }
+}
+
+void PowerModePolicy::SavePowerModeRecoverMap()
+{
+    Json::Value recoverJson;
+    for (const auto& pair : recoverMap_) {
+        recoverJson[to_string(pair.first)] = pair.second;
+    }
+    SettingHelper::SavePowerModeRecoverMap(recoverJson.toStyledString());
 }
 } // namespace PowerMgr
 } // namespace OHOS
