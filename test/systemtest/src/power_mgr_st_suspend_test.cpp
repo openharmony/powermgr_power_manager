@@ -30,7 +30,7 @@ void PowerMgrSTSuspendTest::SetUpTestCase(void)
     // create singleton service object at the beginning
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
-    g_service->SetDeviceMode(PowerMode::NORMAL_MODE);
+    g_service->GetPowerStateMachine()->SetSleepTime(SLEEP_WAIT_TIME_S);
 }
 
 void PowerMgrSTSuspendTest::TearDownTestCase(void)
