@@ -83,7 +83,18 @@
     {
       "name": "WARNING_TIP",
       "value": "Do you agree to have a remote device that wants to control this device?"
+    },
+    {
+      "name": "notice_title",
+      "value": "Safety Tips"
+    },
+    {
+      "name": "notice_text",
+      "value": "Injection permission has been granted."
+    },
+    {
+      "name": "bn_notice_cancel",
+      "value": "Cancel the authorization"
     }
-   
   ]
 }

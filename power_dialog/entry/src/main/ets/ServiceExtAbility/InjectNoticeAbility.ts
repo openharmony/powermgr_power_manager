@@ -19,10 +19,9 @@ import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import rpc from '@ohos.rpc';
 import GlobalContext from '../common/GlobalContext';
 import * as notice_sub from '../InjectNotice/InjectNoticeStub';
-import { injectNoticeUtil } from '../InjectNotice/InjectNoticeUtil';
+import {NOTICE_ID , injectNoticeUtil } from '../InjectNotice/InjectNoticeUtil';
 
-
-const TAG = "InjectNotice";
+const TAG = 'InjectNotice';
 const ACCESS_TYPE_MASK = 0b11;
 const SHIFT_DIGIT = 27;
 const TOKEN_NATIVE = 1;
@@ -31,21 +30,22 @@ export default class InjectNoticeAbility extends extension {
   /**
    * Lifecycle function, called back when a service extension is started for initialization.
    */
-  onCreate(want) {
-    console.info(TAG, 'InjectNoticeAbility onCreate' + want.abilityName);
-    GlobalContext.getContext().setObject("appcontext", this.context.getApplicationContext());
+  onCreate(want): void {
+    console.debug(TAG, 'InjectNoticeAbility onCreate' + JSON.stringify(want));
+    GlobalContext.getContext().setObject('appcontext', this.context.getApplicationContext());
     try {
       injectNoticeUtil.init();
     } catch (e) {
       console.error(TAG, 'InjectNoticeAbility onCreate' + want.abilityName);
     }
-    console.info(TAG, "InjectNoticeAbility onCreate end");
-
+    console.debug(TAG, 'InjectNoticeAbility onCreate end');
   }
 
   onConnect(want): rpc.RemoteObject {
-    console.info(TAG, 'onConnect want: ' + JSON.stringify(want));
+    console.debug(TAG, 'onConnect want: ' + JSON.stringify(want));
     let callingTokenId: number = rpc.IPCSkeleton.getCallingTokenId();
+    if (!this.isSystemAbility(callingTokenId)) {
+    }
     return new notice_sub.InjectNoticeStub('InjectNoticeStub');
   }
 
@@ -57,18 +57,27 @@ export default class InjectNoticeAbility extends extension {
    * Lifecycle function, called back when a service extension is started or recall.
    */
   onRequest(want, startId): void {
-    console.info(TAG, 'onRequest');
+    console.debug(TAG, `onRequest startId: ${startId} want:${JSON.stringify(want)}`);
+    if ('noticeId' in want.parameters) {
+      console.debug(TAG, `onRequest noticeId has value`);
+      if (want.parameters.noticeId === NOTICE_ID) {
+        console.debug(TAG, `onRequest startId: ${startId} close notice`);
+        injectNoticeUtil.cancelAuthorization();
+        injectNoticeUtil.cancelNotificationById(NOTICE_ID);
+        return;
+      }
+    }
   }
   /**
    * Lifecycle function, called back before a service extension is destroyed.
    */
   onDestroy(): void {
-    console.info(TAG, 'onDestroy.');
+    console.debug(TAG, 'onDestroy.');
   }
 
   private isSystemAbility(callingTokenId: number): boolean {
     let type: number = ACCESS_TYPE_MASK & (callingTokenId >> SHIFT_DIGIT);
-    console.info(TAG, 'InjectNoticeAbility isSystemAbility, type:' + type);
+    console.debug(TAG, 'InjectNoticeAbility isSystemAbility, type:' + type);
     return type === TOKEN_NATIVE;
   }
 
@@ -82,7 +91,7 @@ export default class InjectNoticeAbility extends extension {
     } catch (error) {
       console.error(TAG, `verify ${permissionName}, ${error}`);
     }
-    console.info(TAG, `verify ${permissionName}, success`);
+    console.debug(TAG, `verify ${permissionName}, success`);
     return true;
   }
 }
