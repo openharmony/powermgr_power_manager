@@ -25,6 +25,6 @@
         "enable": true
     },
     "pickup": {
-        "enable": true
+        "enable": false
     }
 }
