@@ -64,8 +64,6 @@ SysParam::BootCompletedCallback g_bootCompletedCallback;
 bool g_inLidMode = false;
 } // namespace
 
-static bool g_wakeupDoubleClick = true;
-static bool g_wakeupPickup = true;
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 using namespace MMI;
 
@@ -178,13 +176,6 @@ void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
 void PowerMgrService::WakeupDoubleClickSettingUpdateFunc(const std::string& key)
 {
     bool isSettingEnable = GetSettingWakeupDoubleClick(key);
-    bool originEnable = IsEnableWakeupDoubleClick();
-    if (isSettingEnable == originEnable) {
-        POWER_HILOGE(COMP_SVC, "no need change wakeupDoubleClick switch, the settingEnable is: %{public}d",
-            isSettingEnable);
-        return;
-    }
-    g_wakeupDoubleClick = isSettingEnable;
     WakeupController::ChangeWakeupSourceConfig(isSettingEnable);
     WakeupController::SetWakeupDoubleClickSensor(isSettingEnable);
     POWER_HILOGI(COMP_SVC, "WakeupDoubleClickSettingUpdateFunc isSettingEnable=%{public}d", isSettingEnable);
@@ -193,11 +184,6 @@ void PowerMgrService::WakeupDoubleClickSettingUpdateFunc(const std::string& key)
 bool PowerMgrService::GetSettingWakeupDoubleClick(const std::string& key)
 {
     return SettingHelper::GetSettingWakeupDouble(key);
-}
-
-bool PowerMgrService::IsEnableWakeupDoubleClick()
-{
-    return g_wakeupDoubleClick;
 }
 
 void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
@@ -209,21 +195,10 @@ void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
 void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
 {
     bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
-    bool originEnable = IsEnableWakeupPickupGesture();
-    if (isSettingEnable == originEnable) {
-        POWER_HILOGE(COMP_SVC, "no need change wakeup pickup switch,isSettingEnable=%{public}d", isSettingEnable);
-        return;
-    }
     WakeupController::PickupConnectMotionConfig(isSettingEnable);
     POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
-    g_wakeupPickup = isSettingEnable;
     WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
     POWER_HILOGI(COMP_SVC, "ChangePickupWakeupSourceConfig done");
-}
-
-bool PowerMgrService::IsEnableWakeupPickupGesture()
-{
-    return g_wakeupPickup;
 }
 #endif
 
