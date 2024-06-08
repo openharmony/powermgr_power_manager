@@ -28,6 +28,7 @@ constexpr int32_t WAKEUP_SOURCE_CLOSE = 0;
 sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::lidObserver_ = nullptr;
+sptr<SettingObserver> SettingHelper::powerModeObserver_ = nullptr;
 
 bool SettingHelper::IsWakeupPickupSettingValid()
 {
@@ -498,7 +499,7 @@ void SettingHelper::SetSettingWakeupLid(bool enable)
 void SettingHelper::SaveCurrentMode(int32_t mode)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = settingProvider.PutIntValue(settingPowerModeKey, mode);
+    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_MODE_KEY, mode);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "save power mode key failed, mode=%{public}d ret=%{public}d", mode, ret);
     }
@@ -508,18 +509,46 @@ int32_t SettingHelper::ReadCurrentMode(int32_t defaultMode)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     int32_t mode = defaultMode;
-    ErrCode ret = settingProvider.GetIntValue(settingPowerModeKey, mode);
+    ErrCode ret = settingProvider.GetIntValue(SETTING_POWER_MODE_KEY, mode);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "read power mode key failed, ret=%{public}d", ret);
     }
     return mode;
 }
 
+void SettingHelper::RegisterSettingPowerModeObserver(SettingObserver::UpdateFunc& func)
+{
+    if (powerModeObserver_) {
+        POWER_HILOGI(COMP_UTILS, "setting power mode observer is already registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    powerModeObserver_ = settingProvider.CreateObserver(SETTING_POWER_MODE_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(powerModeObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting power mode observer failed, ret=%{public}d", ret);
+        powerModeObserver_ = nullptr;
+    }
+}
+
+void SettingHelper::UnregisterSettingPowerModeObserver()
+{
+    if (!powerModeObserver_) {
+        POWER_HILOGI(COMP_UTILS, "powerModeObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(powerModeObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting power mode observer failed, ret=%{public}d", ret);
+    }
+    powerModeObserver_ = nullptr;
+}
+
 const std::string SettingHelper::ReadPowerModeRecoverMap()
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     std::string value;
-    ErrCode ret = settingProvider.GetStringValue(settingPowerModeBackupKey, value);
+    ErrCode ret = settingProvider.GetStringValue(SETTING_POWER_MODE_BACKUP_KEY, value);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "get back up power mode policy failed, ret=%{public}d", ret);
     }
@@ -529,7 +558,7 @@ const std::string SettingHelper::ReadPowerModeRecoverMap()
 void SettingHelper::SavePowerModeRecoverMap(const std::string& jsonConfig)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    ErrCode ret = settingProvider.PutStringValue(settingPowerModeBackupKey, jsonConfig);
+    ErrCode ret = settingProvider.PutStringValue(SETTING_POWER_MODE_BACKUP_KEY, jsonConfig);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "save back up power mode policy failed, jsonConfig=%{public}s ret=%{public}d",
             jsonConfig.c_str(), ret);

@@ -66,7 +66,10 @@ void PowerModeModule::InitPowerMode()
     int32_t saveMode = SettingHelper::ReadCurrentMode(static_cast<int32_t>(this->mode_));
     this->mode_ = static_cast<PowerMode>(saveMode);
     Prepare();
-    DelayedSingleton<PowerModePolicy>::GetInstance()->InitRecoverMap();
+    if (!DelayedSingleton<PowerModePolicy>::GetInstance()->InitRecoverMap()) {
+        UpdateModepolicy();
+        RunAction(false);
+    }
 }
 
 void PowerModeModule::SetModeItem(PowerMode mode)
