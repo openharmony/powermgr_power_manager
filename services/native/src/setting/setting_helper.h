@@ -76,6 +76,10 @@ public:
     static bool GetSettingWakeupLid(const std::string& key = SETTING_POWER_WAKEUP_LID_KEY);
     static void SetSettingWakeupLid(bool enable);
     static bool IsWakeupLidSettingValid();
+    static void SaveCurrentMode(int32_t mode);
+    static int32_t ReadCurrentMode(int32_t defaultMode);
+    static const std::string ReadPowerModeRecoverMap();
+    static void SavePowerModeRecoverMap(const std::string &jsonConfig);
 
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
@@ -89,6 +93,8 @@ private:
     static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
     static constexpr const char* SETTING_POWER_WAKEUP_PICKUP_KEY {"settings.power.wakeup_pick_up"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
+    static constexpr const char* settingPowerModeKey {"settings.power.smart_mode_status"};
+    static constexpr const char* settingPowerModeBackupKey {"settings.power.smart_mode_status.backup"};
     static sptr<SettingObserver> doubleClickObserver_;
     static sptr<SettingObserver> pickUpObserver_;
     static sptr<SettingObserver> lidObserver_;

@@ -495,5 +495,45 @@ void SettingHelper::SetSettingWakeupLid(bool enable)
     }
 }
 
+void SettingHelper::SaveCurrentMode(int32_t mode)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    ErrCode ret = settingProvider.PutIntValue(settingPowerModeKey, mode);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "save power mode key failed, mode=%{public}d ret=%{public}d", mode, ret);
+    }
+}
+
+int32_t SettingHelper::ReadCurrentMode(int32_t defaultMode)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t mode = defaultMode;
+    ErrCode ret = settingProvider.GetIntValue(settingPowerModeKey, mode);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "read power mode key failed, ret=%{public}d", ret);
+    }
+    return mode;
+}
+
+const std::string SettingHelper::ReadPowerModeRecoverMap()
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    std::string value;
+    ErrCode ret = settingProvider.GetStringValue(settingPowerModeBackupKey, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get back up power mode policy failed, ret=%{public}d", ret);
+    }
+    return value;
+}
+
+void SettingHelper::SavePowerModeRecoverMap(const std::string& jsonConfig)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    ErrCode ret = settingProvider.PutStringValue(settingPowerModeBackupKey, jsonConfig);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "save back up power mode policy failed, jsonConfig=%{public}s ret=%{public}d",
+            jsonConfig.c_str(), ret);
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS
