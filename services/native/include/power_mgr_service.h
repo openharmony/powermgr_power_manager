@@ -133,13 +133,10 @@ public:
     void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
     static void RegisterSettingWakeupPickupGestureObserver();
     static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
-    static bool IsEnableWakeupPickupGesture();
-    bool WakeupPickupGesture(bool enable);
     static void RegisterSettingObservers();
     static void RegisterSettingWakeupDoubleClickObservers();
     static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
     static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
-    static bool IsEnableWakeupDoubleClick();
     static void RegisterSettingWakeUpLidObserver();
     static void WakeupLidSettingUpdateFunc(const std::string& key);
     static void RegisterSettingPowerModeObservers();

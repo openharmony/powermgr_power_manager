@@ -332,14 +332,14 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest016, TestSize.Level0)
 }
 
 /**
- * @tc.name: PowerSuspendTest018
+ * @tc.name: PowerSuspendTest017
  * @tc.desc: test wakeup lid source
  * @tc.type: FUNC
  * @tc.require: issueI9U4BF
  */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest018, TestSize.Level0)
+HWTEST_F(PowerSuspendTest, PowerSuspendTest017, TestSize.Level0)
 {
-    GTEST_LOG_(INFO) << "PowerSuspendTest018: start";
+    GTEST_LOG_(INFO) << "PowerSuspendTest017: start";
     g_service->SuspendControllerInit();
     g_service->WakeupControllerInit();
     g_service->SuspendDevice(
@@ -348,11 +348,13 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest018, TestSize.Level0)
     g_service->wakeupController_->ChangeLidWakeupSourceConfig(false);
     usleep(SLEEP_WAIT_TIME_US);
     g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_LID);
+    sleep(SLEEP_WAIT_TIME_S);
     EXPECT_FALSE(g_service->suspendController_->stateMachine_->GetState() == PowerState::AWAKE);
     g_service->wakeupController_->ChangeLidWakeupSourceConfig(true);
     usleep(SLEEP_WAIT_TIME_US);
     g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_LID);
+    sleep(SLEEP_WAIT_TIME_S);
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::AWAKE);
-    GTEST_LOG_(INFO) << "PowerSuspendTest018:  end";
+    GTEST_LOG_(INFO) << "PowerSuspendTest017:  end";
 }
 } // namespace
