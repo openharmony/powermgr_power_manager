@@ -65,14 +65,14 @@ void PowerModePolicy::ComparePowerModePolicy()
     SavePowerModeRecoverMap();
 }
 
-void PowerModePolicy::InitRecoverMap()
+bool PowerModePolicy::InitRecoverMap()
 {
     std::string jsonStr = SettingHelper::ReadPowerModeRecoverMap();
     Json::Value recoverJson;
     Json::Reader reader;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), recoverJson)) {
-        POWER_HILOGD(FEATURE_POWER_MODE, "parse recover json str error");
-        return;
+        POWER_HILOGW(FEATURE_POWER_MODE, "parse recover json str error");
+        return false;
     }
     for (const auto &member : recoverJson.getMemberNames()) {
         int32_t key = std::stoi(member);
@@ -83,6 +83,7 @@ void PowerModePolicy::InitRecoverMap()
         recoverMap_[key] = value;
     }
     POWER_HILOGI(FEATURE_POWER_MODE, "init recover map succeed");
+    return true;
 }
 
 void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)

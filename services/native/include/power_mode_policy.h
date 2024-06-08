@@ -48,7 +48,7 @@ public:
     void AddAction(uint32_t type, ModeAction& action);
     void TriggerAllActions(bool isBoot);
     bool IsValidType(uint32_t type);
-    void InitRecoverMap();
+    bool InitRecoverMap();
 
 private:
     std::map<uint32_t, ModeAction> actionMap_;
