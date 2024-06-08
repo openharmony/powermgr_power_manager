@@ -156,10 +156,28 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->RegisterSettingObservers();
         power->RegisterSettingWakeupPickupGestureObserver();
 #endif
+        power->RegisterSettingPowerModeObservers();
         isBootCompleted_ = true;
     };
     WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
+}
+
+void PowerMgrService::RegisterSettingPowerModeObservers()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {PowerModeSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingPowerModeObserver(updateFunc);
+}
+
+void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
+{
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    int32_t currMode = static_cast<int32_t>(power->GetDeviceMode());
+    int32_t saveMode = SettingHelper::ReadCurrentMode(currMode);
+    if (currMode == saveMode) {
+        return;
+    }
+    power->SetDeviceMode(static_cast<PowerMode>(currMode));
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
