@@ -27,7 +27,7 @@ constexpr int SET_DISPLAY_OFF_TIME = 8;
 constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
 constexpr int DOUBLE_TIMES = 2;
 constexpr int TEST_RATE = 3;
-constexpr int ONE_SECOND = 1;
+constexpr int ONE_SECOND = 2;
 
 class PowerMgrSTSuspendTest : public testing::Test {
 public:

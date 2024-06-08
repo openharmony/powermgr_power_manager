@@ -142,21 +142,19 @@ void WakeupController::RegisterSettingsObserver()
 void WakeupController::SetOriginSettingValue(WakeupSource& source)
 {
     if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
-        POWER_HILOGI(COMP_SVC, "the origin doubleClick_enable is: %{public}d", source.IsEnable());
         if (SettingHelper::IsWakeupDoubleSettingValid() == false) {
-            SettingHelper::SetSettingWakeupDouble(false);
-            SetWakeupDoubleClickSensor(false);
+            POWER_HILOGI(COMP_SVC, "the origin doubleClick_enable is: %{public}d", source.IsEnable());
+            SettingHelper::SetSettingWakeupDouble(source.IsEnable());
+            SetWakeupDoubleClickSensor(source.IsEnable());
             return;
         }
         auto enable = SettingHelper::GetSettingWakeupDouble();
         SetWakeupDoubleClickSensor(enable);
     } else if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
-        POWER_HILOGI(FEATURE_WAKEUP, "GetReason_WAKEUP_DEVICE_PICKUP,source enable=%{public}d", source.IsEnable());
         if (!SettingHelper::IsWakeupPickupSettingValid()) {
-            POWER_HILOGI(COMP_SVC, "enter WAKEUP_DEVICE_PICKUP inValid");
-            SettingHelper::SetSettingWakeupPickup(false);
-            PickupConnectMotionConfig(false);
-            POWER_HILOGI(COMP_SVC, "WAKEUP_DEVICE_PICKUP inValid done");
+            POWER_HILOGI(FEATURE_WAKEUP, "GetReason_WAKEUP_DEVICE_PICKUP,source enable=%{public}d", source.IsEnable());
+            SettingHelper::SetSettingWakeupPickup(source.IsEnable());
+            PickupConnectMotionConfig(source.IsEnable());
             return;
         }
         auto enable = SettingHelper::GetSettingWakeupPickup();
