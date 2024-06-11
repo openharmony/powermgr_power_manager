@@ -27,9 +27,9 @@ int TakeOverShutdownCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     POWER_HILOGD(FEATURE_SHUTDOWN, "cmd=%{public}d, flags=%{public}d", code, option.GetFlags());
-    const int32_t DFX_DELAY_MS = 10000;
+    const int32_t DFX_DELAY_S = 10;
     int32_t id = HiviewDFX::XCollie::GetInstance().SetTimer(
-        "PowerShutdownCallback", DFX_DELAY_MS, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_NOOP);
+        "PowerShutdownCallback", DFX_DELAY_S, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_NOOP);
     std::u16string descripter = TakeOverShutdownCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
