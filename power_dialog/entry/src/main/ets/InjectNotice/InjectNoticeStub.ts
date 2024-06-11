@@ -14,10 +14,10 @@
  */
 
 import rpc from '@ohos.rpc';
-import { injectNoticeUtil } from './InjectNoticeUtil';
+import {NOTICE_ID, injectNoticeUtil } from './InjectNoticeUtil';
 
-const TAG = "InjectNotice";
-const getConnectId = (...args) => {
+const TAG = 'InjectNotice';
+const getConnectId = (...args): string => {
     return args.join('-');
 };
 
@@ -29,12 +29,12 @@ export enum CmdCode {
 export class InjectNoticeStub extends rpc.RemoteObject {
     constructor(des) {
         console.debug(TAG, `InjectNoticeStub constructor start`);
-        if (typeof des == 'string') {
+        if (typeof des === 'string') {
             console.debug(TAG, `InjectNoticeStub constructor typeof string`);
-            super(des)
+            super(des);
         } else {
             console.debug(TAG, `InjectNoticeStub constructor typeof not string`);
-            return
+            return;
         }
     }
 
@@ -48,33 +48,33 @@ export class InjectNoticeStub extends rpc.RemoteObject {
                 let pid = data.readInt();
                 console.debug(TAG, `code:${code} pid: ${pid}`);
                 let ret: number = 0;
-                let retStr: string = "success";
+                let retStr: string = 'success';
                 try {
-                    let bOk = injectNoticeUtil.sendNotice();
+                    injectNoticeUtil.sendNotice();
                     console.debug(TAG, `SendNotice() code:${code} pid: ${pid}`);
                 } catch (e) {
                     ret = -1;
                     console.error(TAG, `send notice failed:${e}`);
-                    retStr = "failed"
+                    retStr = 'failed';
                 }
-
                 reply.writeInt(ret);
-                reply.wtireString('retStr');
+                reply.writeString(retStr);
             }
-                break;
+            break;
             case CmdCode.CLOSE_NOTICE_BY_REQUST: {
                 console.debug(TAG, `RpcServer:sync close_notice is called`);
                 let pid = data.readInt();
                 console.debug(TAG, `code:${code} pid: ${pid}`);
+                injectNoticeUtil.cancelNotificationById(NOTICE_ID);
                 reply.writeInt(0);
-                reply.wtireString('success');
+                reply.writeString('success');
             }
-                break;
+            break;
             default:
                 reply.writeInt(-1);
-                reply.wtireString("not support");
-
+                reply.writeString('not support');
         }
+        console.debug(TAG, `onRemoteRequest end`);
         return true;
     }
 };
