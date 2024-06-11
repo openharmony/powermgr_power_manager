@@ -32,6 +32,7 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 constexpr uint32_t PARAM_MAX_NUM = 10;
+constexpr uint32_t PARAM_MAX_SIZE = 2000;
 constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 std::unique_ptr<ShutdownStubDelegator> g_shutdownDelegator;
 std::mutex g_shutdownMutex;
@@ -243,6 +244,9 @@ int32_t PowerMgrStub::UpdateWorkSourceStub(MessageParcel& data)
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     uint32_t size = 0;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, size, E_READ_PARCEL_ERROR);
+    if (size > PARAM_MAX_SIZE) {
+        return E_EXCEED_PARAM_LIMIT;
+    }
     std::map<int32_t, std::string> workSources;
     for (uint32_t i = 0; i < size; ++i) {
         int32_t uid = 0;
