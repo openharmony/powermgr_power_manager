@@ -22,13 +22,13 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-constexpr int32_t DFX_DELAY_MS = 10000;
+constexpr int32_t DFX_DELAY_S = 10;
 
 }
 int32_t ShutdownStubDelegator::HandleRemoteRequest(
     uint32_t code, MessageParcel& data, [[maybe_unused]] MessageParcel& reply, [[maybe_unused]] MessageOption& option)
 {
-    int32_t id = HiviewDFX::XCollie::GetInstance().SetTimer("ShutdownStub", DFX_DELAY_MS, nullptr, nullptr,
+    int32_t id = HiviewDFX::XCollie::GetInstance().SetTimer("ShutdownStub", DFX_DELAY_S, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_NOOP);
     int32_t ret = ERR_OK;
     switch (code) {
