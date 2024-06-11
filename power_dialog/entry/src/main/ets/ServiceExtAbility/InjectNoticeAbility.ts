@@ -43,9 +43,6 @@ export default class InjectNoticeAbility extends extension {
 
   onConnect(want): rpc.RemoteObject {
     console.debug(TAG, 'onConnect want: ' + JSON.stringify(want));
-    let callingTokenId: number = rpc.IPCSkeleton.getCallingTokenId();
-    if (!this.isSystemAbility(callingTokenId)) {
-    }
     return new notice_sub.InjectNoticeStub('InjectNoticeStub');
   }
 
