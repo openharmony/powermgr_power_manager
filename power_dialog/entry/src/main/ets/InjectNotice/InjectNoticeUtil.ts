@@ -25,7 +25,7 @@ import GlobalContext from '../common/GlobalContext';
 
 const TAG: string = 'InjectNotice';
 const LABEL: string = 'inject notice';
-const EVENT_NAME: string = 'event_inject_close_notice'
+const EVENT_NAME: string = 'event_inject_close_notice';
 export const NOTICE_ID: number = 100;
 
 export enum InjectNoticeStaus {
