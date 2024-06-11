@@ -91,6 +91,10 @@
     {
       "name": "notice_text",
       "value": "注入权限已经授权。"
+    },
+    {
+      "name": "bn_notice_cancel",
+      "value": "取消授权"
     }
   ]
 }
