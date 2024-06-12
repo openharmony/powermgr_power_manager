@@ -17,7 +17,6 @@
 #define POWERMGR_POWER_MGR_CLIENT_H
 
 #include <string>
-
 #include <singleton.h>
 
 #include "power_state_machine_info.h"
@@ -25,11 +24,14 @@
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerMgrClient final : public DelayedRefSingleton<PowerMgrClient> {
-    DECLARE_DELAYED_REF_SINGLETON(PowerMgrClient)
+class PowerMgrClient final {
+private:
+    PowerMgrClient();
+    DISALLOW_COPY_AND_MOVE(PowerMgrClient);
 
 public:
-    DISALLOW_COPY_AND_MOVE(PowerMgrClient);
+    static PowerMgrClient& GetInstance();
+    virtual ~PowerMgrClient();
     static const uint32_t CONNECT_RETRY_COUNT = 5;
     static const uint32_t CONNECT_RETRY_MS = 800000;
     /**
