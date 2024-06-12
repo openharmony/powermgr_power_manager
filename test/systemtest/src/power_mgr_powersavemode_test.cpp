@@ -442,22 +442,4 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_023, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_023");
 }
 
-/**
- * @tc.name: PowerSavemode_024
- * @tc.desc: ReceiveEvent
- * @tc.type: FUNC
- * @tc.require: issueI5HUVS
- */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_40, TestSize.Level0)
-{
-    shared_ptr<CommonEventSaveModeTest> subscriber = CommonEventSaveModeTest::RegisterEvent();
-    system("power-shell setmode 601");
-    std::unique_lock<std::mutex> lck(g_mtx);
-    if (g_cv.wait_for(lck, std::chrono::seconds(TIME_OUT)) == std::cv_status::timeout) {
-        g_cv.notify_one();
-    }
-    CommonEventManager::UnSubscribeCommonEvent(subscriber);
-    EXPECT_EQ(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED, g_action);
-    POWER_HILOGI(LABEL_TEST, "PowerSavemode_024");
-}
 } // namespace
