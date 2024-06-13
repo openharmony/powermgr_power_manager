@@ -137,7 +137,7 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
             for (auto& wks : tokenWksItem.second.first) {
                 wks.second = true;
             }
-            tokenWksItem.second.second = tokenWksItem.second.first.size();
+            tokenWksItem.second.second = static_cast<int32_t>(tokenWksItem.second.first.size());
             ProxyInner(tokenWksItem.first, true);
         }
         return true;
