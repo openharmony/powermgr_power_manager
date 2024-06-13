@@ -247,14 +247,14 @@ private:
         }
     };
 
-    std::shared_ptr<FFRTTimer> ffrtTimer_;
+    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
     class ScreenChangeCheck {
     public:
         ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
         void Finish(TransitResult result);
     private:
         void Report(const std::string &msg);
-        std::shared_ptr<FFRTTimer> timer_;
+        std::shared_ptr<FFRTTimer> timer_ {nullptr};
         pid_t pid_ {-1};
         pid_t uid_ {-1};
         PowerState state_;
