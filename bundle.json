@@ -65,6 +65,7 @@
                 "jsoncpp",
                 "libxml2",
                 "napi",
+                "os_account",
                 "safwk",
                 "samgr",
                 "sensor",
