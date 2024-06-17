@@ -322,7 +322,7 @@ void SettingHelper::SetSettingSuspendSources(const std::string& jsonConfig)
     ErrCode ret = settingProvider.PutStringValue(SETTING_POWER_SUSPEND_SOURCES_KEY, jsonConfig);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "set setting power suspend sources key failed, jsonConfig=%{public}s ret=%{public}d",
-            jsonConfig.c_str(), ret);
+            JsonToSimpleStr(jsonConfig).c_str(), ret);
     }
 }
 
@@ -360,7 +360,7 @@ void SettingHelper::SetSettingWakeupSources(const std::string& jsonConfig)
     ErrCode ret = settingProvider.PutStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, jsonConfig);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "set setting power Wakeup sources key failed, jsonConfig=%{public}s ret=%{public}d",
-            jsonConfig.c_str(), ret);
+            JsonToSimpleStr(jsonConfig).c_str(), ret);
     }
 }
 
@@ -542,6 +542,17 @@ void SettingHelper::UnregisterSettingPowerModeObserver()
         POWER_HILOGE(COMP_UTILS, "unregister setting power mode observer failed, ret=%{public}d", ret);
     }
     powerModeObserver_ = nullptr;
+}
+
+std::string SettingHelper::JsonToSimpleStr(const std::string& jsonConfig)
+{
+    std::string str;
+    for (auto ch : jsonConfig) {
+        if (ch != ' ' && ch != '\n') {
+            str += ch;
+        }
+    }
+    return str;
 }
 
 const std::string SettingHelper::ReadPowerModeRecoverMap()
