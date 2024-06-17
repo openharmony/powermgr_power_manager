@@ -258,7 +258,7 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
 void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
+    POWER_HILOGD(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
     Json::Value root;
     Json::Reader reader;
     reader.parse(jsonStr, root);
@@ -521,7 +521,7 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source)
 {
     WakeupDeviceType reason = source.GetReason();
-    POWER_HILOGE(FEATURE_WAKEUP, "CreateMonitor reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_WAKEUP, "CreateMonitor reason=%{public}d", reason);
     std::shared_ptr<WakeupMonitor> monitor = nullptr;
     switch (reason) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:

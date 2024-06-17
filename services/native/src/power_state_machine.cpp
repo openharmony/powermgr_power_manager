@@ -157,7 +157,8 @@ void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start");
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
+                PowerUtils::GetReasonTypeString(reason).c_str());
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             if (ret != ActionResult::SUCCESS) {
@@ -1201,7 +1202,8 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     settingOffStateFlag_ = (state == PowerState::INACTIVE);
     TransitResult ret = pController->TransitTo(reason, force);
     timeoutCheck.Finish(ret);
-    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
+        PowerUtils::GetPowerStateString(state).c_str(), ret);
     settingOnStateFlag_ = false;
     settingOffStateFlag_ = false;
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
