@@ -173,5 +173,100 @@ void FFRTTimer::CancelTimerInner(uint32_t timerId)
     }
 }
 
+LogFilterEntry::LogFilterEntry(uint32_t logId, LogFilterData *data): logId_(logId), logCount_(0), entry_(data)
+{
+}
+
+bool LogFilterEntry::IsValid()
+{
+    bool isIdValid = (logId_ > LOG_FILTER_ID_START) && (logId_ < LOG_FILTER_ID_END);
+    return isIdValid && (entry_ != nullptr);
+}
+
+void LogFilterEntry::FlushLog()
+{
+    // print logs after the first log
+    if (logCount_ > 1) {
+        entry_->Print(logCount_ - 1);
+    }
+    logCount_ = 0;
+}
+
+bool LogFilterEntry::AddLog(const LogFilterData *data)
+{
+    if (data == nullptr || entry_ == nullptr) {
+        return false;
+    }
+
+    if (logCount_ == 0 || !entry_->IsSame(data)) {
+        FlushLog();
+        if (!entry_->Update(data)) {
+            return false;
+        }
+        // print first log
+        entry_->Print(0);
+    }
+
+    ++logCount_;
+    return true;
+}
+
+LogFilter::LogFilter(): queue_("log_filter") {
+    FFRTTask task = std::bind(&LogFilter::FlushAllLog, this);
+    FFRTUtils::SubmitDelayTask(task, LOG_FILTER_INTERVAL, queue_);
+}
+
+LogFilter *LogFilter::GetInstance()
+{
+    static LogFilter instance;
+    return &instance;
+}
+
+bool LogFilter::RegisterLogEntry(uint32_t logId, LogFilterData *data)
+{
+    LogFilterEntry entry(logId, data);
+    if (!entry.IsValid()) {
+        return false;
+    }
+
+    mutex_.lock();
+    logEntry_[logId] = entry;
+    mutex_.unlock();
+    return true;
+}
+
+bool LogFilter::AddLog(uint32_t logId, const LogFilterData *data)
+{
+    if (data == nullptr) {
+        return false;
+    }
+
+    mutex_.lock();
+    if (!LogEntry_.count(logId)) {
+        mutex_.unlock();
+        return false;
+    }
+
+    LogFilterEntry &entry = logEntry_[logId];
+    bool ret = entry.AddLog(data);
+    mutex_.unlock();
+    return ret;
+}
+
+void LogFilter::FlushAllLog()
+{
+    static uint32_t count = 0;
+    mutex_.lock();
+    for (auto &p : logEntry_) {
+        auto &entry = p.second;
+        entry.FlushLog();
+    }
+    mutex_.unlock();
+
+    FFRTTask task = std::bind(&LogFilter::FlushAllLog, this);
+    FFRTUtils::SubmitDelayTask(task, LOG_FILTER_INTERVAL, queue_);
+}
+
+
 } // namespace PowerMgr
 } // namespace OHOS

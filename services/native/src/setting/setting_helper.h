@@ -82,7 +82,6 @@ public:
     static void SavePowerModeRecoverMap(const std::string &jsonConfig);
     static void RegisterSettingPowerModeObserver(SettingObserver::UpdateFunc& func);
     static void UnregisterSettingPowerModeObserver();
-    static std::string JsonToSimpleStr(const std::string& jsonConfig);
 
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
