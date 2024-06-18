@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <vector>
+#include <map>
 
 #include "ffrt_inner.h"
 
@@ -161,6 +162,46 @@ private:
     std::unordered_map<uint32_t, FFRTHandle> handleMap_;
     std::unordered_map<uint32_t, uint32_t> taskId_;
 };
+
+enum LogFilterId {
+    LOG_FILTER_ID_START,
+    LOG_FILTER_ID_OVERRIDE_BRIGHTNESS,
+    LOG_FILTER_ID_GET_CONFIG_BY_PATH,
+    LOG_FILTER_ID_END,
+};
+
+constexpr uint32_t LOG_FILTER_INTERVAL = 5000;
+
+class LogFilterData {
+public:
+    virtual bool IsSame(const LogFilterData *other) const;
+    virtual bool Update(const LogFilterData *other);
+    virtual void Print(uint32_t count) const;
+};
+
+class LogFilterEntry {
+public:
+    LogFilterEntry(uint32_t logId = 0, LogFilterData *data = nullptr);
+    bool IsValid();
+    void FlushLog();
+    bool AddLog(uint32_t logId, const logFilterDta *data);
+private:
+    uint32_t logId_ {0};
+    uint32_t logCount_ {0};
+    LogFilterData *entry_ {nullptr};
+};
+
+class LogFilter {
+public:
+    static LogFilter *GetInstance();
+    bool RegisterLogEntry(uint32_t logId, LogFilterData *data);
+    bool AddLog(uint32_t logId, const LogFilterData *data);
+private:
+    LogFilter();
+    void FlushAllLog();
+    FFRTMutex mutex_;
+    FFRTQueue queue_;
+    std::map<uint32_t, LogFilterEntry> logEntry_;
 } // namespace PowerMgr
 } // namespace OHOS
 

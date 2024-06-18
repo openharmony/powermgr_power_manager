@@ -27,6 +27,7 @@
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
+#include "power_utils.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "setting_helper.h"
@@ -258,7 +259,7 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
 void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGD(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s(%{public}d)", __func__, updataEnable);
     Json::Value root;
     Json::Reader reader;
     reader.parse(jsonStr, root);
