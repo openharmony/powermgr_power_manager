@@ -192,7 +192,7 @@ void SuspendController::RegisterSettingsObserver()
         Cancel();
         for (auto source = sourceList_.begin(), id = 0; source != sourceList_.end(); source++, id++) {
             std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
-            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
+            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}d] reason=%{public}d",
                 id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
