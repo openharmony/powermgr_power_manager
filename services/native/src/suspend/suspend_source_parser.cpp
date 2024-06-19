@@ -101,7 +101,6 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::str
     for (auto iter = members.begin(); iter != members.end(); iter++) {
         std::string key = *iter;
         Json::Value valueObj = root[key];
-        POWER_HILOGI(FEATURE_SUSPEND, "key=%{public}s", key.c_str());
         bool ret = ParseSourcesProc(parseSources, valueObj, key);
         if (ret == false) {
             POWER_HILOGI(FEATURE_SUSPEND, "lost map config key");
@@ -115,7 +114,6 @@ bool SuspendSourceParser::ParseSourcesProc(
     std::shared_ptr<SuspendSources>& parseSources, Json::Value& valueObj, std::string& key)
 {
     SuspendDeviceType suspendDeviceType = SuspendSources::mapSuspendDeviceType(key);
-    POWER_HILOGI(FEATURE_SUSPEND, "key map type=%{public}u", suspendDeviceType);
     if (suspendDeviceType == SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN) {
         return false;
     }
@@ -128,13 +126,14 @@ bool SuspendSourceParser::ParseSourcesProc(
         if (actionValue.isUInt() && delayValue.isUInt()) {
             action = actionValue.asUInt();
             delayMs = delayValue.asUInt();
-            POWER_HILOGI(FEATURE_SUSPEND, "key=%{public}u, action=%{public}u, delayMs=%{public}u",
-                suspendDeviceType, action, delayMs);
             if (action >= ILLEGAL_ACTION) {
                 action = 0;
             }
         }
     }
+
+    POWER_HILOGI(FEATURE_SUSPEND, "key=%{public}s, type=%{public}u, action=%{public}u, delayMs=%{public}u",
+        key.c_str(), suspendDeviceType, action, delayMs);
 
     if (action != 0) {
         SuspendSource suspendSource = SuspendSource(suspendDeviceType, action, delayMs);
