@@ -78,25 +78,29 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
         "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d",
         isWakeup, onForceSleep == true);
     auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
-    TriggerSyncSleepCallbackInner(highPriorityCallbacks, isWakeup);
+    TriggerSyncSleepCallbackInner(highPriorityCallbacks, "High", isWakeup);
     auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
-    TriggerSyncSleepCallbackInner(defaultPriorityCallbacks, isWakeup);
+    TriggerSyncSleepCallbackInner(defaultPriorityCallbacks, "Default", isWakeup);
     auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
-    TriggerSyncSleepCallbackInner(lowPriorityCallbacks, isWakeup);
+    TriggerSyncSleepCallbackInner(lowPriorityCallbacks, "Low", isWakeup);
 
     if (isWakeup && onForceSleep) {
         onForceSleep = false;
     }
 }
 
-void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, bool isWakeup)
+void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks,
+    const std::string& priority, bool isWakeup)
 {
+    uint32_t id = 0;
     for (auto &callback : callbacks) {
         if (callback != nullptr) {
             int64_t start = GetTickCount();
             isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
-            POWER_HILOGI(FEATURE_SUSPEND,  "Trigger sync sleep callback success, cost=%{public}" PRId64, cost);
+            POWER_HILOGI(FEATURE_SUSPEND,
+                "Trigger %{public}s SyncSleepCallback[%{public}u] success, cost=%{public}" PRId64,
+                priority.c_str(), ++id, cost);
         }
     }
 }
@@ -190,9 +194,10 @@ void SuspendController::RegisterSettingsObserver()
         sourceList_ = updateSourceList;
         POWER_HILOGI(COMP_SVC, "start updateListener");
         Cancel();
-        for (auto source = sourceList_.begin(), id = 0; source != sourceList_.end(); source++, id++) {
+        uint32_t id = 0;
+        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
             std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
-            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}d] reason=%{public}d",
+            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
                 id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
