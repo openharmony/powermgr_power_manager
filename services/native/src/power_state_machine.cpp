@@ -27,6 +27,10 @@
 #include "power_mgr_service.h"
 #include "power_utils.h"
 #include "setting_helper.h"
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+#include "os_account_manager.h"
+#include "parameters.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -35,6 +39,7 @@ sptr<SettingObserver> g_displayOffTimeObserver;
 static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
+const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -584,12 +589,29 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
     }
+    if (clearMemory) {
+        ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
+        if (result != ERR_OK) {
+            POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
+            return false;
+        }
+    }
+    hibernateController->PreHibernate();
+    if (clearMemory) {
+        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
+        }
+    }
 
     hibernateController->Hibernate(clearMemory);
+    if (clearMemory) {
+        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+        }
+    }
     if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
         return false;
