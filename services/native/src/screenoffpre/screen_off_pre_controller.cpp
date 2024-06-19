@@ -146,7 +146,7 @@ void ScreenOffPreController::SchedulEyeDetectTimeout(int64_t nextTimeOut, int64_
 bool ScreenOffPreController::NeedEyeDetectLocked(int64_t nextEyeDetectTime)
 {
     if (nextEyeDetectTime < 0) {
-        POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "nextEyeDetectTime<0");
+        POWER_HILOGD(FEATURE_SCREEN_OFF_PRE, "nextEyeDetectTime<0");
         return false;
     }
     return true;
