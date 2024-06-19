@@ -190,8 +190,10 @@ void SuspendController::RegisterSettingsObserver()
         sourceList_ = updateSourceList;
         POWER_HILOGI(COMP_SVC, "start updateListener");
         Cancel();
-        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
+        for (auto source = sourceList_.begin(), id = 0; source != sourceList_.end(); source++, id++) {
             std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
+                id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                     std::placeholders::_2, std::placeholders::_3));
@@ -501,7 +503,6 @@ void SuspendController::Reset()
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
     SuspendDeviceType reason = source.GetReason();
-    POWER_HILOGI(FEATURE_SUSPEND, "CreateMonitor reason=%{public}d", reason);
     std::shared_ptr<SuspendMonitor> monitor = nullptr;
     switch (reason) {
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:

@@ -27,7 +27,6 @@
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
-#include "power_utils.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "setting_helper.h"
@@ -127,8 +126,10 @@ void WakeupController::RegisterSettingsObserver()
         sourceList_ = updateSourceList;
         POWER_HILOGI(COMP_SVC, "start updateListener");
         Cancel();
-        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
+        for (auto source = sourceList_.begin(), id = 0; source != sourceList_.end(); source++, id++) {
             std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
+            POWER_HILOGI(FEATURE_WAKEUP, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
+                id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
                 monitorMap_.emplace(monitor->GetReason(), monitor);
@@ -522,7 +523,6 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source)
 {
     WakeupDeviceType reason = source.GetReason();
-    POWER_HILOGI(FEATURE_WAKEUP, "CreateMonitor reason=%{public}d", reason);
     std::shared_ptr<WakeupMonitor> monitor = nullptr;
     switch (reason) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
