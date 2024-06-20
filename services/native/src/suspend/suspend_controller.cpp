@@ -142,7 +142,7 @@ void SuspendController::Init()
             (*source).GetReason(), (*source).GetAction(), (*source).GetDelay());
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
-            POWER_HILOGI(FEATURE_SUSPEND, "register type=%{public}u", (*source).GetReason());
+            POWER_HILOGI(FEATURE_SUSPEND, "monitor init success, type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
             g_monitorMutex.lock();
