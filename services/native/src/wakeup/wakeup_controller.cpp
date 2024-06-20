@@ -92,7 +92,7 @@ void WakeupController::Init()
 #endif
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
-            POWER_HILOGI(FEATURE_WAKEUP, "register type=%{public}u", (*source).GetReason());
+            POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
