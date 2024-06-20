@@ -714,7 +714,11 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     }
     if (state == PowerState::AWAKE) {
         notify->PublishScreenOnEvents(callTime);
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    } else if (state == PowerState::INACTIVE || state == PowerState::HIBERNATE) {
+#else
     } else if (state == PowerState::INACTIVE) {
+#endif
         notify->PublishScreenOffEvents(callTime);
     } else {
         POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
