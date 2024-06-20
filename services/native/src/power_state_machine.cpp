@@ -636,9 +636,20 @@ bool PowerStateMachine::IsScreenOn()
 
 bool PowerStateMachine::IsFoldScreenOn()
 {
-    POWER_HILOGI(FEATURE_POWER_STATE, "IsFoldScreenOn settingOnStateFlag_ is %{public}d", settingOnStateFlag_.load());
+    POWER_HILOGI(FEATURE_POWER_STATE,
+        "IsFoldScreenOn settingOnStateFlag_ is %{public}d and settingOffStateFlag_ is %{public}d",
+        settingOnStateFlag_.load(), settingOffStateFlag_.load());
+
+    if (settingOnStateFlag_ == true) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Current fold screen is going on");
+        return true;
+    }
+    if (settingOffStateFlag_ == true) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Current fold screen is going off");
+        return false;
+    }
     DisplayState state = stateAction_->GetDisplayState();
-    if (settingOnStateFlag_ == true || state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM) {
+    if (state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM) {
         POWER_HILOGI(FEATURE_POWER_STATE, "Current fold screen is on or going on");
         return true;
     }
