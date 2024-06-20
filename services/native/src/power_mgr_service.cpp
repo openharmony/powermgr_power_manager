@@ -46,9 +46,6 @@
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
 #endif
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-#include "os_account_manager.h"
-#endif
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
@@ -794,14 +791,6 @@ bool PowerMgrService::Hibernate(bool clearMemory)
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
     HibernateControllerInit();
-    hibernateController_->PreHibernate();
-    if (clearMemory) {
-        ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
-        if (result != ERR_OK) {
-            POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
-            return false;
-        }
-    }
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
     hibernateController_->PostHibernate();
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate end.");
