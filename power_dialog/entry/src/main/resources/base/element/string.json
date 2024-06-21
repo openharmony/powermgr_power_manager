@@ -61,10 +61,6 @@
       "value": "Power Options"
     },
     {
-      "name": "TEXT_LOW_BATTERY_BATTERYDIALOG",
-      "value": "Low Power"
-    },
-    {
       "name": "BUTTON_KNOW",
       "value": "Cancel"
     },
