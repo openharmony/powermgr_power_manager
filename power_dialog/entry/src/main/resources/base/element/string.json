@@ -17,14 +17,6 @@
       "value": "label"
     },
     {
-      "name": "ServiceExtAbility_desc",
-      "value": "description"
-    },
-    {
-      "name": "ServiceExtAbility_label",
-      "value": "label"
-    },
-    {
       "name": "ThermalServiceExtAbility_desc",
       "value": "description"
     },
@@ -54,43 +46,43 @@
     },
     {
       "name": "BUTTON_CANCEL_POWERDIALOG",
-      "value": "取消"
+      "value": "Cancel"
     },
     {
       "name": "BUTTON_SHUTDOWN_POWERDIALOG",
-      "value": "关机"
+      "value": "Off"
     },
     {
       "name": "BUTTON_REBOOT_POWERDIALOG",
-      "value": "重启"
+      "value": "Restart"
     },
     {
       "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
-      "value": "电源选项"
+      "value": "Power Options"
     },
     {
       "name": "TEXT_LOW_BATTERY_BATTERYDIALOG",
-      "value": "电量低"
+      "value": "Low Power"
     },
     {
       "name": "BUTTON_KNOW",
-      "value": "知道了"
+      "value": "Cancel"
     },
     {
       "name": "TEXT_HIGH_TEMPERATURE_THERMALDIALOG_HIGH",
-      "value": "高温"
+      "value": "HighTemp"
     },
     {
       "name": "TEXT_LOW_TEMPERATURE_THERMALDIALOG_LOW",
-      "value": "低温"
+      "value": "LowerTemp"
     },
     {
       "name": "BUTTON_CONFIRM",
-      "value": "确定"
+      "value": "confirm"
     },
     {
       "name": "WARNING_TIP",
-      "value": "有远程设备想操控本设备，是否同意？"
+      "value": "Do you agree to have a remote device that wants to control this device?"
     },
     {
       "name": "notice_title",
