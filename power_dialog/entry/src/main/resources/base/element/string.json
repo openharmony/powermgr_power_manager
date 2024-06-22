@@ -1,10 +1,6 @@
 {
   "string": [
     {
-      "name": "app_name",
-      "value": "power_dialog"
-    },
-    {
       "name": "entry_desc",
       "value": "description"
     },
