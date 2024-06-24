@@ -242,17 +242,6 @@ void PowerStateMachine::EmplaceHibernate()
     controllerMap_.emplace(PowerState::HIBERNATE,
         std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_HIBERNATE lambda start");
-            mDeviceState_.screenState.lastOffTime = GetTickCount();
-            DisplayState state = DisplayState::DISPLAY_OFF;
-            if (enableDisplaySuspend_) {
-                POWER_HILOGI(FEATURE_POWER_STATE, "Display suspend enabled");
-                state = DisplayState::DISPLAY_SUSPEND;
-            }
-            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
-            if (ret != ActionResult::SUCCESS) {
-                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to hibernate, display error, ret: %{public}u", ret);
-                return TransitResult::DISPLAY_OFF_ERR;
-            }
             return TransitResult::SUCCESS;
         }));
 }
@@ -589,8 +578,8 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {
         ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
@@ -604,6 +593,10 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
         }
+    }
+
+    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
     }
 
     hibernateController->Hibernate(clearMemory);
@@ -747,11 +740,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     }
     if (state == PowerState::AWAKE) {
         notify->PublishScreenOnEvents(callTime);
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    } else if (state == PowerState::INACTIVE || state == PowerState::HIBERNATE) {
-#else
     } else if (state == PowerState::INACTIVE) {
-#endif
         notify->PublishScreenOffEvents(callTime);
     } else {
         POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
