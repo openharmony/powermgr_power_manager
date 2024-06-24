@@ -42,7 +42,7 @@ void SyncHibernateCallbackProxy::OnSyncHibernate()
         static_cast<int>(PowerMgr::SyncHibernateCallbackInterfaceCode::CMD_ON_SYNC_HIBERNATE),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
     }
 }
 
@@ -64,7 +64,7 @@ void SyncHibernateCallbackProxy::OnSyncWakeup()
         static_cast<int>(PowerMgr::SyncHibernateCallbackInterfaceCode::CMD_ON_SYNC_WAKEUP),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
     }
 }
 } // namespace PowerMgr

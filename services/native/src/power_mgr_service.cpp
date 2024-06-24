@@ -956,7 +956,7 @@ bool PowerMgrService::RegisterRunningLockCallback(const sptr<IPowerRunninglockCa
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     runningLockMgr_->RegisterRunningLockCallback(callback);
     return true;
 }
@@ -969,7 +969,7 @@ bool PowerMgrService::UnRegisterRunningLockCallback(const sptr<IPowerRunninglock
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     runningLockMgr_->RegisterRunningLockCallback(callback);
     return true;
 }
@@ -1026,7 +1026,7 @@ bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     powerStateMachine_->RegisterPowerStateCallback(callback);
     return true;
 }
@@ -1039,7 +1039,7 @@ bool PowerMgrService::UnRegisterPowerStateCallback(const sptr<IPowerStateCallbac
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     powerStateMachine_->UnRegisterPowerStateCallback(callback);
     return true;
 }
@@ -1052,7 +1052,7 @@ bool PowerMgrService::RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& 
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     suspendController_->AddCallback(callback, priority);
     return true;
 }
@@ -1065,7 +1065,7 @@ bool PowerMgrService::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     suspendController_->RemoveCallback(callback);
     return true;
 }
@@ -1104,7 +1104,7 @@ bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& 
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_POWER_MODE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     powerModeModule_.AddPowerModeCallback(callback);
     return true;
 }
@@ -1117,7 +1117,7 @@ bool PowerMgrService::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_POWER_MODE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     powerModeModule_.DelPowerModeCallback(callback);
     return true;
 }
@@ -1130,7 +1130,7 @@ bool PowerMgrService::RegisterScreenStateCallback(int32_t remainTime, const sptr
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     screenOffPreController_->AddScreenStateCallback(remainTime, callback);
     return true;
 }
@@ -1143,7 +1143,7 @@ bool PowerMgrService::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCall
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
     screenOffPreController_->DelScreenStateCallback(callback);
     return true;
 }
@@ -1156,7 +1156,8 @@ bool PowerMgrService::SetDisplaySuspend(bool enable)
     if (!Permission::IsSystem()) {
         return false;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, enable: %{public}d", pid, uid, enable);
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: pid: %{public}d, uid: %{public}d, enable: %{public}d",
+        __func__, pid, uid, enable);
     powerStateMachine_->SetDisplaySuspend(enable);
     return true;
 }
@@ -1166,7 +1167,8 @@ PowerErrors PowerMgrService::SetDeviceMode(const PowerMode& mode)
     std::lock_guard lock(modeMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, mode: %{public}u", pid, uid, mode);
+    POWER_HILOGI(FEATURE_POWER_MODE, "%{public}s: pid: %{public}d, uid: %{public}d, mode: %{public}u",
+        __func__, pid, uid, mode);
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
@@ -1183,7 +1185,8 @@ PowerMode PowerMgrService::GetDeviceMode()
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto mode = powerModeModule_.GetModeItem();
-    POWER_HILOGI(FEATURE_POWER_MODE, "pid: %{public}d, uid: %{public}d, mode: %{public}u", pid, uid, mode);
+    POWER_HILOGI(FEATURE_POWER_MODE, "%{public}s: pid: %{public}d, uid: %{public}d, mode: %{public}u",
+        __func__, pid, uid, mode);
     return mode;
 }
 
@@ -1195,11 +1198,10 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
     std::lock_guard lock(dumpMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(COMP_SVC, "pid: %{public}d, uid: %{public}d", pid, uid);
 
     std::string result;
     bool ret = PowerMgrDumper::Dump(args, result);
-    POWER_HILOGI(COMP_SVC, "ret :%{public}d", ret);
+    POWER_HILOGI(COMP_SVC, "%{public}s: pid: %{public}d, uid: %{public}d ret :%{public}d", __func__, pid, uid, ret);
     return result;
 }
 

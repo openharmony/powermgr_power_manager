@@ -92,7 +92,7 @@ void WakeupController::Init()
 #endif
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
-            POWER_HILOGI(FEATURE_WAKEUP, "register type=%{public}u", (*source).GetReason());
+            POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
             monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
@@ -126,8 +126,11 @@ void WakeupController::RegisterSettingsObserver()
         sourceList_ = updateSourceList;
         POWER_HILOGI(COMP_SVC, "start updateListener");
         Cancel();
-        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
+        uint32_t id = 0;
+        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
             std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
+            POWER_HILOGI(FEATURE_WAKEUP, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
+                id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
                 monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
                 monitorMap_.emplace(monitor->GetReason(), monitor);
@@ -258,7 +261,7 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
 void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s(%{public}d)", __func__, updataEnable);
     Json::Value root;
     Json::Reader reader;
     reader.parse(jsonStr, root);
@@ -521,7 +524,6 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source)
 {
     WakeupDeviceType reason = source.GetReason();
-    POWER_HILOGE(FEATURE_WAKEUP, "CreateMonitor reason=%{public}d", reason);
     std::shared_ptr<WakeupMonitor> monitor = nullptr;
     switch (reason) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
