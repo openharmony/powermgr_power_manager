@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <unistd.h>
 
 #include "hibernate_controller.h"
 #include "system_suspend_controller.h"
@@ -20,6 +21,7 @@ namespace OHOS {
 namespace PowerMgr {
 bool HibernateController::Hibernate(bool clearMemory)
 {
+    sleep(HIBERNATE_DELAY_S);
     SystemSuspendController::GetInstance().Hibernate();
     return true;
 }

@@ -36,6 +36,7 @@ public:
 private:
     std::mutex mutex_;
     std::set<sptr<ISyncHibernateCallback>> callbacks_;
+    static constexpr int32_t HIBERNATE_DELAY_S = 5;
 };
 } // namespace PowerMgr
 } // namespace OHOS
