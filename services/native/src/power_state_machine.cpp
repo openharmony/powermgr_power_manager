@@ -20,7 +20,6 @@
 #include <datetime_ex.h>
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
-#include <unistd.h>
 
 #include "power_hitrace.h"
 #include "power_mode_policy.h"
@@ -607,9 +606,12 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
         }
     }
-    sleep(HIBERNATE_DELAY_S);
 
-    hibernateController->Hibernate(clearMemory);
+    FFRTTask task = [this, clearMemory] {
+        hibernateController->Hibernate(clearMemory);
+    };
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_S);
+
     if (clearMemory) {
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
