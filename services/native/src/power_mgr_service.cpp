@@ -1424,21 +1424,91 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
 #endif
 }
 
-PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
+void PowerMgrService::InvokerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
+    POWER_HILOGI(COMP_SVC, "OnRemoteDied Called");
+    if (!remote.promote()) {
+        POWER_HILOGI(COMP_SVC, "proxy no longer exists, return early");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "the last client using %{public}s has died", interfaceName_.c_str());
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (!pms) {
+        POWER_HILOGE(COMP_SVC, "cannot get PowerMgrService, return early");
+        return;
+    }
+    callback_(pms);
+}
+
+PowerErrors PowerMgrService::SetForceTimingOut(bool enabled, const sptr<IRemoteObject>& token)
+{
+    static sptr<IRemoteObject> thisInterfaceInvoker = nullptr;
+    static std::mutex localMutex;
+    static sptr<InvokerDeathRecipient> drt =
+        sptr<InvokerDeathRecipient>::MakeSptr(__func__, [](const sptr<PowerMgrService>& pms) {
+            auto stateMachine = pms->GetPowerStateMachine();
+            if (!stateMachine) {
+                POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+                return;
+            }
+            stateMachine->SetForceTimingOut(false);
+            POWER_HILOGI(COMP_SVC, "the variables related to SetForceTimingOut has been reset");
+        });
+
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
+
+    // even if drt is nullptr(unlikely), it will be checked in IPCObjectProxy::SendObituary()
+    localMutex.lock();
+    if (token && token->IsProxyObject() && token != thisInterfaceInvoker) {
+        // The localMutex only ensures that the "remove, assign, add" actions for THIS drt are thread safe.
+        // AddDeathRecipient/RemoveDeathRecipient are thread safe theirselves.
+        // Different remote objects(invokers) do not interfere wich each other
+        // Different DeathRecipients for the same invoker do not interfere wich each other
+        // Only one RemoteObject may hold the death recipient defined in this method and only once.
+        if (thisInterfaceInvoker) {
+            thisInterfaceInvoker->RemoveDeathRecipient(drt);
+        } // removed from the old invoker
+        thisInterfaceInvoker = token;
+        thisInterfaceInvoker->AddDeathRecipient(drt); // added to the new invoker
+    }
+    localMutex.unlock();
     powerStateMachine_->SetForceTimingOut(enabled);
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
-{
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(
+    bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token)
+{   
+    static sptr<IRemoteObject> thisInterfaceInvoker = nullptr;
+    static std::mutex localMutex;
+    static sptr<InvokerDeathRecipient> drt =
+        sptr<InvokerDeathRecipient>::MakeSptr(__func__, [](sptr<PowerMgrService> pms) {
+            auto stateMachine = pms->GetPowerStateMachine();
+            if (!stateMachine) {
+                POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+                return;
+            }
+            stateMachine->LockScreenAfterTimingOut(true, false, true);
+            POWER_HILOGI(COMP_SVC, "the variables related to LockScreenAfterTimingOut has been reset");
+        });
+
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
+    localMutex.lock();
+    if (token && token->IsProxyObject() && token != thisInterfaceInvoker) {
+        // The localMutex only ensures that the "remove, assign, add" actions are thread safe.
+        // AddDeathRecipient/RemoveDeathRecipient are thread safe theirselves.
+        if (thisInterfaceInvoker) {
+            thisInterfaceInvoker->RemoveDeathRecipient(drt);
+        } // removed from the old invoker
+        thisInterfaceInvoker = token;
+        thisInterfaceInvoker->AddDeathRecipient(drt); // added to the new invoker
+    }
+    localMutex.unlock();
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
     return PowerErrors::ERR_OK;
 }
 

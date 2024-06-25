@@ -104,9 +104,9 @@ public:
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
     virtual PowerErrors IsStandby(bool& isStandby) override;
-    virtual PowerErrors SetForceTimingOut(bool enabled) override;
+    virtual PowerErrors SetForceTimingOut(bool enabled, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors LockScreenAfterTimingOut(
-        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent = true) override;
+        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) override;
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
@@ -257,6 +257,20 @@ private:
         ~WakeupRunningLock();
     private:
         sptr<IRemoteObject> token_;
+    };
+
+    class InvokerDeathRecipient : public DeathRecipient {
+        using CallbackType = std::function<void(const sptr<PowerMgrService>&)>;
+
+    public:
+        InvokerDeathRecipient(std::string interfaceName, CallbackType callback)
+            : interfaceName_(interfaceName), callback_(callback) {};
+        virtual ~InvokerDeathRecipient() = default;
+        virtual void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+
+    private:
+        std::string interfaceName_;
+        CallbackType callback_;
     };
 
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;

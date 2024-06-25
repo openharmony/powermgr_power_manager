@@ -427,15 +427,15 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
 
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->LockScreenAfterTimingOut(true, false);
+    pmsTest_->LockScreenAfterTimingOut(true, false, nullptr);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->LockScreenAfterTimingOut(false, false);
+    pmsTest_->LockScreenAfterTimingOut(false, false, nullptr);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
         StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    pmsTest_->LockScreenAfterTimingOut(true, true);
+    pmsTest_->LockScreenAfterTimingOut(true, true, nullptr);
     EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     runningLockMgr->UnLock(remoteObject);
