@@ -40,6 +40,7 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
+constexpr int32_t HIBERNATE_DELAY_S = 5;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -605,6 +606,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
         }
     }
+    sleep(HIBERNATE_DELAY_S);
 
     hibernateController->Hibernate(clearMemory);
     if (clearMemory) {
