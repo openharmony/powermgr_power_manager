@@ -45,7 +45,11 @@ std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
 std::mutex g_instanceMutex;
 
-PowerMgrClient::PowerMgrClient() {}
+PowerMgrClient::PowerMgrClient()
+{
+    token_ = sptr<IPCObjectStub>::MakeSptr(u"ohos.powermgr.ClientAlivenessToken");
+}
+
 PowerMgrClient::~PowerMgrClient()
 {
     if (proxy_ != nullptr) {
@@ -455,14 +459,14 @@ bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo
 PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->SetForceTimingOut(enabled);
+    PowerErrors ret = proxy_->SetForceTimingOut(enabled, token_);
     return ret;
 }
 
 PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
+    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent, token_);
     return ret;
 }
 
