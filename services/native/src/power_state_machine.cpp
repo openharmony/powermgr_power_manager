@@ -20,6 +20,7 @@
 #include <datetime_ex.h>
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
+#include <unistd.h>
 
 #include "power_hitrace.h"
 #include "power_mode_policy.h"
