@@ -607,7 +607,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         }
     }
 
-    FFRTTask task = [this, clearMemory] {
+    FFRTTask task = [&hibernateController, clearMemory] {
         hibernateController->Hibernate(clearMemory);
     };
     ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_S);
