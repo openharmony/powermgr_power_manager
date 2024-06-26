@@ -603,7 +603,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 
     FFRTTask task = [hibernateController, this, clearMemory]() {
         hibernateController->Hibernate(clearMemory);
-		if (clearMemory) {
+        if (clearMemory) {
             if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
                 POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
             }
