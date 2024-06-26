@@ -87,12 +87,12 @@ public:
      * Windows overwrite timeout
      * @param timeout Specifies the timeout duration.
      */
-    bool OverrideScreenOffTime(int64_t timeout);
+    PowerErrors OverrideScreenOffTime(int64_t timeout);
 
     /**
      * Windows restores timeout
      */
-    bool RestoreScreenOffTime();
+    PowerErrors RestoreScreenOffTime();
 
     /**
      * Check whether the device screen is on. The result may be true or false, depending on the system state.
@@ -112,7 +112,7 @@ public:
     /**
      * Forcibly suspend the device into deepsleep, and return the suspend result.
      */
-    bool ForceSuspendDevice();
+    PowerErrors ForceSuspendDevice();
 
     /**
      * Check whether the type of running lock is supported
@@ -128,7 +128,7 @@ public:
      * Hibernate the device.
      * @param clearMemory Indicates whether to clear the memory before the device hibernates.
      */
-    bool Hibernate(bool clearMemory);
+    PowerErrors Hibernate(bool clearMemory);
 
     /* Set the device mode.
      *

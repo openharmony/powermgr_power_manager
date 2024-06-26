@@ -91,8 +91,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
     int32_t type = OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
     g_pmsTest->HandlePointEvent(type);
 
-    EXPECT_TRUE(g_pmsTest->OverrideScreenOffTime(TIMEOUTMS));
-    EXPECT_TRUE(g_pmsTest->RestoreScreenOffTime());
+    EXPECT_EQ(g_pmsTest->OverrideScreenOffTime(TIMEOUTMS), PowerErrors::ERR_OK);
+    EXPECT_EQ(g_pmsTest->RestoreScreenOffTime(), PowerErrors::ERR_OK);
 
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;

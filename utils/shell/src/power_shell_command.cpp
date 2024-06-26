@@ -594,9 +594,9 @@ ErrCode PowerShellCommand::RunAsTimeOutCommand()
         return ERR_OK;
     }
     if (option == 'r') {
-        bool ret = PowerMgrClient::GetInstance().RestoreScreenOffTime();
+        int ret = (int)PowerMgrClient::GetInstance().RestoreScreenOffTime();
         resultReceiver_.append("Restore screen off time");
-        if (!ret) {
+        if (ret != ERR_OK) {
             resultReceiver_.append(" failed");
         }
         resultReceiver_.append("\n");
@@ -610,10 +610,10 @@ ErrCode PowerShellCommand::RunAsTimeOutCommand()
     if (option == 'o') {
         int32_t timeout = 0;
         StrToInt(optarg, timeout);
-        bool ret = PowerMgrClient::GetInstance().OverrideScreenOffTime(static_cast<int64_t>(timeout));
+        int ret = (int)PowerMgrClient::GetInstance().OverrideScreenOffTime(static_cast<int64_t>(timeout));
         resultReceiver_.append("Override screen off time to ");
         resultReceiver_.append(std::to_string(timeout));
-        if (!ret) {
+        if (ret != ERR_OK) {
             resultReceiver_.append(" failed");
         }
         resultReceiver_.append("\n");

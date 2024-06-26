@@ -111,8 +111,8 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSi
     EXPECT_EQ(error, PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_FALSE(g_powerMgrServiceProxy->RefreshActivity(GetTickCount(),
         UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, true));
-    EXPECT_FALSE(g_powerMgrServiceProxy->OverrideScreenOffTime(200));
-    EXPECT_FALSE(g_powerMgrServiceProxy->RestoreScreenOffTime());
+    EXPECT_FALSE(g_powerMgrServiceProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(g_powerMgrServiceProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::UNKNOWN);
     EXPECT_FALSE(g_powerMgrServiceProxy->IsScreenOn());
     g_powerMgrServiceProxy->SetDisplaySuspend(true);
@@ -146,7 +146,7 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSi
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCb));
     EXPECT_FALSE(g_powerMgrServiceProxy->RegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(nullptr));
-    EXPECT_FALSE(g_powerMgrServiceProxy->ForceSuspendDevice(0));
+    EXPECT_FALSE(g_powerMgrServiceProxy->ForceSuspendDevice(0) == PowerErrors::ERR_OK);
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
     std::string errorCode = "remote error";
