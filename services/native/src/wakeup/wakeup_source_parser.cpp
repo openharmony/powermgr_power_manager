@@ -103,8 +103,6 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::strin
         std::string key = *iter;
         Json::Value valueObj = root[key];
 
-        POWER_HILOGI(FEATURE_WAKEUP, "key=%{public}s", key.c_str());
-
         bool ret = ParseSourcesProc(parseSources, valueObj, key);
         if (ret == false) {
             POWER_HILOGI(FEATURE_WAKEUP, "lost map config key");
@@ -125,18 +123,17 @@ bool WakeupSourceParser::ParseSourcesProc(
         Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
         Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
         if (!clickValue.isNull() && clickValue.isUInt()) {
-            POWER_HILOGI(FEATURE_WAKEUP, "clickValue=%{public}u", clickValue.asUInt());
             click = (clickValue.asUInt() == SINGLE_CLICK || clickValue.asUInt() == DOUBLE_CLICK) ? clickValue.asUInt() :
                                                                                                    DOUBLE_CLICK;
         }
         if (enableValue.isBool()) {
             enable = enableValue.asBool();
-            POWER_HILOGD(FEATURE_WAKEUP, "enable=%{public}d", enable);
         }
     }
 
     wakeupDeviceType = WakeupSources::mapWakeupDeviceType(key, click);
-    POWER_HILOGI(FEATURE_WAKEUP, "key map type=%{public}u", wakeupDeviceType);
+    POWER_HILOGI(FEATURE_WAKEUP, "key=%{public}s, type=%{public}u, click=%{public}u, enable=%{public}d",
+        key.c_str(), wakeupDeviceType, click, enable);
 
     if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         return false;

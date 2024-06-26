@@ -44,7 +44,7 @@ void ScreenOffPreCallbackProxy::OnScreenStateChanged(uint32_t state)
         static_cast<int>(PowerMgr::ScreenOffPreCallbackInterfaceCode::SCREEN_OFF_PRE_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
     }
 }
 } // namespace PowerMgr

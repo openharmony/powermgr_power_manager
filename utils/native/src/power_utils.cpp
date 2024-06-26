@@ -178,5 +178,16 @@ const std::string PowerUtils::GetRunningLockTypeString(RunningLockType type)
     }
     return "UNKNOWN";
 }
+
+const std::string PowerUtils::JsonToSimpleStr(const std::string& json)
+{
+    std::string str;
+    for (auto ch : json) {
+        if (ch != ' ' && ch != '\n') {
+            str += ch;
+        }
+    }
+    return str;
+}
 } // namespace PowerMgr
 } // namespace OHOS

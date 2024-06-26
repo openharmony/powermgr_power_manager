@@ -513,4 +513,38 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest017, TestSize.Level0)
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->RestoreScreenOffTime();
 }
+
+/**
+ * @tc.name: PowerWakeupTest0018
+ * @tc.desc: test ExecWakeupMonitorByReason(WAKEUP_DEVICE_PEN)
+ * @tc.type: FUNC
+ * @tc.require: issueI9V16C
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest0018, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeup0018: start";
+    g_service->WakeupControllerInit();
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType ::WAKEUP_DEVICE_PEN);
+    auto monitor = g_service->wakeupController_->monitorMap_[WakeupDeviceType ::WAKEUP_DEVICE_PEN];
+    EXPECT_TRUE(monitor != nullptr);
+
+    GTEST_LOG_(INFO) << "PowerWakeupTest0018:  end";
+}
+
+/**
+ * @tc.name: PowerWakeupTest0019
+ * @tc.desc: test ExecWakeupMonitorByReason(WAKEUP_DEVICE_DOUBLE_CLICK)
+ * @tc.type: FUNC
+ * @tc.require: issueI9V16C
+ */
+HWTEST_F(PowerWakeupTest, PowerWakeupTest0019, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerWakeup0019: start";
+    g_service->WakeupControllerInit();
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType ::WAKEUP_DEVICE_DOUBLE_CLICK);
+    auto monitor = g_service->wakeupController_->monitorMap_[WakeupDeviceType ::WAKEUP_DEVICE_DOUBLE_CLICK];
+    EXPECT_TRUE(monitor != nullptr);
+
+    GTEST_LOG_(INFO) << "PowerWakeupTest0019: end";
+}
 } // namespace

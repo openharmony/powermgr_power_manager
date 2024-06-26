@@ -296,7 +296,7 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
 ErrCode PowerShellCommand::RunAsHibernateCommand()
 {
     PowerMgrClient& client = PowerMgrClient::GetInstance();
-    client.Hibernate(true);
+    client.Hibernate(false);
     resultReceiver_.append("Hibernate is called\n");
     return ERR_OK;
 }

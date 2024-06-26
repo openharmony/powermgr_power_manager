@@ -163,7 +163,8 @@ void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start");
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
+                PowerUtils::GetReasonTypeString(reason).c_str());
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             if (ret != ActionResult::SUCCESS) {
@@ -243,17 +244,6 @@ void PowerStateMachine::EmplaceHibernate()
     controllerMap_.emplace(PowerState::HIBERNATE,
         std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_HIBERNATE lambda start");
-            mDeviceState_.screenState.lastOffTime = GetTickCount();
-            DisplayState state = DisplayState::DISPLAY_OFF;
-            if (enableDisplaySuspend_) {
-                POWER_HILOGI(FEATURE_POWER_STATE, "Display suspend enabled");
-                state = DisplayState::DISPLAY_SUSPEND;
-            }
-            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
-            if (ret != ActionResult::SUCCESS) {
-                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to hibernate, display error, ret: %{public}u", ret);
-                return TransitResult::DISPLAY_OFF_ERR;
-            }
             return TransitResult::SUCCESS;
         }));
 }
@@ -590,8 +580,8 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {
         ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
@@ -605,6 +595,10 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
         }
+    }
+
+    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
     }
 
     FFRTTask task = [&hibernateController, this, clearMemory]() {
@@ -621,7 +615,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
     ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
-    return true;
+	return true;
 #else
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner interface not supported.");
     return false;
@@ -752,11 +746,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     }
     if (state == PowerState::AWAKE) {
         notify->PublishScreenOnEvents(callTime);
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    } else if (state == PowerState::INACTIVE || state == PowerState::HIBERNATE) {
-#else
     } else if (state == PowerState::INACTIVE) {
-#endif
         notify->PublishScreenOffEvents(callTime);
     } else {
         POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
@@ -1243,7 +1233,8 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     settingOffStateFlag_ = (state == PowerState::INACTIVE);
     TransitResult ret = pController->TransitTo(reason, force);
     timeoutCheck.Finish(ret);
-    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo ret: %{public}d", ret);
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
+        PowerUtils::GetPowerStateString(state).c_str(), ret);
     settingOnStateFlag_ = false;
     settingOffStateFlag_ = false;
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);

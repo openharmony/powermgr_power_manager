@@ -16,6 +16,7 @@
 #include "setting_helper.h"
 
 #include "power_log.h"
+#include "power_utils.h"
 #include <cinttypes>
 #include <system_ability_definition.h>
 
@@ -322,7 +323,7 @@ void SettingHelper::SetSettingSuspendSources(const std::string& jsonConfig)
     ErrCode ret = settingProvider.PutStringValue(SETTING_POWER_SUSPEND_SOURCES_KEY, jsonConfig);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "set setting power suspend sources key failed, jsonConfig=%{public}s ret=%{public}d",
-            jsonConfig.c_str(), ret);
+            PowerUtils::JsonToSimpleStr(jsonConfig).c_str(), ret);
     }
 }
 
@@ -360,7 +361,7 @@ void SettingHelper::SetSettingWakeupSources(const std::string& jsonConfig)
     ErrCode ret = settingProvider.PutStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, jsonConfig);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "set setting power Wakeup sources key failed, jsonConfig=%{public}s ret=%{public}d",
-            jsonConfig.c_str(), ret);
+            PowerUtils::JsonToSimpleStr(jsonConfig).c_str(), ret);
     }
 }
 
