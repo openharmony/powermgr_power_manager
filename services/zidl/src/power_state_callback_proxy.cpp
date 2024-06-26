@@ -44,7 +44,7 @@ void PowerStateCallbackProxy::OnPowerStateChanged(PowerState state)
         static_cast<int>(PowerMgr::PowerStateCallbackInterfaceCode::POWER_STATE_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
     }
 }
 } // namespace PowerMgr

@@ -44,7 +44,7 @@ void PowerRunningLockCallbackProxy::HandleRunningLockMessage(std::string message
         static_cast<int>(PowerMgr::PowerRunningLockCallbackInterfaceCode::POWER_RUNNINGLOCK_CHANGED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
     }
 }
 } // namespace PowerMgr

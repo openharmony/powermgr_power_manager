@@ -55,7 +55,7 @@ PowerErrors PowerMgrServiceTestProxy::CreateRunningLock(const sptr<IRemoteObject
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::CREATE_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
@@ -82,7 +82,7 @@ bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& rem
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RELEASE_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -108,7 +108,7 @@ bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(RunningLockType type)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_RUNNINGLOCK_TYPE_SUPPORTED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return result;
     }
 
@@ -139,7 +139,7 @@ bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -164,7 +164,7 @@ bool PowerMgrServiceTestProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -188,7 +188,7 @@ bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_ISUSED),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     bool used = false;
@@ -217,7 +217,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     bool succ = false;
@@ -251,7 +251,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCKS),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     bool succ = false;
@@ -275,7 +275,7 @@ bool PowerMgrServiceTestProxy::ResetRunningLocks()
     int ret = stub_->SendRequest(static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESET_RUNNINGLOCKS),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     bool succ = false;
@@ -301,7 +301,7 @@ PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REBOOT_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
@@ -327,7 +327,7 @@ PowerErrors PowerMgrServiceTestProxy::ShutDownDevice(const std::string& reason)
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHUTDOWN_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
@@ -355,7 +355,7 @@ PowerErrors PowerMgrServiceTestProxy::SuspendDevice(int64_t callTimeMs, SuspendD
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SUSPEND_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
@@ -384,7 +384,7 @@ PowerErrors PowerMgrServiceTestProxy::WakeupDevice(int64_t callTimeMs, WakeupDev
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::WAKEUP_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_WAKEUP, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_WAKEUP, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
@@ -412,7 +412,7 @@ bool PowerMgrServiceTestProxy::RefreshActivity(int64_t callTimeMs, UserActivityT
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REFRESH_ACTIVITY), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_ACTIVITY, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_ACTIVITY, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -438,7 +438,7 @@ bool PowerMgrServiceTestProxy::OverrideScreenOffTime(int64_t timeout)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_SVC, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(COMP_SVC, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return result;
     }
     if (!reply.ReadBool(result)) {
@@ -466,7 +466,7 @@ bool PowerMgrServiceTestProxy::RestoreScreenOffTime()
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return result;
     }
     if (!reply.ReadBool(result)) {
@@ -496,7 +496,7 @@ bool PowerMgrServiceTestProxy::ForceSuspendDevice(int64_t callTimeMs)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return result;
     }
     if (!reply.ReadBool(result)) {
@@ -523,7 +523,7 @@ PowerState PowerMgrServiceTestProxy::GetState()
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GET_STATE), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerState::UNKNOWN;
     }
     if (!reply.ReadUint32(result)) {
@@ -551,7 +551,7 @@ bool PowerMgrServiceTestProxy::IsScreenOn()
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return result;
     }
     if (!reply.ReadBool(result)) {
@@ -580,7 +580,7 @@ bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerState
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -605,7 +605,7 @@ bool PowerMgrServiceTestProxy::UnRegisterPowerStateCallback(const sptr<IPowerSta
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_STATE_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -630,7 +630,7 @@ bool PowerMgrServiceTestProxy::RegisterPowerModeCallback(const sptr<IPowerModeCa
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_MODE_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -655,7 +655,7 @@ bool PowerMgrServiceTestProxy::UnRegisterPowerModeCallback(const sptr<IPowerMode
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_MODE_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -680,7 +680,7 @@ bool PowerMgrServiceTestProxy::RegisterRunningLockCallback(const sptr<IPowerRunn
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_RUNNINGLOCK_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -705,7 +705,7 @@ bool PowerMgrServiceTestProxy::UnRegisterRunningLockCallback(const sptr<IPowerRu
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_RUNNINGLOCK_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -731,7 +731,7 @@ bool PowerMgrServiceTestProxy::RegisterScreenStateCallback(int32_t remainTime,
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SCREEN_OFF_PRE_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -756,7 +756,7 @@ bool PowerMgrServiceTestProxy::UnRegisterScreenStateCallback(const sptr<IScreenO
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -780,7 +780,7 @@ bool PowerMgrServiceTestProxy::SetDisplaySuspend(bool enable)
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_DISPLAY_SUSPEND), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;
@@ -804,7 +804,7 @@ PowerErrors PowerMgrServiceTestProxy::SetDeviceMode(const PowerMode& mode)
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SETMODE_DEVICE), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     int32_t error;
@@ -829,7 +829,7 @@ PowerMode PowerMgrServiceTestProxy::GetDeviceMode()
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GETMODE_DEVICE),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerMode::NORMAL_MODE;
     }
 
@@ -862,7 +862,7 @@ std::string PowerMgrServiceTestProxy::ShellDump(const std::vector<std::string>& 
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHELL_DUMP),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return result;
     }
     result = reply.ReadString();
@@ -886,7 +886,7 @@ PowerErrors PowerMgrServiceTestProxy::IsStandby(bool& isStandby)
     int32_t ret = stub_->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_STANDBY), data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
 

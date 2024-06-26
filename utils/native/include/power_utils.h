@@ -27,6 +27,7 @@ public:
     static const std::string GetPowerStateString(PowerState state);
     static const std::string GetDisplayStateString(DisplayState state);
     static const std::string GetRunningLockTypeString(RunningLockType type);
+    static const std::string JsonToSimpleStr(const std::string& json);
 };
 } // namespace PowerMgr
 } // namespace OHOS
