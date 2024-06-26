@@ -601,7 +601,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
     }
 
-    FFRTTask task = [&hibernateController, this, clearMemory]() {
+    FFRTTask task = [hibernateController, this, clearMemory]() {
         hibernateController->Hibernate(clearMemory);
 		if (clearMemory) {
             if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
