@@ -621,7 +621,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
     ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
-	return true;
+    return true;
 #else
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner interface not supported.");
     return false;
