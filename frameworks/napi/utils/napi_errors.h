@@ -36,7 +36,8 @@ public:
     }
     inline bool IsError() const
     {
-        return code_ != PowerErrors::ERR_OK;
+        return code_ != PowerErrors::ERR_OK &&
+               code_ != PowerErrors::ERR_FAILURE;
     }
 
 private:

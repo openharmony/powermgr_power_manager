@@ -59,13 +59,13 @@ public:
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
     bool RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
-    virtual bool OverrideScreenOffTime(int64_t timeout) override;
-    virtual bool RestoreScreenOffTime() override;
+    virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
+    virtual PowerErrors RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn() override;
     virtual bool IsFoldScreenOn() override;
-    virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    virtual bool Hibernate(bool clearMemory) override;
+    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
+    virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;

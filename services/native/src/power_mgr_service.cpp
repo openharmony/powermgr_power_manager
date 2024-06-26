@@ -713,24 +713,28 @@ bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType 
     return true;
 }
 
-bool PowerMgrService::OverrideScreenOffTime(int64_t timeout)
+PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout)
 {
     std::lock_guard lock(screenMutex_);
     if (!Permission::IsSystem()) {
-        return false;
+        POWER_HILOGI(COMP_SVC, "OverrideScreenOffTime failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     POWER_HILOGD(COMP_SVC, "Try to override screen off time");
-    return powerStateMachine_->OverrideScreenOffTimeInner(timeout);
+    return powerStateMachine_->OverrideScreenOffTimeInner(timeout) ?
+        PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 }
 
-bool PowerMgrService::RestoreScreenOffTime()
+PowerErrors PowerMgrService::RestoreScreenOffTime()
 {
     std::lock_guard lock(screenMutex_);
     if (!Permission::IsSystem()) {
-        return false;
+        POWER_HILOGI(COMP_SVC, "RestoreScreenOffTime failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     POWER_HILOGD(COMP_SVC, "Try to restore screen off time");
-    return powerStateMachine_->RestoreScreenOffTimeInner();
+    return powerStateMachine_->RestoreScreenOffTimeInner() ?
+        PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 }
 
 PowerState PowerMgrService::GetState()
@@ -757,35 +761,38 @@ bool PowerMgrService::IsFoldScreenOn()
     return isFoldScreenOn;
 }
 
-bool PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
+PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
-        return false;
+        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     if (shutdownController_->IsShuttingDown()) {
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't force suspend");
-        return false;
+        return PowerErrors::ERR_FAILURE;
     }
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
-    return powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
+    powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
+    return PowerErrors::ERR_OK;
 }
 
-bool PowerMgrService::Hibernate(bool clearMemory)
+PowerErrors PowerMgrService::Hibernate(bool clearMemory)
 {
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate begin.");
+    if (!Permission::IsSystem()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::lock_guard lock(hibernateMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    if (!Permission::IsSystem()) {
-        return false;
-    }
     if (shutdownController_->IsShuttingDown()) {
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't hibernate");
-        return false;
+        return PowerErrors::ERR_FAILURE;
     }
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
@@ -794,10 +801,10 @@ bool PowerMgrService::Hibernate(bool clearMemory)
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
     hibernateController_->PostHibernate();
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate end.");
-    return ret;
+    return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 #else
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate interface not supported.");
-    return false;
+    return PowerErrors::ERR_FAILURE;
 #endif
 }
 
