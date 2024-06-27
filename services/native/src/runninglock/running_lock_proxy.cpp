@@ -231,6 +231,7 @@ void RunningLockProxy::ResetRunningLocks()
             for (auto &wks : tokenWksItem.second.first) {
                 wks.second = false;
             }
+            ProxyInner(tokenWksItem.first, false);
             tokenWksItem.second.second = 0;
         }
     }
