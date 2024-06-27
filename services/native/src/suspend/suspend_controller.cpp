@@ -326,6 +326,10 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
                 SystemSuspendController::GetInstance().Wakeup();
                 StartSleepTimer(reason, action, 0);
             } else if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+                if (stateMachine_->IsSwitchOpen()) {
+                    POWER_HILOGI(FEATURE_SUSPEND, "switch off event is ignored.");
+                    return;
+                }
                 SystemSuspendController::GetInstance().Wakeup();
                 SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
             } else {
