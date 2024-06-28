@@ -339,7 +339,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         return;
     }
     if (!stateMachine_->IsSwitchOpen()) {
-        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed, wakeup control listerner do nothing.");
+        POWER_HILOGD(FEATURE_WAKEUP, "Switch is closed, wakeup control listerner do nothing.");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -420,7 +420,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         }
     }
 
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
+    POWER_HILOGD(FEATURE_WAKEUP, "[UL_POWER] KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
     }

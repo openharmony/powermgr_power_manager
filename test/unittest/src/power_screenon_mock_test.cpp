@@ -52,7 +52,7 @@ void PowerScreenOnMockTest::TearDownTestCase(void)
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
 }
 
-bool PowerMgrService::IsScreenOn()
+bool PowerMgrService::IsScreenOn(bool needPrintLog)
 {
     static uint32_t count = 0;
     bool ret = true;
