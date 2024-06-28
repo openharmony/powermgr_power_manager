@@ -792,8 +792,6 @@ bool PowerMgrService::Hibernate(bool clearMemory)
         pid, uid, static_cast<int>(clearMemory));
     HibernateControllerInit();
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
-    hibernateController_->PostHibernate();
-    POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate end.");
     return ret;
 #else
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate interface not supported.");

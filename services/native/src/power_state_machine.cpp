@@ -40,6 +40,7 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
+constexpr int32_t HIBERNATE_DELAY_MS = 5000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -600,16 +601,20 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
     }
 
-    hibernateController->Hibernate(clearMemory);
-    if (clearMemory) {
-        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
-            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+    FFRTTask task = [hibernateController, this, clearMemory]() {
+        hibernateController->Hibernate(clearMemory);
+        if (clearMemory) {
+            if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
+                POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+            }
         }
-    }
-    if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
-        return false;
-    }
+        if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+            POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
+        }
+        hibernateController->PostHibernate();
+        POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
+    };
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
     return true;
 #else
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner interface not supported.");
