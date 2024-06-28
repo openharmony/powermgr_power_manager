@@ -741,11 +741,13 @@ PowerState PowerMgrService::GetState()
     return state;
 }
 
-bool PowerMgrService::IsScreenOn()
+bool PowerMgrService::IsScreenOn(bool needPrintLog)
 {
     std::lock_guard lock(stateMutex_);
     auto isScreenOn = powerStateMachine_->IsScreenOn();
-    POWER_HILOGD(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
+    if (needPrintLog) {
+        POWER_HILOGD(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
+    }
     return isScreenOn;
 }
 

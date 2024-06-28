@@ -62,7 +62,7 @@ public:
     virtual bool OverrideScreenOffTime(int64_t timeout) override;
     virtual bool RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
-    virtual bool IsScreenOn() override;
+    virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
     virtual bool Hibernate(bool clearMemory) override;
