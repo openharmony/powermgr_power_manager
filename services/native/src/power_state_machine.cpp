@@ -140,9 +140,21 @@ void PowerStateMachine::InitTransitMap()
 
 bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
 {
-    return (!forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to)) &&
-        (!allowMapByReason_.count(reason) ||
-            (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
+    bool isForbidden = forbidMap_.count(currentState_) && forbidMap_[currentState_].count(to);
+    if (isForbidden) {
+        return false;
+    }
+#ifdef HAS_SENSORS_SENSOR_PART
+    // prevent the unexpected double click to light up the screen when calling
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK && IsProximityClose() &&
+        to == PowerState::AWAKE) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click isn't allowed to wakeup device when proximity is close.");
+        return false;
+    }
+#endif
+    bool isAllowed = (!allowMapByReason_.count(reason) ||
+        (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
+    return isAllowed;
 }
 
 void PowerStateMachine::InitState()
@@ -915,6 +927,23 @@ void PowerStateMachine::ShowCurrentScreenLocks()
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}d screen on locks as follows: %{public}s", mapSize, message.c_str());
 }
+
+#ifdef HAS_SENSORS_SENSOR_PART
+bool PowerStateMachine::IsProximityClose()
+{
+    auto pms = pms_.promote();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Pms is nullptr");
+        return false;
+    }
+    auto runningLockMgr = pms->GetRunningLockMgr();
+    if (runningLockMgr == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockMgr is nullptr");
+        return false;
+    }
+    return runningLockMgr->IsProximityClose();
+}
+#endif
 
 void PowerStateMachine::HandleActivityTimeout()
 {
