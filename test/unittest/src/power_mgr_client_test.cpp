@@ -1131,8 +1131,16 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
  */
 HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient048::func started!");
     int32_t time = SET_DISPLAY_OFF_TIME_MS;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    //the last testcase aka WAKEUP_DEVICE_AOD_SLIDING unlocks screen as well.
+    //thus the screen off time will be restored thereafter.
+    //in case the screen turns off cause of time-out, we don't want screen-lock to override screen-off-time
+    auto ret = powerMgrClient.LockScreenAfterTimingOut(false, false);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    sleep(1); // wait for screen lock to restore the overrriden screen-off time after AOD_SLIDING.
+    //everything should be fine now, no more interference from screen-lock
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient048: Prepare Fail, Screen is OFF.";
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -1140,9 +1148,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
     runningLock->Lock();
     usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
-    auto ret = powerMgrClient.SetForceTimingOut(true);
-    EXPECT_EQ(ret, PowerErrors::ERR_OK);
-    ret = powerMgrClient.LockScreenAfterTimingOut(true, false);
+    ret = powerMgrClient.SetForceTimingOut(true);
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
     usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
@@ -1151,6 +1157,9 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
+    ret = powerMgrClient.LockScreenAfterTimingOut(true, false); // reset
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient048::func ended!");
 }
 
 /**
@@ -1161,7 +1170,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient048, TestSize.Level0)
  */
 HWTEST_F(PowerMgrClientTest, PowerMgrClient049, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient049::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.Hibernate(true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient049::fun is end!");
@@ -1203,7 +1212,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient051, TestSize.Level0)
     ASSERT_TRUE(testLock->IsUsed());
     testLock->UnLock();
     testLock->Recover(nullptr);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClient050::fun is end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient051::fun is end!");
 }
 
 /**
