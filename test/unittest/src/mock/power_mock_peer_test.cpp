@@ -133,8 +133,8 @@ HWTEST_F(MockPeerTest, MockPeerTest002, TestSize.Level2)
         sptrProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("app call"));
     EXPECT_EQ(error, PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_FALSE(sptrProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, true));
-    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200));
-    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime());
+    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
     auto state = sptrProxy->GetState();
     EXPECT_EQ(state, PowerState::UNKNOWN);
     EXPECT_FALSE(sptrProxy->IsScreenOn());
@@ -172,7 +172,7 @@ HWTEST_F(MockPeerTest, MockPeerTest003, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(nullptr));
     EXPECT_EQ(sptrProxy->RebootDevice(" "), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(sptrProxy->ShutDownDevice(" "), PowerErrors::ERR_CONNECTION_FAIL);
-    EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0));
+    EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0) == PowerErrors::ERR_OK);
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
     std::string errorCode = "remote error";
