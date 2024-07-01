@@ -66,8 +66,8 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
-    EXPECT_FALSE(sptrProxy->Lock(token));
-    EXPECT_FALSE(sptrProxy->UnLock(token));
+    EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, pid, uid));
     EXPECT_FALSE(sptrProxy->ProxyRunningLocks(true, {std::make_pair(pid, uid)}));

@@ -72,8 +72,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     state = sptrProxy->GetState();
     EXPECT_EQ(state, PowerState::UNKNOWN);
-    EXPECT_FALSE(sptrProxy->Lock(token));
-    EXPECT_FALSE(sptrProxy->UnLock(token));
+    EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 }
 
@@ -126,8 +126,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     RunningLockInfo info("test2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
-    EXPECT_FALSE(sptrProxy->Lock(token));
-    EXPECT_FALSE(sptrProxy->UnLock(token));
+    EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 }
 

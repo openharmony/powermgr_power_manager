@@ -117,10 +117,10 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             ret = IsRunningLockTypeSupportedStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK):
-            ret = LockStub(data);
+            ret = LockStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK):
-            ret = UnLockStub(data);
+            ret = UnLockStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_QUERY):
             ret = QueryRunningLockListsStub(data, reply);
@@ -260,21 +260,23 @@ int32_t PowerMgrStub::UpdateWorkSourceStub(MessageParcel& data)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::LockStub(MessageParcel& data)
+int32_t PowerMgrStub::LockStub(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
     int32_t timeOutMs = 0;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int32, timeOutMs, E_READ_PARCEL_ERROR);
-    Lock(remoteObj, timeOutMs);
+    PowerErrors error = Lock(remoteObj, timeOutMs);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::UnLockStub(MessageParcel& data)
+int32_t PowerMgrStub::UnLockStub(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
-    UnLock(remoteObj);
+    PowerErrors error = UnLock(remoteObj);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 

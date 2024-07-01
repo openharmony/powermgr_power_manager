@@ -909,10 +909,10 @@ bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     return true;
 }
 
-bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
+PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return false;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     std::lock_guard lock(lockMutex_);
     runningLockMgr_->Lock(remoteObj);
@@ -925,19 +925,19 @@ bool PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOut
         };
         RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(remoteObj, task, timeOutMs);
     }
-    return true;
+    return PowerErrors::ERR_OK;
 }
 
-bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
+PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
-        return false;
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
     std::lock_guard lock(lockMutex_);
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
     runningLockMgr_->UpdateWorkSource(remoteObj, {});
     runningLockMgr_->UnLock(remoteObj);
-    return true;
+    return PowerErrors::ERR_OK;
 }
 
 bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
