@@ -44,8 +44,8 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) = 0;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources) = 0;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
-    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
+    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) = 0;
