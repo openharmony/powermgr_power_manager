@@ -40,6 +40,7 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
+constexpr int32_t HIBERNATE_DELAY_MS = 5000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -243,17 +244,6 @@ void PowerStateMachine::EmplaceHibernate()
     controllerMap_.emplace(PowerState::HIBERNATE,
         std::make_shared<StateController>(PowerState::HIBERNATE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_HIBERNATE lambda start");
-            mDeviceState_.screenState.lastOffTime = GetTickCount();
-            DisplayState state = DisplayState::DISPLAY_OFF;
-            if (enableDisplaySuspend_) {
-                POWER_HILOGI(FEATURE_POWER_STATE, "Display suspend enabled");
-                state = DisplayState::DISPLAY_SUSPEND;
-            }
-            uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
-            if (ret != ActionResult::SUCCESS) {
-                POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to hibernate, display error, ret: %{public}u", ret);
-                return TransitResult::DISPLAY_OFF_ERR;
-            }
             return TransitResult::SUCCESS;
         }));
 }
@@ -590,8 +580,8 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {
         ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
@@ -607,16 +597,24 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         }
     }
 
-    hibernateController->Hibernate(clearMemory);
-    if (clearMemory) {
-        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
-            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+    }
+
+    FFRTTask task = [hibernateController, this, clearMemory]() {
+        hibernateController->Hibernate(clearMemory);
+        if (clearMemory) {
+            if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
+                POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+            }
         }
-    }
-    if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
-        return false;
-    }
+        if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+            POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
+        }
+        hibernateController->PostHibernate();
+        POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
+    };
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
     return true;
 #else
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner interface not supported.");
@@ -748,11 +746,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     }
     if (state == PowerState::AWAKE) {
         notify->PublishScreenOnEvents(callTime);
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    } else if (state == PowerState::INACTIVE || state == PowerState::HIBERNATE) {
-#else
     } else if (state == PowerState::INACTIVE) {
-#endif
         notify->PublishScreenOffEvents(callTime);
     } else {
         POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
