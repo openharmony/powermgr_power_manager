@@ -104,8 +104,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest002, TestSize.Level2)
     EXPECT_TRUE(ret == mode);
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, pid, uid));
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND));
-    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200));
-    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime());
+    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
 }
 
 /**
@@ -159,6 +159,6 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
     sptrProxy->RebootDevice(" ");
     sptrProxy->RebootDeviceForDeprecated(" ");
     sptrProxy->ShutDownDevice(" ");
-    EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0));
+    EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0) == PowerErrors::ERR_OK);
 }
 } // namespace

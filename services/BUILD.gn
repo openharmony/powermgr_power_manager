@@ -197,6 +197,7 @@ config("zidl_private_config") {
 
 ohos_shared_library("powermgr_stub") {
   sources = [
+    "zidl/src/power_mgr_async_reply.cpp",
     "zidl/src/power_mgr_stub.cpp",
     "zidl/src/power_mode_callback_stub.cpp",
     "zidl/src/power_runninglock_callback_stub.cpp",

@@ -14,6 +14,7 @@
  */
 
 #include "power_mgr_stub.h"
+#include "power_mgr_async_reply.h"
 
 #include <message_parcel.h>
 #include <string_ex.h>
@@ -152,7 +153,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             ret = SetDisplaySuspendStub(data);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::HIBERNATE):
-            ret = HibernateStub(data);
+            ret = HibernateStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SETMODE_DEVICE):
             ret = SetDeviceModeStub(data, reply);
@@ -419,9 +420,9 @@ int32_t PowerMgrStub::OverrideScreenOffTimeStub(MessageParcel& data, MessageParc
 
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int64, timeout, E_READ_PARCEL_ERROR);
 
-    bool ret = OverrideScreenOffTime(timeout);
-    if (!reply.WriteBool(ret)) {
-        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+    PowerErrors error = OverrideScreenOffTime(timeout);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        POWER_HILOGE(COMP_FWK, "WriteInt32 fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
@@ -429,9 +430,9 @@ int32_t PowerMgrStub::OverrideScreenOffTimeStub(MessageParcel& data, MessageParc
 
 int32_t PowerMgrStub::RestoreScreenOffTimeStub(MessageParcel& reply)
 {
-    bool ret = RestoreScreenOffTime();
-    if (!reply.WriteBool(ret)) {
-        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+    PowerErrors error = RestoreScreenOffTime();
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        POWER_HILOGE(COMP_FWK, "WriteInt32 fail");
         return E_WRITE_PARCEL_ERROR;
     }
     return ERR_OK;
@@ -439,15 +440,15 @@ int32_t PowerMgrStub::RestoreScreenOffTimeStub(MessageParcel& reply)
 
 int32_t PowerMgrStub::ForceSuspendDeviceStub(MessageParcel& data, MessageParcel& reply)
 {
-    bool ret = false;
     int64_t time = 0;
 
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int64, time, E_READ_PARCEL_ERROR);
+    sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(data.ReadRemoteObject());
 
-    ret = ForceSuspendDevice(time);
-    if (!reply.WriteBool(ret)) {
-        POWER_HILOGE(FEATURE_SUSPEND, "WriteBool fail");
-        return E_WRITE_PARCEL_ERROR;
+    PowerErrors error = ForceSuspendDevice(time);
+    int result = static_cast<int>(error);
+    if (powerProxy != nullptr) {
+        powerProxy->SendAsyncReply(result);
     }
     return ERR_OK;
 }
@@ -617,11 +618,17 @@ int32_t PowerMgrStub::SetDisplaySuspendStub(MessageParcel& data)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::HibernateStub(MessageParcel& data)
+int32_t PowerMgrStub::HibernateStub(MessageParcel& data, MessageParcel& reply)
 {
     bool clearMemory = false;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, E_READ_PARCEL_ERROR);
-    Hibernate(clearMemory);
+    sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(data.ReadRemoteObject());
+
+    PowerErrors error = Hibernate(clearMemory);
+    int result = static_cast<int>(error);
+    if (powerProxy != nullptr) {
+        powerProxy->SendAsyncReply(result);
+    }
     return ERR_OK;
 }
 

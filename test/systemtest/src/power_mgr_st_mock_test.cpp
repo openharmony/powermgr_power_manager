@@ -129,7 +129,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock029, TestSize.Level2)
     }
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock029:forcesuspend");
-    EXPECT_EQ(pms->ForceSuspendDevice(0), true);
+    EXPECT_EQ(pms->ForceSuspendDevice(0), PowerErrors::ERR_OK);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock029:End");
     GTEST_LOG_(INFO) << "PowerMgrMock029: end";
@@ -243,7 +243,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock063, TestSize.Level2)
     pms->Lock(token);
     EXPECT_EQ(pms->IsUsed(token), true);
 
-    EXPECT_EQ(pms->ForceSuspendDevice(0), true);
+    EXPECT_EQ(pms->ForceSuspendDevice(0), PowerErrors::ERR_OK);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
 
     pms->UnLock(token);
@@ -319,7 +319,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
-    EXPECT_EQ(pms->ForceSuspendDevice(0), true);
+    EXPECT_EQ(pms->ForceSuspendDevice(0), PowerErrors::ERR_OK);
     EXPECT_CALL(*g_stateAction, GetDisplayState())
         .Times(::testing::AtLeast(1))
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
