@@ -28,6 +28,8 @@ using namespace std;
 
 namespace {
 constexpr int32_t US_PER_MS = 1000;
+constexpr int32_t app0Uid = 8;
+constexpr int32_t app1Uid = 9;
 }
 
 namespace {
@@ -177,6 +179,7 @@ HWTEST_F (RunningLockTest, RunningLockTest005, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_FALSE(runningLock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
+    runningLock->UnLock();
 }
 
 /**
@@ -257,6 +260,7 @@ HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
     ASSERT_NE(runningLock, nullptr);
     runningLock->Lock();
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
+    runningLock->UnLock();
 }
 
 /**
@@ -281,9 +285,11 @@ HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
 
     screenRunningLock->Lock();
     EXPECT_TRUE(screenRunningLock->IsUsed());
+    screenRunningLock->UnLock();
 
     proximityRunningLock->Lock();
     EXPECT_TRUE(proximityRunningLock->IsUsed());
+    proximityRunningLock->UnLock();
 
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
 }
@@ -466,9 +472,166 @@ HWTEST_F (RunningLockTest, RunningLockTest018, TestSize.Level1)
     runninglockProxy->AddRunningLock(pid, uid, remoteObj);
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
     
-    EXPECT_TRUE(runninglockProxy->UpdateWorkSource(pid, uid, remoteObj, {{0, false}}));
+    EXPECT_TRUE(runninglockProxy->UpdateWorkSource(pid, uid, remoteObj, {{0, {"test", false}}}));
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));
+}
+
+/**
+ * @tc.name: RunningLockTest019
+ * @tc.desc: Test runninglock single app scenario
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F (RunningLockTest, RunningLockTest019, TestSize.Level1)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test019", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    ASSERT_NE(runningLock, nullptr);
+    runningLock->Lock();
+
+    std::vector<int32_t> workSource { app0Uid };
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockTest020
+ * @tc.desc: Test runninglock single app scenario with proxy
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F (RunningLockTest, RunningLockTest020, TestSize.Level1)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test020", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    ASSERT_NE(runningLock, nullptr);
+    runningLock->Lock();
+    // open app
+    std::vector<int32_t> workSource1 { app0Uid };
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource1) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+    // freeze app
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app0Uid));
+    EXPECT_FALSE(runningLock->IsUsed());
+    // thaw app
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, app0Uid));
+    EXPECT_TRUE(runningLock->IsUsed());
+    // close app
+    std::vector<int32_t> workSource0 {};
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource0) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockTest021
+ * @tc.desc: Test runninglock multi apps scenario with proxy
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F (RunningLockTest, RunningLockTest021, TestSize.Level1)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    std::vector<int32_t> workSource00 {};
+    std::vector<int32_t> workSource10 { app0Uid };
+    std::vector<int32_t> workSource01 { app1Uid };
+    std::vector<int32_t> workSource11 { app0Uid, app1Uid };
+
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test021", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    ASSERT_NE(runningLock, nullptr);
+    runningLock->Lock();
+    // open app0
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource10) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+    // open app1
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource11) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+    // freeze app0
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app0Uid));
+    EXPECT_TRUE(runningLock->IsUsed());
+    // freeze app1
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app1Uid));
+    EXPECT_FALSE(runningLock->IsUsed());
+    // thaw app0
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, app0Uid));
+    EXPECT_TRUE(runningLock->IsUsed());
+    // thaw app1
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, app1Uid));
+    EXPECT_TRUE(runningLock->IsUsed());
+    // close app0
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource01) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+    // close app1
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource00) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+}
+
+/**
+ * @tc.name: RunningLockTest022
+ * @tc.desc: Test runninglock multi apps scenario with proxy
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F (RunningLockTest, RunningLockTest022, TestSize.Level1)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    std::vector<int32_t> workSource00 {};
+    std::vector<int32_t> workSource10 { app0Uid };
+    std::vector<int32_t> workSource11 { app0Uid, app1Uid };
+
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
+        "background.test022", RunningLockType::RUNNINGLOCK_BACKGROUND);
+    ASSERT_NE(runningLock, nullptr);
+    runningLock->Lock();
+    // open app0
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource10) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+    // freeze app0
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app0Uid));
+    EXPECT_FALSE(runningLock->IsUsed());
+    // open app1
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource11) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+    // close app1
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource10) == 0);
+    EXPECT_FALSE(runningLock->IsUsed());
+    // thaw app0
+    EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, app0Uid));
+    EXPECT_TRUE(runningLock->IsUsed());
+    // close app0
+    EXPECT_TRUE(runningLock->UpdateWorkSource(workSource00) == 0);
+    EXPECT_TRUE(runningLock->IsUsed());
+
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
 }
 } // namespace

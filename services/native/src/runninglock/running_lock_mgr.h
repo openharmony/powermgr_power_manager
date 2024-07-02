@@ -65,6 +65,7 @@ public:
     {
         return runningLocks_;
     }
+    static void NotifyRunningLockChanged(const RunningLockParam& lockInnerParam, const std::string &tag);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     void ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
     void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
@@ -162,7 +163,6 @@ private:
     std::shared_ptr<RunningLockProxy> runninglockProxy_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;
-    static void NotifyRunningLockChanged(const RunningLockParam& lockInnerParam, const std::string &tag);
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
     std::map<std::string, RunningLockInfo> unSceneLockLists_;

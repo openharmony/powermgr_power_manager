@@ -25,7 +25,7 @@ void RunningLockProxy::AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteOb
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
     auto proxyIter = proxyMap_.find(proxyKey);
-    std::map<int32_t, bool> wksMap;
+    WksMap wksMap;
     if (proxyIter == proxyMap_.end()) {
         TokenWorkSourceMap tokenWksMap;
         tokenWksMap.emplace(remoteObj, std::make_pair(wksMap, 0));
@@ -68,7 +68,7 @@ void RunningLockProxy::RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemot
 }
 
 bool RunningLockProxy::UpdateWorkSource(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj,
-    std::map<int32_t, bool> workSourcesState)
+    const std::map<int32_t, std::string>& workSources)
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
     auto proxyIter = proxyMap_.find(proxyKey);
@@ -84,25 +84,43 @@ bool RunningLockProxy::UpdateWorkSource(pid_t pid, pid_t uid, const sptr<IRemote
             return false;
     }
     auto& workSourceMap = tokenWksMapIter->second.first;
+    WksMap workSourcesState;
+    std::string bundleName;
     int32_t proxyCount = 0;
-    for (const auto& wks : workSourceMap) {
-        if (workSourcesState.find(wks.first) != workSourcesState.end() && wks.second == true) {
-            workSourcesState[wks.first] = true;
-            proxyCount++;
+    for (const auto& wks : workSources) {
+        auto iter = workSourceMap.find(wks.first);
+        if (iter != workSourceMap.end()) {
+            workSourcesState.insert({ iter->first, { iter->second.first, iter->second.second } });
+            if (iter->second.second) {
+                proxyCount++;
+            } else {
+                bundleName.append(iter->second.first).append(" ");
+            }
+        } else {
+            workSourcesState.insert({ wks.first, { wks.second, false } });
+            bundleName.append(wks.second).append(" ");
         }
+    }
+    if (!bundleName.empty()) {
+        bundleName.pop_back();
     }
     bool isProxyed = tokenWksMapIter->second.second != 0 &&
         tokenWksMapIter->second.second == static_cast<int32_t>(workSourceMap.size());
-    if (isProxyed && (workSourcesState.size() == 0 ||
-        static_cast<int32_t>(workSourcesState.size()) > proxyCount)) {
-        ProxyInner(remoteObj, false);
-        tokenWksMapIter->second.second = proxyCount;
+    int32_t wksCount = static_cast<int32_t>(workSourcesState.size());
+    if (isProxyed && wksCount > proxyCount) {
+        ProxyInner(remoteObj, bundleName, RunningLockEvent::RUNNINGLOCK_UNPROXY);
+    } else if (!isProxyed && wksCount > 0 && wksCount == proxyCount) {
+        ProxyInner(remoteObj, bundleName, RunningLockEvent::RUNNINGLOCK_PROXY);
+    } else {
+        ProxyInner(remoteObj, bundleName, RunningLockEvent::RUNNINGLOCK_UPDATE);
     }
     tokenWksMapIter->second.first = std::move(workSourcesState);
+    tokenWksMapIter->second.second = proxyCount;
     return true;
 }
 
-void RunningLockProxy::ProxyInner(const sptr<IRemoteObject>& remoteObj, bool isProxy)
+void RunningLockProxy::ProxyInner(const sptr<IRemoteObject>& remoteObj,
+    const std::string& bundleNames, RunningLockEvent event)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -119,11 +137,36 @@ void RunningLockProxy::ProxyInner(const sptr<IRemoteObject>& remoteObj, bool isP
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockMgr is nullptr");
         return;
     }
-    if (isProxy) {
-        rlmgr->UnlockInnerByProxy(remoteObj, lockInner);
-    } else {
-        rlmgr->LockInnerByProxy(remoteObj, lockInner);
+    lockInner->SetBundleName(bundleNames);
+    switch (event) {
+        case RunningLockEvent::RUNNINGLOCK_UPDATE:
+            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
+            break;
+        case RunningLockEvent::RUNNINGLOCK_PROXY:
+            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
+            rlmgr->UnlockInnerByProxy(remoteObj, lockInner);
+            break;
+        case RunningLockEvent::RUNNINGLOCK_UNPROXY:
+            rlmgr->LockInnerByProxy(remoteObj, lockInner);
+            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
+            break;
+        default:
+            break;
     }
+}
+
+std::string RunningLockProxy::MergeBundleName(const WksMap& wksMap)
+{
+    std::string bundleName;
+    for (const auto& wks : wksMap) {
+        if (wks.second.second == false) {
+            bundleName.append(wks.second.first).append(" ");
+        }
+    }
+    if (!bundleName.empty()) {
+        bundleName.pop_back();
+    }
+    return bundleName;
 }
 
 bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
@@ -135,10 +178,10 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
         auto& tokenWksMap = proxyIter->second;
         for (auto& tokenWksItem : tokenWksMap) {
             for (auto& wks : tokenWksItem.second.first) {
-                wks.second = true;
+                wks.second.second = true;
             }
             tokenWksItem.second.second = static_cast<int32_t>(tokenWksItem.second.first.size());
-            ProxyInner(tokenWksItem.first, true);
+            ProxyInner(tokenWksItem.first, "", RunningLockEvent::RUNNINGLOCK_PROXY);
         }
         return true;
     }
@@ -146,14 +189,16 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
         auto& tokenWksMap = proxyItem.second;
         for (auto& tokenWksItem : tokenWksMap) {
             auto& wksMap = tokenWksItem.second.first;
-            if (wksMap.find(uid) != wksMap.end() && !wksMap[uid]) {
-                wksMap[uid] = true;
+            if (wksMap.find(uid) != wksMap.end() && !wksMap[uid].second) {
+                wksMap[uid].second = true;
                 tokenWksItem.second.second++;
             } else {
                 continue;
             }
             if (tokenWksItem.second.second == static_cast<int32_t>(wksMap.size())) {
-                ProxyInner(tokenWksItem.first, true);
+                ProxyInner(tokenWksItem.first, "", RunningLockEvent::RUNNINGLOCK_PROXY);
+            } else {
+                ProxyInner(tokenWksItem.first, MergeBundleName(wksMap), RunningLockEvent::RUNNINGLOCK_UPDATE);
             }
         }
     }
@@ -169,10 +214,11 @@ bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
         auto& tokenWksMap = proxyIter->second;
         for (auto& tokenWksItem : tokenWksMap) {
             for (auto& wks : tokenWksItem.second.first) {
-                wks.second = false;
+                wks.second.second = false;
             }
             tokenWksItem.second.second = 0;
-            ProxyInner(tokenWksItem.first, false);
+            ProxyInner(tokenWksItem.first, MergeBundleName(tokenWksItem.second.first),
+                RunningLockEvent::RUNNINGLOCK_UNPROXY);
         }
         return true;
     }
@@ -180,14 +226,16 @@ bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
         auto& tokenWksMap = proxyItem.second;
         for (auto& tokenWksItem : tokenWksMap) {
             auto& wksMap = tokenWksItem.second.first;
-            if (wksMap.find(uid) != wksMap.end() && wksMap[uid]) {
-                wksMap[uid] = false;
+            if (wksMap.find(uid) != wksMap.end() && wksMap[uid].second) {
+                wksMap[uid].second = false;
                 tokenWksItem.second.second = std::max(0, tokenWksItem.second.second - 1);
             } else {
                 continue;
             }
-            if (tokenWksItem.second.second == 0) {
-                ProxyInner(tokenWksItem.first, false);
+            if (tokenWksItem.second.second == static_cast<int32_t>(wksMap.size()) - 1) {
+                ProxyInner(tokenWksItem.first, MergeBundleName(wksMap), RunningLockEvent::RUNNINGLOCK_UNPROXY);
+            } else {
+                ProxyInner(tokenWksItem.first, MergeBundleName(wksMap), RunningLockEvent::RUNNINGLOCK_UPDATE);
             }
         }
     }
@@ -214,7 +262,8 @@ std::string RunningLockProxy::DumpProxyInfo()
             for (const auto& wks : tokenWksMap.first) {
                 result.append("********workSourceIndex=").append(std::to_string(appIndex))
                     .append("********appuid=").append(std::to_string(wks.first))
-                    .append("********proxyState=").append(std::to_string(wks.second))
+                    .append("********bundleName=").append(wks.second.first)
+                    .append("********proxyState=").append(std::to_string(wks.second.second))
                     .append("\n");
             }
         }
@@ -229,9 +278,10 @@ void RunningLockProxy::ResetRunningLocks()
         auto& tokenWksMap = proxyItem.second;
         for (auto &tokenWksItem : tokenWksMap) {
             for (auto &wks : tokenWksItem.second.first) {
-                wks.second = false;
+                wks.second.second = false;
             }
-            ProxyInner(tokenWksItem.first, false);
+            ProxyInner(tokenWksItem.first, MergeBundleName(tokenWksItem.second.first),
+                RunningLockEvent::RUNNINGLOCK_UNPROXY);
             tokenWksItem.second.second = 0;
         }
     }
