@@ -935,7 +935,6 @@ bool PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
     }
     std::lock_guard lock(lockMutex_);
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
-    runningLockMgr_->UpdateWorkSource(remoteObj, {});
     runningLockMgr_->UnLock(remoteObj);
     return true;
 }

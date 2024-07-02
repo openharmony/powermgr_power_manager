@@ -389,17 +389,7 @@ bool RunningLockMgr::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     RunningLockParam lockInnerParam = lockInner->GetParam();
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "try UpdateWorkSource, name: %{public}s, type: %{public}d lockid: %{public}s",
         lockInnerParam.name.c_str(), lockInnerParam.type, std::to_string(lockInnerParam.lockid).c_str());
-    std::string bundleNames;
-    std::map<int32_t, bool> workSourcesState;
-    for (const auto& wks : workSources) {
-        workSourcesState[wks.first] = false;
-        bundleNames.append(wks.second).append(" ");
-    }
-    bundleNames.pop_back();
-    if (runninglockProxy_->UpdateWorkSource(lockInner->GetPid(), lockInner->GetUid(), remoteObj, workSourcesState)) {
-        lockInner->SetBundleName(bundleNames);
-        NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
-    }
+    runninglockProxy_->UpdateWorkSource(lockInner->GetPid(), lockInner->GetUid(), remoteObj, workSources);
     return true;
 }
 
@@ -607,7 +597,7 @@ void RunningLockMgr::LockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner)
 {
     if (!lockInner->IsProxied()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "LockInnerByProxy failed, runninglock Proxied");
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "LockInnerByProxy failed, runninglock UnProxied");
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
