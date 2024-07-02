@@ -28,6 +28,7 @@ ohos_hap("power_dialog_hap") {
     ":power_dialog_resources",
   ]
 
+  publicity_file = "../publicity.xml"
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "power_dialog"
 
