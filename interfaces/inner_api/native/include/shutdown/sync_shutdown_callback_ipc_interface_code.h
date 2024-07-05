@@ -21,6 +21,7 @@ namespace OHOS {
 namespace PowerMgr {
 enum class SyncShutdownCallbackInterfaceCode {
     CMD_ON_SYNC_SHUTDOWN = 0,
+    CMD_ON_SYNC_SHUTDOWN_OR_REBOOT = 1,
 };
 } // space PowerMgr
 } // namespace OHOS

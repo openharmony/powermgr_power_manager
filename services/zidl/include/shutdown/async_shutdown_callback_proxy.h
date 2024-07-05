@@ -31,6 +31,7 @@ public:
     }
     ~AsyncShutdownCallbackProxy() override = default;
     virtual void OnAsyncShutdown() override;
+    virtual void OnAsyncShutdownOrReboot(bool isReboot) override;
 
 private:
     static inline BrokerDelegator<AsyncShutdownCallbackProxy> delegator_;
