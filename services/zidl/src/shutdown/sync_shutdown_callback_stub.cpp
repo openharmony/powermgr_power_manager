@@ -40,6 +40,8 @@ int SyncShutdownCallbackStub::OnRemoteRequest(
     int32_t ret = ERR_OK;
     if (code == static_cast<uint32_t>(PowerMgr::SyncShutdownCallbackInterfaceCode::CMD_ON_SYNC_SHUTDOWN)) {
         ret = OnSyncShutdownCallbackStub(data, reply);
+    } else if (code == static_cast<uint32_t>(PowerMgr::SyncShutdownCallbackInterfaceCode::CMD_ON_SYNC_SHUTDOWN_OR_REBOOT)) {
+        ret = OnSyncShutdownOrRebootCallbackStub(data, reply);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -50,6 +52,14 @@ int SyncShutdownCallbackStub::OnRemoteRequest(
 int32_t SyncShutdownCallbackStub::OnSyncShutdownCallbackStub(MessageParcel& data, MessageParcel& reply)
 {
     OnSyncShutdown();
+    return ERR_OK;
+}
+
+int32_t SyncShutdownCallbackStub::OnSyncShutdownOrRebootCallbackStub(MessageParcel& data, MessageParcel& reply)
+{
+    bool isReboot;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, isReboot, E_READ_PARCEL_ERROR);
+    OnSyncShutdownOrReboot(isReboot);
     return ERR_OK;
 }
 

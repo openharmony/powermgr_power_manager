@@ -45,5 +45,29 @@ void SyncShutdownCallbackProxy::OnSyncShutdown()
     }
 }
 
+void SyncShutdownCallbackProxy::OnSyncShutdownOrReboot(bool isReboot)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(SyncShutdownCallbackProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
+        return;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Bool, isReboot);
+
+    int ret = remote->SendRequest(
+        static_cast<int32_t>(PowerMgr::SyncShutdownCallbackInterfaceCode::CMD_ON_SYNC_SHUTDOWN_OR_REBOOT),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
+    }
+}
+
 } // namespace PowerMgr
 } // namespace OHOS
