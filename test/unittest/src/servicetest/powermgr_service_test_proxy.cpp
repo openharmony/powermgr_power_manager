@@ -418,18 +418,17 @@ bool PowerMgrServiceTestProxy::RefreshActivity(int64_t callTimeMs, UserActivityT
     return true;
 }
 
-bool PowerMgrServiceTestProxy::OverrideScreenOffTime(int64_t timeout)
+PowerErrors PowerMgrServiceTestProxy::OverrideScreenOffTime(int64_t timeout)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(COMP_SVC, "Write descriptor failed");
-        return result;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
     data.WriteInt64(timeout);
@@ -438,56 +437,50 @@ bool PowerMgrServiceTestProxy::OverrideScreenOffTime(int64_t timeout)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_SVC, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return result;
+        POWER_HILOGE(COMP_SVC, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(COMP_SVC, "ReadBool fail");
-    }
-
-    return result;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrServiceTestProxy::RestoreScreenOffTime()
+PowerErrors PowerMgrServiceTestProxy::RestoreScreenOffTime()
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
-        return result;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return result;
+        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(COMP_FWK, "ReadBool fail");
-    }
-
-    return result;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrServiceTestProxy::ForceSuspendDevice(int64_t callTimeMs)
+PowerErrors PowerMgrServiceTestProxy::ForceSuspendDevice(int64_t callTimeMs)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
-        return result;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
     data.WriteInt64(callTimeMs);
@@ -496,14 +489,12 @@ bool PowerMgrServiceTestProxy::ForceSuspendDevice(int64_t callTimeMs)
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND),
         data, reply, option);
     if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return result;
+        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(FEATURE_SUSPEND, "ReadBool fail");
-    }
-
-    return result;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
 PowerState PowerMgrServiceTestProxy::GetState()

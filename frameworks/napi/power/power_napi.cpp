@@ -97,19 +97,19 @@ napi_value PowerNapi::Suspend(napi_env env, napi_callback_info info)
             }
         }
     }
+
     bool isForce = false;
     napi_get_value_bool(env, argv[0], &isForce);
 
+    PowerErrors code;
     if (isForce) {
-        bool ret = g_powerMgrClient.ForceSuspendDevice();
-        if (!ret) {
-            POWER_HILOGE(FEATURE_WAKEUP, "Forcesuspend Device fail");
-        }
+        code = g_powerMgrClient.ForceSuspendDevice();
     } else {
-        PowerErrors code = g_powerMgrClient.SuspendDevice();
-        if (code != PowerErrors::ERR_OK) {
-            error.ThrowError(env, code);
-        }
+        code = g_powerMgrClient.SuspendDevice();
+    }
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_WAKEUP, "Suspend Device fail, isForce:%{public}d", isForce);
+        return error.ThrowError(env, code);
     }
     return nullptr;
 }
@@ -129,13 +129,14 @@ napi_value PowerNapi::Hibernate(napi_env env, napi_callback_info info)
             }
         }
     }
+
     bool clearMemory = false;
     napi_get_value_bool(env, argv[0], &clearMemory);
 
-    bool ret = g_powerMgrClient.Hibernate(clearMemory);
-    if (!ret) {
+    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory);
+    if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "Hibernate failed.");
-        error.ThrowError(env, PowerErrors::ERR_FAILURE);
+        error.ThrowError(env, code);
     }
     return nullptr;
 }
@@ -325,15 +326,15 @@ napi_value PowerNapi::SetScreenOffTime(napi_env env, napi_callback_info info)
         return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
     }
 
-    bool ret;
+    PowerErrors code;
     if (timeout == RESTORE_DEFAULT_SCREENOFF_TIME) {
-        ret = g_powerMgrClient.RestoreScreenOffTime();
+        code = g_powerMgrClient.RestoreScreenOffTime();
     } else {
-        ret = g_powerMgrClient.OverrideScreenOffTime(timeout);
+        code = g_powerMgrClient.OverrideScreenOffTime(timeout);
     }
-    if (!ret) {
+    if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "SetScreenOffTime failed.");
-        return error.ThrowError(env, PowerErrors::ERR_FAILURE);
+        return error.ThrowError(env, code);
     }
     return nullptr;
 }

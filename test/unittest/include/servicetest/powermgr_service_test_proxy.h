@@ -57,11 +57,11 @@ public:
         const std::string& detail = std::string("app call"));
     bool RefreshActivity(int64_t callTimeMs, UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER,
         bool needChangeBacklight = true);
-    bool OverrideScreenOffTime(int64_t timeout);
-    bool RestoreScreenOffTime();
+    PowerErrors OverrideScreenOffTime(int64_t timeout);
+    PowerErrors RestoreScreenOffTime();
     PowerState GetState();
     bool IsScreenOn(bool needPrintLog = true);
-    bool ForceSuspendDevice(int64_t callTimeMs);
+    PowerErrors ForceSuspendDevice(int64_t callTimeMs);
     PowerErrors RebootDevice(const std::string& reason);
     PowerErrors RebootDeviceForDeprecated(const std::string& reason);
     PowerErrors ShutDownDevice(const std::string& reason);

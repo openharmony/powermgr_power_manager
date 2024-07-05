@@ -72,8 +72,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     state = sptrProxy->GetState();
     EXPECT_EQ(state, PowerState::UNKNOWN);
-    EXPECT_FALSE(sptrProxy->Lock(token));
-    EXPECT_FALSE(sptrProxy->UnLock(token));
+    EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 }
 
@@ -104,8 +104,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest002, TestSize.Level2)
     EXPECT_TRUE(ret == mode);
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, pid, uid));
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND));
-    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200));
-    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime());
+    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
 }
 
 /**
@@ -126,8 +126,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     RunningLockInfo info("test2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
-    EXPECT_FALSE(sptrProxy->Lock(token));
-    EXPECT_FALSE(sptrProxy->UnLock(token));
+    EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 }
 
@@ -159,6 +159,6 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
     sptrProxy->RebootDevice(" ");
     sptrProxy->RebootDeviceForDeprecated(" ");
     sptrProxy->ShutDownDevice(" ");
-    EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0));
+    EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0) == PowerErrors::ERR_OK);
 }
 } // namespace

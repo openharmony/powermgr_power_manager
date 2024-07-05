@@ -59,21 +59,21 @@ public:
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
     bool RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
-    virtual bool OverrideScreenOffTime(int64_t timeout) override;
-    virtual bool RestoreScreenOffTime() override;
+    virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
+    virtual PowerErrors RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
-    virtual bool ForceSuspendDevice(int64_t callTimeMs) override;
-    virtual bool Hibernate(bool clearMemory) override;
+    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
+    virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
-    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
+    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;

@@ -75,8 +75,8 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
     powerMgrClient.SuspendDevice(abnormaltype, false);
-    EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(100));
-    EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime());
+    EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(100) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
 }
 
 /**
@@ -190,8 +190,8 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     sptrProxy->SuspendDevice(0, abnormaltype, false);
     sptrProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("app call"));
     sptrProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, true);
-    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200));
-    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime());
+    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
     auto state = sptrProxy->GetState();
     EXPECT_EQ(state, PowerState::UNKNOWN);
     EXPECT_FALSE(sptrProxy->IsScreenOn());

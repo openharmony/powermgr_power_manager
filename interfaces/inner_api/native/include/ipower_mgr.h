@@ -44,8 +44,8 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) = 0;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources) = 0;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
-    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
+    virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
+    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) = 0;
@@ -60,12 +60,12 @@ public:
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
-    virtual bool OverrideScreenOffTime(int64_t timeout) = 0;
-    virtual bool RestoreScreenOffTime() = 0;
+    virtual PowerErrors OverrideScreenOffTime(int64_t timeout) = 0;
+    virtual PowerErrors RestoreScreenOffTime() = 0;
     virtual PowerState GetState() = 0;
     virtual bool IsScreenOn(bool needPrintLog = true) = 0;
     virtual bool IsFoldScreenOn() = 0;
-    virtual bool ForceSuspendDevice(int64_t callTimeMs) = 0;
+    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
 
@@ -84,7 +84,7 @@ public:
     virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) = 0;
 
     virtual bool SetDisplaySuspend(bool enable) = 0;
-    virtual bool Hibernate(bool clearMemory) = 0;
+    virtual PowerErrors Hibernate(bool clearMemory) = 0;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) = 0;
     virtual PowerMode GetDeviceMode() = 0;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
