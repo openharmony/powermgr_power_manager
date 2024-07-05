@@ -206,22 +206,22 @@ bool PowerMgrClient::RefreshActivity(UserActivityType type)
     return ret;
 }
 
-bool PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
+PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
 {
     if (timeout <= 0) {
         POWER_HILOGW(COMP_FWK, "Invalid timeout, timeout=%{public}" PRId64 "", timeout);
-        return false;
+        return PowerErrors::ERR_PARAM_INVALID;
     }
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    bool ret = proxy_->OverrideScreenOffTime(timeout);
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->OverrideScreenOffTime(timeout);
     POWER_HILOGD(COMP_FWK, "Calling OverrideScreenOffTime Success");
     return ret;
 }
 
-bool PowerMgrClient::RestoreScreenOffTime()
+PowerErrors PowerMgrClient::RestoreScreenOffTime()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    bool ret = proxy_->RestoreScreenOffTime();
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->RestoreScreenOffTime();
     POWER_HILOGD(COMP_FWK, "Calling RestoreScreenOffTime Success");
     return ret;
 }
@@ -233,10 +233,10 @@ bool PowerMgrClient::IsRunningLockTypeSupported(RunningLockType type)
     return proxy_->IsRunningLockTypeSupported(type);
 }
 
-bool PowerMgrClient::ForceSuspendDevice()
+PowerErrors PowerMgrClient::ForceSuspendDevice()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    bool ret = proxy_->ForceSuspendDevice(GetTickCount());
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy_->ForceSuspendDevice(GetTickCount());
     POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDevice Success");
     return ret;
 }
@@ -406,11 +406,10 @@ bool PowerMgrClient::SetDisplaySuspend(bool enable)
     return ret;
 }
 
-bool PowerMgrClient::Hibernate(bool clearMemory)
+PowerErrors PowerMgrClient::Hibernate(bool clearMemory)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    bool ret = proxy_->Hibernate(clearMemory);
-    return ret;
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->Hibernate(clearMemory);
 }
 
 PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)

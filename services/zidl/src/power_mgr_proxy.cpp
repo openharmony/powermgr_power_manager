@@ -14,6 +14,7 @@
  */
 
 #include "power_mgr_proxy.h"
+#include "power_mgr_async_reply.h"
 
 #include <message_parcel.h>
 #include <string_ex.h>
@@ -146,10 +147,10 @@ bool PowerMgrProxy::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     return true;
 }
 
-bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
+PowerErrors PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -157,26 +158,29 @@ bool PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, timeOutMs, false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
+        data, RemoteObject, remoteObj.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, timeOutMs, PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    return true;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
+PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -184,19 +188,22 @@ bool PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
+        data, RemoteObject, remoteObj.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    return true;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    return static_cast<PowerErrors>(error);
 }
 
 bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
@@ -539,50 +546,47 @@ bool PowerMgrProxy::RefreshActivity(int64_t callTimeMs, UserActivityType type, b
     return true;
 }
 
-bool PowerMgrProxy::OverrideScreenOffTime(int64_t timeout)
+PowerErrors PowerMgrProxy::OverrideScreenOffTime(int64_t timeout)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(COMP_SVC, "Write descriptor failed");
-        return result;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int64, timeout, false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int64, timeout, PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_SVC, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return result;
-    }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(COMP_SVC, "ReadBool fail");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    return result;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrProxy::RestoreScreenOffTime()
+PowerErrors PowerMgrProxy::RestoreScreenOffTime()
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
-        return result;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
     int ret = remote->SendRequest(
@@ -590,43 +594,42 @@ bool PowerMgrProxy::RestoreScreenOffTime()
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return result;
-    }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(COMP_FWK, "ReadBool fail");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    return result;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs)
+PowerErrors PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
-    bool result = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
-        return result;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int64, callTimeMs, false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int64, callTimeMs, PowerErrors::ERR_CONNECTION_FAIL);
+    sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
+    data.WriteRemoteObject(asyncCallback->AsObject());
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND), data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return result;
-    }
-    if (!reply.ReadBool(result)) {
-        POWER_HILOGE(FEATURE_SUSPEND, "ReadBool fail");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    return result;
+    int waitTime = 1000;
+    int error = asyncCallback->WaitForAsyncReply(waitTime);
+    return static_cast<PowerErrors>(error);
 }
 
 PowerState PowerMgrProxy::GetState()
@@ -1057,10 +1060,10 @@ bool PowerMgrProxy::SetDisplaySuspend(bool enable)
     return true;
 }
 
-bool PowerMgrProxy::Hibernate(bool clearMemory)
+PowerErrors PowerMgrProxy::Hibernate(bool clearMemory)
 {
     sptr<IRemoteObject> remote = Remote();
-    RETURN_IF_WITH_RET(remote == nullptr, false);
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1068,19 +1071,24 @@ bool PowerMgrProxy::Hibernate(bool clearMemory)
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, PowerErrors::ERR_CONNECTION_FAIL);
+    sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
+    data.WriteRemoteObject(asyncCallback->AsObject());
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::HIBERNATE),
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return false;
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    return true;
+
+    int waitTime = 1000;
+    int error = asyncCallback->WaitForAsyncReply(waitTime);
+    return static_cast<PowerErrors>(error);
 }
 
 PowerErrors PowerMgrProxy::SetDeviceMode(const PowerMode& mode)

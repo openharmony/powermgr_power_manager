@@ -188,7 +188,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine007::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime());
+    EXPECT_EQ(powerMgrClient.RestoreScreenOffTime(), PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine007::fun is end!");
 }
 }
