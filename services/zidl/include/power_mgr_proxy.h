@@ -50,8 +50,8 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
-    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
+    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
     virtual bool ProxyRunningLocks(bool isProxied,
