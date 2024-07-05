@@ -32,6 +32,7 @@ namespace {
 sptr<PowerMgrService> g_service = nullptr;
 MockPowerAction* g_mockPowerAction = nullptr;
 MockStateAction* g_mockStateAction = nullptr;
+bool g_isReboot = false;
 bool g_isHighPriority = false;
 bool g_isDefaultPriority = false;
 bool g_isLowPriority = false;
@@ -53,6 +54,7 @@ void SyncShutdownCallbackTest::TearDownTestCase()
 
 void SyncShutdownCallbackTest::SetUp()
 {
+    g_isReboot = false;
     g_isHighPriority = false;
     g_isDefaultPriority = false;
     g_isLowPriority = false;
@@ -84,6 +86,27 @@ void SyncShutdownCallbackTest::NotSyncShutdownCallback::OnSyncShutdown()
 {
 }
 
+void SyncShutdownCallbackTest::SyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    POWER_HILOGI(LABEL_TEST, "OnSyncShutdownOrReboot called, isReboot=%{public}d", isReboot);
+    g_isReboot = isReboot;
+    g_isDefaultPriority = true;
+}
+
+void SyncShutdownCallbackTest::HighPrioritySyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isHighPriority = true;
+}
+
+void SyncShutdownCallbackTest::LowPrioritySyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isLowPriority = true;
+}
+
+void SyncShutdownCallbackTest::NotSyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+}
+
 /**
  * @tc.name: SyncShutdownCallbackk001
  * @tc.desc: Test synchronous shutdown callback for shutdown and reboot
@@ -97,9 +120,11 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk001, TestSize.Level0)
 
     g_service->RebootDevice("test_reboot");
     EXPECT_TRUE(g_isDefaultPriority);
+    EXPECT_TRUE(g_isReboot); // The callback param will be true for reboot
 
     g_service->ShutDownDevice("test_shutdown");
     EXPECT_TRUE(g_isDefaultPriority);
+    EXPECT_FALSE(g_isReboot); // The callback param will be false for shutdown
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback001 end");
 }
 

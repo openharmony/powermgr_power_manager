@@ -29,23 +29,27 @@ public:
     public:
         ~AsyncShutdownCallback() override = default;
         void OnAsyncShutdown() override;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
 
     class HighPriorityAsyncShutdownCallback : public AsyncShutdownCallbackStub {
     public:
         ~HighPriorityAsyncShutdownCallback() override = default;
         void OnAsyncShutdown() override;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
 
     class LowPriorityAsyncShutdownCallback : public AsyncShutdownCallbackStub {
     public:
         ~LowPriorityAsyncShutdownCallback() override = default;
         void OnAsyncShutdown() override;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
 
     class NotAsyncShutdownCallback : public AsyncShutdownCallbackStub {
         ~NotAsyncShutdownCallback() override = default;
         void OnAsyncShutdown() override;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
 
 protected:

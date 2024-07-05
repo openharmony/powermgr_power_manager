@@ -31,11 +31,13 @@ public:
     public:
         ~AsyncShutdownCallback() override = default;
         void OnAsyncShutdown() override;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
     class SyncShutdownCallback : public SyncShutdownCallbackStub {
     public:
         ~SyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
     class TakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
