@@ -32,6 +32,8 @@ MessageOption g_option;
 bool g_isOnAsyncShutdown = false;
 bool g_isOnSyncShutdown = false;
 bool g_isOnTakeOverShutdown = false;
+bool g_isOnAsyncShutdownOrReboot = false;
+bool g_isOnSyncShutdownOrReboot = false;
 }
 using namespace testing::ext;
 
@@ -58,9 +60,19 @@ void ShutdownClientTest::AsyncShutdownCallback::OnAsyncShutdown()
     g_isOnAsyncShutdown = true;
 }
 
+void ShutdownClientTest::AsyncShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
+{
+    g_isOnAsyncShutdownOrReboot = isReboot;
+}
+
 void ShutdownClientTest::SyncShutdownCallback::OnSyncShutdown()
 {
     g_isOnSyncShutdown = true;
+}
+
+void ShutdownClientTest::SyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isOnSyncShutdownOrReboot = isReboot;
 }
 
 bool ShutdownClientTest::TakeOverShutdownCallback::OnTakeOverShutdown(bool isReboot)
@@ -188,6 +200,48 @@ HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub005, TestSize.Level0)
     bool retVal = takeOverShutdownCallback.TakeOverShutdownCallbackStub::OnTakeOverShutdown(false);
     EXPECT_EQ(retVal, false);
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub005 end");
+}
+
+/**
+ * @tc.name: AsyncShutdownOrRebootCallbackStub
+ * @tc.desc: Test AsyncShutdownOrRebootCallbackStub
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ShutdownClientTest, AsyncShutdownOrRebootCallbackStub006, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownOrRebootCallbackStub006 start");
+    uint32_t code = 1;
+    MessageParcel data;
+    AsyncShutdownCallback asyncShutdownCallback;
+    asyncShutdownCallback.AsyncShutdownCallbackStub::OnAsyncShutdownOrReboot(true);
+    EXPECT_FALSE(g_isOnAsyncShutdownOrReboot);
+    data.WriteInterfaceToken(AsyncShutdownCallback::GetDescriptor());
+    data.WriteBool(true);
+    int32_t ret = asyncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
+    EXPECT_EQ(ret, ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownOrRebootCallbackStub006 end");
+}
+
+/**
+ * @tc.name: SyncShutdownOrRebootCallbackStub
+ * @tc.desc: Test SyncShutdownOrRebootCallbackStub
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ShutdownClientTest, SyncShutdownOrRebootCallbackStub007, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownOrRebootCallbackStub007 start");
+    uint32_t code = 1;
+    MessageParcel data;
+    SyncShutdownCallback syncShutdownCallback;
+    syncShutdownCallback.SyncShutdownCallbackStub::OnSyncShutdownOrReboot(true);
+    EXPECT_FALSE(g_isOnSyncShutdownOrReboot);
+    data.WriteInterfaceToken(SyncShutdownCallback::GetDescriptor());
+    data.WriteBool(true);
+    int32_t ret = syncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
+    EXPECT_EQ(ret, ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownOrRebootCallbackStub007 end");
 }
 } // namespace UnitTest
 } // namespace PowerMgr

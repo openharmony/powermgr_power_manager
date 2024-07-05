@@ -29,23 +29,27 @@ public:
     public:
         ~SyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
     class HighPrioritySyncShutdownCallback : public SyncShutdownCallbackStub {
     public:
         ~HighPrioritySyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
     class LowPrioritySyncShutdownCallback : public SyncShutdownCallbackStub {
     public:
         ~LowPrioritySyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
     class NotSyncShutdownCallback : public SyncShutdownCallbackStub {
         ~NotSyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
 protected:
