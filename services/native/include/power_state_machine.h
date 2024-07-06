@@ -93,7 +93,7 @@ public:
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
-    bool IsScreenOn();
+    bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
     void Reset();
     int64_t GetSleepTime();

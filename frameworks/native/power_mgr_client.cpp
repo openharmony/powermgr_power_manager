@@ -241,12 +241,16 @@ PowerErrors PowerMgrClient::ForceSuspendDevice()
     return ret;
 }
 
-bool PowerMgrClient::IsScreenOn()
+bool PowerMgrClient::IsScreenOn(bool needPrintLog)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
     bool ret = false;
-    ret = proxy_->IsScreenOn();
-    POWER_HILOGI(COMP_FWK, "IsScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
+    ret = proxy_->IsScreenOn(needPrintLog);
+    if (needPrintLog) {
+        POWER_HILOGI(COMP_FWK, "IsScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
+    } else {
+        POWER_HILOGD(COMP_FWK, "IsScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
+    }
     return ret;
 }
 
