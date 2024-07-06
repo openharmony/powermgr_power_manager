@@ -759,14 +759,14 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wpt
         return;
     }
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(remote.promote());
-    FFRTTask unRegFunc = std::bind([](const sptr<IPowerStateCallback>& cb) {
+    FFRTTask unRegFunc = [callback] {
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms == nullptr) {
             POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
             return;
         }
-        pms->UnRegisterPowerStateCallback(cb);
-    }, callback);
+        pms->UnRegisterPowerStateCallback(callback);
+    };
     FFRTUtils::SubmitTask(unRegFunc);
 }
 
@@ -779,7 +779,7 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
             if (!ffrtTimer_) {
                 return;
             }
-            FFRTTask task = std::bind(&PowerStateMachine::HandleActivityTimeout, this);
+            FFRTTask task = [this] { this->HandleActivityTimeout(); };
             ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT, task, delayTime);
             break;
         }

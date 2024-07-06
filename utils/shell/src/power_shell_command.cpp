@@ -130,34 +130,34 @@ PowerShellCommand::PowerShellCommand(int argc, char *argv[]) : ShellCommand(argc
 ErrCode PowerShellCommand::CreateCommandMap()
 {
     commandMap_ = {
-        {"help", std::bind(&PowerShellCommand::RunAsHelpCommand, this)},
-        {"setmode", std::bind(&PowerShellCommand::RunAsSetModeCommand, this)},
-        {"wakeup", std::bind(&PowerShellCommand::RunAsWakeupCommand, this)},
-        {"suspend", std::bind(&PowerShellCommand::RunAsSuspendCommand, this)},
+        {"help", [this]() -> ErrCode { return this->RunAsHelpCommand(); }},
+        {"setmode", [this]() -> ErrCode { return this->RunAsSetModeCommand(); }},
+        {"wakeup", [this]() -> ErrCode { return this->RunAsWakeupCommand(); }},
+        {"suspend", [this]() -> ErrCode { return this->RunAsSuspendCommand(); }},
 #ifndef POWER_SHELL_USER
-        {"hibernate", std::bind(&PowerShellCommand::RunAsHibernateCommand, this)},
-        {"lock", std::bind(&PowerShellCommand::RunAsQueryLockCommand, this)},
-        {"proxylock", std::bind(&PowerShellCommand::RunAsProxyLockCommand, this)},
+        {"hibernate", [this]() -> ErrCode { return this->RunAsHibernateCommand(); }},
+        {"lock", [this]() -> ErrCode { return this->RunAsQueryLockCommand(); }},
+        {"proxylock", [this]() -> ErrCode { return this->RunAsProxyLockCommand(); }},
 #ifdef HAS_DISPLAY_MANAGER_PART
-        {"display", std::bind(&PowerShellCommand::RunAsDisplayCommand, this)},
+        {"display", [this]() -> ErrCode { return this->RunAsDisplayCommand(); }},
 #endif
-        {"dump", std::bind(&PowerShellCommand::RunAsDumpCommand, this)},
+        {"dump", [this]() -> ErrCode { return this->RunAsDumpCommand(); }},
 #endif
-        {"timeout", std::bind(&PowerShellCommand::RunAsTimeOutCommand, this)},
-        {"forcetimeout", std::bind(&PowerShellCommand::RunAsForceTimeOutCommand, this)},
-        {"timeoutscreenlock", std::bind(&PowerShellCommand::RunAsTimeOutScreenLockCommand, this)},
+        {"timeout", [this]() -> ErrCode { return this->RunAsTimeOutCommand(); }},
+        {"forcetimeout", [this]() -> ErrCode { return this->RunAsForceTimeOutCommand(); }},
+        {"timeoutscreenlock", [this]() -> ErrCode { return this->RunAsTimeOutScreenLockCommand(); }},
     };
 
 #ifndef POWER_SHELL_USER
 #ifdef HAS_DISPLAY_MANAGER_PART
     commandDisplay_ = {
-        {'h', std::bind(&PowerShellCommand::RunAsDisplayCommandHelp,        this)},
-        {'r', std::bind(&PowerShellCommand::RunAsDisplayCommandRestore,     this)},
-        {'s', std::bind(&PowerShellCommand::RunAsDisplayCommandSetValue,    this)},
-        {'o', std::bind(&PowerShellCommand::RunAsDisplayCommandOverride,    this)},
-        {'b', std::bind(&PowerShellCommand::RunAsDisplayCommandBoost,       this)},
-        {'c', std::bind(&PowerShellCommand::RunAsDisplayCommandCancelBoost, this)},
-        {'d', std::bind(&PowerShellCommand::RunAsDisplayCommandDiscount,    this)},
+        {'h', [this]() -> ErrCode { return this->RunAsDisplayCommandHelp(); }},
+        {'r', [this]() -> ErrCode { return this->RunAsDisplayCommandRestore(); }},
+        {'s', [this]() -> ErrCode { return this->RunAsDisplayCommandSetValue(); }},
+        {'o', [this]() -> ErrCode { return this->RunAsDisplayCommandOverride(); }},
+        {'b', [this]() -> ErrCode { return this->RunAsDisplayCommandBoost(); }},
+        {'c', [this]() -> ErrCode { return this->RunAsDisplayCommandCancelBoost(); }},
+        {'d', [this]() -> ErrCode { return this->RunAsDisplayCommandDiscount(); }},
     };
 #endif
 #endif

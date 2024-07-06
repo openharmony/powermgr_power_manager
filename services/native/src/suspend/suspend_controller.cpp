@@ -143,8 +143,9 @@ void SuspendController::Init()
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_SUSPEND, "monitor init success, type=%{public}u", (*source).GetReason());
-            monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3));
+            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+                this->ControlListener(reason, action, delay);
+            });
             g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
             g_monitorMutex.unlock();
@@ -200,8 +201,9 @@ void SuspendController::RegisterSettingsObserver()
             POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
                 id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
-                monitor->RegisterListener(std::bind(&SuspendController::ControlListener, this, std::placeholders::_1,
-                    std::placeholders::_2, std::placeholders::_3));
+                monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+                    this->ControlListener(reason, action, delay);
+                });
                 g_monitorMutex.lock();
                 monitorMap_.emplace(monitor->GetReason(), monitor);
                 g_monitorMutex.unlock();
