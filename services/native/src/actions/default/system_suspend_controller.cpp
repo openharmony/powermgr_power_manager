@@ -141,6 +141,8 @@ void SystemSuspendController::Hibernate()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_HIBERNATE",
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
     powerInterface_->Hibernate();
     POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate end.");
 }
