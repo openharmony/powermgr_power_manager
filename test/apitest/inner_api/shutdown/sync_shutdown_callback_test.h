@@ -29,26 +29,45 @@ public:
     public:
         ~SyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
-        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
     class HighPrioritySyncShutdownCallback : public SyncShutdownCallbackStub {
     public:
         ~HighPrioritySyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
-        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
     class LowPrioritySyncShutdownCallback : public SyncShutdownCallbackStub {
     public:
         ~LowPrioritySyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
-        void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
     class NotSyncShutdownCallback : public SyncShutdownCallbackStub {
         ~NotSyncShutdownCallback() override = default;
         void OnSyncShutdown() override;
+    };
+
+    class SyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+    public:
+        ~SyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class HighPrioritySyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+    public:
+        ~HighPrioritySyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class LowPrioritySyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+    public:
+        ~LowPrioritySyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class NotSyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+        ~NotSyncShutdownOrRebootCallback() override = default;
         void OnSyncShutdownOrReboot(bool isReboot) override;
     };
 
