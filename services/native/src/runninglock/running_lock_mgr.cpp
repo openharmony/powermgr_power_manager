@@ -862,8 +862,8 @@ void RunningLockMgr::ProximityController::Disable()
 
 bool RunningLockMgr::ProximityController::IsClose()
 {
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY IsClose: %{public}d", isClose);
-    return isClose;
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY IsClose: %{public}d", isClose_);
+    return isClose_;
 }
 
 void RunningLockMgr::ProximityController::OnClose()
@@ -883,7 +883,7 @@ void RunningLockMgr::ProximityController::OnClose()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
-    isClose = true;
+    isClose_ = true;
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is closed");
     auto runningLock = pms->GetRunningLockMgr();
     if (runningLock->GetValidRunningLockNum(
@@ -913,7 +913,7 @@ void RunningLockMgr::ProximityController::OnAway()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
-    isClose = false;
+    isClose_ = false;
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is away");
     auto runningLock = pms->GetRunningLockMgr();
     if (runningLock->GetValidRunningLockNum(
@@ -926,7 +926,7 @@ void RunningLockMgr::ProximityController::OnAway()
 
 void RunningLockMgr::ProximityController::Clear()
 {
-    isClose = false;
+    isClose_ = false;
 }
 
 void RunningLockMgr::SetProximity(uint32_t status)
@@ -941,6 +941,11 @@ void RunningLockMgr::SetProximity(uint32_t status)
         default:
             break;
     }
+}
+
+bool RunningLockMgr::IsProximityClose()
+{
+    return proximityController_.IsClose();
 }
 #endif
 
