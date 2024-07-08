@@ -99,7 +99,10 @@ napi_value RunningLockNapi::Hold(napi_env env, napi_callback_info info)
     }
     auto runningLock = UnwrapRunningLock(env, thisArg);
     RETURN_IF_WITH_RET(runningLock == nullptr, nullptr);
-    runningLock->Lock(timeOut);
+    ErrCode code = runningLock->Lock(timeOut);
+    if (code == E_PERMISSION_DENIED) {
+        return error.ThrowError(env, PowerErrors::ERR_PERMISSION_DENIED);
+    }
     OHOS::HiviewDFX::ReportXPowerJsStackSysEvent(env, "RunningLockNapi::Hold");
     return nullptr;
 }
@@ -122,7 +125,11 @@ napi_value RunningLockNapi::UnHold(napi_env env, napi_callback_info info)
     napi_value thisArg = NapiUtils::GetCallbackInfo(env, info, argc, nullptr);
     auto runningLock = UnwrapRunningLock(env, thisArg);
     RETURN_IF_WITH_RET(runningLock == nullptr, nullptr);
-    runningLock->UnLock();
+    ErrCode code = runningLock->UnLock();
+    NapiErrors error;
+    if (code == E_PERMISSION_DENIED) {
+        return error.ThrowError(env, PowerErrors::ERR_PERMISSION_DENIED);
+    }
     return nullptr;
 }
 

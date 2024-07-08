@@ -74,6 +74,7 @@ public:
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
     void SetProximity(uint32_t status);
+    bool IsProximityClose();
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
 private:
@@ -136,7 +137,7 @@ private:
         static const uint32_t SAMPLING_RATE =  100000000;
         bool support_ {false};
         bool enabled_ {false};
-        bool isClose {false};
+        bool isClose_ {false};
         uint32_t status_ {0};
         SensorUser user_;
     };
@@ -155,6 +156,9 @@ private:
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
     void ProximityLockOn();
+    RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
+    void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
+
     const wptr<PowerMgrService> pms_;
     std::mutex mutex_;
     std::mutex screenLockListsMutex_;
@@ -163,8 +167,6 @@ private:
     std::shared_ptr<RunningLockProxy> runninglockProxy_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;
-    RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
-    void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
     std::map<std::string, RunningLockInfo> unSceneLockLists_;
 };
 } // namespace PowerMgr

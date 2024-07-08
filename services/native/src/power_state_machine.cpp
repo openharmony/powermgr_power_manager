@@ -140,9 +140,21 @@ void PowerStateMachine::InitTransitMap()
 
 bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
 {
-    return (!forbidMap_.count(currentState_) || !forbidMap_[currentState_].count(to)) &&
-        (!allowMapByReason_.count(reason) ||
-            (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
+    bool isForbidden = forbidMap_.count(currentState_) && forbidMap_[currentState_].count(to);
+    if (isForbidden) {
+        return false;
+    }
+#ifdef HAS_SENSORS_SENSOR_PART
+    // prevent the unexpected double click to light up the screen when calling
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK && IsProximityClose() &&
+        to == PowerState::AWAKE) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click isn't allowed to wakeup device when proximity is close.");
+        return false;
+    }
+#endif
+    bool isAllowed = (!allowMapByReason_.count(reason) ||
+        (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
+    return isAllowed;
 }
 
 void PowerStateMachine::InitState()
@@ -163,7 +175,7 @@ void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
+            POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
@@ -190,7 +202,7 @@ void PowerStateMachine::EmplaceInactive()
 {
     controllerMap_.emplace(PowerState::INACTIVE,
         std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_INACTIVE lambda start");
+            POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_INACTIVE lambda start");
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
             if (enableDisplaySuspend_) {
@@ -262,7 +274,7 @@ void PowerStateMachine::EmplaceDim()
 {
     controllerMap_.emplace(PowerState::DIM,
         std::make_shared<StateController>(PowerState::DIM, shared_from_this(), [this](StateChangeReason reason) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController_DIM lambda start");
+            POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_DIM lambda start");
             if (GetDisplayOffTime() < 0) {
                 POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
                 return TransitResult::OTHER_ERR;
@@ -369,7 +381,9 @@ WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& det
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
     }
 
-    POWER_HILOGI(FEATURE_SUSPEND, "parsedType is %{public}d", static_cast<uint32_t>(parsedType));
+    if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
+        POWER_HILOGI(FEATURE_SUSPEND, "parsedType is %{public}d", static_cast<uint32_t>(parsedType));
+    }
     return parsedType;
 }
 
@@ -398,20 +412,20 @@ bool PowerStateMachine::IsPreBrightWakeUp(WakeupDeviceType type)
 void PowerStateMachine::HandlePreBrightWakeUp(
     int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
-    POWER_HILOGI(FEATURE_WAKEUP, "This wakeup event is trigged by %{public}s.", details.c_str());
+    POWER_HILOGD(FEATURE_WAKEUP, "This wakeup event is trigged by %{public}s.", details.c_str());
     
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
-        POWER_HILOGI(FEATURE_WAKEUP, "Stop sleep ffrt task");
         suspendController->StopSleep();
+    } else {
+        POWER_HILOGI(FEATURE_WAKEUP, "suspendController is nullptr, can't stop sleep ffrt task");
     }
     if (stateAction_ != nullptr) {
         stateAction_->Wakeup(callTimeMs, type, details, pkgName);
     }
     mDeviceState_.lastWakeupDeviceTime = callTimeMs;
 
-    ResetInactiveTimer();
     SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
 
     switch (type) {
@@ -420,18 +434,19 @@ void PowerStateMachine::HandlePreBrightWakeUp(
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS: // fall through
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
             if (suspendController != nullptr) {
-                POWER_HILOGI(FEATURE_WAKEUP, "HandlePreBrightWakeUp. TriggerSyncSleepCallback start.");
+                POWER_HILOGD(FEATURE_WAKEUP, "HandlePreBrightWakeUp. TriggerSyncSleepCallback start.");
                 suspendController->TriggerSyncSleepCallback(true);
             } else {
-                POWER_HILOGD(FEATURE_WAKEUP, "HandlePreBrightWakeUp. suspendController is nullptr");
+                POWER_HILOGI(FEATURE_WAKEUP, "HandlePreBrightWakeUp. suspendController is nullptr");
             }
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
             if (suspendController != nullptr) {
-                POWER_HILOGI(FEATURE_WAKEUP, "restore sleep ffrt task");
                 suspendController->StartSleepTimer(
                     SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
                     static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+            } else {
+                POWER_HILOGI(FEATURE_WAKEUP, "suspendController is nullptr, can't restore sleep ffrt task");
             }
             break;
         default:
@@ -480,10 +495,10 @@ void PowerStateMachine::WakeupDeviceInner(
     SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
 
     if (suspendController != nullptr) {
-        POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
+        POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceInner. TriggerSyncSleepCallback start.");
         suspendController->TriggerSyncSleepCallback(true);
     } else {
-        POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceInner. suspendController is nullptr");
+        POWER_HILOGI(FEATURE_WAKEUP, "WakeupDeviceInner. suspendController is nullptr");
     }
 
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup device finish");
@@ -622,14 +637,16 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 #endif
 }
 
-bool PowerStateMachine::IsScreenOn()
+bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 {
     DisplayState state = stateAction_->GetDisplayState();
     if (state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is on, state: %{public}u", state);
         return true;
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is off, state: %{public}u", state);
+    if (needPrintLog) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is off, state: %{public}u", state);
+    }
     return false;
 }
 
@@ -916,6 +933,23 @@ void PowerStateMachine::ShowCurrentScreenLocks()
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}d screen on locks as follows: %{public}s", mapSize, message.c_str());
 }
 
+#ifdef HAS_SENSORS_SENSOR_PART
+bool PowerStateMachine::IsProximityClose()
+{
+    auto pms = pms_.promote();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Pms is nullptr");
+        return false;
+    }
+    auto runningLockMgr = pms->GetRunningLockMgr();
+    if (runningLockMgr == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLockMgr is nullptr");
+        return false;
+    }
+    return runningLockMgr->IsProximityClose();
+}
+#endif
+
 void PowerStateMachine::HandleActivityTimeout()
 {
     POWER_HILOGD(FEATURE_ACTIVITY, "Enter, displayState = %{public}d", stateAction_->GetDisplayState());
@@ -1051,7 +1085,11 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
         displayOffTime_.load(), time);
     displayOffTime_ = time;
     if (currentState_ == PowerState::AWAKE) {
-        ResetInactiveTimer();
+        if (isScreenOffTimeOverride_ == true) {
+            ResetInactiveTimer(false);
+        } else {
+            ResetInactiveTimer();
+        }
     }
     if (needUpdateSetting) {
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);

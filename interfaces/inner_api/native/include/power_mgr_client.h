@@ -97,7 +97,7 @@ public:
     /**
      * Check whether the device screen is on. The result may be true or false, depending on the system state.
      */
-    bool IsScreenOn();
+    bool IsScreenOn(bool needPrintLog = true);
 
     /**
      * Check whether the fold device screen is on. The result may be true or false, depending on the system state.

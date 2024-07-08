@@ -108,8 +108,9 @@ ErrCode RunningLock::Lock(int32_t timeOutMs)
         timeOutMs = DEFAULT_TIMEOUT;
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "use default timeout");
     }
-    if (!proxy->Lock(token_, timeOutMs)) {
-        return E_INNER_ERR;
+    PowerErrors error = proxy->Lock(token_, timeOutMs);
+    if (error != PowerErrors::ERR_OK) {
+        return error == PowerErrors::ERR_PERMISSION_DENIED ? E_PERMISSION_DENIED : E_INNER_ERR;
     }
     return ERR_OK;
 }
@@ -122,8 +123,9 @@ ErrCode RunningLock::UnLock()
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side UnLock call");
-    if (!proxy->UnLock(token_)) {
-        return E_INNER_ERR;
+    PowerErrors error = proxy->UnLock(token_);
+    if (error != PowerErrors::ERR_OK) {
+        return error == PowerErrors::ERR_PERMISSION_DENIED ? E_PERMISSION_DENIED : E_INNER_ERR;
     }
     return ERR_OK;
 }

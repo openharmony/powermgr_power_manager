@@ -62,7 +62,7 @@ public:
     virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
     virtual PowerErrors RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
-    virtual bool IsScreenOn() override;
+    virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors Hibernate(bool clearMemory) override;
@@ -72,8 +72,8 @@ public:
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources) override;
-    virtual bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
-    virtual bool UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
+    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
