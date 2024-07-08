@@ -130,7 +130,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     TurnOffScreen();
     make_unique<thread>([=] {
         Prepare();
-        POWER_HILOGD(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
+        POWER_HILOGI(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
         if (IsNeedWritePoweroffChargeFlag(reason)) {

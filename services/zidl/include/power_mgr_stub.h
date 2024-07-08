@@ -39,7 +39,7 @@ private:
     int32_t OverrideScreenOffTimeStub(MessageParcel& data, MessageParcel& reply);
     int32_t RestoreScreenOffTimeStub(MessageParcel& reply);
     int32_t GetStateStub(MessageParcel& reply);
-    int32_t IsScreenOnStub(MessageParcel& reply);
+    int32_t IsScreenOnStub(MessageParcel& data, MessageParcel& reply);
     int32_t IsFoldScreenOnStub(MessageParcel& reply);
     int32_t ForceSuspendDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t ProxyRunningLockStub(MessageParcel& data, MessageParcel& reply);
@@ -49,8 +49,8 @@ private:
     int32_t ReleaseRunningLockStub(MessageParcel& data);
     int32_t IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateWorkSourceStub(MessageParcel& data);
-    int32_t LockStub(MessageParcel& data);
-    int32_t UnLockStub(MessageParcel& data);
+    int32_t LockStub(MessageParcel& data, MessageParcel& reply);
+    int32_t UnLockStub(MessageParcel& data, MessageParcel& reply);
     int32_t QueryRunningLockListsStub(MessageParcel& data, MessageParcel& reply);
     int32_t IsUsedStub(MessageParcel& data, MessageParcel& reply);
     int32_t RebootDeviceStub(MessageParcel& data, MessageParcel& reply);

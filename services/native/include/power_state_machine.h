@@ -93,7 +93,7 @@ public:
     bool OverrideScreenOffTimeInner(int64_t timeout);
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
-    bool IsScreenOn();
+    bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
     void Reset();
     int64_t GetSleepTime();
@@ -283,6 +283,9 @@ private:
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
+#ifdef HAS_SENSORS_SENSOR_PART
+    bool IsProximityClose();
+#endif
 
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;
