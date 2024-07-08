@@ -163,7 +163,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
 
 void PowerMgrService::RegisterSettingPowerModeObservers()
 {
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {PowerModeSettingUpdateFunc(key); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string &key) { PowerModeSettingUpdateFunc(key); };
     SettingHelper::RegisterSettingPowerModeObserver(updateFunc);
 }
 
@@ -175,7 +175,8 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
     if (currMode == saveMode) {
         return;
     }
-    power->SetDeviceMode(static_cast<PowerMode>(currMode));
+    POWER_HILOGI(COMP_SVC, "PowerModeSettingUpdateFunc curr:%{public}d, saveMode:%{public}d", currMode, saveMode);
+    power->SetDeviceMode(static_cast<PowerMode>(saveMode));
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
@@ -530,6 +531,7 @@ void PowerMgrService::OnStop()
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
     SettingHelper::UnRegisterSettingWakeupLidObserver();
+    SettingHelper::UnRegisterSettingPowerModeObserver();
 }
 
 void PowerMgrService::Reset()
