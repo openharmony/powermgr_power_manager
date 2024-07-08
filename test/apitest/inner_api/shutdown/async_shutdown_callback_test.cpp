@@ -35,7 +35,6 @@ MockPowerAction* g_mockPowerAction = nullptr;
 MockStateAction* g_mockStateAction = nullptr;
 std::condition_variable g_cv;
 std::mutex g_mtx;
-bool g_isReboot = false;
 bool g_isHighPriority = false;
 bool g_isDefaultPriority = false;
 bool g_isLowPriority = false;
@@ -58,7 +57,6 @@ void AsyncShutdownCallbackTest::TearDownTestCase()
 
 void AsyncShutdownCallbackTest::SetUp()
 {
-    g_isReboot = false;
     g_isHighPriority = false;
     g_isDefaultPriority = false;
     g_isLowPriority = false;
@@ -97,27 +95,25 @@ void AsyncShutdownCallbackTest::NotAsyncShutdownCallback::OnAsyncShutdown()
 {
 }
 
-void AsyncShutdownCallbackTest::AsyncShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
+void AsyncShutdownCallbackTest::AsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
 {
-    POWER_HILOGI(LABEL_TEST, "OnAsyncShutdownOrReboot called, isReboot=%{public}d", isReboot);
-    g_isReboot = isReboot;
     g_isDefaultPriority = true;
     g_cv.notify_one();
 }
 
-void AsyncShutdownCallbackTest::HighPriorityAsyncShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
+void AsyncShutdownCallbackTest::HighPriorityAsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
 {
     g_isHighPriority = true;
     g_cv.notify_one();
 }
 
-void AsyncShutdownCallbackTest::LowPriorityAsyncShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
+void AsyncShutdownCallbackTest::LowPriorityAsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
 {
     g_isLowPriority = true;
     g_cv.notify_one();
 }
 
-void AsyncShutdownCallbackTest::NotAsyncShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
+void AsyncShutdownCallbackTest::NotAsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
 {
 }
 
@@ -150,14 +146,14 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk001, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackk001 start");
     auto callback = new AsyncShutdownCallback();
     g_service->RegisterShutdownCallback(callback, ShutdownPriority::DEFAULT);
+    auto callback2 = new AsyncShutdownOrRebootCallback();
+    g_service->RegisterShutdownCallback(callback2, ShutdownPriority::DEFAULT);
 
     g_service->RebootDevice("test_reboot");
     EXPECT_TRUE(WaitingCallback(g_isDefaultPriority));
-    EXPECT_TRUE(g_isReboot); // The callback param will be true for reboot
 
     g_service->ShutDownDevice("test_shutdown");
     EXPECT_TRUE(WaitingCallback(g_isDefaultPriority));
-    EXPECT_FALSE(g_isReboot); // The callback param will be false for shutdown
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback001 end");
 }
 

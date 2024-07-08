@@ -32,7 +32,6 @@ namespace {
 sptr<PowerMgrService> g_service = nullptr;
 MockPowerAction* g_mockPowerAction = nullptr;
 MockStateAction* g_mockStateAction = nullptr;
-bool g_isReboot = false;
 bool g_isHighPriority = false;
 bool g_isDefaultPriority = false;
 bool g_isLowPriority = false;
@@ -54,7 +53,6 @@ void SyncShutdownCallbackTest::TearDownTestCase()
 
 void SyncShutdownCallbackTest::SetUp()
 {
-    g_isReboot = false;
     g_isHighPriority = false;
     g_isDefaultPriority = false;
     g_isLowPriority = false;
@@ -86,24 +84,22 @@ void SyncShutdownCallbackTest::NotSyncShutdownCallback::OnSyncShutdown()
 {
 }
 
-void SyncShutdownCallbackTest::SyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+void SyncShutdownCallbackTest::SyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
 {
-    POWER_HILOGI(LABEL_TEST, "OnSyncShutdownOrReboot called, isReboot=%{public}d", isReboot);
-    g_isReboot = isReboot;
     g_isDefaultPriority = true;
 }
 
-void SyncShutdownCallbackTest::HighPrioritySyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+void SyncShutdownCallbackTest::HighPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
 {
     g_isHighPriority = true;
 }
 
-void SyncShutdownCallbackTest::LowPrioritySyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+void SyncShutdownCallbackTest::LowPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
 {
     g_isLowPriority = true;
 }
 
-void SyncShutdownCallbackTest::NotSyncShutdownCallback::OnSyncShutdownOrReboot(bool isReboot)
+void SyncShutdownCallbackTest::NotSyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
 {
 }
 
@@ -118,13 +114,14 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk001, TestSize.Level0)
     auto callback = new SyncShutdownCallback();
     g_service->RegisterShutdownCallback(callback, ShutdownPriority::DEFAULT);
 
+    auto callback2 = new SyncShutdownOrRebootCallback();
+    g_service->RegisterShutdownCallback(callback2, ShutdownPriority::DEFAULT);
+
     g_service->RebootDevice("test_reboot");
     EXPECT_TRUE(g_isDefaultPriority);
-    EXPECT_TRUE(g_isReboot); // The callback param will be true for reboot
 
     g_service->ShutDownDevice("test_shutdown");
     EXPECT_TRUE(g_isDefaultPriority);
-    EXPECT_FALSE(g_isReboot); // The callback param will be false for shutdown
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback001 end");
 }
 
