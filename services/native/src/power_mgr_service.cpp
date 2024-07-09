@@ -805,8 +805,6 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
-    hibernateController_->PostHibernate();
-    POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate end.");
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 #else
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate interface not supported.");
