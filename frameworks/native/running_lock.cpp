@@ -138,7 +138,7 @@ bool RunningLock::IsUsed()
         return false;
     }
     bool ret = proxy->IsUsed(token_);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Is Used: %{public}d", ret);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Is Used: %{public}d", ret);
     return ret;
 }
 
