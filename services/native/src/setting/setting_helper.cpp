@@ -532,7 +532,7 @@ void SettingHelper::RegisterSettingPowerModeObserver(SettingObserver::UpdateFunc
     }
 }
 
-void SettingHelper::UnregisterSettingPowerModeObserver()
+void SettingHelper::UnRegisterSettingPowerModeObserver()
 {
     if (!powerModeObserver_) {
         POWER_HILOGI(COMP_UTILS, "powerModeObserver_ is nullptr, no need to unregister");

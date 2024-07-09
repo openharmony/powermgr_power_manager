@@ -63,7 +63,7 @@ public:
     virtual PowerErrors OverrideScreenOffTime(int64_t timeout) = 0;
     virtual PowerErrors RestoreScreenOffTime() = 0;
     virtual PowerState GetState() = 0;
-    virtual bool IsScreenOn() = 0;
+    virtual bool IsScreenOn(bool needPrintLog = true) = 0;
     virtual bool IsFoldScreenOn() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;

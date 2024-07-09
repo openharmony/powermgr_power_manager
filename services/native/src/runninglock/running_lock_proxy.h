@@ -24,9 +24,16 @@
 
 namespace OHOS {
 namespace PowerMgr {
+enum class RunningLockEvent : uint32_t {
+    RUNNINGLOCK_UPDATE = 0,
+    RUNNINGLOCK_PROXY,
+    RUNNINGLOCK_UNPROXY
+};
 class RunningLockProxy {
 public:
-    using TokenWorkSourceMap = std::map<const sptr<IRemoteObject>, std::pair<std::map<int32_t, bool>, int32_t>>;
+    using WksMap = std::map<int32_t, std::pair<std::string, bool>>;
+    using TokenWorkSourceMap = std::map<const sptr<IRemoteObject>,
+        std::pair<WksMap, int32_t>>;
     using RunningLockProxyMap = std::map<std::string, TokenWorkSourceMap>;
     RunningLockProxy() = default;
     ~RunningLockProxy() = default;
@@ -34,7 +41,7 @@ public:
     void AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     void RemoveRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj);
     bool UpdateWorkSource(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj,
-        std::map<int32_t, bool> workSourcesState);
+        const std::map<int32_t, std::string>& workSources);
     bool IncreaseProxyCnt(pid_t pid, pid_t uid);
     bool DecreaseProxyCnt(pid_t pid, pid_t uid);
     void Clear();
@@ -42,7 +49,8 @@ public:
     void ResetRunningLocks();
 private:
     std::string AssembleProxyKey(pid_t pid, pid_t uid);
-    void ProxyInner(const sptr<IRemoteObject>& remoteObj, bool isProxy);
+    void ProxyInner(const sptr<IRemoteObject>& remoteObj, const std::string& bundleNames, RunningLockEvent event);
+    std::string MergeBundleName(const WksMap& wksMap);
     RunningLockProxyMap proxyMap_;
 };
 } // namespace PowerMgr

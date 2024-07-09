@@ -525,7 +525,7 @@ PowerState PowerMgrServiceTestProxy::GetState()
     return static_cast<PowerState>(result);
 }
 
-bool PowerMgrServiceTestProxy::IsScreenOn()
+bool PowerMgrServiceTestProxy::IsScreenOn(bool needPrintLog)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
@@ -538,6 +538,7 @@ bool PowerMgrServiceTestProxy::IsScreenOn()
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return result;
     }
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, needPrintLog, false);
 
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON), data, reply, option);

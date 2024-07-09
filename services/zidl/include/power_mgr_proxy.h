@@ -65,7 +65,7 @@ public:
     virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
     virtual PowerErrors RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
-    virtual bool IsScreenOn() override;
+    virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
