@@ -12,3 +12,7 @@
 # limitations under the License.
 
 persist.powermgr. = powermgr:powermgr:0775
+persist.dfx.userclicktime = powermgr:powermgr:0776
+persist.dfx.shutdownactiontime = powermgr:powermgr:0776
+persist.dfx.shutdowncompletetime = powermgr:powermgr:0776
+persist.dfx.eventtype = powermgr:powermgr:0776
