@@ -163,7 +163,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
 
 void PowerMgrService::RegisterSettingPowerModeObservers()
 {
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {PowerModeSettingUpdateFunc(key); };
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string &key) { PowerModeSettingUpdateFunc(key); };
     SettingHelper::RegisterSettingPowerModeObserver(updateFunc);
 }
 
@@ -175,7 +175,8 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
     if (currMode == saveMode) {
         return;
     }
-    power->SetDeviceMode(static_cast<PowerMode>(currMode));
+    POWER_HILOGI(COMP_SVC, "PowerModeSettingUpdateFunc curr:%{public}d, saveMode:%{public}d", currMode, saveMode);
+    power->SetDeviceMode(static_cast<PowerMode>(saveMode));
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
@@ -530,6 +531,7 @@ void PowerMgrService::OnStop()
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
     SettingHelper::UnRegisterSettingWakeupLidObserver();
+    SettingHelper::UnRegisterSettingPowerModeObserver();
 }
 
 void PowerMgrService::Reset()
@@ -745,11 +747,13 @@ PowerState PowerMgrService::GetState()
     return state;
 }
 
-bool PowerMgrService::IsScreenOn()
+bool PowerMgrService::IsScreenOn(bool needPrintLog)
 {
     std::lock_guard lock(stateMutex_);
     auto isScreenOn = powerStateMachine_->IsScreenOn();
-    POWER_HILOGD(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
+    if (needPrintLog) {
+        POWER_HILOGD(COMP_SVC, "isScreenOn: %{public}d", isScreenOn);
+    }
     return isScreenOn;
 }
 
@@ -798,6 +802,8 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
     HibernateControllerInit();
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
     hibernateController_->PostHibernate();
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate end.");
@@ -935,7 +941,6 @@ PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
     }
     std::lock_guard lock(lockMutex_);
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
-    runningLockMgr_->UpdateWorkSource(remoteObj, {});
     runningLockMgr_->UnLock(remoteObj);
     return PowerErrors::ERR_OK;
 }

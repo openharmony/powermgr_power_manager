@@ -60,7 +60,7 @@ public:
     PowerErrors OverrideScreenOffTime(int64_t timeout);
     PowerErrors RestoreScreenOffTime();
     PowerState GetState();
-    bool IsScreenOn();
+    bool IsScreenOn(bool needPrintLog = true);
     PowerErrors ForceSuspendDevice(int64_t callTimeMs);
     PowerErrors RebootDevice(const std::string& reason);
     PowerErrors RebootDeviceForDeprecated(const std::string& reason);
