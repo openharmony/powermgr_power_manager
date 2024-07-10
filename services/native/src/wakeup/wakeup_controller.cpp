@@ -688,6 +688,5 @@ bool PickupWakeupMonitor::Init()
 }
 
 void PickupWakeupMonitor::Cancel() {}
-
 } // namespace PowerMgr
 } // namespace OHOS
