@@ -231,7 +231,9 @@ void SuspendController::Cancel()
 void SuspendController::StopSleep()
 {
     ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
-    ffrtTimer_->CancelTimer(TIMER_ID_SLEEP);
+    if (ffrtTimer_ != nullptr) {
+        ffrtTimer_->CancelTimer(TIMER_ID_SLEEP);
+    }
     sleepTime_ = -1;
     sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
     ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
@@ -261,12 +263,19 @@ void SuspendController::HandleEvent(int64_t delayTime)
         auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
     };
-    ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
+    if (ffrtTimer_ != nullptr) {
+        ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}s) failed, timer is null",
+            __func__, std::to_string(delayTime).c_str());
+    }
 }
 
 void SuspendController::CancelEvent()
 {
-    ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_OFF);
+    if (ffrtTimer_ != nullptr) {
+        ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_OFF);
+    }
 }
 
 void SuspendController::RecordPowerKeyDown()
@@ -415,7 +424,12 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     FFRTTask task = [this, reason, action] {
         HandleAction(reason, action);
     };
-    ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, delay);
+
+    if (ffrtTimer_ != nullptr) {
+        ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, delay);
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}u) failed, timer is null", __func__, delay);
+    }
     ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
 }
 
@@ -480,7 +494,12 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         FFRTTask task = [this, reason] {
             SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
         };
-        ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
+        if (ffrtTimer_ != nullptr) {
+            ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
+        } else {
+            POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
+                __func__, FORCE_SLEEP_DELAY_MS);
+        }
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
