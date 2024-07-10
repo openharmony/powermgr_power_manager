@@ -31,6 +31,7 @@ public:
     }
     ~SyncShutdownCallbackProxy() override = default;
     virtual void OnSyncShutdown() override;
+    virtual void OnSyncShutdownOrReboot(bool isReboot) override;
 
 private:
     static inline BrokerDelegator<SyncShutdownCallbackProxy> delegator_;

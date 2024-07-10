@@ -84,6 +84,25 @@ void SyncShutdownCallbackTest::NotSyncShutdownCallback::OnSyncShutdown()
 {
 }
 
+void SyncShutdownCallbackTest::SyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isDefaultPriority = true;
+}
+
+void SyncShutdownCallbackTest::HighPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isHighPriority = true;
+}
+
+void SyncShutdownCallbackTest::LowPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isLowPriority = true;
+}
+
+void SyncShutdownCallbackTest::NotSyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+}
+
 /**
  * @tc.name: SyncShutdownCallbackk001
  * @tc.desc: Test synchronous shutdown callback for shutdown and reboot
@@ -94,6 +113,9 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk001, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackk001 start");
     auto callback = new SyncShutdownCallback();
     g_service->RegisterShutdownCallback(callback, ShutdownPriority::DEFAULT);
+
+    auto callback2 = new SyncShutdownOrRebootCallback();
+    g_service->RegisterShutdownCallback(callback2, ShutdownPriority::DEFAULT);
 
     g_service->RebootDevice("test_reboot");
     EXPECT_TRUE(g_isDefaultPriority);

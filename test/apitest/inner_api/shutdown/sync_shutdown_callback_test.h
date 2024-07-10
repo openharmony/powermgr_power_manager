@@ -48,6 +48,29 @@ public:
         void OnSyncShutdown() override;
     };
 
+    class SyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+    public:
+        ~SyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class HighPrioritySyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+    public:
+        ~HighPrioritySyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class LowPrioritySyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+    public:
+        ~LowPrioritySyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class NotSyncShutdownOrRebootCallback : public SyncShutdownCallbackStub {
+        ~NotSyncShutdownOrRebootCallback() override = default;
+        void OnSyncShutdownOrReboot(bool isReboot) override;
+    };
+
 protected:
     static void SetUpTestCase();
     static void TearDownTestCase();

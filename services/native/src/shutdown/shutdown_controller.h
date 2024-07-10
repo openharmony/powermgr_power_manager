@@ -54,19 +54,19 @@ public:
     void RemoveCallback(const sptr<ISyncShutdownCallback>& callback);
 
     bool TriggerTakeOverShutdownCallback(bool isReboot);
-    void TriggerAsyncShutdownCallback();
-    void TriggerSyncShutdownCallback();
+    void TriggerAsyncShutdownCallback(bool isReboot);
+    void TriggerSyncShutdownCallback(bool isReboot);
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
     void RebootOrShutdown(const std::string& reason, bool isReboot);
-    void Prepare();
+    void Prepare(bool isReboot);
     void TurnOffScreen();
     void PublishShutdownEvent() const;
 
     static bool TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
-    static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks);
-    static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks);
+    static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
+    static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
 
     sptr<ShutdownCallbackHolder> takeoverShutdownCallbackHolder_;
     sptr<ShutdownCallbackHolder> asyncShutdownCallbackHolder_;
