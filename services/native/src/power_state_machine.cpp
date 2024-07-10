@@ -604,8 +604,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {
-        ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
-        if (result != ERR_OK) {
+        if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
             hibernating_ = false;
             return false;
