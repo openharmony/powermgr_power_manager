@@ -48,6 +48,29 @@ public:
         void OnAsyncShutdown() override;
     };
 
+    class AsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~AsyncShutdownOrRebootCallback() override = default;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class HighPriorityAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~HighPriorityAsyncShutdownOrRebootCallback() override = default;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class LowPriorityAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~LowPriorityAsyncShutdownOrRebootCallback() override = default;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class NotAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
+        ~NotAsyncShutdownOrRebootCallback() override = default;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
+    };
+
 protected:
     static void SetUpTestCase();
     static void TearDownTestCase();

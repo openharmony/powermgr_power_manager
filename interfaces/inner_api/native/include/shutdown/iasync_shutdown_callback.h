@@ -31,6 +31,15 @@ public:
      * Execute from high priority to low priority.
      */
     virtual void OnAsyncShutdown() = 0;
+
+    /**
+     * Asynchronous shutdown callback interface with isReboot infomation.
+     * <p>
+     * Asynchronously execute the shutdown callback. Wait for a maximum of 30 seconds.
+     * If this timeout occurs, the asynchronous task will be interrupted and the shutdown will be forcibly executed.
+     * Execute from high priority to low priority.
+     */
+    virtual void OnAsyncShutdownOrReboot(bool isReboot) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IAsyncShutdownCallback");
 };
 } // namespace PowerMgr

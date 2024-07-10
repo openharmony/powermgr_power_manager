@@ -33,8 +33,12 @@ public:
 
     void OnAsyncShutdown() override {};
 
+    void OnAsyncShutdownOrReboot(bool isReboot) override {};
+
 private:
     int32_t OnAsyncShutdownCallbackStub(MessageParcel& data, MessageParcel& reply);
+
+    int32_t OnAsyncShutdownOrRebootCallbackStub(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace PowerMgr
 } // namespace OHOS

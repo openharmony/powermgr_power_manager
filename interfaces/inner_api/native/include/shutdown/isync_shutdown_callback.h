@@ -30,6 +30,14 @@ public:
      * Execute from high priority to low priority.
      */
     virtual void OnSyncShutdown() = 0;
+
+    /**
+     * Synchronous shutdown callback interface with isReboot infomation.
+     * <p>
+     * Execute the shutdown callback synchronously and wait for the callback method to return.
+     * Execute from high priority to low priority.
+     */
+    virtual void OnSyncShutdownOrReboot(bool isReboot) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.ISyncShutdownCallback");
 };
 } // namespace PowerMgr

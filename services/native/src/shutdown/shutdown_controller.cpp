@@ -140,13 +140,13 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     std::string actionTimeStr = std::to_string(GetCurrentRealTimeMs());
     PowerEventType eventType = isReboot ? PowerEventType::REBOOT : PowerEventType::SHUTDOWN;
     system::SetParameter("persist.dfx.eventtype", to_string(eventType));
-    TriggerSyncShutdownCallback();
+    TriggerSyncShutdownCallback(isReboot);
     actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
     TurnOffScreen();
     actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
     system::SetParameter("persist.dfx.shutdownactiontime", actionTimeStr);
     make_unique<thread>([=] {
-        Prepare();
+        Prepare(isReboot);
         POWER_HILOGI(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
@@ -164,10 +164,10 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     })->detach();
 }
 
-void ShutdownController::Prepare()
+void ShutdownController::Prepare(bool isReboot)
 {
     auto callbackStart = [&]() {
-        TriggerAsyncShutdownCallback();
+        TriggerAsyncShutdownCallback(isReboot);
     };
 
     packaged_task<void()> callbackTask(callbackStart);
@@ -280,46 +280,48 @@ bool ShutdownController::TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRem
     return isTakeover;
 }
 
-void ShutdownController::TriggerAsyncShutdownCallback()
+void ShutdownController::TriggerAsyncShutdownCallback(bool isReboot)
 {
     auto highPriorityCallbacks = asyncShutdownCallbackHolder_->GetHighPriorityCallbacks();
-    TriggerAsyncShutdownCallbackInner(highPriorityCallbacks);
+    TriggerAsyncShutdownCallbackInner(highPriorityCallbacks, isReboot);
     auto defaultPriorityCallbacks = asyncShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
-    TriggerAsyncShutdownCallbackInner(defaultPriorityCallbacks);
+    TriggerAsyncShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
     auto lowPriorityCallbacks = asyncShutdownCallbackHolder_->GetLowPriorityCallbacks();
-    TriggerAsyncShutdownCallbackInner(lowPriorityCallbacks);
+    TriggerAsyncShutdownCallbackInner(lowPriorityCallbacks, isReboot);
 }
 
-void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks)
+void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
 {
     for (auto &obj : callbacks) {
         sptr<IAsyncShutdownCallback> callback = iface_cast<IAsyncShutdownCallback>(obj);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
             callback->OnAsyncShutdown();
+            callback->OnAsyncShutdownOrReboot(isReboot);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
         }
     }
 }
 
-void ShutdownController::TriggerSyncShutdownCallback()
+void ShutdownController::TriggerSyncShutdownCallback(bool isReboot)
 {
     auto highPriorityCallbacks = syncShutdownCallbackHolder_->GetHighPriorityCallbacks();
-    TriggerSyncShutdownCallbackInner(highPriorityCallbacks);
+    TriggerSyncShutdownCallbackInner(highPriorityCallbacks, isReboot);
     auto defaultPriorityCallbacks = syncShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
-    TriggerSyncShutdownCallbackInner(defaultPriorityCallbacks);
+    TriggerSyncShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
     auto lowPriorityCallbacks = syncShutdownCallbackHolder_->GetLowPriorityCallbacks();
-    TriggerSyncShutdownCallbackInner(lowPriorityCallbacks);
+    TriggerSyncShutdownCallbackInner(lowPriorityCallbacks, isReboot);
 }
 
-void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks)
+void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
 {
     for (auto &obj : callbacks) {
         sptr<ISyncShutdownCallback> callback = iface_cast<ISyncShutdownCallback>(obj);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
             callback->OnSyncShutdown();
+            callback->OnSyncShutdownOrReboot(isReboot);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
         }
