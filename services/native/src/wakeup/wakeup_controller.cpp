@@ -338,8 +338,12 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     if (!Permission::IsSystem()) {
         return;
     }
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    if (!stateMachine_->IsSwitchOpen() || stateMachine_->IsHibernating()) {
+#else
     if (!stateMachine_->IsSwitchOpen()) {
-        POWER_HILOGD(FEATURE_WAKEUP, "Switch is closed, wakeup control listerner do nothing.");
+#endif
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup control listerner do nothing.");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
