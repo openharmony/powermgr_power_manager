@@ -280,7 +280,7 @@ private:
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsSupportSensor(SensorTypeId);
     static void HallSensorCallback(SensorEvent* event);
-    SensorUser sensorUser_;
+    SensorUser sensorUser_{};
 #endif
 
     bool ready_ {false};
