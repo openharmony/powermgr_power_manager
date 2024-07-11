@@ -139,7 +139,7 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
     }
     helper->RegisterObserver(uri, observer);
     helper->NotifyChange(uri);
-    std::thread execCb(SettingProvider::ExecRegisterCb, observer);
+    std::thread execCb([this, observer] { this->ExecRegisterCb(observer); });
     execCb.detach();
     ReleaseDataShareHelper(helper);
     IPCSkeleton::SetCallingIdentity(callingIdentity);

@@ -27,7 +27,7 @@ bool SuspendController::AutoSuspend::started_ = false;
 
 SuspendController::SuspendController()
 {
-    auto f = std::bind(&SuspendController::WaitingSuspendCondition, this);
+    auto f = [this] { this->WaitingSuspendCondition(); };
     suspend_ = std::make_unique<AutoSuspend>(f);
 }
 
@@ -76,7 +76,7 @@ void SuspendController::AutoSuspend::Start(SuspendCallback onSuspend, SuspendCal
         POWER_HILOGW(FEATURE_SUSPEND, "AutoSuspend is already started");
         return;
     }
-    daemon_ = std::make_unique<std::thread>(&AutoSuspend::AutoSuspendLoop, this);
+    daemon_ = std::make_unique<std::thread>([this] { this->AutoSuspendLoop(); });
     daemon_->detach();
     POWER_HILOGD(FEATURE_SUSPEND, "AutoSuspend Start detach");
     started_ = true;
