@@ -465,8 +465,12 @@ void PowerStateMachine::WakeupDeviceInner(
         return;
     }
 
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    if (!IsSwitchOpen() || IsHibernating()) {
+#else
     if (!IsSwitchOpen()) {
-        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed, wakeup device do nothing.");
+#endif
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup device do nothing.");
         return;
     }
 
@@ -595,13 +599,14 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
+    hibernating_ = true;
     if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {
-        ErrCode result = AccountSA::OsAccountManager::DeactivateAllOsAccounts();
-        if (result != ERR_OK) {
+        if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
+            hibernating_ = false;
             return false;
         }
     }
@@ -618,6 +623,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 
     FFRTTask task = [hibernateController, this, clearMemory]() {
         hibernateController->Hibernate(clearMemory);
+        hibernating_ = false;
         if (clearMemory) {
             if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
                 POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");

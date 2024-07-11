@@ -147,6 +147,12 @@ public:
     {
         return switchOpen_;
     }
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    bool IsHibernating() const
+    {
+        return hibernating_;
+    }
+#endif
     int64_t GetLastOnTime() const
     {
         return mDeviceState_.screenState.lastOnTime;
@@ -308,6 +314,9 @@ private:
     bool NeedShowScreenLocks(PowerState state);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     std::atomic<bool> switchOpen_ {true};
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    std::atomic<bool> hibernating_ {false};
+#endif
     std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
