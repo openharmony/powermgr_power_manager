@@ -646,7 +646,6 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 }
 #endif
 
-
 bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 {
     DisplayState state = stateAction_->GetDisplayState();
