@@ -93,7 +93,7 @@ void WakeupController::Init()
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
-            monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
+            monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
     }
@@ -132,7 +132,7 @@ void WakeupController::RegisterSettingsObserver()
             POWER_HILOGI(FEATURE_WAKEUP, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
                 id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
-                monitor->RegisterListener(std::bind(&WakeupController::ControlListener, this, std::placeholders::_1));
+                monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
                 monitorMap_.emplace(monitor->GetReason(), monitor);
             }
         }
