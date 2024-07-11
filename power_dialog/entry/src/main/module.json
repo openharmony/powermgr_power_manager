@@ -67,6 +67,17 @@
           ],
           "when": "always"
         }
+      },
+      {
+        "reason": "inject event",
+        "name": "ohos.permission.INJECT_INPUT_EVENT",
+        "usedScene": {
+          "abilities": [
+            "PowerUiExtensionAbility",
+            "InjectNoticeAbility"
+          ],
+          "when": "always"
+        }
       }
     ]
   }
