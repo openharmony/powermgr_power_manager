@@ -585,9 +585,9 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
     return true;
 }
 
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto hibernateController = pms->GetHibernateController();
@@ -637,11 +637,15 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
             __func__, HIBERNATE_DELAY_MS);
     }
     return true;
+}
 #else
+bool PowerStateMachine::HibernateInner(bool clearMemory)
+{
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner interface not supported.");
     return false;
-#endif
 }
+#endif
+
 
 bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 {
