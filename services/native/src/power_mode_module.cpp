@@ -74,10 +74,10 @@ void PowerModeModule::InitPowerMode()
 
 void PowerModeModule::SetModeItem(PowerMode mode)
 {
-    POWER_HILOGI(FEATURE_POWER_MODE, "mode_: %{public}u, mode: %{public}u", mode_, mode);
+    POWER_HILOGI(FEATURE_POWER_MODE, "SetModeItem mode_: %{public}u, mode: %{public}u", mode_, mode);
 
     /* Same as the previous mode */
-    if (this->mode_ == mode) {
+    if (this->mode_ == mode && this->mode_ != PowerMode::PERFORMANCE_MODE) {
         return;
     }
 
@@ -99,7 +99,7 @@ void PowerModeModule::SetModeItem(PowerMode mode)
 
 PowerMode PowerModeModule::GetModeItem()
 {
-    POWER_HILOGD(FEATURE_POWER_MODE, "mode_: %{public}u", mode_);
+    POWER_HILOGD(FEATURE_POWER_MODE, "GetModeItem mode_: %{public}u", mode_);
     /* get power mode */
     return mode_;
 }
