@@ -107,7 +107,9 @@ public:
         return stateAction_;
     };
     bool ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs);
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool HibernateInner(bool clearMemory);
+#endif
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
@@ -289,6 +291,9 @@ private:
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    bool PrepareHibernate(bool clearMemory);
+#endif
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsProximityClose();
 #endif
