@@ -590,6 +590,42 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 }
 
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+bool PowerStateMachine::PrepareHibernate(bool clearMemory)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto hibernateController = pms->GetHibernateController();
+    if (hibernateController == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
+        return false;
+    }
+    bool ret = true;
+    hibernating_ = true;
+    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
+    }
+    if (clearMemory) {
+        if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
+            POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
+            return false;
+        }
+    }
+    hibernateController->PreHibernate();
+    if (clearMemory) {
+        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
+            return false;
+        }
+    }
+
+    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+        ret = false;
+    }
+    return ret;
+}
+#endif
+
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
@@ -599,30 +635,19 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-    hibernating_ = true;
-    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
-    }
-    if (clearMemory) {
-        if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
-            POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
-            hibernating_ = false;
-            return false;
-        }
-    }
-    hibernateController->PreHibernate();
-    if (clearMemory) {
-        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
-            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
-        }
+
+    if (!PrepareHibernate(clearMemory) && clearMemory) {
+        POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, shutdown begin.");
+        pms->ShutDownDevice("shutdown_by_user");
+        return true;
     }
 
-    if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
-    }
-
-    FFRTTask task = [hibernateController, this, clearMemory]() {
-        hibernateController->Hibernate(clearMemory);
+    FFRTTask task = [hibernateController, this, clearMemory, pms]() {
+        if (!hibernateController->Hibernate(clearMemory) && clearMemory) {
+            POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
+            pms->ShutDownDevice("shutdown_by_user");
+            return;
+        }
         hibernating_ = false;
         if (clearMemory) {
             if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
@@ -636,19 +661,14 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
 
-    if (ffrtTimer_ != nullptr) {
-        ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
-    } else {
+    if (ffrtTimer_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
             __func__, HIBERNATE_DELAY_MS);
+        hibernating_ = false;
+        return false;
     }
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
     return true;
-}
-#else
-bool PowerStateMachine::HibernateInner(bool clearMemory)
-{
-    POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner interface not supported.");
-    return false;
 }
 #endif
 
