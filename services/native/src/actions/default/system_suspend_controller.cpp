@@ -134,17 +134,22 @@ void SystemSuspendController::Wakeup()
     powerInterface_->StopSuspend();
 }
 
-void SystemSuspendController::Hibernate()
+bool SystemSuspendController::Hibernate()
 {
     POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate begin.");
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
-        return;
+        return false;
     }
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_HIBERNATE",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
-    powerInterface_->Hibernate();
+    int32_t ret = powerInterface_->Hibernate();
+    if (ret != HDF_SUCCESS) {
+        POWER_HILOGE(COMP_SVC, "SystemSuspendController hibernate failed.");
+        return false;
+    }
     POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate end.");
+    return true;
 }
 
 OHOS::HDI::Power::V1_2::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
