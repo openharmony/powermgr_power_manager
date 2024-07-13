@@ -35,7 +35,7 @@ class SystemSuspendController : public DelayedRefSingleton<SystemSuspendControll
 public:
     void Suspend(const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force);
     void Wakeup();
-    void Hibernate();
+    bool Hibernate();
     int32_t AcquireRunningLock(const RunningLockParam& param);
     int32_t ReleaseRunningLock(const RunningLockParam& param);
     void Dump(std::string& info);

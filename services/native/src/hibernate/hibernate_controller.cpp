@@ -20,8 +20,7 @@ namespace OHOS {
 namespace PowerMgr {
 bool HibernateController::Hibernate(bool clearMemory)
 {
-    SystemSuspendController::GetInstance().Hibernate();
-    return true;
+    return SystemSuspendController::GetInstance().Hibernate();
 }
 
 void HibernateController::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
