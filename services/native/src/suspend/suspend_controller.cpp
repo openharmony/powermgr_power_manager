@@ -35,6 +35,7 @@ namespace {
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 FFRTMutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
+constexpr int64_t POWERKEY_MIN_INTERVAL = 300; // ms
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -577,6 +578,16 @@ bool PowerKeySuspendMonitor::Init()
     powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
+
+            static int64_t lastPowerkeyUpTime = 0;
+            int64_t currTime = GetTickCount();
+            if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within 300ms, skip. "
+                    "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyUpTime);
+                return;
+            }
+            lastPowerkeyUpTime = currTime;
+
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
