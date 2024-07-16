@@ -55,6 +55,9 @@ static const struct option PROXYLOCK_OPTIONS[] = {
     {"uproxy", required_argument, nullptr, 'u'},
 };
 
+static const struct option HIBERNATE_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+};
 #endif
 
 static const struct option TIME_OUT_OPTIONS[] = {
@@ -80,6 +83,7 @@ static const std::string HELP_MSG =
 #ifndef POWER_SHELL_USER
     "  lock    :    Query running lock lists by bundle app. \n"
     "  proxylock :    Proxy running lock by app uid. \n"
+    "  hibernate :    hibernate the device. \n"
 #ifdef HAS_DISPLAY_MANAGER_PART
     "  display :    Update or Override display brightness. \n"
 #endif
@@ -116,6 +120,12 @@ static const std::string PROXYLOCK_HELP_MSG =
     "  -p  :  proxy runninglock\n"
     "  -u  :  unproxy runninglock\n";
 
+static const std::string HIBERNATE_HELP_MSG =
+    "usage: power-shell hibernate [<options>]\n"
+    "  hibernate <options are as below> \n"
+    "  the default option is false\n"
+    "  true  :  clear memory before hibernate\n"
+    "  false :  skip clearing memory before hibernate\n";
 #endif
 
 static const std::string TIME_OUT_HELP_MSG =
@@ -295,9 +305,36 @@ ErrCode PowerShellCommand::RunAsSuspendCommand()
 #ifndef POWER_SHELL_USER
 ErrCode PowerShellCommand::RunAsHibernateCommand()
 {
+    if (!IsDeveloperMode()) {
+        return ERR_PERMISSION_DENIED;
+    }
+    int ind = 0;
+    int option = getopt_long(argc_, argv_, "h", HIBERNATE_OPTIONS, &ind);
+    resultReceiver_.clear();
+    if (option == 'h') {
+        resultReceiver_.append(HIBERNATE_HELP_MSG);
+        return ERR_OK;
+    }
+    bool clearMemory = false;
+    if (!argList_.empty()) {
+        if (strcmp(argList_[0].c_str(), "false") == 0) {
+            clearMemory = false;
+        } else if (strcmp(argList_[0].c_str(), "true") == 0) {
+            clearMemory = true;
+        } else {
+            resultReceiver_.append("Error! please input your option value. \n");
+            resultReceiver_.append(HIBERNATE_HELP_MSG);
+            return ERR_OK;
+        }
+    }
+
     PowerMgrClient& client = PowerMgrClient::GetInstance();
-    client.Hibernate(false);
-    resultReceiver_.append("Hibernate is called\n");
+    client.Hibernate(clearMemory);
+    if (clearMemory) {
+        resultReceiver_.append("Hibernate true is called\n");
+    } else {
+        resultReceiver_.append("Hibernate false is called\n");
+    }
     return ERR_OK;
 }
 
