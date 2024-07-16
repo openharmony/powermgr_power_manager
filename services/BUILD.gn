@@ -98,7 +98,6 @@ ohos_shared_library("powermgrservice") {
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
-    "ability_base:session_info",
     "ability_runtime:ability_connect_callback_stub",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
