@@ -353,7 +353,7 @@ ErrCode PowerShellCommand::RunAsQueryLockCommand()
         counter++;
         resultReceiver_.append(std::to_string(counter));
         resultReceiver_.append(". bundleName=");
-        resultReceiver_.append(it.first);
+        resultReceiver_.append(it.second.bundleName);
         resultReceiver_.append(" name=");
         resultReceiver_.append(it.second.name);
         resultReceiver_.append(" type=");
