@@ -957,7 +957,7 @@ void PowerStateMachine::ShowCurrentScreenLocks()
     for (auto it : screenOnLockLists) {
         counter++;
         message.append(std::to_string(counter)).append(". ")
-            .append("bundleName=").append(it.first)
+            .append("bundleName=").append(it.second.bundleName)
             .append(" name=").append(it.second.name)
             .append(" pid=").append(std::to_string(it.second.pid))
             .append(". ");
