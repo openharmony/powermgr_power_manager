@@ -53,6 +53,8 @@
                 "data_share",
                 "display_manager",
                 "drivers_interface_power",
+                "ets_runtime",
+                "eventhandler",
                 "ffrt",
                 "hdf_core",
                 "hicollie",

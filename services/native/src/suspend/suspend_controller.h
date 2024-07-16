@@ -21,7 +21,6 @@
 #include <memory>
 #include <vector>
 
-#include "event_handler.h"
 #include "ffrt_utils.h"
 #include "power_state_machine.h"
 #ifdef HAS_SENSORS_SENSOR_PART
