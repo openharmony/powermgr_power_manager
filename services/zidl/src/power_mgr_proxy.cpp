@@ -627,7 +627,7 @@ PowerErrors PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    int waitTime = 1000;
+    int waitTime = 100;
     int error = asyncCallback->WaitForAsyncReply(waitTime);
     return static_cast<PowerErrors>(error);
 }
@@ -1086,7 +1086,7 @@ PowerErrors PowerMgrProxy::Hibernate(bool clearMemory)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    int waitTime = 1000;
+    int waitTime = 100;
     int error = asyncCallback->WaitForAsyncReply(waitTime);
     return static_cast<PowerErrors>(error);
 }
