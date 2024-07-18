@@ -608,6 +608,15 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
             return false;
         }
+        int32_t id;
+        if (AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(id) != ERR_OK) {
+            POWER_HILOGE(FEATURE_SUSPEND, "get default activated os account failed.");
+            return false;
+        }
+        if (AccountSA::OsAccountManager::ActivateOsAccount(id) != ERR_OK) {
+            POWER_HILOGE(FEATURE_SUSPEND, "activate os account failed.");
+            return false;
+        }
     }
     hibernateController->PreHibernate();
     if (clearMemory) {
