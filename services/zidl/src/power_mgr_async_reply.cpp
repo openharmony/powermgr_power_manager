@@ -41,17 +41,16 @@ void PowerMgrStubAsync::SendAsyncReply(int &replyValue)
     std::unique_lock<std::mutex> lck(mutex_);
     asyncReply_ = replyValue;
     notified = true;
+    lck.unlock();
     cv_.notify_all();
 }
 
 int PowerMgrStubAsync::WaitForAsyncReply(int timeout)
 {
     std::unique_lock<std::mutex> lck(mutex_);
-    if (!notified) {
-        cv_.wait_for(lck, std::chrono::milliseconds(timeout), [this]() {
-            return notified;
-        });
-    }
+    cv_.wait_for(lck, std::chrono::milliseconds(timeout), [this]() {
+        return notified;
+    });
     return asyncReply_;
 }
 
