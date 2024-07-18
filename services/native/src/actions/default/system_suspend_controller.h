@@ -43,6 +43,8 @@ public:
     void RegisterHdiStatusListener();
     void RegisterPowerHdiCallback();
     void UnRegisterPowerHdiCallback();
+    void AllowAutoSleep();
+    void DisallowAutoSleep();
     void SetSuspendTag(const std::string& tag);
     
 private:
@@ -66,6 +68,7 @@ private:
     sptr<OHOS::HDI::Power::V1_2::IPowerInterface> powerInterface_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
+    std::atomic<bool> allowSleepTask_ {false};
     FFRTQueue queue_ {"power_system_suspend_controller"};
 };
 } // namespace PowerMgr
