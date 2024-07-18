@@ -47,6 +47,7 @@ private:
     std::mutex mutex_;
     std::condition_variable cv_;
     int asyncReply_ = { 0 };
+    bool notified {false};
 };
 
 class PowerMgrProxyAsync : public IRemoteProxy<IPowerMgrAsync> {
