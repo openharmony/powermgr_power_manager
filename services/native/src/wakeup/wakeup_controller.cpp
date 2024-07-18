@@ -29,6 +29,7 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
+#include "running_lock.h"
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
@@ -355,8 +356,14 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
     if (stateMachine_->GetState() != PowerState::AWAKE) {
+        // Cast from sptr<PowerMgrService> or wptr<PowerMgrService> to wptr<IPowerMgr> using constructor provided by
+        // "refbase.h" breaks the polymorphism in case of multiple inheritance. -- note 2024/07/20
+        // Thus, a cast from sptr<O> to sptr<T> is needed before casting to wptr<T>.
+        sptr<IPowerMgr> proxy {pms};
+        RunningLock wakeupLock {proxy, "wakeupLock", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+        wakeupLock.Init();
+        wakeupLock.Lock();
         Wakeup();
-        SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (stateMachine_->GetState() == PowerState::SLEEP) {
             auto suspendController = pms->GetSuspendController();
@@ -373,8 +380,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
                 return;
         }
 #endif
-        if (!stateMachine_->SetState(PowerState::AWAKE,
-            stateMachine_->GetReasonByWakeType(reason), true)) {
+        if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
     } else {

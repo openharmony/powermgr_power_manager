@@ -27,6 +27,7 @@
 #include "power_mgr_service.h"
 #include "power_utils.h"
 #include "setting_helper.h"
+#include "system_suspend_controller.h"
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
 #include "os_account_manager.h"
 #include "parameters.h"
@@ -184,6 +185,8 @@ void PowerStateMachine::EmplaceAwake()
                 return TransitResult::DISPLAY_ON_ERR;
             }
             ResetInactiveTimer();
+            SystemSuspendController::GetInstance().DisallowAutoSleep();
+            SystemSuspendController::GetInstance().Wakeup();
             return TransitResult::SUCCESS;
         }));
 }
@@ -247,6 +250,7 @@ void PowerStateMachine::EmplaceSleep()
     controllerMap_.emplace(PowerState::SLEEP,
         std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SLEEP lambda start");
+            SystemSuspendController::GetInstance().AllowAutoSleep();
             return TransitResult::SUCCESS;
         }));
 }
