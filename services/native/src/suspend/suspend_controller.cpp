@@ -35,7 +35,7 @@ namespace {
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 FFRTMutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
-constexpr int64_t POWERKEY_MIN_INTERVAL = 300; // ms
+constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -582,7 +582,7 @@ bool PowerKeySuspendMonitor::Init()
             static int64_t lastPowerkeyUpTime = 0;
             int64_t currTime = GetTickCount();
             if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within 300ms, skip. "
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within 350ms, skip. "
                     "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyUpTime);
                 return;
             }
