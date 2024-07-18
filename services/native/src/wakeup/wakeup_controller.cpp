@@ -41,7 +41,7 @@ sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 const int32_t ERR_FAILED = -1;
 #endif
-constexpr int64_t POWERKEY_MIN_INTERVAL = 300; // ms
+constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 }
 
 /** WakeupController Implement */
@@ -590,7 +590,7 @@ bool PowerkeyWakeupMonitor::Init()
             static int64_t lastPowerkeyDownTime = 0;
             int64_t currTime = GetTickCount();
             if (lastPowerkeyDownTime != 0 && currTime - lastPowerkeyDownTime < POWERKEY_MIN_INTERVAL) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey down within 300ms, skip. "
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey down within 350ms, skip. "
                     "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyDownTime);
                 return;
             }
