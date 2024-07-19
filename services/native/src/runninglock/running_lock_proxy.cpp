@@ -260,6 +260,7 @@ std::string RunningLockProxy::DumpProxyInfo()
                 .append("\n");
             int appIndex = 0;
             for (const auto& wks : tokenWksMap.first) {
+                appIndex++;
                 result.append("********workSourceIndex=").append(std::to_string(appIndex))
                     .append("********appuid=").append(std::to_string(wks.first))
                     .append("********bundleName=").append(wks.second.first)

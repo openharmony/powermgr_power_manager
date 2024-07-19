@@ -46,7 +46,7 @@ void MockPeerTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 
 void MockPeerTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**
