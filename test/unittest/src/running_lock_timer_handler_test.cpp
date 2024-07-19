@@ -106,7 +106,6 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Leve
     runningLock2->Init();
     runningLock1->Lock(TIMEOUT_MS);
     runningLock2->Lock(0);
-    // fake test for now, remember to correct it in future.
     EXPECT_TRUE(!runningLock1->IsUsed());
     EXPECT_TRUE(!runningLock2->IsUsed());
     sleep(SLEEP_WAIT_TIME_S);

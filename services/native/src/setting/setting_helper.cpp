@@ -28,8 +28,8 @@ constexpr int32_t WAKEUP_SOURCE_CLOSE = 0;
 }
 sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
-sptr<SettingObserver> SettingHelper::lidObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::powerModeObserver_ = nullptr;
+sptr<SettingObserver> SettingHelper::lidObserver_ = nullptr;
 
 bool SettingHelper::IsWakeupPickupSettingValid()
 {
@@ -429,74 +429,6 @@ void SettingHelper::UnregisterSettingObserver(sptr<SettingObserver>& observer)
     SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(observer);
 }
 
-bool SettingHelper::IsWakeupLidSettingValid()
-{
-    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_LID_KEY);
-}
-
-void SettingHelper::RegisterSettingWakeupLidObserver(SettingObserver::UpdateFunc& func)
-{
-    if (!IsWakeupLidSettingValid()) {
-        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
-        return;
-    }
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    lidObserver_ = settingProvider.CreateObserver(SETTING_POWER_WAKEUP_LID_KEY, func);
-    ErrCode ret = settingProvider.RegisterObserver(lidObserver_);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_UTILS, "register setting wakeup lid failed, ret=%{public}d", ret);
-        lidObserver_ = nullptr;
-    }
-}
-
-void SettingHelper::UnRegisterSettingWakeupLidObserver()
-{
-    if (!lidObserver_) {
-        POWER_HILOGI(COMP_UTILS, "lidObserver_ is nullptr, no need to unregister");
-        return;
-    }
-    if (!IsWakeupLidSettingValid()) {
-        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
-        return;
-    }
-    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(lidObserver_);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_UTILS, "unregister setting wakeup lid observer failed, ret=%{public}d", ret);
-    }
-    lidObserver_ = nullptr;
-}
-
-bool SettingHelper::GetSettingWakeupLid(const std::string& key)
-{
-    if (!IsWakeupLidSettingValid()) {
-        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
-        return false;
-    }
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value = 0;
-    ErrCode ret = settingProvider.GetIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_UTILS, "get setting power wakeup lid key failed, ret=%{public}d", ret);
-    }
-    return (value == WAKEUP_SOURCE_OPEN);
-}
-
-void SettingHelper::SetSettingWakeupLid(bool enable)
-{
-    POWER_HILOGI(COMP_UTILS, "SetSettingWakeupLid, enable=%{public}d", enable);
-    if (!IsWakeupLidSettingValid()) {
-        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
-        return;
-    }
-    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
-    int32_t value = enable ? WAKEUP_SOURCE_OPEN : WAKEUP_SOURCE_CLOSE;
-    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(COMP_UTILS, "set setting power wakeup lid key failed, enable=%{public}d, ret=%{public}d",
-            enable, ret);
-    }
-}
-
 void SettingHelper::SaveCurrentMode(int32_t mode)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
@@ -563,6 +495,73 @@ void SettingHelper::SavePowerModeRecoverMap(const std::string& jsonConfig)
     if (ret != ERR_OK) {
         POWER_HILOGE(COMP_UTILS, "save back up power mode policy failed, jsonConfig=%{public}s ret=%{public}d",
             jsonConfig.c_str(), ret);
+    }
+}
+bool SettingHelper::IsWakeupLidSettingValid()
+{
+    return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_LID_KEY);
+}
+
+void SettingHelper::RegisterSettingWakeupLidObserver(SettingObserver::UpdateFunc& func)
+{
+    if (!IsWakeupLidSettingValid()) {
+        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    lidObserver_ = settingProvider.CreateObserver(SETTING_POWER_WAKEUP_LID_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(lidObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "register setting wakeup lid failed, ret=%{public}d", ret);
+        lidObserver_ = nullptr;
+    }
+}
+
+void SettingHelper::UnRegisterSettingWakeupLidObserver()
+{
+    if (!lidObserver_) {
+        POWER_HILOGI(COMP_UTILS, "lidObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    if (!IsWakeupLidSettingValid()) {
+        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(lidObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting wakeup lid observer failed, ret=%{public}d", ret);
+    }
+    lidObserver_ = nullptr;
+}
+
+bool SettingHelper::GetSettingWakeupLid(const std::string& key)
+{
+    if (!IsWakeupLidSettingValid()) {
+        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
+        return false;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = 0;
+    ErrCode ret = settingProvider.GetIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power wakeup lid key failed, ret=%{public}d", ret);
+    }
+    return (value == WAKEUP_SOURCE_OPEN);
+}
+
+void SettingHelper::SetSettingWakeupLid(bool enable)
+{
+    POWER_HILOGI(COMP_UTILS, "SetSettingWakeupLid, enable=%{public}d", enable);
+    if (!IsWakeupLidSettingValid()) {
+        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = enable ? WAKEUP_SOURCE_OPEN : WAKEUP_SOURCE_CLOSE;
+    ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "set setting power wakeup lid key failed, enable=%{public}d, ret=%{public}d",
+            enable, ret);
     }
 }
 } // namespace PowerMgr

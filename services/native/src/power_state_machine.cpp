@@ -1365,6 +1365,7 @@ StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType ty
 
 StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
 {
+    POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceType :%{public}u", type);
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
@@ -1435,6 +1436,7 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         default:
             break;
     }
+    POWER_HILOGD(FEATURE_WAKEUP, "StateChangeReason: %{public}u", ret);
     return ret;
 }
 

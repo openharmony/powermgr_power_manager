@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "event_handler.h"
+#include "ffrt_utils.h"
 #include "power_state_machine.h"
 #ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
@@ -30,7 +31,6 @@
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
 #include "sleep_callback_holder.h"
-#include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {

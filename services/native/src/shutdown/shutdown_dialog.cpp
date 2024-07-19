@@ -156,6 +156,7 @@ void ShutdownDialog::LoadDialogConfig()
         POWER_HILOGI(COMP_UTILS, "do not find shutdown off json");
         return;
     }
+
     std::ifstream inputStream(configPath, std::ios::in | std::ios::binary);
     std::string contentStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
     Json::Reader reader;
@@ -167,13 +168,16 @@ void ShutdownDialog::LoadDialogConfig()
 
     if (!root["bundleName"].isString() ||
         !root["abilityName"].isString() || !root["uiExtensionType"].isString()) {
-            return;
+        POWER_HILOGE(COMP_UTILS, "json varibale not support");
+        return;
     }
-
     bundleName_ = root["bundleName"].asString();
     abilityName_ = root["abilityName"].asString();
     uiExtensionType_ = root["uiExtensionType"].asString();
+
+    POWER_HILOGI(COMP_UTILS, "PowerOff variables have changed");
 }
+
 void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
@@ -198,7 +202,7 @@ void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(
         data.WriteString16(u"parameters");
         std::string midStr = "\"";
         // sysDialogZOrder = 2 displayed on the lock screen
-        std::string paramStr = "{\"ability.want.params.uiExtensionType\":"+ midStr +
+        std::string paramStr = "{\"ability.want.params.uiExtensionType\":" + midStr +
             ShutdownDialog::GetUiExtensionType() + midStr + ",\"sysDialogZOrder\":2}";
         data.WriteString16(Str8ToStr16(paramStr));
         POWER_HILOGI(FEATURE_SHUTDOWN, "show power dialog is begin");

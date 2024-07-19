@@ -71,17 +71,17 @@ public:
     static void RegisterSettingWakeupPickupObserver(SettingObserver::UpdateFunc& func);
     static void UnregisterSettingWakeupPickupObserver();
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
-    static void RegisterSettingWakeupLidObserver(SettingObserver::UpdateFunc& func);
-    static void UnRegisterSettingWakeupLidObserver();
-    static bool GetSettingWakeupLid(const std::string& key = SETTING_POWER_WAKEUP_LID_KEY);
-    static void SetSettingWakeupLid(bool enable);
-    static bool IsWakeupLidSettingValid();
     static void SaveCurrentMode(int32_t mode);
     static int32_t ReadCurrentMode(int32_t defaultMode);
     static const std::string ReadPowerModeRecoverMap();
     static void SavePowerModeRecoverMap(const std::string &jsonConfig);
     static void RegisterSettingPowerModeObserver(SettingObserver::UpdateFunc& func);
     static void UnRegisterSettingPowerModeObserver();
+    static void RegisterSettingWakeupLidObserver(SettingObserver::UpdateFunc& func);
+    static void UnRegisterSettingWakeupLidObserver();
+    static bool GetSettingWakeupLid(const std::string& key = SETTING_POWER_WAKEUP_LID_KEY);
+    static void SetSettingWakeupLid(bool enable);
+    static bool IsWakeupLidSettingValid();
 
 private:
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
@@ -94,13 +94,13 @@ private:
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
     static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
     static constexpr const char* SETTING_POWER_WAKEUP_PICKUP_KEY {"settings.power.wakeup_pick_up"};
-    static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static constexpr const char* SETTING_POWER_MODE_KEY  {"settings.power.smart_mode_status"};
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
+    static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static sptr<SettingObserver> doubleClickObserver_;
     static sptr<SettingObserver> pickUpObserver_;
-    static sptr<SettingObserver> lidObserver_;
     static sptr<SettingObserver> powerModeObserver_;
+    static sptr<SettingObserver> lidObserver_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
