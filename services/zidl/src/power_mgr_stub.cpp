@@ -571,26 +571,6 @@ int32_t PowerMgrStub::UnRegisterPowerModeCallbackStub(MessageParcel& data)
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::RegisterRunningLockCallbackStub(MessageParcel& data)
-{
-    sptr<IRemoteObject> obj = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
-    sptr<IPowerRunninglockCallback> callback = iface_cast<IPowerRunninglockCallback>(obj);
-    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    RegisterRunningLockCallback(callback);
-    return ERR_OK;
-}
-
-int32_t PowerMgrStub::UnRegisterRunningLockCallbackStub(MessageParcel& data)
-{
-    sptr<IRemoteObject> obj = data.ReadRemoteObject();
-    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
-    sptr<IPowerRunninglockCallback> callback = iface_cast<IPowerRunninglockCallback>(obj);
-    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    UnRegisterRunningLockCallback(callback);
-    return ERR_OK;
-}
-
 int32_t PowerMgrStub::RegisterScreenStateCallbackStub(MessageParcel& data)
 {
     int32_t remainTime = 0;
@@ -611,6 +591,26 @@ int32_t PowerMgrStub::UnRegisterScreenStateCallbackStub(MessageParcel& data)
     sptr<IScreenOffPreCallback> callback = iface_cast<IScreenOffPreCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
     UnRegisterScreenStateCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::RegisterRunningLockCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IPowerRunninglockCallback> callback = iface_cast<IPowerRunninglockCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    RegisterRunningLockCallback(callback);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::UnRegisterRunningLockCallbackStub(MessageParcel& data)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
+    sptr<IPowerRunninglockCallback> callback = iface_cast<IPowerRunninglockCallback>(obj);
+    RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
+    UnRegisterRunningLockCallback(callback);
     return ERR_OK;
 }
 

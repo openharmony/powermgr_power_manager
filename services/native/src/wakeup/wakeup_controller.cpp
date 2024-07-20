@@ -22,8 +22,8 @@
 #include <securec.h>
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 #include <dlfcn.h>
-#include "json/json.h"
 #endif
+#include "json/json.h"
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
@@ -151,6 +151,7 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
             SetWakeupDoubleClickSensor(source.IsEnable());
             return;
         }
+
         auto enable = SettingHelper::GetSettingWakeupDouble();
         SetWakeupDoubleClickSensor(enable);
     } else if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
@@ -160,6 +161,7 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
             PickupConnectMotionConfig(source.IsEnable());
             return;
         }
+
         auto enable = SettingHelper::GetSettingWakeupPickup();
         PickupConnectMotionConfig(enable);
     }
@@ -175,7 +177,6 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         POWER_HILOGE(COMP_SVC, "json parse error");
         return;
     }
-
     bool originEnable = root["touchscreen"]["enable"].asBool();
     if (originEnable == updateEnable) {
         POWER_HILOGI(COMP_SVC, "no need change jsonConfig value");

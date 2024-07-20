@@ -69,10 +69,10 @@ public:
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
-    bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
-    bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
     bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback);
+    bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
+    bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     bool SetDisplaySuspend(bool enable);
     PowerErrors SetDeviceMode(const PowerMode& mode);
     PowerMode GetDeviceMode();
