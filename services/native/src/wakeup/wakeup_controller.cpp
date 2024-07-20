@@ -335,7 +335,7 @@ void WakeupController::Wakeup()
 WakeupController::SleepGuard::SleepGuard(const sptr<PowerMgrService>& pms) : pms_(pms)
 {
     token_ = new (std::nothrow) RunningLockTokenStub();
-    if (!token_) {
+    if (token_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
@@ -346,8 +346,8 @@ WakeupController::SleepGuard::SleepGuard(const sptr<PowerMgrService>& pms) : pms
 
 WakeupController::SleepGuard::~SleepGuard()
 {
-    if (!token_) {
-        POWER_HILOGE(COMP_SVC, "dtor no token");
+    if (token_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "dtor: token_ is nullptr, direct return ");
         return;
     }
     pms_->ReleaseRunningLock(token_);
