@@ -339,7 +339,7 @@ WakeupController::SleepGuard::SleepGuard(const sptr<PowerMgrService>& pms) : pms
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
-    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    RunningLockInfo info = {"SleepGuard", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
     pms_->CreateRunningLock(token_, info);
     pms_->Lock(token_);
 }
