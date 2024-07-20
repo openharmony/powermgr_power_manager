@@ -65,6 +65,20 @@ public:
     bool CheckEventReciveTime(WakeupDeviceType wakeupType);
 
 private:
+    class SleepGuard final {
+    public:
+        explicit SleepGuard(const sptr<PowerMgrService>& pms);
+        ~SleepGuard();
+        SleepGuard(const SleepGuard&) = delete;
+        SleepGuard(SleepGuard&&) = delete;
+        SleepGuard& operator=(const SleepGuard&) = delete;
+        SleepGuard& operator=(SleepGuard&&) = delete;
+
+    private:
+        sptr<IRemoteObject> token_;
+        sptr<PowerMgrService> pms_;
+    };
+
     void ControlListener(WakeupDeviceType reason);
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;

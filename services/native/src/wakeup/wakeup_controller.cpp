@@ -29,7 +29,6 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
-#include "running_lock.h"
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
@@ -333,6 +332,27 @@ void WakeupController::Wakeup()
     suspendController->StopSleep();
 }
 
+WakeupController::SleepGuard::SleepGuard(const sptr<PowerMgrService>& pms) : pms_(pms)
+{
+    token_ = new (std::nothrow) RunningLockTokenStub();
+    if (!token_) {
+        POWER_HILOGE(COMP_SVC, "create runninglock token failed");
+        return;
+    }
+    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    pms_->CreateRunningLock(token_, info);
+    pms_->Lock(token_);
+}
+
+WakeupController::SleepGuard::~SleepGuard()
+{
+    if (!token_) {
+        POWER_HILOGE(COMP_SVC, "dtor no token");
+        return;
+    }
+    pms_->ReleaseRunningLock(token_);
+}
+
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
@@ -356,13 +376,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
     if (stateMachine_->GetState() != PowerState::AWAKE) {
-        // Cast from sptr<PowerMgrService> or wptr<PowerMgrService> to wptr<IPowerMgr> using constructor provided by
-        // "refbase.h" breaks the polymorphism in case of multiple inheritance. -- note 2024/07/20
-        // Thus, a cast from sptr<O> to sptr<T> is needed before casting to wptr<T>.
-        sptr<IPowerMgr> proxy {pms};
-        RunningLock wakeupLock {proxy, "wakeupLock", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
-        wakeupLock.Init();
-        wakeupLock.Lock();
+        SleepGuard sleepGuard(pms);
         Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (stateMachine_->GetState() == PowerState::SLEEP) {
