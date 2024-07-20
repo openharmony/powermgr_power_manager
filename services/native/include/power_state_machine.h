@@ -169,7 +169,7 @@ public:
     void EnableMock(IDeviceStateAction* mockAction);
     int64_t GetDisplayOffTime();
     int64_t GetDimTime(int64_t displayOffTime);
-    static constexpr int64_t OFF_TIMEOUT_FACTOR = 4;
+    static constexpr int64_t OFF_TIMEOUT_FACTOR = 5;
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
     static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
     static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
