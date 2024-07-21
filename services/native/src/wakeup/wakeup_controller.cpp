@@ -333,6 +333,27 @@ void WakeupController::Wakeup()
     suspendController->StopSleep();
 }
 
+WakeupController::SleepGuard::SleepGuard(const sptr<PowerMgrService>& pms) : pms_(pms)
+{
+    token_ = new (std::nothrow) RunningLockTokenStub();
+    if (token_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "create runninglock token failed");
+        return;
+    }
+    RunningLockInfo info = {"SleepGuard", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    pms_->CreateRunningLock(token_, info);
+    pms_->Lock(token_);
+}
+
+WakeupController::SleepGuard::~SleepGuard()
+{
+    if (token_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "dtor: token_ is nullptr, direct return ");
+        return;
+    }
+    pms_->ReleaseRunningLock(token_);
+}
+
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
@@ -356,8 +377,8 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
     if (stateMachine_->GetState() != PowerState::AWAKE) {
+        SleepGuard sleepGuard(pms);
         Wakeup();
-        SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (stateMachine_->GetState() == PowerState::SLEEP) {
             auto suspendController = pms->GetSuspendController();
@@ -374,8 +395,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
                 return;
         }
 #endif
-        if (!stateMachine_->SetState(PowerState::AWAKE,
-            stateMachine_->GetReasonByWakeType(reason), true)) {
+        if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
     } else {
