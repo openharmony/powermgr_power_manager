@@ -106,6 +106,16 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface_->SetSuspendTag(tag);
 }
 
+void SystemSuspendController::AllowAutoSleep()
+{
+    allowSleepTask_ = true;
+}
+
+void SystemSuspendController::DisallowAutoSleep()
+{
+    allowSleepTask_ = false;
+}
+
 void SystemSuspendController::Suspend(
     const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force)
 {
@@ -118,7 +128,7 @@ void SystemSuspendController::Suspend(
         "TYPE", static_cast<int32_t>(1));
     if (force) {
         powerInterface_->ForceSuspend();
-    } else {
+    } else if (allowSleepTask_.load()) {
         powerInterface_->StartSuspend();
     }
 }
