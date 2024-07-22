@@ -178,6 +178,8 @@ void PowerStateMachine::EmplaceAwake()
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
+            HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON",
+                HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             if (ret != ActionResult::SUCCESS) {
