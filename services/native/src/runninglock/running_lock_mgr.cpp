@@ -92,6 +92,7 @@ void RunningLockMgr::InitLocksTypeScreen()
                 POWER_HILOGI(FEATURE_RUNNING_LOCK,
                     "[UL_POWER] RUNNINGLOCK_SCREEN active, and the  currrent power state = %{public}d",
                     stateMachine->GetState());
+                pms->RefreshActivityInner(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE, true);
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_SCREEN inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {

@@ -595,7 +595,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
  */
 HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative022 func started!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative022 function started!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
     auto runningLockMgr = pmsTest->GetRunningLockMgr();
