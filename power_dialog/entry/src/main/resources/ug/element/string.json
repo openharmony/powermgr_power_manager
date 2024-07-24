@@ -1,0 +1,20 @@
+{
+    "string": [
+        {
+            "name": "BUTTON_CANCEL_POWERDIALOG",
+            "value": "بىكار قىلىش"
+        },
+        {
+            "name": "BUTTON_REBOOT_POWERDIALOG",
+            "value": "قايتا قوزغىتىش"
+        },
+        {
+            "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value": "توك مەنبە تاللانمىلىرى"
+        },
+        {
+            "name": "BUTTON_SHUTDOWN_POWERDIALOG",
+            "value": "ئېتىش"
+        }
+    ]
+}

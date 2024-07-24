@@ -44,7 +44,7 @@ export class InjectNoticeStub extends rpc.RemoteObject {
         console.info(TAG, `onRemoteRequest start ${connectId}`);
         switch (code) {
             case CmdCode.OPEN_NOTICE: {
-                console.debug(TAG, `RpcServer:sync open_notice is called`);
+                console.debug(TAG, `RpcServer:open notice is called`);
                 let pid = data.readInt();
                 console.debug(TAG, `code:${code} pid: ${pid}`);
                 let ret: number = 0;
@@ -62,7 +62,7 @@ export class InjectNoticeStub extends rpc.RemoteObject {
             }
             break;
             case CmdCode.CLOSE_NOTICE_BY_REQUST: {
-                console.debug(TAG, `RpcServer:sync close_notice is called`);
+                console.debug(TAG, `RpcServer:close notice is called`);
                 let pid = data.readInt();
                 console.debug(TAG, `code:${code} pid: ${pid}`);
                 injectNoticeUtil.cancelNotificationById(NOTICE_ID);
