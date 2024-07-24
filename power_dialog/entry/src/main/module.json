@@ -53,7 +53,7 @@
         "name": "InjectNoticeAbility",
         "srcEntry": "./ets/ServiceExtAbility/InjectNoticeAbility.ts",
         "icon": "$media:icon",
-	      "label": "InjectNoticeAbility",
+        "label": "InjectNoticeAbility",
         "visible": false,
         "type": "service"
       }
