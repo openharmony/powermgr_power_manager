@@ -92,7 +92,6 @@ void RunningLockMgr::InitLocksTypeScreen()
                 POWER_HILOGI(FEATURE_RUNNING_LOCK,
                     "[UL_POWER] RUNNINGLOCK_SCREEN active, and the  currrent power state = %{public}d",
                     stateMachine->GetState());
-                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_SCREEN inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {
@@ -256,8 +255,8 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "CreateRunningLock name:%{public}s, type:%{public}d, bundleName:%{public}s",
-        lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "CreateRunningLock name:%{public}s, type:%{public}d, lockid:%{public}s",
+        lockInner->GetName().c_str(), lockInner->GetType(), std::to_string(runningLockParam.lockid).c_str());
     {
         std::lock_guard<std::mutex> lock(mutex_);
         runningLocks_.emplace(remoteObj, lockInner);
@@ -272,6 +271,9 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
     bool result = false;
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
+        auto lockid = TransformLockid(remoteObj);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
+            std::to_string(lockid).c_str());
         return result;
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "ReleaseLock name:%{public}s, type:%{public}d, bundleName:%{public}s",
@@ -305,13 +307,13 @@ bool RunningLockMgr::NeedNotify(RunningLockType type)
 void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
 {
     std::lock_guard<std::mutex> lock(screenLockListsMutex_);
-    auto iterator = unSceneLockLists_.find(singleLockParam.bundleName);
+    auto iterator = unSceneLockLists_.find(std::to_string(singleLockParam.lockid));
     if (fill) {
         if (iterator == unSceneLockLists_.end()) {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "Add non-scene lock information from lists");
             RunningLockInfo unSceneAppLockInfo = FillAppRunningLockInfo(singleLockParam);
             unSceneLockLists_.insert(
-                std::pair<std::string, RunningLockInfo>(unSceneAppLockInfo.bundleName, unSceneAppLockInfo));
+                std::pair<std::string, RunningLockInfo>(std::to_string(singleLockParam.lockid), unSceneAppLockInfo));
         }
         return;
     }
@@ -383,7 +385,9 @@ bool RunningLockMgr::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 {
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr");
+        auto lockid = TransformLockid(remoteObj);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
+            std::to_string(lockid).c_str());
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
@@ -398,7 +402,9 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     PowerHitrace powerHitrace("RunningLock_Lock");
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockInner is nullptr");
+        auto lockid = TransformLockid(remoteObj);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
+            std::to_string(lockid).c_str());
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
@@ -440,6 +446,9 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
     PowerHitrace powerHitrace("RunningLock_Unlock");
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
+        auto lockid = TransformLockid(remoteObj);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
+            std::to_string(lockid).c_str());
         return false;
     }
     if (lockInner->IsProxied()) {
@@ -563,6 +572,13 @@ void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerP
     if (g_runningLockCallback != nullptr) {
         g_runningLockCallback->HandleRunningLockMessage(message);
     }
+}
+
+uint64_t RunningLockMgr::TransformLockid(const sptr<IRemoteObject>& remoteObj)
+{
+    uintptr_t remoteObjPtr = reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr());
+    uint64_t lockid = std::hash<uintptr_t>()(remoteObjPtr);
+    return lockid;
 }
 
 bool RunningLockMgr::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)

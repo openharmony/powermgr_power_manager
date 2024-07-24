@@ -35,6 +35,7 @@ int SyncSleepCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
         POWER_HILOGE(COMP_SVC, "Descriptor is not match");
+        HiviewDFX::XCollie::GetInstance().CancelTimer(id);
         return E_GET_POWER_SERVICE_FAILED;
     }
 

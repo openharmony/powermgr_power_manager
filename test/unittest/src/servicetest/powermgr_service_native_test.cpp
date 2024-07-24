@@ -69,14 +69,14 @@ void PowerMgrServiceNativeTest::PowerStateTestCallback::OnPowerStateChanged(Powe
     POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged");
 }
 
-void PowerMgrServiceNativeTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
-}
-
 void PowerMgrServiceNativeTest::ScreenOffPreTestCallback::OnScreenStateChanged(uint32_t state)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreTestCallback::OnScreenStateChanged.");
+}
+
+void PowerMgrServiceNativeTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**
@@ -818,17 +818,17 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
 {
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
-    sptr<IPowerRunninglockCallback> RunninglockCallback =new PowerRunningLockTestCallback();
     sptr<IScreenOffPreCallback> screenOffPreCallback = new ScreenOffPreTestCallback();
+    sptr<IPowerRunninglockCallback> RunninglockCallback =new PowerRunningLockTestCallback();
 
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerStateCallback(stateCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(stateCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterPowerModeCallback(modeCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCallback));
-    EXPECT_TRUE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCallback));
-    EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterScreenStateCallback(4000, screenOffPreCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterScreenStateCallback(screenOffPreCallback));
+    EXPECT_TRUE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCallback));
+    EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCallback));
 }
 
 /**
@@ -879,14 +879,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is start");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is end");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is end");
 }
 
 /**

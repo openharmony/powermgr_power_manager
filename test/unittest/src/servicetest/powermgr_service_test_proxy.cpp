@@ -653,56 +653,6 @@ bool PowerMgrServiceTestProxy::UnRegisterPowerModeCallback(const sptr<IPowerMode
     return true;
 }
 
-bool PowerMgrServiceTestProxy::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
-{
-    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
-        return false;
-    }
-
-    data.WriteRemoteObject(callback->AsObject());
-
-    int ret = stub_->OnRemoteRequest(
-        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_RUNNINGLOCK_CALLBACK),
-        data, reply, option);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return false;
-    }
-    return true;
-}
-
-bool PowerMgrServiceTestProxy::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
-{
-    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
-        return false;
-    }
-
-    data.WriteRemoteObject(callback->AsObject());
-
-    int ret = stub_->OnRemoteRequest(
-        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_RUNNINGLOCK_CALLBACK),
-        data, reply, option);
-    if (ret != ERR_OK) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
-        return false;
-    }
-    return true;
-}
-
 bool PowerMgrServiceTestProxy::RegisterScreenStateCallback(int32_t remainTime,
     const sptr<IScreenOffPreCallback>& callback)
 {
@@ -749,6 +699,56 @@ bool PowerMgrServiceTestProxy::UnRegisterScreenStateCallback(const sptr<IScreenO
         data, reply, option);
     if (ret != ERR_OK) {
         POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_RUNNINGLOCK_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_RUNNINGLOCK_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return false;
     }
     return true;

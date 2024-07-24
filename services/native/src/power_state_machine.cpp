@@ -27,6 +27,7 @@
 #include "power_mgr_service.h"
 #include "power_utils.h"
 #include "setting_helper.h"
+#include "system_suspend_controller.h"
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
 #include "os_account_manager.h"
 #include "parameters.h"
@@ -184,6 +185,8 @@ void PowerStateMachine::EmplaceAwake()
                 return TransitResult::DISPLAY_ON_ERR;
             }
             ResetInactiveTimer();
+            SystemSuspendController::GetInstance().DisallowAutoSleep();
+            SystemSuspendController::GetInstance().Wakeup();
             return TransitResult::SUCCESS;
         }));
 }
@@ -247,6 +250,7 @@ void PowerStateMachine::EmplaceSleep()
     controllerMap_.emplace(PowerState::SLEEP,
         std::make_shared<StateController>(PowerState::SLEEP, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGI(FEATURE_POWER_STATE, "StateController_SLEEP lambda start");
+            SystemSuspendController::GetInstance().AllowAutoSleep();
             return TransitResult::SUCCESS;
         }));
 }
@@ -608,6 +612,15 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
             return false;
         }
+        int32_t id;
+        if (AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(id) != ERR_OK) {
+            POWER_HILOGE(FEATURE_SUSPEND, "get default activated os account failed.");
+            return false;
+        }
+        if (AccountSA::OsAccountManager::ActivateOsAccount(id) != ERR_OK) {
+            POWER_HILOGE(FEATURE_SUSPEND, "activate os account failed.");
+            return false;
+        }
     }
     hibernateController->PreHibernate();
     if (clearMemory) {
@@ -957,7 +970,7 @@ void PowerStateMachine::ShowCurrentScreenLocks()
     for (auto it : screenOnLockLists) {
         counter++;
         message.append(std::to_string(counter)).append(". ")
-            .append("bundleName=").append(it.first)
+            .append("bundleName=").append(it.second.bundleName)
             .append(" name=").append(it.second.name)
             .append(" pid=").append(std::to_string(it.second.pid))
             .append(". ");
@@ -1356,6 +1369,7 @@ StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType ty
 
 StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
 {
+    POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceType :%{public}u", type);
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON:
@@ -1426,6 +1440,7 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         default:
             break;
     }
+    POWER_HILOGD(FEATURE_WAKEUP, "StateChangeReason: %{public}u", ret);
     return ret;
 }
 

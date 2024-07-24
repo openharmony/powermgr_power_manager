@@ -49,7 +49,8 @@ bool RunningLockTimerHandler::RegisterRunningLockTimer(
         }
         return false;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "AddRunningLockTimer timerid=%{public}u", curTimerId);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "AddRunningLockTimer timerid=%{public}u, timeoutMs=%{public}d",
+        curTimerId, timeoutMs);
     AddRunningLockTimerMap(token, curTimerId);
     return true;
 }

@@ -37,7 +37,6 @@ using namespace OHOS;
 using namespace std;
 static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
-static constexpr int SLEEP_WAIT_TIME_US = 500 * 1000;
 
 void PowerSuspendTest::SetUpTestCase(void)
 {
