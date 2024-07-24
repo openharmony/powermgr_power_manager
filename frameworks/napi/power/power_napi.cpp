@@ -191,8 +191,8 @@ static void SetFrameworkBootStage(bool isReboot)
     ret = ioctl(fd, SET_SHUT_STAGE, &stage);
     if (ret < 0) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
-        close(fd);
     }
+    close(fd);
     return;
 }
 

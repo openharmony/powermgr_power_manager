@@ -29,7 +29,7 @@ namespace OHOS {
 namespace PowerMgr {
 int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
-    {
+{
     POWER_HILOGD(COMP_SVC, "cmd = %{public}d, flags= %{public}d", code, option.GetFlags());
     const int DFX_DELAY_S = 10;
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerModeCallbackStub", DFX_DELAY_S, nullptr, nullptr,
@@ -38,6 +38,7 @@ int PowerModeCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
         POWER_HILOGE(COMP_SVC, "Descriptor is not match");
+        HiviewDFX::XCollie::GetInstance().CancelTimer(id);
         return E_GET_POWER_SERVICE_FAILED;
     }
 

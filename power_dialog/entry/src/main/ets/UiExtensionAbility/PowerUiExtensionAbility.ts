@@ -22,9 +22,8 @@ export default class PowerUiExtensionAbility extends UIExtensionAbility {
       'session': session
     });
     
-    if('isInputDlg' in  want.parameters)
-    {
-      if(want.parameters.isInputDlg === true){
+    if ('isInputDlg' in want.parameters) {
+      if (want.parameters.isInputDlg === true) {
         session.loadContent('pages/inputDialog', storage);
         session.setWindowBackgroundColor('#00000000');
         return;

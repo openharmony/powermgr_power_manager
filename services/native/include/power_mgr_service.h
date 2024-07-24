@@ -120,9 +120,9 @@ public:
     void SwitchSubscriberCancel();
     void HallSensorSubscriberInit();
     void HallSensorSubscriberCancel();
+    bool CheckDialogFlag();
     void InputMonitorInit();
     void InputMonitorCancel();
-    bool CheckDialogFlag();
     bool CheckDialogAndShuttingDown();
     void SuspendControllerInit();
     void WakeupControllerInit();
@@ -137,10 +137,10 @@ public:
     static void RegisterSettingWakeupDoubleClickObservers();
     static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
     static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
-    static void RegisterSettingWakeUpLidObserver();
-    static void WakeupLidSettingUpdateFunc(const std::string& key);
     static void RegisterSettingPowerModeObservers();
     static void PowerModeSettingUpdateFunc(const std::string& key);
+    static void RegisterSettingWakeUpLidObserver();
+    static void WakeupLidSettingUpdateFunc(const std::string& key);
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif

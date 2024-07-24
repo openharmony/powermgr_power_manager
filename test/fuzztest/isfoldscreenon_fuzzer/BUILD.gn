@@ -1,0 +1,73 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../powermgr.gni")
+
+module_output_path = "power_manager/power_manager"
+
+##############################fuzztest##########################################
+ohos_fuzztest("IsFoldScreenOnFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file = "${powermgr_root_path}/test/fuzztest/isfoldscreenon_fuzzer"
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src/hibernate",
+    "${powermgr_service_path}/native/src/runninglock",
+    "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_service_path}/native/src/suspend",
+    "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/screenoffpre",
+    "../power_utils",
+  ]
+
+  if (power_manager_feature_wakeup_action) {
+    include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
+  }
+
+  configs = [
+    "${powermgr_utils_path}:coverage_flags",
+    "${powermgr_utils_path}:utils_config",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [
+    "../power_utils/power_fuzzer.cpp",
+    "./isfoldscreenon_fuzzer_test.cpp",
+  ]
+  deps = [
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/jsoncpp:jsoncpp",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "power_manager:power_ffrt",
+  ]
+  if (has_sensors_sensor_part) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+  }
+}

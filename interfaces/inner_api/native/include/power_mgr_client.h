@@ -17,6 +17,8 @@
 #define POWERMGR_POWER_MGR_CLIENT_H
 
 #include <string>
+#include <singleton.h>
+
 #include "power_state_machine_info.h"
 #include "running_lock.h"
 
@@ -168,11 +170,11 @@ public:
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    void RecoverRunningLocks();
     bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
     bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback);
     bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
-    void RecoverRunningLocks();
     std::string Dump(const std::vector<std::string>& args);
     PowerErrors GetError();
 

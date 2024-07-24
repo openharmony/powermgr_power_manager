@@ -153,6 +153,7 @@ private:
     bool InitLocks();
     static bool IsSceneRunningLockType(RunningLockType type);
     static bool NeedNotify(RunningLockType type);
+    static uint64_t TransformLockid(const sptr<IRemoteObject>& remoteObj);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
     void ProximityLockOn();

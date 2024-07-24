@@ -30,6 +30,10 @@ SCREEN:
   STATE: {type: INT32, desc: screen state}
   BRIGHTNESS: {type: INT32, desc: brightness level}
 
+STATE:
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: power state}
+  STATE: {type: INT32, desc: power state}
+
 SCREEN_ON_TIMEOUT:
   __BASE: {type: FAULT, level: CRITICAL, desc: timeout screen on information}
   PID: {type: INT32, desc: session pid}
@@ -47,11 +51,6 @@ SCREEN_OFF_TIMEOUT:
   PROCESS_NAME: {type: STRING, desc: call process name}
   MSG: {type: STRING, desc: screen off timeout message}
   REASON: {type: STRING, desc: screen off reason}
-
-STATE:
-  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: power state}
-  STATE: {type: INT32, desc: power state}
-
 
 STATE_CORRECTION:
   __BASE: {type: FAULT, level: CRITICAL, desc: the power state is inconsistent with the display state}

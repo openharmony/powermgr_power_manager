@@ -76,10 +76,10 @@ public:
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
-    virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
-    virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback) override;
     virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) override;
+    virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
+    virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
     virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
