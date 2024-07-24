@@ -19,6 +19,10 @@
     {
       "name": "split_color",
       "value": "#40E4E7ED"
+    },
+    {
+      "name": "capsule_color",
+      "value": "#07DF7E70"
     }
   ]
 }

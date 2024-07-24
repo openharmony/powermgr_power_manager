@@ -1,0 +1,20 @@
+{
+    "string": [
+        {
+            "name": "BUTTON_CANCEL_POWERDIALOG",
+            "value": "འདོར་བ།"
+        },
+        {
+            "name": "BUTTON_REBOOT_POWERDIALOG",
+            "value": "བསྐྱར་སློང་།"
+        },
+        {
+            "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value": "གློག་ཁུངས་གདམ་ག"
+        },
+        {
+            "name": "BUTTON_SHUTDOWN_POWERDIALOG",
+            "value": "སྒོ་རྒྱག་པ།"
+        }
+    ]
+}
