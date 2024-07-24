@@ -20,8 +20,8 @@ import WantAgent, { WantAgent as _WantAgent } from '@ohos.wantAgent';
 import CommonEventManager from '@ohos.commonEvent';
 import Base from '@ohos.base';
 import type context from '@ohos.app.ability.common';
+import image from '@ohos.multimedia.image';
 import GlobalContext from '../common/GlobalContext';
-
 
 const TAG: string = 'InjectNotice';
 const LABEL: string = 'inject notice';
@@ -74,7 +74,7 @@ class InjectNoticeUtil {
     wantAgentFlags: [WantAgent.WantAgentFlags.CONSTANT_FLAG],
   };
   commonEventSubscriber: CommonEventManager.CommonEventSubscriber = null;
-
+  capsuleIcon: image.PixelMap | null = null;
   constructor() {
 
   }
@@ -84,16 +84,17 @@ class InjectNoticeUtil {
     if (this.isInit) {
       return;
     }
-    // console.info(TAG, 'subscribe notification begin');
-    /* await notificationSubscribe.subscribe(this.subscriber, (err: Base.BusinessError) => {
-       if (err) {
-         console.error(TAG + `Failed to subscribe notification. Code is ${err.code}, message is ${err.message}`);
-         return;
-       }
-     });*/
     this.initRemovalWantAgent();
     this.initButtonWantAgent();
     this.createCommonEventSubscriber();
+    let systemLiveViewSubscriber: notificationManager.SystemLiveViewSubscriber = {
+      onResponse: this.onSystemLiveBttonsResponse,
+    };
+    notificationManager.subscribeSystemLiveView(systemLiveViewSubscriber).then(() => {
+      console.info(TAG, 'subscribeSystemLiveView success');
+    }).catch((error: Base.BusinessError) => {
+      console.error(`subscribeSystemLiveView fail: ${JSON.stringify(error)}`);
+    });
     console.info(TAG, 'init end');
     this.isInit = true;
   }
@@ -115,38 +116,43 @@ class InjectNoticeUtil {
 
   sendNotice(): void {
     console.debug(TAG, 'sendNotice begin==>');
-    this.enableNotification();
-    console.debug(TAG, 'sendNotice enableNotification end');
     console.debug(TAG, `wantAgentObj is ${this.wantAgentObj}`);
     console.debug(TAG, `removalWantAgentObj is ${this.removalWantAgentObj}`);
     let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
     let resourceManager = applicationContext.resourceManager;
     let imagePixelMap = resourceManager.getDrawableDescriptor($r('app.media.icon_notice')).getPixelMap();
+    let capsuleColor = resourceManager.getColorSync($r('app.color.capsule_color'));
+    let title = resourceManager.getStringSync($r('app.string.notice_title'));
+    let text = resourceManager.getStringSync($r('app.string.notice_text'));
+    let noticeText = resourceManager.getStringSync($r('app.string.notice_title'));
+    let cancelBnText = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
     let notificationRequest: notificationManager.NotificationRequest = {
       id: NOTICE_ID,
       label: LABEL,
       isOngoing: true,
       isFloatingIcon: true,
       smallIcon: imagePixelMap,
-      largeIcon: imagePixelMap,
+      isUnremovable: false,
       removalWantAgent: this.removalWantAgentObj,
       slotType: notificationManager.SlotType.SERVICE_INFORMATION,
-      actionButtons: [
-        {
-          title: resourceManager.getStringSync($r('app.string.bn_notice_cancel')),
-          wantAgent: this.wantAgentObj,
-        }
-      ],
       content: {
-        notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT, // 普通文本类型通知
-        normal: {
-          title: resourceManager.getStringSync($r('app.string.notice_title')),
-          text: resourceManager.getStringSync($r('app.string.notice_text')),
+        notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_SYSTEM_LIVE_VIEW,
+        systemLiveView: {
+          title: title,
+          text: text,
+          typeCode: 1,
+          capsule: {
+            title: noticeText,
+            backgroundColor: String(capsuleColor),
+          },
+          button: {
+            names: [cancelBnText],
+            icons: [imagePixelMap],
+          },
         },
-
       },
     };
-    console.info(TAG, 'publish begin');
+    console.debug(TAG, `publish content is ${JSON.stringify(notificationRequest)}`);
     notificationManager.publish(notificationRequest, (err: Base.BusinessError) => {
       if (err) {
         console.error(TAG, TAG + `Failed to publish notification. Code is ${err.code}, message is ${err.message}`);
@@ -208,7 +214,7 @@ class InjectNoticeUtil {
     console.debug(TAG, 'cancelAuthorization begin===>');
     try {
       inputEventClient.permitInjection(false);
-    } catch(err: Base.BusinessError){
+    } catch (err: Base.BusinessError) {
       console.error(TAG + `cancelAuthorization fail: ${JSON.stringify(err)}`);
     }
     console.debug(TAG, 'cancelAuthorization end===>');
@@ -216,7 +222,7 @@ class InjectNoticeUtil {
 
   createCommonEventSubscriber(): void {
     console.debug(TAG, 'createCommonEventSubscriber begin===>');
-    if(this.commonEventSubscriber !== null) {
+    if (this.commonEventSubscriber !== null) {
       console.debug(TAG, `commonEventSubscriber has init`);
       return;
     }
@@ -230,17 +236,17 @@ class InjectNoticeUtil {
     }).catch((err: Base.BusinessError) => {
       console.error(TAG, `createCommonEventSubscriber fail:${JSON.stringify(err)}}`);
     });
-    console.debug(TAG, 'cancelAuthorization end===>');
+    console.debug(TAG, 'cancelAuthorization end');
   }
 
   subscribe(): void {
-    console.debug(TAG, 'subscribe begin===>');
-    if(this.commonEventSubscriber === null) {
+    console.debug(TAG, 'subscribe begin');
+    if (this.commonEventSubscriber === null) {
       console.debug(TAG, 'subscribe commonEventSubscriber is null');
       return;
     }
     CommonEventManager.subscribe(this.commonEventSubscriber, (err: Base.BusinessError,
-                                                              data: CommonEventManager.CommonEventData) => {
+      data: CommonEventManager.CommonEventData) => {
       if (err.code) {
         console.error(TAG, `commonEventSubscribeCallBack err:${JSON.stringify(err)}`);
         return;
@@ -261,7 +267,12 @@ class InjectNoticeUtil {
         }
       }
     });
-    console.debug(TAG, 'subscribe end===>');
+    console.debug(TAG, 'subscribe end');
+  }
+
+  onSystemLiveBttonsResponse(notificationId: number,
+    buttonOptions: notificationManager.ButtonOptions): void {
+      console.debug(TAG, 'onSystemLiveBttonsResponse:', JSON.stringify(buttonOptions), 'id:' + notificationId);
   }
 }
 

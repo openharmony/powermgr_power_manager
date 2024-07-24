@@ -1,0 +1,92 @@
+{
+    "string":[
+        {
+            "name":"BatteryServiceExtAbility_desc",
+            "value":"[TS_941050]_description"
+        },
+        {
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"[TS_941055]_Cancel"
+        },
+        {
+            "name":"ThermalServiceExtAbility_desc",
+            "value":"[TS_941047]_description"
+        },
+        {
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"[TS_941053]_Restart"
+        },
+        {
+            "name":"TEXT_HIGH_TEMPERATURE_THERMALDIALOG_HIGH",
+            "value":"[TS_941064]_HighTemp"
+        },
+        {
+            "name":"PowerServiceExtAbility_reason",
+            "value":"[TS_941043]_reboot or shutdown"
+        },
+        {
+            "name":"ThermalServiceExtAbility_high_label",
+            "value":"[TS_941054]_ThermalServiceExtAbility_high_label"
+        },
+        {
+            "name":"PowerServiceExtAbility_label",
+            "value":"[TS_941056]_PowerServiceExtAbility_label"
+        },
+        {
+            "name":"bn_notice_cancel",
+            "value":"[TS_941065]_Cancel the authorization"
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"[TS_941052]_有远程设备想操控本设备，是否同意？"
+        },
+        {
+            "name":"BatteryServiceExtAbility_label",
+            "value":"[TS_941059]_BatteryServiceExtAbility_label"
+        },
+        {
+            "name":"notice_title",
+            "value":"[TS_941060]_Safety Tips"
+        },
+        {
+            "name":"entry_desc",
+            "value":"[TS_941061]_description"
+        },
+        {
+            "name":"notice_text",
+            "value":"[TS_941046]_Injection permission has been granted."
+        },
+        {
+            "name":"MainAbility_desc",
+            "value":"[TS_941045]_power_dialog"
+        },
+        {
+            "name":"ThermalServiceExtAbility_low_label",
+            "value":"[TS_941066]_ThermalServiceExtAbility_low_label"
+        },
+        {
+            "name":"BUTTON_KNOW",
+            "value":"[TS_941048]_Cancel"
+        },
+        {
+            "name":"TEXT_LOW_TEMPERATURE_THERMALDIALOG_LOW",
+            "value":"[TS_941051]_LowerTemp"
+        },
+        {
+            "name":"MainAbility_label",
+            "value":"[TS_941049]_label"
+        },
+        {
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"[TS_941057]_Power Options"
+        },
+        {
+            "name":"BUTTON_CONFIRM",
+            "value":"[TS_941058]_确定"
+        },
+        {
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"[TS_941044]_Power off"
+        }
+    ]
+}
