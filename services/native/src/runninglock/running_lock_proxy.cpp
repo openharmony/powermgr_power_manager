@@ -183,7 +183,6 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
             tokenWksItem.second.second = static_cast<int32_t>(tokenWksItem.second.first.size());
             ProxyInner(tokenWksItem.first, "", RunningLockEvent::RUNNINGLOCK_PROXY);
         }
-        return true;
     }
     for (auto& proxyItem : proxyMap_) {
         auto& tokenWksMap = proxyItem.second;
@@ -220,7 +219,6 @@ bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
             ProxyInner(tokenWksItem.first, MergeBundleName(tokenWksItem.second.first),
                 RunningLockEvent::RUNNINGLOCK_UNPROXY);
         }
-        return true;
     }
     for (auto& proxyItem : proxyMap_) {
         auto& tokenWksMap = proxyItem.second;
