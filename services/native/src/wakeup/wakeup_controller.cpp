@@ -370,7 +370,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr || pms->IsScreenOn()) {
+    if ((reason !=  WakeupDeviceType::WAKEUP_DEVICE_SWITCH) && (pms == nullptr || pms->IsScreenOn()) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this powerkey down event.");
         return;
     }
@@ -381,7 +381,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         SleepGuard sleepGuard(pms);
         Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
-        if (stateMachine_->GetState() == PowerState::SLEEP) {
+        if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && stateMachine_->GetState() == PowerState::SLEEP) {
             auto suspendController = pms->GetSuspendController();
             if (suspendController != nullptr) {
                 POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
