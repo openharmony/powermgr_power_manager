@@ -718,11 +718,15 @@ bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType 
 PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout)
 {
     std::lock_guard lock(screenMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(COMP_SVC,
+        "Try to override screenOffTime, timeout=%{public}" PRId64 ", pid: %{public}d, uid: %{public}d",
+        timeout, pid, uid);
     if (!Permission::IsSystem()) {
         POWER_HILOGI(COMP_SVC, "OverrideScreenOffTime failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    POWER_HILOGD(COMP_SVC, "Try to override screen off time");
     return powerStateMachine_->OverrideScreenOffTimeInner(timeout) ?
         PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 }
