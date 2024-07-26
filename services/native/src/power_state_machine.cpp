@@ -553,7 +553,6 @@ bool PowerStateMachine::CheckRefreshTime()
 
 bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
 {
-    POWER_HILOGI(COMP_SVC, "Override screenOffTime, timeout=%{public}" PRId64 "", timeout);
     if (!isScreenOffTimeOverride_) {
         int64_t beforeOverrideTime = this->GetDisplayOffTime();
         isScreenOffTimeOverride_ = true;
