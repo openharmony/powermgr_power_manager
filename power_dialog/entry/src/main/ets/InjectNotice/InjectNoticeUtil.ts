@@ -134,7 +134,7 @@ class InjectNoticeUtil {
       smallIcon: imagePixelMap,
       isUnremovable: false,
       removalWantAgent: this.removalWantAgentObj,
-      slotType: notificationManager.SlotType.SERVICE_INFORMATION,
+      slotType: notificationManager.SlotType.LIVE_VIEW,
       content: {
         notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_SYSTEM_LIVE_VIEW,
         systemLiveView: {
