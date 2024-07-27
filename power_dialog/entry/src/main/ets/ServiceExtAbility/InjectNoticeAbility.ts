@@ -19,7 +19,7 @@ import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import rpc from '@ohos.rpc';
 import GlobalContext from '../common/GlobalContext';
 import * as notice_sub from '../InjectNotice/InjectNoticeStub';
-import {NOTICE_ID , injectNoticeUtil } from '../InjectNotice/InjectNoticeUtil';
+import {NOTICE_ID, injectNoticeUtil } from '../InjectNotice/InjectNoticeUtil';
 
 const TAG = 'InjectNotice';
 const ACCESS_TYPE_MASK = 0b11;
