@@ -520,7 +520,7 @@ void PowerStateMachine::RefreshActivityInner(
         return;
     }
     // Check the screen state
-    if (IsScreenOn()) {
+    if (IsScreenOn() && !IsSettingState(PowerState::INACTIVE)) {
         if (stateAction_ != nullptr) {
             stateAction_->RefreshActivity(callTimeMs, type,
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
@@ -553,7 +553,6 @@ bool PowerStateMachine::CheckRefreshTime()
 
 bool PowerStateMachine::OverrideScreenOffTimeInner(int64_t timeout)
 {
-    POWER_HILOGI(COMP_SVC, "Override screenOffTime, timeout=%{public}" PRId64 "", timeout);
     if (!isScreenOffTimeOverride_) {
         int64_t beforeOverrideTime = this->GetDisplayOffTime();
         isScreenOffTimeOverride_ = true;
