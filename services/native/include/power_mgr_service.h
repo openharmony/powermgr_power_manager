@@ -34,6 +34,8 @@
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
 
+#include "common_event_subscriber.h"
+
 #ifdef POWER_MANAGER_WAKEUP_ACTION
 #include "wakeup_action_controller.h"
 #endif
@@ -308,6 +310,8 @@ private:
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
     int32_t inputMonitorId_ {-1};
+    void SubscribeCommonEvent();
+    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_;
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -318,6 +322,15 @@ public:
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
 };
 #endif
+
+class PowerCommonEventSubscriber : public EventFwk::CommonEventSubscriber {
+public:
+    explicit PowerCommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo)
+        : EventFwk::CommonEventSubscriber(subscribeInfo) {}
+    virtual ~PowerCommonEventSubscriber() {}
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
+};
+
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_POWER_MGR_SERVICE_H
