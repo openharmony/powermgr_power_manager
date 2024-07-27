@@ -138,6 +138,19 @@ bool WakeupSourceParser::ParseSourcesProc(
     if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         return false;
     }
+
+    if (!enable) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
+            SettingHelper::SetSettingWakeupDouble(enable);
+            POWER_HILOGI(FEATURE_WAKEUP, "the setting wakeupDoubleClick enable=%{public}d", enable);
+        }
+
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
+            SettingHelper::SetSettingWakeupPickup(enable);
+            POWER_HILOGI(FEATURE_WAKEUP, "the setting pickup enable=%{public}d", enable);
+        }
+    }
+
     if (enable == true) {
         WakeupSource wakeupSource = WakeupSource(wakeupDeviceType, enable, click);
         parseSources->PutSource(wakeupSource);
