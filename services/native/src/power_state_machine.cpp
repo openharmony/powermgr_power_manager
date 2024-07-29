@@ -1292,6 +1292,24 @@ bool PowerStateMachine::NeedShowScreenLocks(PowerState state)
         state == PowerState::INACTIVE || state == PowerState::DIM;
 }
 
+void PowerStateMachine::UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason)
+{
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
+        reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        settingOnStateFlag_ = false;
+        settingOffStateFlag_ = true;
+        return;
+    }
+    settingOnStateFlag_ = (state == PowerState::AWAKE);
+    settingOffStateFlag_ = (state == PowerState::INACTIVE);
+}
+
+void PowerStateMachine::RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason)
+{
+    settingOnStateFlag_ = false;
+    settingOffStateFlag_ = false;
+}
+
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
@@ -1315,14 +1333,12 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         forceTimingOut_.load()) {
         force = true;
     }
-    settingOnStateFlag_ = (state == PowerState::AWAKE);
-    settingOffStateFlag_ = (state == PowerState::INACTIVE);
+    UpdateSettingStateFlag(state, reason);
     TransitResult ret = pController->TransitTo(reason, force);
     timeoutCheck.Finish(ret);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), ret);
-    settingOnStateFlag_ = false;
-    settingOffStateFlag_ = false;
+    RestoreSettingStateFlag(state, reason);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 
