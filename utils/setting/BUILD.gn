@@ -46,6 +46,7 @@ ohos_shared_library("power_setting") {
     "data_share:datashare_consumer",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
 
