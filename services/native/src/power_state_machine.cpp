@@ -649,7 +649,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
     }
 
     if (hibernating_) {
-        POWER_HILOGE(FEATURE_SUSPEND, "hibernate hibernating hibernating.");
+        POWER_HILOGE(FEATURE_SUSPEND, "the device is hibernating, please try again later.");
         return false;
     }
     hibernating_ = true;
