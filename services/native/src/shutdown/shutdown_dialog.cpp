@@ -20,8 +20,8 @@
 #include <memory>
 #include <set>
 #include <string_ex.h>
+#include <dlfcn.h>
 
-#include <ability_manager_client.h>
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
 #include <key_event.h>
@@ -121,20 +121,31 @@ bool ShutdownDialog::ConnectSystemUi()
         POWER_HILOGW(FEATURE_SHUTDOWN, "power dialog has been show");
         return true;
     }
-    auto ams = AbilityManagerClient::GetInstance();
-    if (ams == nullptr) {
-        POWER_HILOGW(FEATURE_SHUTDOWN, "AbilityManagerClient is nullptr");
+    
+    Want want;
+    want.SetElementName("com.ohos.systemui", "com.ohos.systemui.dialog");
+
+    void *handler = dlopen("libpower_ability.z.so", RTLD_NOW);
+    if (handler == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "dlopen libpower_ability.z.so failed, reason : %{public}s", dlerror());
         return false;
     }
 
-    Want want;
-    want.SetElementName("com.ohos.systemui", "com.ohos.systemui.dialog");
-    ErrCode result = ams->ConnectAbility(want, dialogConnectionCallback_, INVALID_USERID);
-    if (result != ERR_OK) {
-        POWER_HILOGW(FEATURE_SHUTDOWN, "ConnectAbility systemui dialog failed, result = %{public}d", result);
+    auto powerConnectAbility = reinterpret_cast<void (*)(const Want&, const sptr<IAbilityConnection>&,
+        int32_t)>(dlsym(handler, "PowerConnectAbility"));
+    if (powerConnectAbility == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "find PowerConnectAbility function failed, reason : %{public}s", dlerror());
+#ifndef FUZZ_TEST
+        dlclose(handler);
+#endif
+        handler = nullptr;
         return false;
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "ConnectAbility systemui dialog success.");
+    powerConnectAbility(want, dialogConnectionCallback_, INVALID_USERID);
+#ifndef FUZZ_TEST
+    dlclose(handler);
+#endif
+    handler = nullptr;
     return true;
 }
 
