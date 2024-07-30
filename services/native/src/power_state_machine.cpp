@@ -147,9 +147,11 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
     }
 #ifdef HAS_SENSORS_SENSOR_PART
     // prevent the unexpected double click to light up the screen when calling
-    if (reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK && IsProximityClose() &&
-        to == PowerState::AWAKE) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click isn't allowed to wakeup device when proximity is close.");
+    if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
+            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) &&
+        IsProximityClose() && to == PowerState::AWAKE) {
+        POWER_HILOGI(
+            FEATURE_POWER_STATE, "Double-click or pickup isn't allowed to wakeup device when proximity is close.");
         return false;
     }
 #endif
