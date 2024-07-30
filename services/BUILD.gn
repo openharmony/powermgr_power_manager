@@ -98,7 +98,6 @@ ohos_shared_library("powermgrservice") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_connect_callback_stub",
-    "ability_runtime:ability_manager",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "c_utils:utils",
@@ -114,6 +113,7 @@ ohos_shared_library("powermgrservice") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "libxml2:libxml2",
@@ -121,6 +121,10 @@ ohos_shared_library("powermgrservice") {
   ]
 
   defines = []
+
+  if (use_libfuzzer) {
+    defines += [ "FUZZ_TEST" ]
+  }
 
   if (power_manager_feature_screen_on_timeout_check) {
     defines += [ "SCREEN_ON_TIMEOUT_CHECK" ]
