@@ -269,6 +269,8 @@ private:
         StateChangeReason reason_;
     };
 
+    void UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason);
+    void RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason);
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();
