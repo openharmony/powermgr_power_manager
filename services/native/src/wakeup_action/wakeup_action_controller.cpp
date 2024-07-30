@@ -17,6 +17,7 @@
 
 #include <ipc_skeleton.h>
 #include "power_log.h"
+#include "power_mgr_service.h"
 #include "system_suspend_controller.h"
 
 namespace OHOS {
@@ -85,16 +86,14 @@ void WakeupActionController::HandleAction(const std::string& reason)
 
 void WakeupActionController::HandleHibernate(SuspendDeviceType reason)
 {
-    if (stateMachine_ == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "Can't get PowerStateMachine");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "pms is nullptr");
         return;
     }
-    bool ret = stateMachine_->SetState(
-        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(reason), true);
-    if (ret) {
-        POWER_HILOGI(FEATURE_WAKEUP_ACTION, "State changed, call hibernate");
-    } else {
-        POWER_HILOGI(FEATURE_WAKEUP_ACTION, "Hibernate: State change failed");
+    POWER_HILOGI(FEATURE_WAKEUP_ACTION, "low capacity, hibernate begin, %{public}d", static_cast<int>(reason));
+    if (pms->Hibernate(false) != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "hibernate failed.");
     }
 }
 
