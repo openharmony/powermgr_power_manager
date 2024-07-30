@@ -41,7 +41,8 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
-constexpr int32_t HIBERNATE_DELAY_MS = 5000;
+constexpr uint32_t HIBERNATE_DELAY_MS = 5000;
+constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -188,7 +189,9 @@ void PowerStateMachine::EmplaceAwake()
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_ON_ERR;
             }
-            ResetInactiveTimer();
+            if (reason != StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
+                ResetInactiveTimer();
+            }
             SystemSuspendController::GetInstance().DisallowAutoSleep();
             SystemSuspendController::GetInstance().Wakeup();
             return TransitResult::SUCCESS;
@@ -395,6 +398,25 @@ WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& det
     return parsedType;
 }
 
+bool PowerStateMachine::IsPreBrightAuthReason(StateChangeReason reason)
+{
+    bool ret = false;
+    switch (reason) {
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
+            ret = true;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
+            ret = true;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
+            ret = true;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
 bool PowerStateMachine::IsPreBrightWakeUp(WakeupDeviceType type)
 {
     bool ret = false;
@@ -417,11 +439,11 @@ bool PowerStateMachine::IsPreBrightWakeUp(WakeupDeviceType type)
     return ret;
 }
 
-void PowerStateMachine::HandlePreBrightWakeUp(
-    int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
+void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
+    const std::string& pkgName, bool timeoutTriggered)
 {
     POWER_HILOGD(FEATURE_WAKEUP, "This wakeup event is trigged by %{public}s.", details.c_str());
-    
+
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
@@ -434,11 +456,18 @@ void PowerStateMachine::HandlePreBrightWakeUp(
     }
     mDeviceState_.lastWakeupDeviceTime = callTimeMs;
 
-    SetState(PowerState::AWAKE, GetReasonByWakeType(type), true);
+    StateChangeReason reason = GetReasonByWakeType(type);
+    if (!timeoutTriggered && IsPreBrightAuthReason(reason)) {
+        POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+            PowerUtils::GetReasonTypeString(reason).c_str());
+        CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
+    }
+    SetState(PowerState::AWAKE, reason, true);
 
     switch (type) {
-        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT:
+        case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT: {
             break;
+        }
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS: // fall through
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
             if (suspendController != nullptr) {
@@ -888,6 +917,13 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
             suspendController->CancelEvent();
             break;
         }
+        case CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG: {
+            if (!ffrtTimer_) {
+                return;
+            }
+            ffrtTimer_->CancelTimer(TIMER_ID_PRE_BRIGHT_AUTH);
+            break;
+        }
         default: {
             break;
         }
@@ -1313,6 +1349,48 @@ void PowerStateMachine::RestoreSettingStateFlag(const PowerState state, const St
     settingOffStateFlag_ = false;
 }
 
+bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
+{
+    bool ret = false;
+    PowerStateMachine::PreBrightState curState = preBrightState_.load();
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
+        if (ffrtTimer_ != nullptr) {
+            FFRTTask authFailTask = [this] {
+                POWER_HILOGI(FEATURE_WAKEUP, "Auth result of PRE_BRIGHT isn't received within %{public}u ms",
+                    PRE_BRIGHT_AUTH_TIMER_DELAY_MS);
+                const std::string detail = "pre_bright_auth_fail_screen_off";
+                const std::string pkgName = "pre_bright_auth_time";
+                HandlePreBrightWakeUp(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF,
+                    detail, pkgName, true);
+            };
+            if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
+                POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+                    PowerUtils::GetReasonTypeString(reason).c_str());
+                CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
+            }
+            POWER_HILOGD(FEATURE_POWER_STATE, "Start pre-bright-auth timer");
+            ffrtTimer_->SetTimer(TIMER_ID_PRE_BRIGHT_AUTH, authFailTask, PRE_BRIGHT_AUTH_TIMER_DELAY_MS);
+            preBrightState_.store(PowerStateMachine::PRE_BRIGHT_STARTED, std::memory_order_relaxed);
+            ret = true;
+        }
+    } else if (IsPreBrightAuthReason(reason)) {
+        if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
+            preBrightState_.store(PowerStateMachine::PRE_BRIGHT_FINISHED, std::memory_order_relaxed);
+            ret = true;
+        }
+    } else {
+        if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
+            POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+                PowerUtils::GetReasonTypeString(reason).c_str());
+            CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
+        }
+        preBrightState_.store(PowerStateMachine::PRE_BRIGHT_UNSTART, std::memory_order_relaxed);
+        ret = true;
+    }
+    POWER_HILOGD(FEATURE_WAKEUP, "Pre bright state: %{public}u", static_cast<uint32_t>(preBrightState_.load()));
+    return ret;
+}
+
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
@@ -1323,6 +1401,10 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
 
     if (NeedShowScreenLocks(state)) {
         ShowCurrentScreenLocks();
+    }
+
+    if (!HandlePreBrightState(reason)) {
+        return false;
     }
 
     std::shared_ptr<StateController> pController = GetStateController(state);
