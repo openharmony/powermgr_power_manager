@@ -155,7 +155,11 @@ void RunningLock::Release()
 
 std::string RunningLock::GetBundleNameByUid(const int32_t uid)
 {
-    std::string bundleName;
+    std::string bundleName = "";
+    if (uid < OHOS::AppExecFwk::Constants::BASE_APP_UID) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "GetBundleNameByUid Invalid for uid=%{public}d", uid);
+        return bundleName;
+    }
     AppExecFwk::BundleMgrClient bundleObj;
     ErrCode res = bundleObj.GetNameForUid(uid, bundleName);
     if (res != ERR_OK) {
