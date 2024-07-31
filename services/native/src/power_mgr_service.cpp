@@ -880,7 +880,7 @@ PowerErrors PowerMgrService::CreateRunningLock(
     return PowerErrors::ERR_OK;
 }
 
-bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
     std::lock_guard lock(lockMutex_);
     bool result = false;
@@ -888,7 +888,7 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
         return result;
     }
 
-    result = runningLockMgr_->ReleaseLock(remoteObj);
+    result = runningLockMgr_->ReleaseLock(remoteObj, name);
     return result;
 }
 
@@ -943,14 +943,14 @@ PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t 
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj)
+PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     std::lock_guard lock(lockMutex_);
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
-    runningLockMgr_->UnLock(remoteObj);
+    runningLockMgr_->UnLock(remoteObj, name);
     return PowerErrors::ERR_OK;
 }
 
