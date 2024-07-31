@@ -48,11 +48,11 @@ public:
 
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
         const RunningLockParam& runningLockParam);
-    bool ReleaseLock(const sptr<IRemoteObject> remoteObj);
+    bool ReleaseLock(const sptr<IRemoteObject> remoteObj, const std::string& name = "");
     bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources);
     bool Lock(const sptr<IRemoteObject>& remoteObj);
-    bool UnLock(const sptr<IRemoteObject> remoteObj);
+    bool UnLock(const sptr<IRemoteObject> remoteObj, const std::string& name = "");
     void RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
@@ -61,6 +61,7 @@ public:
     bool Init();
     bool ExistValidRunningLock();
     std::shared_ptr<RunningLockInner> GetRunningLockInner(const sptr<IRemoteObject>& remoteObj);
+    std::shared_ptr<RunningLockInner> GetRunningLockInnerByName(const std::string& name);
     const RunningLockMap& GetRunningLockMap() const
     {
         return runningLocks_;

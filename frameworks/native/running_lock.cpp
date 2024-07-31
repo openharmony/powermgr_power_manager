@@ -123,7 +123,7 @@ ErrCode RunningLock::UnLock()
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side UnLock call");
-    PowerErrors error = proxy->UnLock(token_);
+    PowerErrors error = proxy->UnLock(token_, runningLockInfo_.name);
     if (error != PowerErrors::ERR_OK) {
         return error == PowerErrors::ERR_PERMISSION_DENIED ? E_PERMISSION_DENIED : E_INNER_ERR;
     }
@@ -149,8 +149,8 @@ void RunningLock::Release()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
         return;
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side ReleaseRunningLock call");
-    proxy->ReleaseRunningLock(token_);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "ReleaseRunningLock name=%{public}s", runningLockInfo_.name.c_str());
+    proxy->ReleaseRunningLock(token_, runningLockInfo_.name);
 }
 
 std::string RunningLock::GetBundleNameByUid(const int32_t uid)

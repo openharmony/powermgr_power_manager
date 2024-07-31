@@ -249,6 +249,28 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
     return nullptr;
 }
 
+std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInnerByName(
+    const std::string& name)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    std::shared_ptr<RunningLockInner> lockInner = nullptr;
+    std::string result = ToString(runningLocks_.size());
+    for (auto& iter : runningLocks_) {
+        if (iter.second == nullptr) {
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "GetRunningLockInnerByName nullptr");
+            continue;
+        }
+        if (iter.second->GetName() == name) {
+            lockInner = iter.second;
+        }
+        auto& lockParam = iter.second->GetParam();
+        result.append(" lockid=").append(ToString(lockParam.lockid))
+            .append(" name=").append(lockParam.name);
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "DumpInfo: %{public}s", result.c_str());
+    return lockInner;
+}
+
 std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockParam& runningLockParam)
 {
@@ -267,7 +289,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     return lockInner;
 }
 
-bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
+bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj, const std::string& name)
 {
     bool result = false;
     auto lockInner = GetRunningLockInner(remoteObj);
@@ -275,7 +297,11 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj)
         auto lockid = TransformLockid(remoteObj);
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
             std::to_string(lockid).c_str());
-        return result;
+        lockInner = GetRunningLockInnerByName(name);
+        if (lockInner == nullptr) {
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
+            return result;
+        }
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "ReleaseLock name:%{public}s, type:%{public}d, bundleName:%{public}s",
         lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
@@ -442,7 +468,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     return true;
 }
 
-bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
+bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::string& name)
 {
     PowerHitrace powerHitrace("RunningLock_Unlock");
     auto lockInner = GetRunningLockInner(remoteObj);
@@ -450,7 +476,11 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj)
         auto lockid = TransformLockid(remoteObj);
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
             std::to_string(lockid).c_str());
-        return false;
+        lockInner = GetRunningLockInnerByName(name);
+        if (lockInner == nullptr) {
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
+            return false;
+        }
     }
     if (lockInner->IsProxied()) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
