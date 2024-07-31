@@ -222,7 +222,9 @@ int32_t PowerMgrStub::ReleaseRunningLockStub(MessageParcel& data)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
-    ReleaseRunningLock(remoteObj);
+    std::string name;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, String, name, E_READ_PARCEL_ERROR);
+    ReleaseRunningLock(remoteObj, name);
     return ERR_OK;
 }
 
@@ -275,7 +277,9 @@ int32_t PowerMgrStub::UnLockStub(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     RETURN_IF_WITH_RET((remoteObj == nullptr), E_READ_PARCEL_ERROR);
-    PowerErrors error = UnLock(remoteObj);
+    std::string name;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, String, name, E_READ_PARCEL_ERROR);
+    PowerErrors error = UnLock(remoteObj, name);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }

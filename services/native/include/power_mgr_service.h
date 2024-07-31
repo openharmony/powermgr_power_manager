@@ -70,12 +70,12 @@ public:
     virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
-    virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
         const std::map<int32_t, std::string>& workSources) override;
     virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
-    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj) override;
+    virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
