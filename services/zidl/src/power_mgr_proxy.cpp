@@ -57,7 +57,7 @@ PowerErrors PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteOb
     return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
@@ -72,6 +72,7 @@ bool PowerMgrProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, remoteObj.GetRefPtr(), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, name, false);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RELEASE_RUNNINGLOCK),
@@ -177,7 +178,7 @@ PowerErrors PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t ti
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
+PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -193,6 +194,7 @@ PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
         data, RemoteObject, remoteObj.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, name, PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK),
