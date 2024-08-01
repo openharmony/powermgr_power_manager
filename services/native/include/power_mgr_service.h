@@ -250,16 +250,10 @@ public:
 private:
     class WakeupRunningLock {
     public:
-        static void Create();
-        static void Lock();
-        static void Unlock();
-
+        WakeupRunningLock();
+        ~WakeupRunningLock();
     private:
-        WakeupRunningLock() = default;
-        ~WakeupRunningLock() = default;
-
-        static sptr<RunningLockTokenStub> token_;
-        static const int32_t TIMEOUT = 10000; // 10seconds
+        sptr<IRemoteObject> token_;
     };
 
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
