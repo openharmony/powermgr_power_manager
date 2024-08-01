@@ -355,6 +355,7 @@ WakeupController::SleepGuard::~SleepGuard()
     pms_->ReleaseRunningLock(token_);
 }
 
+#ifdef POWER_MANAGER_WAKEUP_ACTION
 bool WakeupController::IsLowCapacityWakeup(WakeupDeviceType reason)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -397,6 +398,7 @@ void WakeupController::ProcessLowCapacityWakeup()
     }
     wakeupActionController->ExecuteByGetReason();
 }
+#endif
 
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
