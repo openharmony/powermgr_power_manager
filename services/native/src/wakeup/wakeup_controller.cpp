@@ -355,12 +355,64 @@ WakeupController::SleepGuard::~SleepGuard()
     pms_->ReleaseRunningLock(token_);
 }
 
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+bool WakeupController::IsLowCapacityWakeup(WakeupDeviceType reason)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] pms is nullptr");
+        return false;
+    }
+    auto wakeupActionController = pms->GetWakeupActionController();
+    if (wakeupActionController == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupActionController is nullptr.");
+        return false;
+    }
+    return (reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
+        (wakeupActionController->IsLowCapacityWakeup());
+}
+
+void WakeupController::ProcessLowCapacityWakeup()
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] processing low capacity wake up begins.");
+    if (stateMachine_->GetState() != PowerState::SLEEP) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] the current power state is not sleep.");
+        return;
+    }
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] pms is nullptr");
+        return;
+    }
+    auto wakeupActionController = pms->GetWakeupActionController();
+    if (wakeupActionController == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupActionController is nullptr");
+        return;
+    }
+    SleepGuard sleepGuard(pms);
+    Wakeup();
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr) {
+        POWER_HILOGI(FEATURE_WAKEUP, "ControlListener TriggerSyncSleepCallback start.");
+        suspendController->TriggerSyncSleepCallback(true);
+    }
+    wakeupActionController->ExecuteByGetReason();
+}
+#endif
+
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
     if (!Permission::IsSystem()) {
         return;
     }
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    if (IsLowCapacityWakeup(reason)) {
+        ProcessLowCapacityWakeup();
+        return;
+    }
+#endif
+
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     if (!stateMachine_->IsSwitchOpen() || stateMachine_->IsHibernating()) {
 #else
@@ -381,21 +433,10 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         SleepGuard sleepGuard(pms);
         Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
-        if (stateMachine_->GetState() == PowerState::SLEEP) {
-            auto suspendController = pms->GetSuspendController();
-            if (suspendController != nullptr) {
-                POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
-                suspendController->TriggerSyncSleepCallback(true);
-            }
+        if (stateMachine_->GetState() == PowerState::SLEEP && pms->GetSuspendController() != nullptr) {
+            POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
+            pms->GetSuspendController()->TriggerSyncSleepCallback(true);
         }
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-        POWER_HILOGI(FEATURE_WAKEUP, "start get wakeup action reason");
-        if ((reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
-            (pms->GetWakeupActionController()->ExecuteByGetReason())) {
-                POWER_HILOGI(FEATURE_WAKEUP, "wakeup action reason avaiable");
-                return;
-        }
-#endif
         if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }

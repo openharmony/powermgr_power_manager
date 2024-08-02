@@ -49,6 +49,10 @@ public:
     void Wakeup();
     void NotifyDisplayActionDone(uint32_t event);
     void SetOriginSettingValue(WakeupSource& source);
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    bool IsLowCapacityWakeup(WakeupDeviceType reason);
+    void ProcessLowCapacityWakeup();
+#endif
     static int32_t SetWakeupDoubleClickSensor(bool enable);
     static void ChangeWakeupSourceConfig(bool updateEnable);
     static void ChangePickupWakeupSourceConfig(bool updataEnable);
