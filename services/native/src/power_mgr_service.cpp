@@ -159,7 +159,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->RegisterSettingPowerModeObservers();
         isBootCompleted_ = true;
     };
-    WakeupRunningLock::Create();
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
 
@@ -694,9 +693,8 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
-    WakeupRunningLock::Lock();
+    WakeupRunningLock wakeupRunningLock;
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
-    WakeupRunningLock::Unlock();
     return PowerErrors::ERR_OK;
 }
 
@@ -1283,33 +1281,25 @@ void PowerMgrService::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallbac
     shutdownController_->RemoveCallback(callback);
 }
 
-sptr<RunningLockTokenStub> PowerMgrService::WakeupRunningLock::token_;
-
-void PowerMgrService::WakeupRunningLock::Create()
+PowerMgrService::WakeupRunningLock::WakeupRunningLock()
 {
     token_ = new (std::nothrow) RunningLockTokenStub();
-    if (!token_) {
+    if (token_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
     RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
-    pms->CreateRunningLock(token_->AsObject(), info);
+    pms->CreateRunningLock(token_, info);
+    pms->Lock(token_);
 }
 
-void PowerMgrService::WakeupRunningLock::Lock()
+PowerMgrService::WakeupRunningLock::~WakeupRunningLock()
 {
-    if (!token_) {
+    if (token_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "token_ is nullptr");
         return;
     }
-    pms->Lock(token_->AsObject());
-}
-
-void PowerMgrService::WakeupRunningLock::Unlock()
-{
-    if (!token_) {
-        return;
-    }
-    pms->UnLock(token_->AsObject());
+    pms->ReleaseRunningLock(token_);
 }
 
 void PowerMgrService::SuspendControllerInit()
