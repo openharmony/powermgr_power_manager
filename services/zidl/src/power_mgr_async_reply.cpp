@@ -14,7 +14,7 @@
  */
 
 #include "power_mgr_async_reply.h"
-#include "power_log.h"
+#include "power_common.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -36,7 +36,7 @@ int PowerMgrStubAsync::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
     return result;
 }
 
-void PowerMgrStubAsync::SendAsyncReply(int &replyValue)
+void PowerMgrStubAsync::SendAsyncReply(int replyValue)
 {
     std::unique_lock<std::mutex> lck(mutex_);
     asyncReply_ = replyValue;
@@ -54,13 +54,15 @@ int PowerMgrStubAsync::WaitForAsyncReply(int timeout)
     return asyncReply_;
 }
 
-void PowerMgrProxyAsync::SendAsyncReply(int &replyValue)
+void PowerMgrProxyAsync::SendAsyncReply(int replyValue)
 {
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     data.WriteInt32(replyValue);
-    Remote()->SendRequest(SEND_ASYNC_REPLY, data, reply, option);
+    remote->SendRequest(SEND_ASYNC_REPLY, data, reply, option);
 }
 } // namespace PowerMgr
 } // namespace OHOS
