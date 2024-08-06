@@ -23,6 +23,9 @@ config("module_private_config") {
 
   include_dirs = [
     "include",
+    "include/interface_coverage_test",
+    "include/scenario_test/running_lock",
+    "include/scenario_test/wakeup_suspend",
     "mock",
     "include/utils",
     "${powermgr_service_zidl}/include",
@@ -82,7 +85,7 @@ defs = [ "POWER_GTEST" ]
 ohos_unittest("test_power_mgr_client") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_mgr_client_test.cpp" ]
+  sources = [ "src/interface_coverage_test/power_mgr_client_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -195,7 +198,7 @@ ohos_unittest("test_power_device_mode") {
 ohos_unittest("test_running_lock") {
   module_out_path = module_output_path
 
-  sources = [ "src/running_lock_test.cpp" ]
+  sources = [ "src/interface_coverage_test/running_lock_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -215,7 +218,7 @@ ohos_unittest("test_running_lock") {
 ohos_unittest("test_power_mgr_service") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_mgr_service_test.cpp" ]
+  sources = [ "src/interface_coverage_test/power_mgr_service_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -257,28 +260,6 @@ ohos_unittest("test_power_mgr_service_death") {
   external_deps = deps_ex
 }
 
-ohos_unittest("ces_system") {
-  module_out_path = module_output_path
-
-  sources = [ "src/ces_system_test.cpp" ]
-
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    ":module_private_config",
-    "${powermgr_utils_path}:coverage_flags",
-  ]
-
-  deps = [
-    "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
-    "${powermgr_service_path}:powermgrservice",
-    "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = deps_ex
-}
-
 ohos_unittest("test_power_state_level_framework") {
   module_out_path = module_output_path
 
@@ -305,7 +286,7 @@ ohos_unittest("test_power_state_level_framework") {
 ohos_unittest("test_power_state_machine") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_state_machine_test.cpp" ]
+  sources = [ "src/interface_coverage_test/power_state_machine_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -417,7 +398,7 @@ ohos_unittest("test_power_mgr_util") {
     "${powermgr_utils_path}/setting/src/setting_observer.cpp",
     "${powermgr_utils_path}/setting/src/setting_provider.cpp",
     "src/mock/mock_accesstoken_kit.cpp",
-    "src/power_mgr_util_test.cpp",
+    "src/interface_coverage_test/power_mgr_util_test.cpp",
   ]
 
   configs = [
@@ -781,7 +762,7 @@ ohos_unittest("test_running_lock_mock") {
 ohos_unittest("test_power_suspend_parse") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_suspend_parse_test.cpp" ]
+  sources = [ "src/interface_coverage_test/power_suspend_parse_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -818,7 +799,7 @@ ohos_unittest("test_power_suspend_parse") {
 ohos_unittest("test_power_wakeup_parse") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_wakeup_parse_test.cpp" ]
+  sources = [ "src/interface_coverage_test/power_wakeup_parse_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -855,7 +836,7 @@ ohos_unittest("test_power_wakeup_parse") {
 ohos_unittest("test_power_suspend") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_suspend_test.cpp" ]
+  sources = [ "src/scenario_test/wakeup_suspend/power_suspend_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -894,7 +875,7 @@ ohos_unittest("test_power_suspend") {
 ohos_unittest("test_power_wakeup") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_wakeup_test.cpp" ]
+  sources = [ "src/scenario_test/wakeup_suspend/power_wakeup_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -933,7 +914,7 @@ ohos_unittest("test_power_wakeup") {
 ohos_unittest("test_power_shutdown_clinet") {
   module_out_path = module_output_path
 
-  sources = [ "src/shutdown_client_test.cpp" ]
+  sources = [ "src/interface_coverage_test/shutdown_client_test.cpp" ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
