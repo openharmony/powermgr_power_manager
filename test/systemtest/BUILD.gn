@@ -60,6 +60,30 @@ if (has_sensors_sensor_part) {
 
 ##############################systemtest##########################################
 
+ohos_systemtest("ces_system") {
+  module_out_path = module_output_path
+
+  sources = [ "src/ces_system_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
+##############################mocksystemtest##########################################
+
 ohos_systemtest("test_power_mgr_mock_system") {
   module_out_path = module_output_path
 
@@ -310,6 +334,7 @@ ohos_systemtest("test_power_st_mgr_mock_suspend") {
 group("systemtest_powermgr") {
   testonly = true
   deps = [
+    ":ces_system",
     ":test_power_level_event_system_test_off",
     ":test_power_level_event_system_test_on",
     ":test_power_mgr_mock_system",
