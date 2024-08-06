@@ -30,6 +30,10 @@ public:
     void RegisterPublishEvents();
     void PublishScreenOffEvents(int64_t eventTime);
     void PublishScreenOnEvents(int64_t eventTime);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    void PublishEnterForceSleepEvents(int64_t eventTime);
+    void PublishExitForceSleepEvents(int64_t eventTime);
+#endif
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
@@ -38,6 +42,10 @@ private:
 
     sptr<IntentWant> screenOffWant_ {nullptr};
     sptr<IntentWant> screenOnWant_ {nullptr};
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    sptr<IntentWant> enterForceSleepWant_ {nullptr};
+    sptr<IntentWant> exitForceSleepWant_ {nullptr};
+#endif
     sptr<OHOS::EventFwk::CommonEventPublishInfo> publishInfo_ {nullptr};
 };
 } // namespace PowerMgr
