@@ -37,6 +37,12 @@ void PowerMgrNotify::RegisterPublishEvents()
     screenOffWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     screenOnWant_ = new (std::nothrow)IntentWant();
     screenOnWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    enterForceSleepWant_ = new (std::nothrow)IntentWant();
+    enterForceSleepWant_->SetAction(CommonEventSupport::COMMON_EVENT_ENTER_FORCE_SLEEP);
+    exitForceSleepWant_ = new (std::nothrow)IntentWant();
+    exitForceSleepWant_->SetAction(CommonEventSupport::COMMON_EVENT_EXIT_FORCE_SLEEP);
+#endif
 }
 
 void PowerMgrNotify::PublishEvents(int64_t eventTime, sptr<IntentWant> want)
@@ -64,5 +70,24 @@ void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
     PublishEvents(eventTime, screenOnWant_);
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", screenOnWant_->GetAction().c_str());
 }
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+void PowerMgrNotify::PublishEnterForceSleepEvents(int64_t eventTime)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
+        enterForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    PublishEvents(eventTime, enterForceSleepWant_);
+    POWER_HILOGI(
+        FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", enterForceSleepWant_->GetAction().c_str());
+}
+
+void PowerMgrNotify::PublishExitForceSleepEvents(int64_t eventTime)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
+        exitForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    PublishEvents(eventTime, exitForceSleepWant_);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", exitForceSleepWant_->GetAction().c_str());
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
