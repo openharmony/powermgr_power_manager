@@ -616,6 +616,9 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceInner StartSleepTimer start.");
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+        forceSleeping_.store(true, std::memory_order_relaxed);
+#endif
         suspendController->StartSleepTimer(
             SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
             static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND), 0);
@@ -849,12 +852,32 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         POWER_HILOGE(FEATURE_POWER_STATE, "Notify is null");
         return;
     }
-    if (state == PowerState::AWAKE) {
-        notify->PublishScreenOnEvents(callTime);
-    } else if (state == PowerState::INACTIVE) {
-        notify->PublishScreenOffEvents(callTime);
-    } else {
-        POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
+
+    switch (state) {
+        case PowerState::AWAKE: {
+            notify->PublishScreenOnEvents(callTime);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+            if (forceSleeping_.load()) {
+                notify->PublishExitForceSleepEvents(callTime);
+                forceSleeping_.store(false, std::memory_order_relaxed);
+            }
+#endif
+            break;
+        }
+        case PowerState::INACTIVE: {
+            notify->PublishScreenOffEvents(callTime);
+            break;
+        }
+        case PowerState::SLEEP: {
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+            if (forceSleeping_.load()) {
+                notify->PublishEnterForceSleepEvents(callTime);
+            }
+            break;
+#endif
+        }
+        default:
+            POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
     }
 }
 
