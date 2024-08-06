@@ -397,8 +397,8 @@ ohos_unittest("test_power_mgr_util") {
     "${powermgr_utils_path}/permission/src/permission.cpp",
     "${powermgr_utils_path}/setting/src/setting_observer.cpp",
     "${powermgr_utils_path}/setting/src/setting_provider.cpp",
-    "src/mock/mock_accesstoken_kit.cpp",
     "src/interface_coverage_test/power_mgr_util_test.cpp",
+    "src/mock/mock_accesstoken_kit.cpp",
   ]
 
   configs = [
