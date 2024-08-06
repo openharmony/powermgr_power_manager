@@ -85,6 +85,7 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
@@ -126,9 +127,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
         if (power == nullptr) {
             POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
             return;
-        }
-        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            power->GetPowerModeModule().InitPowerMode();
         }
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
@@ -563,6 +561,11 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s Add",
         systemAbilityId, deviceId.c_str());
+    if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
+            this->GetPowerModeModule().InitPowerMode();
+        }
+    }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
     }
