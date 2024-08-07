@@ -225,12 +225,12 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Lev
     g_service->SuspendDevice(
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     g_service->suspendController_->ControlListener(SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendControllerTest009");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendControllerTest009");
 
     g_service->suspendController_->stateMachine_->EmplaceInactive();
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendControllerTest009");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendControllerTest009");
     g_service->suspendController_->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, 1, 0);
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() != PowerState::AWAKE);
 
