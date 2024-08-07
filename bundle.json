@@ -81,6 +81,7 @@
                     "//base/powermgr/power_manager/etc/init:powermgr_cfg",
                     "//base/powermgr/power_manager/etc/para:powermgr_para",
                     "//base/powermgr/power_manager/etc/para:powermgr_para_dac",
+                    "//base/powermgr/power_manager/utils/ability:power_ability",
                     "//base/powermgr/power_manager/utils/shell:power-shell",
                     "//base/powermgr/power_manager/utils/param:power_sysparam",
                     "//base/powermgr/power_manager/utils/permission:power_permission",
