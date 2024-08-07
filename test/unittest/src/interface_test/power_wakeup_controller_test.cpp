@@ -125,8 +125,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest003, TestSize.Level
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
     EXPECT_TRUE(g_service->wakeupController_ != nullptr);
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest003");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest003");
     g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
     EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::AWAKE));
@@ -136,8 +136,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest003, TestSize.Level
     EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::AWAKE));
 
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest003");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest003");
     g_service->wakeupController_->ControlListener(WakeupDeviceType ::WAKEUP_DEVICE_POWER_BUTTON);
     EXPECT_TRUE(static_cast<uint32_t>(g_service->wakeupController_->stateMachine_->GetState()) ==
         static_cast<uint32_t>(PowerState::AWAKE));
@@ -382,8 +382,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest012, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest012: start");
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest012");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest012");
     EXPECT_TRUE(g_service->IsScreenOn());
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
@@ -405,8 +405,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest013, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest013: start");
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupControllerTest013");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupControllerTest013");
     EXPECT_TRUE(g_service->IsScreenOn());
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -428,8 +428,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest014, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest014: start");
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupControllerTest014");
+    g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
+        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupControllerTest014");
     EXPECT_TRUE(g_service->IsScreenOn());
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     std::shared_ptr<MMI::AxisEvent> axisEvent = MMI::AxisEvent::Create();
