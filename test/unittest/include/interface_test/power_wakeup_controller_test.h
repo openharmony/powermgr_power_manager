@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef POWER_SUSPEND_TEST_H
-#define POWER_SUSPEND_TEST_H
+#ifndef POWER_WAKEUP_CONTROLLER_TEST_H
+#define POWER_WAKEUP_CONTROLLER_TEST_H
 
 #include <gtest/gtest.h>
+
+#ifdef POWERMGR_GTEST
+#define private   public
+#define protected public
+#endif
+
 namespace OHOS {
 namespace PowerMgr {
-class PowerSuspendTest : public testing::Test {
+class PowerWakeupControllerTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
 };
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWER_SUSPEND_TEST_H
+#endif // POWER_WAKEUP_CONTROLLER_TEST_H
