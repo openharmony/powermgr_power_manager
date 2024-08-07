@@ -45,6 +45,7 @@ public:
     void Init();
     void Cancel();
     void RegisterSettingsObserver();
+    void UnregisterSettingsObserver();
     void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
     void NotifyDisplayActionDone(uint32_t event);

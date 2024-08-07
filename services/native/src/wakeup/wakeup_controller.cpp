@@ -70,10 +70,7 @@ WakeupController::~WakeupController()
         inputManager->RemoveMonitor(monitorId_);
     }
 #endif
-
-    if (g_wakeupSourcesKeyObserver) {
-        SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
-    }
+    UnregisterSettingsObserver();
 }
 
 void WakeupController::Init()
@@ -140,6 +137,14 @@ void WakeupController::RegisterSettingsObserver()
     };
     g_wakeupSourcesKeyObserver = SettingHelper::RegisterSettingWakeupSourcesObserver(updateFunc);
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
+}
+
+void WakeupController::UnregisterSettingsObserver()
+{
+    if (g_wakeupSourcesKeyObserver) {
+        SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
+        g_wakeupSourcesKeyObserver = nullptr;
+    }
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE

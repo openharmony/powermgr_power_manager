@@ -236,6 +236,19 @@ HWTEST_F(PowerMgrUtilTest, SettingProvider004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SettingProviderTest005
+ * @tc.desc: test UpdateCurrentUserId func
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, SettingProvider005, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "SettingProvider005::fun is start!");
+    auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
+    settingProvider.UpdateCurrentUserId();
+    POWER_HILOGI(LABEL_TEST, "SettingProvider005::fun is end!");
+}
+
+/**
  * @tc.name: SysparamTest001
  * @tc.desc: test GetIntValue in proxy
  * @tc.type: FUNC
