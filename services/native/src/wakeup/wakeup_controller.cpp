@@ -42,6 +42,7 @@ sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
 const int32_t ERR_FAILED = -1;
 #endif
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
+constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 }
 
 /** WakeupController Implement */
@@ -343,7 +344,7 @@ WakeupController::SleepGuard::SleepGuard(const sptr<PowerMgrService>& pms) : pms
     }
     RunningLockInfo info = {"SleepGuard", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
     pms_->CreateRunningLock(token_, info);
-    pms_->Lock(token_);
+    pms_->Lock(token_, WAKEUP_LOCK_TIMEOUT_MS);
 }
 
 WakeupController::SleepGuard::~SleepGuard()
@@ -432,6 +433,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     if (stateMachine_->GetState() != PowerState::AWAKE || reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH) {
         SleepGuard sleepGuard(pms);
         Wakeup();
+        SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (stateMachine_->GetState() == PowerState::SLEEP && pms->GetSuspendController() != nullptr) {
             POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
