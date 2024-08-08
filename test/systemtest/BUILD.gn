@@ -334,7 +334,6 @@ ohos_systemtest("test_power_st_mgr_mock_suspend") {
 group("systemtest_powermgr") {
   testonly = true
   deps = [
-    ":ces_system",
     ":test_power_level_event_system_test_off",
     ":test_power_level_event_system_test_on",
     ":test_power_mgr_mock_system",
