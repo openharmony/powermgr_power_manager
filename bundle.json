@@ -29,7 +29,8 @@
             "power_manager_feature_wakeup_action",
             "power_manager_feature_power_dialog",
             "power_manager_feature_enable_s4",
-            "power_manager_feature_doubleclick_or_pickup"
+            "power_manager_feature_doubleclick_or_pickup",
+            "power_manager_feature_force_sleep_broadcast"
         ],
         "adapted_system_type": [
             "standard"
