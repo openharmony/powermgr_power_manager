@@ -459,10 +459,10 @@ PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled)
     return ret;
 }
 
-PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return ret;
 }
 
