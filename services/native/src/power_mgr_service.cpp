@@ -58,6 +58,7 @@ static std::string g_wakeupReason = "";
 const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
 const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
+constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -1286,7 +1287,7 @@ PowerMgrService::WakeupRunningLock::WakeupRunningLock()
     }
     RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
     pms->CreateRunningLock(token_, info);
-    pms->Lock(token_);
+    pms->Lock(token_, WAKEUP_LOCK_TIMEOUT_MS);
 }
 
 PowerMgrService::WakeupRunningLock::~WakeupRunningLock()
