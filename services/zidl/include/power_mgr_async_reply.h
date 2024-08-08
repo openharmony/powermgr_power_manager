@@ -30,7 +30,7 @@ public:
     enum PowerInterfaceId {
         SEND_ASYNC_REPLY = 0,
     };
-    virtual void SendAsyncReply(int &reply) = 0;
+    virtual void SendAsyncReply(int reply) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgrAsync");
 };
@@ -41,7 +41,7 @@ public:
     PowerMgrStubAsync() = default;
     ~PowerMgrStubAsync() override = default;
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void SendAsyncReply(int &reply) override;
+    void SendAsyncReply(int reply) override;
     int WaitForAsyncReply(int timeout);
 private:
     std::mutex mutex_;
@@ -57,7 +57,7 @@ public:
     ~PowerMgrProxyAsync() = default;
     DISALLOW_COPY_AND_MOVE(PowerMgrProxyAsync);
 
-    void SendAsyncReply(int &reply) override;
+    void SendAsyncReply(int reply) override;
 private:
     static inline BrokerDelegator<PowerMgrProxyAsync> delegator_;
 };
