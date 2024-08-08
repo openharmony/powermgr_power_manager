@@ -31,7 +31,7 @@ void PowerRunningLockCallbackProxy::HandleRunningLockMessage(std::string message
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
 
     if (!data.WriteInterfaceToken(PowerRunningLockCallbackProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
