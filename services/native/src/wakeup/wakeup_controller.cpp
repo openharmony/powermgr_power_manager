@@ -432,6 +432,7 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     if (stateMachine_->GetState() != PowerState::AWAKE || reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH) {
         SleepGuard sleepGuard(pms);
         Wakeup();
+        SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (stateMachine_->GetState() == PowerState::SLEEP && pms->GetSuspendController() != nullptr) {
             POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
