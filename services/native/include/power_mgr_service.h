@@ -104,7 +104,7 @@ public:
     virtual PowerErrors IsStandby(bool& isStandby) override;
     virtual PowerErrors SetForceTimingOut(bool enabled) override;
     virtual PowerErrors LockScreenAfterTimingOut(
-        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent) override;
+        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent = true) override;
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
