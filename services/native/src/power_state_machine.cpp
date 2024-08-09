@@ -821,8 +821,10 @@ void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 
 void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
 {
-    if (GetState() == PowerState::INACTIVE && IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION)) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Coordination is enabled, not notify power state");
+    if (GetState() == PowerState::INACTIVE &&
+        (!enabledScreenOffEvent_.load(std::memory_order_relaxed) ||
+            IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION))) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] not notify inactive power state");
         return;
     }
     POWER_HILOGD(
@@ -1131,12 +1133,14 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
     }
 }
 
-void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock)
+void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent)
 {
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockScreenAfterTimingOut: %{public}u, %{public}u",
-        static_cast<uint32_t>(enabled), static_cast<uint32_t>(checkScreenOnLock));
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockScreenAfterTimingOut: %{public}u, %{public}u, %{public}u",
+        static_cast<uint32_t>(enabled), static_cast<uint32_t>(checkScreenOnLock),
+        static_cast<uint32_t>(sendScreenOffEvent));
     enabledTimingOutLockScreen_.store(enabled, std::memory_order_relaxed);
     enabledTimingOutLockScreenCheckLock_.store(checkScreenOnLock, std::memory_order_relaxed);
+    enabledScreenOffEvent_.store(sendScreenOffEvent, std::memory_order_relaxed);
 }
 
 bool PowerStateMachine::CheckRunningLock(PowerState state)

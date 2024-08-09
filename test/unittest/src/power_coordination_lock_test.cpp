@@ -748,4 +748,46 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_012, TestSize.Lev
     powerMgrClient.SetForceTimingOut(false);
 }
 #endif
+/**
+ * @tc.name: PowerCoordinationLockTest_013
+ * @tc.desc: test publishing screen off event
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_013, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_013 start");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    shared_ptr<PowerStateCommonEventSubscriber> subscriber = PowerStateCommonEventSubscriber::RegisterEvent();
+    const sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
+    powerMgrClient.RegisterPowerStateCallback(stateCallback);
+    EXPECT_FALSE(subscriber == nullptr);
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    powerMgrClient.SuspendDevice();
+    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    EXPECT_TRUE(g_screenOffEvent);
+    EXPECT_TRUE(g_inactiveCallback);
+    for (int i = 0; i < 4; ++i) {
+        powerMgrClient.WakeupDevice();
+        EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+        ResetTriggeredFlag();
+        powerMgrClient.LockScreenAfterTimingOut(i % 2, i / 2, 0);
+        powerMgrClient.SuspendDevice();
+        usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+        EXPECT_FALSE(g_screenOffEvent);
+        EXPECT_FALSE(g_inactiveCallback);
+    }
+    for (int i = 0; i < 4; ++i) {
+        powerMgrClient.WakeupDevice();
+        EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+        ResetTriggeredFlag();
+        powerMgrClient.LockScreenAfterTimingOut(i % 2, i / 2, 1);
+        powerMgrClient.SuspendDevice();
+        usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+        EXPECT_TRUE(g_screenOffEvent);
+        EXPECT_TRUE(g_inactiveCallback);
+    }
+    powerMgrClient.LockScreenAfterTimingOut(1, 0, 1);
+    POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_013 end");
+}
 }

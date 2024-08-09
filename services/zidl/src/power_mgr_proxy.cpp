@@ -1235,7 +1235,7 @@ PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -1248,10 +1248,9 @@ PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool,
-        static_cast<uint32_t>(enabledLockScreen), PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool,
-        static_cast<uint32_t>(checkLock), PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, enabledLockScreen, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, checkLock, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, sendScreenOffEvent, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, reply, option);
     if (ret != ERR_OK) {

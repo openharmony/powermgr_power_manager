@@ -181,7 +181,7 @@ public:
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
     void SetForceTimingOut(bool enabled);
-    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock);
+    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent);
     bool IsSettingState(PowerState state);
 
 private:
@@ -339,6 +339,7 @@ private:
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
+    std::atomic<bool> enabledScreenOffEvent_{true};
     std::atomic<int64_t> settingStateFlag_ {-1};
     std::atomic<bool> settingOnStateFlag_ {false};
     std::atomic<bool> settingOffStateFlag_ {false};
