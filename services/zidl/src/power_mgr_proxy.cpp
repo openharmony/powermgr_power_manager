@@ -233,8 +233,10 @@ bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>
     for (int i = 0; i < num; i++) {
         std::string key = reply.ReadString();
         RunningLockInfo* info = reply.ReadParcelable<RunningLockInfo>();
-        runningLockLists.insert(std::pair<std::string, RunningLockInfo>(key, *info));
-        delete info;
+        if (info != nullptr) {
+            runningLockLists.insert(std::pair<std::string, RunningLockInfo>(key, *info));
+            delete info;
+        }
     }
     return true;
 }
