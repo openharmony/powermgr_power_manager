@@ -1387,12 +1387,12 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return PowerErrors::ERR_OK;
 }
 
