@@ -33,14 +33,15 @@ static const std::string SYSTEM_POWER_WAKEUP_CONFIG_FILE = "/system/etc/power_co
 static const uint32_t SINGLE_CLICK = static_cast<uint32_t>(WakeUpAction::CLICK_SINGLE);
 static const uint32_t DOUBLE_CLICK = static_cast<uint32_t>(WakeUpAction::CLICK_DOUBLE);
 } // namespace
+bool WakeupSourceParser::isSettingUpdated_ = false;
 
 std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
 {
     std::shared_ptr<WakeupSources> parseSources;
-    bool isSettingUpdated = SettingHelper::IsWakeupSourcesSettingValid();
-    POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isSettingUpdated);
+    isSettingUpdated_ = SettingHelper::IsWakeupSourcesSettingValid();
+    POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isSettingUpdated_);
     std::string configJsonStr;
-    if (isSettingUpdated) {
+    if (isSettingUpdated_) {
         configJsonStr = SettingHelper::GetSettingWakeupSources();
     } else {
         std::string targetPath;
@@ -139,7 +140,7 @@ bool WakeupSourceParser::ParseSourcesProc(
         return false;
     }
 
-    if (!enable) {
+    if (!enable && !isSettingUpdated_) {
         if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
             SettingHelper::SetSettingWakeupDouble(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting wakeupDoubleClick enable=%{public}d", enable);
