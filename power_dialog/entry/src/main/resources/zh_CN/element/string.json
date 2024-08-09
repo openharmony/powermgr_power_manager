@@ -74,19 +74,31 @@
         },
         {
             "name": "WARNING_TIP",
-            "value": "有远程设备想操控本设备，是否同意？"
+            "value": "用于共享屏幕时，与会人可远程协助你的桌面"
         },
         {
             "name": "notice_title",
-            "value": "安全提示"
+            "value": "远程协助"
         },
         {
             "name": "notice_text",
-            "value": "注入权限已经授权。"
+            "value": "%s正在远程协助你的桌面"
         },
         {
             "name": "bn_notice_cancel",
-            "value": "取消授权"
+            "value": "断开远程协助"
+        },
+        {
+            "name": "bn_agree",
+            "value": "允许"
+        },
+        {
+            "name": "bn_not_agree",
+            "value": "不允许"
+        },
+        {
+            "name": "text_inject_tip_title",
+            "value": "允许%s使用你的屏幕"
         }
     ]
 }

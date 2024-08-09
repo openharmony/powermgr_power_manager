@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import util from '@ohos.util'
 import notificationManager from '@ohos.notificationManager';
 import notificationSubscribe from '@ohos.notificationSubscribe';
 import inputEventClient from '@ohos.multimodalInput.inputEventClient';
@@ -124,6 +125,7 @@ class InjectNoticeUtil {
     let capsuleColor = resourceManager.getColorSync($r('app.color.capsule_color'));
     let title = resourceManager.getStringSync($r('app.string.notice_title'));
     let text = resourceManager.getStringSync($r('app.string.notice_text'));
+    text = util.format(text, '');
     let noticeText = resourceManager.getStringSync($r('app.string.notice_title'));
     let cancelBnText = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
     let notificationRequest: notificationManager.NotificationRequest = {
