@@ -85,6 +85,10 @@
             "value": "%s is assisting your desktop remotely"
         },
         {
+            "name": "bn_notice_cancel",
+            "value": "Disconnect Remote Assistance"
+        },
+        {
             "name": "bn_agree",
             "value": "Allow"
         },

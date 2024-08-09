@@ -85,6 +85,10 @@
             "value": "%s正在远程协助你的桌面"
         },
         {
+            "name": "bn_notice_cancel",
+            "value": "断开远程协助"
+        },
+        {
             "name": "bn_agree",
             "value": "允许"
         },

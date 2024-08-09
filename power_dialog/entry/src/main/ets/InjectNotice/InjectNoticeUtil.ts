@@ -127,7 +127,7 @@ class InjectNoticeUtil {
     let text = resourceManager.getStringSync($r('app.string.notice_text'));
     text = util.format(text, '');
     let noticeText = resourceManager.getStringSync($r('app.string.notice_title'));
-    let cancelBnText = 'stop';
+    let cancelBnText = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
     let notificationRequest: notificationManager.NotificationRequest = {
       id: NOTICE_ID,
       label: LABEL,
