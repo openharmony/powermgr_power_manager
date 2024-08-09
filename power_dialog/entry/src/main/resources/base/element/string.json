@@ -74,19 +74,27 @@
         },
         {
             "name": "WARNING_TIP",
-            "value": "Do you agree to have a remote device that wants to control this device?"
+            "value": "When used to share the screen, participants can remotely assist your desktop"
         },
         {
             "name": "notice_title",
-            "value": "Safety Tips"
+            "value": "Remote assistance"
         },
         {
             "name": "notice_text",
-            "value": "Injection permission has been granted."
+            "value": "%s is assisting your desktop remotely"
         },
         {
-            "name": "bn_notice_cancel",
-            "value": "Cancel the authorization"
+            "name": "bn_agree",
+            "value": "Allow"
+        },
+        {
+            "name": "bn_not_agree",
+            "value": "Don't allow"
+        },
+        {
+            "name": "text_inject_tip_title",
+            "value": "Allow %s to use your screen"
         }
     ]
 }
