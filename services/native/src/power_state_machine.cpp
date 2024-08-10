@@ -1412,6 +1412,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     }
 
     if (!HandlePreBrightState(reason)) {
+        timeoutCheck.Finish(TransitResult::OTHER_ERR);
         return false;
     }
 
