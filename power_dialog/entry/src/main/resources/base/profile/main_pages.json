@@ -3,6 +3,8 @@
     "pages/powerDialog",
     "pages/thermalHighDialog",
     "pages/thermalLowDialog",
-    "pages/inputDialog"
+    "pages/inputDialog",
+    "pages/capsuleIcon",
+    "pages/pluginWindow"
   ]
 }

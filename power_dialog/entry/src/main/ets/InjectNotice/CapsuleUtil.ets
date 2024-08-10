@@ -57,7 +57,6 @@ export class CapsuleUtil {
     PluginMgr.push(pushData, logInfo);
   }
   
-
   public processCapsule(isVisible: boolean): void {
     this.pushToPluginMgr({
       requestVisible: isVisible,
