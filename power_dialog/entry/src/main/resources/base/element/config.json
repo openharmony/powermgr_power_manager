@@ -1,0 +1,8 @@
+{
+    "string": [
+      {
+        "name": "plugin_capsule_my_inject",
+        "value": "{\"pluginSlot\":\"status_bar_pc_myinject\",\"pluginType\":\"message\",\"pluginDeviceType\":\"2in1\",\"pluginTemplateName\":\"pages/capsuleIcon.js\",\"pluginIconType\":\"small\",\"pluginPosition\":\"right\",\"pluginPriority\":1, \"clickInfo\": {\"clickType\":\"window\", \"windowType\":\"large\",\"windowHeight\":64,\"abilityName\":\"CapsuleWindowAbility\"}}"
+      }
+    ]
+  }
