@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import util from '@ohos.util'
+import util from '@ohos.util';
 import notificationManager from '@ohos.notificationManager';
-import notificationSubscribe from '@ohos.notificationSubscribe';
 import inputEventClient from '@ohos.multimodalInput.inputEventClient';
 import WantAgent, { WantAgent as _WantAgent } from '@ohos.wantAgent';
 import CommonEventManager from '@ohos.commonEvent';
@@ -39,9 +38,6 @@ export enum InjectNoticeStaus {
 class InjectNoticeUtil {
   status: InjectNoticeStaus = InjectNoticeStaus.DEFAULT;
   isInit: boolean = false;
-  subscriber: notificationSubscribe.NotificationSubscriber = {
-    onCancel: this.onCancelCallBack,
-  };
   wantAgentObj: _WantAgent = null;
   wantAgentInfo: WantAgent.WantAgentInfo = {
     wants: [
@@ -89,19 +85,18 @@ class InjectNoticeUtil {
     this.initButtonWantAgent();
     this.createCommonEventSubscriber();
     let systemLiveViewSubscriber: notificationManager.SystemLiveViewSubscriber = {
-      onResponse: this.onSystemLiveBttonsResponse,
+      onResponse: this.onLiveNoticeResponseCallback,
     };
+    console.info(TAG, 'subscribeSystemLiveView begin');
     notificationManager.subscribeSystemLiveView(systemLiveViewSubscriber).then(() => {
       console.info(TAG, 'subscribeSystemLiveView success');
     }).catch((error: Base.BusinessError) => {
       console.error(`subscribeSystemLiveView fail: ${JSON.stringify(error)}`);
     });
+    console.info(TAG, 'initCapsuleIcon begin');
+    this.initCapsuleIcon();
     console.info(TAG, 'init end');
     this.isInit = true;
-  }
-
-  private onCancelCallBack(data: notificationSubscribe.SubscribeCallbackData): void {
-    console.info(TAG, 'Cancel callback:' + JSON.stringify(data));
   }
 
   async cancelNotificationById(id: number): Promise<void> {
@@ -122,12 +117,13 @@ class InjectNoticeUtil {
     let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
     let resourceManager = applicationContext.resourceManager;
     let imagePixelMap = resourceManager.getDrawableDescriptor($r('app.media.icon_notice')).getPixelMap();
-    let capsuleColor = resourceManager.getColorSync($r('app.color.capsule_color'));
+    let capsuleColor = resourceManager.getColorSync($r('sys.color.ohos_id_color_warning'));
     let title = resourceManager.getStringSync($r('app.string.notice_title'));
     let text = resourceManager.getStringSync($r('app.string.notice_text'));
     text = util.format(text, '');
     let noticeText = resourceManager.getStringSync($r('app.string.notice_title'));
     let cancelBnText = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
+    let cancelBnImage = resourceManager.getDrawableDescriptor($r('app.media.link_slash')).getPixelMap();
     let notificationRequest: notificationManager.NotificationRequest = {
       id: NOTICE_ID,
       label: LABEL,
@@ -146,14 +142,17 @@ class InjectNoticeUtil {
           capsule: {
             title: noticeText,
             backgroundColor: String(capsuleColor),
+            icon: this.capsuleIcon!
+
           },
           button: {
             names: [cancelBnText],
-            icons: [imagePixelMap],
+            icons: [cancelBnImage],
           },
         },
       },
     };
+
     console.debug(TAG, `publish content is ${JSON.stringify(notificationRequest)}`);
     notificationManager.publish(notificationRequest, (err: Base.BusinessError) => {
       if (err) {
@@ -240,7 +239,7 @@ class InjectNoticeUtil {
     });
     console.debug(TAG, 'cancelAuthorization end');
   }
-
+ 
   subscribe(): void {
     console.debug(TAG, 'subscribe begin');
     if (this.commonEventSubscriber === null) {
@@ -275,6 +274,52 @@ class InjectNoticeUtil {
   onSystemLiveBttonsResponse(notificationId: number,
     buttonOptions: notificationManager.ButtonOptions): void {
       console.debug(TAG, 'onSystemLiveBttonsResponse:', JSON.stringify(buttonOptions), 'id:' + notificationId);
+  }
+
+  onLiveNoticeResponseCallback(notificationId: number, buttonOptions: notificationManager.ButtonOptions): void {
+    console.debug(TAG, 'onLiveNoticeResponseCallback enter');
+    if (buttonOptions == null) {
+      console.error(TAG, 'onLiveNoticeResponseCallback button callback: ' + 'buttonOptions is null');
+      return;
+    }
+    let clickButtonName = buttonOptions.buttonName;
+    let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
+    let resourceManager = applicationContext.resourceManager;
+    let locateButtonName = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
+    console.info(TAG, 'onLiveNoticeResponseCallback button callback: ' + clickButtonName + ', notificationId = ' + notificationId);
+    if (clickButtonName === locateButtonName) {
+      console.debug(TAG, `onLiveNoticeResponseCallback close notice`);
+      injectNoticeUtil.cancelAuthorization();
+      injectNoticeUtil.cancelNotificationById(NOTICE_ID);
+    }
+   }
+ 
+   async initCapsuleIcon(): Promise<void> {
+    console.debug(TAG, `initCapsuleIcon begin`);
+    if (this.capsuleIcon != null) {
+      console.debug(TAG, `initCapsuleIcon has init`);
+      return;
+    }
+    let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
+    let resourceManager = applicationContext.resourceManager;
+    let defaultSize: image.Size = {
+      'height': 30,
+      'width': 30,
+    };
+    let svgData = resourceManager.getMediaContentSync($r('app.media.capsule_icon34'));
+    let opts: image.DecodingOptions = {
+      'index': 0,
+      'sampleSize': 1,
+      'rotate' :0,
+      'editable': true,
+      'desiredSize': defaultSize,
+      'desiredPixelFormat': 3,
+    };
+    let imageSource = image.createImageSource(svgData.buffer);
+    let svImage: image.PixelMap | null = null;
+    svImage = await imageSource.createPixelMap(opts);
+    this.capsuleIcon = svImage;
+    console.debug(TAG, `initCapsuleIcon end vaule: ${this.capsuleIcon}`);
   }
 }
 
