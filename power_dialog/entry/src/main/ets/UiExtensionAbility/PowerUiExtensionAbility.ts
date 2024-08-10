@@ -19,7 +19,8 @@ import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 export default class PowerUiExtensionAbility extends UIExtensionAbility {
   onSessionCreate(want, session): void {
     let storage: LocalStorage = new LocalStorage({
-      'session': session
+      'session': session,
+      'context': this.context
     });
     
     if ('isInputDlg' in want.parameters) {
