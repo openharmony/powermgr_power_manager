@@ -43,6 +43,7 @@
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
 #include "errors.h"
+#include "parameters.h"
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
 #endif
@@ -157,6 +158,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->RegisterSettingWakeupPickupGestureObserver();
 #endif
         power->RegisterSettingPowerModeObservers();
+        power->KeepScreenOnInit();
         isBootCompleted_ = true;
     };
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
@@ -178,6 +180,50 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
     }
     POWER_HILOGI(COMP_SVC, "PowerModeSettingUpdateFunc curr:%{public}d, saveMode:%{public}d", currMode, saveMode);
     power->SetDeviceMode(static_cast<PowerMode>(saveMode));
+}
+
+bool PowerMgrService::IsDeveloperMode()
+{
+    return OHOS::system::GetBoolParameter("const.security.developermode.state", true);
+}
+
+void PowerMgrService::KeepScreenOnInit()
+{
+    if (ptoken_ != nullptr) {
+        POWER_HILOGI(COMP_SVC, "runninglock token is not null");
+        return;
+    }
+    ptoken_ = new (std::nothrow) RunningLockTokenStub();
+    if (ptoken_ == nullptr) {
+        POWER_HILOGI(COMP_SVC, "create runninglock token failed");
+        return;
+    }
+    RunningLockInfo info = {"PowerMgrKeepOnLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN};
+    PowerErrors ret = pms->CreateRunningLock(ptoken_, info);
+    if (ret != PowerErrors::ERR_OK) {
+        POWER_HILOGI(COMP_SVC, "create runninglock failed");
+    }
+    return;
+}
+
+void PowerMgrService::KeepScreenOn(bool isOpenOn)
+{
+    if (!IsDeveloperMode()) {
+        POWER_HILOGI(COMP_SVC, "not developer mode");
+        return;
+    }
+    if (ptoken_ == nullptr) {
+        POWER_HILOGI(COMP_SVC, "runninglock token is null");
+        return;
+    }
+    if (isOpenOn) {
+        POWER_HILOGI(COMP_SVC, "try lock RUNNINGLOCK_SCREEN");
+        pms->Lock(ptoken_);
+    } else {
+        POWER_HILOGI(COMP_SVC, "try unlock RUNNINGLOCK_SCREEN");
+        pms->UnLock(ptoken_);
+    }
+    return;
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
