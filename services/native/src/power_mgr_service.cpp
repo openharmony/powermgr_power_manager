@@ -1508,7 +1508,7 @@ PowerErrors PowerMgrService::LockScreenAfterTimingOut(
         thisInterfaceInvoker->AddDeathRecipient(drt); // added to the new invoker
     }
     localMutex.unlock();
-    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return PowerErrors::ERR_OK;
 }
 
