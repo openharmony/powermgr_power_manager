@@ -93,6 +93,7 @@ private:
     std::mutex mutex_;
     std::mutex monitorMutex_;
     std::mutex eventHandleMutex_;
+    static std::mutex sourceUpdateMutex_;
     int32_t monitorId_ {-1};
 };
 
