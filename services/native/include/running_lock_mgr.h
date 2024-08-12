@@ -73,7 +73,9 @@ private:
 
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
+#ifdef HAS_SENSORS_SENSOR_PART
     void InitLocksTypeProximity();
+#endif
     void InitLocksTypeCoordination();
     void ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid);
 
@@ -171,9 +173,11 @@ private:
     bool IsSceneRunningLockType(RunningLockType type);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
+#ifdef HAS_SENSORS_SENSOR_PART
     void ProximityLockOn();
-    const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
+#endif
+    const wptr<PowerMgrService> pms_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;

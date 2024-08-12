@@ -22,7 +22,9 @@
 #include "power_common.h"
 #include "power_log.h"
 #include "runninglock_entity.h"
+#ifdef HAS_DFX_HIVIEW_PART
 #include "xpower_event_js.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -100,7 +102,9 @@ napi_value RunningLockNapi::Hold(napi_env env, napi_callback_info info)
     auto runningLock = UnwrapRunningLock(env, thisArg);
     RETURN_IF_WITH_RET(runningLock == nullptr, nullptr);
     runningLock->Lock(timeOut);
+#ifdef HAS_DFX_HIVIEW_PART
     OHOS::HiviewDFX::ReportXPowerJsStackSysEvent(env, "RunningLockNapi::Hold");
+#endif
     return nullptr;
 }
 
