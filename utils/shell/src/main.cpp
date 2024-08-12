@@ -19,7 +19,7 @@
 #include "power_shell_command.h"
 #include "securec.h"
 
-constexpr int MAX_PARAMETER_COUNT = 4;
+constexpr int MAX_PARAMETER_COUNT = 10;
 constexpr int MAX_PARAMETER_LENGTH = 30;
 void Loop(char* arg0)
 {

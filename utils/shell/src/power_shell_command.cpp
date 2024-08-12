@@ -191,10 +191,21 @@ ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
     if (!IsDeveloperMode()) {
         return ERR_PERMISSION_DENIED;
     }
+    resultReceiver_.clear();
+    auto parameterCount = argList_.size();
+    if (parameterCount < 2) {
+        resultReceiver_.append("too few arguments \n");
+        return ERR_OK;
+    }
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
     bool enableLockScreen = argList_[0][0] - '0';
     bool checkScreenOnLock = argList_[1][0] - '0';
-    PowerMgrClient& client = PowerMgrClient::GetInstance();
-    client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock);
+    if (parameterCount == 2) {
+        client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock);
+        return ERR_OK;
+    }
+    bool sendScreenOffEvent = argList_[2][0] - '0';
+    client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock, sendScreenOffEvent);
     return ERR_OK;
 }
 
