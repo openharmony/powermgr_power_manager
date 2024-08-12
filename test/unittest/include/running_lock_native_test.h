@@ -30,7 +30,9 @@
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "running_lock_action.h"
+#ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
+#endif
 #include "power_mgr_factory.h"
 
 namespace OHOS {

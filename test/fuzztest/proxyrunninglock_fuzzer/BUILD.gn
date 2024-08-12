@@ -63,6 +63,9 @@ ohos_fuzztest("ProxyRunningLocksFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "power_manager:power_ffrt",
-    "sensor:sensor_interface_native",
   ]
+
+  if (has_sensors_sensor_part) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+  }
 }

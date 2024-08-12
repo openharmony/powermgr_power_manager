@@ -237,6 +237,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "RunningLockNative005 end");
 }
 
+#ifdef HAS_SENSORS_SENSOR_PART
 /**
  * @tc.name: RunningLockNative006
  * @tc.desc: test callback in runningLockMgr
@@ -282,6 +283,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
     POWER_HILOGI(LABEL_TEST, "RunningLockNative006 end");
 }
+#endif
 
 /**
  * @tc.name: RunningLockNative007

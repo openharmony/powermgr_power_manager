@@ -48,8 +48,11 @@ deps_ex = [
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
-  "sensor:sensor_interface_native",
 ]
+
+if (has_sensors_sensor_part) {
+  deps_ex += [ "sensor:sensor_interface_native" ]
+}
 
 ##############################systemtest##########################################
 

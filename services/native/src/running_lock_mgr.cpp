@@ -73,7 +73,9 @@ bool RunningLockMgr::InitLocks()
 {
     InitLocksTypeScreen();
     InitLocksTypeBackground();
+#ifdef HAS_SENSORS_SENSOR_PART
     InitLocksTypeProximity();
+#endif
     InitLocksTypeCoordination();
     return true;
 }
@@ -740,9 +742,13 @@ void RunningLockMgr::DumpInfo(std::string& result)
     result.append("Peripherals Info: \n")
             .append("  Proximity: ")
             .append("Enabled=")
+#ifdef HAS_SENSORS_SENSOR_PART
             .append(ToString(proximityController_.IsEnabled()))
+#endif
             .append(" Status=")
+#ifdef HAS_SENSORS_SENSOR_PART
             .append(ToString(proximityController_.GetStatus()))
+#endif
             .append("\n");
 }
 
