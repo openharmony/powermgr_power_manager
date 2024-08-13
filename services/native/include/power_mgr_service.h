@@ -146,6 +146,8 @@ public:
 #endif
     void VibratorInit();
     void Reset();
+    void KeepScreenOnInit();
+    void KeepScreenOn(bool isOpenOn);
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
@@ -265,6 +267,7 @@ private:
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid,
         int32_t timeOutMS = -1);
     static void RegisterBootCompletedCallback();
+    static bool IsDeveloperMode();
 
     inline PowerModeModule& GetPowerModeModule()
     {
@@ -302,6 +305,7 @@ private:
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
     int32_t inputMonitorId_ {-1};
+    sptr<IRemoteObject> ptoken_;
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART

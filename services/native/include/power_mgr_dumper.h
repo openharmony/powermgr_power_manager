@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include "power_mgr_service.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -27,6 +28,7 @@ public:
     ~PowerMgrDumper() = delete;
 
     static bool Dump(const std::vector<std::string>& args, std::string& result);
+    static bool DumpArg(const sptr<PowerMgrService>& pms, const std::string& arg);
 
 private:
     static void DumpRunningLockInfo(std::string& result);

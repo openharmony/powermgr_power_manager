@@ -15,7 +15,6 @@
 
 #include "power_mgr_dumper.h"
 
-#include "power_mgr_service.h"
 #include "system_suspend_controller.h"
 
 namespace OHOS {
@@ -27,6 +26,8 @@ const std::string ARGS_RUNNINGLOCK = "-r";
 const std::string ARGS_STATE = "-s";
 const std::string ARGS_DIALOG = "-d";
 const std::string ARGS_REG_KEY = "-k";
+const std::string ARGS_On = "-t";
+const std::string ARGS_Off = "-f";
 }
 
 bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& result)
@@ -41,12 +42,7 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
     if (pms == nullptr) {
         return true;
     }
-    if (args[0] == ARGS_DIALOG) {
-        pms->GetShutdownDialog().ConnectSystemUi();
-        return true;
-    }
-    if (args[0] == ARGS_REG_KEY) {
-        pms->GetShutdownDialog().KeyMonitorInit();
+    if (DumpArg(pms, args[0])) {
         return true;
     }
     for (auto it = args.begin(); it != args.end(); it++) {
@@ -78,6 +74,27 @@ bool PowerMgrDumper::Dump(const std::vector<std::string>& args, std::string& res
         }
     }
     return true;
+}
+
+bool PowerMgrDumper::DumpArg(const sptr<PowerMgrService>& pms, const std::string& arg)
+{
+    if (arg == ARGS_DIALOG) {
+        pms->GetShutdownDialog().ConnectSystemUi();
+        return true;
+    }
+    if (arg == ARGS_REG_KEY) {
+        pms->GetShutdownDialog().KeyMonitorInit();
+        return true;
+    }
+    if (arg == ARGS_On) {
+        pms->KeepScreenOn(true);
+        return true;
+    }
+    if (arg == ARGS_Off) {
+        pms->KeepScreenOn(false);
+        return true;
+    }
+    return false;
 }
 
 void PowerMgrDumper::ShowUsage(std::string& result)
