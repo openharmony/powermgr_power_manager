@@ -1224,7 +1224,7 @@ PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled, const sptr<IRemoteObj
     }
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool,
         static_cast<uint32_t>(enabled), PowerErrors::ERR_CONNECTION_FAIL);
-    if (token.GetRefPtr()==nullptr) {
+    if (token.GetRefPtr() == nullptr) {
         POWER_HILOGE(COMP_FWK, "token nullptr");
     }
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, token, PowerErrors::ERR_CONNECTION_FAIL);
