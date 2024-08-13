@@ -63,7 +63,9 @@ void Loop(char* arg0)
 int main(int argc, char *argv[])
 {
     if (argc <= 1) {
+#ifndef POWER_SHELL_USER
         Loop(argv[0]);
+#endif
     } else {
         OHOS::PowerMgr::PowerShellCommand cmd(argc, argv);
         std::cout << cmd.ExecCommand();
