@@ -148,14 +148,14 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"hibernate", [this]() -> ErrCode { return this->RunAsHibernateCommand(); }},
         {"lock", [this]() -> ErrCode { return this->RunAsQueryLockCommand(); }},
         {"proxylock", [this]() -> ErrCode { return this->RunAsProxyLockCommand(); }},
+        {"forcetimeout", [this]() -> ErrCode { return this->RunAsForceTimeOutCommand(); }},
+        {"timeoutscreenlock", [this]() -> ErrCode { return this->RunAsTimeOutScreenLockCommand(); }},
 #ifdef HAS_DISPLAY_MANAGER_PART
         {"display", [this]() -> ErrCode { return this->RunAsDisplayCommand(); }},
 #endif
         {"dump", [this]() -> ErrCode { return this->RunAsDumpCommand(); }},
 #endif
         {"timeout", [this]() -> ErrCode { return this->RunAsTimeOutCommand(); }},
-        {"forcetimeout", [this]() -> ErrCode { return this->RunAsForceTimeOutCommand(); }},
-        {"timeoutscreenlock", [this]() -> ErrCode { return this->RunAsTimeOutScreenLockCommand(); }},
     };
 
 #ifndef POWER_SHELL_USER
