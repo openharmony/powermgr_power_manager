@@ -47,7 +47,8 @@ if (!defined(global_parts_info) || defined(global_parts_info.sensors_sensor)) {
   has_sensors_sensor_part = false
 }
 
-if (!defined(global_parts_info) || defined(global_parts_info.hiviewdfx_hiview)) {
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.hiviewdfx_hiview)) {
   has_dfx_hiview_part = true
   cflags_cc += [ "-DHAS_DFX_HIVIEW_PART" ]
 } else {
