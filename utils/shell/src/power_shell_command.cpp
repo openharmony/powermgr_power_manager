@@ -193,14 +193,15 @@ ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
     }
     resultReceiver_.clear();
     auto parameterCount = argList_.size();
-    if (parameterCount < 2) {
+    constexpr size_t MIN_PARAMETER_COUNT = 2;
+    if (parameterCount < MIN_PARAMETER_COUNT) {
         resultReceiver_.append("too few arguments \n");
         return ERR_OK;
     }
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     bool enableLockScreen = argList_[0][0] - '0';
     bool checkScreenOnLock = argList_[1][0] - '0';
-    if (parameterCount == 2) {
+    if (parameterCount == MIN_PARAMETER_COUNT) {
         client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock);
         return ERR_OK;
     }

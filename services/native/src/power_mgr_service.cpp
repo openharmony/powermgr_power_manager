@@ -1480,7 +1480,7 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled, const sptr<IRemoteO
 
 PowerErrors PowerMgrService::LockScreenAfterTimingOut(
     bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token)
-{   
+{
     static sptr<IRemoteObject> thisInterfaceInvoker = nullptr;
     static std::mutex localMutex;
     static sptr<InvokerDeathRecipient> drt =
