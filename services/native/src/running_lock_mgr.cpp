@@ -744,9 +744,7 @@ void RunningLockMgr::DumpInfo(std::string& result)
             .append("Enabled=")
 #ifdef HAS_SENSORS_SENSOR_PART
             .append(ToString(proximityController_.IsEnabled()))
-#endif
             .append(" Status=")
-#ifdef HAS_SENSORS_SENSOR_PART
             .append(ToString(proximityController_.GetStatus()))
 #endif
             .append("\n");
