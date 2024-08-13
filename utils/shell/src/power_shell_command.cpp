@@ -148,14 +148,14 @@ ErrCode PowerShellCommand::CreateCommandMap()
         {"hibernate", [this]() -> ErrCode { return this->RunAsHibernateCommand(); }},
         {"lock", [this]() -> ErrCode { return this->RunAsQueryLockCommand(); }},
         {"proxylock", [this]() -> ErrCode { return this->RunAsProxyLockCommand(); }},
+        {"forcetimeout", [this]() -> ErrCode { return this->RunAsForceTimeOutCommand(); }},
+        {"timeoutscreenlock", [this]() -> ErrCode { return this->RunAsTimeOutScreenLockCommand(); }},
 #ifdef HAS_DISPLAY_MANAGER_PART
         {"display", [this]() -> ErrCode { return this->RunAsDisplayCommand(); }},
 #endif
         {"dump", [this]() -> ErrCode { return this->RunAsDumpCommand(); }},
 #endif
         {"timeout", [this]() -> ErrCode { return this->RunAsTimeOutCommand(); }},
-        {"forcetimeout", [this]() -> ErrCode { return this->RunAsForceTimeOutCommand(); }},
-        {"timeoutscreenlock", [this]() -> ErrCode { return this->RunAsTimeOutScreenLockCommand(); }},
     };
 
 #ifndef POWER_SHELL_USER
@@ -191,10 +191,22 @@ ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
     if (!IsDeveloperMode()) {
         return ERR_PERMISSION_DENIED;
     }
+    resultReceiver_.clear();
+    auto parameterCount = argList_.size();
+    constexpr size_t MIN_PARAMETER_COUNT = 2;
+    if (parameterCount < MIN_PARAMETER_COUNT) {
+        resultReceiver_.append("too few arguments \n");
+        return ERR_OK;
+    }
+    PowerMgrClient& client = PowerMgrClient::GetInstance();
     bool enableLockScreen = argList_[0][0] - '0';
     bool checkScreenOnLock = argList_[1][0] - '0';
-    PowerMgrClient& client = PowerMgrClient::GetInstance();
-    client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock);
+    if (parameterCount == MIN_PARAMETER_COUNT) {
+        client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock);
+        return ERR_OK;
+    }
+    bool sendScreenOffEvent = argList_[2][0] - '0';
+    client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock, sendScreenOffEvent);
     return ERR_OK;
 }
 

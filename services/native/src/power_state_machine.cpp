@@ -1105,10 +1105,14 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
 {
     bool isScreenOnLockActive = IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN);
     bool currentValue = forceTimingOut_.exchange(enabled);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
     PowerState curState = GetState();
     POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, PowerState=%{public}u",
-        currentValue ? "TRUE" : "FALSE", enabled ? "TRUE" : "FALSE", isScreenOnLockActive ? "TRUE" : "FALSE", curState);
+        "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, PowerState=%{public}u, "
+        "PID=%{public}d, UID=%{public}d",
+        currentValue ? "TRUE" : "FALSE", enabled ? "TRUE" : "FALSE", isScreenOnLockActive ? "TRUE" : "FALSE", curState,
+        pid, uid);
     if (currentValue == enabled || !isScreenOnLockActive || IsSettingState(PowerState::DIM)) {
         // no need to interact with screen state or timer
         return;
@@ -1135,9 +1139,12 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
 
 void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent)
 {
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockScreenAfterTimingOut: %{public}u, %{public}u, %{public}u",
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_RUNNING_LOCK,
+        "LockScreenAfterTimingOut: %{public}u, %{public}u, %{public}u, PID=%{public}d, UID=%{public}d",
         static_cast<uint32_t>(enabled), static_cast<uint32_t>(checkScreenOnLock),
-        static_cast<uint32_t>(sendScreenOffEvent));
+        static_cast<uint32_t>(sendScreenOffEvent), pid, uid);
     enabledTimingOutLockScreen_.store(enabled, std::memory_order_relaxed);
     enabledTimingOutLockScreenCheckLock_.store(checkScreenOnLock, std::memory_order_relaxed);
     enabledScreenOffEvent_.store(sendScreenOffEvent, std::memory_order_relaxed);
