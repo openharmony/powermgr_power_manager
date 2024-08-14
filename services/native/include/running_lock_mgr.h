@@ -65,7 +65,9 @@ public:
     void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
+#ifdef HAS_SENSORS_SENSOR_PART
     void SetProximity(uint32_t status);
+#endif
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
 private:
