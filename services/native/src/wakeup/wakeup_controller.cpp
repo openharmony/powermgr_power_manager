@@ -44,6 +44,7 @@ const int32_t ERR_FAILED = -1;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 }
+std::mutex WakeupController::sourceUpdateMutex_;
 
 /** WakeupController Implement */
 WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine)
@@ -176,6 +177,7 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
 
 void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
 {
+    std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     POWER_HILOGD(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
     Json::Value root;
@@ -268,6 +270,7 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
 
 void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
+    std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s(%{public}d)", __func__, updataEnable);
     Json::Value root;
@@ -289,6 +292,7 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 
 void WakeupController::ChangeLidWakeupSourceConfig(bool updataEnable)
 {
+    std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
     Json::Value root;
