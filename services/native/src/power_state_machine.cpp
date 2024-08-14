@@ -877,6 +877,8 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
             }
             break;
 #endif
+            POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish EnterForceSleepEvent, state:%{public}u", state);
+            break;
         }
         default:
             POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
