@@ -741,11 +741,11 @@ void RunningLockMgr::DumpInfo(std::string& result)
 
     result.append("Peripherals Info: \n")
             .append("  Proximity: ")
-            .append("Enabled=")
 #ifdef HAS_SENSORS_SENSOR_PART
-            .append(ToString(proximityController_.IsEnabled()))
-            .append(" Status=")
-            .append(ToString(proximityController_.GetStatus()))
+            .append("Enabled=").append(ToString(proximityController_.IsEnabled()))
+            .append(" Status=").append(ToString(proximityController_.GetStatus()))
+#else
+            .append("Enabled=false")
 #endif
             .append("\n");
 }
