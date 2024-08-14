@@ -27,7 +27,7 @@ declare_args() {
 if (!defined(global_parts_info) ||
     defined(global_parts_info.powermgr_display_manager)) {
   has_display_manager_part = true
-  cflags_cc = [ "-DHAS_DISPLAY_MANAGER_PART" ]
+  defines = [ "HAS_DISPLAY_MANAGER_PART" ]
 } else {
   has_display_manager_part = false
 }
@@ -35,14 +35,14 @@ if (!defined(global_parts_info) ||
 if (!defined(global_parts_info) ||
     defined(global_parts_info.resourceschedule_device_standby)) {
   has_device_standby_part = true
-  cflags_cc += [ "-DHAS_DEVICE_STANDBY_PART" ]
+  defines += [ "-DHAS_DEVICE_STANDBY_PART" ]
 } else {
   has_device_standby_part = false
 }
 
 if (!defined(global_parts_info) || defined(global_parts_info.sensors_sensor)) {
   has_sensors_sensor_part = true
-  cflags_cc += [ "-DHAS_SENSORS_SENSOR_PART" ]
+  defines += [ "-DHAS_SENSORS_SENSOR_PART" ]
 } else {
   has_sensors_sensor_part = false
 }
@@ -50,7 +50,7 @@ if (!defined(global_parts_info) || defined(global_parts_info.sensors_sensor)) {
 if (!defined(global_parts_info) ||
     defined(global_parts_info.hiviewdfx_hiview)) {
   has_dfx_hiview_part = true
-  cflags_cc += [ "-DHAS_DFX_HIVIEW_PART" ]
+  defines += [ "-DHAS_DFX_HIVIEW_PART" ]
 } else {
   has_dfx_hiview_part = false
 }
@@ -58,7 +58,7 @@ if (!defined(global_parts_info) ||
 if (!defined(global_parts_info) ||
     defined(global_parts_info.multimodalinput_input)) {
   has_multimodalinput_input_part = true
-  cflags_cc += [ "-DHAS_MULTIMODALINPUT_INPUT_PART" ]
+  defines += [ "-DHAS_MULTIMODALINPUT_INPUT_PART" ]
 } else {
   has_multimodalinput_input_part = false
 }
