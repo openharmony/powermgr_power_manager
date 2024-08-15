@@ -24,10 +24,11 @@ declare_args() {
   power_manager_feature_power_dialog = true
 }
 
+defines = []
 if (!defined(global_parts_info) ||
     defined(global_parts_info.powermgr_display_manager)) {
   has_display_manager_part = true
-  defines = [ "HAS_DISPLAY_MANAGER_PART" ]
+  defines += [ "HAS_DISPLAY_MANAGER_PART" ]
 } else {
   has_display_manager_part = false
 }
