@@ -33,6 +33,7 @@ ohos_shared_library("power_ability") {
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
   ]
 
   subsystem_name = "powermgr"
