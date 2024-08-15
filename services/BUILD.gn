@@ -117,8 +117,6 @@ ohos_shared_library("powermgrservice") {
     "window_manager:libwm",
   ]
 
-  defines = []
-
   if (has_display_manager_part) {
     defines += [ "HAS_DISPLAY_MANAGER" ]
     external_deps += [
