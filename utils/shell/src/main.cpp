@@ -21,7 +21,7 @@
 
 constexpr int MAX_PARAMETER_COUNT = 10;
 constexpr int MAX_PARAMETER_LENGTH = 30;
-void Loop(char* arg0)
+static void Loop(char* arg0)
 {
     std::cout << "===================Power-Shell===================" << std::endl;
     std::cout << "You can run Power-Shell commands here without exiting the process(" << std::endl;
