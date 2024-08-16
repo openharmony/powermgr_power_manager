@@ -74,7 +74,7 @@
         },
         {
             "name": "WARNING_TIP",
-            "value": "用于共享屏幕时，与会人可远程协助你的桌面"
+            "value": "用于共享屏幕时，与会人可远程协助您的桌面"
         },
         {
             "name": "notice_title",
@@ -82,7 +82,7 @@
         },
         {
             "name": "notice_text",
-            "value": "%s正在远程协助你的桌面"
+            "value": "%s正在远程协助您的桌面"
         },
         {
             "name": "bn_notice_cancel",
@@ -98,7 +98,7 @@
         },
         {
             "name": "text_inject_tip_title",
-            "value": "允许%s使用你的屏幕"
+            "value": "允许%s使用您的屏幕"
         }
     ]
 }
