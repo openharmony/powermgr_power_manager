@@ -711,11 +711,11 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
                 POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
             }
         }
-        hibernateController->PostHibernate();
         hibernating_ = false;
         if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
             POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
         }
+        hibernateController->PostHibernate();
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
     if (ffrtTimer_ == nullptr) {
