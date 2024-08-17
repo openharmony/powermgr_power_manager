@@ -33,7 +33,7 @@ public:
         : IRemoteProxy<ISyncHibernateCallback>(impl) {}
     ~SyncHibernateCallbackProxy() = default;
     virtual void OnSyncHibernate() override;
-    virtual void OnSyncWakeup() override;
+    virtual void OnSyncWakeup(bool hibernateResult = false) override;
 
 private:
     static inline BrokerDelegator<SyncHibernateCallbackProxy> delegator_;

@@ -715,7 +715,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
             POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
         }
-        hibernateController->PostHibernate();
+        hibernateController->PostHibernate(success);
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
     if (ffrtTimer_ == nullptr) {
