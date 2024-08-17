@@ -31,7 +31,7 @@ public:
     virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
     virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
     virtual void PreHibernate() const;
-    virtual void PostHibernate() const;
+    virtual void PostHibernate(bool hibernateResult = false) const;
 
 private:
     std::mutex mutex_;

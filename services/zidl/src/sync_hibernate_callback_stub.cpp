@@ -59,7 +59,9 @@ int32_t SyncHibernateCallbackStub::OnSyncHibernateStub(MessageParcel& data)
 
 int32_t SyncHibernateCallbackStub::OnSyncWakeupStub(MessageParcel& data)
 {
-    OnSyncWakeup();
+    bool hibernateResult = false;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, hibernateResult, E_READ_PARCEL_ERROR);
+    OnSyncWakeup(hibernateResult);
     return ERR_OK;
 }
 } // namespace PowerMgr
