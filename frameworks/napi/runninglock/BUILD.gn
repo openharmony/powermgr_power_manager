@@ -38,10 +38,11 @@ ohos_shared_library("runninglock") {
     external_deps = deps_ex
   } else {
     external_deps = deps_ex
-    external_deps += [
-      "hiview:libxpower_event_js",
-      "napi:ace_napi",
-    ]
+    external_deps += [ "napi:ace_napi" ]
+
+    if (has_dfx_hiview_part) {
+      external_deps += [ "hiview:libxpower_event_js" ]
+    }
   }
 
   relative_install_dir = "module"
