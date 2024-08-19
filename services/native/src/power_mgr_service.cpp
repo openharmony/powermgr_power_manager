@@ -60,6 +60,7 @@ const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.
 const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
+constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -1523,11 +1524,11 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
     if (stateMachine == nullptr) {
         return;
     }
-    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
+    if (keyEvent->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION, true);
-        POWER_HILOGD(FEATURE_INPUT, "Key event has simulate flag in coordinated state, override screen off time");
+        POWER_HILOGD(FEATURE_INPUT, "remote key event in coordinated state, override screen off time");
     }
 }
 
@@ -1548,11 +1549,11 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
         action == PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
         return;
     }
-    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) &&
+    if (pointerEvent->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID &&
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION, true);
-        POWER_HILOGD(FEATURE_INPUT, "Pointer event has simulate flag in coordinated state, override screen off time");
+        POWER_HILOGD(FEATURE_INPUT, "remote pointer event in coordinated state, override screen off time");
     }
 }
 
