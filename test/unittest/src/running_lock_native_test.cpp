@@ -261,6 +261,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     type = static_cast<RunningLockMgr::RunningLockChangedType>(UNTYPE);
     runningLockMgr->NotifyRunningLockChanged(remoteObj, lockInner, type);
 
+#ifdef HAS_SENSORS_SENSOR_PART
     auto runningLockMgrController = std::make_shared<RunningLockMgr::ProximityController>();
     SensorEvent sensorEvent;
     ProximityData data;
@@ -278,6 +279,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     runningLockMgrController->support_ = true;
     runningLockMgrController->Enable();
     runningLockMgrController->Disable();
+#endif
 
     EXPECT_FALSE(runningLockMgr->ReleaseLock(remoteObj));
     POWER_HILOGI(LABEL_TEST, "RunningLockNative006 end");

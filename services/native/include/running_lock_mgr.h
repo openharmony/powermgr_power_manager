@@ -65,7 +65,9 @@ public:
     void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
+#ifdef HAS_SENSORS_SENSOR_PART
     void SetProximity(uint32_t status);
+#endif
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
 private:
@@ -73,7 +75,9 @@ private:
 
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
+#ifdef HAS_SENSORS_SENSOR_PART
     void InitLocksTypeProximity();
+#endif
     void InitLocksTypeCoordination();
     void ProxyRunningLockInner(bool isProxied, pid_t pid, pid_t uid);
 
@@ -171,9 +175,11 @@ private:
     bool IsSceneRunningLockType(RunningLockType type);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
+#ifdef HAS_SENSORS_SENSOR_PART
     void ProximityLockOn();
-    const wptr<PowerMgrService> pms_;
     ProximityController proximityController_;
+#endif
+    const wptr<PowerMgrService> pms_;
     std::mutex mutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
