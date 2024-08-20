@@ -26,7 +26,7 @@ namespace PowerMgr {
 class ISyncHibernateCallback : public IRemoteBroker {
 public:
     virtual void OnSyncHibernate() = 0;
-    virtual void OnSyncWakeup() = 0;
+    virtual void OnSyncWakeup(bool hibernateResult = false) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.ISyncHibernateCallback");
 };
 } // namespace PowerMgr

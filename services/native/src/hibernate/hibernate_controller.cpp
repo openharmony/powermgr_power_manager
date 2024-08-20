@@ -44,11 +44,11 @@ void HibernateController::PreHibernate() const
     }
 }
 
-void HibernateController::PostHibernate() const
+void HibernateController::PostHibernate(bool hibernateResult) const
 {
     for (const auto &cb : callbacks_) {
         if (cb != nullptr) {
-            cb->OnSyncWakeup();
+            cb->OnSyncWakeup(hibernateResult);
         }
     }
 }

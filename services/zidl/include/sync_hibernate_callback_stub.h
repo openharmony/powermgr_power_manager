@@ -31,7 +31,7 @@ public:
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     void OnSyncHibernate() override {}
-    void OnSyncWakeup() override {}
+    void OnSyncWakeup(bool hibernateResult = false) override {}
 
 private:
     int32_t OnSyncHibernateStub(MessageParcel& data);
