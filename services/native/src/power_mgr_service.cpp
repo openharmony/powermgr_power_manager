@@ -37,6 +37,7 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
+#include "power_xcollie.h"
 #include "setting_helper.h"
 #include "running_lock_timer_handler.h"
 #include "sysparam.h"
@@ -911,6 +912,7 @@ RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& in
 PowerErrors PowerMgrService::CreateRunningLock(
     const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo)
 {
+    PowerXCollie powerXCollie("PowerMgrService::CreateRunningLock", true);
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -931,6 +933,7 @@ PowerErrors PowerMgrService::CreateRunningLock(
 
 bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ReleaseRunningLock", true);
     std::lock_guard lock(lockMutex_);
     bool result = false;
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
@@ -965,6 +968,7 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     const std::map<int32_t, std::string>& workSources)
 {
+    PowerXCollie powerXCollie("PowerMgrService::UpdateWorkSource", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
@@ -975,6 +979,7 @@ bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 
 PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
+    PowerXCollie powerXCollie("PowerMgrService::Lock", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -994,6 +999,7 @@ PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t 
 
 PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
+    PowerXCollie powerXCollie("PowerMgrService::UnLock", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1005,6 +1011,7 @@ PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const 
 
 bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
 {
+    PowerXCollie powerXCollie("PowerMgrService::QueryRunningLockLists", true);
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
@@ -1046,6 +1053,7 @@ bool PowerMgrService::UnRegisterRunningLockCallback(const sptr<IPowerRunninglock
 
 void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ForceUnLock", true);
     std::lock_guard lock(lockMutex_);
     runningLockMgr_->UnLock(remoteObj);
     runningLockMgr_->ReleaseLock(remoteObj);
@@ -1053,6 +1061,7 @@ void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
 
 bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
+    PowerXCollie powerXCollie("PowerMgrService::IsUsed", true);
     std::lock_guard lock(lockMutex_);
     auto isUsed = runningLockMgr_->IsUsed(remoteObj);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLock is Used: %{public}d", isUsed);
@@ -1061,6 +1070,7 @@ bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
 
 bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ProxyRunningLock", true);
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem()) {
         return false;
@@ -1070,6 +1080,7 @@ bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 
 bool PowerMgrService::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ProxyRunningLocks", true);
     if (!Permission::IsSystem()) {
         return false;
     }
@@ -1080,6 +1091,7 @@ bool PowerMgrService::ProxyRunningLocks(bool isProxied, const std::vector<std::p
 
 bool PowerMgrService::ResetRunningLocks()
 {
+    PowerXCollie powerXCollie("PowerMgrService::ResetRunningLocks", true);
     if (!Permission::IsSystem()) {
         return false;
     }
