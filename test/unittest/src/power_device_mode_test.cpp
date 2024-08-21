@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,7 @@ HWTEST_F (PowerDeviceModeTest, PowerDeviceModeCallback001, TestSize.Level0)
  */
 HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
 {
+    POWER_HILOGI(LABEL_TEST, "SetDeviceModeTest001 start");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "SetDeviceModeTest001: SetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -96,7 +97,7 @@ HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
     powerMgrClient.SetDeviceMode(mode);
     EXPECT_EQ(powerMgrClient.GetDeviceMode(), mode);
     powerMgrClient.SetDeviceMode(mode1);
-
+    POWER_HILOGI(LABEL_TEST, "SetDeviceModeTest001 end");
     GTEST_LOG_(INFO) << "SetDeviceModeTest001: SetDeviceMode end.";
 }
 
@@ -107,6 +108,7 @@ HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
  */
 HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
 {
+    POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 start");
     PowerMode mode = PowerMode::NORMAL_MODE;
     PowerMode mode1 = PowerMode::NORMAL_MODE;
     PowerMode mode2 = PowerMode::NORMAL_MODE;
@@ -119,5 +121,6 @@ HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
     mode2 = powerMgrClient.GetDeviceMode();
     EXPECT_EQ(mode1, mode2);
     powerMgrClient.SetDeviceMode(mode);
+    POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 end");
 }
 }

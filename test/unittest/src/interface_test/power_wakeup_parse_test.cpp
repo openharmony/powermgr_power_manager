@@ -29,6 +29,7 @@
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
+#include "power_log.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -109,6 +110,7 @@ void TestPowerWakeup(PowerMgrService* pmsTest_)
  */
 HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 start");
     GTEST_LOG_(INFO) << "PowerSuspendParse001: start";
     std::string str = SYSTEM_POWER_WAKEUP_FILE;
 
@@ -124,5 +126,6 @@ HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
     TestPowerWakeup(pmsTest_);
 
     GTEST_LOG_(INFO) << "PowerWakeupParse001:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 end");
 }
 } // namespace
