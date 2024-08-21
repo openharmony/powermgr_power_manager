@@ -79,6 +79,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest020, TestSize.Level1)
     // open app
     std::vector<int32_t> workSource1 { app0Uid };
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource1) == 0);
+    usleep(100*1000);
     EXPECT_TRUE(runningLock->IsUsed());
     // freeze app
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app0Uid));
@@ -89,6 +90,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest020, TestSize.Level1)
     // close app
     std::vector<int32_t> workSource0 {};
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource0) == 0);
+    usleep(100*1000);
     EXPECT_TRUE(runningLock->IsUsed());
 
     runningLock->UnLock();
@@ -169,21 +171,25 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest022, TestSize.Level1)
     runningLock->Lock();
     // open app0
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource10) == 0);
+    usleep(100*1000);
     EXPECT_TRUE(runningLock->IsUsed());
     // freeze app0
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app0Uid));
     EXPECT_FALSE(runningLock->IsUsed());
     // open app1
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource11) == 0);
+    usleep(100*1000);
     EXPECT_TRUE(runningLock->IsUsed());
     // close app1
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource10) == 0);
+    usleep(100*1000);
     EXPECT_FALSE(runningLock->IsUsed());
     // thaw app0
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, app0Uid));
     EXPECT_TRUE(runningLock->IsUsed());
     // close app0
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource00) == 0);
+    usleep(100*1000);
     EXPECT_TRUE(runningLock->IsUsed());
 
     runningLock->UnLock();
