@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ using ModeActionPolicy = std::function<void(bool)>;
  */
 HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest001 start.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     powerModeModuleTest->mode_ = PowerMode::PERFORMANCE_MODE;
     powerModeModuleTest->PublishPowerModeEvent();
@@ -93,6 +94,7 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
  */
 HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest003, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerModePolicyNativeTest003 start.");
     PowerModePolicy *powerModePolicyTest = new PowerModePolicy();
     EXPECT_TRUE(powerModePolicyTest->GetPowerModeValuePolicy(MODEITEM) == INIT_VALUE_FALSE);
     EXPECT_TRUE(powerModePolicyTest->GetPolicyFromMap(MODEITEM) == INIT_VALUE_FALSE);

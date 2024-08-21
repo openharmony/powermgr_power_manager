@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,6 +137,7 @@ namespace {
  */
 HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest001 start.");
     // We need wait for 15s, to preivent the last test interfere(screen is in keyguard scene and screen is ON).
     int waitForStatusOk = 15;
     sleep(waitForStatusOk);
@@ -159,7 +160,7 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
 
     auto err = CommonEventManager::GetInstance().UnsubscribeCommonEvent(subscriber);
     EXPECT_EQ(ERR_OK, err);
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest001 end.");
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest001: Test ScreenOFF Notification end.";
 }
 
@@ -170,6 +171,7 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest002 start.");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest002: Test ScreenOn Notification start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -190,7 +192,7 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level0)
 
     auto err = CommonEventManager::GetInstance().UnsubscribeCommonEvent(subscriber);
     EXPECT_EQ(ERR_OK, err);
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest002 end.");
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest002: Test ScreenOn Notification end.";
 }
 }
