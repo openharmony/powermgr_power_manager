@@ -41,7 +41,6 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
-constexpr uint32_t HIBERNATE_DELAY_MS = 5000;
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
@@ -294,7 +293,6 @@ void PowerStateMachine::EmplaceDim()
             if (reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
                 dimTime = COORDINATED_STATE_SCREEN_OFF_TIME_MS;
             }
-            DisplayState dispState = stateAction_->GetDisplayState();
             uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
             if (ret != ActionResult::SUCCESS) {
                 // failed but not return, still need to set screen off

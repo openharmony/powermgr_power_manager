@@ -32,6 +32,7 @@ ohos_shared_library("power") {
   deps_ex = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
   ]
 
   if (!build_public_version) {

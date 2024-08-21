@@ -36,7 +36,6 @@ namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
-constexpr uint32_t COORDINATION_LOCK_AUTO_SUSPEND_DELAY_TIME = 0;
 sptr<IPowerRunninglockCallback> g_runningLockCallback = nullptr;
 }
 

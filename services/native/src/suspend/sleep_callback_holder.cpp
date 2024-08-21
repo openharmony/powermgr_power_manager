@@ -26,15 +26,15 @@ void SleepCallbackHolder::AddCallback(const sptr<ISyncSleepCallback>& callback, 
     std::lock_guard<std::mutex> lock(mutex_);
     switch (priority) {
         case SleepPriority::LOW: {
-            auto iter = lowPriorityCallbacks_.insert(callback);
+            lowPriorityCallbacks_.insert(callback);
             break;
         }
         case SleepPriority::DEFAULT: {
-            auto iter = defaultPriorityCallbacks_.insert(callback);
+            defaultPriorityCallbacks_.insert(callback);
             break;
         }
         case SleepPriority::HIGH: {
-            auto iter = highPriorityCallbacks_.insert(callback);
+            highPriorityCallbacks_.insert(callback);
             break;
         }
         default: {
