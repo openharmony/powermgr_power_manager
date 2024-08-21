@@ -31,10 +31,7 @@ config("coverage_flags") {
 }
 
 ohos_source_set("power_utils") {
-  sources = [
-    "native/src/app_manager_utils.cpp",
-    "native/src/power_utils.cpp",
-  ]
+  sources = [ "native/src/power_utils.cpp" ]
 
   include_dirs = [ "${powermgr_inner_api}/native/include" ]
 
@@ -43,12 +40,8 @@ ohos_source_set("power_utils") {
   public_configs = [ ":utils_config" ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
-    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
-    "ipc:ipc_core",
-    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "powermgr"

@@ -21,7 +21,6 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 
-#include "app_manager_utils.h"
 #include "power_hitrace.h"
 #include "ffrt_utils.h"
 #include "power_log.h"
@@ -932,7 +931,7 @@ void RunningLockMgr::ProximityController::OnClose()
     if (runningLock->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
         uint32_t delayTime = FOREGROUND_INCALL_DELAY_TIME_MS;
-        if (!AppManagerUtils::IsForegroundApplication(INCALL_APP_BUNDLE_NAME)) {
+        if (!PowerUtils::IsForegroundApplication(INCALL_APP_BUNDLE_NAME)) {
             delayTime = BACKGROUND_INCALL_DELAY_TIME_MS;
         }
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Start proximity-screen-off timer, delay time:%{public}u", delayTime);

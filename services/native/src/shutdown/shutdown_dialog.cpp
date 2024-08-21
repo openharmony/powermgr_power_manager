@@ -121,7 +121,7 @@ bool ShutdownDialog::ConnectSystemUi()
         POWER_HILOGW(FEATURE_SHUTDOWN, "power dialog has been show");
         return true;
     }
-    
+
     Want want;
     want.SetElementName("com.ohos.systemui", "com.ohos.systemui.dialog");
 
