@@ -60,7 +60,7 @@ void AppManagerUtils::GetForegroundApplications(std::vector<OHOS::AppExecFwk::Ap
     }
     int32_t ret = appMgr->GetForegroundApplications(appsData);
     POWER_HILOGI(
-        FEATURE_UTIL, "GetForegroundApplications, ret: %{public}u, num of apps: %{public}u", ret, appsData.size());
+        FEATURE_UTIL, "GetForegroundApplications, ret: %{public}u, num of apps: %{public}zu", ret, appsData.size());
 }
 
 bool AppManagerUtils::IsForegroundApplication(const std::string& appName)
@@ -79,8 +79,7 @@ bool AppManagerUtils::IsForegroundApplication(const std::string& appName)
             break;
         }
     }
-
-    POWER_HILOGI(FEATURE_UTIL, "IsForegroundApplication, ret: %{public}zu", static_cast<uint32_t>(IsForeground));
+    POWER_HILOGI(FEATURE_UTIL, "IsForegroundApplication, ret: %{public}u", static_cast<uint32_t>(IsForeground));
     return IsForeground;
 }
 
