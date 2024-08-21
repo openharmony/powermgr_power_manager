@@ -179,11 +179,23 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
 {
     std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGD(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
+    if (jsonStr.empty()) {
+        POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
     Json::Value root;
     Json::Reader reader;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
         POWER_HILOGE(COMP_SVC, "json parse error");
+        return;
+    }
+    if (root["touchscreen"]["enable"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "the touchscreenNode is empty");
+        return;
+    }
+    if (!root["touchscreen"]["enable"].isBool()) {
+        POWER_HILOGE(COMP_SVC, "the origin touchscreenEnable value is invalid");
         return;
     }
     bool originEnable = root["touchscreen"]["enable"].asBool();
@@ -193,7 +205,7 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
     }
 
     root["touchscreen"]["enable"] = updateEnable;
-    POWER_HILOGD(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
+    POWER_HILOGI(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 
@@ -272,17 +284,29 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
     std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s(%{public}d)", __func__, updataEnable);
+    if (jsonStr.empty()) {
+        POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "%{public}s(%{public}d)", __func__, updataEnable);
     Json::Value root;
     Json::Reader reader;
     reader.parse(jsonStr, root);
     if (!reader.parse(jsonStr, root)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "Failed to parse json string");
+        POWER_HILOGE(COMP_SVC, "Failed to parse json string");
+        return;
+    }
+    if (root["pickup"]["enable"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "the pickupNode is empty");
+        return;
+    }
+    if (!root["pickup"]["enable"].isBool()) {
+        POWER_HILOGE(COMP_SVC, "the origin pickupEnable value is invalid");
         return;
     }
     bool originEnable = root["pickup"]["enable"].asBool();
     if (originEnable == updataEnable) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "no need change jsonconfig_value");
+        POWER_HILOGI(COMP_SVC, "no need change jsonconfig_value");
         return;
     }
     root["pickup"]["enable"] = updataEnable;
