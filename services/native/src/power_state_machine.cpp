@@ -614,9 +614,6 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceInner StartSleepTimer start.");
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-        forceSleeping_.store(true, std::memory_order_relaxed);
-#endif
         suspendController->StartSleepTimer(
             SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
             static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND), 0);
@@ -857,9 +854,10 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         case PowerState::AWAKE: {
             notify->PublishScreenOnEvents(callTime);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-            if (forceSleeping_.load()) {
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
                 notify->PublishExitForceSleepEvents(callTime);
-                forceSleeping_.store(false, std::memory_order_relaxed);
+                suspendController->SetForceSleepingFlag(false);
             }
 #endif
             break;
@@ -870,7 +868,8 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         }
         case PowerState::SLEEP: {
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-            if (forceSleeping_.load()) {
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
                 notify->PublishEnterForceSleepEvents(callTime);
             }
             break;
