@@ -39,7 +39,10 @@ ohos_source_set("power_utils") {
 
   public_configs = [ ":utils_config" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
