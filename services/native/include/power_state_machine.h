@@ -334,9 +334,6 @@ private:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::atomic<bool> hibernating_ {false};
 #endif
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    std::atomic<bool> forceSleeping_ {false};
-#endif
     std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
