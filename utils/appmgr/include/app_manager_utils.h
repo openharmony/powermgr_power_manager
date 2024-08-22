@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef POWER_UTILS_H
-#define POWER_UTILS_H
+#ifndef POWERMGR_APP_MANAGER_UTILS_H
+#define POWERMGR_APP_MANAGER_UTILS_H
 
-#include "power_state_machine_info.h"
-#include "running_lock_info.h"
+#include <string>
+#include <vector>
+
+#include "app_mgr_interface.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerUtils {
+class AppManagerUtils final {
 public:
-    static const std::string GetReasonTypeString(StateChangeReason type);
-    static const std::string GetPowerStateString(PowerState state);
-    static const std::string GetDisplayStateString(DisplayState state);
-    static const std::string GetRunningLockTypeString(RunningLockType type);
-    static const std::string JsonToSimpleStr(const std::string& json);
+    static sptr<OHOS::AppExecFwk::IAppMgr> GetAppManagerInstance();
+    static void GetForegroundApplications(std::vector<OHOS::AppExecFwk::AppStateData>& appsData);
     static bool IsForegroundApplication(const std::string& appName);
+
+private:
+    static sptr<OHOS::AppExecFwk::IAppMgr> appManagerInstance_;
 };
+
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWER_UTILS_H
+
+#endif // POWERMGR_APP_MANAGER_UTILS_H
