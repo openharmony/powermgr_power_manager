@@ -496,10 +496,12 @@ int32_t PowerMgrStub::IsScreenOnStub(MessageParcel& data, MessageParcel& reply)
 int32_t PowerMgrStub::RegisterPowerStateCallbackStub(MessageParcel& data)
 {
     sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    bool isSync = true;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, isSync, E_READ_PARCEL_ERROR);
     RETURN_IF_WITH_RET((obj == nullptr), E_READ_PARCEL_ERROR);
     sptr<IPowerStateCallback> callback = iface_cast<IPowerStateCallback>(obj);
     RETURN_IF_WITH_RET((callback == nullptr), E_READ_PARCEL_ERROR);
-    RegisterPowerStateCallback(callback);
+    RegisterPowerStateCallback(callback, isSync);
     return ERR_OK;
 }
 

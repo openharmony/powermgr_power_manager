@@ -83,7 +83,7 @@ public:
     virtual bool ProxyRunningLocks(bool isProxied,
         const std::vector<std::pair<pid_t, pid_t>>& processInfos) override;
     virtual bool ResetRunningLocks() override;
-    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
 
     virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;

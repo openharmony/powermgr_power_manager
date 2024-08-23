@@ -26,6 +26,7 @@ namespace PowerMgr {
 class IPowerStateCallback : public IRemoteBroker {
 public:
     virtual void OnPowerStateChanged(PowerState state) = 0;
+    virtual void OnAsyncPowerStateChanged(PowerState state) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerStateCallback");
 };

@@ -162,7 +162,7 @@ public:
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
     bool ResetRunningLocks();
-    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
     bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
