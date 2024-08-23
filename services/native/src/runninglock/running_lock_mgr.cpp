@@ -174,15 +174,6 @@ void RunningLockMgr::InitLocksTypeProximity()
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
             [this](bool active, [[maybe_unused]] RunningLockParam runningLockParam) -> int32_t {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL action start");
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            if (pms == nullptr) {
-                return RUNNINGLOCK_FAILURE;
-            }
-            auto stateMachine = pms->GetPowerStateMachine();
-            auto suspendController = pms->GetSuspendController();
-            if (stateMachine == nullptr || suspendController == nullptr) {
-                return RUNNINGLOCK_FAILURE;
-            }
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
                 proximityController_.Enable();

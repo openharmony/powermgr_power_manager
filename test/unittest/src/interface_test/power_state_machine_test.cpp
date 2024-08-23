@@ -195,13 +195,25 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level0)
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.",
+    POWER_HILOGI(
+        LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
+}
+
+void PowerStateMachineTest::PowerStateTest1Callback::OnAsyncPowerStateChanged(PowerState state)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnAsyncPowerStateChanged state = %{public}u.",
         static_cast<uint32_t>(state));
 }
 
 void PowerStateMachineTest::PowerStateTest2Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %u.",
+    POWER_HILOGI(
+        LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
+}
+
+void PowerStateMachineTest::PowerStateTest2Callback::OnAsyncPowerStateChanged(PowerState state)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest2Callback::OnAsyncPowerStateChanged state = %{public}u.",
         static_cast<uint32_t>(state));
 }
 
@@ -228,6 +240,30 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
     }
     EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(cb1));
     POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
+}
+
+/**
+ * @tc.name: PowerStateCallback002
+ * @tc.desc: test PowerStateCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerStateMachineTest, PowerStateCallback002, TestSize.Level0)
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<IPowerStateCallback> cb1 = new PowerStateTest1Callback();
+    powerMgrClient.RegisterPowerStateCallback(cb1, false);
+    POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 1.");
+    {
+        sptr<IPowerStateCallback> cb2 = new PowerStateTest2Callback();
+        powerMgrClient.UnRegisterPowerStateCallback(cb2);
+        POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 2.");
+        powerMgrClient.RegisterPowerStateCallback(cb2, false);
+        POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 3.");
+        powerMgrClient.RegisterPowerStateCallback(cb2, false);
+        POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 4.");
+    }
+    EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(cb1));
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 end.");
 }
 }
 
