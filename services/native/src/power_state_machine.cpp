@@ -774,18 +774,28 @@ void PowerStateMachine::ReceiveScreenEvent(bool isScreenOn)
     }
 }
 
-void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     std::lock_guard lock(mutex_);
     RETURN_IF(callback == nullptr);
     auto object = callback->AsObject();
     RETURN_IF(object == nullptr);
-    auto retIt = powerStateListeners_.insert(callback);
-    if (retIt.second) {
+
+    bool result = false;
+    if (isSync) {
+        auto retIt = syncPowerStateListeners_.insert(callback);
+        result = retIt.second;
+        POWER_HILOGD(FEATURE_POWER_STATE, "sync listeners.size = %{public}d, insertOk = %{public}d",
+            static_cast<unsigned int>(syncPowerStateListeners_.size()), retIt.second);
+    } else {
+        auto retIt = asyncPowerStateListeners_.insert(callback);
+        result = retIt.second;
+        POWER_HILOGD(FEATURE_POWER_STATE, "async listeners.size = %{public}d, insertOk = %{public}d",
+            static_cast<unsigned int>(asyncPowerStateListeners_.size()), retIt.second);
+    }
+    if (result) {
         object->AddDeathRecipient(powerStateCBDeathRecipient_);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "listeners.size = %{public}d, insertOk = %{public}d",
-        static_cast<unsigned int>(powerStateListeners_.size()), retIt.second);
 }
 
 void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
@@ -794,12 +804,22 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
     RETURN_IF(callback == nullptr);
     auto object = callback->AsObject();
     RETURN_IF(object == nullptr);
-    size_t eraseNum = powerStateListeners_.erase(callback);
-    if (eraseNum != 0) {
-        object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
+    size_t eraseNum = 0;
+    if (syncPowerStateListeners_.find(callback) != syncPowerStateListeners_.end()) {
+        eraseNum = syncPowerStateListeners_.erase(callback);
+        if (eraseNum != 0) {
+            object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
+        }
+        POWER_HILOGD(FEATURE_POWER_STATE, "sync listeners.size = %{public}d, eraseNum = %{public}zu",
+            static_cast<unsigned int>(syncPowerStateListeners_.size()), eraseNum);
+    } else {
+        eraseNum = asyncPowerStateListeners_.erase(callback);
+        if (eraseNum != 0) {
+            object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
+        }
+        POWER_HILOGD(FEATURE_POWER_STATE, "async listeners.size = %{public}d, eraseNum = %{public}zu",
+            static_cast<unsigned int>(asyncPowerStateListeners_.size()), eraseNum);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "listeners.size = %{public}d, eraseNum = %{public}zu",
-        static_cast<unsigned int>(powerStateListeners_.size()), eraseNum);
 }
 
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
@@ -823,17 +843,20 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
         return;
     }
     POWER_HILOGD(
-        FEATURE_POWER_STATE, "state=%{public}u, listeners.size=%{public}zu", state, powerStateListeners_.size());
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "STATE", static_cast<uint32_t>(state));
+        FEATURE_POWER_STATE, "state=%{public}u, listeners.size=%{public}zu", state, syncPowerStateListeners_.size());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE",
+        static_cast<uint32_t>(state));
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
     SendEventToPowerMgrNotify(state, now);
 
     // Call back all native function
-    for (auto& listener : powerStateListeners_) {
+    for (auto& listener : syncPowerStateListeners_) {
         listener->OnPowerStateChanged(state);
+    }
+    for (auto& listener : asyncPowerStateListeners_) {
+        listener->OnAsyncPowerStateChanged(state);
     }
 }
 
@@ -1425,7 +1448,7 @@ void PowerStateMachine::HandleProximityScreenOffTimer(PowerState state, StateCha
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
             reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) &&
         IsProximityClose() && state == PowerState::AWAKE) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click or pickup is allowed to cancel proximity-screen-off timer");
+        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click or pickup is not allowed to cancel proximity-screen-off timer");
         return;
     }
     if (reason != StateChangeReason::STATE_CHANGE_REASON_PROXIMITY) {
