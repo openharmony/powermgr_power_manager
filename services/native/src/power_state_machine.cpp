@@ -852,11 +852,11 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
     SendEventToPowerMgrNotify(state, now);
 
     // Call back all native function
-    for (auto& listener : syncPowerStateListeners_) {
-        listener->OnPowerStateChanged(state);
-    }
     for (auto& listener : asyncPowerStateListeners_) {
         listener->OnAsyncPowerStateChanged(state);
+    }
+    for (auto& listener : syncPowerStateListeners_) {
+        listener->OnPowerStateChanged(state);
     }
 }
 

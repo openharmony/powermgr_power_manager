@@ -72,7 +72,8 @@ void PowerMgrServiceNativeTest::TearDown()
 
 void PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
+    POWER_HILOGI(
+        LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
 }
 
 namespace {
