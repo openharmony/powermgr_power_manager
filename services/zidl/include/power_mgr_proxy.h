@@ -72,7 +72,7 @@ public:
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
     virtual PowerErrors SetSuspendTag(const std::string& tag) override;
-    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;

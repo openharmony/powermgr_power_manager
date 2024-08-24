@@ -21,6 +21,7 @@ namespace OHOS {
 namespace PowerMgr {
 enum class PowerStateCallbackInterfaceCode {
     POWER_STATE_CHANGED = 0,
+    ASYNC_POWER_STATE_CHANGED = 1,
 };
 } // space PowerMgr
 } // namespace OHOS
