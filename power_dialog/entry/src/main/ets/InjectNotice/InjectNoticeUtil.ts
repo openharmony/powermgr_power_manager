@@ -38,23 +38,6 @@ export enum InjectNoticeStaus {
 class InjectNoticeUtil {
   status: InjectNoticeStaus = InjectNoticeStaus.DEFAULT;
   isInit: boolean = false;
-  wantAgentObj: _WantAgent = null;
-  wantAgentInfo: WantAgent.WantAgentInfo = {
-    wants: [
-      {
-        bundleName: 'com.ohos.powerdialog',
-        abilityName: 'InjectNoticeAbility',
-        action: '',
-        parameters: {
-          noticeId: NOTICE_ID,
-          noticeLabel: LABEL,
-        },
-      }
-    ],
-    actionType: WantAgent.OperationType.START_ABILITY,
-    requestCode: 0,
-    wantAgentFlags: [WantAgent.WantAgentFlags.CONSTANT_FLAG],
-  };
   removalWantAgentObj: _WantAgent = null;
   removalWantAgentInfo: WantAgent.WantAgentInfo = {
     wants: [
@@ -82,7 +65,6 @@ class InjectNoticeUtil {
       return;
     }
     this.initRemovalWantAgent();
-    this.initButtonWantAgent();
     this.createCommonEventSubscriber();
     let systemLiveViewSubscriber: notificationManager.SystemLiveViewSubscriber = {
       onResponse: this.onLiveNoticeResponseCallback,
@@ -112,7 +94,6 @@ class InjectNoticeUtil {
 
   sendNotice(): void {
     console.debug(TAG, 'sendNotice begin==>');
-    console.debug(TAG, `wantAgentObj is ${this.wantAgentObj}`);
     console.debug(TAG, `removalWantAgentObj is ${this.removalWantAgentObj}`);
     let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
     let resourceManager = applicationContext.resourceManager;
@@ -182,35 +163,6 @@ class InjectNoticeUtil {
     console.info(TAG, 'initRemovalWantAgent getWantAgent end');
   }
 
-  async initButtonWantAgent(): Promise<void> {
-    console.info(TAG, 'getWantAgent begin');
-    if (this.wantAgentObj !== null) {
-      console.info(TAG, 'has init getWantAgent');
-      return;
-    }
-    try {
-      await WantAgent.getWantAgent(this.wantAgentInfo).then((data) => {
-        this.wantAgentObj = data;
-        console.info(TAG, `getWantAgent ok`);
-      }).catch((err: Base.BusinessError) => {
-        console.error(TAG, `getWantAgent failed, code: ${JSON.stringify(err.code)}, message: ${JSON.stringify(err.message)}`);
-      });
-    } catch (err: Base.BusinessError) {
-      console.error(TAG, `getWantAgent catch failed, code: ${JSON.stringify(err.code)}, message: ${JSON.stringify(err.message)}`);
-    }
-    console.info(TAG, 'getWantAgent end');
-  }
-
-  async enableNotification(): Promise<void> {
-    console.debug(TAG, 'requestEnableNotification begin===>');
-    await notificationManager.requestEnableNotification().then(() => {
-      console.debug(TAG + 'requestEnableNotification success');
-    }).catch((err: Base.BusinessError) => {
-      console.error(TAG + `requestEnableNotification fail: ${JSON.stringify(err)}`);
-    });
-    console.debug(TAG, 'requestEnableNotification end===>');
-  }
-
   async cancelAuthorization(): Promise<void> {
     console.debug(TAG, 'cancelAuthorization begin===>');
     try {
@@ -229,6 +181,7 @@ class InjectNoticeUtil {
     }
     let subscribeInfo: CommonEventManager.CommonEventSubscribeInfo = {
       events: [EVENT_NAME],
+      publisherPermission: 'ohos.permission.INJECT_INPUT_EVENT',
     };
     CommonEventManager.createSubscriber(subscribeInfo).then((commonEventSubscriber: CommonEventManager.CommonEventSubscriber) => {
       console.debug(TAG, 'createCommonEventSubscriber ok');
