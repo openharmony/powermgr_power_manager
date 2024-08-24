@@ -112,7 +112,7 @@ public:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool HibernateInner(bool clearMemory);
 #endif
-    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
     void CancelDelayTimer(int32_t event);
@@ -322,7 +322,8 @@ private:
     std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
-    std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
+    std::set<const sptr<IPowerStateCallback>, classcomp> syncPowerStateListeners_;
+    std::set<const sptr<IPowerStateCallback>, classcomp> asyncPowerStateListeners_;
     std::shared_ptr<IDeviceStateAction> stateAction_;
 
     std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
