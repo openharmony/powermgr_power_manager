@@ -228,6 +228,7 @@ class InjectNoticeUtil {
     }
     let subscribeInfo: CommonEventManager.CommonEventSubscribeInfo = {
       events: [EVENT_NAME],
+      publisherPermission: 'ohos.permission.INJECT_INPUT_EVENT',
     };
     CommonEventManager.createSubscriber(subscribeInfo).then((commonEventSubscriber: CommonEventManager.CommonEventSubscriber) => {
       console.debug(TAG, 'createCommonEventSubscriber ok');
