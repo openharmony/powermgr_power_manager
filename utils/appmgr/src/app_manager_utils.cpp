@@ -16,7 +16,6 @@
 #include "app_manager_utils.h"
 
 #include "power_log.h"
-#include <ability_manager_proxy.h>
 #include <app_mgr_interface.h>
 #include <if_system_ability_manager.h>
 #include <iservice_registry.h>
