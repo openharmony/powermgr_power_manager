@@ -26,11 +26,11 @@
 #define protected public
 #include "power_vibrator.h"
 #include "vibrator_source_parser.h"
+#include "setting_provider.h"
 #undef private
 #undef protected
 
 #include "setting_observer.h"
-#include "setting_provider.h"
 #include "sysparam.h"
 #include "tokenid_kit.h"
 
@@ -50,6 +50,7 @@ const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.
 const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 const std::string SHUTDOWN_DIAG = "shutdown_diag";
+constexpr int32_t INVALID_CODE = -1;
 
 /**
  * @tc.name: PermissionIsSystemNative
@@ -245,6 +246,7 @@ HWTEST_F(PowerMgrUtilTest, SettingProvider005, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "SettingProvider005::fun is start!");
     auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
     settingProvider.UpdateCurrentUserId();
+    EXPECT_NE(settingProvider.currentUserId_, INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "SettingProvider005::fun is end!");
 }
 
