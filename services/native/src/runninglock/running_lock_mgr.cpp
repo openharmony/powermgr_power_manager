@@ -179,6 +179,16 @@ void RunningLockMgr::InitLocksTypeProximity()
                 proximityController_.Enable();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
+                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+                if (pms == nullptr) {
+                    return RUNNINGLOCK_FAILURE;
+                }
+                auto stateMachine = pms->GetPowerStateMachine();
+                if (stateMachine == nullptr) {
+                    return RUNNINGLOCK_FAILURE;
+                }
+                PreprocessBeforeAwake();
+                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 proximityController_.Disable();
                 proximityController_.Clear();
             }
