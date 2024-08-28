@@ -15,6 +15,8 @@
 
 #include "device_state_action.h"
 
+#include <mutex>
+#include <condition_variable>
 #include <ipc_skeleton.h>
 #include "display_power_mgr_client.h"
 #include "power_log.h"
@@ -101,11 +103,93 @@ PowerStateChangeReason DeviceStateAction::GetDmsReasonByPowerReason(StateChangeR
         case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
             break;
+        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION;
+            break;
         default:
             break;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "The reason to DMS is = %{public}d", static_cast<uint32_t>(dmsReason));
     return dmsReason;
+}
+
+bool DeviceStateAction::TryToCancelScreenOff()
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]ready to call TryToCancelScreenOff");
+    std::unique_lock lock(cancelScreenOffMutex_);
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]TryToCancelScreenOff mutex acquired");
+    if (!screenOffStarted_) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]powerkey screen off not in progress");
+        return false;
+    }
+    interruptingScreenOff_ = true;
+    // block thread until suspendbegin
+    constexpr uint32_t timeoutMs = 300;
+    bool notified = cancelScreenOffCv_.wait_for(lock, std::chrono::milliseconds(timeoutMs), [this] {
+        return cancelScreenOffCvUnblocked_;
+    });
+    if (!notified) {
+        POWER_HILOGW(FEATURE_POWER_STATE, "[UL_POWER]TryToCancelScreenOff wait for response timed out");
+    }
+    if (screenOffInterrupted_) {
+        //not really calling the interface of DMS, interrupted early instead
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]Interrupted before calling SuspendBegin");
+        return true;
+    }
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]calling TryToCancelScreenOff");
+    screenOffInterrupted_ = DisplayManager::GetInstance().TryToCancelScreenOff();
+    return screenOffInterrupted_;
+}
+
+void DeviceStateAction::BeginPowerkeyScreenOff()
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]BeginPowerkeyScreenOff");
+    std::lock_guard lock(cancelScreenOffMutex_);
+    screenOffStarted_ = true;
+    cancelScreenOffCvUnblocked_ = false;
+    interruptingScreenOff_ = false;
+    screenOffInterrupted_ = false;
+}
+
+void DeviceStateAction::EndPowerkeyScreenOff()
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]EndPowerkeyScreenOff");
+    std::unique_lock lock(cancelScreenOffMutex_);
+    screenOffStarted_ = false;
+    cancelScreenOffCvUnblocked_ = true;
+    interruptingScreenOff_ = false;
+    screenOffInterrupted_ = false;
+    lock.unlock();
+    cancelScreenOffCv_.notify_all();
+}
+
+bool DeviceStateAction::IsInterruptingScreenOff(PowerStateChangeReason dispReason)
+{
+    bool ret = false;
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]IsInterruptingScreenOff, dispReason: %{public}d", dispReason);
+    if (dispReason == PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {
+        std::unique_lock lock(cancelScreenOffMutex_);
+        if (screenOffStarted_ && interruptingScreenOff_) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]powerkey screen off interrupted before SuspendBegin");
+            ret = true;
+            // If there is a powerkey screen off event on going, tell the blocked thread that this function has been
+            // executed and has observed interruptingScreenOff_ set by TryToCancelScreenOff.
+            // The screen off action will be interrupted inside our own process without calling DMS interfaces
+            // and it would be safe for TryToCancelScreenOff to return true.
+            screenOffInterrupted_ = true;
+        } else {
+            // Otherwise calls SuspendBegin before unblocking TryToCancelScreenOff to reduce the possibility for
+            // TryToCancelScreenOff to fail.
+            DisplayManager::GetInstance().SuspendBegin(dispReason);
+        }
+        cancelScreenOffCvUnblocked_ = true;
+        lock.unlock();
+        cancelScreenOffCv_.notify_all();
+    } else {
+        // not in the process of a powerkey screen off, calls SuspendBegin as usual
+        DisplayManager::GetInstance().SuspendBegin(dispReason);
+    }
+    return ret;
 }
 
 uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReason reason)
@@ -123,8 +207,7 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
         currentState = DisplayState::DISPLAY_ON;
     }
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-    PowerStateChangeReason dispReason = (reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ?
-            PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION : GetDmsReasonByPowerReason(reason));
+    PowerStateChangeReason dispReason = GetDmsReasonByPowerReason(reason);
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
@@ -142,7 +225,10 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
             if (currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
-                DisplayManager::GetInstance().SuspendBegin(dispReason);
+                // SuspendBegin is processed inside IsInterruptingScreenOff
+                if (IsInterruptingScreenOff(dispReason)) {
+                    return ActionResult::FAILED;
+                }
                 IPCSkeleton::SetCallingIdentity(identity);
             }
             break;

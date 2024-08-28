@@ -124,6 +124,9 @@ public:
     void ResetSleepTimer();
     void SetAutoSuspend(SuspendDeviceType type, uint32_t delay);
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
+    bool TryToCancelScreenOff();
+    void BeginPowerkeyScreenOff();
+    void EndPowerkeyScreenOff();
     void SetDisplaySuspend(bool enable);
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
