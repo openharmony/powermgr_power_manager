@@ -553,7 +553,7 @@ bool PowerMgrServiceTestProxy::IsScreenOn(bool needPrintLog)
     return result;
 }
 
-bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
 
@@ -567,6 +567,7 @@ bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerState
     }
 
     data.WriteRemoteObject(callback->AsObject());
+    data.WriteBool(isSync);
 
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK),

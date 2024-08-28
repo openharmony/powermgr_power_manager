@@ -42,6 +42,8 @@ int PowerStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     int ret = ERR_OK;
     if (code == static_cast<uint32_t>(PowerMgr::PowerStateCallbackInterfaceCode::POWER_STATE_CHANGED)) {
         ret = OnPowerStateChangedStub(data);
+    } else if (code == static_cast<uint32_t>(PowerMgr::PowerStateCallbackInterfaceCode::ASYNC_POWER_STATE_CHANGED)) {
+        ret = OnAsyncPowerStateChangedStub(data);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -54,6 +56,14 @@ int32_t PowerStateCallbackStub::OnPowerStateChangedStub(MessageParcel& data)
     uint32_t type;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
     OnPowerStateChanged(static_cast<PowerState>(type));
+    return ERR_OK;
+}
+
+int32_t PowerStateCallbackStub::OnAsyncPowerStateChangedStub(MessageParcel& data)
+{
+    uint32_t type;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
+    OnAsyncPowerStateChanged(static_cast<PowerState>(type));
     return ERR_OK;
 }
 } // namespace PowerMgr
