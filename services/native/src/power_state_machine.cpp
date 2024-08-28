@@ -849,12 +849,36 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         POWER_HILOGE(FEATURE_POWER_STATE, "Notify is null");
         return;
     }
-    if (state == PowerState::AWAKE) {
-        notify->PublishScreenOnEvents(callTime);
-    } else if (state == PowerState::INACTIVE) {
-        notify->PublishScreenOffEvents(callTime);
-    } else {
-        POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
+
+    switch (state) {
+        case PowerState::AWAKE: {
+            notify->PublishScreenOnEvents(callTime);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
+                POWER_HILOGI(FEATURE_POWER_STATE, "Set flag of force sleeping to false");
+                notify->PublishExitForceSleepEvents(callTime);
+                suspendController->SetForceSleepingFlag(false);
+            }
+#endif
+            break;
+        }
+        case PowerState::INACTIVE: {
+            notify->PublishScreenOffEvents(callTime);
+            break;
+        }
+        case PowerState::SLEEP: {
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
+                notify->PublishEnterForceSleepEvents(callTime);
+            }
+            break;
+#endif
+            break;
+        }
+        default:
+            POWER_HILOGI(FEATURE_POWER_STATE, "No need to publish event, state:%{public}u", state);
     }
 }
 

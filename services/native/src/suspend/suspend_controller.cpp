@@ -487,6 +487,16 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr && pms->GetSuspendController() != nullptr) {
+        pms->GetSuspendController()->SetForceSleepingFlag(true);
+        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
+    }
+#endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {
