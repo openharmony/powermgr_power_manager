@@ -1033,7 +1033,7 @@ bool PowerMgrService::ResetRunningLocks()
     return true;
 }
 
-bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     std::lock_guard lock(stateMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -1041,8 +1041,9 @@ bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
-    powerStateMachine_->RegisterPowerStateCallback(callback);
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s: pid: %{public}d, uid: %{public}d, isSync: %{public}u", __func__, pid,
+        uid, static_cast<uint32_t>(isSync));
+    powerStateMachine_->RegisterPowerStateCallback(callback, isSync);
     return true;
 }
 

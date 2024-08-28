@@ -35,6 +35,7 @@ public:
     ~PowerStateCallbackProxy() = default;
     DISALLOW_COPY_AND_MOVE(PowerStateCallbackProxy);
     virtual void OnPowerStateChanged(PowerState state) override;
+    virtual void OnAsyncPowerStateChanged(PowerState state) override;
 
 private:
     static inline BrokerDelegator<PowerStateCallbackProxy> delegator_;
