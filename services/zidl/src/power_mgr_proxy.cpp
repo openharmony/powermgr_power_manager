@@ -724,6 +724,35 @@ bool PowerMgrProxy::IsFoldScreenOn()
     return result;
 }
 
+bool PowerMgrProxy::IsCollaborationScreenOn()
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_COLLABORATION_SCREEN_ON), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
+    }
+
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(COMP_FWK, "Read IsFoldScreenOn failed");
+    }
+
+    return result;
+}
+
 bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     sptr<IRemoteObject> remote = Remote();

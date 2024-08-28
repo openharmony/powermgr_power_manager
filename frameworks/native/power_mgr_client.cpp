@@ -267,6 +267,15 @@ bool PowerMgrClient::IsFoldScreenOn()
     return ret;
 }
 
+bool PowerMgrClient::IsCollaborationScreenOn()
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = false;
+    ret = proxy_->IsCollaborationScreenOn();
+    POWER_HILOGI(COMP_FWK, "IsCollaborationScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
+    return ret;
+}
+
 PowerState PowerMgrClient::GetState()
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerState::UNKNOWN);
