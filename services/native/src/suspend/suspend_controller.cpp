@@ -331,7 +331,7 @@ void SuspendController::CancelEvent()
     }
 }
 
-void SuspendController::RecordPowerKeyDown()
+void SuspendController::RecordPowerKeyDown(bool interrupting)
 {
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
@@ -342,7 +342,10 @@ void SuspendController::RecordPowerKeyDown()
     if (!isScreenOn) {
         powerkeyDownWhenScreenOff_ = true;
     } else {
-        powerkeyDownWhenScreenOff_ = false;
+        if (interrupting) {
+            POWER_HILOGI(FEATURE_SUSPEND, "Suspend record key down after interrupting screen off");
+        }
+        powerkeyDownWhenScreenOff_ = interrupting;
     }
 
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -652,13 +655,55 @@ bool PowerKeySuspendMonitor::Init()
                     "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");
                 return;
             }
-            Notify();
+            auto powerkeyScreenOffTask = [*this]() mutable {
+                Notify();
+                powerkeyScreenOff_ = false;
+                EndPowerkeyScreenOff();
+            };
+            BeginPowerkeyScreenOff();
+            powerkeyScreenOff_ = true;
+            ffrt::submit(powerkeyScreenOffTask, {}, {&powerkeyScreenOff_});
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER]submitted screen off ffrt task");
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 #else
     return false;
 #endif
+}
+
+void PowerKeySuspendMonitor::BeginPowerkeyScreenOff() const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    auto stateAction = stateMachine->GetStateAction();
+    if (stateAction == nullptr) {
+        return;
+    }
+    stateAction->BeginPowerkeyScreenOff();
+}
+
+void PowerKeySuspendMonitor::EndPowerkeyScreenOff() const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    auto stateAction = stateMachine->GetStateAction();
+    if (stateAction == nullptr) {
+        return;
+    }
+    stateAction->EndPowerkeyScreenOff();
 }
 
 void PowerKeySuspendMonitor::Cancel()

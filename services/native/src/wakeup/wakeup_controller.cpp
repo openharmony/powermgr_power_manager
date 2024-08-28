@@ -41,7 +41,7 @@ sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 const int32_t ERR_FAILED = -1;
 #endif
-constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
+
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
@@ -666,7 +666,6 @@ std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source
 }
 
 /** PowerkeyWakeupMonitor Implement */
-
 bool PowerkeyWakeupMonitor::Init()
 {
     if (powerkeyShortPressId_ >= 0) {
@@ -684,15 +683,6 @@ bool PowerkeyWakeupMonitor::Init()
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
 
-            static int64_t lastPowerkeyDownTime = 0;
-            int64_t currTime = GetTickCount();
-            if (lastPowerkeyDownTime != 0 && currTime - lastPowerkeyDownTime < POWERKEY_MIN_INTERVAL) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey down within 350ms, skip. "
-                    "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyDownTime);
-                return;
-            }
-            lastPowerkeyDownTime = currTime;
-
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
@@ -700,7 +690,18 @@ bool PowerkeyWakeupMonitor::Init()
             pms->RefreshActivityInner(
                 static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
-            suspendController->RecordPowerKeyDown();
+            bool poweroffInterrupted = false;
+            if (PowerKeySuspendMonitor::powerkeyScreenOff_.load()) {
+                auto stateMachine = pms->GetPowerStateMachine();
+                if (!stateMachine) {
+                    POWER_HILOGE(FEATURE_WAKEUP, "TryToCancelScreenOff, state machine is nullptr");
+                } else {
+                    poweroffInterrupted = stateMachine->TryToCancelScreenOff();
+                }
+            }
+            // sync with the end of powerkey screen off task
+            ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
+            suspendController->RecordPowerKeyDown(poweroffInterrupted);
             Notify();
         });
 

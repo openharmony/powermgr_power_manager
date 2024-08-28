@@ -69,6 +69,12 @@ public:
     {
         return 0;
     }
+    virtual bool TryToCancelScreenOff()
+    {
+        return false;
+    }
+    virtual void BeginPowerkeyScreenOff() {};
+    virtual void EndPowerkeyScreenOff() {};
     virtual void SetCoordinated([[maybe_unused]] bool coordinated) {};
     virtual uint32_t GoToSleep([[maybe_unused]] const std::function<void()> onSuspend,
         [[maybe_unused]] const std::function<void()> onWakeup, [[maybe_unused]] bool force)
