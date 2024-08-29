@@ -28,12 +28,26 @@ void NativePowerStateMachineTest::SetUpTestCase() {}
 
 void PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
+    POWER_HILOGI(
+        LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
+}
+
+void PowerStateTest1Callback::OnAsyncPowerStateChanged(PowerState state)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnAsyncPowerStateChanged state = %{public}u.",
+        static_cast<uint32_t>(state));
 }
 
 void PowerStateTest2Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
+    POWER_HILOGI(
+        LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
+}
+
+void PowerStateTest2Callback::OnAsyncPowerStateChanged(PowerState state)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerStateTest2Callback::OnAsyncPowerStateChanged state = %{public}u.",
+        static_cast<uint32_t>(state));
 }
 
 namespace {
@@ -98,6 +112,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
     stateMachine->UnRegisterPowerStateCallback(cb);
     sptr<IPowerStateCallback> cb1 = new PowerStateTest2Callback();
+    stateMachine->RegisterPowerStateCallback(cb1);
     stateMachine->UnRegisterPowerStateCallback(cb1);
     sptr<IPowerStateCallback> cb2 = nullptr;
     stateMachine->RegisterPowerStateCallback(cb2);
@@ -105,6 +120,19 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
     stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
 
+    sptr<IPowerStateCallback> cb3 = new PowerStateTest1Callback();
+    stateMachine->RegisterPowerStateCallback(cb3, false);
+    stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true);
+    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
+    stateMachine->UnRegisterPowerStateCallback(cb3);
+    sptr<IPowerStateCallback> cb4 = new PowerStateTest2Callback();
+    sptr<IPowerStateCallback> cb5 = nullptr;
+    stateMachine->RegisterPowerStateCallback(cb4, false);
+    stateMachine->RegisterPowerStateCallback(cb5, false);
+    stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT, true);
+    EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
+    stateMachine->UnRegisterPowerStateCallback(cb4);
+    stateMachine->UnRegisterPowerStateCallback(cb5);
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device end.";
 }

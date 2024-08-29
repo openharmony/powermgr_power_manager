@@ -41,7 +41,6 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
-constexpr uint32_t HIBERNATE_DELAY_MS = 5000;
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
@@ -147,7 +146,7 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
         return false;
     }
 #ifdef HAS_SENSORS_SENSOR_PART
-    // prevent the unexpected double click to light up the screen when calling
+    // prevent the double click and pickup to light up the screen when calling
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
             reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) &&
         IsProximityClose() && to == PowerState::AWAKE) {
@@ -294,7 +293,6 @@ void PowerStateMachine::EmplaceDim()
             if (reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
                 dimTime = COORDINATED_STATE_SCREEN_OFF_TIME_MS;
             }
-            DisplayState dispState = stateAction_->GetDisplayState();
             uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
             if (ret != ActionResult::SUCCESS) {
                 // failed but not return, still need to set screen off
@@ -616,9 +614,6 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceInner StartSleepTimer start.");
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-        forceSleeping_.store(true, std::memory_order_relaxed);
-#endif
         suspendController->StartSleepTimer(
             SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
             static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND), 0);
@@ -715,7 +710,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
             POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
         }
-        hibernateController->PostHibernate();
+        hibernateController->PostHibernate(success);
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
     if (ffrtTimer_ == nullptr) {
@@ -779,18 +774,28 @@ void PowerStateMachine::ReceiveScreenEvent(bool isScreenOn)
     }
 }
 
-void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     std::lock_guard lock(mutex_);
     RETURN_IF(callback == nullptr);
     auto object = callback->AsObject();
     RETURN_IF(object == nullptr);
-    auto retIt = powerStateListeners_.insert(callback);
-    if (retIt.second) {
+
+    bool result = false;
+    if (isSync) {
+        auto retIt = syncPowerStateListeners_.insert(callback);
+        result = retIt.second;
+        POWER_HILOGD(FEATURE_POWER_STATE, "sync listeners.size = %{public}d, insertOk = %{public}d",
+            static_cast<unsigned int>(syncPowerStateListeners_.size()), retIt.second);
+    } else {
+        auto retIt = asyncPowerStateListeners_.insert(callback);
+        result = retIt.second;
+        POWER_HILOGD(FEATURE_POWER_STATE, "async listeners.size = %{public}d, insertOk = %{public}d",
+            static_cast<unsigned int>(asyncPowerStateListeners_.size()), retIt.second);
+    }
+    if (result) {
         object->AddDeathRecipient(powerStateCBDeathRecipient_);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "listeners.size = %{public}d, insertOk = %{public}d",
-        static_cast<unsigned int>(powerStateListeners_.size()), retIt.second);
 }
 
 void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
@@ -799,12 +804,22 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
     RETURN_IF(callback == nullptr);
     auto object = callback->AsObject();
     RETURN_IF(object == nullptr);
-    size_t eraseNum = powerStateListeners_.erase(callback);
-    if (eraseNum != 0) {
-        object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
+    size_t eraseNum = 0;
+    if (syncPowerStateListeners_.find(callback) != syncPowerStateListeners_.end()) {
+        eraseNum = syncPowerStateListeners_.erase(callback);
+        if (eraseNum != 0) {
+            object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
+        }
+        POWER_HILOGD(FEATURE_POWER_STATE, "sync listeners.size = %{public}d, eraseNum = %{public}zu",
+            static_cast<unsigned int>(syncPowerStateListeners_.size()), eraseNum);
+    } else {
+        eraseNum = asyncPowerStateListeners_.erase(callback);
+        if (eraseNum != 0) {
+            object->RemoveDeathRecipient(powerStateCBDeathRecipient_);
+        }
+        POWER_HILOGD(FEATURE_POWER_STATE, "async listeners.size = %{public}d, eraseNum = %{public}zu",
+            static_cast<unsigned int>(asyncPowerStateListeners_.size()), eraseNum);
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "listeners.size = %{public}d, eraseNum = %{public}zu",
-        static_cast<unsigned int>(powerStateListeners_.size()), eraseNum);
 }
 
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
@@ -828,16 +843,19 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
         return;
     }
     POWER_HILOGD(
-        FEATURE_POWER_STATE, "state=%{public}u, listeners.size=%{public}zu", state, powerStateListeners_.size());
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "STATE", static_cast<uint32_t>(state));
+        FEATURE_POWER_STATE, "state=%{public}u, listeners.size=%{public}zu", state, syncPowerStateListeners_.size());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE",
+        static_cast<uint32_t>(state));
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
     SendEventToPowerMgrNotify(state, now);
 
     // Call back all native function
-    for (auto& listener : powerStateListeners_) {
+    for (auto& listener : asyncPowerStateListeners_) {
+        listener->OnAsyncPowerStateChanged(state);
+    }
+    for (auto& listener : syncPowerStateListeners_) {
         listener->OnPowerStateChanged(state);
     }
 }
@@ -859,9 +877,10 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         case PowerState::AWAKE: {
             notify->PublishScreenOnEvents(callTime);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-            if (forceSleeping_.load()) {
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
                 notify->PublishExitForceSleepEvents(callTime);
-                forceSleeping_.store(false, std::memory_order_relaxed);
+                suspendController->SetForceSleepingFlag(false);
             }
 #endif
             break;
@@ -872,7 +891,8 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         }
         case PowerState::SLEEP: {
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-            if (forceSleeping_.load()) {
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
                 notify->PublishEnterForceSleepEvents(callTime);
             }
             break;
@@ -904,13 +924,15 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wpt
 
 void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
 {
+    if (!ffrtTimer_) {
+        POWER_HILOGE(FEATURE_ACTIVITY, "Failed to set delay timer, the timer pointer is null");
+        return;
+    }
     POWER_HILOGD(FEATURE_ACTIVITY, "Set delay timer, delayTime=%{public}s, event=%{public}d",
         std::to_string(delayTime).c_str(), event);
+
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
-            if (!ffrtTimer_) {
-                return;
-            }
             FFRTTask task = [this] { this->HandleActivityTimeout(); };
             ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT, task, delayTime);
             break;
@@ -925,6 +947,27 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
             suspendController->HandleEvent(delayTime);
             break;
         }
+        case CHECK_PROXIMITY_SCREEN_OFF_MSG: {
+            FFRTTask delayScreenOffTask = [this] {
+                POWER_HILOGI(FEATURE_POWER_STATE, "proximity-screen-off timer task is triggered");
+                proximityScreenOffTimerStarted_.store(false, std::memory_order_relaxed);
+                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+                auto suspendController = pms->GetSuspendController();
+                if (suspendController == nullptr) {
+                    POWER_HILOGW(
+                        FEATURE_POWER_STATE, "suspendController is nullptr, exit proximity-screen-off timer task");
+                    return;
+                }
+                bool ret = SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
+                if (ret) {
+                    suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+                        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+                }
+            };
+            ffrtTimer_->SetTimer(TIMER_ID_PROXIMITY_SCREEN_OFF, delayScreenOffTask, delayTime);
+            proximityScreenOffTimerStarted_.store(true, std::memory_order_relaxed);
+            break;
+        }
         default: {
             break;
         }
@@ -933,12 +976,14 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
 
 void PowerStateMachine::CancelDelayTimer(int32_t event)
 {
+    if (!ffrtTimer_) {
+        POWER_HILOGE(FEATURE_ACTIVITY, "Failed to cancel delay timer, the timer pointer is null");
+        return;
+    }
     POWER_HILOGD(FEATURE_ACTIVITY, "Cancel delay timer, event: %{public}d", event);
+
     switch (event) {
         case CHECK_USER_ACTIVITY_TIMEOUT_MSG: {
-            if (!ffrtTimer_) {
-                return;
-            }
             ffrtTimer_->CancelTimer(TIMER_ID_USER_ACTIVITY_TIMEOUT);
             break;
         }
@@ -953,10 +998,12 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
             break;
         }
         case CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG: {
-            if (!ffrtTimer_) {
-                return;
-            }
             ffrtTimer_->CancelTimer(TIMER_ID_PRE_BRIGHT_AUTH);
+            break;
+        }
+        case CHECK_PROXIMITY_SCREEN_OFF_MSG: {
+            ffrtTimer_->CancelTimer(TIMER_ID_PROXIMITY_SCREEN_OFF);
+            proximityScreenOffTimerStarted_.store(false, std::memory_order_relaxed);
             break;
         }
         default: {
@@ -1375,7 +1422,7 @@ bool PowerStateMachine::NeedShowScreenLocks(PowerState state)
         state == PowerState::INACTIVE || state == PowerState::DIM;
 }
 
-void PowerStateMachine::UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason)
+void PowerStateMachine::UpdateSettingStateFlag(PowerState state, StateChangeReason reason)
 {
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
         reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
@@ -1387,10 +1434,34 @@ void PowerStateMachine::UpdateSettingStateFlag(const PowerState state, const Sta
     settingOffStateFlag_ = (state == PowerState::INACTIVE);
 }
 
-void PowerStateMachine::RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason)
+void PowerStateMachine::RestoreSettingStateFlag()
 {
     settingOnStateFlag_ = false;
     settingOffStateFlag_ = false;
+}
+
+void PowerStateMachine::HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason)
+{
+    if (!proximityScreenOffTimerStarted_.load()) {
+        return;
+    }
+    if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
+            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) &&
+        IsProximityClose() && state == PowerState::AWAKE) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click or pickup is not allowed to cancel proximity-screen-off timer");
+        return;
+    }
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_PROXIMITY) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Cancel proximity-screen-off timer, reason:%{public}s",
+            PowerUtils::GetReasonTypeString(reason).c_str());
+        CancelDelayTimer(PowerStateMachine::CHECK_PROXIMITY_SCREEN_OFF_MSG);
+        return;
+    }
+    if (state == PowerState::AWAKE) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Cancel proximity-screen-off timer, reason:%{public}s(away)",
+            PowerUtils::GetReasonTypeString(reason).c_str());
+        CancelDelayTimer(PowerStateMachine::CHECK_PROXIMITY_SCREEN_OFF_MSG);
+    }
 }
 
 bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
@@ -1447,6 +1518,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         ShowCurrentScreenLocks();
     }
 
+    HandleProximityScreenOffTimer(state, reason);
     if (!HandlePreBrightState(reason)) {
         timeoutCheck.Finish(TransitResult::OTHER_ERR);
         return false;
@@ -1468,7 +1540,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     timeoutCheck.Finish(ret);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), ret);
-    RestoreSettingStateFlag(state, reason);
+    RestoreSettingStateFlag();
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 

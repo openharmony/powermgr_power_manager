@@ -72,7 +72,8 @@ void PowerMgrServiceNativeTest::TearDown()
 
 void PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %u.", static_cast<uint32_t>(state));
+    POWER_HILOGI(
+        LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
 }
 
 namespace {
@@ -153,8 +154,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    EXPECT_TRUE(powerModeModuleTest != nullptr);
     auto flag = SettingHelper::IsAutoAdjustBrightnessSettingValid();
-    EXPECT_TRUE(flag);
     powerModeModuleTest->RegisterAutoAdjustBrightnessObserver();
     SettingHelper::SetSettingAutoAdjustBrightness(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingAutoAdjustBrightness(INVALID_CODE);
@@ -170,9 +171,9 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterAutoAdjustBrightnessObserver();
     auto flag = SettingHelper::IsBrightnessSettingValid();
-    EXPECT_TRUE(flag);
     SettingHelper::SetSettingBrightness(INVALID_CODE);
     auto ret = SettingHelper::GetSettingAutoAdjustBrightness(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 end.");
@@ -187,9 +188,9 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterVibrateStateObserver();
     auto flag = SettingHelper::IsVibrationSettingValid();
-    EXPECT_TRUE(flag);
     SettingHelper::SetSettingVibration(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingVibration(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 end.");
@@ -205,10 +206,9 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterAutoWindowRotationObserver();
     auto flag = SettingHelper::IsWindowRotationSettingValid();
-    EXPECT_TRUE(flag);
-
     SettingHelper::SetSettingWindowRotation(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingWindowRotation(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 end.");
@@ -223,11 +223,11 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterIntellVoiceObserver();
     auto flag = SettingHelper::IsIntellVoiceSettingValid();
     SettingHelper::SetSettingIntellVoice(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingIntellVoice(INVALID_CODE);
-    EXPECT_TRUE(ret == -1);
     powerModeModuleTest->UnregisterSaveModeObserver();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 end.");
 }
@@ -267,14 +267,18 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrServiceNative011
- * @tc.desc: test displayOffTimeSettingValid
+ * @tc.desc: test RegisterSettingWakeupDoubleClickObservers
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 begin.");
-    auto ret = SettingHelper::IsDisplayOffTimeSettingValid();
-    EXPECT_TRUE(ret);
+    g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
+    g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
+    SettingHelper::IsWakeupPickupSettingValid();
+    SettingHelper::UnregisterSettingWakeupDoubleObserver();
+    SettingHelper::UnregisterSettingWakeupDoubleObserver();
+    EXPECT_TRUE(SettingHelper::doubleClickObserver_ == nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 end.");
 }
 

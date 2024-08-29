@@ -14,10 +14,17 @@
 import("//base/powermgr/power_manager/powermgr.gni")
 
 config("private_config") {
-  include_dirs = [ "../native/include" ]
+  include_dirs = [
+    "include",
+    "../native/include",
+  ]
 }
 
-ohos_shared_library("power_ability") {
+config("public_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_source_set("power_appmgr") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -25,20 +32,22 @@ ohos_shared_library("power_ability") {
   }
   branch_protector_ret = "pac_ret"
 
-  sources = [ "power_ability.cpp" ]
+  sources = [ "src/app_manager_utils.cpp" ]
 
   configs = [
     ":private_config",
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [ "${powermgr_utils_path}/appmgr:power_appmgr" ]
+  public_configs = [ ":public_config" ]
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "powermgr"

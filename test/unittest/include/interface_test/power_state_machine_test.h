@@ -50,12 +50,14 @@ public:
         PowerStateTest1Callback() {};
         virtual ~PowerStateTest1Callback() {};
         virtual void OnPowerStateChanged(PowerState state) override;
+        virtual void OnAsyncPowerStateChanged(PowerState state) override;
     };
     class PowerStateTest2Callback : public PowerStateCallbackStub {
     public:
         PowerStateTest2Callback() {};
         virtual ~PowerStateTest2Callback() {};
         virtual void OnPowerStateChanged(PowerState state) override;
+        virtual void OnAsyncPowerStateChanged(PowerState state) override;
     };
 private:
 };

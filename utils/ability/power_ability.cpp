@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
+#include <string>
+#include <vector>
 #include <ability_manager_client.h>
+#include "app_manager_utils.h"
 #include "power_log.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 using namespace OHOS;
 using namespace PowerMgr;
 using namespace AAFwk;
 
-extern "C" void PowerConnectAbility(const Want &want, const sptr<IAbilityConnection>& connect, int32_t userId)
+void PowerConnectAbility(const Want& want, const sptr<IAbilityConnection>& connect, int32_t userId)
 {
     auto amsClient = AbilityManagerClient::GetInstance();
     if (amsClient == nullptr) {
@@ -35,7 +43,7 @@ extern "C" void PowerConnectAbility(const Want &want, const sptr<IAbilityConnect
     POWER_HILOGI(FEATURE_UTIL, "ConnectAbility systemui dialog success.");
 }
 
-extern "C" void PowerStartAbility(const Want &want)
+void PowerStartAbility(const Want& want)
 {
     auto amsClient = AbilityManagerClient::GetInstance();
     if (amsClient == nullptr) {
@@ -49,3 +57,17 @@ extern "C" void PowerStartAbility(const Want &want)
     }
     POWER_HILOGI(FEATURE_UTIL, "StartAbility systemui dialog success.");
 }
+
+void PowerGetForegroundApplications(std::vector<OHOS::AppExecFwk::AppStateData>& appsData)
+{
+    AppManagerUtils::GetForegroundApplications(appsData);
+}
+
+bool PowerIsForegroundApplication(const std::string& appName)
+{
+    return AppManagerUtils::IsForegroundApplication(appName);
+}
+
+#ifdef __cplusplus
+}
+#endif

@@ -315,10 +315,10 @@ bool PowerMgrClient::ResetRunningLocks()
     return proxy_->ResetRunningLocks();
 }
 
-bool PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->RegisterPowerStateCallback(callback);
+    bool ret = proxy_->RegisterPowerStateCallback(callback, isSync);
     return ret;
 }
 
