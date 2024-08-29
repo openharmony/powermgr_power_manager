@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <dlfcn.h>
+#include <string>
+#include "power_log.h"
 #include "power_utils.h"
 
 namespace OHOS {
@@ -188,6 +191,32 @@ const std::string PowerUtils::JsonToSimpleStr(const std::string& json)
         }
     }
     return str;
+}
+
+bool PowerUtils::IsForegroundApplication(const std::string& appName)
+{
+    void* handler = dlopen("libpower_ability.z.so", RTLD_NOW);
+    if (handler == nullptr) {
+        POWER_HILOGE(FEATURE_UTIL, "dlopen libpower_ability.z.so failed, reason : %{public}s", dlerror());
+        return false;
+    }
+
+    auto powerIsForegroundApplicationFunc =
+        reinterpret_cast<bool (*)(const std::string&)>(dlsym(handler, "PowerIsForegroundApplication"));
+    if (powerIsForegroundApplicationFunc == nullptr) {
+        POWER_HILOGE(FEATURE_UTIL, "find PowerIsForegroundApplication function failed, reason : %{public}s", dlerror());
+#ifndef FUZZ_TEST
+        dlclose(handler);
+#endif
+        handler = nullptr;
+        return false;
+    }
+    bool isForeground = powerIsForegroundApplicationFunc(appName);
+#ifndef FUZZ_TEST
+    dlclose(handler);
+#endif
+    handler = nullptr;
+    return isForeground;
 }
 } // namespace PowerMgr
 } // namespace OHOS

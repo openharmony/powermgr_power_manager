@@ -21,7 +21,6 @@
 #include <memory>
 #include <vector>
 
-#include "event_handler.h"
 #include "ffrt_utils.h"
 #include "power_state_machine.h"
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -75,6 +74,17 @@ public:
     void StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void Reset();
 
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    void SetForceSleepingFlag(bool isForceSleeping)
+    {
+        forceSleeping_.store(isForceSleeping, std::memory_order_relaxed);
+    }
+    bool GetForceSleepingFlag()
+    {
+        return forceSleeping_.load();
+    }
+#endif
+
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void HandleAutoSleep(SuspendDeviceType reason);
@@ -99,6 +109,9 @@ private:
     std::mutex mutex_;
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    std::atomic<bool> forceSleeping_ {false};
+#endif
 };
 
 class SuspendMonitor {

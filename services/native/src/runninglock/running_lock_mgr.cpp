@@ -36,8 +36,10 @@ namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
-constexpr uint32_t COORDINATION_LOCK_AUTO_SUSPEND_DELAY_TIME = 0;
 sptr<IPowerRunninglockCallback> g_runningLockCallback = nullptr;
+const string INCALL_APP_BUNDLE_NAME = "com.ohos.callui";
+constexpr uint32_t FOREGROUND_INCALL_DELAY_TIME_MS = 300;
+constexpr uint32_t BACKGROUND_INCALL_DELAY_TIME_MS = 800;
 }
 
 RunningLockMgr::~RunningLockMgr() {}
@@ -172,21 +174,21 @@ void RunningLockMgr::InitLocksTypeProximity()
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
             [this](bool active, [[maybe_unused]] RunningLockParam runningLockParam) -> int32_t {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL action start");
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            if (pms == nullptr) {
-                return RUNNINGLOCK_FAILURE;
-            }
-            auto stateMachine = pms->GetPowerStateMachine();
-            if (stateMachine == nullptr) {
-                return RUNNINGLOCK_FAILURE;
-            }
             if (active) {
-                ProximityLockOn();
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
+                proximityController_.Enable();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
+                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+                if (pms == nullptr) {
+                    return RUNNINGLOCK_FAILURE;
+                }
+                auto stateMachine = pms->GetPowerStateMachine();
+                if (stateMachine == nullptr) {
+                    return RUNNINGLOCK_FAILURE;
+                }
                 PreprocessBeforeAwake();
-                stateMachine->SetState(PowerState::AWAKE,
-                    StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 proximityController_.Disable();
                 proximityController_.Clear();
             }
@@ -487,8 +489,8 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
         }
     }
     if (lockInner->IsProxied()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
-        return false;
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied, unProxy");
+        runninglockProxy_->UpdateProxyState(lockInner->GetPid(), lockInner->GetUid(), remoteObj, false);
     }
     auto lockInnerParam = lockInner->GetParam();
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "try UnLock, name: %{public}s, type: %{public}d lockid: %{public}s",
@@ -927,14 +929,14 @@ void RunningLockMgr::ProximityController::OnClose()
     isClose_ = true;
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is closed");
     auto runningLock = pms->GetRunningLockMgr();
-    if (runningLock->GetValidRunningLockNum(
-        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
+    if (runningLock->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
-        bool ret = stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
-        if (ret) {
-            suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+        uint32_t delayTime = FOREGROUND_INCALL_DELAY_TIME_MS;
+        if (!PowerUtils::IsForegroundApplication(INCALL_APP_BUNDLE_NAME)) {
+            delayTime = BACKGROUND_INCALL_DELAY_TIME_MS;
         }
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Start proximity-screen-off timer, delay time:%{public}u", delayTime);
+        stateMachine->SetDelayTimer(delayTime, PowerStateMachine::CHECK_PROXIMITY_SCREEN_OFF_MSG);
     }
 }
 

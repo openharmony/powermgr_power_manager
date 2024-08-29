@@ -487,6 +487,10 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    SetForceSleepingFlag(true);
+#endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {

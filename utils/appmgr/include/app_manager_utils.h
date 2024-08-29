@@ -13,23 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_POWER_MANAGER_ISYNC_HIBERNATE_CALLBACK_H
-#define POWERMGR_POWER_MANAGER_ISYNC_HIBERNATE_CALLBACK_H
+#ifndef POWERMGR_APP_MANAGER_UTILS_H
+#define POWERMGR_APP_MANAGER_UTILS_H
 
-#include <iremote_broker.h>
-#include <iremote_object.h>
-#include <iremote_proxy.h>
-#include <iremote_stub.h>
+#include <string>
+#include <vector>
+
+#include "app_mgr_interface.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class ISyncHibernateCallback : public IRemoteBroker {
+class AppManagerUtils final {
 public:
-    virtual void OnSyncHibernate() = 0;
-    virtual void OnSyncWakeup(bool hibernateResult = false) = 0;
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.ISyncHibernateCallback");
+    static sptr<OHOS::AppExecFwk::IAppMgr> GetAppManagerInstance();
+    static void GetForegroundApplications(std::vector<OHOS::AppExecFwk::AppStateData>& appsData);
+    static bool IsForegroundApplication(const std::string& appName);
+
+private:
+    static sptr<OHOS::AppExecFwk::IAppMgr> appManagerInstance_;
 };
+
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // POWERMGR_POWER_MANAGER_ISYNC_HIBERNATE_CALLBACK_H
+#endif // POWERMGR_APP_MANAGER_UTILS_H

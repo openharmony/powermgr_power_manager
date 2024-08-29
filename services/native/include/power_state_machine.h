@@ -76,6 +76,7 @@ public:
         CHECK_USER_ACTIVITY_TIMEOUT_MSG = 0,
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG,
         CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG,
+        CHECK_PROXIMITY_SCREEN_OFF_MSG,
     };
 
     static void onSuspend();
@@ -111,7 +112,7 @@ public:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool HibernateInner(bool clearMemory);
 #endif
-    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
     void CancelDelayTimer(int32_t event);
@@ -275,8 +276,8 @@ private:
     };
 
     static std::string GetTransitResultString(TransitResult result);
-    void UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason);
-    void RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason);
+    void UpdateSettingStateFlag(PowerState state, StateChangeReason reason);
+    void RestoreSettingStateFlag();
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();
@@ -299,6 +300,7 @@ private:
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
+    void HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason);
     bool HandlePreBrightState(StateChangeReason reason);
     bool IsPreBrightAuthReason(StateChangeReason reason);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
@@ -320,7 +322,8 @@ private:
     std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
-    std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
+    std::set<const sptr<IPowerStateCallback>, classcomp> syncPowerStateListeners_;
+    std::set<const sptr<IPowerStateCallback>, classcomp> asyncPowerStateListeners_;
     std::shared_ptr<IDeviceStateAction> stateAction_;
 
     std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
@@ -332,9 +335,6 @@ private:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::atomic<bool> hibernating_ {false};
 #endif
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    std::atomic<bool> forceSleeping_ {false};
-#endif
     std::unordered_map<StateChangeReason, std::unordered_map<PowerState, std::set<PowerState>>> allowMapByReason_;
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
@@ -344,6 +344,7 @@ private:
     std::atomic<bool> settingOnStateFlag_ {false};
     std::atomic<bool> settingOffStateFlag_ {false};
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
+    std::atomic<bool> proximityScreenOffTimerStarted_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS

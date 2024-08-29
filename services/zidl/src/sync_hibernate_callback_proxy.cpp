@@ -46,7 +46,7 @@ void SyncHibernateCallbackProxy::OnSyncHibernate()
     }
 }
 
-void SyncHibernateCallbackProxy::OnSyncWakeup()
+void SyncHibernateCallbackProxy::OnSyncWakeup(bool hibernateResult)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF(remote == nullptr);
@@ -57,6 +57,11 @@ void SyncHibernateCallbackProxy::OnSyncWakeup()
 
     if (!data.WriteInterfaceToken(SyncHibernateCallbackProxy::GetDescriptor())) {
         POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return;
+    }
+
+    if (!data.WriteBool(hibernateResult)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write hibernateResult failed");
         return;
     }
 

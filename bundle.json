@@ -31,7 +31,8 @@
             "power_manager_feature_enable_s4",
             "power_manager_feature_doubleclick_or_pickup",
             "power_manager_feature_force_sleep_broadcast",
-            "power_manager_feature_screen_on_timeout_check"
+            "power_manager_feature_screen_on_timeout_check",
+            "power_manager_feature_dialog_path"
         ],
         "adapted_system_type": [
             "standard"
@@ -53,7 +54,10 @@
                 "data_share",
                 "display_manager",
                 "drivers_interface_power",
+                "ets_runtime",
+                "eventhandler",
                 "ffrt",
+                "graphic_2d",
                 "hdf_core",
                 "hicollie",
                 "hisysevent",
