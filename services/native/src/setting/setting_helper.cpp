@@ -558,10 +558,6 @@ bool SettingHelper::GetSettingWakeupLid(const std::string& key)
 void SettingHelper::SetSettingWakeupLid(bool enable)
 {
     POWER_HILOGI(COMP_UTILS, "SetSettingWakeupLid, enable=%{public}d", enable);
-    if (!IsWakeupLidSettingValid()) {
-        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
-        return;
-    }
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     int32_t value = enable ? WAKEUP_SOURCE_OPEN : WAKEUP_SOURCE_CLOSE;
     ErrCode ret = settingProvider.PutIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
