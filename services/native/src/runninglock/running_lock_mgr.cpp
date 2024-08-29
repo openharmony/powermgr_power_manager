@@ -489,8 +489,8 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
         }
     }
     if (lockInner->IsProxied()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
-        return false;
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied, unProxy");
+        runninglockProxy_->UpdateProxyState(lockInner->GetPid(), lockInner->GetUid(), remoteObj, false);
     }
     auto lockInnerParam = lockInner->GetParam();
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "try UnLock, name: %{public}s, type: %{public}d lockid: %{public}s",
