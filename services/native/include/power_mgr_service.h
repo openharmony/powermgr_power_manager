@@ -66,6 +66,7 @@ public:
     virtual PowerState GetState() override;
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
+    virtual bool IsCollaborationScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(

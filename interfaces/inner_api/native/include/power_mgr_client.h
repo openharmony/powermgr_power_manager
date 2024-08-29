@@ -107,6 +107,12 @@ public:
     bool IsFoldScreenOn();
 
     /**
+     * Check whether the collaboration device screen is on.
+     * The result may be true or false, depending on the system state.
+     */
+    bool IsCollaborationScreenOn();
+
+    /**
      * Get Power state. The result is PowerState type.
      */
     PowerState GetState();

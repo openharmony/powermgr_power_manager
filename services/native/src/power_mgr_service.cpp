@@ -825,6 +825,14 @@ bool PowerMgrService::IsFoldScreenOn()
     return isFoldScreenOn;
 }
 
+bool PowerMgrService::IsCollaborationScreenOn()
+{
+    std::lock_guard lock(stateMutex_);
+    auto isCollaborationScreenOn = powerStateMachine_->IsCollaborationScreenOn();
+    POWER_HILOGI(COMP_SVC, "isCollaborationScreenOn: %{public}d", isCollaborationScreenOn);
+    return isCollaborationScreenOn;
+}
+
 PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);
