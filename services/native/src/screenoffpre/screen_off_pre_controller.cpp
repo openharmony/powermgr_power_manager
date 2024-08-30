@@ -54,7 +54,12 @@ void ScreenOffPreController::AddScreenStateCallback(int32_t remainTime, const sp
         isRegistered_ = true;
         if (powerStateMachine_ != nullptr) {
             int64_t systemTime = powerStateMachine_->GetDisplayOffTime();
-            auto settingTime = SettingHelper::GetSettingDisplayOffTime(systemTime);
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms == nullptr) {
+                POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "get PowerMgrService fail");
+                return;
+            }
+            int64_t settingTime = pms->GetSettingDisplayOffTime(systemTime);
             int64_t dimTime = powerStateMachine_->GetDimTime(systemTime);
             POWER_HILOGD(FEATURE_SCREEN_OFF_PRE,
                 "systemTime=%{public}lld,settingTime=%{public}lld,dimTime=%{public}lld",
