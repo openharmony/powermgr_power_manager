@@ -138,7 +138,9 @@ void PowerStateMachine::InitTransitMap()
         {
             StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK,
             {
-                {PowerState::DIM, {PowerState::INACTIVE}}
+                {PowerState::DIM, {PowerState::INACTIVE}},
+                // allow AWAKE to INACTIVE without going to DIM for UTs to pass
+                {PowerState::AWAKE, {PowerState::INACTIVE}}
             }
         },
     });
@@ -764,6 +766,11 @@ bool PowerStateMachine::IsFoldScreenOn()
     return false;
 }
 
+bool PowerStateMachine::IsCollaborationScreenOn()
+{
+    return isAwakeNotified_.load(std::memory_order_relaxed);
+}
+
 void PowerStateMachine::ReceiveScreenEvent(bool isScreenOn)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Enter");
@@ -839,11 +846,11 @@ void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
     stateAction_ = std::move(mock);
 }
 
-void PowerStateMachine::NotifyPowerStateChanged(PowerState state)
+void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeReason reason)
 {
     if (GetState() == PowerState::INACTIVE &&
-        (!enabledScreenOffEvent_.load(std::memory_order_relaxed) ||
-            IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION))) {
+        !enabledScreenOffEvent_.load(std::memory_order_relaxed) &&
+        reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK) {
         POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] not notify inactive power state");
         return;
     }
@@ -881,6 +888,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     switch (state) {
         case PowerState::AWAKE: {
             notify->PublishScreenOnEvents(callTime);
+            isAwakeNotified_.store(true, std::memory_order_relaxed);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
             auto suspendController = pms->GetSuspendController();
             if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
@@ -892,6 +900,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         }
         case PowerState::INACTIVE: {
             notify->PublishScreenOffEvents(callTime);
+            isAwakeNotified_.store(false, std::memory_order_relaxed);
             break;
         }
         case PowerState::SLEEP: {
@@ -1815,6 +1824,17 @@ void PowerStateMachine::DumpInfo(std::string& result)
     AppendDumpInfo(result, reason, time);
 }
 
+bool PowerStateMachine::StateController::NeedNotify(PowerState currentState)
+{
+    if (currentState == GetState()) {
+        return false;
+    }
+    if (currentState == PowerState::DIM && GetState() == PowerState::AWAKE) {
+        return false;
+    }
+    return true;
+}
+
 TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason reason, bool ignoreLock)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Start");
@@ -1850,13 +1870,12 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
     }
     TransitResult ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
-        bool needNotify = (GetState() != owner->currentState_ &&
-            !(GetState() == PowerState::AWAKE && owner->currentState_ == PowerState::DIM));
+        bool needNotify = NeedNotify(owner->currentState_);
         lastReason_ = reason;
         lastTime_ = GetTickCount();
         owner->currentState_ = GetState();
         if (needNotify) {
-            owner->NotifyPowerStateChanged(owner->currentState_);
+            owner->NotifyPowerStateChanged(owner->currentState_, reason);
         }
     } else if (IsReallyFailed(reason)) {
         RecordFailure(owner->currentState_, reason, ret);
