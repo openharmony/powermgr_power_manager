@@ -26,6 +26,7 @@ declare_args() {
   power_manager_feature_screen_on_timeout_check = false
   power_manager_feature_doubleclick_or_pickup = true
   power_manager_feature_force_sleep_broadcast = false
+  power_manager_feature_charging_type_setting = false
 }
 
 cflags_cc = []
