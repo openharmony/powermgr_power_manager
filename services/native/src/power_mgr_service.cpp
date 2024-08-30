@@ -144,12 +144,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->GetShutdownDialog().LoadDialogConfig();
         power->GetShutdownDialog().KeyMonitorInit();
 #endif
-#ifndef CONFIG_FACTORY_MODE
-        power->RegisterSettingWakeUpLidObserver();
-        POWER_HILOGI(COMP_SVC, "Allow subscribe Hall sensor");
-#else
-        POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
-#endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
         power->SuspendControllerInit();
@@ -162,6 +156,12 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
         power->RegisterSettingWakeupDoubleClickObservers();
         power->RegisterSettingWakeupPickupGestureObserver();
+#endif
+#ifndef CONFIG_FACTORY_MODE
+        power->RegisterSettingWakeUpLidObserver();
+        POWER_HILOGI(COMP_SVC, "Allow subscribe Hall sensor");
+#else
+        POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
 #endif
         power->RegisterSettingPowerModeObservers();
         power->KeepScreenOnInit();
@@ -824,6 +824,14 @@ bool PowerMgrService::IsFoldScreenOn()
     auto isFoldScreenOn = powerStateMachine_->IsFoldScreenOn();
     POWER_HILOGI(COMP_SVC, "isFoldScreenOn: %{public}d", isFoldScreenOn);
     return isFoldScreenOn;
+}
+
+bool PowerMgrService::IsCollaborationScreenOn()
+{
+    std::lock_guard lock(stateMutex_);
+    auto isCollaborationScreenOn = powerStateMachine_->IsCollaborationScreenOn();
+    POWER_HILOGI(COMP_SVC, "isCollaborationScreenOn: %{public}d", isCollaborationScreenOn);
+    return isCollaborationScreenOn;
 }
 
 PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)

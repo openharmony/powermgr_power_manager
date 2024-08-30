@@ -159,8 +159,16 @@ bool WakeupSourceParser::ParseSourcesProc(
         parseSources->PutSource(wakeupSource);
     }
 
+    SetSettingsToDatabase(wakeupDeviceType, enable);
     return true;
 }
 
+void WakeupSourceParser::SetSettingsToDatabase(WakeupDeviceType type, bool enable)
+{
+    if (type == WakeupDeviceType::WAKEUP_DEVICE_LID) {
+        SettingHelper::SetSettingWakeupLid(enable);
+        POWER_HILOGI(FEATURE_WAKEUP, "the setting lidwakeup enable=%{public}d", enable);
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

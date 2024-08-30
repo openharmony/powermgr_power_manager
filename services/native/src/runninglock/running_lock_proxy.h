@@ -47,6 +47,7 @@ public:
     void Clear();
     std::string DumpProxyInfo();
     void ResetRunningLocks();
+    bool UpdateProxyState(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj, bool state);
 private:
     std::string AssembleProxyKey(pid_t pid, pid_t uid);
     void ProxyInner(const sptr<IRemoteObject>& remoteObj, const std::string& bundleNames, RunningLockEvent event);

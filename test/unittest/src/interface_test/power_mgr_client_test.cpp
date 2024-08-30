@@ -1302,4 +1302,27 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient056, TestSize.Level0)
     powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient056::fun is end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient057
+ * @tc.desc: test IsCollaborationScreenOn
+ * @tc.type: FUNC
+ * @tc.require: #IAN4ZA
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient057, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.WakeupDevice();
+
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsCollaborationScreenOn(), false) << "PowerMgrClient057: Screen is Off";
+
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsCollaborationScreenOn(), true) << "PowerMgrClient057: Screen is On";
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057::fun is end!");
+}
 } // namespace

@@ -27,6 +27,9 @@ namespace OHOS {
 namespace PowerMgr {
 using namespace DisplayPowerMgr;
 using namespace Rosen;
+#ifdef SCENE_BOARD_ENABLED
+using DisplayManager = DisplayManagerLite;
+#endif
 
 DeviceStateAction::DeviceStateAction()
 {
