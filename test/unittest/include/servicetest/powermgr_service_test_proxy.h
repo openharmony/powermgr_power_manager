@@ -65,7 +65,7 @@ public:
     PowerErrors RebootDevice(const std::string& reason);
     PowerErrors RebootDeviceForDeprecated(const std::string& reason);
     PowerErrors ShutDownDevice(const std::string& reason);
-    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);

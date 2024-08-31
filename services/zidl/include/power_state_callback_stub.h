@@ -30,9 +30,11 @@ public:
     virtual ~PowerStateCallbackStub() = default;
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     void OnPowerStateChanged(PowerState __attribute__((unused))state) override {}
+    void OnAsyncPowerStateChanged(PowerState __attribute__((unused))state) override {}
 
 private:
     int32_t OnPowerStateChangedStub(MessageParcel& data);
+    int32_t OnAsyncPowerStateChangedStub(MessageParcel& data);
 };
 } // namespace PowerMgr
 } // namespace OHOS
