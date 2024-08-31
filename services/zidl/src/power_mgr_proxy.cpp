@@ -747,7 +747,7 @@ bool PowerMgrProxy::IsCollaborationScreenOn()
     }
 
     if (!reply.ReadBool(result)) {
-        POWER_HILOGE(COMP_FWK, "Read IsFoldScreenOn failed");
+        POWER_HILOGE(COMP_FWK, "Read IsCollaborationScreenOn failed");
     }
 
     return result;
