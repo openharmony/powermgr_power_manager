@@ -724,7 +724,7 @@ bool PowerMgrProxy::IsFoldScreenOn()
     return result;
 }
 
-bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
@@ -739,6 +739,7 @@ bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& 
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, isSync, false);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK),
