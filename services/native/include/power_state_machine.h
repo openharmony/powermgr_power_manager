@@ -96,6 +96,7 @@ public:
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
+    bool IsCollaborationScreenOn();
     void Reset();
     int64_t GetSleepTime();
 
@@ -181,7 +182,7 @@ public:
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
     void SetForceTimingOut(bool enabled);
-    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock);
+    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent);
     bool IsSettingState(PowerState state);
 
 private:
@@ -247,6 +248,7 @@ private:
 
     protected:
         bool CheckState();
+        bool NeedNotify(PowerState currentState);
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
         PowerState state_;
@@ -289,7 +291,8 @@ private:
     void EmplaceDim();
     void InitTransitMap();
     bool CanTransitTo(PowerState to, StateChangeReason reason);
-    void NotifyPowerStateChanged(PowerState state);
+    void NotifyPowerStateChanged(PowerState state,
+        StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
     void HandleActivityTimeout();
@@ -337,9 +340,11 @@ private:
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
+    std::atomic<bool> enabledScreenOffEvent_{true};
     std::atomic<int64_t> settingStateFlag_ {-1};
     std::atomic<bool> settingOnStateFlag_ {false};
     std::atomic<bool> settingOffStateFlag_ {false};
+    std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
 };
 } // namespace PowerMgr

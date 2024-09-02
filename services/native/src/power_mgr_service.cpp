@@ -770,6 +770,14 @@ bool PowerMgrService::IsFoldScreenOn()
     return isFoldScreenOn;
 }
 
+bool PowerMgrService::IsCollaborationScreenOn()
+{
+    std::lock_guard lock(stateMutex_);
+    auto isCollaborationScreenOn = powerStateMachine_->IsCollaborationScreenOn();
+    POWER_HILOGI(COMP_SVC, "isCollaborationScreenOn: %{public}d", isCollaborationScreenOn);
+    return isCollaborationScreenOn;
+}
+
 PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);
@@ -1379,12 +1387,12 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return PowerErrors::ERR_OK;
 }
 

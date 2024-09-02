@@ -104,6 +104,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_FOLD_SCREEN_ON):
             ret = IsFoldScreenOnStub(reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_COLLABORATION_SCREEN_ON):
+            ret = IsCollaborationScreenOnStub(reply);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND):
             ret = ForceSuspendDeviceStub(data, reply);
             break;
@@ -469,6 +472,17 @@ int32_t PowerMgrStub::GetStateStub(MessageParcel& reply)
     return ERR_OK;
 }
 
+int32_t PowerMgrStub::IsCollaborationScreenOnStub(MessageParcel& reply)
+{
+    bool ret = false;
+    ret = IsCollaborationScreenOn();
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
 int32_t PowerMgrStub::IsFoldScreenOnStub(MessageParcel& reply)
 {
     bool ret = false;
@@ -722,9 +736,11 @@ int32_t PowerMgrStub::LockScreenAfterTimingOutStub(MessageParcel& data, MessageP
 {
     bool enabledLockScreen = true;
     bool checkLock = false;
+    bool sendScreenOffEvent = false;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, enabledLockScreen, E_READ_PARCEL_ERROR);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, checkLock, E_READ_PARCEL_ERROR);
-    PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, sendScreenOffEvent, E_READ_PARCEL_ERROR);
+    PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
