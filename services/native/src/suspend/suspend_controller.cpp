@@ -32,7 +32,12 @@ namespace OHOS {
 namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+sptr<SettingObserver> g_suspendSourcesKeyAcObserver = nullptr;
+sptr<SettingObserver> g_suspendSourcesKeyDcObserver = nullptr;
+#else
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
+#endif
 FFRTMutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
@@ -50,9 +55,21 @@ SuspendController::SuspendController(
 
 SuspendController::~SuspendController()
 {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyAcObserver);
+        g_suspendSourcesKeyAcObserver = nullptr;
+    }
+    if (g_suspendSourcesKeyDcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyDcObserver);
+        g_suspendSourcesKeyDcObserver = nullptr;
+    }
+#else
     if (g_suspendSourcesKeyObserver) {
         SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyObserver);
+        g_suspendSourcesKeyObserver = nullptr;
     }
+#endif
     ffrtTimer_.reset();
 }
 
@@ -179,40 +196,73 @@ void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
     });
 }
 
+void SuspendController::UpdateSuspendSources()
+{
+    POWER_HILOGI(COMP_SVC, "start setting string update");
+    std::lock_guard lock(mutex_);
+
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+    std::string jsonStr;
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (pms->IsPowerConnected()) {
+        jsonStr = SettingHelper::GetSettingAcSuspendSources();
+    } else {
+        jsonStr = SettingHelper::GetSettingDcSuspendSources();
+    }
+#else
+    jsonStr = SettingHelper::GetSettingSuspendSources();
+#endif
+    std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
+    std::vector<SuspendSource> updateSourceList = sources->GetSourceList();
+    if (updateSourceList.size() == 0) {
+        return;
+    }
+    sourceList_ = updateSourceList;
+    POWER_HILOGI(COMP_SVC, "start updateListener");
+    Cancel();
+    uint32_t id = 0;
+    for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
+        std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+        POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
+            id, source->GetReason());
+        if (monitor != nullptr && monitor->Init()) {
+            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+                this->ControlListener(reason, action, delay);
+            });
+            g_monitorMutex.lock();
+            monitorMap_.emplace(monitor->GetReason(), monitor);
+            g_monitorMutex.unlock();
+        }
+    }
+}
+
 void SuspendController::RegisterSettingsObserver()
 {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver && g_suspendSourcesKeyDcObserver) {
+#else
     if (g_suspendSourcesKeyObserver) {
+#endif
         POWER_HILOGE(FEATURE_POWER_STATE, "suspend sources key observer is already registered");
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
-        POWER_HILOGI(COMP_SVC, "start setting string update");
-        std::lock_guard lock(mutex_);
-        std::string jsonStr = SettingHelper::GetSettingSuspendSources();
-        std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
-        std::vector<SuspendSource> updateSourceList = sources->GetSourceList();
-        if (updateSourceList.size() == 0) {
-            return;
-        }
-        sourceList_ = updateSourceList;
-        POWER_HILOGI(COMP_SVC, "start updateListener");
-        Cancel();
-        uint32_t id = 0;
-        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
-            std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
-            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
-                id, source->GetReason());
-            if (monitor != nullptr && monitor->Init()) {
-                monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
-                    this->ControlListener(reason, action, delay);
-                });
-                g_monitorMutex.lock();
-                monitorMap_.emplace(monitor->GetReason(), monitor);
-                g_monitorMutex.unlock();
-            }
-        }
+        SuspendController::UpdateSuspendSources();
     };
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver == nullptr) {
+        g_suspendSourcesKeyAcObserver = SettingHelper::RegisterSettingAcSuspendSourcesObserver(updateFunc);
+    }
+    if (g_suspendSourcesKeyDcObserver == nullptr) {
+        g_suspendSourcesKeyDcObserver = SettingHelper::RegisterSettingDcSuspendSourcesObserver(updateFunc);
+    }
+#else
     g_suspendSourcesKeyObserver = SettingHelper::RegisterSettingSuspendSourcesObserver(updateFunc);
+#endif
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
 }
 
@@ -653,6 +703,5 @@ bool SwitchSuspendMonitor::Init()
 }
 
 void SwitchSuspendMonitor::Cancel() {}
-
 } // namespace PowerMgr
 } // namespace OHOS
