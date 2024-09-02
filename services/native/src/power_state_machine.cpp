@@ -888,6 +888,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
             auto suspendController = pms->GetSuspendController();
             if (suspendController != nullptr && suspendController->GetForceSleepingFlag()) {
                 notify->PublishExitForceSleepEvents(callTime);
+                POWER_HILOGI(FEATURE_POWER_STATE, "Set flag of force sleeping to false");
                 suspendController->SetForceSleepingFlag(false);
             }
 #endif
