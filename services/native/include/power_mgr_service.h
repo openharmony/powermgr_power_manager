@@ -42,6 +42,13 @@
 
 namespace OHOS {
 namespace PowerMgr {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+typedef enum {
+    POWER_CONNECT_INVALID = -1,
+    POWER_CONNECT_DC = 0, // DC for Direct Current, means battery supply
+    POWER_CONNECT_AC = 1, // AC for Alternating Current, means charing supply
+} PowerConnectStatus;
+#endif
 class RunningLockMgr;
 class PowerMgrService final : public SystemAbility, public PowerMgrStub {
     DECLARE_SYSTEM_ABILITY(PowerMgrService)
@@ -137,7 +144,6 @@ public:
     void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
     static void RegisterSettingWakeupPickupGestureObserver();
     static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
-    static void RegisterSettingObservers();
     static void RegisterSettingWakeupDoubleClickObservers();
     static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
     static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
@@ -152,6 +158,22 @@ public:
     void Reset();
     void KeepScreenOnInit();
     void KeepScreenOn(bool isOpenOn);
+    void UnregisterAllSettingObserver();
+    void RegisterAllSettingObserver();
+    int64_t GetSettingDisplayOffTime(int64_t defaultTime);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    PowerConnectStatus GetPowerConnectStatus() const
+    {
+        return powerConnectStatus_;
+    }
+    void SetPowerConnectStatus(PowerConnectStatus status)
+    {
+        powerConnectStatus_ = status;
+    }
+    void PowerConnectStatusInit();
+    bool IsPowerConnected() const;
+    void UpdateSettingInvalidDisplayOffTime();
+#endif
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
@@ -324,6 +346,9 @@ private:
     int32_t monitorId_ {0};
     int32_t inputMonitorId_ {-1};
     sptr<IRemoteObject> ptoken_;
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    PowerConnectStatus powerConnectStatus_ {PowerConnectStatus::POWER_CONNECT_INVALID};
+#endif
     void SubscribeCommonEvent();
     std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_;
 };
@@ -343,6 +368,10 @@ public:
         : EventFwk::CommonEventSubscriber(subscribeInfo) {}
     virtual ~PowerCommonEventSubscriber() {}
     void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
+private:
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    void OnPowerConnectStatusChanged(PowerConnectStatus status);
+#endif
 };
 
 } // namespace PowerMgr

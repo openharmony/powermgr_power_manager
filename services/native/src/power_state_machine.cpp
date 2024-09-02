@@ -36,7 +36,12 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+sptr<SettingObserver> g_displayOffTimeAcObserver;
+sptr<SettingObserver> g_displayOffTimeDcObserver;
+#else
 sptr<SettingObserver> g_displayOffTimeObserver;
+#endif
 static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
@@ -1279,47 +1284,90 @@ void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
         }
     }
     if (needUpdateSetting) {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+        SettingHelper::SetSettingDisplayAcScreenOffTime(displayOffTime_);
+        SettingHelper::SetSettingDisplayDcScreenOffTime(displayOffTime_);
+#else
         SettingHelper::SetSettingDisplayOffTime(displayOffTime_);
+#endif
     }
 }
 
-static void DisplayOffTimeUpdateFunc()
+void PowerStateMachine::DisplayOffTimeUpdateFunc()
 {
-    auto stateMachine = DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine();
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "get PowerMgrService fail");
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "get PowerStateMachine fail");
+        return;
+    }
+
     int64_t systemTime = stateMachine->GetDisplayOffTime();
-    auto settingTime = SettingHelper::GetSettingDisplayOffTime(systemTime);
+    int64_t settingTime = pms->GetSettingDisplayOffTime(systemTime);
     if (settingTime == systemTime) {
         return;
     }
-    POWER_HILOGD(FEATURE_POWER_STATE, "setting update display off time %{public}" PRId64 " -> %{public}" PRId64 "",
+    POWER_HILOGI(FEATURE_POWER_STATE, "setting update display off time %{public}" PRId64 " -> %{public}" PRId64 "",
         systemTime, settingTime);
     g_beforeOverrideTime = settingTime;
     auto policy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    if (policy == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "get PowerModePolicy fail");
+        return;
+    }
     policy->RemoveBackupMapSettingSwitch(PowerModePolicy::ServiceType::DISPLAY_OFFTIME);
     stateMachine->SetDisplayOffTime(settingTime, false);
 }
 
 void PowerStateMachine::RegisterDisplayOffTimeObserver()
 {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_displayOffTimeAcObserver && g_displayOffTimeDcObserver) {
+#else
     if (g_displayOffTimeObserver) {
+#endif
         POWER_HILOGI(FEATURE_POWER_STATE, "setting display off time observer is already registered");
         return;
     }
     DisplayOffTimeUpdateFunc();
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
-        DisplayOffTimeUpdateFunc();
+        PowerStateMachine::DisplayOffTimeUpdateFunc();
     };
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_displayOffTimeAcObserver == nullptr) {
+        g_displayOffTimeAcObserver = SettingHelper::RegisterSettingDisplayAcScreenOffTimeObserver(updateFunc);
+    }
+    if (g_displayOffTimeDcObserver == nullptr) {
+        g_displayOffTimeDcObserver = SettingHelper::RegisterSettingDisplayDcScreenOffTimeObserver(updateFunc);
+    }
+#else
     g_displayOffTimeObserver = SettingHelper::RegisterSettingDisplayOffTimeObserver(updateFunc);
+#endif
 }
 
 void PowerStateMachine::UnregisterDisplayOffTimeObserver()
 {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_displayOffTimeAcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_displayOffTimeAcObserver);
+        g_displayOffTimeAcObserver = nullptr;
+    }
+    if (g_displayOffTimeDcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_displayOffTimeDcObserver);
+        g_displayOffTimeDcObserver = nullptr;
+    }
+#else
     if (g_displayOffTimeObserver == nullptr) {
         POWER_HILOGD(FEATURE_POWER_STATE, "g_displayOffTimeObserver is nullptr, no need to unregister");
         return;
     }
     SettingHelper::UnregisterSettingObserver(g_displayOffTimeObserver);
     g_displayOffTimeObserver = nullptr;
+#endif
 }
 
 void PowerStateMachine::SetSleepTime(int64_t time)
