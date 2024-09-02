@@ -17,11 +17,7 @@
 #define POWERMGR_DEVICE_STATE_ACTION_H
 
 #include "dm_common.h"
-#ifdef SCENE_BOARD_ENABLED
-#include "display_manager_lite.h"
-#else
 #include "display_manager.h"
-#endif
 
 #include "actions/idevice_state_action.h"
 #include "display_power_callback_stub.h"
