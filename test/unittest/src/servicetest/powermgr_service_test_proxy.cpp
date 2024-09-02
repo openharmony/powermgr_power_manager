@@ -63,7 +63,7 @@ PowerErrors PowerMgrServiceTestProxy::CreateRunningLock(const sptr<IRemoteObject
     return static_cast<PowerErrors>(error);
 }
 
-bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
@@ -77,6 +77,7 @@ bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& rem
     }
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, name, false);
 
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RELEASE_RUNNINGLOCK),
@@ -145,7 +146,7 @@ bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_
     return true;
 }
 
-bool PowerMgrServiceTestProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
+bool PowerMgrServiceTestProxy::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
@@ -159,6 +160,7 @@ bool PowerMgrServiceTestProxy::UnLock(const sptr<IRemoteObject>& remoteObj)
     }
 
     data.WriteRemoteObject(remoteObj.GetRefPtr());
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, name, false);
 
     int ret = stub_->OnRemoteRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK),
