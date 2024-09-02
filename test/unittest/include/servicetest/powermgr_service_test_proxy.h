@@ -41,10 +41,10 @@ public:
     ~PowerMgrServiceTestProxy() = default;
 
     PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo);
-    bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj);
+    bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
     bool IsRunningLockTypeSupported(RunningLockType type);
     bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1);
-    bool UnLock(const sptr<IRemoteObject>& remoteObj);
+    bool UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied,
         const std::vector<std::pair<pid_t, pid_t>>& processInfos);
