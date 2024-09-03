@@ -590,7 +590,8 @@ void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerP
     int32_t pid = lockInnerParam.pid;
     int32_t uid = lockInnerParam.uid;
     int32_t type = static_cast <int32_t>(lockInnerParam.type);
-    string name = lockInnerParam.name;
+    auto pos = lockInnerParam.name.rfind('_');
+    string name = lockInnerParam.name.substr(0, pos);
     string bundleName = lockInnerParam.bundleName;
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
