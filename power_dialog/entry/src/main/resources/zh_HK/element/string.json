@@ -1,20 +1,48 @@
 {
-    "string": [
+    "string":[
         {
-            "name": "BUTTON_CANCEL_POWERDIALOG",
-            "value": "取消"
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"取消"
         },
         {
-            "name": "BUTTON_REBOOT_POWERDIALOG",
-            "value": "重新啟動"
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"重新啟動"
         },
         {
-            "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value": "電源選項"
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"電源選項"
         },
         {
-            "name": "BUTTON_SHUTDOWN_POWERDIALOG",
-            "value": "關機"
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"關機"
+        },
+        {
+            "name":"bn_notice_cancel",
+            "value":"中斷遠距協助"
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"用於分享屏幕時，與會者可以遠距協助您的主屏幕"
+        },
+        {
+            "name":"bn_agree",
+            "value":"允許"
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"允許%s使用您的屏幕"
+        },
+        {
+            "name":"notice_title",
+            "value":"遠距協助"
+        },
+        {
+            "name":"notice_text",
+            "value":"%s正在遠距協助您的主屏幕"
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"不允許"
         }
     ]
 }
