@@ -47,7 +47,7 @@ constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_TEST_MS = 2000 + 2000;
 constexpr int32_t WAIT_SUSPEND_TIME_MS = 2000;
-
+constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
 bool g_awakeCallback = false;
@@ -60,7 +60,7 @@ std::shared_ptr<KeyEvent> CreateKeyEvent()
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    keyEvent->SetDeviceId(COLLABORATION_REMOTE_DEVICE_ID);
     return keyEvent;
 }
 
@@ -76,22 +76,18 @@ std::shared_ptr<PointerEvent> CreatePointerEvent()
     item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_SIX);
-    item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
     item.SetPointerId(1);
     item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_TEN);
     item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_EIGHT);
-    item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
+    pointerEvent->SetDeviceId(COLLABORATION_REMOTE_DEVICE_ID);
     pointerEvent->SetPointerAction(PointerEvent::POINTER_ACTION_DOWN);
     pointerEvent->SetPointerId(1);
     pointerEvent->SetSourceType(PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-
-    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
-
     return pointerEvent;
 }
 #endif
