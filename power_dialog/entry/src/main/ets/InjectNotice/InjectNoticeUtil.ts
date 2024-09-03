@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+import util from '@ohos.util';
 import notificationManager from '@ohos.notificationManager';
-import notificationSubscribe from '@ohos.notificationSubscribe';
 import inputEventClient from '@ohos.multimodalInput.inputEventClient';
 import WantAgent, { WantAgent as _WantAgent } from '@ohos.wantAgent';
 import CommonEventManager from '@ohos.commonEvent';
@@ -38,26 +38,6 @@ export enum InjectNoticeStaus {
 class InjectNoticeUtil {
   status: InjectNoticeStaus = InjectNoticeStaus.DEFAULT;
   isInit: boolean = false;
-  subscriber: notificationSubscribe.NotificationSubscriber = {
-    onCancel: this.onCancelCallBack,
-  };
-  wantAgentObj: _WantAgent = null;
-  wantAgentInfo: WantAgent.WantAgentInfo = {
-    wants: [
-      {
-        bundleName: 'com.ohos.powerdialog',
-        abilityName: 'InjectNoticeAbility',
-        action: '',
-        parameters: {
-          noticeId: NOTICE_ID,
-          noticeLabel: LABEL,
-        },
-      }
-    ],
-    actionType: WantAgent.OperationType.START_ABILITY,
-    requestCode: 0,
-    wantAgentFlags: [WantAgent.WantAgentFlags.CONSTANT_FLAG],
-  };
   removalWantAgentObj: _WantAgent = null;
   removalWantAgentInfo: WantAgent.WantAgentInfo = {
     wants: [
@@ -85,22 +65,20 @@ class InjectNoticeUtil {
       return;
     }
     this.initRemovalWantAgent();
-    this.initButtonWantAgent();
     this.createCommonEventSubscriber();
     let systemLiveViewSubscriber: notificationManager.SystemLiveViewSubscriber = {
-      onResponse: this.onSystemLiveBttonsResponse,
+      onResponse: this.onLiveNoticeResponseCallback,
     };
+    console.info(TAG, 'subscribeSystemLiveView begin');
     notificationManager.subscribeSystemLiveView(systemLiveViewSubscriber).then(() => {
       console.info(TAG, 'subscribeSystemLiveView success');
     }).catch((error: Base.BusinessError) => {
       console.error(`subscribeSystemLiveView fail: ${JSON.stringify(error)}`);
     });
+    console.info(TAG, 'initCapsuleIcon begin');
+    this.initCapsuleIcon();
     console.info(TAG, 'init end');
     this.isInit = true;
-  }
-
-  private onCancelCallBack(data: notificationSubscribe.SubscribeCallbackData): void {
-    console.info(TAG, 'Cancel callback:' + JSON.stringify(data));
   }
 
   async cancelNotificationById(id: number): Promise<void> {
@@ -116,16 +94,17 @@ class InjectNoticeUtil {
 
   sendNotice(): void {
     console.debug(TAG, 'sendNotice begin==>');
-    console.debug(TAG, `wantAgentObj is ${this.wantAgentObj}`);
     console.debug(TAG, `removalWantAgentObj is ${this.removalWantAgentObj}`);
     let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
     let resourceManager = applicationContext.resourceManager;
     let imagePixelMap = resourceManager.getDrawableDescriptor($r('app.media.icon_notice')).getPixelMap();
-    let capsuleColor = resourceManager.getColorSync($r('app.color.capsule_color'));
+    let capsuleColor = resourceManager.getColorSync($r('sys.color.ohos_id_color_warning'));
     let title = resourceManager.getStringSync($r('app.string.notice_title'));
     let text = resourceManager.getStringSync($r('app.string.notice_text'));
+    text = util.format(text, '');
     let noticeText = resourceManager.getStringSync($r('app.string.notice_title'));
     let cancelBnText = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
+    let cancelBnImage = resourceManager.getDrawableDescriptor($r('app.media.link_slash')).getPixelMap();
     let notificationRequest: notificationManager.NotificationRequest = {
       id: NOTICE_ID,
       label: LABEL,
@@ -144,21 +123,24 @@ class InjectNoticeUtil {
           capsule: {
             title: noticeText,
             backgroundColor: String(capsuleColor),
+            icon: this.capsuleIcon!
+
           },
           button: {
             names: [cancelBnText],
-            icons: [imagePixelMap],
+            icons: [cancelBnImage],
           },
         },
       },
     };
+
     console.debug(TAG, `publish content is ${JSON.stringify(notificationRequest)}`);
     notificationManager.publish(notificationRequest, (err: Base.BusinessError) => {
       if (err) {
         console.error(TAG, TAG + `Failed to publish notification. Code is ${err.code}, message is ${err.message}`);
         return;
       }
-      console.info(TAG, 'Succeeded in publishing notification.');
+      console.info(TAG, 'succeeded in publishing notification.');
     });
   }
 
@@ -181,35 +163,6 @@ class InjectNoticeUtil {
     console.info(TAG, 'initRemovalWantAgent getWantAgent end');
   }
 
-  async initButtonWantAgent(): Promise<void> {
-    console.info(TAG, 'getWantAgent begin');
-    if (this.wantAgentObj !== null) {
-      console.info(TAG, 'has init getWantAgent');
-      return;
-    }
-    try {
-      await WantAgent.getWantAgent(this.wantAgentInfo).then((data) => {
-        this.wantAgentObj = data;
-        console.info(TAG, `getWantAgent ok`);
-      }).catch((err: Base.BusinessError) => {
-        console.error(TAG, `getWantAgent failed, code: ${JSON.stringify(err.code)}, message: ${JSON.stringify(err.message)}`);
-      });
-    } catch (err: Base.BusinessError) {
-      console.error(TAG, `getWantAgent catch failed, code: ${JSON.stringify(err.code)}, message: ${JSON.stringify(err.message)}`);
-    }
-    console.info(TAG, 'getWantAgent end');
-  }
-
-  async enableNotification(): Promise<void> {
-    console.debug(TAG, 'requestEnableNotification begin===>');
-    await notificationManager.requestEnableNotification().then(() => {
-      console.debug(TAG + 'requestEnableNotification success');
-    }).catch((err: Base.BusinessError) => {
-      console.error(TAG + `requestEnableNotification fail: ${JSON.stringify(err)}`);
-    });
-    console.debug(TAG, 'requestEnableNotification end===>');
-  }
-
   async cancelAuthorization(): Promise<void> {
     console.debug(TAG, 'cancelAuthorization begin===>');
     try {
@@ -228,6 +181,7 @@ class InjectNoticeUtil {
     }
     let subscribeInfo: CommonEventManager.CommonEventSubscribeInfo = {
       events: [EVENT_NAME],
+      publisherPermission: 'ohos.permission.INJECT_INPUT_EVENT',
     };
     CommonEventManager.createSubscriber(subscribeInfo).then((commonEventSubscriber: CommonEventManager.CommonEventSubscriber) => {
       console.debug(TAG, 'createCommonEventSubscriber ok');
@@ -238,7 +192,7 @@ class InjectNoticeUtil {
     });
     console.debug(TAG, 'cancelAuthorization end');
   }
-
+ 
   subscribe(): void {
     console.debug(TAG, 'subscribe begin');
     if (this.commonEventSubscriber === null) {
@@ -273,6 +227,52 @@ class InjectNoticeUtil {
   onSystemLiveBttonsResponse(notificationId: number,
     buttonOptions: notificationManager.ButtonOptions): void {
       console.debug(TAG, 'onSystemLiveBttonsResponse:', JSON.stringify(buttonOptions), 'id:' + notificationId);
+  }
+
+  onLiveNoticeResponseCallback(notificationId: number, buttonOptions: notificationManager.ButtonOptions): void {
+    console.debug(TAG, 'onLiveNoticeResponseCallback enter');
+    if (buttonOptions == null) {
+      console.error(TAG, 'onLiveNoticeResponseCallback button callback: ' + 'buttonOptions is null');
+      return;
+    }
+    let clickButtonName = buttonOptions.buttonName;
+    let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
+    let resourceManager = applicationContext.resourceManager;
+    let locateButtonName = resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
+    console.info(TAG, 'onLiveNoticeResponseCallback button callback: ' + clickButtonName + ', notificationId = ' + notificationId);
+    if (clickButtonName === locateButtonName) {
+      console.debug(TAG, `onLiveNoticeResponseCallback close notice`);
+      injectNoticeUtil.cancelAuthorization();
+      injectNoticeUtil.cancelNotificationById(NOTICE_ID);
+    }
+   }
+ 
+   async initCapsuleIcon(): Promise<void> {
+    console.debug(TAG, `initCapsuleIcon begin`);
+    if (this.capsuleIcon != null) {
+      console.debug(TAG, `initCapsuleIcon has init`);
+      return;
+    }
+    let applicationContext = (GlobalContext.getContext().getObject('appcontext')) as context.ApplicationContext;
+    let resourceManager = applicationContext.resourceManager;
+    let defaultSize: image.Size = {
+      'height': 30,
+      'width': 30,
+    };
+    let svgData = resourceManager.getMediaContentSync($r('app.media.capsule_icon34'));
+    let opts: image.DecodingOptions = {
+      'index': 0,
+      'sampleSize': 1,
+      'rotate' :0,
+      'editable': true,
+      'desiredSize': defaultSize,
+      'desiredPixelFormat': 3,
+    };
+    let imageSource = image.createImageSource(svgData.buffer);
+    let svImage: image.PixelMap | null = null;
+    svImage = await imageSource.createPixelMap(opts);
+    this.capsuleIcon = svImage;
+    console.debug(TAG, `initCapsuleIcon end vaule: ${this.capsuleIcon}`);
   }
 }
 
