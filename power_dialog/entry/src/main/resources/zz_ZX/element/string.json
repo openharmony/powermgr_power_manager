@@ -38,7 +38,7 @@
         },
         {
             "name":"WARNING_TIP",
-            "value":"[TS_941052]_有远程设备想操控本设备，是否同意？"
+            "value":"[TS_941052]_Do you agree to have a remote device that wants to control this device?"
         },
         {
             "name":"BatteryServiceExtAbility_label",
@@ -82,11 +82,23 @@
         },
         {
             "name":"BUTTON_CONFIRM",
-            "value":"[TS_941058]_确定"
+            "value":"[TS_941058]_confirm"
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
             "value":"[TS_941044]_Power off"
+        },
+        {
+            "name":"bn_agree",
+            "value":"[TS_959926]_Allow"
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"[TS_959925]_Allow %s to use your screen"
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"[TS_959924]_Don't allow"
         }
     ]
 }
