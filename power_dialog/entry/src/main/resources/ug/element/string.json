@@ -1,20 +1,48 @@
 {
-    "string": [
+    "string":[
         {
-            "name": "BUTTON_CANCEL_POWERDIALOG",
-            "value": "بىكار قىلىش"
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"بىكار قىلىش"
         },
         {
-            "name": "BUTTON_REBOOT_POWERDIALOG",
-            "value": "قايتا قوزغىتىش"
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"قايتا قوزغىتىش"
         },
         {
-            "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value": "توك مەنبە تاللانمىلىرى"
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"توك مەنبە تاللانمىلىرى"
         },
         {
-            "name": "BUTTON_SHUTDOWN_POWERDIALOG",
-            "value": "ئېتىش"
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"ئېتىش"
+        },
+        {
+            "name":"bn_notice_cancel",
+            "value":"يىراقتىن ياردەمنى ئۈزۈش"
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"ئېكران ئورتاقلاشقاندا يىغىندىكىلەر ئېكرانىڭىزدا مەشغۇلات قىلىپ، سىزگە يىراقتىن ياردەم بېرەلەيدۇ."
+        },
+        {
+            "name":"bn_agree",
+            "value":"رۇخسەت"
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"\u200f«%s» ئېكرانىڭىزنى ئىشلەتمەكچى"
+        },
+        {
+            "name":"notice_title",
+            "value":"يىراقتىن ياردەم"
+        },
+        {
+            "name":"notice_text",
+            "value":"نۆۋەتتە %s سىزگە يىراقتىن ياردەم بېرىۋاتىدۇ."
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"چەكلەش"
         }
     ]
 }
