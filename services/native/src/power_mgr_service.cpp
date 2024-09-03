@@ -815,8 +815,6 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
     HibernateControllerInit();
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 #else
