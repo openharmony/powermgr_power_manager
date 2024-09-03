@@ -1,20 +1,48 @@
 {
-    "string": [
+    "string":[
         {
-            "name": "BUTTON_CANCEL_POWERDIALOG",
-            "value": "འདོར་བ།"
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"འདོར་བ།"
         },
         {
-            "name": "BUTTON_REBOOT_POWERDIALOG",
-            "value": "བསྐྱར་སློང་།"
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"བསྐྱར་སློང་།"
         },
         {
-            "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value": "གློག་ཁུངས་གདམ་ག"
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"གློག་ཁུངས་གདམ་ག"
         },
         {
-            "name": "BUTTON_SHUTDOWN_POWERDIALOG",
-            "value": "སྒོ་རྒྱག་པ།"
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"སྒོ་རྒྱག་པ།"
+        },
+        {
+            "name":"bn_notice_cancel",
+            "value":"རྒྱང་རིང་རམ་འདེགས་གཅོད་པ།"
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"བརྙན་ཡོལ་མཉམ་སྤྱོད་བྱེད་སྐབས། ཚོགས་ཞུགས་མི་སྣས་ཁྱེད་ཀྱི་ཅོག་ངོས་ལ་རྒྱང་རིང་རམ་འདེགས་བྱེད་ཐུབ།"
+        },
+        {
+            "name":"bn_agree",
+            "value":"ཆོག་པ།"
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"%sཡིས་ཁྱེད་ཀྱི་བརྙན་ཡོལ་བཀོལ་ཆོག་པར་བྱེད་པ།"
+        },
+        {
+            "name":"notice_title",
+            "value":"རྒྱང་རིང་རམ་འདེགས།"
+        },
+        {
+            "name":"notice_text",
+            "value":"%sཡིས་ཁྱེད་ཀྱི་ཅོག་ངོས་ལ་རྒྱང་རིང་རམ་འདེགས་བྱེད་བཞིན་པ།"
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"མི་ཆོག"
         }
     ]
 }
