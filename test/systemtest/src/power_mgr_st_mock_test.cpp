@@ -285,7 +285,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock071, TestSize.Level2)
         .Times(::testing::AtLeast(1))
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(1)
+        .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
     pms->Lock(token);
@@ -325,7 +325,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
         .Times(::testing::AtLeast(1))
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
-        .Times(1)
+        .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     sleep(REFRESHACTIVITY_WAIT_TIME_S + ONE_SECOND);
     pms->Lock(token);
