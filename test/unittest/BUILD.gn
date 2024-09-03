@@ -662,12 +662,7 @@ ohos_unittest("test_device_state_action_native") {
   ]
 
   deps_ex += [ "display_manager:displaymgr" ]
-  if (window_manager_use_sceneboard) {
-    defines += [ "SCENE_BOARD_ENABLED" ]
-    deps_ex += [ "window_manager:libdm_lite" ]
-  } else {
-    deps_ex += [ "window_manager:libdm" ]
-  }
+  deps_ex += [ "window_manager:libdm" ]
   external_deps = deps_ex
 }
 

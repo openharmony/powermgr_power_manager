@@ -20,11 +20,7 @@
 #include "power_common.h"
 #include "power_time.h"
 #include "power_mgr_factory.h"
-#ifdef SCENE_BOARD_ENABLED
-#include "screen_manager_lite.h"
-#else
 #include "screen_manager.h"
-#endif
 #include "parameters.h"
 
 #include <algorithm>
@@ -204,13 +200,8 @@ void ShutdownController::PublishShutdownEvent() const
 void ShutdownController::TurnOffScreen()
 {
     POWER_HILOGD(FEATURE_SHUTDOWN, "Turn off screen before shutdown");
-#ifdef SCENE_BOARD_ENABLED
-    bool ret = Rosen::ScreenManagerLite::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
-        Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN);
-#else
     bool ret = Rosen::ScreenManager::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
         Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN);
-#endif
     POWER_HILOGI(FEATURE_SHUTDOWN, "Turn off screen before shutting down, ret = %{public}d", ret);
 }
 
