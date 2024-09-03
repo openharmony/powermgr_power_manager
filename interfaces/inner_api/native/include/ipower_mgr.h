@@ -65,6 +65,7 @@ public:
     virtual PowerState GetState() = 0;
     virtual bool IsScreenOn(bool needPrintLog = true) = 0;
     virtual bool IsFoldScreenOn() = 0;
+    virtual bool IsCollaborationScreenOn() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;
@@ -90,7 +91,7 @@ public:
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
     virtual PowerErrors IsStandby(bool& isStandby) = 0;
     virtual PowerErrors SetForceTimingOut(bool enabled) = 0;
-    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock) = 0;
+    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent) = 0;
 
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;

@@ -64,6 +64,7 @@ public:
     virtual PowerState GetState() override;
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
+    virtual bool IsCollaborationScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
@@ -103,7 +104,8 @@ public:
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
     virtual PowerErrors IsStandby(bool& isStandby) override;
     virtual PowerErrors SetForceTimingOut(bool enabled) override;
-    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock) override;
+    virtual PowerErrors LockScreenAfterTimingOut(
+        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent = true) override;
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;

@@ -263,6 +263,15 @@ bool PowerMgrClient::IsFoldScreenOn()
     return ret;
 }
 
+bool PowerMgrClient::IsCollaborationScreenOn()
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    bool ret = false;
+    ret = proxy_->IsCollaborationScreenOn();
+    POWER_HILOGI(COMP_FWK, "IsCollaborationScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
+    return ret;
+}
+
 PowerState PowerMgrClient::GetState()
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerState::UNKNOWN);
@@ -459,10 +468,10 @@ PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled)
     return ret;
 }
 
-PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return ret;
 }
 
