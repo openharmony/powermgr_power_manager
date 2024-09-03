@@ -140,7 +140,7 @@ class InjectNoticeUtil {
         console.error(TAG, TAG + `Failed to publish notification. Code is ${err.code}, message is ${err.message}`);
         return;
       }
-      console.info(TAG, 'Succeeded in publishing notification.');
+      console.info(TAG, 'succeeded in publishing notification.');
     });
   }
 
