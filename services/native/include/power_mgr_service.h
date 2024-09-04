@@ -308,6 +308,11 @@ private:
         int32_t timeOutMS = -1);
     static void RegisterBootCompletedCallback();
     static bool IsDeveloperMode();
+#ifdef MSDP_MOVEMENT_ENABLE
+    void RegisterMovementCallback();
+    void UnRegisterMovementCallback();
+    void ResetMovementState();
+#endif
 
     inline PowerModeModule& GetPowerModeModule()
     {
