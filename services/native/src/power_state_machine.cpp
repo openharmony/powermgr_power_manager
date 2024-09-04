@@ -634,8 +634,8 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-    SystemSuspendController::GetInstance().Wakeup();
     bool ret = true;
+    hibernating_ = true;
     if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
@@ -680,43 +680,35 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
         return false;
     }
-    if (hibernating_) {
-        POWER_HILOGE(FEATURE_SUSPEND, "the device is hibernating, please try again later.");
-        return false;
-    }
-    hibernating_ = true;
+
     if (!PrepareHibernate(clearMemory) && clearMemory) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, shutdown begin.");
         pms->ShutDownDevice("shutdown_by_user");
-        hibernating_ = false;
         return true;
     }
 
     FFRTTask task = [hibernateController, this, clearMemory, pms]() {
-        bool success = hibernateController->Hibernate(clearMemory);
-        if (!success && clearMemory) {
+        if (!hibernateController->Hibernate(clearMemory) && clearMemory) {
             POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
             pms->ShutDownDevice("shutdown_by_user");
-            hibernating_ = false;
             return;
         }
-        if (success) {
-            switchOpen_ = true;
-        }
+        hibernating_ = false;
         if (clearMemory) {
             if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
                 POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
             }
         }
-        hibernateController->PostHibernate();
-        hibernating_ = false;
         if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
             POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
         }
+        hibernateController->PostHibernate();
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
+
     if (ffrtTimer_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "ffrtTimer is null");
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
+            __func__, HIBERNATE_DELAY_MS);
         hibernating_ = false;
         return false;
     }
