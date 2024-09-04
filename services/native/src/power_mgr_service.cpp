@@ -51,6 +51,9 @@
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 #include "battery_srv_client.h"
 #endif
+#ifdef MSDP_MOVEMENT_ENABLE
+#include <dlfcn.h>
+#endif
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
@@ -93,6 +96,9 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+#ifdef MSDP_MOVEMENT_ENABLE
+    AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
+#endif
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
@@ -577,6 +583,9 @@ void PowerMgrService::OnStop()
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+#ifdef MSDP_MOVEMENT_ENABLE
+    RemoveSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
+#endif
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     SettingHelper::UnregisterSettingWakeupPickupObserver();
@@ -586,6 +595,9 @@ void PowerMgrService::OnStop()
     if (!OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriberPtr_)) {
         POWER_HILOGE(COMP_SVC, "Power Onstop unregister to commonevent manager failed!");
     }
+#ifdef MSDP_MOVEMENT_ENABLE
+    UnRegisterMovementCallback();
+#endif
 }
 
 void PowerMgrService::Reset()
@@ -610,6 +622,16 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
         std::lock_guard lock(lockMutex_);
         runningLockMgr_->ResetRunningLocks();
     }
+#ifdef MSDP_MOVEMENT_ENABLE
+    if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
+        auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (power == nullptr) {
+            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        power->ResetMovementState();
+    }
+#endif
 }
 
 void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -624,7 +646,100 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
     }
+#ifdef MSDP_MOVEMENT_ENABLE
+    if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
+        auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (power == nullptr) {
+            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        power->UnRegisterMovementCallback();
+        power->RegisterMovementCallback();
+    }
+#endif
 }
+
+#ifdef MSDP_MOVEMENT_ENABLE
+static const char* MOVEMENT_SUBSCRIBER_CONFIG = "RegisterMovementCallback";
+static const char* MOVEMENT_UNSUBSCRIBER_CONFIG = "UnRegisterMovementCallback";
+static const char* RESET_MOVEMENT_STATE_CONFIG = "ResetMovementState";
+static const char* POWER_MANAGER_EXT_PATH = "/system/lib64/libpower_manager_ext.z.so";
+typedef void(*FuncMovementSubscriber)();
+typedef void(*FuncMovementUnsubscriber)();
+typedef void(*FuncResetMovementState)();
+
+void PowerMgrService::RegisterMovementCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to RegisterMovementCallback");
+    void *subscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (subscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen RegisterMovementCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncMovementSubscriber MovementSubscriberFlag =
+        reinterpret_cast<FuncMovementSubscriber>(dlsym(subscriberHandler, MOVEMENT_SUBSCRIBER_CONFIG));
+    if (MovementSubscriberFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "RegisterMovementCallback is null, reason : %{public}s", dlerror());
+        dlclose(subscriberHandler);
+        subscriberHandler = nullptr;
+        return;
+    }
+    MovementSubscriberFlag();
+    POWER_HILOGI(COMP_SVC, "RegisterMovementCallback Success");
+    dlclose(subscriberHandler);
+    subscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::UnRegisterMovementCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to UnRegisterMovementCallback");
+    void *unSubscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (unSubscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen UnRegisterMovementCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncMovementUnsubscriber MovementUnsubscriberFlag =
+        reinterpret_cast<FuncMovementUnsubscriber>(dlsym(unSubscriberHandler, MOVEMENT_UNSUBSCRIBER_CONFIG));
+    if (MovementUnsubscriberFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "UnRegisterMovementCallback is null, reason : %{public}s", dlerror());
+        dlclose(unSubscriberHandler);
+        unSubscriberHandler = nullptr;
+        return;
+    }
+    MovementUnsubscriberFlag();
+    POWER_HILOGI(COMP_SVC, "UnRegisterMovementCallback Success");
+    dlclose(unSubscriberHandler);
+    unSubscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::ResetMovementState()
+{
+    POWER_HILOGI(COMP_SVC, "Start to ResetMovementState");
+    void *resetMovementStateHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (resetMovementStateHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen ResetMovementState failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncResetMovementState ResetMovementStateFlag =
+        reinterpret_cast<FuncResetMovementState>(dlsym(resetMovementStateHandler, RESET_MOVEMENT_STATE_CONFIG));
+    if (ResetMovementStateFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "ResetMovementState is null, reason : %{public}s", dlerror());
+        dlclose(resetMovementStateHandler);
+        resetMovementStateHandler = nullptr;
+        return;
+    }
+    ResetMovementStateFlag();
+    POWER_HILOGI(COMP_SVC, "ResetMovementState Success");
+    dlclose(resetMovementStateHandler);
+    resetMovementStateHandler = nullptr;
+    return;
+}
+#endif
 
 int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
