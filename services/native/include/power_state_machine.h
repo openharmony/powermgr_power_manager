@@ -100,6 +100,9 @@ public:
     bool IsCollaborationScreenOn();
     void Reset();
     int64_t GetSleepTime();
+#ifdef MSDP_MOVEMENT_ENABLE
+    bool IsMovementStateOn();
+#endif
 
     PowerState GetState()
     {
