@@ -125,6 +125,10 @@ ohos_shared_library("powermgrservice") {
 
   defines = []
 
+  if (power_manager_feature_movement) {
+    defines += [ "MSDP_MOVEMENT_ENABLE" ]
+  }
+
   if (use_libfuzzer) {
     defines += [ "FUZZ_TEST" ]
   }
