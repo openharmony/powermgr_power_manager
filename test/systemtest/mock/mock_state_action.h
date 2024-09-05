@@ -27,6 +27,9 @@ public:
     virtual ~MockStateAction() = default;
     MOCK_METHOD3(Suspend, void(int64_t callTimeMs, SuspendDeviceType type, uint32_t flags));
     MOCK_METHOD0(ForceSuspend, void());
+    MOCK_METHOD0(TryToCancelScreenOff, bool());
+    MOCK_METHOD0(BeginPowerkeyScreenOff, void());
+    MOCK_METHOD0(EndPowerkeyScreenOff, void());
     MOCK_METHOD4(Wakeup, void(int64_t callTimeMs, WakeupDeviceType type,
         const std::string& details, const std::string& pkgName));
     MOCK_METHOD3(RefreshActivity, void(int64_t callTimeMs, UserActivityType type, uint32_t flags));
