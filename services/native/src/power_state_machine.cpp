@@ -49,8 +49,10 @@ sptr<SettingObserver> g_displayOffTimeDcObserver;
 sptr<SettingObserver> g_displayOffTimeObserver;
 #endif
 static int64_t g_beforeOverrideTime {-1};
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
+#endif
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
@@ -2055,9 +2057,9 @@ void PowerStateMachine::StateController::RecordFailure(
         .append("   Time:")
         .append(ToString(failTime_))
         .append("\n");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     const int logLevel = 2;
     const std::string tag = "TAG_POWER";
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN", HiviewDFX::HiSysEvent::EventType::FAULT,
         "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
