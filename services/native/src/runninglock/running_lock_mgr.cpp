@@ -17,11 +17,14 @@
 
 #include <cinttypes>
 #include <datetime_ex.h>
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 #include <ipc_skeleton.h>
 #include <securec.h>
-
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
 #include "power_hitrace.h"
+#endif
 #include "ffrt_utils.h"
 #include "power_log.h"
 #include "power_mgr_factory.h"
@@ -432,7 +435,9 @@ bool RunningLockMgr::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 
 bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 {
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
     PowerHitrace powerHitrace("RunningLock_Lock");
+#endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
         auto lockid = TransformLockid(remoteObj);
@@ -476,7 +481,9 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 
 bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::string& name)
 {
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
     PowerHitrace powerHitrace("RunningLock_Unlock");
+#endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
         auto lockid = TransformLockid(remoteObj);

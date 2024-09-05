@@ -112,7 +112,7 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  defines = [ "MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE" ]
+  defines += [ "MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",

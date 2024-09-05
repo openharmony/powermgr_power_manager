@@ -15,21 +15,25 @@
 
 #ifndef POWERMGR_POWER_HITRACE_H
 #define POWERMGR_POWER_HITRACE_H
-
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
 #include "hitrace_meter.h"
-
+#endif
 namespace OHOS {
 namespace PowerMgr {
 class PowerHitrace {
 public:
     explicit PowerHitrace(const std::string& trace) : trace_(trace)
     {
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
         StartTrace(HITRACE_TAG_POWER, trace_.c_str());
+#endif
     }
 
     ~PowerHitrace()
     {
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
         FinishTrace(HITRACE_TAG_POWER);
+#endif
     }
 private:
     std::string trace_;
