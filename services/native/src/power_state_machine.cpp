@@ -1364,7 +1364,7 @@ bool PowerStateMachine::NeedShowScreenLocks(PowerState state)
         state == PowerState::INACTIVE || state == PowerState::DIM;
 }
 
-void PowerStateMachine::UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason)
+void PowerStateMachine::UpdateSettingStateFlag(PowerState state, StateChangeReason reason)
 {
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
         reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
@@ -1376,7 +1376,7 @@ void PowerStateMachine::UpdateSettingStateFlag(const PowerState state, const Sta
     settingOffStateFlag_ = (state == PowerState::INACTIVE);
 }
 
-void PowerStateMachine::RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason)
+void PowerStateMachine::RestoreSettingStateFlag()
 {
     settingOnStateFlag_ = false;
     settingOffStateFlag_ = false;
@@ -1410,7 +1410,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     timeoutCheck.Finish(ret);
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), ret);
-    RestoreSettingStateFlag(state, reason);
+    RestoreSettingStateFlag();
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 

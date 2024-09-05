@@ -185,7 +185,6 @@ public:
     bool IsSettingState(PowerState state);
 
 private:
-    static std::string GetTransitResultString(TransitResult result);
     class SettingStateFlag {
     public:
         SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner, StateChangeReason reason)
@@ -271,8 +270,9 @@ private:
         StateChangeReason reason_;
     };
 
-    void UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason);
-    void RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason);
+    static std::string GetTransitResultString(TransitResult result);
+    void UpdateSettingStateFlag(PowerState state, StateChangeReason reason);
+    void RestoreSettingStateFlag();
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();
