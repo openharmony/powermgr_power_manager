@@ -63,12 +63,14 @@ ohos_fuzztest("ForceSuspendDeviceFuzzTest") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
     "power_manager:power_ffrt",
   ]
   if (has_sensors_sensor_part) {
     external_deps += [ "sensor:sensor_interface_native" ]
+  }
+  if (has_hiviewdfx_hisysevent_part) {
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 }

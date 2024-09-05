@@ -18,10 +18,13 @@
 #include <algorithm>
 #include <cinttypes>
 #include <datetime_ex.h>
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 #include <ipc_skeleton.h>
-
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
 #include "power_hitrace.h"
+#endif
 #include "power_mode_policy.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
@@ -211,12 +214,16 @@ void PowerStateMachine::InitState()
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Init power state");
     if (IsScreenOn()) {
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_ON);
+#endif
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
     } else {
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_OFF);
+#endif
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
     }
 }
@@ -227,8 +234,10 @@ void PowerStateMachine::EmplaceAwake()
         std::make_shared<StateController>(PowerState::AWAKE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON",
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+#endif
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
             if (ret != ActionResult::SUCCESS) {
@@ -395,7 +404,9 @@ void PowerStateMachine::onWakeup()
 void PowerStateMachine::SuspendDeviceInner(
     pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed, bool ignoreScreenState)
 {
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
     PowerHitrace powerHitrace("SuspendDevice");
+#endif
     if (type > SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX) {
         POWER_HILOGW(FEATURE_SUSPEND, "Invalid type: %{public}d", type);
         return;
@@ -541,7 +552,9 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
 void PowerStateMachine::WakeupDeviceInner(
     pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
     PowerHitrace powerHitrace("WakeupDevice");
+#endif
     if (type > WakeupDeviceType::WAKEUP_DEVICE_MAX) {
         POWER_HILOGW(FEATURE_WAKEUP, "Invalid type: %{public}d", type);
         return;
@@ -896,8 +909,10 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
     }
     POWER_HILOGD(
         FEATURE_POWER_STATE, "state=%{public}u, listeners.size=%{public}zu", state, syncPowerStateListeners_.size());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE",
         static_cast<uint32_t>(state));
+#endif
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
@@ -1499,10 +1514,11 @@ void PowerStateMachine::ScreenChangeCheck::Report(const std::string &msg)
         return;
     }
     lastReportTime = now;
-    
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT,
         "PID", pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg.c_str(),
         "REASON", PowerUtils::GetReasonTypeString(reason_).c_str());
+#endif
 }
 
 std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateController(PowerState state)
@@ -1951,9 +1967,11 @@ void PowerStateMachine::StateController::CorrectState(
         .append(" due to current display state is ")
         .append(PowerUtils::GetDisplayStateString(state));
     POWER_HILOGW(FEATURE_POWER_STATE, "%{public}s", msg.c_str());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE_CORRECTION", HiviewDFX::HiSysEvent::EventType::FAULT,
         "ERROR_STATE", static_cast<uint32_t>(currentState), "CORRECTION_STATE", static_cast<uint32_t>(correctState),
         "DISPLAY_STATE", static_cast<uint32_t>(state), "MSG", msg);
+#endif
     currentState = correctState;
 }
 
@@ -2039,9 +2057,11 @@ void PowerStateMachine::StateController::RecordFailure(
         .append("\n");
     const int logLevel = 2;
     const std::string tag = "TAG_POWER";
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN", HiviewDFX::HiSysEvent::EventType::FAULT,
         "LOG_LEVEL", logLevel, "TAG", tag, "MESSAGE", message);
     POWER_HILOGI(FEATURE_POWER_STATE, "RecordFailure: %{public}s", message.c_str());
+#endif
 }
 
 bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason)

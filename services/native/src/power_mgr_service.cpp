@@ -17,7 +17,9 @@
 
 #include <datetime_ex.h>
 #include <file_ex.h>
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 #include <if_system_ability_manager.h>
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
@@ -988,8 +990,10 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
     HibernateControllerInit();
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
+#endif
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 #else
