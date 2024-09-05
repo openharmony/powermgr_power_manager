@@ -77,7 +77,7 @@ if (has_sensors_sensor_part) {
   deps_ex += [ "sensor:sensor_interface_native" ]
 }
 if (has_hiviewdfx_hisysevent_part) {
-  external_deps += [ "hisysevent:libhisysevent" ]
+  deps_ex += [ "hisysevent:libhisysevent" ]
 }
 defs = [ "POWER_GTEST" ]
 
