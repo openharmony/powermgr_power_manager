@@ -45,6 +45,10 @@ int32_t SysParam::GetIntValue(const std::string& key, int32_t def)
         return def;
     }
     int32_t intValue = def;
+    if (!StrToInt(TrimStr(value), intValue)) {
+        POWER_HILOGW(COMP_UTILS, "StrToInt failed, return default def, value=%{public}s, def=%{public}d", value, def);
+        return def;
+    }
     StrToInt(TrimStr(value), intValue);
     return intValue;
 }

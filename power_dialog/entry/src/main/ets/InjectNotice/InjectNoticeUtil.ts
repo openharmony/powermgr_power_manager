@@ -28,7 +28,7 @@ const LABEL: string = 'inject notice';
 const EVENT_NAME: string = 'event_inject_close_notice';
 export const NOTICE_ID: number = 100;
 
-export enum InjectNoticeStaus {
+export enum InjectNoticeStatus {
   DEFAULT = 0,
   OPENING = 1,
   SERVER_CLOSE = 2,
@@ -36,7 +36,7 @@ export enum InjectNoticeStaus {
 };
 
 class InjectNoticeUtil {
-  status: InjectNoticeStaus = InjectNoticeStaus.DEFAULT;
+  status: InjectNoticeStatus = InjectNoticeStatus.DEFAULT;
   isInit: boolean = false;
   removalWantAgentObj: _WantAgent = null;
   removalWantAgentInfo: WantAgent.WantAgentInfo = {
