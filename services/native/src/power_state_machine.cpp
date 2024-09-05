@@ -49,7 +49,9 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 constexpr uint32_t HIBERNATE_DELAY_MS = 3000;
+#endif
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
