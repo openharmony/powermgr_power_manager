@@ -49,6 +49,9 @@ static int64_t g_beforeOverrideTime {-1};
 constexpr int32_t DISPLAY_OFF = 0;
 constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+constexpr uint32_t HIBERNATE_DELAY_MS = 3000;
+#endif
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
@@ -684,6 +687,8 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
+    
+    hibernateController->PreHibernate();
     if (clearMemory) {
         if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
@@ -699,7 +704,6 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
             return false;
         }
     }
-    hibernateController->PreHibernate();
     if (clearMemory) {
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
