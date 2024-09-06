@@ -13,22 +13,17 @@
  * limitations under the License.
  */
 
-@Entry
-@Component
-struct CapsuleIcon {
-  build() {
-    Row() {
-      Image($r('app.media.capsule_icon34'))
-        .width('34vp')
-        .height('34vp')
-    }
-    .alignItems(VerticalAlign.Center)
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .height('100%')
-  }
-
-  aboutToAppear(): void {
-    console.debug('CapsuleIcon page aboutToAppear');
+{
+  "app": {
+    "bundleName": "com.ohos.powerdialog",
+    "vendor": "ohos",
+    "versionCode": 1000007,
+    "versionName": "1.1.1.1",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name",
+    "distributedNotificationEnabled": true,
+    "minAPIVersion": 12,
+    "targetAPIVersion": 12
   }
 }
+

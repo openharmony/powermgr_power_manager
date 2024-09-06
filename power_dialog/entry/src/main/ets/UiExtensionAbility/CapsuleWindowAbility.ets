@@ -19,7 +19,7 @@ import Want from '@ohos.app.ability.Want';
 const TAG = 'CapsuleWindowAbility ';
 
 export default class CapsuleWindowAbility extends UIExtensionAbility {
-    
+
     onCreate(): void {
         console.info(TAG, 'onCreate');
     }
@@ -28,26 +28,24 @@ export default class CapsuleWindowAbility extends UIExtensionAbility {
         console.info(TAG, 'onSessionCreate want:', JSON.stringify(want));
         console.info(TAG, 'onSessionCreate session:', JSON.stringify(session), 'session isNUll:', session == null);
         try {
-          let storage: LocalStorage = new LocalStorage({
-            'session': session
-          });
+          let para: Record<string, UIExtensionContentSession> = { 'session': session };
+          let storage: LocalStorage = new LocalStorage(para);
           session.loadContent('pages/pluginWindow', storage);
+	  session.setWindowBackgroundColor('#00000000');
         } catch (err) {
-            
           console.error(`Failed to load the content. Cause code: ${err}`);
-        
       };
       }
-    
+
       onForeground() {
       }
-    
+
       onBackground() {
       }
-    
+
       onSessionDestroy(session: UIExtensionContentSession) {
       }
-    
+
       onDestroy() {
       }
 }
