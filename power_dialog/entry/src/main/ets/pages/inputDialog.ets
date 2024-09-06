@@ -68,7 +68,6 @@ struct InputCustomDialog {
         .margin({left: '24vp', right: '24vp' })
 
         Row(){
-          
             Button($r('app.string.bn_not_agree'))
               .onClick(() => {
                 if (this.controller) {
@@ -96,8 +95,8 @@ struct InputCustomDialog {
 @Entry
 @Component
 struct InputDialog {
-  private mContext?: common.UIExtensionContext;
-  @State titleTip: string = ''; 
+  private mContext: common.UIExtensionContext | undefined = undefined;
+  @State titleTip: string = '';
   dialogController: CustomDialogController = new CustomDialogController({
     builder: InputCustomDialog({
       cancel: () => { this.onCancel() },
@@ -116,7 +115,7 @@ struct InputDialog {
     console.log('aboutToAppear');
     let storage = LocalStorage.GetShared();
     this.mContext = storage.get<common.UIExtensionContext>('context');
-    let tileTipFormat = this.mContext.resourceManager.getStringSync($r('app.string.text_inject_tip_title'));
+    let tileTipFormat = this.mContext!.resourceManager.getStringSync($r('app.string.text_inject_tip_title'));
     this.titleTip = util.format(tileTipFormat, '');
     console.log('InjectNotice', `aboutToAppear titelTip:${this.titleTip}`);
   }
