@@ -125,4 +125,24 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->SuspendDevice(SUSCALLTIMEMS, reasonSDT, false) == PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 end.");
 }
+
+#ifdef MSDP_MOVEMENT_ENABLE
+/**
+ * @tc.name: PowerMgrServiceNative003
+ * @tc.desc: test RegisterMovementCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 begin.");
+    auto stateMachine = std::make_shared<PowerStateMachine>(g_pmsTest);
+    g_pmsTest->RegisterMovementCallback();
+    g_pmsTest->UnRegisterMovementCallback();
+    g_pmsTest->ResetMovementState();
+    bool ret =  stateMachine->IsMovementStateOn();
+    EXPECT_TRUE(ret == false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 end.");
+}
+#endif
+
 } // namespace
