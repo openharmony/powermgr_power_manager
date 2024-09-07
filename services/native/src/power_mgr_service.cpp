@@ -122,6 +122,7 @@ bool PowerMgrService::Init()
         screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
         screenOffPreController_->Init();
     }
+    system::SetParameter("bootevent.powermgr.ready", "true");
     POWER_HILOGI(COMP_SVC, "Init success");
     return true;
 }
