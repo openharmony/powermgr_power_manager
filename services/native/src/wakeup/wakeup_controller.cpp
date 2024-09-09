@@ -191,6 +191,10 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         POWER_HILOGE(COMP_SVC, "json parse error");
         return;
     }
+    if (root["touchscreen"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this touchscreenNode is empty");
+        return;
+    }
     if (root["touchscreen"]["enable"].isNull()) {
         POWER_HILOGE(COMP_SVC, "the touchscreenNode is empty");
         return;
@@ -206,7 +210,7 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
     }
 
     root["touchscreen"]["enable"] = updateEnable;
-    POWER_HILOGI(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
+    POWER_HILOGI(COMP_SVC, "the new doubleJsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 
@@ -297,6 +301,10 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         POWER_HILOGE(COMP_SVC, "Failed to parse json string");
         return;
     }
+    if (root["pickup"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this pickNode is empty");
+        return;
+    }
     if (root["pickup"]["enable"].isNull()) {
         POWER_HILOGE(COMP_SVC, "the pickupNode is empty");
         return;
@@ -311,6 +319,7 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         return;
     }
     root["pickup"]["enable"] = updataEnable;
+    POWER_HILOGI(COMP_SVC, "the new pickupJsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 #endif
