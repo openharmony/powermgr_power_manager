@@ -42,6 +42,8 @@ void PowerSuspendTest::SetUpTestCase(void)
 {
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
 }
 
 void PowerSuspendTest::TearDownTestCase(void)
@@ -59,9 +61,6 @@ namespace {
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: start");
-
-    g_service->WakeupControllerInit();
-    g_service->SuspendControllerInit();
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
     EXPECT_TRUE(g_service->IsScreenOn());
@@ -78,10 +77,35 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
-    sleep(1);
+    sleep(2);
     // the second powerkey event would interrupt the transition to INACTIVE
     EXPECT_TRUE(g_service->IsScreenOn());
 
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
+}
+/**
+ * @tc.name: PowerSuspendTest002
+ * @tc.desc: test simulate powerkey event once when screenon
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: start");
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
+    EXPECT_TRUE(g_service->IsScreenOn());
+
+    auto inputManager = MMI::InputManager::GetInstance();
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
+    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+
+    inputManager->SimulateInputEvent(keyEventPowerkeyDown);
+    inputManager->SimulateInputEvent(keyEventPowerkeyUp);
+    sleep(2);
+    EXPECT_FALSE(g_service->IsScreenOn());
 }
 } // namespace
