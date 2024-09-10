@@ -41,13 +41,6 @@ static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
 static const std::string TEST_DEVICE_ID = "test_device_id";
 
-class InputCallbackMock : public IInputEventConsumer {
-public:
-    virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
-    virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
-    virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
-};
-
 void PowerWakeupTest::SetUpTestCase(void)
 {
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -114,7 +107,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
 
 /**
  * @tc.name: PowerWakeupTest002
- * @tc.desc: test simulate powerkey event when screenoff
+ * @tc.desc: test simulate normal key event when screenoff
  * @tc.type: FUNC
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
@@ -130,13 +123,11 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
     auto inputManager = MMI::InputManager::GetInstance();
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
     keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
     keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
-    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
 
-    inputManager->SimulateInputEvent(keyEventPowerkeyDown);
-    inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(1);
