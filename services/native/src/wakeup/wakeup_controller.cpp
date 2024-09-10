@@ -43,7 +43,6 @@ const int32_t ERR_FAILED = -1;
 #endif
 
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
-constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -492,11 +491,6 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */
-bool InputCallback::isSecondaryEvent(std::shared_ptr<InputEvent> event) const
-{
-    return event->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) || event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
-}
-
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -504,8 +498,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
-    // ignore remote event, ignore secondary event
-    if (isSecondaryEvent(keyEvent)) {
+    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -553,7 +546,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (!NonWindowEvent(pointerEvent)) {
         return;
     }
-    if (isSecondaryEvent(pointerEvent)) {
+    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
