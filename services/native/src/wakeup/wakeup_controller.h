@@ -104,8 +104,6 @@ public:
     virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
     bool NonWindowEvent(const std::shared_ptr<PointerEvent>& pointerEvent) const;
-private:
-    bool isSecondaryEvent(std::shared_ptr<InputEvent> event) const;
 };
 #endif
 
