@@ -22,11 +22,6 @@ declare_args() {
 }
 
 ohos_app("power_dialog_hap") {
-  deps = [
-    ":power_dialog_js_assets",
-    ":power_dialog_resources",
-  ]
-
   publicity_file = "../publicity.xml"
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "power_dialog"
@@ -48,21 +43,4 @@ ohos_app("power_dialog_hap") {
     private_key_path = "HwPowerOptionDialog Release"
     compatible_version = "8"
   }
-}
-
-ohos_js_assets("power_dialog_js_assets") {
-  hap_profile = "entry/src/main/module.json"
-  ets2abc = true
-  source_dir = "entry/src/main/ets"
-}
-
-ohos_app_scope("power_dialog_app_profile") {
-  app_profile = "AppScope/app.json"
-  sources = [ "AppScope/resources" ]
-}
-
-ohos_resources("power_dialog_resources") {
-  sources = [ "entry/src/main/resources" ]
-  deps = [ ":power_dialog_app_profile" ]
-  hap_profile = "entry/src/main/module.json"
 }
