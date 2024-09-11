@@ -182,6 +182,10 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         POWER_HILOGE(COMP_SVC, "json parse error");
         return;
     }
+    if (root["touchscreen"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this touchscreenNode is empty");
+        return;
+    }
     if (root["touchscreen"]["enable"].isNull()) {
         POWER_HILOGE(COMP_SVC, "the touchscreenNode is empty");
         return;
@@ -285,6 +289,10 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
     reader.parse(jsonStr, root);
     if (!reader.parse(jsonStr, root)) {
         POWER_HILOGE(COMP_SVC, "Failed to parse json string");
+        return;
+    }
+    if (root["pickup"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this pickNode is empty");
         return;
     }
     if (root["pickup"]["enable"].isNull()) {
