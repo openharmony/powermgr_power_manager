@@ -26,7 +26,9 @@
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -433,9 +435,11 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         force = false;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SLEEP_START",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TRIGGER_EVENT_TYPE", static_cast<int32_t>(reason),
         "ACTION_EVENT_TYPE", static_cast<int32_t>(force));
+#endif
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
