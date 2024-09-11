@@ -32,6 +32,9 @@
 #include "os_account_manager.h"
 #include "parameters.h"
 #endif
+#ifdef MSDP_MOVEMENT_ENABLE
+#include <dlfcn.h>
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -141,22 +144,59 @@ void PowerStateMachine::InitTransitMap()
     });
 }
 
+#ifdef MSDP_MOVEMENT_ENABLE
+static const char* MOVEMENT_STATE_CONFIG = "GetMovementState";
+static const char* POWER_MANAGER_EXT_PATH = "/system/lib64/libpower_manager_ext.z.so";
+typedef bool(*FuncMovementState)();
+
+bool PowerStateMachine::IsMovementStateOn()
+{
+    POWER_HILOGD(FEATURE_POWER_STATE, "Start to GetMovementState");
+    void *stateHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (stateHandler == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Dlopen GetMovementState failed, reason : %{public}s", dlerror());
+        return false;
+    }
+
+    FuncMovementState MovementStateFlag = reinterpret_cast<FuncMovementState>(dlsym(stateHandler,
+        MOVEMENT_STATE_CONFIG));
+    if (MovementStateFlag == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "GetMovementState is null, reason : %{public}s", dlerror());
+        dlclose(stateHandler);
+        stateHandler = nullptr;
+        return false;
+    }
+    bool ret = MovementStateFlag();
+    dlclose(stateHandler);
+    stateHandler = nullptr;
+    return ret;
+}
+#endif
+
 bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
 {
     bool isForbidden = forbidMap_.count(currentState_) && forbidMap_[currentState_].count(to);
     if (isForbidden) {
         return false;
     }
-#ifdef HAS_SENSORS_SENSOR_PART
-    // prevent the unexpected double click to light up the screen when calling
+    // prevent the unexpected double click to light up the screen when calling or sporting
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
-            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) &&
-        IsProximityClose() && to == PowerState::AWAKE) {
-        POWER_HILOGI(
-            FEATURE_POWER_STATE, "Double-click or pickup isn't allowed to wakeup device when proximity is close.");
-        return false;
-    }
+            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
+#ifdef HAS_SENSORS_SENSOR_PART
+        if (IsProximityClose()) {
+            POWER_HILOGI(FEATURE_POWER_STATE,
+                "Double-click or pickup isn't allowed to wakeup device when proximity is close.");
+            return false;
+        }
 #endif
+#ifdef MSDP_MOVEMENT_ENABLE
+        if (IsMovementStateOn()) {
+            POWER_HILOGI(FEATURE_POWER_STATE,
+                "Double-click or pickup isn't allowed to wakeup device when movement state is on.");
+            return false;
+        }
+#endif
+    }
     bool isAllowed = (!allowMapByReason_.count(reason) ||
         (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
     return isAllowed;
