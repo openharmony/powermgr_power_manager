@@ -12,23 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-@Entry
-@Component
-struct CapsuleIcon {
-  build() {
-    Row() {
-      Image($r('app.media.capsule_icon34'))
-        .width('34vp')
-        .height('34vp')
+{
+  "app": {
+    "products": [
+      {
+        "name": "default",
+        "compileSdkVersion": 14,
+        "compatibleSdkVersion": 14,
+        "targetSdkVersion": 14,
+        "runtimeOS": "OpenHarmony",
+        "signingConfig": "default"
+      }
+    ],
+    "signingConfigs": [
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
     }
-    .alignItems(VerticalAlign.Center)
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .height('100%')
-  }
-
-  aboutToAppear(): void {
-    console.debug('CapsuleIcon page aboutToAppear');
-  }
+  ]
 }

@@ -22,7 +22,7 @@ export default class PowerUiExtensionAbility extends UIExtensionAbility {
       'session': session,
       'context': this.context
     });
-    
+
     if ('isInputDlg' in want.parameters) {
       if (want.parameters.isInputDlg === true) {
         session.loadContent('pages/inputDialog', storage);
@@ -30,7 +30,7 @@ export default class PowerUiExtensionAbility extends UIExtensionAbility {
         return;
       }
     }
-    
+
     session.loadContent('pages/powerDialog', storage);
     session.setWindowBackgroundColor('#00000000');
   }

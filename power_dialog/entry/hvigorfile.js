@@ -13,22 +13,5 @@
  * limitations under the License.
  */
 
-@Entry
-@Component
-struct CapsuleIcon {
-  build() {
-    Row() {
-      Image($r('app.media.capsule_icon34'))
-        .width('34vp')
-        .height('34vp')
-    }
-    .alignItems(VerticalAlign.Center)
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .height('100%')
-  }
-
-  aboutToAppear(): void {
-    console.debug('CapsuleIcon page aboutToAppear');
-  }
-}
+// Script for compiling build behavior. It is built in the build plug-in and cannot be modified currently.
+module.exports = require('@ohos/hvigor-ohos-plugin').hapTasks;

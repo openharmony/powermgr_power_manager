@@ -52,7 +52,7 @@ export class CapsuleUtil {
       name: PLUGIN_NAME,
       data: {},
       extraData: extraData
-    }
+    };
     console.debug(TAG, `pushToPluginMgr push content: ${JSON.stringify(pushData)} `);
     PluginMgr.push(pushData, logInfo);
   }
@@ -95,4 +95,4 @@ export class CapsuleUtil {
         console.log('push_callback:data:', JSON.stringify(data));
     });
   }
-}  
+}
