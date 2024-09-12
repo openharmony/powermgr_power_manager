@@ -28,6 +28,8 @@ config("powermgr_private_config") {
 }
 
 ohos_shared_library("powermgr_client") {
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "${powermgr_framework_native}/client_lifecycle.cpp",
     "${powermgr_framework_native}/power_mgr_client.cpp",
