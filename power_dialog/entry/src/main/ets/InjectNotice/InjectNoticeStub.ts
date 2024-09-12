@@ -15,7 +15,7 @@
 
 import Base from '@ohos.base';
 import rpc from '@ohos.rpc';
-import deviceInfo from '@ohos.DeviceInfo';
+import deviceInfo from '@ohos.deviceInfo';
 import {NOTICE_ID, injectNoticeUtil } from './InjectNoticeUtil';
 import {CapsuleUtil} from './CapsuleUtil';
 
@@ -85,7 +85,7 @@ export class InjectNoticeStub extends rpc.RemoteObject {
     }
 
     handlePC(code, data, reply, option): boolean {
-   
+
         switch (code) {
             case CmdCode.OPEN_NOTICE: {
                 console.debug(TAG, `RpcServer:open notice is called`);
@@ -94,7 +94,8 @@ export class InjectNoticeStub extends rpc.RemoteObject {
                     let instance: CapsuleUtil = CapsuleUtil.getInstance();
                     console.debug(TAG, ` processCapsulebeign:${deviceInfo.deviceType}`);
                     instance.processCapsule(true);
-                } catch (err: Base.BusinessError) {
+                } catch (error) {
+                    let err = error as Base.BusinessError;
                     console.error(TAG, `CapsuleUtil.getInstance() err:${JSON.stringify(err)}`);
                 }
                 reply.writeInt(0);
@@ -110,8 +111,8 @@ export class InjectNoticeStub extends rpc.RemoteObject {
                     console.debug(TAG, ` processCapsulebeign close:${deviceInfo.deviceType}`);
                     instance.processCapsule(false);
                     instance.closePanel();
-
-                } catch (err: Base.BusinessError) {
+                } catch (error) {
+                    let err = error as Base.BusinessError;
                     console.error(TAG, `CapsuleUtil.getInstance()  close err:${JSON.stringify(err)}`);
                 }
                 reply.writeInt(0);

@@ -16,8 +16,8 @@
 import util from '@ohos.util';
 import notificationManager from '@ohos.notificationManager';
 import inputEventClient from '@ohos.multimodalInput.inputEventClient';
-import WantAgent, { WantAgent as _WantAgent } from '@ohos.wantAgent';
-import CommonEventManager from '@ohos.commonEvent';
+import WantAgent, { WantAgent as _WantAgent } from '@ohos.app.ability.wantAgent';
+import CommonEventManager from '@ohos.commonEventManager';
 import Base from '@ohos.base';
 import type context from '@ohos.app.ability.common';
 import image from '@ohos.multimedia.image';
@@ -49,9 +49,9 @@ class InjectNoticeUtil {
         },
       }
     ],
-    operationType: WantAgent.OperationType.SEND_COMMON_EVENT,
+    actionType: WantAgent.OperationType.SEND_COMMON_EVENT,
     requestCode: 0,
-    wantAgentFlags: [WantAgent.WantAgentFlags.CONSTANT_FLAG],
+    actionFlags: [WantAgent.WantAgentFlags.CONSTANT_FLAG],
   };
   commonEventSubscriber: CommonEventManager.CommonEventSubscriber = null;
   capsuleIcon: image.PixelMap | null = null;
@@ -113,7 +113,7 @@ class InjectNoticeUtil {
       smallIcon: imagePixelMap,
       isUnremovable: false,
       removalWantAgent: this.removalWantAgentObj,
-      slotType: notificationManager.SlotType.LIVE_VIEW,
+      notificationSlotType: notificationManager.SlotType.LIVE_VIEW,
       content: {
         notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_SYSTEM_LIVE_VIEW,
         systemLiveView: {
@@ -157,7 +157,8 @@ class InjectNoticeUtil {
       }).catch((err: Base.BusinessError) => {
         console.error(TAG, `initRemovalWantAgent getWantAgent failed, code: ${JSON.stringify(err.code)}, message: ${JSON.stringify(err.message)}`);
       });
-    } catch (err: Base.BusinessError) {
+    } catch (error) {
+      let err = error as Base.BusinessError;
       console.error(TAG, `initRemovalWantAgent getWantAgent catch failed, code: ${JSON.stringify(err.code)}, message: ${JSON.stringify(err.message)}`);
     }
     console.info(TAG, 'initRemovalWantAgent getWantAgent end');
@@ -167,7 +168,8 @@ class InjectNoticeUtil {
     console.debug(TAG, 'cancelAuthorization begin===>');
     try {
       inputEventClient.permitInjection(false);
-    } catch (err: Base.BusinessError) {
+    } catch (error) {
+      let err = error as Base.BusinessError;
       console.error(TAG + `cancelAuthorization fail: ${JSON.stringify(err)}`);
     }
     console.debug(TAG, 'cancelAuthorization end===>');

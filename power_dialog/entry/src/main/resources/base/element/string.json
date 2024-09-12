@@ -41,6 +41,18 @@
             "value": "reboot or shutdown"
         },
         {
+            "name": "inject_notice_ability_label",
+            "value": "InjectNoticeAbility"
+        },
+        {
+            "name": "capsule_window_ability_label",
+            "value": "CapsuleWindowAbility"
+        },
+        {
+            "name": "inject_input_reason",
+            "value": "inject event"
+        },
+        {
             "name": "BUTTON_CANCEL_POWERDIALOG",
             "value": "Cancel"
         },

@@ -18,7 +18,7 @@ export default class GlobalContext {
   private constructor() {}
   private static instance: GlobalContext;
   private _objects = new Map<string, Object>();
-  
+
   public static getContext(): GlobalContext {
     if (!GlobalContext.instance) {
       console.log('make a singleton object');
@@ -27,12 +27,12 @@ export default class GlobalContext {
     console.log('finished ~');
     return GlobalContext.instance;
   }
-  
+
   getObject(value: string): Object | undefined {
     console.log('get singleton object value');
     return this._objects.get(value);
   }
-  
+
   setObject(key: string, objectClass: Object): void {
     console.log('set singleton object key and value');
     this._objects.set(key, objectClass);
