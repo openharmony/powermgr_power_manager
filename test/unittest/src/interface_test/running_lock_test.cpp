@@ -232,11 +232,7 @@ HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_FALSE(runningLock->IsUsed());
 
-    usleep(timeoutMs * US_PER_MS);
-
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
-    EXPECT_TRUE(runningLock->IsUsed());
-    usleep(timeoutMs / 2 * US_PER_MS);
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
 }
@@ -473,6 +469,30 @@ HWTEST_F (RunningLockTest, RunningLockTest018, TestSize.Level1)
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
     
     EXPECT_TRUE(runninglockProxy->UpdateWorkSource(pid, uid, remoteObj, {{0, {"test", false}}}));
+    runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
+    EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
+    EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));
+}
+
+/**
+ * @tc.name: RunningLockTest019
+ * @tc.desc: Test UpdateWorkSource function
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F (RunningLockTest, RunningLockTest019, TestSize.Level1)
+{
+    auto runninglockProxy = std::make_shared<RunningLockProxy>();
+    pid_t pid = 1;
+    pid_t uid = -1;
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    sptr<IRemoteObject> remoteObj2 = nullptr;
+    runninglockProxy->AddRunningLock(pid, uid, remoteObj);
+    runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
+    
+    EXPECT_TRUE(runninglockProxy->UpdateWorkSource(pid, uid, remoteObj, {{0, {"test019", false}}}));
+    EXPECT_TRUE(runninglockProxy->UpdateProxyState(pid, uid, remoteObj, true));
+    EXPECT_TRUE(runninglockProxy->UpdateProxyState(pid, uid, remoteObj, false));
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));

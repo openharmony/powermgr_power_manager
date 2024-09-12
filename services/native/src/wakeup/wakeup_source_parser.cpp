@@ -143,12 +143,14 @@ bool WakeupSourceParser::ParseSourcesProc(
     }
 
     if (!enable && g_isFirstSettingUpdated) {
-        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK
+            && (!SettingHelper::IsWakeupDoubleSettingValid())) {
             SettingHelper::SetSettingWakeupDouble(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting wakeupDoubleClick enable=%{public}d", enable);
         }
 
-        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP
+            && (!SettingHelper::IsWakeupPickupSettingValid())) {
             SettingHelper::SetSettingWakeupPickup(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting pickup enable=%{public}d", enable);
         }
@@ -159,8 +161,18 @@ bool WakeupSourceParser::ParseSourcesProc(
         parseSources->PutSource(wakeupSource);
     }
 
+    SetSettingsToDatabase(wakeupDeviceType, enable);
     return true;
 }
 
+void WakeupSourceParser::SetSettingsToDatabase(WakeupDeviceType type, bool enable)
+{
+    if (type == WakeupDeviceType::WAKEUP_DEVICE_LID) {
+        if (!SettingHelper::IsWakeupLidSettingValid()) {
+            SettingHelper::SetSettingWakeupLid(enable);
+            POWER_HILOGI(FEATURE_WAKEUP, "the setting lidwakeup enable=%{public}d", enable);
+        }
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

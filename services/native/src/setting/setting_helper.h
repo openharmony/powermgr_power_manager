@@ -31,10 +31,34 @@ public:
         ENABLE = 1,
     };
     static void UpdateCurrentUserId();
+    static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
     static bool IsDisplayOffTimeSettingValid();
+    static bool IsSuspendSourcesSettingValid();
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    static bool IsSettingDisplayAcScreenOffTimeValid();
+    static int64_t GetSettingDisplayAcScreenOffTime(int64_t defaultVal);
+    static void SetSettingDisplayAcScreenOffTime(int64_t time);
+    static sptr<SettingObserver> RegisterSettingDisplayAcScreenOffTimeObserver(SettingObserver::UpdateFunc& func);
+    static bool IsSettingDisplayDcScreenOffTimeValid();
+    static int64_t GetSettingDisplayDcScreenOffTime(int64_t defaultVal);
+    static void SetSettingDisplayDcScreenOffTime(int64_t time);
+    static sptr<SettingObserver> RegisterSettingDisplayDcScreenOffTimeObserver(SettingObserver::UpdateFunc& func);
+    static bool IsSettingAcSuspendSourcesValid();
+    static const std::string GetSettingAcSuspendSources();
+    static void SetSettingAcSuspendSources(const std::string& jsonConfig);
+    static sptr<SettingObserver> RegisterSettingAcSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
+    static bool IsSettingDcSuspendSourcesValid();
+    static const std::string GetSettingDcSuspendSources();
+    static void SetSettingDcSuspendSources(const std::string& jsonConfig);
+    static sptr<SettingObserver> RegisterSettingDcSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
+#else
     static int64_t GetSettingDisplayOffTime(int64_t defaultVal);
     static void SetSettingDisplayOffTime(int64_t time);
     static sptr<SettingObserver> RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc& func);
+    static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
+    static const std::string GetSettingSuspendSources();
+    static void SetSettingSuspendSources(const std::string& jsonConfig);
+#endif
     static bool IsAutoAdjustBrightnessSettingValid();
     static int32_t GetSettingAutoAdjustBrightness(int32_t defaultVal);
     static void SetSettingAutoAdjustBrightness(SwitchStatus status);
@@ -53,10 +77,6 @@ public:
     static int32_t GetSettingIntellVoice(int32_t defaultVal);
     static void SetSettingIntellVoice(SwitchStatus status);
     static sptr<SettingObserver> RegisterSettingIntellVoiceObserver(SettingObserver::UpdateFunc& func);
-    static sptr<SettingObserver> RegisterSettingSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
-    static bool IsSuspendSourcesSettingValid();
-    static const std::string GetSettingSuspendSources();
-    static void SetSettingSuspendSources(const std::string& jsonConfig);
     static sptr<SettingObserver> RegisterSettingWakeupSourcesObserver(SettingObserver::UpdateFunc& func);
     static bool IsWakeupSourcesSettingValid();
     static const std::string GetSettingWakeupSources();
@@ -71,7 +91,6 @@ public:
     static void SetSettingWakeupPickup(bool enable);
     static void RegisterSettingWakeupPickupObserver(SettingObserver::UpdateFunc& func);
     static void UnregisterSettingWakeupPickupObserver();
-    static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
     static void SaveCurrentMode(int32_t mode);
     static int32_t ReadCurrentMode(int32_t defaultMode);
     static const std::string ReadPowerModeRecoverMap();
@@ -85,12 +104,30 @@ public:
     static bool IsWakeupLidSettingValid();
 
 private:
+    static bool IsSettingKeyValid(const std::string& key);
+    static int32_t GetSettingIntValue(const std::string& key, int32_t defaultVal);
+    static void SetSettingIntValue(const std::string& key, int32_t value);
+    static int64_t GetSettingLongValue(const std::string& key, int64_t defaultVal);
+    static void SetSettingLongValue(const std::string& key, int64_t value);
+    static const std::string GetSettingStringValue(const std::string& key);
+    static void SetSettingJsonStringValue(const std::string& key, const std::string& jsonConfig);
+    static sptr<SettingObserver> RegisterSettingKeyObserver(const std::string& key, SettingObserver::UpdateFunc& func);
+
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    // AC for Alternating Current, means charing supply
+    // DC for Direct Current, means battery supply
+    static constexpr const char* SETTING_DISPLAY_AC_OFF_TIME_KEY {"settings.display.ac.screen_off_timeout"};
+    static constexpr const char* SETTING_DISPLAY_DC_OFF_TIME_KEY {"settings.display.dc.screen_off_timeout"};
+    static constexpr const char* SETTING_POWER_AC_SUSPEND_SOURCES_KEY {"settings.power.ac.suspend_sources"};
+    static constexpr const char* SETTING_POWER_DC_SUSPEND_SOURCES_KEY {"settings.power.dc.suspend_sources"};
+#else
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
+    static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
+#endif
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
     static constexpr const char* SETTING_VIBRATION_KEY {"physic_navi_haptic_feedback_enabled"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.general.accelerometer_rotation_status"};
-    static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
     static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};

@@ -42,7 +42,7 @@ ohos_shared_library("power_vibrator") {
   ]
   if (defined(global_parts_info) &&
       defined(global_parts_info.sensors_miscdevice)) {
-    defines = [ "POWER_VIBRATOR_MODE_ENABLE" ]
+    defines += [ "POWER_VIBRATOR_MODE_ENABLE" ]
     external_deps += [ "miscdevice:vibrator_interface_native" ]
   }
   subsystem_name = "powermgr"

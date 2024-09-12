@@ -115,6 +115,10 @@ bool SettingProvider::IsValidKey(const std::string& key)
 {
     std::string value;
     ErrCode ret = GetStringValue(key, value);
+    if (!value.empty()) {
+        POWER_HILOGI(COMP_UTILS, "the getValue is:%{public}s", value.c_str());
+    }
+    POWER_HILOGI(COMP_UTILS, "the getRet is:%{public}u", ret);
     return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
 }
 
@@ -298,8 +302,22 @@ Uri SettingProvider::AssembleUri(const std::string& key)
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)
 {
-    return key == SETTING_POWER_WAKEUP_DOUBLE_KEY || key == SETTING_POWER_WAKEUP_PICKUP_KEY ||
-           key == SETTING_POWER_WAKEUP_SOURCES_KEY;
+    std::vector<std::string> needMultiUserStrVec {
+        SETTING_POWER_WAKEUP_DOUBLE_KEY,
+        SETTING_POWER_WAKEUP_PICKUP_KEY,
+        SETTING_POWER_WAKEUP_SOURCES_KEY,
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+        SETTING_DISPLAY_AC_OFF_TIME_KEY,
+        SETTING_DISPLAY_DC_OFF_TIME_KEY,
+        SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
+        SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
+#endif
+    };
+    
+    if (std::count(needMultiUserStrVec.begin(), needMultiUserStrVec.end(), key)) {
+        return true;
+    }
+    return false;
 }
 
 std::string SettingProvider::ReplaceUserIdForUri(int32_t userId)

@@ -32,6 +32,7 @@ public:
     static bool ParseSourcesProc(
         std::shared_ptr<WakeupSources>& parseSources, Json::Value& valueObj, std::string& key);
     static bool GetTargetPath(std::string& targetPath);
+    static void SetSettingsToDatabase(WakeupDeviceType type, bool enable);
 };
 } // namespace PowerMgr
 } // namespace OHOS

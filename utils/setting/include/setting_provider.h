@@ -45,12 +45,21 @@ protected:
     ~SettingProvider() override;
 
 private:
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    // AC for Alternating Current, means charing supply
+    // DC for Direct Current, means battery supply
+    static constexpr const char* SETTING_DISPLAY_AC_OFF_TIME_KEY {"settings.display.ac.screen_off_timeout"};
+    static constexpr const char* SETTING_DISPLAY_DC_OFF_TIME_KEY {"settings.display.dc.screen_off_timeout"};
+    static constexpr const char* SETTING_POWER_AC_SUSPEND_SOURCES_KEY {"settings.power.ac.suspend_sources"};
+    static constexpr const char* SETTING_POWER_DC_SUSPEND_SOURCES_KEY {"settings.power.dc.suspend_sources"};
+#else
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
+    static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
+#endif
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};
     static constexpr const char* SETTING_VIBRATION_KEY {"physic_navi_haptic_feedback_enabled"};
     static constexpr const char* SETTING_WINDOW_ROTATION_KEY {"settings.general.accelerometer_rotation_status"};
-    static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
     static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
     static constexpr const char* SETTING_INTELL_VOICE_KEY {"intell_voice_trigger_enabled"};
     static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};

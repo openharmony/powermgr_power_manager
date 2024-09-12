@@ -47,7 +47,7 @@ constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_TEST_MS = 2000 + 2000;
 constexpr int32_t WAIT_SUSPEND_TIME_MS = 2000;
-
+constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 bool g_screenOnEvent = false;
 bool g_screenOffEvent = false;
 bool g_awakeCallback = false;
@@ -60,7 +60,7 @@ std::shared_ptr<KeyEvent> CreateKeyEvent()
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    keyEvent->SetDeviceId(COLLABORATION_REMOTE_DEVICE_ID);
     return keyEvent;
 }
 
@@ -76,22 +76,18 @@ std::shared_ptr<PointerEvent> CreatePointerEvent()
     item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_SIX);
-    item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
     item.SetPointerId(1);
     item.SetDisplayX(ARBITRARY_NON_MAGIC_NUMBER_SIX);
     item.SetDisplayY(ARBITRARY_NON_MAGIC_NUMBER_TEN);
     item.SetPressure(ARBITRARY_NON_MAGIC_NUMBER_EIGHT);
-    item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
+    pointerEvent->SetDeviceId(COLLABORATION_REMOTE_DEVICE_ID);
     pointerEvent->SetPointerAction(PointerEvent::POINTER_ACTION_DOWN);
     pointerEvent->SetPointerId(1);
     pointerEvent->SetSourceType(PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-
-    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
-
     return pointerEvent;
 }
 #endif
@@ -384,7 +380,8 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
     const sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     powerMgrClient.RegisterPowerStateCallback(stateCallback);
 
-    powerMgrClient.SuspendDevice();
+    powerMgrClient.LockScreenAfterTimingOut(false, false, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, false);
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
@@ -404,6 +401,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
+    powerMgrClient.LockScreenAfterTimingOut(true, false, true);
     powerMgrClient.SuspendDevice();
     usleep(WAIT_AUTO_SUSPEND_SLEEP_TIME_MS * US_PER_MS);
 
@@ -443,6 +441,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
     EXPECT_FALSE(subscriber == nullptr);
     const sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     powerMgrClient.RegisterPowerStateCallback(stateCallback);
+    powerMgrClient.LockScreenAfterTimingOut(false, false, false);
 
     usleep(OVER_TIME_SCREEN_OFF_TIME_TEST_MS * US_PER_MS);
 
@@ -463,6 +462,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
+    powerMgrClient.LockScreenAfterTimingOut(true, false, true);
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     powerMgrClient.RestoreScreenOffTime();
@@ -495,7 +495,8 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Lev
     const sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     powerMgrClient.RegisterPowerStateCallback(stateCallback);
 
-    powerMgrClient.SuspendDevice();
+    powerMgrClient.LockScreenAfterTimingOut(false, false, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, false);
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
@@ -518,6 +519,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Lev
 
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
+    powerMgrClient.LockScreenAfterTimingOut(true, false, true);
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_008 end");
@@ -557,7 +559,8 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Lev
     runninglockOne->UnLock();
     EXPECT_FALSE(runninglockOne->IsUsed());
 
-    powerMgrClient.SuspendDevice();
+    powerMgrClient.LockScreenAfterTimingOut(false, false, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, false);
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
@@ -574,6 +577,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
+    powerMgrClient.LockScreenAfterTimingOut(true, false, true);
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_009 end");
@@ -605,7 +609,8 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
     const sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     powerMgrClient.RegisterPowerStateCallback(stateCallback);
 
-    powerMgrClient.SuspendDevice();
+    powerMgrClient.LockScreenAfterTimingOut(false, false, false);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, false);
     usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
@@ -625,6 +630,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
+    powerMgrClient.LockScreenAfterTimingOut(true, false, true);
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     powerMgrClient.UnRegisterPowerStateCallback(stateCallback);
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_010 end");
@@ -772,10 +778,15 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_013, TestSize.Lev
         EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
         ResetTriggeredFlag();
         powerMgrClient.LockScreenAfterTimingOut(i % 2, i / 2, 0);
-        powerMgrClient.SuspendDevice();
+        powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, false);
         usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
-        EXPECT_FALSE(g_screenOffEvent);
-        EXPECT_FALSE(g_inactiveCallback);
+        if (i % 2) {
+            EXPECT_TRUE(g_screenOffEvent);
+            EXPECT_TRUE(g_inactiveCallback);
+        } else {
+            EXPECT_FALSE(g_screenOffEvent);
+            EXPECT_FALSE(g_inactiveCallback);
+        }
     }
     for (int i = 0; i < 4; ++i) {
         powerMgrClient.WakeupDevice();

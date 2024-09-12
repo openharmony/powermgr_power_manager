@@ -180,6 +180,12 @@ ErrCode PowerShellCommand::RunAsForceTimeOutCommand()
     if (!IsDeveloperMode()) {
         return ERR_PERMISSION_DENIED;
     }
+    auto parameterCount = argList_.size();
+    constexpr size_t MIN_PARAMETER_COUNT = 1;
+    if (parameterCount < MIN_PARAMETER_COUNT) {
+        resultReceiver_.append("too few arguments \n");
+        return ERR_OK;
+    }
     bool enabled = argList_[0][0] - '0';
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     client.SetForceTimingOut(enabled);

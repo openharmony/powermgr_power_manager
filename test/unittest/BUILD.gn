@@ -65,7 +65,6 @@ deps_ex = [
   "config_policy:configpolicy_util",
   "ffrt:libffrt",
   "hilog:libhilog",
-  "hisysevent:libhisysevent",
   "input:libmmi-client",
   "ipc:ipc_core",
   "jsoncpp:jsoncpp",
@@ -77,7 +76,9 @@ deps_ex = [
 if (has_sensors_sensor_part) {
   deps_ex += [ "sensor:sensor_interface_native" ]
 }
-
+if (has_hiviewdfx_hisysevent_part) {
+  deps_ex += [ "hisysevent:libhisysevent" ]
+}
 defs = [ "POWER_GTEST" ]
 
 ##############################client_test##########################################
@@ -269,7 +270,7 @@ ohos_unittest("test_power_mgr_service_death") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  defines = [ "POWERMGR_SERVICE_DEATH_UT" ]
+  defines += [ "POWERMGR_SERVICE_DEATH_UT" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -546,7 +547,7 @@ ohos_unittest("test_mock_proxy") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  defines = [
+  defines += [
     "MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE",
     "MOCK_MOCK_READSTRING_DESCRIPTIR",
   ]
@@ -563,7 +564,7 @@ ohos_unittest("test_mock_proxy") {
 
 ohos_unittest("power_state_machine_native_test") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
 
   sources = [ "src/native_power_state_machine_test.cpp" ]
 
@@ -585,7 +586,7 @@ ohos_unittest("power_state_machine_native_test") {
 
 ohos_unittest("test_running_lock_native") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
 
   sources = [ "src/running_lock_native_test.cpp" ]
 
@@ -607,7 +608,7 @@ ohos_unittest("test_running_lock_native") {
 
 ohos_unittest("test_power_mgr_service_native") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
 
   sanitize = {
     cfi = true
@@ -644,7 +645,7 @@ ohos_unittest("test_power_mgr_service_native") {
 
 ohos_unittest("test_device_state_action_native") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
 
   sources = [ "src/device_state_action_native_test.cpp" ]
 
@@ -689,7 +690,7 @@ ohos_unittest("test_power_mgr_dump") {
 
 ohos_unittest("test_power_mgr_client_native") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
 
   sources = [ "src/power_mgr_client_native_test.cpp" ]
 
@@ -712,7 +713,7 @@ ohos_unittest("test_power_mgr_client_native") {
 
 ohos_unittest("power_mode_module_native_test") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
   sources = [ "src/power_mode_module_native_test.cpp" ]
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -730,7 +731,7 @@ ohos_unittest("power_mode_module_native_test") {
 
 ohos_unittest("test_running_lock_hub_native") {
   module_out_path = module_output_path
-  defines = defs
+  defines += defs
 
   include_dirs =
       [ "${powermgr_service_path}/native/src/actions/default/suspend" ]
@@ -798,7 +799,7 @@ ohos_unittest("test_power_suspend_parse") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "THERMAL_GTEST" ]
+  defines += [ "THERMAL_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -835,7 +836,7 @@ ohos_unittest("test_power_wakeup_parse") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "THERMAL_GTEST" ]
+  defines += [ "THERMAL_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -873,7 +874,7 @@ ohos_unittest("test_power_suspend_controller") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "POWERMGR_GTEST" ]
+  defines += [ "POWERMGR_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -912,7 +913,7 @@ ohos_unittest("test_power_suspend") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "POWERMGR_GTEST" ]
+  defines += [ "POWERMGR_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -951,7 +952,7 @@ ohos_unittest("test_power_wakeup_controller") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "POWERMGR_GTEST" ]
+  defines += [ "POWERMGR_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -990,7 +991,7 @@ ohos_unittest("test_power_wakeup") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "POWERMGR_GTEST" ]
+  defines += [ "POWERMGR_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -1048,7 +1049,7 @@ ohos_unittest("test_power_getcontroller_mock") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "POWERMGR_GTEST" ]
+  defines += [ "POWERMGR_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -1087,7 +1088,7 @@ ohos_unittest("test_power_screenon_mock") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  defines = [ "POWERMGR_GTEST" ]
+  defines += [ "POWERMGR_GTEST" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",

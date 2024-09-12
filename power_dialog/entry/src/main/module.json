@@ -61,7 +61,7 @@
         "name": "CapsuleWindowAbility",
         "srcEntry": "./ets/UiExtensionAbility/CapsuleWindowAbility.ets",
         "type": "sys/commonUI",
-        "exported": true,
+        "exported": false,
         "label": "CapsuleWindowAbility",
         "skills": [
           {

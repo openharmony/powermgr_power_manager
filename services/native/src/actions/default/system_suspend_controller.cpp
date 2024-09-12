@@ -14,8 +14,9 @@
  */
 
 #include "system_suspend_controller.h"
-
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include "hisysevent.h"
+#endif
 #include "power_common.h"
 #include "power_log.h"
 #include "suspend/running_lock_hub.h"
@@ -101,8 +102,10 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SET_SUSPEND_TAG", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "TAG", tag);
+#endif
     powerInterface_->SetSuspendTag(tag);
 }
 
@@ -124,8 +127,10 @@ void SystemSuspendController::Suspend(
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "TYPE", static_cast<int32_t>(1));
+#endif
     if (force) {
         powerInterface_->ForceSuspend();
     } else if (allowSleepTask_.load()) {
@@ -139,8 +144,10 @@ void SystemSuspendController::Wakeup()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "TYPE", static_cast<int32_t>(0));
+#endif
     powerInterface_->StopSuspend();
 }
 
@@ -151,8 +158,10 @@ bool SystemSuspendController::Hibernate()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return false;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_HIBERNATE",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
+#endif
     int32_t ret = powerInterface_->Hibernate();
     if (ret != HDF_SUCCESS) {
         POWER_HILOGE(COMP_SVC, "SystemSuspendController hibernate failed.");

@@ -286,6 +286,30 @@ void RunningLockProxy::ResetRunningLocks()
     }
 }
 
+bool RunningLockProxy::UpdateProxyState(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj,
+    bool state)
+{
+    std::string proxyKey = AssembleProxyKey(pid, uid);
+    auto proxyIter = proxyMap_.find(proxyKey);
+    if (proxyIter == proxyMap_.end()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UpdateProxyState failed, proxyKey=%{public}s not existed",
+            proxyKey.c_str());
+        return false;
+    }
+    auto& tokenWksMap = proxyIter->second;
+    auto tokenWksMapIter = tokenWksMap.find(remoteObj);
+    if (tokenWksMapIter == tokenWksMap.end()) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UpdateProxyState failed, runninglock not existed");
+        return false;
+    }
+    auto& workSourceMap = tokenWksMapIter->second.first;
+    for (auto &wks : workSourceMap) {
+        wks.second.second = false;
+    }
+    tokenWksMapIter->second.second = 0;
+    return true;
+}
+
 void RunningLockProxy::Clear()
 {
     proxyMap_.clear();

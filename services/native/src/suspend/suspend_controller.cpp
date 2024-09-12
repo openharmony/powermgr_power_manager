@@ -26,13 +26,20 @@
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+sptr<SettingObserver> g_suspendSourcesKeyAcObserver = nullptr;
+sptr<SettingObserver> g_suspendSourcesKeyDcObserver = nullptr;
+#else
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
+#endif
 FFRTMutex g_monitorMutex;
 const uint32_t SLEEP_DELAY_MS = 5000;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
@@ -50,9 +57,21 @@ SuspendController::SuspendController(
 
 SuspendController::~SuspendController()
 {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyAcObserver);
+        g_suspendSourcesKeyAcObserver = nullptr;
+    }
+    if (g_suspendSourcesKeyDcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyDcObserver);
+        g_suspendSourcesKeyDcObserver = nullptr;
+    }
+#else
     if (g_suspendSourcesKeyObserver) {
         SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyObserver);
+        g_suspendSourcesKeyObserver = nullptr;
     }
+#endif
     ffrtTimer_.reset();
 }
 
@@ -179,40 +198,73 @@ void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
     });
 }
 
+void SuspendController::UpdateSuspendSources()
+{
+    POWER_HILOGI(COMP_SVC, "start setting string update");
+    std::lock_guard lock(mutex_);
+
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+    std::string jsonStr;
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (pms->IsPowerConnected()) {
+        jsonStr = SettingHelper::GetSettingAcSuspendSources();
+    } else {
+        jsonStr = SettingHelper::GetSettingDcSuspendSources();
+    }
+#else
+    jsonStr = SettingHelper::GetSettingSuspendSources();
+#endif
+    std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
+    std::vector<SuspendSource> updateSourceList = sources->GetSourceList();
+    if (updateSourceList.size() == 0) {
+        return;
+    }
+    sourceList_ = updateSourceList;
+    POWER_HILOGI(COMP_SVC, "start updateListener");
+    Cancel();
+    uint32_t id = 0;
+    for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
+        std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+        POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
+            id, source->GetReason());
+        if (monitor != nullptr && monitor->Init()) {
+            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+                this->ControlListener(reason, action, delay);
+            });
+            g_monitorMutex.lock();
+            monitorMap_.emplace(monitor->GetReason(), monitor);
+            g_monitorMutex.unlock();
+        }
+    }
+}
+
 void SuspendController::RegisterSettingsObserver()
 {
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver && g_suspendSourcesKeyDcObserver) {
+#else
     if (g_suspendSourcesKeyObserver) {
+#endif
         POWER_HILOGE(FEATURE_POWER_STATE, "suspend sources key observer is already registered");
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {
-        POWER_HILOGI(COMP_SVC, "start setting string update");
-        std::lock_guard lock(mutex_);
-        std::string jsonStr = SettingHelper::GetSettingSuspendSources();
-        std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
-        std::vector<SuspendSource> updateSourceList = sources->GetSourceList();
-        if (updateSourceList.size() == 0) {
-            return;
-        }
-        sourceList_ = updateSourceList;
-        POWER_HILOGI(COMP_SVC, "start updateListener");
-        Cancel();
-        uint32_t id = 0;
-        for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
-            std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
-            POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
-                id, source->GetReason());
-            if (monitor != nullptr && monitor->Init()) {
-                monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
-                    this->ControlListener(reason, action, delay);
-                });
-                g_monitorMutex.lock();
-                monitorMap_.emplace(monitor->GetReason(), monitor);
-                g_monitorMutex.unlock();
-            }
-        }
+        SuspendController::UpdateSuspendSources();
     };
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver == nullptr) {
+        g_suspendSourcesKeyAcObserver = SettingHelper::RegisterSettingAcSuspendSourcesObserver(updateFunc);
+    }
+    if (g_suspendSourcesKeyDcObserver == nullptr) {
+        g_suspendSourcesKeyDcObserver = SettingHelper::RegisterSettingDcSuspendSourcesObserver(updateFunc);
+    }
+#else
     g_suspendSourcesKeyObserver = SettingHelper::RegisterSettingSuspendSourcesObserver(updateFunc);
+#endif
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
 }
 
@@ -281,7 +333,7 @@ void SuspendController::CancelEvent()
     }
 }
 
-void SuspendController::RecordPowerKeyDown()
+void SuspendController::RecordPowerKeyDown(bool interrupting)
 {
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
@@ -292,7 +344,10 @@ void SuspendController::RecordPowerKeyDown()
     if (!isScreenOn) {
         powerkeyDownWhenScreenOff_ = true;
     } else {
-        powerkeyDownWhenScreenOff_ = false;
+        if (interrupting) {
+            POWER_HILOGI(FEATURE_SUSPEND, "Suspend record key down after interrupting screen off");
+        }
+        powerkeyDownWhenScreenOff_ = interrupting;
     }
 
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -380,9 +435,11 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         force = false;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SLEEP_START",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TRIGGER_EVENT_TYPE", static_cast<int32_t>(reason),
         "ACTION_EVENT_TYPE", static_cast<int32_t>(force));
+#endif
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
@@ -489,7 +546,13 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    SetForceSleepingFlag(true);
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr && pms->GetSuspendController() != nullptr) {
+        pms->GetSuspendController()->SetForceSleepingFlag(true);
+        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
+    }
 #endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasionBySuspendType(reason), true);
@@ -602,13 +665,55 @@ bool PowerKeySuspendMonitor::Init()
                     "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");
                 return;
             }
-            Notify();
+            auto powerkeyScreenOffTask = [*this]() mutable {
+                Notify();
+                powerkeyScreenOff_ = false;
+                EndPowerkeyScreenOff();
+            };
+            BeginPowerkeyScreenOff();
+            powerkeyScreenOff_ = true;
+            ffrt::submit(powerkeyScreenOffTask, {}, {&powerkeyScreenOff_});
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER]submitted screen off ffrt task");
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 #else
     return false;
 #endif
+}
+
+void PowerKeySuspendMonitor::BeginPowerkeyScreenOff() const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    auto stateAction = stateMachine->GetStateAction();
+    if (stateAction == nullptr) {
+        return;
+    }
+    stateAction->BeginPowerkeyScreenOff();
+}
+
+void PowerKeySuspendMonitor::EndPowerkeyScreenOff() const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    auto stateAction = stateMachine->GetStateAction();
+    if (stateAction == nullptr) {
+        return;
+    }
+    stateAction->EndPowerkeyScreenOff();
 }
 
 void PowerKeySuspendMonitor::Cancel()
@@ -653,6 +758,5 @@ bool SwitchSuspendMonitor::Init()
 }
 
 void SwitchSuspendMonitor::Cancel() {}
-
 } // namespace PowerMgr
 } // namespace OHOS

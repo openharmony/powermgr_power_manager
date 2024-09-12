@@ -97,8 +97,12 @@ public:
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
+    bool IsCollaborationScreenOn();
     void Reset();
     int64_t GetSleepTime();
+#ifdef MSDP_MOVEMENT_ENABLE
+    bool IsMovementStateOn();
+#endif
 
     PowerState GetState()
     {
@@ -120,11 +124,15 @@ public:
     void ResetSleepTimer();
     void SetAutoSuspend(SuspendDeviceType type, uint32_t delay);
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
+    bool TryToCancelScreenOff();
+    void BeginPowerkeyScreenOff();
+    void EndPowerkeyScreenOff();
     void SetDisplaySuspend(bool enable);
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
+    static void DisplayOffTimeUpdateFunc();
 
     // only use for test
     int64_t GetLastSuspendDeviceTime() const
@@ -248,6 +256,7 @@ private:
 
     protected:
         bool CheckState();
+        bool NeedNotify(PowerState currentState);
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
         PowerState state_;
@@ -290,7 +299,8 @@ private:
     void EmplaceDim();
     void InitTransitMap();
     bool CanTransitTo(PowerState to, StateChangeReason reason);
-    void NotifyPowerStateChanged(PowerState state);
+    void NotifyPowerStateChanged(PowerState state,
+        StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
     void HandleActivityTimeout();
@@ -343,6 +353,7 @@ private:
     std::atomic<int64_t> settingStateFlag_ {-1};
     std::atomic<bool> settingOnStateFlag_ {false};
     std::atomic<bool> settingOffStateFlag_ {false};
+    std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
     std::atomic<bool> proximityScreenOffTimerStarted_ {false};
 };

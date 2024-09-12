@@ -31,7 +31,9 @@
 #include <common_event_support.h>
 #include <datetime_ex.h>
 #include <future>
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 #include <thread>
 #include <dlfcn.h>
 
@@ -134,8 +136,10 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
+#endif
     PublishShutdownEvent();
     std::string actionTimeStr = std::to_string(GetCurrentRealTimeMs());
     PowerEventType eventType = isReboot ? PowerEventType::REBOOT : PowerEventType::SHUTDOWN;

@@ -24,6 +24,7 @@
 #include <input_manager.h>
 #include <securec.h>
 
+#include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
@@ -50,6 +51,8 @@ public:
 
 void PowerWakeupControllerTest::SetUpTestCase(void)
 {
+    PowerMgrClient::GetInstance().SuspendDevice();
+    EXPECT_FALSE(PowerMgrClient::GetInstance().IsScreenOn());
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
     g_service->OnAddSystemAbility(DISPLAY_POWER_MANAGER_ID, TEST_DEVICE_ID);

@@ -26,13 +26,15 @@ declare_args() {
   power_manager_feature_screen_on_timeout_check = false
   power_manager_feature_doubleclick_or_pickup = true
   power_manager_feature_force_sleep_broadcast = false
+  power_manager_feature_movement = true
+  power_manager_feature_charging_type_setting = false
 }
 
-cflags_cc = []
+defines = []
 if (!defined(global_parts_info) ||
     defined(global_parts_info.powermgr_display_manager)) {
   has_display_manager_part = true
-  cflags_cc += [ "-DHAS_DISPLAY_MANAGER_PART" ]
+  defines += [ "HAS_DISPLAY_MANAGER_PART" ]
 } else {
   has_display_manager_part = false
 }
@@ -40,14 +42,14 @@ if (!defined(global_parts_info) ||
 if (!defined(global_parts_info) ||
     defined(global_parts_info.resourceschedule_device_standby)) {
   has_device_standby_part = true
-  cflags_cc += [ "-DHAS_DEVICE_STANDBY_PART" ]
+  defines += [ "HAS_DEVICE_STANDBY_PART" ]
 } else {
   has_device_standby_part = false
 }
 
 if (!defined(global_parts_info) || defined(global_parts_info.sensors_sensor)) {
   has_sensors_sensor_part = true
-  cflags_cc += [ "-DHAS_SENSORS_SENSOR_PART" ]
+  defines += [ "HAS_SENSORS_SENSOR_PART" ]
 } else {
   has_sensors_sensor_part = false
 }
@@ -55,9 +57,25 @@ if (!defined(global_parts_info) || defined(global_parts_info.sensors_sensor)) {
 if (!defined(global_parts_info) ||
     defined(global_parts_info.multimodalinput_input)) {
   has_multimodalinput_input_part = true
-  cflags_cc += [ "-DHAS_MULTIMODALINPUT_INPUT_PART" ]
+  defines += [ "HAS_MULTIMODALINPUT_INPUT_PART" ]
 } else {
   has_multimodalinput_input_part = false
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.hiviewdfx_hisysevent)) {
+  has_hiviewdfx_hisysevent_part = true
+  defines += [ "HAS_HIVIEWDFX_HISYSEVENT_PART" ]
+} else {
+  has_hiviewdfx_hisysevent_part = false
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.hiviewdfx_hitrace)) {
+  has_hiviewdfx_hitrace_part = true
+  defines += [ "HAS_HIVIEWDFX_HITRACE_PART" ]
+} else {
+  has_hiviewdfx_hitrace_part = false
 }
 
 ability_runtime_path = "//foundation/ability/ability_runtime"

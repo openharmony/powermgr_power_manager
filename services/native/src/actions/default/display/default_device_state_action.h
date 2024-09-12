@@ -31,6 +31,9 @@ public:
     void RefreshActivity(const int64_t callTimeMs, UserActivityType type,
         const uint32_t flags) override {}
     DisplayState GetDisplayState() override;
+    bool TryToCancelScreenOff() override;
+    void BeginPowerkeyScreenOff() override {};
+    void EndPowerkeyScreenOff() override {};
     uint32_t SetDisplayState(DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
     void SetCoordinated(bool coordinated) override;

@@ -31,8 +31,10 @@
             "power_manager_feature_enable_s4",
             "power_manager_feature_doubleclick_or_pickup",
             "power_manager_feature_force_sleep_broadcast",
+            "power_manager_feature_movement",
             "power_manager_feature_screen_on_timeout_check",
-            "power_manager_feature_dialog_path"
+            "power_manager_feature_dialog_path",
+            "power_manager_feature_charging_type_setting"
         ],
         "adapted_system_type": [
             "standard"
