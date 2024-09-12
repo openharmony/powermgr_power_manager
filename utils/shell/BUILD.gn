@@ -40,7 +40,7 @@ ohos_executable("power-shell") {
   }
 
   if (build_variant == "user") {
-    defines = [ "POWER_SHELL_USER" ]
+    defines += [ "POWER_SHELL_USER" ]
   }
 
   install_enable = true

@@ -79,7 +79,8 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(1);
-    EXPECT_FALSE(g_service->IsScreenOn());
+    // the second powerkey event would interrupt the transition to INACTIVE
+    EXPECT_TRUE(g_service->IsScreenOn());
 
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
 }

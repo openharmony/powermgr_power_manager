@@ -26,6 +26,7 @@ group("fuzztest") {
     "getsetdevicemode_fuzzer:GetSetDeviceModeFuzzTest",
     "getstate_fuzzer:GetStateFuzzTest",
     "hibernate_fuzzer:HibernateFuzzTest",
+    "iscollaborationscreenon_fuzzer:IsCollaborationScreenOnFuzzTest",
     "isfoldscreenon_fuzzer:IsFoldScreenOnFuzzTest",
     "isrunninglocktypesupported_fuzzer:IsRunningLockTypeSupportedFuzzTest",
     "isscreenon_fuzzer:IsScreenOnFuzzTest",

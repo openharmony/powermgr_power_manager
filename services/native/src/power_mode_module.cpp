@@ -393,7 +393,7 @@ void PowerModeModule::SetDisplayOffTime(bool isBoot)
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    POWER_HILOGD(FEATURE_POWER_MODE, "Set display off timeout: %{public}d", time);
+    POWER_HILOGI(FEATURE_POWER_MODE, "Set default display off timeout: %{public}d", time);
     bool needUpdateSetting = time > 0;
     pms->GetPowerStateMachine()->SetDisplayOffTime(static_cast<int64_t>(time), needUpdateSetting);
 }

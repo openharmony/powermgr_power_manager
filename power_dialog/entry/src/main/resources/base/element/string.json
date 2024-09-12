@@ -74,7 +74,7 @@
         },
         {
             "name": "WARNING_TIP",
-            "value": "When used to share the screen, participants can remotely assist your desktop"
+            "value": "This allows your screen to be controlled remotely during screen sharing."
         },
         {
             "name": "notice_title",
@@ -82,11 +82,11 @@
         },
         {
             "name": "notice_text",
-            "value": "%s is assisting your desktop remotely"
+            "value": "%s is assisting you remotely"
         },
         {
             "name": "bn_notice_cancel",
-            "value": "Disconnect Remote Assistance"
+            "value": "End remote assistance"
         },
         {
             "name": "bn_agree",
@@ -94,11 +94,11 @@
         },
         {
             "name": "bn_not_agree",
-            "value": "Don't allow"
+            "value": "Deny"
         },
         {
             "name": "text_inject_tip_title",
-            "value": "Allow %s to use your screen"
+            "value": "Allow %s to use your screen?"
         }
     ]
 }

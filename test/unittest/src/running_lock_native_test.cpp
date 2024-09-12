@@ -626,6 +626,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
     runningLockMgr->Lock(remoteObj);
     // after the activation of screen-on lock the screen should no longer be in DIM state
     EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
+    runningLockMgr->UnLock(remoteObj);
     
     pmsTest->RestoreScreenOffTime();
 }

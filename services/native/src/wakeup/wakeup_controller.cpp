@@ -16,7 +16,9 @@
 #include "wakeup_controller.h"
 
 #include <datetime_ex.h>
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
+#endif
 #include <input_manager.h>
 #include <ipc_skeleton.h>
 #include <securec.h>
@@ -41,8 +43,9 @@ sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 const int32_t ERR_FAILED = -1;
 #endif
-constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
+
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
+constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -190,6 +193,10 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         POWER_HILOGE(COMP_SVC, "json parse error");
         return;
     }
+    if (root["touchscreen"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this touchscreenNode is empty");
+        return;
+    }
     if (root["touchscreen"]["enable"].isNull()) {
         POWER_HILOGE(COMP_SVC, "the touchscreenNode is empty");
         return;
@@ -205,7 +212,7 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
     }
 
     root["touchscreen"]["enable"] = updateEnable;
-    POWER_HILOGI(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
+    POWER_HILOGI(COMP_SVC, "the new doubleJsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 
@@ -296,6 +303,10 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         POWER_HILOGE(COMP_SVC, "Failed to parse json string");
         return;
     }
+    if (root["pickup"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this pickNode is empty");
+        return;
+    }
     if (root["pickup"]["enable"].isNull()) {
         POWER_HILOGE(COMP_SVC, "the pickupNode is empty");
         return;
@@ -310,6 +321,7 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         return;
     }
     root["pickup"]["enable"] = updataEnable;
+    POWER_HILOGI(COMP_SVC, "the new pickupJsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 #endif
@@ -482,6 +494,11 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */
+bool InputCallback::isSecondaryEvent(std::shared_ptr<InputEvent> event) const
+{
+    return event->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) || event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
+}
+
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -489,7 +506,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
-    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+    // ignore remote event, ignore secondary event
+    if (isSecondaryEvent(keyEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -537,7 +555,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (!NonWindowEvent(pointerEvent)) {
         return;
     }
-    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+    if (isSecondaryEvent(pointerEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -666,7 +684,6 @@ std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source
 }
 
 /** PowerkeyWakeupMonitor Implement */
-
 bool PowerkeyWakeupMonitor::Init()
 {
     if (powerkeyShortPressId_ >= 0) {
@@ -684,15 +701,6 @@ bool PowerkeyWakeupMonitor::Init()
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
 
-            static int64_t lastPowerkeyDownTime = 0;
-            int64_t currTime = GetTickCount();
-            if (lastPowerkeyDownTime != 0 && currTime - lastPowerkeyDownTime < POWERKEY_MIN_INTERVAL) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey down within 350ms, skip. "
-                    "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyDownTime);
-                return;
-            }
-            lastPowerkeyDownTime = currTime;
-
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
             if (pms == nullptr) {
                 return;
@@ -700,7 +708,18 @@ bool PowerkeyWakeupMonitor::Init()
             pms->RefreshActivityInner(
                 static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
             std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
-            suspendController->RecordPowerKeyDown();
+            bool poweroffInterrupted = false;
+            if (PowerKeySuspendMonitor::powerkeyScreenOff_.load()) {
+                auto stateMachine = pms->GetPowerStateMachine();
+                if (!stateMachine) {
+                    POWER_HILOGE(FEATURE_WAKEUP, "TryToCancelScreenOff, state machine is nullptr");
+                } else {
+                    poweroffInterrupted = stateMachine->TryToCancelScreenOff();
+                }
+            }
+            // sync with the end of powerkey screen off task
+            ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
+            suspendController->RecordPowerKeyDown(poweroffInterrupted);
             Notify();
         });
 

@@ -52,12 +52,13 @@ public:
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
-    void RecordPowerKeyDown();
+    void RecordPowerKeyDown(bool interrupting = false);
     bool GetPowerkeyDownWhenScreenOff();
 
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
     void TriggerSyncSleepCallback(bool isWakeup);
+    void UpdateSuspendSources();
 
     std::shared_ptr<PowerStateMachine> GetStateMachine() const
     {
@@ -169,8 +170,10 @@ public:
     ~PowerKeySuspendMonitor() override = default;
     bool Init() override;
     void Cancel() override;
-
+    static inline std::atomic<bool> powerkeyScreenOff_ {false};
 private:
+    void BeginPowerkeyScreenOff() const;
+    void EndPowerkeyScreenOff() const;
     static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     int32_t powerkeyReleaseId_ {-1};

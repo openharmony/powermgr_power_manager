@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,31 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_POWER_HITRACE_H
-#define POWERMGR_POWER_HITRACE_H
-#ifdef HAS_HIVIEWDFX_HITRACE_PART
-#include "hitrace_meter.h"
-#endif
+#ifndef POWER_UTILS_POWER_XCOLLIE_H
+#define POWER_UTILS_POWER_XCOLLIE_H
+
+#include <functional>
+#include <string>
+
 namespace OHOS {
 namespace PowerMgr {
-class PowerHitrace {
+class PowerXCollie {
 public:
-    explicit PowerHitrace(const std::string& trace) : trace_(trace)
-    {
-#ifdef HAS_HIVIEWDFX_HITRACE_PART
-        StartTrace(HITRACE_TAG_POWER, trace_.c_str());
-#endif
-    }
+    PowerXCollie(const std::string &logTag, bool isRecovery = false);
+    ~PowerXCollie();
 
-    ~PowerHitrace()
-    {
-#ifdef HAS_HIVIEWDFX_HITRACE_PART
-        FinishTrace(HITRACE_TAG_POWER);
-#endif
-    }
 private:
-    std::string trace_;
+    void CancelPowerXCollie();
+
+    int32_t id_;
+    std::string logTag_;
+    bool isCanceled_;
 };
+
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_POWER_HITRACE__H
+
+#endif // POWER_UTILS_POWER_XCOLLIE_H
