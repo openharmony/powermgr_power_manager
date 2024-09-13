@@ -86,7 +86,7 @@ static bool IsNeedWritePoweroffChargeFlag(const std::string& reason)
         (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS);
 }
 
-static const char* POWER_CHARGE_EXTENSION_PATH = "/system/lib64/libpower_charge_ext.z.so";
+static const char* POWER_CHARGE_EXTENSION_PATH = "system/lib64/libpower_charge_ext.z.so";
 static const char* WRITE_POWER_OFF_CHARGE_FLAG_FUNC = "WritePoweroffChargeFlag";
 typedef void(*Func)();
 
