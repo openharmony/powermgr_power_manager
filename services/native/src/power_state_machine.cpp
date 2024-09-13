@@ -23,6 +23,8 @@
 #endif
 #include <ipc_skeleton.h>
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
+
+#include "c/executor_task.h"
 #include "power_hitrace.h"
 #endif
 #include "power_mode_policy.h"
@@ -59,7 +61,8 @@ constexpr uint32_t HIBERNATE_DELAY_MS = 3000;
 #endif
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 }
-PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
+PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
+    : pms_(pms), ffrtTimer_(ffrtTimer), currentState_(PowerState::UNKNOWN)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Instance start");
     // NOTICE Need get screen state when device startup,
@@ -151,7 +154,8 @@ void PowerStateMachine::InitTransitMap()
             {
                 {PowerState::DIM, {PowerState::INACTIVE}},
                 // allow AWAKE to INACTIVE without going to DIM for UTs to pass
-                {PowerState::AWAKE, {PowerState::INACTIVE}}
+                {PowerState::AWAKE, {PowerState::INACTIVE}},
+                {PowerState::INACTIVE, {PowerState::SLEEP}}
             }
         },
     });
@@ -1626,11 +1630,51 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
     return ret;
 }
 
+bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason)
+{
+    void* curTask = ffrt_get_cur_task();
+    if (curTask == nullptr) {
+        // not actually an ffrt task;
+        return true;
+    }
+    if (!ffrtTimer_) {
+        return false;
+    }
+    void* pendingTask = nullptr;
+    if (IsTimeoutReason(reason)) {
+        switch (state) {
+            case PowerState::DIM:
+                pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_TIMEOUT);
+                break;
+            case PowerState::INACTIVE:
+                pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_OFF);
+                break;
+            case PowerState::SLEEP:
+                pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_SLEEP);
+                break;
+            default:
+                pendingTask = nullptr;
+                break;
+        }
+    }
+    return curTask == pendingTask;
+}
+
+bool PowerStateMachine::IsTimeoutReason(StateChangeReason reason)
+{
+    return reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
+        reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
+}
+
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
+    if (!CheckFFRTTaskAvailability(state, reason)) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "this timeout task is invalidated, directly return");
+        return false;
+    }
     ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
     SettingStateFlag flag(state, shared_from_this(), reason);
 
@@ -1650,9 +1694,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         timeoutCheck.Finish(TransitResult::OTHER_ERR);
         return false;
     }
-    if ((reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
-            reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) &&
-        forceTimingOut_.load()) {
+    if (IsTimeoutReason(reason) && forceTimingOut_.load()) {
         force = true;
     }
     UpdateSettingStateFlag(state, reason);

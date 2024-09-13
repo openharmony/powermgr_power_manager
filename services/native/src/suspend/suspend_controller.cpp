@@ -48,11 +48,12 @@ constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 std::atomic_bool onForceSleep = false;
 
 /** SuspendController Implement */
-SuspendController::SuspendController(
-    std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine)
+SuspendController::SuspendController(const std::shared_ptr<ShutdownController>& shutdownController,
+    const std::shared_ptr<PowerStateMachine>& stateMachine, const std::shared_ptr<FFRTTimer>& ffrtTimer)
 {
     shutdownController_ = shutdownController;
     stateMachine_ = stateMachine;
+    ffrtTimer_ = ffrtTimer;
 }
 
 SuspendController::~SuspendController()
@@ -296,14 +297,14 @@ void SuspendController::StopSleep()
 
 void SuspendController::HandleEvent(int64_t delayTime)
 {
-    FFRTTask task = [&]() {
-        g_monitorMutex.lock();
-        auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-        if (timeoutSuspendMonitor == monitorMap_.end()) {
-            g_monitorMutex.unlock();
-            return;
-        }
-
+    g_monitorMutex.lock();
+    auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    if (timeoutSuspendMonitor == monitorMap_.end()) {
+        g_monitorMutex.unlock();
+        POWER_HILOGW(FEATURE_SUSPEND, "no timeout suspend monitor");
+        return;
+    }
+    FFRTTask task = [this, delayTime, monitor = timeoutSuspendMonitor->second]() {
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms != nullptr) {
             if (pms->CheckDialogFlag()) {
@@ -312,17 +313,17 @@ void SuspendController::HandleEvent(int64_t delayTime)
         }
         if (stateMachine_ != nullptr) {
             int32_t timeout = stateMachine_->GetDisplayOffTime();
-            POWER_HILOGI(FEATURE_INPUT, "This time of timeout is %{public}d ms", timeout);
+            POWER_HILOGI(FEATURE_INPUT, "This time of timeout is: timer=%{public}" PRId64 "ms, current=%{public}d ms",
+                delayTime, timeout);
         }
-        g_monitorMutex.unlock();
-        auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
     };
+    g_monitorMutex.unlock();
     if (ffrtTimer_ != nullptr) {
         ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
     } else {
-        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}s) failed, timer is null",
-            __func__, std::to_string(delayTime).c_str());
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}s) failed, timer is null", __func__,
+            std::to_string(delayTime).c_str());
     }
 }
 

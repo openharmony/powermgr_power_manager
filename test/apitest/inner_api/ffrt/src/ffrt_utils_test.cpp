@@ -14,7 +14,10 @@
  */
 #include "ffrt_utils_test.h"
 
+#include "c/executor_task.h"
 #include "ffrt_utils.h"
+#include "power_state_machine.h"
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -164,6 +167,30 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest007, TestSize.Level1)
     bool ret = FFRTUtils::SubmitTimeoutTask(task, 5); // task time out is 5ms
     EXPECT_FALSE(ret); // task will timeout
     EXPECT_EQ(x, 0); // task not finished
+}
+
+/**
+ * @tc.name: FFRTUtilsTest008
+ * @tc.desc: test getting task handle of queue task and normal task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTUtilsTest008, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 start");
+    FFRTQueue queue("test_power_ffrt_queue_test008");
+    void* taskptr = nullptr;
+    FFRTHandle handle;
+    FFRTTask task = [&taskptr]() {
+        taskptr = ffrt_get_cur_task();
+        POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 taskptr address: %{public}p", taskptr);
+    };
+    handle = queue.submit_h(task);
+    queue.wait(handle);
+    EXPECT_EQ(taskptr, (void*)handle);
+    handle = ffrt::submit_h(task);
+    ffrt::wait({handle});
+    EXPECT_EQ(taskptr, (void*)handle);
+    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 end");
 }
 
 /**
@@ -325,6 +352,32 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest002, TestSize.Level1)
     // task id is set to 0 in Clear()
     EXPECT_EQ(timer.GetTaskId(TIMER_ID_A), 0);
 }
+
+/**
+ * @tc.name: FFRTTimerTest003
+ * @tc.desc: test cancellation invalidating already started task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTTimerTest003, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 start");
+    FFRTTimer timer{"FFRTTimerTest003"};
+    bool executed = false;
+    bool canceled = false;
+    FFRTTask task = [&executed, &canceled, &timer]() {
+        executed = true;
+        ffrt::this_task::sleep_for(std::chrono::milliseconds(5000));
+        canceled = (ffrt_get_cur_task() != timer.GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_OFF));
+    };
+    timer.SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task);
+    sleep(1);
+    timer.CancelTimer(TIMER_ID_USER_ACTIVITY_OFF);
+    timer.Wait(TIMER_ID_USER_ACTIVITY_OFF);
+    EXPECT_TRUE(executed);
+    EXPECT_TRUE(canceled);
+    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 end");
+}
+
 } // namespace Test
 } // namespace PowerMgr
 } // namespace OHOS

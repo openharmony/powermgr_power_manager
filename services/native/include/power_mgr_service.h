@@ -20,6 +20,7 @@
 #include <system_ability.h>
 
 #include "actions/idevice_power_action.h"
+#include "ffrt_utils.h"
 #include "ipower_mgr.h"
 #include "power_mgr_notify.h"
 #include "power_mgr_stub.h"
@@ -343,6 +344,7 @@ private:
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
     std::shared_ptr<ShutdownController> shutdownController_;
+    std::shared_ptr<FFRTTimer> ffrtTimer_;
     PowerModeModule powerModeModule_;
     ShutdownDialog shutdownDialog_;
     uint32_t mockCount_ {0};

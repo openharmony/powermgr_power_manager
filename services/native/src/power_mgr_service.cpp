@@ -113,6 +113,9 @@ void PowerMgrService::OnStart()
 bool PowerMgrService::Init()
 {
     POWER_HILOGI(COMP_SVC, "Init start");
+    if (!ffrtTimer_) {
+        ffrtTimer_ = std::make_shared<FFRTTimer>("power_manager_ffrt_queue");
+    }
     if (!runningLockMgr_) {
         runningLockMgr_ = std::make_shared<RunningLockMgr>(pms);
     }
@@ -281,7 +284,7 @@ void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& ke
 bool PowerMgrService::PowerStateMachineInit()
 {
     if (powerStateMachine_ == nullptr) {
-        powerStateMachine_ = std::make_shared<PowerStateMachine>(pms);
+        powerStateMachine_ = std::make_shared<PowerStateMachine>(pms, ffrtTimer_);
         if (!(powerStateMachine_->Init())) {
             POWER_HILOGE(COMP_SVC, "Power state machine start fail!");
             return false;
@@ -606,12 +609,16 @@ void PowerMgrService::Reset()
 {
     POWER_HILOGW(COMP_SVC, "start destruct ffrt_queue");
     if (powerStateMachine_) {
+        // release one strong reference to ffrtTimer
         powerStateMachine_->Reset();
     }
     if (suspendController_) {
+        // release one strong reference to ffrtTimer
         suspendController_->Reset();
     }
+    ffrtTimer_.reset(); // all strong references gone, ffrtTimer will be destructed.
     if (screenOffPreController_) {
+        // another queue without using FFRTTimer, leave it as is for now.
         screenOffPreController_->Reset();
     }
 }
@@ -1498,7 +1505,7 @@ PowerMgrService::WakeupRunningLock::~WakeupRunningLock()
 void PowerMgrService::SuspendControllerInit()
 {
     if (!suspendController_) {
-        suspendController_ = std::make_shared<SuspendController>(shutdownController_, powerStateMachine_);
+        suspendController_ = std::make_shared<SuspendController>(shutdownController_, powerStateMachine_, ffrtTimer_);
     }
     suspendController_->Init();
 }
