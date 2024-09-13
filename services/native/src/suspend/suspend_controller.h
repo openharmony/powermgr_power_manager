@@ -40,8 +40,8 @@ class SuspendMonitor;
 class SuspendEventHandler;
 class SuspendController : public std::enable_shared_from_this<SuspendController> {
 public:
-    SuspendController(
-        std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine);
+    SuspendController(const std::shared_ptr<ShutdownController>& shutdownController,
+        const std::shared_ptr<PowerStateMachine>& stateMachine, const std::shared_ptr<FFRTTimer>& ffrtTimer_);
     ~SuspendController();
     void Init();
     void ExecSuspendMonitorByReason(SuspendDeviceType reason);
