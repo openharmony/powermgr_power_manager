@@ -120,7 +120,6 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(g_service->IsScreenOn());
 
-    auto inputManager = MMI::InputManager::GetInstance();
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
     keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
@@ -128,6 +127,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
     keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
     keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
 
+    auto inputManager = MMI::InputManager::GetInstance();
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(1);
