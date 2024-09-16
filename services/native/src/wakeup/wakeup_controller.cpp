@@ -216,13 +216,13 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 
+static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 static const char* SET_WAKEUP_DOUBLE_CLICK_SENSOR = "SetWakeupDoubleClickSensor";
-static const char* POWER_DOUBLE_CLICK_PATH = "/system/lib64/libpower_manager_ext.z.so";
 typedef int32_t(*Func)(bool);
 int32_t WakeupController::SetWakeupDoubleClickSensor(bool enable)
 {
     POWER_HILOGI(COMP_SVC, "enter SetWakeupDoubleClickSensor");
-    void *handler = dlopen(POWER_DOUBLE_CLICK_PATH, RTLD_LAZY | RTLD_NODELETE);
+    void *handler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
     if (handler == nullptr) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "Dlopen failed, reason : %{public}s", dlerror());
         return ERR_FAILED;
@@ -241,7 +241,6 @@ int32_t WakeupController::SetWakeupDoubleClickSensor(bool enable)
 
 static const char* SET_WAKEUP_MOTION_SUBSCRIBER_CONFIG = "PickupMotionSubscriber";
 static const char* SET_WAKEUP_MOTION_UNSUBSCRIBER_CONFIG = "PickupMotionUnsubscriber";
-static const char* POWER_MANAGER_EXT_PATH = "/system/lib64/libpower_manager_ext.z.so";
 typedef void(*FuncSubscriber)();
 typedef void(*FuncUnsubscriber)();
 

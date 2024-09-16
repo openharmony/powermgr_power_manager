@@ -159,7 +159,7 @@ void PowerStateMachine::InitTransitMap()
 
 #ifdef MSDP_MOVEMENT_ENABLE
 static const char* MOVEMENT_STATE_CONFIG = "GetMovementState";
-static const char* POWER_MANAGER_EXT_PATH = "/system/lib64/libpower_manager_ext.z.so";
+static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 typedef bool(*FuncMovementState)();
 
 bool PowerStateMachine::IsMovementStateOn()
