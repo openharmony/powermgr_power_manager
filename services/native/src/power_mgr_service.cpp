@@ -665,7 +665,7 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 static const char* MOVEMENT_SUBSCRIBER_CONFIG = "RegisterMovementCallback";
 static const char* MOVEMENT_UNSUBSCRIBER_CONFIG = "UnRegisterMovementCallback";
 static const char* RESET_MOVEMENT_STATE_CONFIG = "ResetMovementState";
-static const char* POWER_MANAGER_EXT_PATH = "/system/lib64/libpower_manager_ext.z.so";
+static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 typedef void(*FuncMovementSubscriber)();
 typedef void(*FuncMovementUnsubscriber)();
 typedef void(*FuncResetMovementState)();
