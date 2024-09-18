@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,7 @@ constexpr int32_t INVALID_CODE = -1;
  */
 HWTEST_F(PowerMgrUtilTest, PermissionIsSystemNative, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PermissionIsSystemNative start");
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_TRUE(Permission::IsSystem());
     EXPECT_TRUE(Permission::IsPermissionGranted("REBOOT"));
@@ -66,6 +67,7 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsSystemNative, TestSize.Level0)
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_SHELL);
     EXPECT_TRUE(Permission::IsSystem());
     EXPECT_TRUE(Permission::IsPermissionGranted("REBOOT"));
+    POWER_HILOGI(LABEL_TEST, "PermissionIsSystemNative end");
 }
 
 /**
@@ -75,6 +77,7 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsSystemNative, TestSize.Level0)
  */
 HWTEST_F(PowerMgrUtilTest, PermissionIsSystemHap, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PermissionIsSystemHap start");
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockAccesstokenKit::MockSetSystemApp(false);
     EXPECT_FALSE(Permission::IsSystem());
@@ -83,6 +86,7 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsSystemHap, TestSize.Level0)
     EXPECT_TRUE(Permission::IsSystem());
     MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
     EXPECT_TRUE(Permission::IsPermissionGranted("REBOOT"));
+    POWER_HILOGI(LABEL_TEST, "PermissionIsSystemHap end");
 }
 
 /**
@@ -92,6 +96,7 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsSystemHap, TestSize.Level0)
  */
 HWTEST_F(PowerMgrUtilTest, PermissionIsSystemInvalid, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PermissionIsSystemInvalid start");
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
     EXPECT_FALSE(Permission::IsSystem());
     EXPECT_FALSE(Permission::IsPermissionGranted("REBOOT"));
@@ -99,6 +104,7 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsSystemInvalid, TestSize.Level0)
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_TYPE_BUTT);
     EXPECT_FALSE(Permission::IsSystem());
     EXPECT_FALSE(Permission::IsPermissionGranted("REBOOT"));
+    POWER_HILOGI(LABEL_TEST, "PermissionIsSystemInvalid end");
 }
 
 /**
@@ -108,12 +114,14 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsSystemInvalid, TestSize.Level0)
  */
 HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedHap, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PermissionIsPermissionGrantedHap start");
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_DENIED);
     EXPECT_FALSE(Permission::IsPermissionGranted("REBOOT"));
 
     MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
     EXPECT_TRUE(Permission::IsPermissionGranted("REBOOT"));
+    POWER_HILOGI(LABEL_TEST, "PermissionIsPermissionGrantedHap end");
 }
 
 /**
@@ -123,11 +131,13 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedHap, TestSize.Level0)
  */
 HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedNative, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PermissionIsPermissionGrantedNative start");
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_TRUE(Permission::IsPermissionGranted("REBOOT"));
 
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_SHELL);
     EXPECT_TRUE(Permission::IsPermissionGranted("REBOOT"));
+    POWER_HILOGI(LABEL_TEST, "PermissionIsPermissionGrantedNative end");
 }
 
 /**
@@ -137,10 +147,12 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedNative, TestSize.Level0)
  */
 HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedInvalid, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PermissionIsPermissionGrantedInvalid start");
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
     EXPECT_FALSE(Permission::IsPermissionGranted("REBOOT"));
     MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_TYPE_BUTT);
     EXPECT_FALSE(Permission::IsPermissionGranted("REBOOT"));
+    POWER_HILOGI(LABEL_TEST, "PermissionIsPermissionGrantedInvalid end");
 }
 
 /**
@@ -277,6 +289,7 @@ HWTEST_F (PowerMgrUtilTest, PowerVibratorTest001, TestSize.Level0)
     vibrator->LoadConfig(POWER_VIBRATOR_CONFIG_FILE,
         VENDOR_POWER_VIBRATOR_CONFIG_FILE, SYSTEM_POWER_VIBRATOR_CONFIG_FILE);
     vibrator->StartVibrator(SHUTDOWN_DIAG);
+    POWER_HILOGI(LABEL_TEST, "PowerVibratorTest001 is end!");
 }
 
 /**
@@ -295,5 +308,6 @@ HWTEST_F (PowerMgrUtilTest, PowerVibratorTest002, TestSize.Level0)
     VibratorSource vibratorSource = VibratorSource(key, enable, type);
     vibrator->sourceList_.emplace_back(vibratorSource);
     vibrator->StartVibrator(SHUTDOWN_DIAG);
+    POWER_HILOGI(LABEL_TEST, "PowerVibratorTest002 is end!");
 }
 } // namespace

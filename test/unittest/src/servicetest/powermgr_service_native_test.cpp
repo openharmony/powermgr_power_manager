@@ -816,6 +816,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest038, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level2)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest039:Start");
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
     sptr<IScreenOffPreCallback> screenOffPreCallback = new ScreenOffPreTestCallback();
@@ -829,6 +830,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterScreenStateCallback(screenOffPreCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCallback));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest039:End");
 }
 
 /**
@@ -839,6 +841,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest040:Start");
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     std::vector<std::string> dumpArgsNone {};
     std::vector<std::string> dumpArgsHelp {};
@@ -854,6 +857,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level
     std::string helpDebugInfo = g_powerMgrServiceProxy->ShellDump(dumpArgsHelp, dumpArgsHelp.size());
     auto helpIndex = helpDebugInfo.find(expectedDebugInfo);
     EXPECT_TRUE(helpIndex != string::npos);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest040:End");
 }
 
 /**

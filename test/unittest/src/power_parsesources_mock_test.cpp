@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,7 @@ namespace {
  */
 HWTEST_F(PowerParseSourceMockTest, PowerParseSourceMockTest001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerParseSourceMockTest001 start.");
     GTEST_LOG_(INFO) << "PowerParseSourceMockTest001: start";
 
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -94,7 +95,7 @@ HWTEST_F(PowerParseSourceMockTest, PowerParseSourceMockTest001, TestSize.Level0)
     std::shared_ptr<SuspendSources> sources6 = SuspendSourceParser::ParseSources(jsonStr3);
     tmp = sources6->getSourceKeys();
     EXPECT_TRUE(tmp.size() != 0);
-
+    POWER_HILOGI(LABEL_TEST, "PowerParseSourceMockTest001 end.");
     GTEST_LOG_(INFO) << "PowerParseSourceMockTest001:  end";
 }
 } // namespace

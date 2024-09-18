@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "actions/irunning_lock_action.h"
 #include "running_lock_hub.h"
 #include "suspend_controller.h"
+#include "power_log.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -47,6 +48,7 @@ void RunningSuspendCallback()
  */
 HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative001 start.");
     auto sc = std::make_shared<Suspend::SuspendController>();
     auto runningLockHub = std::make_shared<Suspend::RunningLockHub>(sc);
     runningLockHub->Acquire("777");
@@ -57,6 +59,7 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
     runningLockHub->Release("777");
     runningLockHub->Release("333");
     EXPECT_TRUE(runningLockHub->runningLockMap_.empty());
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative001 end.");
 }
 
 /**
@@ -66,6 +69,7 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
  */
 HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative002 start.");
     auto SuspendController = std::make_shared<Suspend::SuspendController>();
     SuspendController->Wakeup();
     SuspendController->Suspend(RunningSuspendCallback, RunningSuspendCallback, false);
@@ -80,5 +84,6 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
     SuspendController->IncSuspendBlockCounter();
     SuspendController->DecSuspendBlockCounter();
     SuspendController->DecSuspendBlockCounter();
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative002 end.");
 }
 } // namespace

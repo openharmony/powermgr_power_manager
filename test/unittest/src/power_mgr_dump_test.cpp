@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "power_mgr_dumper.h"
 #include "key_event.h"
 #include "pointer_event.h"
+#include "power_log.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -61,12 +62,14 @@ namespace {
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative001 start");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative001 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-i";
     args.push_back(arg);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative001 end");
 }
 
 /**
@@ -76,12 +79,14 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative002 start");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative002 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-k";
     args.push_back(arg);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative002 end");
 }
 
 /**
@@ -91,6 +96,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level0)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative003 start");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative003 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
@@ -101,6 +107,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
     args.push_back(arg1);
     args.push_back(arg2);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative003 end");
 }
 
 /**
@@ -110,11 +117,13 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative004 start");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative004 fail to get PowerMgrService";
     int32_t fd = 1;
     std::vector<std::u16string> args;
     std::u16string arg = u"-h";
     args.push_back(arg);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative004 end");
 }
 } // namespace
