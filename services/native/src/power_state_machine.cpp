@@ -106,7 +106,6 @@ PowerStateMachine::~PowerStateMachine()
 bool PowerStateMachine::Init()
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "Start init");
-    ffrtTimer_ = std::make_shared<FFRTTimer>("power_state_machine_timer");
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
     InitTransitMap();
     InitStateMap();
@@ -1638,6 +1637,7 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         return true;
     }
     if (!ffrtTimer_) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "ffrtTimer_ is nullptr");
         return false;
     }
     void* pendingTask = nullptr;
@@ -1656,6 +1656,8 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
                 pendingTask = nullptr;
                 break;
         }
+    } else {
+        return true;
     }
     return curTask == pendingTask;
 }

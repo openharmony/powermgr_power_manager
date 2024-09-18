@@ -146,12 +146,6 @@ void* FFRTTimer::GetTaskHandlePtr(uint32_t timerId)
     return static_cast<void*>(handleMap_[timerId]);
 }
 
-void FFRTTimer::Wait(uint32_t timerId)
-{
-    std::lock_guard lock(mutex_);
-    queue_.wait(handleMap_[timerId]);
-}
-
 /* inner functions must be called when mutex_ is locked */
 void FFRTTimer::CancelAllTimerInner()
 {
