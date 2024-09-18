@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "mock_power_remote_object.h"
 #include "power_mgr_client.h"
+#include "power_log.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -32,6 +33,7 @@ namespace {
  */
 HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_001 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
 
@@ -41,6 +43,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
     EXPECT_NE(deathRecipient, nullptr);
     deathRecipient->OnRemoteDied(remoteObj);
     EXPECT_NE(powerMgrClient.proxy_, nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_001 end");
 }
 
 /**
@@ -51,6 +54,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
  */
 HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_002 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
 
@@ -61,5 +65,6 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level
     EXPECT_FALSE(sptrRemoteObj == nullptr);
     deathRecipient->OnRemoteDied(sptrRemoteObj);
     EXPECT_NE(powerMgrClient.proxy_, nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_002 end");
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@ namespace {
  */
 HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
@@ -53,6 +54,6 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     PowerMode mode = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     EXPECT_EQ(mode, powerMgrClient.GetDeviceMode());
-    POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 1.");
+    POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 end.");
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "power_state_callback_stub.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
+#include "power_log.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -78,6 +79,7 @@ namespace {
  */
 HWTEST_F(PowerScreenOnMockTest, PowerScreenOnMockTest001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerScreenOnMockTest001 start.");
     GTEST_LOG_(INFO) << "PowerScreenOnMockTest001: start";
 
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -91,6 +93,7 @@ HWTEST_F(PowerScreenOnMockTest, PowerScreenOnMockTest001, TestSize.Level0)
     EXPECT_TRUE(pmsTest_ != nullptr);
 
     sleep(SLEEP_WAIT_TIME_S);
+    POWER_HILOGI(LABEL_TEST, "PowerScreenOnMockTest001 end.");
     GTEST_LOG_(INFO) << "PowerScreenOnMockTest001:  end";
 }
 } // namespace
