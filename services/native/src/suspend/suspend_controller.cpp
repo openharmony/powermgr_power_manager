@@ -151,7 +151,6 @@ private:
 void SuspendController::Init()
 {
     std::lock_guard lock(mutex_);
-    ffrtTimer_ = std::make_shared<FFRTTimer>("suspend_controller_timer");
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {

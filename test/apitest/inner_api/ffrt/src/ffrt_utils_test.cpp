@@ -16,7 +16,6 @@
 
 #include "c/executor_task.h"
 #include "ffrt_utils.h"
-#include "power_state_machine.h"
 #include "power_log.h"
 
 namespace OHOS {
@@ -364,15 +363,20 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest003, TestSize.Level1)
     FFRTTimer timer{"FFRTTimerTest003"};
     bool executed = false;
     bool canceled = false;
-    FFRTTask task = [&executed, &canceled, &timer]() {
+    std::atomic<bool> done {false};
+    FFRTTask task = [&executed, &canceled, &timer, &done]() {
         executed = true;
         ffrt::this_task::sleep_for(std::chrono::milliseconds(5000));
         canceled = (ffrt_get_cur_task() != timer.GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_OFF));
+        done.store(true);
     };
     timer.SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task);
     sleep(1);
     timer.CancelTimer(TIMER_ID_USER_ACTIVITY_OFF);
-    timer.Wait(TIMER_ID_USER_ACTIVITY_OFF);
+    sleep(4);
+    while (!done.load()) {
+        usleep(100000);
+    }
     EXPECT_TRUE(executed);
     EXPECT_TRUE(canceled);
     POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 end");
