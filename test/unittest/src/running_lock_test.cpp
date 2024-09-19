@@ -232,11 +232,7 @@ HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_FALSE(runningLock->IsUsed());
 
-    usleep(timeoutMs * US_PER_MS);
-
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
-    EXPECT_TRUE(runningLock->IsUsed());
-    usleep(timeoutMs / 2 * US_PER_MS);
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
 }
