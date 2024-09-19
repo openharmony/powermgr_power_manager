@@ -34,7 +34,8 @@
             "power_manager_feature_movement",
             "power_manager_feature_screen_on_timeout_check",
             "power_manager_feature_dialog_path",
-            "power_manager_feature_charging_type_setting"
+            "power_manager_feature_charging_type_setting",
+            "power_manager_feature_external_screen_management"
         ],
         "adapted_system_type": [
             "standard"

@@ -450,21 +450,21 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObject, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObject);
 
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     pmsTest_->LockScreenAfterTimingOut(true, false, true, nullptr);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     pmsTest_->LockScreenAfterTimingOut(false, false, true, nullptr);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
         StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     pmsTest_->LockScreenAfterTimingOut(true, true, true, nullptr);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     runningLockMgr->UnLock(remoteObject);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     // wait runninglock async task to end, otherwise it will interfere with the next test case
     pmsTest_->OnStop();
@@ -573,11 +573,11 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService025 failed to get PowerStateMachine";
 
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID),
         StateChangeReason::STATE_CHANGE_REASON_LID);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH),
         StateChangeReason::STATE_CHANGE_REASON_SWITCH);
-    EXPECT_EQ(stateMaschine_->GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
+    EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
         StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_LID),
         StateChangeReason::STATE_CHANGE_REASON_LID);

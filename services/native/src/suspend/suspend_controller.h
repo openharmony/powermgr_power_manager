@@ -72,6 +72,11 @@ public:
     {
         return sleepAction_;
     }
+    std::shared_ptr<SuspendMonitor> GetSpecifiedSuspendMonitor(SuspendDeviceType type) const;
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    void PowerOffInternalScreen(SuspendDeviceType type);
+    void PowerOffAllScreens(SuspendDeviceType type);
+#endif
     void StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void Reset();
 
@@ -92,6 +97,10 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    bool IsPowerOffInernalScreenOnlyScene(SuspendDeviceType reason, SuspendAction action, bool isScreenOn) const;
+    void ProcessPowerOffInternalScreenOnly(const sptr<PowerMgrService>& pms, SuspendDeviceType reason);
+#endif
 
     void TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, const std::string& priority,
         bool isWakeup);

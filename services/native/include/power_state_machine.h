@@ -22,13 +22,14 @@
 
 #include "actions/idevice_state_action.h"
 #include "ffrt_utils.h"
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+#include "hibernate_controller.h"
+#endif
 #include "ipower_state_callback.h"
 #include "power_common.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-#include "hibernate_controller.h"
-#endif
+
 
 #define DEFAULT_DISPLAY_OFF_TIME 30000
 #define DEFAULT_SLEEP_TIME       5000
@@ -79,8 +80,24 @@ public:
         CHECK_PROXIMITY_SCREEN_OFF_MSG,
     };
 
+    class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        PowerStateCallbackDeathRecipient() = default;
+        virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
+        virtual ~PowerStateCallbackDeathRecipient() = default;
+    };
+
+    static constexpr int64_t OFF_TIMEOUT_FACTOR = 5;
+    static constexpr int64_t MAX_DIM_TIME_MS = 7500;
+    static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_REPORT_INTERVAL_MS = 600000;
+
     static void onSuspend();
     static void onWakeup();
+    static void DisplayOffTimeUpdateFunc();
+    static void RegisterDisplayOffTimeObserver();
+    static void UnregisterDisplayOffTimeObserver();
 
     bool Init();
     void InitState();
@@ -132,9 +149,15 @@ public:
     void SetDisplaySuspend(bool enable);
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
-    StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
+    StateChangeReason GetReasonBySuspendType(SuspendDeviceType type);
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
-    static void DisplayOffTimeUpdateFunc();
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    bool GetPowerOffInternalScreenOnlyFlag() const;
+    void SetPowerOffInternalScreenOnlyFlag(bool value);
+    int32_t GetExternalScreenNumber() const;
+    void IncreaseExternalScreenNumber();
+    void DecreaseExternalScreenNumber();
+#endif
 
     // only use for test
     int64_t GetLastSuspendDeviceTime() const
@@ -171,24 +194,12 @@ public:
     {
         return mDeviceState_.screenState.lastOnTime;
     }
-    class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
-    public:
-        PowerStateCallbackDeathRecipient() = default;
-        virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
-        virtual ~PowerStateCallbackDeathRecipient() = default;
-    };
+
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
     int64_t GetDisplayOffTime();
     int64_t GetDimTime(int64_t displayOffTime);
-    static constexpr int64_t OFF_TIMEOUT_FACTOR = 5;
-    static constexpr int64_t MAX_DIM_TIME_MS = 7500;
-    static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
-    static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
-    static constexpr uint32_t SCREEN_CHANGE_REPORT_INTERVAL_MS = 600000;
     void SetDisplayOffTime(int64_t time, bool needUpdateSetting = true);
-    static void RegisterDisplayOffTimeObserver();
-    static void UnregisterDisplayOffTimeObserver();
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
     void SetForceTimingOut(bool enabled);
@@ -287,6 +298,7 @@ private:
     };
 
     static std::string GetTransitResultString(TransitResult result);
+
     void UpdateSettingStateFlag(PowerState state, StateChangeReason reason);
     void RestoreSettingStateFlag();
     void InitStateMap();
@@ -358,6 +370,10 @@ private:
     std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
     std::atomic<bool> proximityScreenOffTimerStarted_ {false};
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    std::atomic<bool> powerOffInternalScreenOnly_ {false};
+    std::atomic<int32_t> externalScreenNumber_ {0};
+#endif
 };
 } // namespace PowerMgr
 } // namespace OHOS
