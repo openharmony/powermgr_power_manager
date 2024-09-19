@@ -139,7 +139,7 @@ uint32_t FFRTTimer::GetTaskId(uint32_t timerId)
     return id;
 }
 
-void* FFRTTimer::GetTaskHandlePtr(uint32_t timerId)
+const void* FFRTTimer::GetTaskHandlePtr(uint32_t timerId)
 {
     std::lock_guard lock(mutex_);
     // conversion function to void* defined in task.h

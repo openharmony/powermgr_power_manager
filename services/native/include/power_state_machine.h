@@ -98,8 +98,8 @@ public:
     bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
     bool IsCollaborationScreenOn();
-    bool CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason);
-    bool IsTimeoutReason(StateChangeReason reason);
+    bool CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason) const;
+    bool IsTimeoutReason(StateChangeReason reason) const;
     void Reset();
     int64_t GetSleepTime();
 #ifdef MSDP_MOVEMENT_ENABLE

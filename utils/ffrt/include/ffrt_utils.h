@@ -153,7 +153,8 @@ public:
     void CancelTimer(uint32_t timerId);
     void SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs = 0);
     uint32_t GetTaskId(uint32_t timerId);
-    void* GetTaskHandlePtr(uint32_t timerId);
+    const void* GetTaskHandlePtr(uint32_t timerId);
+
 private:
     /* inner functions must be called when mutex_ is locked */
     void CancelAllTimerInner();

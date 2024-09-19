@@ -1629,7 +1629,7 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
     return ret;
 }
 
-bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason)
+bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason) const
 {
     void* curTask = ffrt_get_cur_task();
     if (curTask == nullptr) {
@@ -1640,29 +1640,27 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         POWER_HILOGE(FEATURE_POWER_STATE, "ffrtTimer_ is nullptr");
         return false;
     }
-    void* pendingTask = nullptr;
-    if (IsTimeoutReason(reason)) {
-        switch (state) {
-            case PowerState::DIM:
-                pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_TIMEOUT);
-                break;
-            case PowerState::INACTIVE:
-                pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_OFF);
-                break;
-            case PowerState::SLEEP:
-                pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_SLEEP);
-                break;
-            default:
-                pendingTask = nullptr;
-                break;
-        }
-    } else {
+    if (!IsTimeoutReason(reason)) {
         return true;
+    }
+    const void* pendingTask = nullptr;
+    switch (state) {
+        case PowerState::DIM:
+            pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_TIMEOUT);
+            break;
+        case PowerState::INACTIVE:
+            pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_OFF);
+            break;
+        case PowerState::SLEEP:
+            pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_SLEEP);
+            break;
+        default:
+            break;
     }
     return curTask == pendingTask;
 }
 
-bool PowerStateMachine::IsTimeoutReason(StateChangeReason reason)
+bool PowerStateMachine::IsTimeoutReason(StateChangeReason reason) const
 {
     return reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK ||
         reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
