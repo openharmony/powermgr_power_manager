@@ -511,16 +511,17 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 start.");
     constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
-    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 200;
+    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 125;
     constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 800;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SHORT_SCREEN_OFF_TIME_MS);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
     std::vector<std::thread> refreshThreads;
-    bool notified = false;
-    auto refreshTask = [&powerMgrClient, &notified]() {
-        while (!notified) {
+    bool endTask = false;
+    bool endRefresh = false;
+    auto refreshTask = [&powerMgrClient, &endRefresh]() {
+        while (!endRefresh) {
             powerMgrClient.RefreshActivity();
         }
     };
@@ -529,8 +530,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
         refreshThreads.emplace_back(std::thread(refreshTask));
     }
 
-    auto checkingTask = [&powerMgrClient, &notified]() {
-        while (!notified) {
+    auto checkingTask = [&powerMgrClient, &endTask]() {
+        while (!endTask) {
             powerMgrClient.SuspendDevice();
             EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
             usleep(OPERATION_DELAY_US);
@@ -539,14 +540,22 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
             usleep(OPERATION_DELAY_US);
         }
     };
-    // checks whether refresh tasks may unexpectly turn screen on
+    // checks whether refresh tasks may unexpectedly turn screen on
     std::thread checkingThread(checkingTask);
     sleep(10);
-    notified = true;
+    endTask = true;
+    checkingThread.join();
+    // part2 start
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    // checks whether timeout events are all blocked
+    powerMgrClient.OverrideScreenOffTime(EXTREMELY_SHORT_SCREEN_OFF_TIME_MS);
+    sleep(10);
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+    endRefresh = true;
     for (auto& thread : refreshThreads) {
         thread.join();
     }
-    checkingThread.join();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 end.");
 }
 

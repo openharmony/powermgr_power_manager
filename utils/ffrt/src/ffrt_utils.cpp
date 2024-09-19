@@ -93,6 +93,7 @@ FFRTTimer::FFRTTimer(const char *timer_name): queue_(timer_name)
 FFRTTimer::~FFRTTimer()
 {
     Clear();
+    // queue_ will be destructed thereafter.
 }
 
 void FFRTTimer::Clear()
@@ -119,22 +120,8 @@ void FFRTTimer::CancelTimer(uint32_t timerId)
     mutex_.unlock();
 }
 
-void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task)
-{
-    mutex_.lock();
-    CancelTimerInner(timerId);
-    ++taskId_[timerId];
-    POWER_HILOGD(FEATURE_UTIL, "Timer[%{public}u] Add Task[%{public}u]", timerId, taskId_[timerId]);
-    FFRTUtils::SubmitTask(task);
-    mutex_.unlock();
-}
-
 void FFRTTimer::SetTimer(uint32_t timerId, FFRTTask& task, uint32_t delayMs)
 {
-    if (delayMs == 0) {
-        return SetTimer(timerId, task);
-    }
-
     mutex_.lock();
     CancelTimerInner(timerId);
     ++taskId_[timerId];
@@ -150,6 +137,13 @@ uint32_t FFRTTimer::GetTaskId(uint32_t timerId)
     uint32_t id = taskId_[timerId];
     mutex_.unlock();
     return id;
+}
+
+const void* FFRTTimer::GetTaskHandlePtr(uint32_t timerId)
+{
+    std::lock_guard lock(mutex_);
+    // conversion function to void* defined in task.h
+    return static_cast<void*>(handleMap_[timerId]);
 }
 
 /* inner functions must be called when mutex_ is locked */

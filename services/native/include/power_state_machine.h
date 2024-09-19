@@ -69,7 +69,7 @@ enum class TransitResult {
 
 class PowerStateMachine : public std::enable_shared_from_this<PowerStateMachine> {
 public:
-    explicit PowerStateMachine(const wptr<PowerMgrService>& pms);
+    PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer = nullptr);
     ~PowerStateMachine();
 
     enum {
@@ -98,6 +98,8 @@ public:
     bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
     bool IsCollaborationScreenOn();
+    bool CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason) const;
+    bool IsTimeoutReason(StateChangeReason reason) const;
     void Reset();
     int64_t GetSleepTime();
 #ifdef MSDP_MOVEMENT_ENABLE
@@ -322,8 +324,8 @@ private:
     bool IsProximityClose();
 #endif
 
-    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
     const wptr<PowerMgrService> pms_;
+    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
     PowerState currentState_;
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
