@@ -240,6 +240,9 @@ void PowerStateMachine::EmplaceAwake()
             POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_AWAKE lambda start, reason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+            HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER_UE, "SCREEN_ON",
+                HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PNAMEID", "PowerManager", "PVERSIONID", "1.0",
+                "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON",
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
 #endif
@@ -273,6 +276,11 @@ void PowerStateMachine::EmplaceInactive()
     controllerMap_.emplace(PowerState::INACTIVE,
         std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_INACTIVE lambda start");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+            HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER_UE, "SCREEN_OFF",
+                HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PNAMEID", "PowerManager", "PVERSIONID", "1.0",
+                "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+#endif
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
             if (enableDisplaySuspend_) {
