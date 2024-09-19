@@ -48,11 +48,12 @@ constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 std::atomic_bool onForceSleep = false;
 
 /** SuspendController Implement */
-SuspendController::SuspendController(
-    std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine)
+SuspendController::SuspendController(const std::shared_ptr<ShutdownController>& shutdownController,
+    const std::shared_ptr<PowerStateMachine>& stateMachine, const std::shared_ptr<FFRTTimer>& ffrtTimer)
 {
     shutdownController_ = shutdownController;
     stateMachine_ = stateMachine;
+    ffrtTimer_ = ffrtTimer;
 }
 
 SuspendController::~SuspendController()
@@ -150,7 +151,6 @@ private:
 void SuspendController::Init()
 {
     std::lock_guard lock(mutex_);
-    ffrtTimer_ = std::make_shared<FFRTTimer>("suspend_controller_timer");
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     sourceList_ = sources->GetSourceList();
     if (sourceList_.empty()) {
@@ -321,8 +321,8 @@ void SuspendController::HandleEvent(int64_t delayTime)
     if (ffrtTimer_ != nullptr) {
         ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
     } else {
-        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}s) failed, timer is null",
-            __func__, std::to_string(delayTime).c_str());
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}s) failed, timer is null", __func__,
+            std::to_string(delayTime).c_str());
     }
 }
 
