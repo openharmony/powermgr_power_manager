@@ -68,6 +68,10 @@ public:
         return wakeupReason_;
     }
     bool CheckEventReciveTime(WakeupDeviceType wakeupType);
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    void PowerOnInternalScreen(WakeupDeviceType type);
+    void PowerOnAllScreens(WakeupDeviceType type);
+#endif
 
 private:
     class SleepGuard final {
@@ -84,7 +88,14 @@ private:
         sptr<PowerMgrService> pms_;
     };
 
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    bool IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) const;
+    void ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);
+#endif
+    bool NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason) const;
+    void HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);
     void ControlListener(WakeupDeviceType reason);
+
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
     std::map<WakeupDeviceType, int64_t> eventHandleMap_;

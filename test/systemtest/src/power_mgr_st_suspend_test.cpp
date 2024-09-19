@@ -44,7 +44,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
     POWER_HILOGI(FEATURE_INPUT, "auto suspend by reason=%{public}d", reason);
 
     bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
+        PowerState::SLEEP, stateMachine_->GetReasonBySuspendType(reason));
     if (ret) {
         POWER_HILOGI(FEATURE_INPUT, "State changed, Mock suspend intreface");
     } else {

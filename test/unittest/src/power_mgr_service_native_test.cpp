@@ -136,12 +136,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 begin.");
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
     EXPECT_TRUE(SettingHelper::pickUpObserver_ != nullptr);
     SettingHelper::UnregisterSettingWakeupPickupObserver();
     SettingHelper::UnregisterSettingWakeupPickupObserver();
     EXPECT_TRUE(SettingHelper::pickUpObserver_ == nullptr);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 end.");
 }
 
@@ -273,16 +275,17 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 begin.");
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
     SettingHelper::IsWakeupPickupSettingValid();
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     EXPECT_TRUE(SettingHelper::doubleClickObserver_ == nullptr);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 end.");
 }
 
-#ifdef MSDP_MOVEMENT_ENABLE
 /**
  * @tc.name: PowerMgrServiceNative012
  * @tc.desc: test RegisterMovementCallback
@@ -291,14 +294,142 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 begin.");
+#ifdef MSDP_MOVEMENT_ENABLE
     auto stateMachine = std::make_shared<PowerStateMachine>(g_pmsTest);
     g_pmsTest->RegisterMovementCallback();
     g_pmsTest->UnRegisterMovementCallback();
     g_pmsTest->ResetMovementState();
     bool ret =  stateMachine->IsMovementStateOn();
     EXPECT_TRUE(ret == false);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 end.");
 }
+
+/**
+ * @tc.name: PowerMgrServiceNative013
+ * @tc.desc: test RegisterExternalScreenListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 begin.");
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    g_pmsTest->RegisterExternalScreenListener();
+    EXPECT_TRUE(g_pmsTest->externalScreenListener_ != nullptr);
+    g_pmsTest->UnRegisterExternalScreenListener();
+    EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 end.");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative014
+ * @tc.desc: test ExternalScreenListener OnConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 begin.");
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    g_pmsTest->SuspendControllerInit();
+    g_pmsTest->WakeupControllerInit();
+    // Register screen listener
+    g_pmsTest->RegisterExternalScreenListener();
+    EXPECT_TRUE(g_pmsTest->externalScreenListener_ != nullptr);
+
+    auto powerStateMachine = g_pmsTest->GetPowerStateMachine();
+    constexpr uint64_t SCREEN_A_ID = 10001;
+    // Mock open switch to wakeup deivce
+    // case 1: isSwitchOpen:true, isScreenOn:true
+    powerStateMachine->SetSwitchState(true);
+    g_pmsTest->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_SWITCH, "PowerMgrServiceNative014");
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    powerStateMachine->DecreaseExternalScreenNumber();
+    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 0);
+
+    // case 2: isSwitchOpen:true, isScreenOn:false
+    g_pmsTest->SuspendDevice(GetTickCount(), SuspendDevice::SUSPEND_DEVICE_REASON_POWER_KEY, false);
+    EXPECT_FALSE(powerStateMachine->IsScreenOn());
+    g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    powerStateMachine->DecreaseExternalScreenNumber();
+    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 0);
+
+    // case 3: isSwitchOpen:false, isScreenOn:false
+    powerStateMachine->SetSwitchState(false);
+    g_pmsTest->SuspendDevice(GetTickCount(), SuspendDevice::SUSPEND_DEVICE_REASON_SWITCH, false);
+    EXPECT_FALSE(powerStateMachine->IsScreenOn());
+    g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
+    EXPECT_FALSE(powerStateMachine->IsScreenOn());
+
+    // Unregister screen listener
+    g_pmsTest->UnRegisterExternalScreenListener();
+    EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 end.");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative015
+ * @tc.desc: test ExternalScreenListener OnDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 begin.");
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    g_pmsTest->SuspendControllerInit();
+    g_pmsTest->WakeupControllerInit();
+    // Register screen listener
+    g_pmsTest->RegisterExternalScreenListener();
+    EXPECT_TRUE(g_pmsTest->externalScreenListener_ != nullptr);
+
+    auto powerStateMachine = g_pmsTest->GetPowerStateMachine();
+    constexpr uint64_t SCREEN_A_ID = 10001;
+    // Mock open switch to wakeup deivce
+    // case 1: isSwitchOpen:true, isScreenOn:true
+    powerStateMachine->SetSwitchState(true);
+    g_pmsTest->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_SWITCH, "PowerMgrServiceNative015");
+    powerStateMachine->IncreaseExternalScreenNumber();
+    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 1);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    g_pmsTest->externalScreenListener_->OnDisconnect(SCREEN_A_ID);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+
+    // case 2: isSwitchOpen:true, isScreenOn:false
+    g_pmsTest->SuspendDevice(GetTickCount(), SuspendDevice::SUSPEND_DEVICE_REASON_POWER_KEY, false);
+    EXPECT_FALSE(powerStateMachine->IsScreenOn());
+    powerStateMachine->IncreaseExternalScreenNumber();
+    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 1);
+    g_pmsTest->externalScreenListener_->OnDisconnect(SCREEN_A_ID);
+    EXPECT_FALSE(powerStateMachine->IsScreenOn());
+
+    // case 3: isSwitchOpen:false, isScreenOn:true, and there's only 1 external screen
+    // Mock open switch to wakeup deivce
+    powerStateMachine->SetSwitchState(true);
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_SWITCH, "PowerMgrServiceNative015");
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    powerStateMachine->IncreaseExternalScreenNumber();
+    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 1);
+    // Mock close switch to suspend device when switch's action is configured as ACTION_NONE
+    powerStateMachine->SetSwitchState(false);
+    auto suspendController = g_service->GetSuspendController();
+    suspendController->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, SuspendAction::ACTION_NONE, 0);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    EXPECT_EQ(powerStateMachine->GetPowerOffInternalScreenOnlyFlag(), true);
+    g_pmsTest->externalScreenListener_->OnDisconnect(SCREEN_A_ID);
+    EXPECT_FALSE(powerStateMachine->IsScreenOn());
+
+    // Unregister screen listener
+    g_pmsTest->UnRegisterExternalScreenListener();
+    EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 end.");
+}
 
 } // namespace
