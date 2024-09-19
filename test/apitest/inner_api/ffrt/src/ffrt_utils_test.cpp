@@ -14,7 +14,6 @@
  */
 #include "ffrt_utils_test.h"
 
-#include "c/executor_task.h"
 #include "ffrt_utils.h"
 #include "power_log.h"
 

@@ -23,8 +23,6 @@
 #endif
 #include <ipc_skeleton.h>
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-
-#include "c/executor_task.h"
 #include "power_hitrace.h"
 #endif
 #include "power_mode_policy.h"
@@ -153,8 +151,7 @@ void PowerStateMachine::InitTransitMap()
             {
                 {PowerState::DIM, {PowerState::INACTIVE}},
                 // allow AWAKE to INACTIVE without going to DIM for UTs to pass
-                {PowerState::AWAKE, {PowerState::INACTIVE}},
-                {PowerState::INACTIVE, {PowerState::SLEEP}}
+                {PowerState::AWAKE, {PowerState::INACTIVE}}
             }
         },
     });
@@ -1631,6 +1628,9 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
 
 bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason) const
 {
+    if (!IsTimeoutReason(reason)) {
+        return true;
+    }
     void* curTask = ffrt_get_cur_task();
     if (curTask == nullptr) {
         // not actually an ffrt task;
@@ -1640,9 +1640,6 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         POWER_HILOGE(FEATURE_POWER_STATE, "ffrtTimer_ is nullptr");
         return false;
     }
-    if (!IsTimeoutReason(reason)) {
-        return true;
-    }
     const void* pendingTask = nullptr;
     switch (state) {
         case PowerState::DIM:
@@ -1651,10 +1648,8 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         case PowerState::INACTIVE:
             pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_OFF);
             break;
-        case PowerState::SLEEP:
-            pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_SLEEP);
-            break;
         default:
+            pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_SLEEP);
             break;
     }
     return curTask == pendingTask;
