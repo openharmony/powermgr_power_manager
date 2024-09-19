@@ -482,7 +482,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
 {
     constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
-    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 200;
+    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 125;
     constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 800;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SHORT_SCREEN_OFF_TIME_MS);

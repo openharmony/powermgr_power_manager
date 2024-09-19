@@ -296,14 +296,14 @@ void SuspendController::StopSleep()
 
 void SuspendController::HandleEvent(int64_t delayTime)
 {
-    g_monitorMutex.lock();
-    auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-    if (timeoutSuspendMonitor == monitorMap_.end()) {
-        g_monitorMutex.unlock();
-        POWER_HILOGW(FEATURE_SUSPEND, "no timeout suspend monitor");
-        return;
-    }
-    FFRTTask task = [this, delayTime, monitor = timeoutSuspendMonitor->second]() {
+    FFRTTask task = [&]() {
+        g_monitorMutex.lock();
+        auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+        if (timeoutSuspendMonitor == monitorMap_.end()) {
+            g_monitorMutex.unlock();
+            return;
+        }
+
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms != nullptr) {
             if (pms->CheckDialogFlag()) {
@@ -312,12 +312,12 @@ void SuspendController::HandleEvent(int64_t delayTime)
         }
         if (stateMachine_ != nullptr) {
             int32_t timeout = stateMachine_->GetDisplayOffTime();
-            POWER_HILOGI(FEATURE_INPUT, "This time of timeout is: timer=%{public}" PRId64 "ms, current=%{public}d ms",
-                delayTime, timeout);
+            POWER_HILOGI(FEATURE_INPUT, "This time of timeout is %{public}d ms", timeout);
         }
+        g_monitorMutex.unlock();
+        auto monitor = timeoutSuspendMonitor->second;
         monitor->HandleEvent();
     };
-    g_monitorMutex.unlock();
     if (ffrtTimer_ != nullptr) {
         ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
     } else {
