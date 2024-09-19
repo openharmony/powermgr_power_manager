@@ -31,7 +31,6 @@ ohos_unittest("test_ffrt_utils") {
     "${powermgr_utils_path}:coverage_flags",
   ]
   deps = [
-    "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
     "//third_party/googletest:gtest_main",
   ]

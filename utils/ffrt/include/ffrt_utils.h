@@ -18,7 +18,9 @@
 #include <functional>
 #include <vector>
 
+#include "c/executor_task.h"
 #include "ffrt_inner.h"
+
 
 namespace OHOS {
 namespace PowerMgr {
