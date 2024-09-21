@@ -710,12 +710,12 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
 
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     skipWakeup = stateMachine_->IsHibernating();
-#endif
     if (skipWakeup) {
         POWER_HILOGI(
             FEATURE_WAKEUP, "[UL_POWER] Device is hibernating, skip current wakeup reason: %{public}u", reason);
         return true;
     }
+#endif
 
     skipWakeup = (pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
     if (skipWakeup) {

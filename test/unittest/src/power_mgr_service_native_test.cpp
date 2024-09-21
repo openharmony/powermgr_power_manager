@@ -364,6 +364,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
     g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
+    powerStateMachine->DecreaseExternalScreenNumber();
+    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 0);
 
     // Unregister screen listener
     g_pmsTest->UnRegisterExternalScreenListener();
