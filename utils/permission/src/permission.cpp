@@ -109,5 +109,36 @@ bool Permission::IsPermissionGranted(const std::string& perm)
     }
     return true;
 }
+
+bool Permission::IsNativePermissionGranted(const std::string& perm)
+{
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    pid_t uid = IPCSkeleton::GetCallingUid();
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    POWER_HILOGD(COMP_UTILS, "checking permission, perm=%{public}s type=%{public}d, pid=%{public}d, uid=%{public}d",
+        perm.c_str(), static_cast<int32_t>(type), pid, uid);
+    int32_t result = PermissionState::PERMISSION_DENIED;
+    switch (type) {
+        case ATokenTypeEnum::TOKEN_HAP:
+            result = PermissionState::PERMISSION_GRANTED;
+            break;
+        case ATokenTypeEnum::TOKEN_NATIVE:
+        case ATokenTypeEnum::TOKEN_SHELL:
+            result = AccessTokenKit::VerifyAccessToken(tokenId, perm);
+            break;
+        case ATokenTypeEnum::TOKEN_INVALID:
+        case ATokenTypeEnum::TOKEN_TYPE_BUTT:
+            break;
+        default:
+            break;
+    }
+    if (result == PermissionState::PERMISSION_DENIED) {
+        POWER_HILOGW(COMP_UTILS, "permission denied, perm=%{public}s type=%{public}d, pid=%{public}d, uid=%{public}d",
+            perm.c_str(), static_cast<int32_t>(type), pid, uid);
+        return false;
+    }
+    return true;
+}
 } // namespace PowerMgr
 } // namespace OHOS
