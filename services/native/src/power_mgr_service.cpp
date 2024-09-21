@@ -1831,7 +1831,9 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
                 FEATURE_SUSPEND, "[UL_POWER] Suspend device when external screen is disconnected and switch is closed");
             suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         } else {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Don't suspend device when there's still external screen");
+            POWER_HILOGI(FEATURE_SUSPEND,
+                "[UL_POWER] Refresh device rather than suspend device when there's still external screen");
+            pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
         }
     }
 }
