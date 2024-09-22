@@ -577,4 +577,40 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
 
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest020: end");
 }
+
+/**
+ * @tc.name: PowerWakeupControllerTest021
+ * @tc.desc: test ProcessPowerOffInternalScreenOnly and ProcessPowerOnInternalScreenOnly
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: start");
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    g_service->SuspendControllerInit();
+    g_service->WakeupControllerInit();
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    auto suspendController = g_service->GetSuspendController();
+    auto wakeupController = g_service->GetWakeupController();
+
+    // Mock open switch to wakeup deivce
+    powerStateMachine->SetSwitchState(true);
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_SWITCH, "PowerWakeupControllerTest021");
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    // Mock close switch to suspend deivce, action is configured as ACTION_NONE
+    powerStateMachine->SetSwitchState(false);
+    suspendController->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, SuspendAction::ACTION_NONE, 0);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    EXPECT_EQ(powerStateMachine->GetPowerOffInternalScreenOnlyFlag(), true);
+
+    // Mock open switch to power on internal screen
+    powerStateMachine->SetSwitchState(true);
+    wakeupController->ControlListener(WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
+    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    EXPECT_EQ(powerStateMachine->GetPowerOffInternalScreenOnlyFlag(), false);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: end");
+}
 } // namespace

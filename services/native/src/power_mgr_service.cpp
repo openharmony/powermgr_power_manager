@@ -165,6 +165,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+        // External screen listener must be registered after SuspendControllerInit and WakeupControllerInit
+        power->RegisterExternalScreenListener();
+#endif
         power->VibratorInit();
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
         power->RegisterSettingWakeupDoubleClickObservers();
@@ -465,23 +469,23 @@ void PowerMgrService::SwitchSubscriberInit()
     switchId_ =
         InputManager::GetInstance()->SubscribeSwitchEvent([this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
             POWER_HILOGI(FEATURE_WAKEUP, "switch event received");
-            std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
-            if (suspendController == nullptr) {
-                POWER_HILOGE(FEATURE_INPUT, "get suspendController instance error");
-                return;
-            }
-            std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
-            if (wakeupController == nullptr) {
-                POWER_HILOGE(FEATURE_INPUT, "wakeupController is not init");
-                return;
-            }
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
                 POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Switch close event received, begin to suspend");
+                std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
+                if (suspendController == nullptr) {
+                    POWER_HILOGE(FEATURE_INPUT, "get suspendController instance error");
+                    return;
+                }
                 powerStateMachine_->SetSwitchState(false);
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
                 POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch open event received, begin to wakeup");
+                std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+                if (wakeupController == nullptr) {
+                    POWER_HILOGE(FEATURE_INPUT, "get wakeupController instance error");
+                    return;
+                }
                 powerStateMachine_->SetSwitchState(true);
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
                 wakeupController->ExecWakeupMonitorByReason(reason);
@@ -581,6 +585,9 @@ void PowerMgrService::OnStop()
     SystemSuspendController::GetInstance().UnRegisterPowerHdiCallback();
     KeyMonitorCancel();
     HallSensorSubscriberCancel();
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    UnRegisterExternalScreenListener();
+#endif
     SwitchSubscriberCancel();
     InputMonitorCancel();
     ready_ = false;
@@ -883,7 +890,8 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type,
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_ACTIVITY, "Try to refresh activity, pid: %{public}d, uid: %{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_ACTIVITY,
+        "Try to refresh activity, pid: %{public}d, uid: %{public}d, activity type: %{public}u", pid, uid, type);
     return RefreshActivityInner(callTimeMs, type, needChangeBacklight);
 }
 
@@ -1731,6 +1739,104 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
 }
 
 void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const {};
+#endif
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void PowerMgrService::RegisterExternalScreenListener()
+{
+    if (externalScreenListener_ != nullptr) {
+        POWER_HILOGI(COMP_SVC, "External screen listener has already been registered");
+        return;
+    }
+
+    externalScreenListener_ = sptr<ExternalScreenListener>::MakeSptr();
+    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().RegisterScreenListener(externalScreenListener_);
+    POWER_HILOGI(COMP_SVC, "Register external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+}
+
+void PowerMgrService::UnRegisterExternalScreenListener()
+{
+    if (externalScreenListener_ == nullptr) {
+        POWER_HILOGI(COMP_SVC, "No need to unregister external screen listener");
+        return;
+    }
+
+    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().UnregisterScreenListener(externalScreenListener_);
+    externalScreenListener_ = nullptr;
+    POWER_HILOGI(COMP_SVC, "Unregister external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+}
+
+void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
+{
+    auto powerStateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    auto wakeupController = pms->GetWakeupController();
+    if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
+        POWER_HILOGE(
+            COMP_SVC, "OnConnect: get important instance error, screenId:%{public}u", static_cast<uint32_t>(screenId));
+        return;
+    }
+
+    powerStateMachine->IncreaseExternalScreenNumber();
+    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber();
+    bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
+    bool isScreenOn = powerStateMachine->IsScreenOn();
+    POWER_HILOGI(COMP_SVC,
+        "External screen is connected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
+        "%{public}d, isScreenOn: %{public}d",
+        static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
+
+    if (isSwitchOpen && isScreenOn) {
+        pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
+    } else if (isSwitchOpen && !isScreenOn) {
+        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN, "ScreenConnected");
+    } else if (!isSwitchOpen && !isScreenOn) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power off all screens when switch is closed");
+        suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+    } else {
+        if (curExternalScreenNum > 1) {
+            // When the power state is ON and there are 2 external screens or more, power off closed internal screen
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens except for the closed internal screen");
+            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN);
+            suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+        }
+    }
+}
+
+void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
+{
+    auto powerStateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    if (powerStateMachine == nullptr || suspendController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "OnDisconnect: get important instance error, screenId:%{public}u",
+            static_cast<uint32_t>(screenId));
+        return;
+    }
+
+    powerStateMachine->DecreaseExternalScreenNumber();
+    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber();
+    bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
+    bool isScreenOn = powerStateMachine->IsScreenOn();
+    POWER_HILOGI(COMP_SVC,
+        "External screen is disconnected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
+        "%{public}d, isScreenOn: %{public}d",
+        static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
+
+    if (isSwitchOpen && isScreenOn) {
+        pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
+    } else if (!isSwitchOpen && isScreenOn) {
+        // When there's no external screen, we should suspend the device, oterwise do nothing
+        if (curExternalScreenNum == 0) {
+            POWER_HILOGI(
+                FEATURE_SUSPEND, "[UL_POWER] Suspend device when external screen is disconnected and switch is closed");
+            suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+        } else {
+            POWER_HILOGI(FEATURE_SUSPEND,
+                "[UL_POWER] Refresh device rather than suspend device when there's still external screen");
+            pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
+        }
+    }
+}
 #endif
 
 void PowerMgrService::SubscribeCommonEvent()

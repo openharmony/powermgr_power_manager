@@ -16,16 +16,19 @@
 #include "wakeup_controller.h"
 
 #include <datetime_ex.h>
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+#include <display_manager.h>
+#endif
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#include <dlfcn.h>
+#endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
 #include <input_manager.h>
 #include <ipc_skeleton.h>
+#include <json/json.h>
 #include <securec.h>
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
-#include <dlfcn.h>
-#endif
-#include "json/json.h"
 #include "permission.h"
 #include "power_errors.h"
 #include "power_log.h"
@@ -445,12 +448,15 @@ void WakeupController::ProcessLowCapacityWakeup()
 }
 #endif
 
-void WakeupController::ControlListener(WakeupDeviceType reason)
+void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason)
 {
-    std::lock_guard lock(mutex_);
-    if (!Permission::IsSystem()) {
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    if (IsPowerOnInernalScreenOnlyScene(reason)) {
+        ProcessPowerOnInternalScreenOnly(pms, reason);
         return;
     }
+#endif
+
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     if (IsLowCapacityWakeup(reason)) {
         ProcessLowCapacityWakeup();
@@ -458,19 +464,6 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
     }
 #endif
 
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    if (!stateMachine_->IsSwitchOpen() || stateMachine_->IsHibernating()) {
-#else
-    if (!stateMachine_->IsSwitchOpen()) {
-#endif
-        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup control listerner do nothing.");
-        return;
-    }
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if ((pms == nullptr || pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH)) {
-        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this event: %{public}d", reason);
-        return;
-    }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
@@ -479,16 +472,44 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         Wakeup();
         SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
-        if (stateMachine_->GetState() == PowerState::SLEEP && pms->GetSuspendController() != nullptr) {
+        auto suspendController = pms->GetSuspendController();
+        if (suspendController != nullptr && stateMachine_->GetState() == PowerState::SLEEP) {
             POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
-            pms->GetSuspendController()->TriggerSyncSleepCallback(true);
+            suspendController->TriggerSyncSleepCallback(true);
         }
         if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+        if (suspendController != nullptr && !stateMachine_->IsSwitchOpen() &&
+            stateMachine_->GetExternalScreenNumber() > 0) {
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power off closed internal screen only when the device is AWAKE");
+            suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+        }
+#endif
     } else {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] state=%{public}u no transitor", stateMachine_->GetState());
     }
+}
+
+void WakeupController::ControlListener(WakeupDeviceType reason)
+{
+    std::lock_guard lock(mutex_);
+    if (!Permission::IsSystem()) {
+        return;
+    }
+
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] get PowerMgrService instance error");
+        return;
+    }
+
+    if (NeedToSkipCurrentWakeup(pms, reason)) {
+        return;
+    }
+
+    HandleWakeup(pms, reason);
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -635,6 +656,73 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
         eventHandleMap_[wakeupType] = now;
         return false;
     }
+    return false;
+}
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
+{
+    using namespace OHOS::Rosen;
+    uint64_t screenId = DisplayManager::GetInstance().GetInternalScreenId();
+    bool ret = DisplayManager::GetInstance().SetScreenPowerById(
+        screenId, ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    POWER_HILOGI(FEATURE_WAKEUP, "Power on internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d",
+        type, static_cast<uint32_t>(screenId), ret);
+}
+
+void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
+{
+    using namespace OHOS::Rosen;
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(
+        ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, type = %{public}u, ret = %{public}d", type, ret);
+}
+
+bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) const
+{
+    bool isScreenOn = stateMachine_->IsScreenOn();
+    if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && isScreenOn &&
+        stateMachine_->GetPowerOffInternalScreenOnlyFlag()) {
+        return true;
+    }
+    return false;
+}
+
+void WakeupController::ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrService>& pms, WakeupDeviceType reason)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power on internal screen only when external screen is on");
+    PowerOnInternalScreen(reason);
+    stateMachine_->SetPowerOffInternalScreenOnlyFlag(false);
+    pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
+}
+#endif
+
+bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason) const
+{
+    bool skipWakeup = !stateMachine_->IsSwitchOpen();
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    skipWakeup = skipWakeup && (stateMachine_->GetExternalScreenNumber() == 0);
+#endif
+    if (skipWakeup) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);
+        return true;
+    }
+
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    skipWakeup = stateMachine_->IsHibernating();
+    if (skipWakeup) {
+        POWER_HILOGI(
+            FEATURE_WAKEUP, "[UL_POWER] Device is hibernating, skip current wakeup reason: %{public}u", reason);
+        return true;
+    }
+#endif
+
+    skipWakeup = (pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
+    if (skipWakeup) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Screen is on, skip current wakeup reason: %{public}u", reason);
+        return true;
+    }
+
     return false;
 }
 

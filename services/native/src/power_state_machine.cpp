@@ -436,7 +436,7 @@ void PowerStateMachine::SuspendDeviceInner(
         POWER_HILOGD(FEATURE_SUSPEND, "Do not suspend device, screen state is ignored");
     }
 
-    if (SetState(PowerState::INACTIVE, GetReasionBySuspendType(type), true)) {
+    if (SetState(PowerState::INACTIVE, GetReasonBySuspendType(type), true)) {
         uint32_t delay = 0;
         SetAutoSuspend(type, delay);
     }
@@ -682,7 +682,7 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
     SetState(
-        PowerState::INACTIVE, GetReasionBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
+        PowerState::INACTIVE, GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
@@ -799,15 +799,26 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 
 bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 {
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    bool isScreenOn {false};
+    // When there's external screen, the original way to get screen state is inaccurate,
+    // so use PowerState instead
+    if (GetExternalScreenNumber() > 0) {
+        PowerState powerState = GetState();
+        isScreenOn = (powerState == PowerState::AWAKE) || (powerState == PowerState::DIM);
+    } else {
+        DisplayState displayState = stateAction_->GetDisplayState();
+        isScreenOn = (displayState == DisplayState::DISPLAY_ON) || (displayState == DisplayState::DISPLAY_DIM);
+    }
+#else
     DisplayState state = stateAction_->GetDisplayState();
-    if (state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM) {
-        POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is on, state: %{public}u", state);
-        return true;
-    }
+    bool isScreenOn = (state == DisplayState::DISPLAY_ON) || (state == DisplayState::DISPLAY_DIM);
+#endif
+
     if (needPrintLog) {
-        POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is off, state: %{public}u", state);
+        POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is %{public}s", isScreenOn ? "ON" : "OFF");
     }
-    return false;
+    return isScreenOn;
 }
 
 bool PowerStateMachine::IsFoldScreenOn()
@@ -909,7 +920,9 @@ void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
     ResetInactiveTimer();
 
     std::unique_ptr<IDeviceStateAction> mock(mockAction);
-    stateAction_.reset();
+    if (stateAction_ != nullptr) {
+        stateAction_.reset();
+    }
     stateAction_ = std::move(mock);
 }
 
@@ -1456,6 +1469,38 @@ int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
     return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
 }
 
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    bool PowerStateMachine::GetPowerOffInternalScreenOnlyFlag() const
+    {
+        return powerOffInternalScreenOnly_.load();
+    }
+
+    void PowerStateMachine::SetPowerOffInternalScreenOnlyFlag(bool value)
+    {
+        powerOffInternalScreenOnly_.store(value);
+    }
+
+    int32_t PowerStateMachine::GetExternalScreenNumber() const
+    {
+        return externalScreenNumber_.load();
+    }
+
+    void PowerStateMachine::IncreaseExternalScreenNumber()
+    {
+        ++externalScreenNumber_;
+    }
+
+    void PowerStateMachine::DecreaseExternalScreenNumber()
+    {
+        int32_t curNum = externalScreenNumber_.load();
+        if (curNum == 0) {
+            POWER_HILOGW(COMP_SVC, "No external screen already");
+            return;
+        }
+        --externalScreenNumber_;
+    }
+#endif
+
 bool PowerStateMachine::IsSettingState(PowerState state)
 {
     int64_t flag = settingStateFlag_.load();
@@ -1842,7 +1887,7 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
     return ret;
 }
 
-StateChangeReason PowerStateMachine::GetReasionBySuspendType(SuspendDeviceType type)
+StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType type)
 {
     POWER_HILOGD(FEATURE_SUSPEND, "SuspendDeviceType: %{public}u", type);
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
