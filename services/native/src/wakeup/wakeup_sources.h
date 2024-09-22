@@ -18,9 +18,9 @@
 
 #include "power_state_machine_info.h"
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 namespace OHOS {
 namespace PowerMgr {

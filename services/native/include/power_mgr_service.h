@@ -16,7 +16,11 @@
 #ifndef POWERMGR_POWER_MGR_SERVICE_H
 #define POWERMGR_POWER_MGR_SERVICE_H
 
+#include <common_event_subscriber.h>
 #include <iremote_object.h>
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+#include <screen_manager.h>
+#endif
 #include <system_ability.h>
 
 #include "actions/idevice_power_action.h"
@@ -34,9 +38,6 @@
 #include "sp_singleton.h"
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
-
-#include "common_event_subscriber.h"
-
 #ifdef POWER_MANAGER_WAKEUP_ACTION
 #include "wakeup_action_controller.h"
 #endif
@@ -44,18 +45,29 @@
 namespace OHOS {
 namespace PowerMgr {
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-typedef enum {
+enum class PowerConnectStatus : int32_t {
     POWER_CONNECT_INVALID = -1,
     POWER_CONNECT_DC = 0, // DC for Direct Current, means battery supply
     POWER_CONNECT_AC = 1, // AC for Alternating Current, means charing supply
-} PowerConnectStatus;
+};
 #endif
+
 class RunningLockMgr;
 class PowerMgrService final : public SystemAbility, public PowerMgrStub {
     DECLARE_SYSTEM_ABILITY(PowerMgrService)
     DECLARE_DELAYED_SP_SINGLETON(PowerMgrService);
 
 public:
+    static void RegisterSettingWakeupPickupGestureObserver();
+    static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
+    static void RegisterSettingWakeupDoubleClickObservers();
+    static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
+    static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
+    static void RegisterSettingPowerModeObservers();
+    static void PowerModeSettingUpdateFunc(const std::string& key);
+    static void RegisterSettingWakeUpLidObserver();
+    static void WakeupLidSettingUpdateFunc(const std::string& key);
+
     virtual void OnStart() override;
     virtual void OnStop() override;
     virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
@@ -125,6 +137,10 @@ public:
     void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) override;
 
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    void RegisterExternalScreenListener();
+    void UnRegisterExternalScreenListener();
+#endif
     void HandleKeyEvent(int32_t keyCode);
     void HandlePointEvent(int32_t type);
     void KeyMonitorCancel();
@@ -143,15 +159,6 @@ public:
 #endif
     bool IsCollaborationState();
     void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
-    static void RegisterSettingWakeupPickupGestureObserver();
-    static void WakeupPickupGestureSettingUpdateFunc(const std::string& key);
-    static void RegisterSettingWakeupDoubleClickObservers();
-    static void WakeupDoubleClickSettingUpdateFunc(const std::string& key);
-    static bool GetSettingWakeupDoubleClick(const std::string& key = SETTING_POWER_WAKEUP_DOUBLE_KEY);
-    static void RegisterSettingPowerModeObservers();
-    static void PowerModeSettingUpdateFunc(const std::string& key);
-    static void RegisterSettingWakeUpLidObserver();
-    static void WakeupLidSettingUpdateFunc(const std::string& key);
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif
@@ -264,23 +271,34 @@ public:
         return shutdownController_;
     }
 
-    std::shared_ptr<SuspendController> suspendController_ = nullptr;
-    std::shared_ptr<WakeupController> wakeupController_ = nullptr;
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    std::shared_ptr<HibernateController> hibernateController_ = nullptr;
-#endif
-    std::shared_ptr<ScreenOffPreController> screenOffPreController_ = nullptr;
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
+private:
+    static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
+    static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
+    static constexpr int32_t HALL_REPORT_INTERVAL = 0;
+    static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
+    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
+    static std::atomic_bool isBootCompleted_;
+
+    static void RegisterBootCompletedCallback();
+    static bool IsDeveloperMode();
+#ifdef HAS_SENSORS_SENSOR_PART
+    static void HallSensorCallback(SensorEvent* event);
 #endif
 
-private:
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    class ExternalScreenListener : public Rosen::ScreenManager::IScreenListener {
+    public:
+        virtual void OnConnect(uint64_t screenId) override;
+        virtual void OnDisconnect(uint64_t screenId) override;
+        virtual void OnChange(uint64_t screenId) override {}
+    };
+#endif
     class WakeupRunningLock {
     public:
         WakeupRunningLock();
         ~WakeupRunningLock();
     private:
-        sptr<IRemoteObject> token_;
+        sptr<IRemoteObject> token_ {nullptr};
     };
 
     class InvokerDeathRecipient : public DeathRecipient {
@@ -288,7 +306,8 @@ private:
 
     public:
         InvokerDeathRecipient(std::string interfaceName, CallbackType callback)
-            : interfaceName_(interfaceName), callback_(callback) {};
+            : interfaceName_(interfaceName),
+              callback_(callback) {}
         virtual ~InvokerDeathRecipient() = default;
         virtual void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
 
@@ -297,37 +316,26 @@ private:
         CallbackType callback_;
     };
 
-    static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
-    static constexpr int32_t INIT_KEY_MONITOR_DELAY_MS = 1000;
-    static constexpr int32_t HALL_REPORT_INTERVAL = 0;
-    static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
-    static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
-    bool Init();
-    bool PowerStateMachineInit();
-    std::string GetBundleNameByUid(const int32_t uid);
-    RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid,
-        int32_t timeOutMS = -1);
-    static void RegisterBootCompletedCallback();
-    static bool IsDeveloperMode();
-#ifdef MSDP_MOVEMENT_ENABLE
-    void RegisterMovementCallback();
-    void UnRegisterMovementCallback();
-    void ResetMovementState();
-#endif
-
     inline PowerModeModule& GetPowerModeModule()
     {
         return powerModeModule_;
     }
 
+    bool Init();
+    bool PowerStateMachineInit();
+    std::string GetBundleNameByUid(const int32_t uid);
+    RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid, int32_t timeOutMS = -1);
+    void SubscribeCommonEvent();
+#ifdef MSDP_MOVEMENT_ENABLE
+    void RegisterMovementCallback();
+    void UnRegisterMovementCallback();
+    void ResetMovementState();
+#endif
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsSupportSensor(SensorTypeId);
-    static void HallSensorCallback(SensorEvent* event);
-    SensorUser sensorUser_{};
 #endif
 
     bool ready_ {false};
-    static std::atomic_bool isBootCompleted_;
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
@@ -340,11 +348,25 @@ private:
     std::mutex screenMutex_;
     std::mutex dumpMutex_;
     std::mutex lockMutex_;
-    std::shared_ptr<RunningLockMgr> runningLockMgr_;
-    std::shared_ptr<PowerStateMachine> powerStateMachine_;
-    std::shared_ptr<PowerMgrNotify> powerMgrNotify_;
-    std::shared_ptr<ShutdownController> shutdownController_;
-    std::shared_ptr<FFRTTimer> ffrtTimer_;
+    std::shared_ptr<RunningLockMgr> runningLockMgr_ {nullptr};
+    std::shared_ptr<PowerStateMachine> powerStateMachine_ {nullptr};
+    std::shared_ptr<PowerMgrNotify> powerMgrNotify_ {nullptr};
+    std::shared_ptr<ShutdownController> shutdownController_ {nullptr};
+    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
+    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_ {nullptr};
+    std::shared_ptr<SuspendController> suspendController_ {nullptr};
+    std::shared_ptr<WakeupController> wakeupController_ {nullptr};
+    sptr<IRemoteObject> ptoken_ {nullptr};
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    std::shared_ptr<HibernateController> hibernateController_ {nullptr};
+#endif
+    std::shared_ptr<ScreenOffPreController> screenOffPreController_ {nullptr};
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    std::shared_ptr<WakeupActionController> wakeupActionController_ {nullptr};
+#endif
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    sptr<Rosen::ScreenManager::IScreenListener> externalScreenListener_ {nullptr};
+#endif
     PowerModeModule powerModeModule_;
     ShutdownDialog shutdownDialog_;
     uint32_t mockCount_ {0};
@@ -352,12 +374,12 @@ private:
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
     int32_t inputMonitorId_ {-1};
-    sptr<IRemoteObject> ptoken_;
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     PowerConnectStatus powerConnectStatus_ {PowerConnectStatus::POWER_CONNECT_INVALID};
 #endif
-    void SubscribeCommonEvent();
-    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_;
+#ifdef HAS_SENSORS_SENSOR_PART
+    SensorUser sensorUser_{};
+#endif
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART

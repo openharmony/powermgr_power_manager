@@ -361,4 +361,32 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func ended!");
 }
+
+/**
+ * @tc.name: NativePowerStateMachine010
+ * @tc.desc: test GetExternalScreenNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010: func started!");
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->RegisterExternalScreenListener();
+    EXPECT_TRUE(pmsTest->externalScreenListener_ != nullptr);
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    constexpr uint64_t SCREEN_A_ID = 10001;
+    constexpr uint64_t SCREEN_B_ID = 10002;
+    pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
+    EXPECT_EQ(stateMachine->GetExternalScreenNumber(), 1);
+    pmsTest->externalScreenListener_->OnConnect(SCREEN_B_ID);
+    EXPECT_EQ(stateMachine->GetExternalScreenNumber(), 2);
+    pmsTest->externalScreenListener_->OnDisconnect(SCREEN_B_ID);
+    EXPECT_EQ(stateMachine->GetExternalScreenNumber(), 1);
+    pmsTest->UnRegisterExternalScreenListener();
+#endif
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010: func ended!");
+}
+
 } // namespace

@@ -15,20 +15,26 @@
 
 #include "suspend_controller.h"
 #include <datetime_ex.h>
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+#include <display_manager.h>
+#endif
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#include <hisysevent.h>
+#endif
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
 #endif
-#include <securec.h>
 #include <ipc_skeleton.h>
+#include <securec.h>
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+#include <screen_manager.h>
+#endif
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-#include <hisysevent.h>
-#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -185,15 +191,13 @@ void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
     FFRTUtils::SubmitTask([this, reason] {
         g_monitorMutex.lock();
-        if (monitorMap_.find(reason) != monitorMap_.end()) {
-            auto monitor = monitorMap_[reason];
-            if (monitor == nullptr) {
-                POWER_HILOGI(COMP_SVC, "get monitor fail");
-                g_monitorMutex.unlock();
-                return;
-            }
-            monitor->Notify();
+        auto suspendMonitor = GetSpecifiedSuspendMonitor(reason);
+        if (suspendMonitor == nullptr) {
+            POWER_HILOGI(COMP_SVC, "get monitor fail, type: %{public}u", reason);
+            g_monitorMutex.unlock();
+            return;
         }
+        suspendMonitor->Notify();
         g_monitorMutex.unlock();
     });
 }
@@ -298,8 +302,8 @@ void SuspendController::HandleEvent(int64_t delayTime)
 {
     FFRTTask task = [&]() {
         g_monitorMutex.lock();
-        auto timeoutSuspendMonitor = monitorMap_.find(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-        if (timeoutSuspendMonitor == monitorMap_.end()) {
+        auto timeoutSuspendMonitor = GetSpecifiedSuspendMonitor(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+        if (timeoutSuspendMonitor == nullptr) {
             g_monitorMutex.unlock();
             return;
         }
@@ -315,8 +319,7 @@ void SuspendController::HandleEvent(int64_t delayTime)
             POWER_HILOGI(FEATURE_INPUT, "This time of timeout is %{public}d ms", timeout);
         }
         g_monitorMutex.unlock();
-        auto monitor = timeoutSuspendMonitor->second;
-        monitor->HandleEvent();
+        timeoutSuspendMonitor->HandleEvent();
     };
     if (ffrtTimer_ != nullptr) {
         ffrtTimer_->SetTimer(TIMER_ID_USER_ACTIVITY_OFF, task, delayTime);
@@ -370,7 +373,7 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
     if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-        POWER_HILOGI(FEATURE_SUSPEND, "Do nothing for reason %{public}d", reason);
+        POWER_HILOGI(FEATURE_SUSPEND, "SuspendWhenScreenOff: Do nothing for reason %{public}u", reason);
         return;
     }
     if (stateMachine_ == nullptr) {
@@ -415,15 +418,27 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (pms == nullptr) {
         return;
     }
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "get PowerStateMachine instance error");
+        return;
+    }
 
     if (pms->CheckDialogAndShuttingDown()) {
         return;
     }
 
-    if (!pms->IsScreenOn()) {
+    bool isScreenOn = stateMachine_->IsScreenOn();
+    if (!isScreenOn) {
         SuspendWhenScreenOff(reason, action, delay);
         return;
     }
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
+        ProcessPowerOffInternalScreenOnly(pms, reason);
+        return;
+    }
+#endif
 
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
@@ -440,16 +455,61 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TRIGGER_EVENT_TYPE", static_cast<int32_t>(reason),
         "ACTION_EVENT_TYPE", static_cast<int32_t>(force));
 #endif
-    if (stateMachine_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return;
-    }
     bool ret = stateMachine_->SetState(
-        PowerState::INACTIVE, stateMachine_->GetReasionBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
+        PowerState::INACTIVE, stateMachine_->GetReasonBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
     if (ret) {
         StartSleepTimer(reason, action, delay);
     }
 }
+
+std::shared_ptr<SuspendMonitor> SuspendController::GetSpecifiedSuspendMonitor(SuspendDeviceType type) const
+{
+    auto iter = monitorMap_.find(type);
+    if (iter == monitorMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void SuspendController::PowerOffInternalScreen(SuspendDeviceType type)
+{
+    using namespace OHOS::Rosen;
+    uint64_t screenId = DisplayManager::GetInstance().GetInternalScreenId();
+    bool ret = DisplayManager::GetInstance().SetScreenPowerById(
+        screenId, ScreenPowerState::POWER_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "Power off internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d", type,
+        static_cast<uint32_t>(screenId), ret);
+}
+
+void SuspendController::PowerOffAllScreens(SuspendDeviceType type)
+{
+    using namespace OHOS::Rosen;
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(
+        ScreenPowerState::POWER_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    POWER_HILOGI(FEATURE_SUSPEND, "Power off all screens, type = %{public}u, ret = %{public}d", type, ret);
+}
+
+bool SuspendController::IsPowerOffInernalScreenOnlyScene(
+    SuspendDeviceType reason, SuspendAction action, bool isScreenOn) const
+{
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH && isScreenOn &&
+        action == SuspendAction::ACTION_NONE && stateMachine_->GetExternalScreenNumber() > 0) {
+        return true;
+    }
+    return false;
+}
+
+void SuspendController::ProcessPowerOffInternalScreenOnly(const sptr<PowerMgrService>& pms, SuspendDeviceType reason)
+{
+    POWER_HILOGI(
+        FEATURE_SUSPEND, "[UL_POWER] Power off internal screen when closing switch is configured as no operation");
+    PowerOffInternalScreen(reason);
+    stateMachine_->SetPowerOffInternalScreenOnlyFlag(true);
+    pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
+}
+#endif
 
 void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
@@ -527,7 +587,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
         return;
     }
     bool ret = stateMachine_->SetState(
-        PowerState::SLEEP, stateMachine_->GetReasionBySuspendType(reason));
+        PowerState::SLEEP, stateMachine_->GetReasonBySuspendType(reason));
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
         TriggerSyncSleepCallback(false);
@@ -555,7 +615,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     }
 #endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
-        stateMachine_->GetReasionBySuspendType(reason), true);
+        stateMachine_->GetReasonBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
         onForceSleep = true;
@@ -583,7 +643,7 @@ void SuspendController::HandleHibernate(SuspendDeviceType reason)
         return;
     }
     bool ret = stateMachine_->SetState(
-        PowerState::HIBERNATE, stateMachine_->GetReasionBySuspendType(reason), true);
+        PowerState::HIBERNATE, stateMachine_->GetReasonBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, call hibernate");
     } else {

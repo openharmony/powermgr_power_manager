@@ -212,6 +212,10 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "battery_manager:batterysrv_client" ]
   }
 
+  if (power_manager_feature_external_screen_management) {
+    defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
+  }
+
   if (factory == true) {
     defines += [ "CONFIG_FACTORY_MODE" ]
   }
