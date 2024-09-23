@@ -248,7 +248,7 @@ bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
     if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
         POWER_HILOGE(COMP_FWK, "size exceed limit, size=%{public}d", size);
         return false;
-    }  
+    }
     for (int i = 0; i < size; ++i) {
         data.WriteInt32(processInfos[i].first);
         data.WriteInt32(processInfos[i].second);

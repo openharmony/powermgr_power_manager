@@ -322,7 +322,7 @@ bool PowerMgrProxy::ProxyRunningLocks(bool isProxied, const std::vector<std::pai
     if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "size exceed limit, size=%{public}u", size);
         return false;
-    }  
+    }
     for (size_t i = 0; i < size; ++i) {
         RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, processInfos[i].first, false);
         RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, processInfos[i].second, false);
