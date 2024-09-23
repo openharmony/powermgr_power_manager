@@ -682,7 +682,7 @@ bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) 
 {
     bool isScreenOn = stateMachine_->IsScreenOn();
     if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && isScreenOn &&
-        stateMachine_->GetPowerOffInternalScreenOnlyFlag()) {
+        stateMachine_->GetExternalScreenNumber() > 0) {
         return true;
     }
     return false;
@@ -692,7 +692,6 @@ void WakeupController::ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrServi
 {
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power on internal screen only when external screen is on");
     PowerOnInternalScreen(reason);
-    stateMachine_->SetPowerOffInternalScreenOnlyFlag(false);
     pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
 }
 #endif

@@ -423,7 +423,6 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
     auto suspendController = g_service->GetSuspendController();
     suspendController->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, SuspendAction::ACTION_NONE, 0);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
-    EXPECT_EQ(powerStateMachine->GetPowerOffInternalScreenOnlyFlag(), true);
     g_pmsTest->externalScreenListener_->OnDisconnect(SCREEN_A_ID);
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
 

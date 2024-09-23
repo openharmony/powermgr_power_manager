@@ -506,7 +506,6 @@ void SuspendController::ProcessPowerOffInternalScreenOnly(const sptr<PowerMgrSer
     POWER_HILOGI(
         FEATURE_SUSPEND, "[UL_POWER] Power off internal screen when closing switch is configured as no operation");
     PowerOffInternalScreen(reason);
-    stateMachine_->SetPowerOffInternalScreenOnlyFlag(true);
     pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
 }
 #endif
