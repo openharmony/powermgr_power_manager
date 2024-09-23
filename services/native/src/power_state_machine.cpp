@@ -1470,16 +1470,6 @@ int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
 }
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    bool PowerStateMachine::GetPowerOffInternalScreenOnlyFlag() const
-    {
-        return powerOffInternalScreenOnly_.load();
-    }
-
-    void PowerStateMachine::SetPowerOffInternalScreenOnlyFlag(bool value)
-    {
-        powerOffInternalScreenOnly_.store(value);
-    }
-
     int32_t PowerStateMachine::GetExternalScreenNumber() const
     {
         return externalScreenNumber_.load();
