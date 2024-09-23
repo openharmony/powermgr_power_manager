@@ -17,7 +17,7 @@
 
 #include <datetime_ex.h>
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-#include <display_manager.h>
+#include <display_manager_lite.h>
 #endif
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 #include <dlfcn.h>
@@ -663,8 +663,8 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
 {
     using namespace OHOS::Rosen;
-    uint64_t screenId = DisplayManager::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManager::GetInstance().SetScreenPowerById(
+    uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
+    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(
         screenId, ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
     POWER_HILOGI(FEATURE_WAKEUP, "Power on internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d",
         type, static_cast<uint32_t>(screenId), ret);
@@ -673,7 +673,7 @@ void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
 void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
 {
     using namespace OHOS::Rosen;
-    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(
+    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(
         ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
     POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, type = %{public}u, ret = %{public}d", type, ret);
 }

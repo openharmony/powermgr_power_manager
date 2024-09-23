@@ -663,7 +663,7 @@ ohos_unittest("test_device_state_action_native") {
   ]
 
   deps_ex += [ "display_manager:displaymgr" ]
-  deps_ex += [ "window_manager:libdm" ]
+  deps_ex += [ "window_manager:libdm_lite" ]
   external_deps = deps_ex
 }
 
