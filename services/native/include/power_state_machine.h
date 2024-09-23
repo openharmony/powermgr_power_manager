@@ -152,8 +152,6 @@ public:
     StateChangeReason GetReasonBySuspendType(SuspendDeviceType type);
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    bool GetPowerOffInternalScreenOnlyFlag() const;
-    void SetPowerOffInternalScreenOnlyFlag(bool value);
     int32_t GetExternalScreenNumber() const;
     void IncreaseExternalScreenNumber();
     void DecreaseExternalScreenNumber();
@@ -371,7 +369,6 @@ private:
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
     std::atomic<bool> proximityScreenOffTimerStarted_ {false};
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    std::atomic<bool> powerOffInternalScreenOnly_ {false};
     std::atomic<int32_t> externalScreenNumber_ {0};
 #endif
 };
