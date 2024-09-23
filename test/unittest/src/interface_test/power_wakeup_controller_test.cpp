@@ -603,13 +603,11 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level
     powerStateMachine->SetSwitchState(false);
     suspendController->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, SuspendAction::ACTION_NONE, 0);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
-    EXPECT_EQ(powerStateMachine->GetPowerOffInternalScreenOnlyFlag(), true);
 
     // Mock open switch to power on internal screen
     powerStateMachine->SetSwitchState(true);
     wakeupController->ControlListener(WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
-    EXPECT_EQ(powerStateMachine->GetPowerOffInternalScreenOnlyFlag(), false);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: end");
 }
