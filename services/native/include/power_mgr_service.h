@@ -19,7 +19,7 @@
 #include <common_event_subscriber.h>
 #include <iremote_object.h>
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-#include <screen_manager.h>
+#include <screen_manager_lite.h>
 #endif
 #include <system_ability.h>
 
@@ -286,7 +286,7 @@ private:
 #endif
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    class ExternalScreenListener : public Rosen::ScreenManager::IScreenListener {
+    class ExternalScreenListener : public Rosen::ScreenManagerLite::IScreenListener {
     public:
         virtual void OnConnect(uint64_t screenId) override;
         virtual void OnDisconnect(uint64_t screenId) override;
@@ -365,7 +365,7 @@ private:
     std::shared_ptr<WakeupActionController> wakeupActionController_ {nullptr};
 #endif
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    sptr<Rosen::ScreenManager::IScreenListener> externalScreenListener_ {nullptr};
+    sptr<Rosen::ScreenManagerLite::IScreenListener> externalScreenListener_ {nullptr};
 #endif
     PowerModeModule powerModeModule_;
     ShutdownDialog shutdownDialog_;

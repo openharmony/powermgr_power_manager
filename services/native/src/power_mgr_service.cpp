@@ -1750,7 +1750,7 @@ void PowerMgrService::RegisterExternalScreenListener()
     }
 
     externalScreenListener_ = sptr<ExternalScreenListener>::MakeSptr();
-    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().RegisterScreenListener(externalScreenListener_);
+    Rosen::DMError ret = Rosen::ScreenManagerLite::GetInstance().RegisterScreenListener(externalScreenListener_);
     POWER_HILOGI(COMP_SVC, "Register external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
 }
 
@@ -1761,7 +1761,7 @@ void PowerMgrService::UnRegisterExternalScreenListener()
         return;
     }
 
-    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().UnregisterScreenListener(externalScreenListener_);
+    Rosen::DMError ret = Rosen::ScreenManagerLite::GetInstance().UnregisterScreenListener(externalScreenListener_);
     externalScreenListener_ = nullptr;
     POWER_HILOGI(COMP_SVC, "Unregister external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
 }
