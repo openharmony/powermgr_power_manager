@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 PowerErrors PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
 {
@@ -191,6 +192,10 @@ PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj, const st
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
+    if (argc > args.size()) {
+        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
+        return result;
+    }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
         data, RemoteObject, remoteObj.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
@@ -314,6 +319,10 @@ bool PowerMgrProxy::ProxyRunningLocks(bool isProxied, const std::vector<std::pai
     size_t size = processInfos.size();
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, isProxied, false);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, size, false);
+    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "size exceed limit, size=%{public}u", size);
+        return false;
+    }  
     for (size_t i = 0; i < size; ++i) {
         RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, processInfos[i].first, false);
         RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, processInfos[i].second, false);
@@ -1192,6 +1201,10 @@ std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint3
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+    if (argc > args.size()) {
+        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
         return result;
     }
 
