@@ -47,7 +47,6 @@ sptr<SettingObserver> g_suspendSourcesKeyDcObserver = nullptr;
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 #endif
 FFRTMutex g_monitorMutex;
-const uint32_t SLEEP_DELAY_MS = 5000;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 } // namespace
 
@@ -517,7 +516,6 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
             POWER_HILOGI(FEATURE_SUSPEND, "sleeptime less than zero, no need suspend");
             return;
         }
-        delay = delay + SLEEP_DELAY_MS;
     }
 
     int64_t tick = GetTickCount();
