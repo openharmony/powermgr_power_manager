@@ -140,12 +140,14 @@ bool WakeupSourceParser::ParseSourcesProc(
     }
 
     if (!enable) {
-        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK
+        && (!SettingHelper::IsWakeupDoubleSettingValid())) {
             SettingHelper::SetSettingWakeupDouble(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting wakeupDoubleClick enable=%{public}d", enable);
         }
 
-        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP
+        && (!SettingHelper::IsWakeupPickupSettingValid())) {
             SettingHelper::SetSettingWakeupPickup(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting pickup enable=%{public}d", enable);
         }
