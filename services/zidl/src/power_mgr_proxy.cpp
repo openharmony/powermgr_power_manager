@@ -192,10 +192,6 @@ PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj, const st
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    if (argc > args.size()) {
-        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
-        return result;
-    }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
         data, RemoteObject, remoteObj.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
@@ -1209,6 +1205,10 @@ std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint3
     }
 
     data.WriteUint32(argc);
+    if (argc > args.size()) {
+        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
+        return result;
+    }    
     for (uint32_t i = 0; i < argc; i++) {
         data.WriteString(args[i]);
     }
