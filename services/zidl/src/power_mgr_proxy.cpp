@@ -1204,7 +1204,7 @@ std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint3
     if (argc > args.size()) {
         POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
         return result;
-    }    
+    }
     for (uint32_t i = 0; i < argc; i++) {
         data.WriteString(args[i]);
     }
