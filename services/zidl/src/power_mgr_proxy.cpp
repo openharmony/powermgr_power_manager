@@ -1199,10 +1199,6 @@ std::string PowerMgrProxy::ShellDump(const std::vector<std::string>& args, uint3
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return result;
     }
-    if (argc > args.size()) {
-        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
-        return result;
-    }
 
     data.WriteUint32(argc);
     if (argc > args.size()) {
