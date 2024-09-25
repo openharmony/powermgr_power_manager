@@ -745,6 +745,17 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
 #endif
 
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+uint32_t PowerStateMachine::GetPreHibernateDelay()
+{
+    int64_t preHibernateEnd = GetTickCount();
+    uint32_t preHibernateDelay = static_cast<uint32_t>(preHibernateEnd - g_preHibernateStart);
+    preHibernateDelay = preHibernateDelay > HIBERNATE_DELAY_MS ? 0 : HIBERNATE_DELAY_MS - preHibernateDelay;
+    POWER_HILOGI(FEATURE_SUSPEND, "preHibernateDelay = %{public}u", preHibernateDelay);
+    return preHibernateDelay;
+}
+#endif
+
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
@@ -766,10 +777,6 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         return true;
     }
 
-    int64_t preHibernateEnd = GetTickCount();
-    uint32_t preHibernateDelay = static_cast<uint32_t>(preHibernateEnd - g_preHibernateStart);
-    preHibernateDelay = preHibernateDelay > HIBERNATE_DELAY_MS ? 0 : HIBERNATE_DELAY_MS - preHibernateDelay;
-    POWER_HILOGI(FEATURE_SUSPEND, "preHibernateDelay = %{public}u", preHibernateDelay);
     FFRTTask task = [hibernateController, this, clearMemory, pms]() {
         bool success = hibernateController->Hibernate(clearMemory);
         if (!success && clearMemory) {
@@ -798,7 +805,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         hibernating_ = false;
         return false;
     }
-    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, preHibernateDelay);
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, GetPreHibernateDelay());
     return true;
 }
 #endif

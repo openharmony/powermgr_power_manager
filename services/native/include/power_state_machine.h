@@ -329,6 +329,7 @@ private:
     bool NeedShowScreenLocks(PowerState state);
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool PrepareHibernate(bool clearMemory);
+    uint32_t GetPreHibernateDelay();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsProximityClose();
