@@ -179,9 +179,9 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
     if (isForbidden) {
         return false;
     }
-    // prevent the unexpected double click to light up the screen when calling or sporting
+    // prevent the double click and pickup to light up the screen when calling or sporting
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
-            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
+             reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
 #ifdef HAS_SENSORS_SENSOR_PART
         if (IsProximityClose()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
