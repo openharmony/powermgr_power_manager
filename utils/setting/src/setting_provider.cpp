@@ -108,6 +108,10 @@ bool SettingProvider::IsValidKey(const std::string& key)
 {
     std::string value;
     ErrCode ret = GetStringValue(key, value);
+    if (!value.empty()) {
+        POWER_HILOGI(COMP_UTILS, "the getValue is:%{public}s", value.c_str());
+    }
+    POWER_HILOGI(COMP_UTILS, "the getRet is:%{public}u", ret);
     return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
 }
 
