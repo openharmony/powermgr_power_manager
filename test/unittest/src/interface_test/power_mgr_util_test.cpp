@@ -156,6 +156,71 @@ HWTEST_F(PowerMgrUtilTest, PermissionIsPermissionGrantedInvalid, TestSize.Level0
 }
 
 /**
+ * @tc.name: IsNativePermissionGranted
+ * @tc.desc: The function IsSystem and IsNativePermissionGranted in the test TOKEN_HAP
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, IsNativePermissionGrantedHap, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "IsNativePermissionGrantedHap start");
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockAccesstokenKit::MockSetSystemApp(false);
+    EXPECT_FALSE(Permission::IsSystem());
+
+    MockAccesstokenKit::MockSetSystemApp(true);
+    EXPECT_TRUE(Permission::IsSystem());
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_DENIED);
+    EXPECT_TRUE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
+    EXPECT_TRUE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    POWER_HILOGI(LABEL_TEST, "IsNativePermissionGrantedHap end");
+}
+
+/**
+ * @tc.name: IsNativePermissionGranted
+ * @tc.desc: The function IsNativePermissionGranted in the test TOKEN_NATIVE or TOKEN_SHELL
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, IsNativePermissionGrantedNative, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "IsNativePermissionGrantedNative start");
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_DENIED);
+    EXPECT_FALSE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
+    EXPECT_TRUE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_SHELL);
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_DENIED);
+    EXPECT_FALSE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
+    EXPECT_TRUE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    POWER_HILOGI(LABEL_TEST, "IsNativePermissionGrantedNative end");
+}
+
+/**
+ * @tc.name: IsNativePermissionGranted
+ * @tc.desc: The function IsNativePermissionGranted in the test TOKEN_INVALID or TOKEN_TYPE_BUTT
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, IsNativePermissionGrantedInvalid, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "IsNativePermissionGrantedInvalid start");
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_DENIED);
+    EXPECT_FALSE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
+    EXPECT_FALSE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_TYPE_BUTT);
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_DENIED);
+    EXPECT_FALSE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    MockAccesstokenKit::MockSetPermissionState(PermissionState::PERMISSION_GRANTED);
+    EXPECT_FALSE(Permission::IsNativePermissionGranted("POWER_OPTIMIZATION"));
+    POWER_HILOGI(LABEL_TEST, "IsNativePermissionGrantedInvalid end");
+}
+
+/**
  * @tc.name: SettingObserverTest001
  * @tc.desc: test SetKey in proxy
  * @tc.type: FUNC
