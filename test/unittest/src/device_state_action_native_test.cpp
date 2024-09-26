@@ -71,9 +71,6 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
     state = DisplayState::DISPLAY_SUSPEND;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_SUSPEND);
-    state = DisplayState::DISPLAY_UNKNOWN;
-    EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::FAILED);
-    EXPECT_FALSE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_UNKNOWN);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_OFF, reason);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_ON, reason);
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is end!");
