@@ -109,7 +109,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S + 3 * ONE_SECOND);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
-    powerStateMachine->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME, false);
+    powerStateMachine->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS, false);
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend002: end";
 }
 

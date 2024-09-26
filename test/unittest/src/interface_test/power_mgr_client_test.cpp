@@ -62,7 +62,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient001, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient001: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient001::fun is end!");
 }
 
@@ -89,7 +89,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient002, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient002: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient002::fun is end!");
 }
 
@@ -116,7 +116,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient003, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient003: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient003::fun is end!");
 }
 
@@ -143,7 +143,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient004, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient004: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient004::fun is end!");
 }
 
@@ -170,7 +170,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient005, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient005: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient005::fun is end!");
 }
 
@@ -197,7 +197,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient006, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient006: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient006::fun is end!");
 }
 
@@ -223,7 +223,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient007, TestSize.Level2)
     powerMgrClient.RefreshActivity(abnormaltype);
     usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2 + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient007: RefreshActivity Device Fail, Screen is OFF";
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient007::fun is end!");
 }
 
@@ -252,7 +252,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient008, TestSize.Level2)
     auto ret = displayMgrClient.GetDisplayState();
     EXPECT_EQ(ret, DisplayPowerMgr::DisplayState::DISPLAY_DIM);
 
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient008::fun is end!");
 }
 #endif
@@ -336,7 +336,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient011, TestSize.Level2)
     ret = displayMgrClient.GetDisplayState();
     EXPECT_EQ(ret, DisplayPowerMgr::DisplayState::DISPLAY_OFF);
 
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient011::fun is end!");
 }
 #endif
@@ -364,7 +364,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient012, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient012:End.");
 }
 
@@ -393,7 +393,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient013, TestSize.Level2)
     EXPECT_EQ(runningLock->IsUsed(), false);
     usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient013:End.");
 }
 
@@ -423,7 +423,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient014, TestSize.Level2)
 
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient014:End.");
 }
 
@@ -454,7 +454,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient015, TestSize.Level2)
 
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient015:End.");
 }
 
@@ -485,7 +485,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient016, TestSize.Level2)
 
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
-    powerMgrClient.OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient016:End.");
 }
 

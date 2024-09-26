@@ -30,9 +30,9 @@ namespace PowerMgr {
 constexpr int NEXT_WAIT_TIME_S = 1;
 constexpr int ASYNC_WAIT_TIME_S = 3;
 constexpr int REFRESHACTIVITY_WAIT_TIME_S = 8;
-constexpr int SCREEN_OFF_WAIT_TIME_S = (DEFAULT_DISPLAY_OFF_TIME / 1000);
+constexpr int SCREEN_OFF_WAIT_TIME_S = (PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS / 1000);
 constexpr int SCREEN_DIM_WAIT_TIME_S = (SCREEN_OFF_WAIT_TIME_S / 2);
-constexpr int SLEEP_WAIT_TIME_S = (DEFAULT_SLEEP_TIME / 1000);
+constexpr int SLEEP_WAIT_TIME_S = (PowerStateMachine::DEFAULT_SLEEP_TIME_MS / 1000);
 constexpr int SET_DISPLAY_OFF_TIME_MS = 8000;
 
 class PowerMgrMockSystemTest : public testing::Test {

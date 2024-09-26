@@ -30,10 +30,6 @@
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 
-
-#define DEFAULT_DISPLAY_OFF_TIME 30000
-#define DEFAULT_SLEEP_TIME       5000
-
 namespace OHOS {
 namespace PowerMgr {
 class RunningLockMgr;
@@ -87,6 +83,14 @@ public:
         virtual ~PowerStateCallbackDeathRecipient() = default;
     };
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    static constexpr int32_t DEFAULT_AC_DISPLAY_OFF_TIME_MS = 600000;
+    static constexpr int32_t DEFAULT_DC_DISPLAY_OFF_TIME_MS = 300000
+    static constexpr int32_t DEFAULT_DISPLAY_OFF_TIME_MS = DEFAULT_DC_DISPLAY_OFF_TIME_MS;
+#else
+    static constexpr int32_t DEFAULT_DISPLAY_OFF_TIME_MS = 30000;
+#endif
+    static constexpr int32_t DEFAULT_SLEEP_TIME_MS = 5000;
     static constexpr int64_t OFF_TIMEOUT_FACTOR = 5;
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
     static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
@@ -350,8 +354,8 @@ private:
     std::set<const sptr<IPowerStateCallback>, classcomp> asyncPowerStateListeners_;
     std::shared_ptr<IDeviceStateAction> stateAction_;
 
-    std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
-    int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
+    std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME_MS};
+    int64_t sleepTime_ {DEFAULT_SLEEP_TIME_MS};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
