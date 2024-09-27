@@ -160,7 +160,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock030, TestSize.Level2)
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
-    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
+    pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock030:End");
     GTEST_LOG_(INFO) << "PowerMgrMock030: end";
 }
@@ -295,7 +295,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock071, TestSize.Level2)
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
-    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
+    pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock071:End");
     GTEST_LOG_(INFO) << "PowerMgrMock071: end";
 }
@@ -334,7 +334,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock072, TestSize.Level2)
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
-    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
+    pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock072:End");
     GTEST_LOG_(INFO) << "PowerMgrMock072: end";
 }
@@ -429,7 +429,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock076, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->UnLock(token);
 
-    pms->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME);
+    pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock076:End");
     GTEST_LOG_(INFO) << "PowerMgrMock076: end";
 }

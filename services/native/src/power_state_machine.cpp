@@ -915,8 +915,8 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
 void PowerStateMachine::EnableMock(IDeviceStateAction* mockAction)
 {
     std::lock_guard lock(mutex_);
-    displayOffTime_ = DEFAULT_DISPLAY_OFF_TIME;
-    sleepTime_ = DEFAULT_SLEEP_TIME;
+    displayOffTime_ = DEFAULT_DISPLAY_OFF_TIME_MS;
+    sleepTime_ = DEFAULT_SLEEP_TIME_MS;
     ResetInactiveTimer();
 
     std::unique_ptr<IDeviceStateAction> mock(mockAction);

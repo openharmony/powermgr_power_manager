@@ -150,6 +150,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         SettingHelper::UpdateCurrentUserId(); // update setting user id before get setting values
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
         power->PowerConnectStatusInit();
+        power->UpdateSettingInvalidDisplayOffTime(); // update setting value if invalid before register
 #endif
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
@@ -1931,22 +1932,12 @@ int64_t PowerMgrService::GetSettingDisplayOffTime(int64_t defaultTime)
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 void PowerMgrService::UpdateSettingInvalidDisplayOffTime()
 {
-    if (SettingHelper::IsSettingDisplayAcScreenOffTimeValid() &&
-        SettingHelper::IsSettingDisplayDcScreenOffTimeValid()) {
-        return;
+    if (!SettingHelper::IsSettingDisplayAcScreenOffTimeValid()) {
+        SettingHelper::SetSettingDisplayAcScreenOffTime(DEFAULT_AC_DISPLAY_OFF_TIME_MS);
     }
-
-    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (power == nullptr) {
-        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
-        return;
+    if (!SettingHelper::IsSettingDisplayDcScreenOffTimeValid()) {
+        SettingHelper::SetSettingDisplayDcScreenOffTime(DEFAULT_DC_DISPLAY_OFF_TIME_MS);
     }
-    auto stateMachine = power->GetPowerStateMachine();
-    if (stateMachine == nullptr) {
-        POWER_HILOGE(COMP_SVC, "get PowerStateMachine fail");
-        return;
-    }
-    stateMachine->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME, true);
 }
 
 void PowerCommonEventSubscriber::OnPowerConnectStatusChanged(PowerConnectStatus status)
