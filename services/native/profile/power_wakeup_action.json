@@ -2,6 +2,21 @@
     "53": {
         "scene": "LowCapacity",
         "action": 1,
-        "description": "(such as)53 is a uniquely wakeup reason by reading node through HDI interface(GetWakeupReason)"
+        "description": "(such as)53 is a wakeup reason by reading node through HDI interface(GetWakeupReason)"
+    },
+    "51": {
+        "scene": "BatteryDrainsMoreThanRsoc5InMs",
+        "action": 1,
+        "description": "(such as)51 is a wakeup reason by reading node through HDI interface(GetWakeupReason)"
+    },
+    "52": {
+        "scene": "SocNtcOverheatInMsAndLidClose",
+        "action": 1,
+        "description": "(such as)52 is a wakeup reason by reading node through HDI interface(GetWakeupReason)"
+    },
+    "56": {
+        "scene": "UlsrLowRsoc",
+        "action": 1,
+        "description": "(such as)56 is a wakeup reason by reading node through HDI interface(GetWakeupReason)"
     }
 }
