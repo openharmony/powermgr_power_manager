@@ -96,7 +96,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest001, TestSize.Level
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount());
     sleep(SCREEN_OFF_WAIT_TIME_S / 2);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest001::fun is end");
 }
 
@@ -117,7 +117,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest002, TestSize.Level
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_BUTTON);
     sleep(SCREEN_OFF_WAIT_TIME_S / 2);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest002::fun is end");
 }
 
@@ -138,7 +138,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest003, TestSize.Level
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_TOUCH);
     sleep(SCREEN_OFF_WAIT_TIME_S / 2);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest003::fun is end");
 }
 
@@ -159,7 +159,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest004, TestSize.Level
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY);
     sleep(SCREEN_OFF_WAIT_TIME_S / 2);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest004::fun is end");
 }
 
@@ -182,7 +182,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest005, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest005::fun is end");
 }
 
@@ -205,7 +205,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest006, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest006::fun is end");
 }
 
@@ -227,7 +227,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest007, TestSize.Level
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), abnormaltype);
     usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest007::fun is end");
 }
 
@@ -304,7 +304,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     g_powerMgrServiceProxy->UnLock(token);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest010:End");
 }
@@ -338,7 +338,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
 
     g_powerMgrServiceProxy->UnLock(token);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest011:End");
 }
@@ -372,7 +372,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
 
     g_powerMgrServiceProxy->UnLock(token);
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
-    g_powerMgrServiceProxy->OverrideScreenOffTime(DEFAULT_SLEEP_TIME);
+    g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest012:End");
 }
