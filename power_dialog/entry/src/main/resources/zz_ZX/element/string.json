@@ -38,7 +38,7 @@
         },
         {
             "name":"WARNING_TIP",
-            "value":"[TS_941052]_Do you agree to have a remote device that wants to control this device?"
+            "value":"[TS_941052]_This allows your screen to be controlled remotely during screen sharing."
         },
         {
             "name":"BatteryServiceExtAbility_label",
@@ -81,10 +81,6 @@
             "value":"[TS_941057]_Power Options"
         },
         {
-            "name":"BUTTON_CONFIRM",
-            "value":"[TS_941058]_confirm"
-        },
-        {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
             "value":"[TS_941044]_Power off"
         },
@@ -94,7 +90,7 @@
         },
         {
             "name":"text_inject_tip_title",
-            "value":"[TS_959925]_Allow %s to use your screen"
+            "value":"[TS_959925]_Allow %s to use your screen?"
         },
         {
             "name":"bn_not_agree",

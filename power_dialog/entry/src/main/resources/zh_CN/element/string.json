@@ -69,12 +69,11 @@
             "value":"低温"
         },
         {
-            "name":"BUTTON_CONFIRM",
-            "value":"确定"
-        },
-        {
             "name":"WARNING_TIP",
-            "value":"用于共享屏幕时，与会人可远程协助您的桌面"
+            "value":"用于共享屏幕时，与会人可远程协助您的桌面。",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"notice_title",
@@ -98,7 +97,10 @@
         },
         {
             "name":"text_inject_tip_title",
-            "value":"允许%s使用您的屏幕"
+            "value":"允许%s使用您的屏幕？",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
