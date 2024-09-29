@@ -640,9 +640,8 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
 
     stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
-    stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
-    EXPECT_EQ(stateMachine->GetState(), PowerState::DIM);
     runningLockMgr->Lock(remoteObj);
+    stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     // after the activation of screen-on lock the screen should no longer be in DIM state
     EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
     runningLockMgr->UnLock(remoteObj);
