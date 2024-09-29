@@ -26,12 +26,18 @@ declare_args() {
   power_manager_feature_screen_on_timeout_check = false
   power_manager_feature_doubleclick_or_pickup = true
   power_manager_feature_force_sleep_broadcast = false
-  power_manager_feature_movement = true
+  power_manager_feature_movement = false
   power_manager_feature_charging_type_setting = false
   power_manager_feature_external_screen_management = false
 }
 
 defines = []
+if (!defined(global_parts_info) || defined(global_parts_info.msdp_movement)) {
+  has_msdp_movement_part = true
+} else {
+  has_msdp_movement_part = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.powermgr_display_manager)) {
   has_display_manager_part = true
