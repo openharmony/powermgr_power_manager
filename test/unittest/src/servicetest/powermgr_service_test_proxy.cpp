@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 PowerMgrServiceTestProxy::PowerMgrServiceTestProxy(const sptr<PowerMgrService>& service)
 {
     if (service != nullptr) {
@@ -244,6 +245,10 @@ bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
     int32_t size = processInfos.size();
     data.WriteBool(isProxied);
     data.WriteUint32(size);
+    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGE(COMP_FWK, "size exceed limit, size=%{public}d", size);
+        return false;
+    }
     for (int i = 0; i < size; ++i) {
         data.WriteInt32(processInfos[i].first);
         data.WriteInt32(processInfos[i].second);
@@ -846,6 +851,10 @@ std::string PowerMgrServiceTestProxy::ShellDump(const std::vector<std::string>& 
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+    if (argc > args.size()) {
+        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
         return result;
     }
 
