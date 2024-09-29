@@ -21,6 +21,12 @@ namespace PowerMgr {
 int PowerMgrStubAsync::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     POWER_HILOGI(COMP_FWK, "code=%{public}u, flags=%{public}d", code, option.GetFlags());
+    std::u16string descriptor = PowerMgrStubAsync::GetDescriptor();
+    std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (descriptor != remoteDescriptor) {
+        POWER_HILOGE(COMP_FWK, "Descriptor is not matched");
+        return E_GET_POWER_SERVICE_FAILED;
+    }
     int result = ERR_OK;
     switch (code) {
         case SEND_ASYNC_REPLY: {
@@ -61,6 +67,10 @@ void PowerMgrProxyAsync::SendAsyncReply(int replyValue)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
+    if (!data.WriteInterfaceToken(PowerMgrProxyAsync::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return;
+    }
     data.WriteInt32(replyValue);
     remote->SendRequest(SEND_ASYNC_REPLY, data, reply, option);
 }
