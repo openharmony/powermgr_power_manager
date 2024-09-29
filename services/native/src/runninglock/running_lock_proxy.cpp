@@ -21,6 +21,9 @@
 
 namespace OHOS {
 namespace PowerMgr {
+namespace {
+static const std::string OFFLOAD_RUNNING_NAME = "AudioOffloadBackgroudPlay";
+}
 void RunningLockProxy::AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj)
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
@@ -155,6 +158,26 @@ void RunningLockProxy::ProxyInner(const sptr<IRemoteObject>& remoteObj,
     }
 }
 
+std::string RunningLockProxy::GetRunningLockName(const sptr<IRemoteObject>& remoteObj)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+        return "";
+    }
+    auto rlmgr = pms->GetRunningLockMgr();
+    if (rlmgr == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockMgr is nullptr");
+        return "";
+    }
+    auto lockInner = rlmgr->GetRunningLockInner(remoteObj);
+    if (lockInner == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockMgr is nullptr");
+        return "";
+    }
+    return lockInner->GetName();
+}
+
 std::string RunningLockProxy::MergeBundleName(const WksMap& wksMap)
 {
     std::string bundleName;
@@ -187,6 +210,10 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
     for (auto& proxyItem : proxyMap_) {
         auto& tokenWksMap = proxyItem.second;
         for (auto& tokenWksItem : tokenWksMap) {
+            if (GetRunningLockName(tokenWksItem.first).find(OFFLOAD_RUNNING_NAME) != std::string::npos) {
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
+                continue;
+            }
             auto& wksMap = tokenWksItem.second.first;
             if (wksMap.find(uid) != wksMap.end() && !wksMap[uid].second) {
                 wksMap[uid].second = true;
@@ -223,6 +250,10 @@ bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
     for (auto& proxyItem : proxyMap_) {
         auto& tokenWksMap = proxyItem.second;
         for (auto& tokenWksItem : tokenWksMap) {
+            if (GetRunningLockName(tokenWksItem.first).find(OFFLOAD_RUNNING_NAME) != std::string::npos) {
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
+                continue;
+            }
             auto& wksMap = tokenWksItem.second.first;
             if (wksMap.find(uid) != wksMap.end() && wksMap[uid].second) {
                 wksMap[uid].second = false;
