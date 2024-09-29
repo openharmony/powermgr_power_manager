@@ -1,116 +1,118 @@
 {
-    "string": [
+    "string":[
         {
-            "name": "entry_desc",
-            "value": "description"
+            "name":"entry_desc",
+            "value":"description"
         },
         {
-            "name": "MainAbility_desc",
-            "value": "power_dialog"
+            "name":"MainAbility_desc",
+            "value":"power_dialog"
         },
         {
-            "name": "MainAbility_label",
-            "value": "label"
+            "name":"MainAbility_label",
+            "value":"label"
         },
         {
-            "name": "ThermalServiceExtAbility_desc",
-            "value": "description"
+            "name":"ThermalServiceExtAbility_desc",
+            "value":"description"
         },
         {
-            "name": "ThermalServiceExtAbility_low_label",
-            "value": "ThermalServiceExtAbility_low_label"
+            "name":"ThermalServiceExtAbility_low_label",
+            "value":"ThermalServiceExtAbility_low_label"
         },
         {
-            "name": "PowerServiceExtAbility_label",
-            "value": "PowerServiceExtAbility_label"
+            "name":"PowerServiceExtAbility_label",
+            "value":"PowerServiceExtAbility_label"
         },
         {
-            "name": "BatteryServiceExtAbility_label",
-            "value": "BatteryServiceExtAbility_label"
+            "name":"BatteryServiceExtAbility_label",
+            "value":"BatteryServiceExtAbility_label"
         },
         {
-            "name": "ThermalServiceExtAbility_high_label",
-            "value": "ThermalServiceExtAbility_high_label"
+            "name":"ThermalServiceExtAbility_high_label",
+            "value":"ThermalServiceExtAbility_high_label"
         },
         {
-            "name": "BatteryServiceExtAbility_desc",
-            "value": "description"
+            "name":"BatteryServiceExtAbility_desc",
+            "value":"description"
         },
         {
-            "name": "PowerServiceExtAbility_reason",
-            "value": "reboot or shutdown"
+            "name":"PowerServiceExtAbility_reason",
+            "value":"reboot or shutdown"
         },
         {
-            "name": "inject_notice_ability_label",
-            "value": "InjectNoticeAbility"
+            "name":"inject_notice_ability_label",
+            "value":"InjectNoticeAbility"
         },
         {
-            "name": "capsule_window_ability_label",
-            "value": "CapsuleWindowAbility"
+            "name":"capsule_window_ability_label",
+            "value":"CapsuleWindowAbility"
         },
         {
-            "name": "inject_input_reason",
-            "value": "inject event"
+            "name":"inject_input_reason",
+            "value":"inject event"
         },
         {
-            "name": "BUTTON_CANCEL_POWERDIALOG",
-            "value": "Cancel"
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"Cancel"
         },
         {
-            "name": "BUTTON_SHUTDOWN_POWERDIALOG",
-            "value": "Power off"
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"Power off"
         },
         {
-            "name": "BUTTON_REBOOT_POWERDIALOG",
-            "value": "Restart"
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"Restart"
         },
         {
-            "name": "TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value": "Power Options"
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"Power Options"
         },
         {
-            "name": "BUTTON_KNOW",
-            "value": "Cancel"
+            "name":"BUTTON_KNOW",
+            "value":"Cancel"
         },
         {
-            "name": "TEXT_HIGH_TEMPERATURE_THERMALDIALOG_HIGH",
-            "value": "HighTemp"
+            "name":"TEXT_HIGH_TEMPERATURE_THERMALDIALOG_HIGH",
+            "value":"HighTemp"
         },
         {
-            "name": "TEXT_LOW_TEMPERATURE_THERMALDIALOG_LOW",
-            "value": "LowerTemp"
+            "name":"TEXT_LOW_TEMPERATURE_THERMALDIALOG_LOW",
+            "value":"LowerTemp"
         },
         {
-            "name": "BUTTON_CONFIRM",
-            "value": "confirm"
+            "name":"WARNING_TIP",
+            "value":"This allows your screen to be controlled remotely during screen sharing.",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
-            "name": "WARNING_TIP",
-            "value": "This allows your screen to be controlled remotely during screen sharing."
+            "name":"notice_title",
+            "value":"Remote assistance"
         },
         {
-            "name": "notice_title",
-            "value": "Remote assistance"
+            "name":"notice_text",
+            "value":"%s is assisting you remotely"
         },
         {
-            "name": "notice_text",
-            "value": "%s is assisting you remotely"
+            "name":"bn_notice_cancel",
+            "value":"End remote assistance"
         },
         {
-            "name": "bn_notice_cancel",
-            "value": "End remote assistance"
+            "name":"bn_agree",
+            "value":"Allow"
         },
         {
-            "name": "bn_agree",
-            "value": "Allow"
+            "name":"bn_not_agree",
+            "value":"Deny"
         },
         {
-            "name": "bn_not_agree",
-            "value": "Deny"
-        },
-        {
-            "name": "text_inject_tip_title",
-            "value": "Allow %s to use your screen?"
+            "name":"text_inject_tip_title",
+            "value":"Allow %s to use your screen?",
+            "attr":{
+                "priority":"LT"
+            }
         }
     ]
 }
