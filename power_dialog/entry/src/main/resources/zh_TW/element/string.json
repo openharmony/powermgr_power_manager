@@ -22,7 +22,10 @@
         },
         {
             "name":"WARNING_TIP",
-            "value":"用於共享螢幕時，與會者可遠端協助您的桌面"
+            "value":"用於分享螢幕時，與會者可遠端協助您的桌面。",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_agree",
@@ -30,7 +33,10 @@
         },
         {
             "name":"text_inject_tip_title",
-            "value":"允許%s使用您的螢幕"
+            "value":"允許%s使用您的螢幕？",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"notice_title",
