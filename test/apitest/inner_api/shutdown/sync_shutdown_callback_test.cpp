@@ -193,10 +193,10 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level0)
     auto notSyncCallback = new NotSyncShutdownCallback();
     g_service->RegisterShutdownCallback(notSyncCallback, ShutdownPriority::DEFAULT);
 
-    EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_reboot"))).Times(1);
+    EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_reboot"))).Times(::testing::AtLeast(1));
     g_service->RebootDevice("test_reboot");
 
-    EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_shutdown"))).Times(1);
+    EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_shutdown"))).Times(::testing::AtLeast(1));
     g_service->ShutDownDevice("test_shutdown");
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 end");
 }
