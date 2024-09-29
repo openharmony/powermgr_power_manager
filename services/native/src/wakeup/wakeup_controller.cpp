@@ -514,9 +514,9 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */
-bool InputCallback::isSecondaryEvent(std::shared_ptr<InputEvent> event) const
+bool InputCallback::isRemoteEvent(std::shared_ptr<InputEvent> event) const
 {
-    return event->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) || event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
+    return event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
 }
 
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
@@ -526,8 +526,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
-    // ignore remote event, ignore secondary event
-    if (isSecondaryEvent(keyEvent)) {
+    // ignores remote event
+    if (isRemoteEvent(keyEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -575,7 +575,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (!NonWindowEvent(pointerEvent)) {
         return;
     }
-    if (isSecondaryEvent(pointerEvent)) {
+    if (isRemoteEvent(pointerEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
