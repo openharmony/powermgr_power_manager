@@ -327,9 +327,8 @@ private:
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid, int32_t timeOutMS = -1);
     void SubscribeCommonEvent();
 #ifdef MSDP_MOVEMENT_ENABLE
-    void RegisterMovementCallback();
-    void UnRegisterMovementCallback();
-    void ResetMovementState();
+    void PowerExRegisterListener();
+    void PowerExUnregisterListener();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsSupportSensor(SensorTypeId);
