@@ -205,6 +205,7 @@ private:
     std::mutex mutex_;
     static std::vector<std::weak_ptr<RunningLock>> runningLocks_;
     static std::mutex runningLocksMutex_;
+    sptr<IRemoteObject> token_ {nullptr};
     PowerErrors error_ = PowerErrors::ERR_OK;
 };
 } // namespace PowerMgr
