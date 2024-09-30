@@ -129,7 +129,7 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "hitrace:hitrace_meter" ]
   }
 
-  if (power_manager_feature_movement && has_msdp_movement_part) {
+  if (power_manager_feature_movement) {
     defines += [ "MSDP_MOVEMENT_ENABLE" ]
   }
 
