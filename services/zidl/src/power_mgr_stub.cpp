@@ -725,9 +725,14 @@ int32_t PowerMgrStub::IsStandbyStub(MessageParcel& data, MessageParcel& reply)
 
 int32_t PowerMgrStub::SetForceTimingOutStub(MessageParcel& data, MessageParcel& reply)
 {
+    POWER_HILOGI(COMP_FWK, "SetForceTimingOutStub msg received");
     bool enabled = false;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, enabled, E_READ_PARCEL_ERROR);
-    PowerErrors ret = SetForceTimingOut(enabled);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        POWER_HILOGE(COMP_FWK, "ReadRemoteObject failed, possibly blocked by SeLinux");
+    }
+    PowerErrors ret = SetForceTimingOut(enabled, token);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
@@ -736,11 +741,15 @@ int32_t PowerMgrStub::LockScreenAfterTimingOutStub(MessageParcel& data, MessageP
 {
     bool enabledLockScreen = true;
     bool checkLock = false;
-    bool sendScreenOffEvent = false;
+    bool sendScreenOffEvent = true;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, enabledLockScreen, E_READ_PARCEL_ERROR);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, checkLock, E_READ_PARCEL_ERROR);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, sendScreenOffEvent, E_READ_PARCEL_ERROR);
-    PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        POWER_HILOGI(COMP_FWK, "ReadRemoteObject failed, possibly blocked by SeLinux");
+    }
+    PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent, token);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
