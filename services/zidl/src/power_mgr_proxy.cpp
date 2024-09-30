@@ -1239,7 +1239,7 @@ PowerErrors PowerMgrProxy::IsStandby(bool& isStandby)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
+PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled, const sptr<IRemoteObject>& token)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -1254,6 +1254,10 @@ PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
     }
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool,
         static_cast<uint32_t>(enabled), PowerErrors::ERR_CONNECTION_FAIL);
+    if (token.GetRefPtr() == nullptr) {
+        POWER_HILOGE(COMP_FWK, "token nullptr");
+    }
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, token, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_FORCE_TIMING_OUT), data, reply, option);
     if (ret != ERR_OK) {
@@ -1265,7 +1269,8 @@ PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
+PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(
+    bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -1281,6 +1286,8 @@ PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, enabledLockScreen, PowerErrors::ERR_CONNECTION_FAIL);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, checkLock, PowerErrors::ERR_CONNECTION_FAIL);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, sendScreenOffEvent, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, token.GetRefPtr(), PowerErrors::ERR_CONNECTION_FAIL);
+
     int32_t ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, reply, option);
     if (ret != ERR_OK) {
