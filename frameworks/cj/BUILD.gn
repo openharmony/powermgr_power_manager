@@ -14,37 +14,9 @@
 import("//build/ohos.gni")
 import("../../powermgr.gni")
 
-ohos_shared_library("cj_power_ffi") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  include_dirs = [
-    "${powermgr_framework_native}/",
-    "${powermgr_inner_api}/native/include",
+group("cj_power_manager_packages") {
+  deps = [
+    "${powermgr_root_path}/frameworks/cj/power:cj_power_ffi",
+    "${powermgr_root_path}/frameworks/cj/runninglock:cj_running_lock_ffi",
   ]
-
-  sources = [ "src/power_ffi.cpp" ]
-
-  if (build_ohos_sdk) {
-    defines += [ "PREVIEWER" ]
-    sources = []
-  }
-
-  deps = [ "${powermgr_inner_api}:powermgr_client" ]
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-    "napi:cj_bind_ffi",
-  ]
-  innerapi_tags = [ "platformsdk" ]
-  part_name = "${powermgr_part_name}"
-  subsystem_name = "powermgr"
-}
-
-group("power_cj") {
-  deps = [ ":cj_power_ffi" ]
 }
