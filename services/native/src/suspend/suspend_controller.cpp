@@ -26,7 +26,6 @@
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
-#include <hisysevent.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -380,9 +379,6 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         force = false;
     }
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SLEEP_START",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TRIGGER_EVENT_TYPE", static_cast<int32_t>(reason),
-        "ACTION_EVENT_TYPE", static_cast<int32_t>(force));
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
@@ -487,6 +483,16 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr && pms->GetSuspendController() != nullptr) {
+        pms->GetSuspendController()->SetForceSleepingFlag(true);
+        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
+    }
+#endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasionBySuspendType(reason), true);
     if (ret) {

@@ -443,7 +443,6 @@ ohos_unittest("test_power_mgr_util") {
     "data_share:datashare_consumer",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "os_account:os_account_innerkits",
   ]
   external_deps += deps_ex
 }

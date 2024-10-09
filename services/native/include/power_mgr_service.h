@@ -34,8 +34,6 @@
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
 
-#include "common_event_subscriber.h"
-
 #ifdef POWER_MANAGER_WAKEUP_ACTION
 #include "wakeup_action_controller.h"
 #endif
@@ -66,6 +64,7 @@ public:
     virtual PowerState GetState() override;
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
+    virtual bool IsCollaborationScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
@@ -83,7 +82,7 @@ public:
     virtual bool ProxyRunningLocks(bool isProxied,
         const std::vector<std::pair<pid_t, pid_t>>& processInfos) override;
     virtual bool ResetRunningLocks() override;
-    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
+    virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true) override;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) override;
 
     virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
@@ -105,7 +104,8 @@ public:
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
     virtual PowerErrors IsStandby(bool& isStandby) override;
     virtual PowerErrors SetForceTimingOut(bool enabled) override;
-    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock) override;
+    virtual PowerErrors LockScreenAfterTimingOut(
+        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent = true) override;
 
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
@@ -148,6 +148,8 @@ public:
 #endif
     void VibratorInit();
     void Reset();
+    void KeepScreenOnInit();
+    void KeepScreenOn(bool isOpenOn);
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
@@ -267,6 +269,12 @@ private:
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid,
         int32_t timeOutMS = -1);
     static void RegisterBootCompletedCallback();
+    static bool IsDeveloperMode();
+#ifdef MSDP_MOVEMENT_ENABLE
+    void RegisterMovementCallback();
+    void UnRegisterMovementCallback();
+    void ResetMovementState();
+#endif
 
     inline PowerModeModule& GetPowerModeModule()
     {
@@ -304,8 +312,7 @@ private:
     int32_t doubleClickId_ {0};
     int32_t monitorId_ {0};
     int32_t inputMonitorId_ {-1};
-    void SubscribeCommonEvent();
-    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_;
+    sptr<IRemoteObject> ptoken_;
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -316,15 +323,6 @@ public:
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
 };
 #endif
-
-class PowerCommonEventSubscriber : public EventFwk::CommonEventSubscriber {
-public:
-    explicit PowerCommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo)
-        : EventFwk::CommonEventSubscriber(subscribeInfo) {}
-    virtual ~PowerCommonEventSubscriber() {}
-    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
-};
-
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_POWER_MGR_SERVICE_H

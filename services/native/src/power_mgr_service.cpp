@@ -43,8 +43,12 @@
 #include "system_suspend_controller.h"
 #include "xcollie/watchdog.h"
 #include "errors.h"
+#include "parameters.h"
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
+#endif
+#ifdef MSDP_MOVEMENT_ENABLE
+#include <dlfcn.h>
 #endif
 
 using namespace OHOS::AppExecFwk;
@@ -132,7 +136,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
             return;
         }
         auto powerStateMachine = power->GetPowerStateMachine();
-        power->SubscribeCommonEvent();
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
 #ifdef POWER_MANAGER_POWER_DIALOG
@@ -158,6 +161,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->RegisterSettingWakeupPickupGestureObserver();
 #endif
         power->RegisterSettingPowerModeObservers();
+        power->KeepScreenOnInit();
         isBootCompleted_ = true;
     };
     SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
@@ -179,6 +183,50 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
     }
     POWER_HILOGI(COMP_SVC, "PowerModeSettingUpdateFunc curr:%{public}d, saveMode:%{public}d", currMode, saveMode);
     power->SetDeviceMode(static_cast<PowerMode>(saveMode));
+}
+
+bool PowerMgrService::IsDeveloperMode()
+{
+    return OHOS::system::GetBoolParameter("const.security.developermode.state", true);
+}
+
+void PowerMgrService::KeepScreenOnInit()
+{
+    if (ptoken_ != nullptr) {
+        POWER_HILOGI(COMP_SVC, "runninglock token is not null");
+        return;
+    }
+    ptoken_ = new (std::nothrow) RunningLockTokenStub();
+    if (ptoken_ == nullptr) {
+        POWER_HILOGI(COMP_SVC, "create runninglock token failed");
+        return;
+    }
+    RunningLockInfo info = {"PowerMgrKeepOnLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN};
+    PowerErrors ret = pms->CreateRunningLock(ptoken_, info);
+    if (ret != PowerErrors::ERR_OK) {
+        POWER_HILOGI(COMP_SVC, "create runninglock failed");
+    }
+    return;
+}
+
+void PowerMgrService::KeepScreenOn(bool isOpenOn)
+{
+    if (!IsDeveloperMode()) {
+        POWER_HILOGI(COMP_SVC, "not developer mode");
+        return;
+    }
+    if (ptoken_ == nullptr) {
+        POWER_HILOGI(COMP_SVC, "runninglock token is null");
+        return;
+    }
+    if (isOpenOn) {
+        POWER_HILOGI(COMP_SVC, "try lock RUNNINGLOCK_SCREEN");
+        pms->Lock(ptoken_);
+    } else {
+        POWER_HILOGI(COMP_SVC, "try unlock RUNNINGLOCK_SCREEN");
+        pms->UnLock(ptoken_);
+    }
+    return;
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
@@ -529,15 +577,18 @@ void PowerMgrService::OnStop()
     RemoveSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     RemoveSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+#ifdef MSDP_MOVEMENT_ENABLE
+    RemoveSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
+#endif
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
     SettingHelper::UnRegisterSettingWakeupLidObserver();
     SettingHelper::UnRegisterSettingPowerModeObserver();
-    if (!OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriberPtr_)) {
-        POWER_HILOGE(COMP_SVC, "Power Onstop unregister to commonevent manager failed!");
-    }
+#ifdef MSDP_MOVEMENT_ENABLE
+    UnRegisterMovementCallback();
+#endif
 }
 
 void PowerMgrService::Reset()
@@ -562,6 +613,16 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
         std::lock_guard lock(lockMutex_);
         runningLockMgr_->ResetRunningLocks();
     }
+#ifdef MSDP_MOVEMENT_ENABLE
+    if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
+        auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (power == nullptr) {
+            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        power->ResetMovementState();
+    }
+#endif
 }
 
 void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -576,7 +637,100 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
     }
+#ifdef MSDP_MOVEMENT_ENABLE
+    if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
+        auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (power == nullptr) {
+            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        power->UnRegisterMovementCallback();
+        power->RegisterMovementCallback();
+    }
+#endif
 }
+
+#ifdef MSDP_MOVEMENT_ENABLE
+static const char* MOVEMENT_SUBSCRIBER_CONFIG = "RegisterMovementCallback";
+static const char* MOVEMENT_UNSUBSCRIBER_CONFIG = "UnRegisterMovementCallback";
+static const char* RESET_MOVEMENT_STATE_CONFIG = "ResetMovementState";
+static const char* POWER_MANAGER_EXT_PATH = "/system/lib64/libpower_manager_ext.z.so";
+typedef void(*FuncMovementSubscriber)();
+typedef void(*FuncMovementUnsubscriber)();
+typedef void(*FuncResetMovementState)();
+
+void PowerMgrService::RegisterMovementCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to RegisterMovementCallback");
+    void *subscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (subscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen RegisterMovementCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncMovementSubscriber MovementSubscriberFlag =
+        reinterpret_cast<FuncMovementSubscriber>(dlsym(subscriberHandler, MOVEMENT_SUBSCRIBER_CONFIG));
+    if (MovementSubscriberFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "RegisterMovementCallback is null, reason : %{public}s", dlerror());
+        dlclose(subscriberHandler);
+        subscriberHandler = nullptr;
+        return;
+    }
+    MovementSubscriberFlag();
+    POWER_HILOGI(COMP_SVC, "RegisterMovementCallback Success");
+    dlclose(subscriberHandler);
+    subscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::UnRegisterMovementCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to UnRegisterMovementCallback");
+    void *unSubscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (unSubscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen UnRegisterMovementCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncMovementUnsubscriber MovementUnsubscriberFlag =
+        reinterpret_cast<FuncMovementUnsubscriber>(dlsym(unSubscriberHandler, MOVEMENT_UNSUBSCRIBER_CONFIG));
+    if (MovementUnsubscriberFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "UnRegisterMovementCallback is null, reason : %{public}s", dlerror());
+        dlclose(unSubscriberHandler);
+        unSubscriberHandler = nullptr;
+        return;
+    }
+    MovementUnsubscriberFlag();
+    POWER_HILOGI(COMP_SVC, "UnRegisterMovementCallback Success");
+    dlclose(unSubscriberHandler);
+    unSubscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::ResetMovementState()
+{
+    POWER_HILOGI(COMP_SVC, "Start to ResetMovementState");
+    void *resetMovementStateHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (resetMovementStateHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen ResetMovementState failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncResetMovementState ResetMovementStateFlag =
+        reinterpret_cast<FuncResetMovementState>(dlsym(resetMovementStateHandler, RESET_MOVEMENT_STATE_CONFIG));
+    if (ResetMovementStateFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "ResetMovementState is null, reason : %{public}s", dlerror());
+        dlclose(resetMovementStateHandler);
+        resetMovementStateHandler = nullptr;
+        return;
+    }
+    ResetMovementStateFlag();
+    POWER_HILOGI(COMP_SVC, "ResetMovementState Success");
+    dlclose(resetMovementStateHandler);
+    resetMovementStateHandler = nullptr;
+    return;
+}
+#endif
 
 int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
@@ -780,6 +934,14 @@ bool PowerMgrService::IsFoldScreenOn()
     return isFoldScreenOn;
 }
 
+bool PowerMgrService::IsCollaborationScreenOn()
+{
+    std::lock_guard lock(stateMutex_);
+    auto isCollaborationScreenOn = powerStateMachine_->IsCollaborationScreenOn();
+    POWER_HILOGI(COMP_SVC, "isCollaborationScreenOn: %{public}d", isCollaborationScreenOn);
+    return isCollaborationScreenOn;
+}
+
 PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);
@@ -817,8 +979,6 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
     HibernateControllerInit();
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
     bool ret = powerStateMachine_->HibernateInner(clearMemory);
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 #else
@@ -1043,7 +1203,7 @@ bool PowerMgrService::ResetRunningLocks()
     return true;
 }
 
-bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     std::lock_guard lock(stateMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -1051,8 +1211,9 @@ bool PowerMgrService::RegisterPowerStateCallback(const sptr<IPowerStateCallback>
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         return false;
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
-    powerStateMachine_->RegisterPowerStateCallback(callback);
+    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s: pid: %{public}d, uid: %{public}d, isSync: %{public}u", __func__, pid,
+        uid, static_cast<uint32_t>(isSync));
+    powerStateMachine_->RegisterPowerStateCallback(callback, isSync);
     return true;
 }
 
@@ -1388,12 +1549,12 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled)
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock);
+    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return PowerErrors::ERR_OK;
 }
 
@@ -1443,37 +1604,5 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
 
 void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const {};
 #endif
-
-void PowerMgrService::SubscribeCommonEvent()
-{
-    using namespace OHOS::EventFwk;
-    bool result = false;
-    MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
-    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::COMMON);
-    if (!subscriberPtr_) {
-        subscriberPtr_ = std::make_shared<PowerCommonEventSubscriber>(subscribeInfo);
-    }
-    result = CommonEventManager::SubscribeCommonEvent(subscriberPtr_);
-    if (!result) {
-        POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT_USER_SWITCHED failed");
-    }
-    return;
-}
-
-void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
-{
-    std::string action = data.GetWant().GetAction();
-    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (power == nullptr) {
-        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
-        return;
-    }
-    if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-        SettingHelper::UpdateCurrentUserId();
-        power->WakeupControllerInit();
-    }
-}
 } // namespace PowerMgr
 } // namespace OHOS

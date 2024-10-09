@@ -151,8 +151,6 @@ bool SystemSuspendController::Hibernate()
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return false;
     }
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_HIBERNATE",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
     int32_t ret = powerInterface_->Hibernate();
     if (ret != HDF_SUCCESS) {
         POWER_HILOGE(COMP_SVC, "SystemSuspendController hibernate failed.");

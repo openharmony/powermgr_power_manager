@@ -122,6 +122,10 @@ ohos_shared_library("powermgrservice") {
 
   defines = []
 
+  if (power_manager_feature_movement) {
+    defines += [ "MSDP_MOVEMENT_ENABLE" ]
+  }
+
   if (power_manager_feature_screen_on_timeout_check) {
     defines += [ "SCREEN_ON_TIMEOUT_CHECK" ]
     external_deps += [
@@ -181,6 +185,10 @@ ohos_shared_library("powermgrservice") {
       "init:libbegetutil",
       "os_account:os_account_innerkits",
     ]
+  }
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
   if (factory == true) {

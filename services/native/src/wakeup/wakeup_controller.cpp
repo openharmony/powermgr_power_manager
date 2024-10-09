@@ -171,11 +171,27 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
 void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
 {
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGD(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
+    if (jsonStr.empty()) {
+        POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
     Json::Value root;
     Json::Reader reader;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
         POWER_HILOGE(COMP_SVC, "json parse error");
+        return;
+    }
+    if (root["touchscreen"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this touchscreenNode is empty");
+        return;
+    }
+    if (root["touchscreen"]["enable"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "the touchscreenNode is empty");
+        return;
+    }
+    if (!root["touchscreen"]["enable"].isBool()) {
+        POWER_HILOGE(COMP_SVC, "the origin touchscreenEnable value is invalid");
         return;
     }
     bool originEnable = root["touchscreen"]["enable"].asBool();
@@ -185,7 +201,7 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
     }
 
     root["touchscreen"]["enable"] = updateEnable;
-    POWER_HILOGD(COMP_SVC, "the new jsonConfig is: %{public}s", root.toStyledString().c_str());
+    POWER_HILOGI(COMP_SVC, "the new doubleJsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 
@@ -263,20 +279,37 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
 void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
-    POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s(%{public}d)", __func__, updataEnable);
+    if (jsonStr.empty()) {
+        POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "%{public}s(%{public}d)", __func__, updataEnable);
     Json::Value root;
     Json::Reader reader;
     reader.parse(jsonStr, root);
     if (!reader.parse(jsonStr, root)) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "Failed to parse json string");
+        POWER_HILOGE(COMP_SVC, "Failed to parse json string");
+        return;
+    }
+    if (root["pickup"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "this pickNode is empty");
+        return;
+    }
+    if (root["pickup"]["enable"].isNull()) {
+        POWER_HILOGE(COMP_SVC, "the pickupNode is empty");
+        return;
+    }
+    if (!root["pickup"]["enable"].isBool()) {
+        POWER_HILOGE(COMP_SVC, "the origin pickupEnable value is invalid");
         return;
     }
     bool originEnable = root["pickup"]["enable"].asBool();
     if (originEnable == updataEnable) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "no need change jsonconfig_value");
+        POWER_HILOGI(COMP_SVC, "no need change jsonconfig_value");
         return;
     }
     root["pickup"]["enable"] = updataEnable;
+    POWER_HILOGI(COMP_SVC, "the new pickupJsonConfig is: %{public}s", root.toStyledString().c_str());
     SettingHelper::SetSettingWakeupSources(root.toStyledString());
 }
 #endif
@@ -355,64 +388,12 @@ WakeupController::SleepGuard::~SleepGuard()
     pms_->ReleaseRunningLock(token_);
 }
 
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-bool WakeupController::IsLowCapacityWakeup(WakeupDeviceType reason)
-{
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] pms is nullptr");
-        return false;
-    }
-    auto wakeupActionController = pms->GetWakeupActionController();
-    if (wakeupActionController == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupActionController is nullptr.");
-        return false;
-    }
-    return (reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
-        (wakeupActionController->IsLowCapacityWakeup());
-}
-
-void WakeupController::ProcessLowCapacityWakeup()
-{
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] processing low capacity wake up begins.");
-    if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] the current power state is not sleep.");
-        return;
-    }
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] pms is nullptr");
-        return;
-    }
-    auto wakeupActionController = pms->GetWakeupActionController();
-    if (wakeupActionController == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupActionController is nullptr");
-        return;
-    }
-    SleepGuard sleepGuard(pms);
-    Wakeup();
-    auto suspendController = pms->GetSuspendController();
-    if (suspendController != nullptr) {
-        POWER_HILOGI(FEATURE_WAKEUP, "ControlListener TriggerSyncSleepCallback start.");
-        suspendController->TriggerSyncSleepCallback(true);
-    }
-    wakeupActionController->ExecuteByGetReason();
-}
-#endif
-
 void WakeupController::ControlListener(WakeupDeviceType reason)
 {
     std::lock_guard lock(mutex_);
     if (!Permission::IsSystem()) {
         return;
     }
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    if (IsLowCapacityWakeup(reason)) {
-        ProcessLowCapacityWakeup();
-        return;
-    }
-#endif
-
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     if (!stateMachine_->IsSwitchOpen() || stateMachine_->IsHibernating()) {
 #else
@@ -433,10 +414,21 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         SleepGuard sleepGuard(pms);
         Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
-        if (stateMachine_->GetState() == PowerState::SLEEP && pms->GetSuspendController() != nullptr) {
-            POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
-            pms->GetSuspendController()->TriggerSyncSleepCallback(true);
+        if (stateMachine_->GetState() == PowerState::SLEEP) {
+            auto suspendController = pms->GetSuspendController();
+            if (suspendController != nullptr) {
+                POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
+                suspendController->TriggerSyncSleepCallback(true);
+            }
         }
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+        POWER_HILOGI(FEATURE_WAKEUP, "start get wakeup action reason");
+        if ((reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
+            (pms->GetWakeupActionController()->ExecuteByGetReason())) {
+                POWER_HILOGI(FEATURE_WAKEUP, "wakeup action reason avaiable");
+                return;
+        }
+#endif
         if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
