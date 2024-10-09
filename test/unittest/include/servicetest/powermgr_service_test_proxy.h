@@ -41,10 +41,10 @@ public:
     ~PowerMgrServiceTestProxy() = default;
 
     PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo);
-    bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj);
+    bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
     bool IsRunningLockTypeSupported(RunningLockType type);
     bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1);
-    bool UnLock(const sptr<IRemoteObject>& remoteObj);
+    bool UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied,
         const std::vector<std::pair<pid_t, pid_t>>& processInfos);
@@ -65,7 +65,7 @@ public:
     PowerErrors RebootDevice(const std::string& reason);
     PowerErrors RebootDeviceForDeprecated(const std::string& reason);
     PowerErrors ShutDownDevice(const std::string& reason);
-    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);

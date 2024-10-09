@@ -18,10 +18,8 @@
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "power_common.h"
-#include "power_time.h"
 #include "power_mgr_factory.h"
 #include "screen_manager.h"
-#include "parameters.h"
 
 #include <algorithm>
 #include <cinttypes>
@@ -48,15 +46,6 @@ namespace PowerMgr {
 namespace {
 const time_t MAX_TIMEOUT_SEC = 30;
 const std::string REASON_POWEROFF_CHARGE_DISABLE = "POWEROFF_CHARGE_DISABLE";
-
-enum PowerEventType {
-    DEFAULT = 0,
-    REBOOT = 1,
-    SHUTDOWN = 2,
-    SUSPEND = 3,
-    HIBERNATE = 4
-};
-
 }
 ShutdownController::ShutdownController() : started_(false)
 {
@@ -97,7 +86,7 @@ static bool IsNeedWritePoweroffChargeFlag(const std::string& reason)
         (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS);
 }
 
-static const char* POWER_CHARGE_EXTENSION_PATH = "/system/lib64/libpower_charge_ext.z.so";
+static const char* POWER_CHARGE_EXTENSION_PATH = "system/lib64/libpower_charge_ext.z.so";
 static const char* WRITE_POWER_OFF_CHARGE_FLAG_FUNC = "WritePoweroffChargeFlag";
 typedef void(*Func)();
 
@@ -137,14 +126,8 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
     PublishShutdownEvent();
-    std::string actionTimeStr = std::to_string(GetCurrentRealTimeMs());
-    PowerEventType eventType = isReboot ? PowerEventType::REBOOT : PowerEventType::SHUTDOWN;
-    system::SetParameter("persist.dfx.eventtype", to_string(eventType));
     TriggerSyncShutdownCallback(isReboot);
-    actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
     TurnOffScreen();
-    actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
-    system::SetParameter("persist.dfx.shutdownactiontime", actionTimeStr);
     make_unique<thread>([=] {
         Prepare(isReboot);
         POWER_HILOGI(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
@@ -156,8 +139,6 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
 #endif
 
         if (devicePowerAction_ != nullptr) {
-            std::string shutdownDeviceTime = std::to_string(GetCurrentRealTimeMs());
-            system::SetParameter("persist.dfx.shutdowncompletetime", shutdownDeviceTime);
             isReboot ? devicePowerAction_->Reboot(reason) : devicePowerAction_->Shutdown(reason);
         }
         started_ = false;

@@ -75,7 +75,6 @@ public:
     enum {
         CHECK_USER_ACTIVITY_TIMEOUT_MSG = 0,
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG,
-        CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG,
     };
 
     static void onSuspend();
@@ -87,8 +86,8 @@ public:
         pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed, bool ignoreScreenState = false);
     void WakeupDeviceInner(
         pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName);
-    void HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceType type, const std::string& details,
-        const std::string& pkgName, bool timeoutTriggered = false);
+    void HandlePreBrightWakeUp(
+        int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName);
     void RefreshActivityInner(pid_t pid, int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
     bool CheckRefreshTime();
     bool OverrideScreenOffTimeInner(int64_t timeout);
@@ -96,8 +95,12 @@ public:
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn(bool needPrintLog = true);
     bool IsFoldScreenOn();
+    bool IsCollaborationScreenOn();
     void Reset();
     int64_t GetSleepTime();
+#ifdef MSDP_MOVEMENT_ENABLE
+    bool IsMovementStateOn();
+#endif
 
     PowerState GetState()
     {
@@ -111,7 +114,7 @@ public:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool HibernateInner(bool clearMemory);
 #endif
-    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
+    void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
     void CancelDelayTimer(int32_t event);
@@ -181,16 +184,10 @@ public:
     void SetSleepTime(int64_t time);
     bool IsRunningLockEnabled(RunningLockType type);
     void SetForceTimingOut(bool enabled);
-    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock);
+    void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent);
     bool IsSettingState(PowerState state);
 
 private:
-    enum PreBrightState : uint32_t {
-        PRE_BRIGHT_UNSTART = 0,
-        PRE_BRIGHT_STARTED,
-        PRE_BRIGHT_FINISHED,
-    };
-
     class SettingStateFlag {
     public:
         SettingStateFlag(PowerState state, std::shared_ptr<PowerStateMachine> owner, StateChangeReason reason)
@@ -247,6 +244,7 @@ private:
 
     protected:
         bool CheckState();
+        bool NeedNotify(PowerState currentState);
         void MatchState(PowerState& currentState, DisplayState state);
         void CorrectState(PowerState& currentState, PowerState correctState, DisplayState state);
         PowerState state_;
@@ -261,6 +259,7 @@ private:
         }
     };
 
+    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
     class ScreenChangeCheck {
     public:
         ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
@@ -275,8 +274,8 @@ private:
     };
 
     static std::string GetTransitResultString(TransitResult result);
-    void UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason);
-    void RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason);
+    void UpdateSettingStateFlag(PowerState state, StateChangeReason reason);
+    void RestoreSettingStateFlag();
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();
@@ -289,7 +288,8 @@ private:
     void EmplaceDim();
     void InitTransitMap();
     bool CanTransitTo(PowerState to, StateChangeReason reason);
-    void NotifyPowerStateChanged(PowerState state);
+    void NotifyPowerStateChanged(PowerState state,
+        StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
     bool CheckRunningLock(PowerState state);
     void HandleActivityTimeout();
@@ -299,10 +299,6 @@ private:
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
-    bool HandlePreBrightState(StateChangeReason reason);
-    bool IsPreBrightAuthReason(StateChangeReason reason);
-    bool IsPreBrightWakeUp(WakeupDeviceType type);
-    bool NeedShowScreenLocks(PowerState state);
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool PrepareHibernate(bool clearMemory);
 #endif
@@ -310,7 +306,6 @@ private:
     bool IsProximityClose();
 #endif
 
-    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
     const wptr<PowerMgrService> pms_;
     PowerState currentState_;
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
@@ -320,13 +315,17 @@ private:
     std::mutex stateMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
-    std::set<const sptr<IPowerStateCallback>, classcomp> powerStateListeners_;
+    std::set<const sptr<IPowerStateCallback>, classcomp> syncPowerStateListeners_;
+    std::set<const sptr<IPowerStateCallback>, classcomp> asyncPowerStateListeners_;
     std::shared_ptr<IDeviceStateAction> stateAction_;
 
+private:
     std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME};
     int64_t sleepTime_ {DEFAULT_SLEEP_TIME};
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
+    bool IsPreBrightWakeUp(WakeupDeviceType type);
+    bool NeedShowScreenLocks(PowerState state);
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     std::atomic<bool> switchOpen_ {true};
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
@@ -336,10 +335,11 @@ private:
     std::atomic<bool> forceTimingOut_ {false};
     std::atomic<bool> enabledTimingOutLockScreen_ {true};
     std::atomic<bool> enabledTimingOutLockScreenCheckLock_ {false};
+    std::atomic<bool> enabledScreenOffEvent_{true};
     std::atomic<int64_t> settingStateFlag_ {-1};
     std::atomic<bool> settingOnStateFlag_ {false};
     std::atomic<bool> settingOffStateFlag_ {false};
-    std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
+    std::atomic<bool> isAwakeNotified_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS

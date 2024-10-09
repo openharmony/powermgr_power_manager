@@ -47,5 +47,29 @@ void PowerStateCallbackProxy::OnPowerStateChanged(PowerState state)
         POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
     }
 }
+
+void PowerStateCallbackProxy::OnAsyncPowerStateChanged(PowerState state)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+
+    if (!data.WriteInterfaceToken(PowerStateCallbackProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Uint32, static_cast<uint32_t>(state));
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerStateCallbackInterfaceCode::ASYNC_POWER_STATE_CHANGED),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

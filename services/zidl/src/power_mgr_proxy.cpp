@@ -233,8 +233,10 @@ bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>
     for (int i = 0; i < num; i++) {
         std::string key = reply.ReadString();
         RunningLockInfo* info = reply.ReadParcelable<RunningLockInfo>();
-        runningLockLists.insert(std::pair<std::string, RunningLockInfo>(key, *info));
-        delete info;
+        if (info != nullptr) {
+            runningLockLists.insert(std::pair<std::string, RunningLockInfo>(key, *info));
+            delete info;
+        }
     }
     return true;
 }
@@ -722,7 +724,36 @@ bool PowerMgrProxy::IsFoldScreenOn()
     return result;
 }
 
-bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+bool PowerMgrProxy::IsCollaborationScreenOn()
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_COLLABORATION_SCREEN_ON), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
+    }
+
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(COMP_FWK, "Read IsCollaborationScreenOn failed");
+    }
+
+    return result;
+}
+
+bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET((remote == nullptr) || (callback == nullptr), false);
@@ -737,6 +768,7 @@ bool PowerMgrProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& 
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, RemoteObject, callback->AsObject(), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, isSync, false);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK),
@@ -1233,7 +1265,7 @@ PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock)
+PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -1246,10 +1278,9 @@ PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(bool enabledLockScreen, bool
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool,
-        static_cast<uint32_t>(enabledLockScreen), PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool,
-        static_cast<uint32_t>(checkLock), PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, enabledLockScreen, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, checkLock, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, sendScreenOffEvent, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, reply, option);
     if (ret != ERR_OK) {

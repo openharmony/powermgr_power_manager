@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 /* This files contains faultlog fuzzer test modules. */
 
-#define FUZZ_PROJECT_NAME "synchibernatecallback_fuzzer"
+#define FUZZ_PROJECT_NAME "iscollaborationscreenon_fuzzer"
 
 #include "power_fuzzer.h"
 #include "power_mgr_ipc_interface_code.h"
@@ -31,8 +31,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(PowerMgrInterfaceCode::REG_SYNC_HIBERNATE_CALLBACK), data, size);
-    g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(PowerMgrInterfaceCode::UNREG_SYNC_HIBERNATE_CALLBACK), data, size);
+        static_cast<uint32_t>(PowerMgrInterfaceCode::IS_COLLABORATION_SCREEN_ON), data, size);
     return 0;
 }

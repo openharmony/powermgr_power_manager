@@ -284,7 +284,9 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
         std::lock_guard<std::mutex> lock(mutex_);
         runningLocks_.emplace(remoteObj, lockInner);
     }
-    runninglockProxy_->AddRunningLock(lockInner->GetPid(), lockInner->GetUid(), remoteObj);
+    if (lockInner->GetType() != RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
+        runninglockProxy_->AddRunningLock(lockInner->GetPid(), lockInner->GetUid(), remoteObj);
+    }
     remoteObj->AddDeathRecipient(runningLockDeathRecipient_);
     return lockInner;
 }
@@ -310,7 +312,9 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj, const std:
         std::lock_guard<std::mutex> lock(mutex_);
         runningLocks_.erase(remoteObj);
     }
-    runninglockProxy_->RemoveRunningLock(lockInner->GetPid(), lockInner->GetUid(), remoteObj);
+    if (lockInner->GetType() != RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
+        runninglockProxy_->RemoveRunningLock(lockInner->GetPid(), lockInner->GetUid(), remoteObj);
+    }
     result = remoteObj->RemoveDeathRecipient(runningLockDeathRecipient_);
     return result;
 }

@@ -13,95 +13,121 @@
  * limitations under the License.
  */
 
+import common from '@ohos.app.ability.common';
+import util from '@ohos.util';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import inputEventClient from '@ohos.multimodalInput.inputEventClient';
-import Constants from '../common/constant';
 
 @Extend(Button)
 function customizeButton() {
   .backgroundColor(Color.Transparent)
   .fontColor('#0D81F2')
-  .fontSize(Constants.BUTTON_TEXT_FONT_SIZE)
-  .fontWeight(Constants.BUTTON_TEXT_FONT_WEIGHT)
-  .height(Constants.BUTTON_HEIGHT)
-  .width(Constants.BUTTON_WIDTH)
+  .fontSize($r('sys.float.ohos_id_text_size_button1'))
+  .height('40vp')
+  .width('160vp')
 }
 
 @CustomDialog
-struct InputCustomDialog{
-  controller?: CustomDialogController
+struct InputCustomDialog {
+  @Prop titleTip: string = '';
+  controller?: CustomDialogController;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {
   }
+
   build() {
     Column() {
-      Column() {
+        Row() {
+          Image($r('app.media.icon_notice'))
+            .width('40vp')
+            .height('40vp')
+            .objectFit(ImageFit.Contain)
+            .autoResize(false)
+            .draggable(false)
+        }
+        .height('64vp')
+        .margin({top: '24vp'})
+
+        Row() {
+          Text(this.titleTip)
+            .fontSize($r('sys.float.ohos_id_text_size_headline8'))
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .textAlign(TextAlign.Center)
+        }
+        .height('56vp')
+        .margin({left: '24vp', right: '24vp'})
+
         Row() {
           Text($r('app.string.WARNING_TIP'))
-            .fontSize(Constants.DIALOG_TITLE_FONT_SIZE)
-            .fontColor(Color.Black)
-            .fontWeight(Constants.DIALOG_TITLE_FONT_WEIGHT)
-            .lineHeight(Constants.DIALOG_TITLE_LINE_HEIGHT)
-            .opacity(Constants.DIALOG_TITLE_OPACITY)
+            .fontSize($r('sys.float.ohos_id_text_size_button1'))
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .textAlign(TextAlign.Center)
         }
-      }.margin({
-        top: Constants.DIALOG_TITLE_MARGIN_TOP,
-        bottom: Constants.DIALOG_TITLE_MARGIN_BOTTOM
-      })
-      Row(){
-        Flex({ justifyContent: FlexAlign.SpaceAround }) {
-          Button($r('app.string.BUTTON_CANCEL_POWERDIALOG'))
-            .onClick(() => {
-              if (this.controller) {
-                this.controller.close();
-              }
-              this.cancel();
-              
-            })
-            .customizeButton()
-          Button($r('app.string.BUTTON_CONFIRM'))
-            .onClick(() => {
-              if (this.controller) {
-                this.controller.close();
-              }
-              this.confirm();
-            })
-            .customizeButton()
-        }.margin({ bottom: 10 })
-      }
+        .height('22vp')
+        .margin({left: '24vp', right: '24vp' })
+
+        Row(){
+          
+            Button($r('app.string.bn_not_agree'))
+              .onClick(() => {
+                if (this.controller) {
+                  this.controller.close();
+                }
+                this.cancel();
+              }).customizeButton()
+
+            Button($r('app.string.bn_agree'))
+              .onClick(() => {
+                if (this.controller) {
+                  this.controller.close();
+                }
+                this.confirm();
+              }).customizeButton()
+        }
+        .height('64vp')
+        .margin({top: '8vp', left: '16vp', right: '16vp', bottom: '16vp'})
     }
+    .width('400vp')
+    .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
   }
 }
 
 @Entry
 @Component
 struct InputDialog {
+  private mContext?: common.UIExtensionContext;
+  @State titleTip: string = ''; 
   dialogController: CustomDialogController = new CustomDialogController({
     builder: InputCustomDialog({
       cancel: () => { this.onCancel() },
       confirm: () => { this.onConfirm() },
+      titleTip: this.titleTip,
     }),
     cancel: this.existApp,
     autoCancel: false,
     alignment: DialogAlignment.Center,
     offset: { dx: 0, dy: -20 },
-    gridCount: 4,
-    customStyle: false
+    customStyle: false,
+    cornerRadius: $r('sys.float.ohos_id_corner_radius_dialog'),
   });
 
   aboutToAppear() {
     console.log('aboutToAppear');
+    let storage = LocalStorage.GetShared();
+    this.mContext = storage.get<common.UIExtensionContext>('context');
+    let tileTipFormat = this.mContext.resourceManager.getStringSync($r('app.string.text_inject_tip_title'));
+    this.titleTip = util.format(tileTipFormat, '');
+    console.log('InjectNotice', `aboutToAppear titelTip:${this.titleTip}`);
   }
+
   aboutToDisappear() {
     console.log('aboutToDisappear');
-    this.dialogController = null;
   }
 
   onCancel() {
     try {
       console.log('cancel input');
-      inputEventClient.permitInjection(false);
       let storage = LocalStorage.GetShared()
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {

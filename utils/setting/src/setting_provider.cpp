@@ -15,13 +15,11 @@
 
 #include "setting_provider.h"
 #include <thread>
-#include <regex>
 #include "datashare_predicates.h"
 #include "datashare_result_set.h"
 #include "datashare_values_bucket.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "os_account_manager.h"
 #include "power_log.h"
 #include "rdb_errno.h"
 #include "result_set.h"
@@ -30,17 +28,12 @@
 namespace OHOS {
 namespace PowerMgr {
 SettingProvider* SettingProvider::instance_;
-std::mutex SettingProvider::settingMutex_;
+std::mutex SettingProvider::mutex_;
 sptr<IRemoteObject> SettingProvider::remoteObj_;
-const int32_t INITIAL_USER_ID = 100;
-int32_t SettingProvider::currentUserId_ = INITIAL_USER_ID;
 namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
 const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
-const std::string SETTING_URI_PROXY_USER = "datashare:///com.ohos.settingsdata/entry/settingsdata/";
-const std::string SETTING_URI_PROXY_USER_ADAPT = "USER_SETTINGSDATA_##USERID##?Proxy=true";
-constexpr const char *USERID_REPLACE = "##USERID##";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 } // namespace
 
@@ -53,7 +46,7 @@ SettingProvider::~SettingProvider()
 SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
 {
     if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(settingMutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         if (instance_ == nullptr) {
             instance_ = new SettingProvider();
             Initialize(systemAbilityId);
@@ -115,6 +108,10 @@ bool SettingProvider::IsValidKey(const std::string& key)
 {
     std::string value;
     ErrCode ret = GetStringValue(key, value);
+    if (!value.empty()) {
+        POWER_HILOGI(COMP_UTILS, "the getValue is:%{public}s", value.c_str());
+    }
+    POWER_HILOGI(COMP_UTILS, "the getRet is:%{public}u", ret);
     return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
 }
 
@@ -139,7 +136,7 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
-    auto helper = CreateDataShareHelper(observer->GetKey());
+    auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
@@ -158,7 +155,7 @@ ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observe
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
-    auto helper = CreateDataShareHelper(observer->GetKey());
+    auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
@@ -188,7 +185,7 @@ void SettingProvider::Initialize(int32_t systemAbilityId)
 ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& value)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
-    auto helper = CreateDataShareHelper(key);
+    auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
@@ -229,7 +226,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
 ErrCode SettingProvider::PutStringValue(const std::string& key, const std::string& value, bool needNotify)
 {
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
-    auto helper = CreateDataShareHelper(key);
+    auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_NO_INIT;
@@ -254,20 +251,11 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
     return ERR_OK;
 }
 
-std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelper(const std::string& key)
+std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelper()
 {
-    std::lock_guard<std::mutex> lock(settingMutex_);
-    std::string uriProxyStr;
-    bool isNeedMultiUser = IsNeedMultiUser(key);
-    if (isNeedMultiUser == true && currentUserId_ != INITIAL_USER_ID) {
-        uriProxyStr = SETTING_URI_PROXY_USER + "USER_SETTINGSDATA_" + std::to_string(currentUserId_) + "?Proxy=true";
-        POWER_HILOGI(COMP_UTILS, "the uriProxyStr is %{public}s", uriProxyStr.c_str());
-    } else {
-        uriProxyStr = SETTING_URI_PROXY;
-    }
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, uriProxyStr, SETTINGS_DATA_EXT_URI);
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
-        POWER_HILOGW(COMP_UTILS, "helper is nullptr, uri=%{public}s", uriProxyStr.c_str());
+        POWER_HILOGW(COMP_UTILS, "helper is nullptr, uri=%{public}s", SETTING_URI_PROXY.c_str());
         return nullptr;
     }
     return helper;
@@ -284,55 +272,8 @@ bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShar
 
 Uri SettingProvider::AssembleUri(const std::string& key)
 {
-    std::lock_guard<std::mutex> lock(settingMutex_);
-    bool isNeedMultiUser = IsNeedMultiUser(key);
-    if (isNeedMultiUser == true && currentUserId_ != INITIAL_USER_ID) {
-        std::string userSetting = ReplaceUserIdForUri(currentUserId_);
-        Uri uri(SETTING_URI_PROXY + userSetting + "&key=" + key);
-        std::string specialUri = SETTING_URI_PROXY + userSetting + "&key=" + key;
-        POWER_HILOGI(COMP_UTILS, "the non-global uri is %{public}s", specialUri.c_str());
-        return uri;
-    }
     Uri uri(SETTING_URI_PROXY + "&key=" + key);
     return uri;
-}
-
-bool SettingProvider::IsNeedMultiUser(const std::string& key)
-{
-    if (key == SETTING_POWER_WAKEUP_DOUBLE_KEY) {
-        return true;
-    }
-    if (key == SETTING_POWER_WAKEUP_PICKUP_KEY) {
-        return true;
-    }
-    if (key == SETTING_POWER_WAKEUP_SOURCES_KEY) {
-        return true;
-    }
-    return false;
-}
-
-std::string SettingProvider::ReplaceUserIdForUri(int32_t userId)
-{
-    std::string tempUri = SETTING_URI_PROXY_USER_ADAPT;
-    std::regex pattern(USERID_REPLACE);
-    return std::regex_replace(tempUri, pattern, std::to_string(userId));
-}
-
-void SettingProvider::UpdateCurrentUserId()
-{
-    std::lock_guard<std::mutex> lock(settingMutex_);
-    std::vector<int> activedIds;
-    int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activedIds);
-    if (ret != 0) {
-        POWER_HILOGE(COMP_UTILS, "QueryActivedOsAccountIds failed, ret is %{public}d", ret);
-        return;
-    }
-    if (activedIds.empty()) {
-        POWER_HILOGE(COMP_UTILS, "QueryActivedOsAccountIds is empty");
-        return;
-    }
-    currentUserId_ = activedIds[0];
-    POWER_HILOGI(COMP_UTILS, "currentUserId_ is %{public}d", currentUserId_);
 }
 } // namespace PowerMgr
 } // namespace OHOS
