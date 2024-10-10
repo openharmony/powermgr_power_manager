@@ -63,21 +63,7 @@ SuspendController::SuspendController(const std::shared_ptr<ShutdownController>& 
 
 SuspendController::~SuspendController()
 {
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    if (g_suspendSourcesKeyAcObserver) {
-        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyAcObserver);
-        g_suspendSourcesKeyAcObserver = nullptr;
-    }
-    if (g_suspendSourcesKeyDcObserver) {
-        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyDcObserver);
-        g_suspendSourcesKeyDcObserver = nullptr;
-    }
-#else
-    if (g_suspendSourcesKeyObserver) {
-        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyObserver);
-        g_suspendSourcesKeyObserver = nullptr;
-    }
-#endif
+    UnregisterSettingsObserver();
     ffrtTimer_.reset();
 }
 
@@ -269,6 +255,25 @@ void SuspendController::RegisterSettingsObserver()
     g_suspendSourcesKeyObserver = SettingHelper::RegisterSettingSuspendSourcesObserver(updateFunc);
 #endif
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
+}
+
+void SuspendController::UnregisterSettingsObserver()
+{
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (g_suspendSourcesKeyAcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyAcObserver);
+        g_suspendSourcesKeyAcObserver = nullptr;
+    }
+    if (g_suspendSourcesKeyDcObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyDcObserver);
+        g_suspendSourcesKeyDcObserver = nullptr;
+    }
+#else
+    if (g_suspendSourcesKeyObserver) {
+        SettingHelper::UnregisterSettingObserver(g_suspendSourcesKeyObserver);
+        g_suspendSourcesKeyObserver = nullptr;
+    }
+#endif
 }
 
 void SuspendController::Execute()
