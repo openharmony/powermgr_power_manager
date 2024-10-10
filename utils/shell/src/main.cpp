@@ -14,14 +14,15 @@
  */
 
 #include <iostream>
-#include <sstream>
-
 #include "power_shell_command.h"
+
+#ifndef POWER_SHELL_USER
+#include <sstream>
 #include "securec.h"
 
 constexpr int MAX_PARAMETER_COUNT = 10;
 constexpr int MAX_PARAMETER_LENGTH = 30;
-void Loop(char* arg0)
+static void Loop(char* arg0)
 {
     std::cout << "===================Power-Shell===================" << std::endl;
     std::cout << "You can run Power-Shell commands here without exiting the process(" << std::endl;
@@ -60,6 +61,7 @@ void Loop(char* arg0)
         std::getline(std::cin, input);
     }
 }
+#endif
 int main(int argc, char *argv[])
 {
     if (argc <= 1) {
