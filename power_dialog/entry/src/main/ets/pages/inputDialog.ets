@@ -22,6 +22,7 @@ import inputEventClient from '@ohos.multimodalInput.inputEventClient';
 const TAG: string = 'InjectNotice';
 const BN_WIDTH: Length = '176vp';
 
+@Extend(Button)
 function customizeButton(backcolor?: Color | Resource, titleColor?:Color | Resource) {
   .backgroundColor(backcolor === undefined ? Color.Transparent : backcolor)
   .fontColor(titleColor === undefined ? '#0D81F2' : titleColor)
@@ -111,13 +112,13 @@ struct InputCustomDialog {
       .margin({top:'16vp', bottom:'16vp'})
       .height('40vp')
     }
+    .padding({ left: '15vp', right: '15vp' })
+    .margin(1)
+    .outlineWidth(1)
+    .outlineColor(this.innerLineColor)
+    .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
+    .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
   }
-  .padding({ left: '15vp', right: '15vp' })
-  .margin(1)
-  .outlineWidth(1)
-  .outlineColor(this.innerLineColor)
-  .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
-  .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
 }
 
 @Entry
@@ -198,7 +199,8 @@ struct InputDialog {
     try {
       console.log('existApp input');
       console.log(TAG, 'existApp input');
-+     let storage = LocalStorage.getShared();
+      let storage = LocalStorage.getShared();
+      let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
         console.log('existApp terminateSelf session');
         session.terminateSelf();
