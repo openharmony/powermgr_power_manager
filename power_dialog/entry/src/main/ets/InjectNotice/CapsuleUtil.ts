@@ -17,6 +17,8 @@ import process from '@ohos.process';
 import PluginMgr from '@ohos.pluginComponent';
 import pluginComponentManager from '@ohos.pluginComponent';
 import { AsyncCallback } from '@ohos.base';
+import inputEventClient from '@ohos.multimodalInput.inputEventClient';
+import Base from '@ohos.base';
 
 const TAG = 'InjectNotice';
 const PLUGIN_NAME = 'pages/capsuleIcon.js';
@@ -63,8 +65,8 @@ export class CapsuleUtil {
       requestPid: process.pid
     }, (err, data) => {
       console.info(TAG, 'push complete isVisible: ' + isVisible);
-      console.log('push_callback:err:', JSON.stringify(err));
-      console.log('push_callback:data:', JSON.stringify(data));
+      console.log(TAG, 'push_callback:err:', JSON.stringify(err));
+      console.log(TAG, 'push_callback:data:', JSON.stringify(data));
     });
   }
 
@@ -78,8 +80,8 @@ export class CapsuleUtil {
       requestPid: process.pid
     }, (err, data) => {
         console.info(TAG, 'push close panel complete');
-        console.log('push_callback:err:', JSON.stringify(err));
-        console.log('push_callback:data:', JSON.stringify(data));
+        console.log(TAG, 'push_callback:err:', JSON.stringify(err));
+        console.log(TAG, 'push_callback:data:', JSON.stringify(data));
     });
   }
 
@@ -91,8 +93,19 @@ export class CapsuleUtil {
       requestCloseWindow: true
     }, (err, data) => {
         console.info(TAG, 'push close window complete');
-        console.log('push_callback:err:', JSON.stringify(err));
-        console.log('push_callback:data:', JSON.stringify(data));
+        console.info(TAG, 'push_callback:err:', JSON.stringify(err));
+        console.info(TAG, 'push_callback:data:', JSON.stringify(data));
     });
+  }
+
+  cancelAuthorization(): void {
+    console.debug(TAG, 'cancelAuthorization begin===>');
+    try {
+      inputEventClient.permitInjection(false);
+    } catch (error) {
+      let err = error as Base.BusinessError;
+      console.error(TAG + `cancelAuthorization fail: ${JSON.stringify(err)}`);
+    }
+    console.debug(TAG, 'cancelAuthorization end===>');
   }
 }

@@ -106,11 +106,13 @@ export class InjectNoticeStub extends rpc.RemoteObject {
             case CmdCode.CLOSE_NOTICE_BY_REQUST: {
                 console.debug(TAG, `RpcServer:close notice is called`);
                 try {
-                    console.debug(TAG, ` CapsuleUtil.getInstance beign close:${deviceInfo.deviceType}`);
+                    console.debug(TAG, `capsuleUtil.getInstance beign close:${deviceInfo.deviceType}`);
                     let instance: CapsuleUtil = CapsuleUtil.getInstance();
-                    console.debug(TAG, ` processCapsulebeign close:${deviceInfo.deviceType}`);
                     instance.processCapsule(false);
                     instance.closePanel();
+                    console.debug(TAG, `capsuleUtil cancelAuthorization begin:${deviceInfo.deviceType}`);
+                    instance.cancelAuthorization();
+                    console.debug(TAG, `capsuleUtil cancelAuthorization end:${deviceInfo.deviceType}`);
                 } catch (error) {
                     let err = error as Base.BusinessError;
                     console.error(TAG, `CapsuleUtil.getInstance()  close err:${JSON.stringify(err)}`);

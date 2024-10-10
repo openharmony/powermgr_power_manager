@@ -13,63 +13,122 @@
  * limitations under the License.
  */
 
+import Base from '@ohos.base';
+import common from '@ohos.app.ability.common';
+import util from '@ohos.util';
+
+import {CapsuleUtil} from '../InjectNotice/CapsuleUtil'
+
+const TAG = 'InjectNotice';
+
+@Extend(Text) function textModify(width: Length,
+  fontSize: number | string | Resource,
+  fontColor: ResourceColor, align: Alignment) {
+  .width(width)
+  .fontSize(fontSize)
+  .fontColor(fontColor)
+  .align(align)
+}
+
 @Entry
 @Component
 struct PluginWindow {
-  @State titleText: string = ''
+  private mContext ?: common.UIExtensionContext;
+  @State titleText: string = '';
+  @State bnDisconnect: string = '';
+  @State handlePopup: boolean = false;
+  @State hoverColor: ResourceColor = 'sys.color.comp_background_primary';
+  private bnHotPress: boolean = false;
   aboutToAppear(): void {
     console.debug('PluginWindow page aboutToAppear');
+    this.mContext = getContext(this) as common.UIExtensionContext;
+    let text = this.mContext.resourceManager.getStringSync($r('app.string.notice_text'));
+    this.titleText = util.format(text, '');
+    this.bnDisconnect = this.mContext.resourceManager.getStringSync($r('app.string.bn_notice_cancel'));
+    console.debug(`PluginWindow page aboutToAppear titleText:${this.titleText} ${this.bnDisconnect}`);
   }
-  
-  build() {
 
-    Flex({ alignItems: ItemAlign.Center }) {
-      Row() {
-        Flex({direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
-          Text($r('app.string.notice_title'))
-            .fontSize($r('sys.float.ohos_id_text_size_headline8'))
-            .fontWeight(FontWeight.Medium)
-            .align(Alignment.Start)
-            .backgroundColor(Color.Orange)
+  @Builder buildTitle() {
+    Text($r('app.string.notice_title'))
+      .textModify('272vp', $r('sys.float.Title_S'), $r('sys.color.font_primary'), Alignment.Start)
+      .fontWeight(FontWeight.Bold);
+  }
 
-          Text(this.titleText)
-            .align(Alignment.Start)
-            .fontSize($r('sys.float.ohos_id_text_size_sub_title3'))
-            .backgroundColor($r('sys.color.ohos_id_color_text_hint'))
-            .margin({
-              top: 2
-            })
-        }
-        .padding({
-          left: 24
-        })
-      }
-      .flexGrow(1)
-      .justifyContent(FlexAlign.Start)
-      .padding({ right: $r('sys.float.padding_level2') })
+  @Builder buildContent() {
+    Text(this.titleText)
+      .textModify('272vp', $r('sys.float.Subtitle_S'), $r('sys.color.font_secondary'), Alignment.Start)
+      .fontWeight(FontWeight.Regular)
+      .margin({ top: '2vp' });
+  }
 
-
-      Column(){
-        Image('')
-          .width('32vp')
-          .height('32vp')
-          .backgroundColor(Color.Red)
-          .objectFit(ImageFit.Contain)
-          .autoResize(false)
-          .draggable(false)
-
-      }
+  @Builder buildSymbolGlyph() {
+    SymbolGlyph($r('sys.symbol.link_slash'))
+      .fontSize('24vp')
+      .fontColor([$r('sys.color.icon_primary')])
       .onClick(() => {
-        console.log('1111111111')
+        this.handleBnClick();
+      });
+  }
+
+  build() {
+    Row() {
+      Column() {
+        this.buildTitle();
+        this.buildContent();
+      }
+
+      Column() {
+        this.buildSymbolGlyph();
+      }
+      .justifyContent(FlexAlign.Center)
+      .backgroundColor(this.hoverColor)
+      .width('40vp').height('40vp')
+      .bindPopup(this.handlePopup, {
+        message: this.bnDisconnect,
       })
-      .margin({
-        right: 12
+      .onHover((isHover: boolean, event: HoverEvent) => {
+        this.onBnHover(isHover, event);
+      })
+      .onMouse((event: MouseEvent) => {
+        this.onBnMouse(event);
       })
     }
-    .height(64)
-    .width('100%')
-    .borderRadius(20)
-    .backgroundColor(Color.Gray)
+    .margin({top: '8vp', bottom: '4vp', right: '16vp', left: '24vp'});
   }
 
+  onBnHover(isHover: boolean, event: HoverEvent): void {
+    if (isHover) {
+      if (!this.bnHotPress) {
+        this.handlePopup = true;
+        this.hoverColor = $r('sys.color.interactive_hover');
+      }
+    } else {
+      this.handlePopup = false;
+    }
+    this.hoverColor = 'sys.color.comp_background_primary';
+  }
+
+  onBnMouse(event: MouseEvent): void {
+    if (event.action == MouseAction.Press) {
+      this.bnHotPress = true;
+      this.hoverColor = $r('sys.color.interactive_pressed');
+    } else {
+      this.bnHotPress = false;
+    }
+  }
+
+  handleBnClick() :void {
+    console.debug(TAG, 'handleBnClick entry');
+    let instance: CapsuleUtil = CapsuleUtil.getInstance();
+    try {
+      instance.processCapsule(false);
+      instance.closePanel();
+    } catch (error) {
+      let err = error as Base.BusinessError;
+      console.error(TAG, `handleBnClick capsule close err:${JSON.stringify(err)}`);
+    }
+    console.debug(TAG, `handleBnClick capsule close ok`);
+    instance.cancelAuthorization();
+    console.debug(TAG, 'handleBnClick exit');
+  }
 }

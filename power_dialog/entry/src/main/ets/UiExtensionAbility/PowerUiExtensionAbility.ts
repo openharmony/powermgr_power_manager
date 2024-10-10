@@ -15,9 +15,12 @@
 
 import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 
+const TAG: string = 'InjectNotice';
 
 export default class PowerUiExtensionAbility extends UIExtensionAbility {
   onSessionCreate(want, session): void {
+    AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
+    console.debug(TAG, 'powerUiExtensionAbility onSessionCreate currentColorMode:', this.context.config.colorMode);
     let storage: LocalStorage = new LocalStorage({
       'session': session,
       'context': this.context
@@ -33,5 +36,10 @@ export default class PowerUiExtensionAbility extends UIExtensionAbility {
 
     session.loadContent('pages/powerDialog', storage);
     session.setWindowBackgroundColor('#00000000');
+  }
+
+  onForeground(): void {
+    AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
+    console.debug(TAG, 'powerUiExtensionAbility  onForeground currentColorMode:', this.context.config.colorMode);
   }
 }

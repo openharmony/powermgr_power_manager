@@ -16,7 +16,8 @@
 import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import Want from '@ohos.app.ability.Want';
-const TAG = 'CapsuleWindowAbility ';
+
+const TAG = 'CapsuleWindowAbility';
 
 export default class CapsuleWindowAbility extends UIExtensionAbility {
 
@@ -31,9 +32,9 @@ export default class CapsuleWindowAbility extends UIExtensionAbility {
           let para: Record<string, UIExtensionContentSession> = { 'session': session };
           let storage: LocalStorage = new LocalStorage(para);
           session.loadContent('pages/pluginWindow', storage);
-	  session.setWindowBackgroundColor('#00000000');
+          session.setWindowBackgroundColor('#00000000');
         } catch (err) {
-          console.error(`Failed to load the content. Cause code: ${err}`);
+          console.error(TAG, `Failed to load the content. Cause code: ${err}`);
       };
       }
 

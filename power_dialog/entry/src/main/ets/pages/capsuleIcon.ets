@@ -17,15 +17,12 @@
 @Component
 struct CapsuleIcon {
   build() {
-    Row() {
+    Stack() {
       Image($r('app.media.capsule_icon34'))
         .width('34vp')
         .height('34vp')
     }
-    .alignItems(VerticalAlign.Center)
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .height('100%')
+    .alignContent(Alignment.Center)
   }
 
   aboutToAppear(): void {
