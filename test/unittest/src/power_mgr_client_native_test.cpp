@@ -55,7 +55,6 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     wptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
     powerMgrClient.ResetProxy(remoteObject_);
-    powerMgrClient.~PowerMgrClient();
     EXPECT_TRUE(powerMgrClient.Connect() == ERR_OK);
     powerMgrClient.ResetProxy(remoteObject_);
     powerMgrClient.ResetProxy(nullptr);

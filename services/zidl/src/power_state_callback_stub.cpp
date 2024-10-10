@@ -30,7 +30,7 @@ int PowerStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     POWER_HILOGD(COMP_SVC, "cmd = %{public}d, flags= %{public}d", code, option.GetFlags());
     const int DFX_DELAY_S = 10;
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerStateCallbackStub", DFX_DELAY_S, nullptr, nullptr,
-        HiviewDFX::XCOLLIE_FLAG_NOOP);
+        HiviewDFX::XCOLLIE_FLAG_LOG);
     std::u16string descripter = PowerStateCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (descripter != remoteDescripter) {
