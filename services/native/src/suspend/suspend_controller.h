@@ -46,6 +46,7 @@ public:
     void Init();
     void ExecSuspendMonitorByReason(SuspendDeviceType reason);
     void RegisterSettingsObserver();
+    void UnregisterSettingsObserver();
     void Execute();
     void Cancel();
     void StopSleep();

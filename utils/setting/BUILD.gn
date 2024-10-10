@@ -50,6 +50,10 @@ ohos_shared_library("power_setting") {
     "samgr:samgr_proxy",
   ]
 
+  if (power_manager_feature_charging_type_setting) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+  }
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }

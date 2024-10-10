@@ -117,6 +117,7 @@ public:
     bool NonWindowEvent(const std::shared_ptr<PointerEvent>& pointerEvent) const;
 private:
     bool isRemoteEvent(std::shared_ptr<InputEvent> event) const;
+    bool isKeyboardKeycode(int32_t keyCode) const;
 };
 #endif
 
