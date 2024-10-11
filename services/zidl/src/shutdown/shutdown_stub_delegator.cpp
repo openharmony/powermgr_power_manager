@@ -29,7 +29,7 @@ int32_t ShutdownStubDelegator::HandleRemoteRequest(
     uint32_t code, MessageParcel& data, [[maybe_unused]] MessageParcel& reply, [[maybe_unused]] MessageOption& option)
 {
     int32_t id = HiviewDFX::XCollie::GetInstance().SetTimer("ShutdownStub", DFX_DELAY_S, nullptr, nullptr,
-        HiviewDFX::XCOLLIE_FLAG_NOOP);
+        HiviewDFX::XCOLLIE_FLAG_LOG);
     int32_t ret = ERR_OK;
     switch (code) {
         case static_cast<int32_t>(PowerMgr::ShutdownClientInterfaceCode::CMD_REG_TAKEOVER_SHUTDOWN_CALLBACK):

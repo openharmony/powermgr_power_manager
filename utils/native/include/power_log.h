@@ -19,6 +19,8 @@
 #define CONFIG_HILOG
 #ifdef CONFIG_HILOG
 
+#include <stdint.h>
+
 #include "hilog/log.h"
 
 namespace OHOS {

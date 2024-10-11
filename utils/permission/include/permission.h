@@ -25,6 +25,7 @@ public:
     static bool IsHap();
     static bool IsSystem();
     static bool IsPermissionGranted(const std::string& perm);
+    static bool IsNativePermissionGranted(const std::string& perm);
 };
 } // namespace PowerMgr
 } // namespace OHOS
