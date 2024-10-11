@@ -85,7 +85,7 @@ struct InputCustomDialog {
         }
         this.cancel();
       }).customizeButton($r('sys.color.comp_background_tertiary'), $r('sys.color.font_emphasize'))
-    }
+  }
 
   @Builder buildBnAgree() {
     Button($r('app.string.bn_agree'), { type: ButtonType.Normal, stateEffect: true })
@@ -166,13 +166,14 @@ struct InputDialog {
   onCancel() {
     try {
       console.log(TAG, 'cancel input');
+      inputEventClient.permitInjection(false);
       let storage = LocalStorage.getShared();
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
         console.log(TAG, 'cancel terminateSelf session end');
         session.terminateSelf();
       }
-      console.log('cancel end');
+      console.log(TAG, 'cancel end');
     } catch (err) {
       console.error(TAG, 'cancel failed:%{public}s', JSON.stringify(err));
     }
@@ -200,7 +201,7 @@ struct InputDialog {
       let storage = LocalStorage.getShared();
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
-        console.log('existApp terminateSelf session');
+        console.log(TAG, 'existApp terminateSelf session');
         session.terminateSelf();
       }
     } catch (err) {
@@ -219,7 +220,7 @@ struct InputDialog {
       this.outBorderColor = 'rgba(0, 0, 0, 0.4)';
       this.innerBorderColor = 'rgba(255, 255, 255, 0.2)';
     } else {
-      console.info('color mode is not dark curMode:' + this.currentMode);
+      console.info(TAG, 'color mode is not dark curMode:' + this.currentMode);
       this.outBorderColor = 'rgba(0, 0, 0, 0.1)';
       this.innerBorderColor = 'rgba(255, 255, 255, 0.2)';
     }
