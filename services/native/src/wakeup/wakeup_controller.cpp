@@ -716,7 +716,8 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
     }
 #endif
 
-    skipWakeup = (pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
+    skipWakeup = (pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH) &&
+        (reason != WakeupDeviceType::WAKEUP_DEVICE_LID);
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Screen is on, skip current wakeup reason: %{public}u", reason);
         return true;
