@@ -150,14 +150,13 @@ struct InputDialog {
   });
 
   aboutToAppear() {
-    console.log(TAG, 'aboutToAppear');
     console.log(TAG, `aboutToAppear currentMode:${this.currentMode}`);
     let storage = LocalStorage.getShared();
     this.mContext = storage.get<common.UIExtensionContext>('context');
     let tileTipFormat = this.mContext!.resourceManager.getStringSync($r('app.string.text_inject_tip_title'));
     this.titleTip = util.format(tileTipFormat, '');
     this.onColorModeChange();
-    console.log('InjectNotice', `aboutToAppear titelTip:${this.titleTip}`);
+    console.log(TAG, `aboutToAppear titelTip:${this.titleTip}`);
   }
 
   aboutToDisappear() {
@@ -183,13 +182,13 @@ struct InputDialog {
     try {
       console.info(TAG, 'confirm input');
       inputEventClient.permitInjection(true);
-      let storage = LocalStorage.getShared()
+      let storage = LocalStorage.getShared();
       let session = storage.get<UIExtensionContentSession>('session');
       if (session) {
         console.log(TAG, 'confirm terminateSelf session end');
         session.terminateSelf();
       }
-      console.log('confirm end');
+      console.log(TAG, 'confirm end');
     } catch (err) {
       console.error(TAG, 'confirm failed:%{public}s', JSON.stringify(err));
     }
@@ -197,7 +196,6 @@ struct InputDialog {
 
   existApp() {
     try {
-      console.log('existApp input');
       console.log(TAG, 'existApp input');
       let storage = LocalStorage.getShared();
       let session = storage.get<UIExtensionContentSession>('session');
@@ -206,7 +204,7 @@ struct InputDialog {
         session.terminateSelf();
       }
     } catch (err) {
-      console.error(TAG,'existApp failed:%{public}s', JSON.stringify(err));
+      console.error(TAG, 'existApp failed:%{public}s', JSON.stringify(err));
     }
   }
 
