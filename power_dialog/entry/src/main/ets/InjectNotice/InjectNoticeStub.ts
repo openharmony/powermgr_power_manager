@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+import Base from '@ohos.base';
 import rpc from '@ohos.rpc';
+import deviceInfo from '@ohos.DeviceInfo';
 import {NOTICE_ID, injectNoticeUtil } from './InjectNoticeUtil';
+import {CapsuleUtil} from './CapsuleUtil';
 
 const TAG = 'InjectNotice';
 const getConnectId = (...args): string => {
@@ -39,9 +42,12 @@ export class InjectNoticeStub extends rpc.RemoteObject {
     }
 
     onRemoteRequest(code, data, reply, option): boolean {
-        console.debug(TAG, `onRemoteRequest start`);
+        console.debug(TAG, `onRemoteRequest start deviceInfo.deviceType:${deviceInfo.deviceType}`);
         const connectId = getConnectId(rpc.IPCSkeleton.getCallingPid(), rpc.IPCSkeleton.getCallingTokenId());
         console.info(TAG, `onRemoteRequest start ${connectId}`);
+        if (deviceInfo.deviceType === '2in1') {
+            return this.handlePC(code, data, reply, option);
+        }
         switch (code) {
             case CmdCode.OPEN_NOTICE: {
                 console.debug(TAG, `RpcServer:open notice is called`);
@@ -68,6 +74,49 @@ export class InjectNoticeStub extends rpc.RemoteObject {
                 injectNoticeUtil.cancelNotificationById(NOTICE_ID);
                 reply.writeInt(0);
                 reply.writeString('success');
+            }
+            break;
+            default:
+                reply.writeInt(-1);
+                reply.writeString('not support');
+        }
+        console.debug(TAG, `onRemoteRequest end`);
+        return true;
+    }
+
+    handlePC(code, data, reply, option): boolean {
+   
+        switch (code) {
+            case CmdCode.OPEN_NOTICE: {
+                console.debug(TAG, `RpcServer:open notice is called`);
+                try {
+                    console.debug(TAG, ` CapsuleUtil.getInstance beign:${deviceInfo.deviceType}`);
+                    let instance: CapsuleUtil = CapsuleUtil.getInstance();
+                    console.debug(TAG, ` processCapsulebeign:${deviceInfo.deviceType}`);
+                    instance.processCapsule(true);
+                } catch (err: Base.BusinessError) {
+                    console.error(TAG, `CapsuleUtil.getInstance() err:${JSON.stringify(err)}`);
+                }
+                reply.writeInt(0);
+                reply.writeString('success');
+                return true;
+            }
+            break;
+            case CmdCode.CLOSE_NOTICE_BY_REQUST: {
+                console.debug(TAG, `RpcServer:close notice is called`);
+                try {
+                    console.debug(TAG, ` CapsuleUtil.getInstance beign close:${deviceInfo.deviceType}`);
+                    let instance: CapsuleUtil = CapsuleUtil.getInstance();
+                    console.debug(TAG, ` processCapsulebeign close:${deviceInfo.deviceType}`);
+                    instance.processCapsule(false);
+                    instance.closePanel();
+
+                } catch (err: Base.BusinessError) {
+                    console.error(TAG, `CapsuleUtil.getInstance()  close err:${JSON.stringify(err)}`);
+                }
+                reply.writeInt(0);
+                reply.writeString('success');
+                return true;
             }
             break;
             default:
