@@ -37,6 +37,7 @@
 #include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
+#include "power_xcollie.h"
 #include "setting_helper.h"
 #include "running_lock_timer_handler.h"
 #include "sysparam.h"
@@ -62,6 +63,7 @@ static std::string g_wakeupReason = "";
 const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
 const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
+constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -89,6 +91,7 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
@@ -134,9 +137,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
             POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
             return;
         }
-        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            power->GetPowerModeModule().InitPowerMode();
-        }
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
@@ -152,8 +152,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
+        SettingHelper::UpdateCurrentUserId();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+        power->SubscribeCommonEvent();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
@@ -588,6 +590,9 @@ void PowerMgrService::OnStop()
 #endif
     SettingHelper::UnRegisterSettingWakeupLidObserver();
     SettingHelper::UnRegisterSettingPowerModeObserver();
+    if (!OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriberPtr_)) {
+        POWER_HILOGE(COMP_SVC, "Power Onstop unregister to commonevent manager failed!");
+    }
 #ifdef MSDP_MOVEMENT_ENABLE
     UnRegisterMovementCallback();
 #endif
@@ -631,6 +636,11 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s Add",
         systemAbilityId, deviceId.c_str());
+    if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
+            this->GetPowerModeModule().InitPowerMode();
+        }
+    }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
     }
@@ -1023,6 +1033,7 @@ RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& in
 PowerErrors PowerMgrService::CreateRunningLock(
     const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo)
 {
+    PowerXCollie powerXCollie("PowerMgrService::CreateRunningLock", true);
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1043,6 +1054,7 @@ PowerErrors PowerMgrService::CreateRunningLock(
 
 bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ReleaseRunningLock", true);
     std::lock_guard lock(lockMutex_);
     bool result = false;
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
@@ -1077,6 +1089,7 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     const std::map<int32_t, std::string>& workSources)
 {
+    PowerXCollie powerXCollie("PowerMgrService::UpdateWorkSource", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
@@ -1087,6 +1100,7 @@ bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 
 PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
+    PowerXCollie powerXCollie("PowerMgrService::Lock", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1106,6 +1120,7 @@ PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t 
 
 PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
+    PowerXCollie powerXCollie("PowerMgrService::UnLock", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1117,6 +1132,7 @@ PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const 
 
 bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
 {
+    PowerXCollie powerXCollie("PowerMgrService::QueryRunningLockLists", true);
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
@@ -1158,6 +1174,7 @@ bool PowerMgrService::UnRegisterRunningLockCallback(const sptr<IPowerRunninglock
 
 void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ForceUnLock", true);
     std::lock_guard lock(lockMutex_);
     runningLockMgr_->UnLock(remoteObj);
     runningLockMgr_->ReleaseLock(remoteObj);
@@ -1165,6 +1182,7 @@ void PowerMgrService::ForceUnLock(const sptr<IRemoteObject>& remoteObj)
 
 bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
+    PowerXCollie powerXCollie("PowerMgrService::IsUsed", true);
     std::lock_guard lock(lockMutex_);
     auto isUsed = runningLockMgr_->IsUsed(remoteObj);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLock is Used: %{public}d", isUsed);
@@ -1173,6 +1191,7 @@ bool PowerMgrService::IsUsed(const sptr<IRemoteObject>& remoteObj)
 
 bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ProxyRunningLock", true);
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsSystem()) {
         return false;
@@ -1182,6 +1201,7 @@ bool PowerMgrService::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 
 bool PowerMgrService::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
 {
+    PowerXCollie powerXCollie("PowerMgrService::ProxyRunningLocks", true);
     if (!Permission::IsSystem()) {
         return false;
     }
@@ -1192,6 +1212,7 @@ bool PowerMgrService::ProxyRunningLocks(bool isProxied, const std::vector<std::p
 
 bool PowerMgrService::ResetRunningLocks()
 {
+    PowerXCollie powerXCollie("PowerMgrService::ResetRunningLocks", true);
     if (!Permission::IsSystem()) {
         return false;
     }
@@ -1452,9 +1473,9 @@ PowerMgrService::WakeupRunningLock::WakeupRunningLock()
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
-    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND};
     pms->CreateRunningLock(token_, info);
-    pms->Lock(token_);
+    pms->Lock(token_, WAKEUP_LOCK_TIMEOUT_MS);
 }
 
 PowerMgrService::WakeupRunningLock::~WakeupRunningLock()
@@ -1671,5 +1692,44 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
 
 void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const {};
 #endif
+
+void PowerMgrService::SubscribeCommonEvent()
+{
+    using namespace OHOS::EventFwk;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::COMMON);
+    if (!subscriberPtr_) {
+        subscriberPtr_ = std::make_shared<PowerCommonEventSubscriber>(subscribeInfo);
+    }
+    bool result = CommonEventManager::SubscribeCommonEvent(subscriberPtr_);
+    if (!result) {
+        POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT_USER_SWITCHED failed");
+    }
+}
+
+void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
+{
+    std::string action = data.GetWant().GetAction();
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (power == nullptr) {
+        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+    if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        SettingHelper::UnregisterSettingWakeupDoubleObserver();
+        SettingHelper::UnregisterSettingWakeupPickupObserver();
+#endif
+        power->GetWakeupController()->UnregisterSettingsObserver();
+        SettingHelper::UpdateCurrentUserId();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        power->RegisterSettingObservers();
+        power->RegisterSettingWakeupPickupGestureObserver();
+#endif
+        power->WakeupControllerInit();
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

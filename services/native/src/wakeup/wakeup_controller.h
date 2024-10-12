@@ -45,10 +45,15 @@ public:
     void Init();
     void Cancel();
     void RegisterSettingsObserver();
+    void UnregisterSettingsObserver();
     void ExecWakeupMonitorByReason(WakeupDeviceType reason);
     void Wakeup();
     void NotifyDisplayActionDone(uint32_t event);
     void SetOriginSettingValue(WakeupSource& source);
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    bool IsLowCapacityWakeup(WakeupDeviceType reason);
+    void ProcessLowCapacityWakeup();
+#endif
     static int32_t SetWakeupDoubleClickSensor(bool enable);
     static void ChangeWakeupSourceConfig(bool updateEnable);
     static void ChangePickupWakeupSourceConfig(bool updataEnable);
@@ -88,6 +93,7 @@ private:
     std::mutex mutex_;
     std::mutex monitorMutex_;
     std::mutex eventHandleMutex_;
+    static std::mutex sourceUpdateMutex_;
     int32_t monitorId_ {-1};
 };
 
