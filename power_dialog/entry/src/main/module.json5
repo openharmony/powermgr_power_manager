@@ -33,7 +33,7 @@
         "srcEntry": "./ets/mainability/MainAbility.ts",
         "description": "$string:MainAbility_desc",
         "icon": "$media:icon",
-        "label": "$string:MainAbility_label",
+        "label": "$string:notice_title",
         "startWindowIcon": "$media:icon",
         "startWindowBackground": "$color:default_background_color",
         "exported": false,
