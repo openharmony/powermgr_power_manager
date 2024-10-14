@@ -179,7 +179,7 @@ public:
         powerConnectStatus_ = status;
     }
     void PowerConnectStatusInit();
-    bool IsPowerConnected() const;
+    bool IsPowerConnected();
     void UpdateSettingInvalidDisplayOffTime();
 #endif
 
