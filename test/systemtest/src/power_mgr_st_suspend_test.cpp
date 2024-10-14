@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,14 +41,14 @@ void PowerMgrSTSuspendTest::TearDownTestCase(void)
 
 void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_INPUT, "auto suspend by reason=%{public}d", reason);
+    POWER_HILOGD(FEATURE_INPUT, "auto suspend by reason=%{public}d", reason);
 
     bool ret = stateMachine_->SetState(
         PowerState::SLEEP, stateMachine_->GetReasonBySuspendType(reason));
     if (ret) {
-        POWER_HILOGI(FEATURE_INPUT, "State changed, Mock suspend intreface");
+        POWER_HILOGD(FEATURE_INPUT, "State changed, Mock suspend intreface");
     } else {
-        POWER_HILOGI(FEATURE_INPUT, "auto suspend: State change failed");
+        POWER_HILOGD(FEATURE_INPUT, "auto suspend: State change failed");
     }
 }
 

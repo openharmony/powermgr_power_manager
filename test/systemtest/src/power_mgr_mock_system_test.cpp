@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,13 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
+    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start");
     g_powerState = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
     g_service->EnableMock(g_powerState, g_shutdownState, g_powerAction, g_lockAction);
+    POWER_HILOGD(LABEL_TEST, "ResetMockAction:End");
 }
 
 void PowerMgrMockSystemTest::SetUpTestCase(void)
@@ -69,7 +70,7 @@ namespace {
 HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock106: start";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock106:Start");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -84,7 +85,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->UnLock(token);
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock106:End");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
     GTEST_LOG_(INFO) << "PowerMgrMock106: end";
 }
 }
