@@ -51,14 +51,14 @@ bool WakeupSourceParser::ParseSourcesProc(
 
 namespace {
 /**
- * @tc.name: PowerParseSourceMockTest
+ * @tc.name: PowerParseSourceMockTest001
  * @tc.desc: test ParseSources(exception)
  * @tc.type: FUNC
  * @tc.require: issueI7G6OY
  */
 HWTEST_F(PowerParseSourceMockTest, PowerParseSourceMockTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerParseSourceMockTest001 start.");
+    POWER_HILOGD(LABEL_TEST, "PowerParseSourceMockTest001 start.");
     GTEST_LOG_(INFO) << "PowerParseSourceMockTest001: start";
 
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -95,7 +95,7 @@ HWTEST_F(PowerParseSourceMockTest, PowerParseSourceMockTest001, TestSize.Level0)
     std::shared_ptr<SuspendSources> sources6 = SuspendSourceParser::ParseSources(jsonStr3);
     tmp = sources6->getSourceKeys();
     EXPECT_TRUE(tmp.size() != 0);
-    POWER_HILOGI(LABEL_TEST, "PowerParseSourceMockTest001 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerParseSourceMockTest001 end.");
     GTEST_LOG_(INFO) << "PowerParseSourceMockTest001:  end";
 }
 } // namespace

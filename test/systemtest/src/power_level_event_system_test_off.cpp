@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,8 @@ namespace {
  */
 HWTEST_F(PowerLevelEventSystemTestOff, PowerSavemode_001, TestSize.Level0)
 {
-    GTEST_LOG_(INFO) << "PowerScreenOff_001 start";
+    POWER_HILOGD(LABEL_TEST, "PowerSavemode_001 start");
+    GTEST_LOG_(INFO) << "PowerSavemode_001 start";
     shared_ptr<CommonEventScreenOffTest> subscriber = CommonEventScreenOffTest::RegisterEvent();
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
@@ -110,6 +111,6 @@ HWTEST_F(PowerLevelEventSystemTestOff, PowerSavemode_001, TestSize.Level0)
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_OFF, g_action);
-    POWER_HILOGI(LABEL_TEST, "PowerScreenOff_001_end");
+    POWER_HILOGD(LABEL_TEST, "PowerSavemode_001 end");
 }
 } // namespace

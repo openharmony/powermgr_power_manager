@@ -137,11 +137,11 @@ namespace {
  */
 HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest001 start.");
+    GTEST_LOG_(INFO) << "PowerMgrNotifyTest001: Test ScreenOFF Notification start.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrNotifyTest001 start.");
     // We need wait for 15s, to preivent the last test interfere(screen is in keyguard scene and screen is ON).
     int waitForStatusOk = 15;
     sleep(waitForStatusOk);
-    GTEST_LOG_(INFO) << "PowerMgrNotifyTest001: Test ScreenOFF Notification start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     // Wakeup Device before test
@@ -160,7 +160,7 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
 
     auto err = CommonEventManager::GetInstance().UnsubscribeCommonEvent(subscriber);
     EXPECT_EQ(ERR_OK, err);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest001 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrNotifyTest001 end.");
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest001: Test ScreenOFF Notification end.";
 }
 
@@ -171,9 +171,9 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest002 start.");
-    sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest002: Test ScreenOn Notification start.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrNotifyTest002 start.");
+    sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     // Wakeup Device before test
@@ -192,7 +192,7 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level0)
 
     auto err = CommonEventManager::GetInstance().UnsubscribeCommonEvent(subscriber);
     EXPECT_EQ(ERR_OK, err);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest002 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrNotifyTest002 end.");
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest002: Test ScreenOn Notification end.";
 }
 }

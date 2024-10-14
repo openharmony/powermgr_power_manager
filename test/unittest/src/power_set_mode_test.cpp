@@ -44,13 +44,13 @@ char* GetOneCfgFile(const char *pathSuffix, char *buf, unsigned int bufLength)
 
 namespace {
 /**
- * @tc.name: SetDeviceModeTest001
+ * @tc.name: SetModeTest001
  * @tc.desc: test SetDeviceMode in proxy
  * @tc.type: FUNC
  */
 HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SetModeTest001 start.");
+    POWER_HILOGD(LABEL_TEST, "SetModeTest001 start.");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "SetModeTest001: SetMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -72,7 +72,7 @@ HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
         powerMgrClient.SetDeviceMode(mode3);
         EXPECT_EQ(mode3, powerMgrClient.GetDeviceMode());
     }
-    POWER_HILOGI(LABEL_TEST, "SetModeTest001 end.");
+    POWER_HILOGD(LABEL_TEST, "SetModeTest001 end.");
     GTEST_LOG_(INFO) << "SetModeTest001: SetMode end.";
 }
 
@@ -83,10 +83,10 @@ HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
  */
 HWTEST_F (PowerSetModeTest, SaveModeTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SetModeTest001 start.");
+    POWER_HILOGD(LABEL_TEST, "SaveModeTest001 start.");
     auto mode = std::make_shared<PowerSaveMode>();
     int32_t ret = mode->GetSleepTime(0);
     EXPECT_TRUE(ret == -1);
-    POWER_HILOGI(LABEL_TEST, "SetModeTest001 end.");
+    POWER_HILOGD(LABEL_TEST, "SaveModeTest001 end.");
 }
 }

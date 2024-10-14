@@ -58,11 +58,11 @@ public:
     {
         auto controller = controller_.lock();
         if (controller == nullptr) {
-            POWER_HILOGI(FEATURE_SUSPEND, "OnPowerStateChanged: No controller");
+            POWER_HILOGD(FEATURE_SUSPEND, "OnPowerStateChanged: No controller");
             return;
         }
         if (state == PowerState::AWAKE) {
-            POWER_HILOGI(FEATURE_SUSPEND, "Turn awake, stop sleep timer");
+            POWER_HILOGD(FEATURE_SUSPEND, "Turn awake, stop sleep timer");
             controller->StopSleep();
         }
     }
@@ -92,7 +92,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest001, TestSize.Lev
 }
 
 /**
- * @tc.name: PowerWakeupTest002
+ * @tc.name: PowerSuspendControllerTest002
  * @tc.desc: test ExecSuspendMonitorByReason(Normal and exception)
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
@@ -249,8 +249,26 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Lev
 }
 
 /**
- * @tc.name: PowerSuspendControllerTest011
+ * @tc.name: PowerSuspendControllerTest010
  * @tc.desc: test HandleAction
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest010, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest010: start";
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->HandleAction(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, static_cast<uint32_t>(SuspendAction::ACTION_NONE));
+    g_service->suspendController_->HandleAction(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest010:  end";
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest011
+ * @tc.desc: test HandleForceSleep
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
@@ -258,17 +276,16 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest011: start";
     g_service->SuspendControllerInit();
-    g_service->suspendController_->HandleAction(
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, static_cast<uint32_t>(SuspendAction::ACTION_NONE));
-    g_service->suspendController_->HandleAction(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
+    g_service->suspendController_->stateMachine_->controllerMap_.clear();
+    g_service->suspendController_->HandleForceSleep(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND);
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
+    g_service->suspendController_->stateMachine_->InitStateMap();
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest011:  end";
 }
 
 /**
  * @tc.name: PowerSuspendControllerTest012
- * @tc.desc: test HandleForceSleep
+ * @tc.desc: test HandleHibernate
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
@@ -277,15 +294,16 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012, TestSize.Lev
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest012: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->stateMachine_->controllerMap_.clear();
-    g_service->suspendController_->HandleForceSleep(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND);
-    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
+    g_service->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() != PowerState::HIBERNATE);
     g_service->suspendController_->stateMachine_->InitStateMap();
+
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest012:  end";
 }
 
 /**
  * @tc.name: PowerSuspendControllerTest013
- * @tc.desc: test HandleHibernate
+ * @tc.desc: test HandleShutdown
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
@@ -293,40 +311,22 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest013, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest013: start";
     g_service->SuspendControllerInit();
-    g_service->suspendController_->stateMachine_->controllerMap_.clear();
-    g_service->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
-    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() != PowerState::HIBERNATE);
-    g_service->suspendController_->stateMachine_->InitStateMap();
-
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest013:  end";
 }
 
 /**
  * @tc.name: PowerSuspendControllerTest014
- * @tc.desc: test HandleShutdown
+ * @tc.desc: test getSourceKeys
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest014, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest014: start";
-    g_service->SuspendControllerInit();
-    EXPECT_TRUE(g_service->suspendController_ != nullptr);
-    GTEST_LOG_(INFO) << "PowerSuspendControllerTest014:  end";
-}
-
-/**
- * @tc.name: PowerSuspendControllerTest016
- * @tc.desc: test getSourceKeys
- * @tc.type: FUNC
- * @tc.require: issueI7COGR
- */
-HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest016, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "PowerSuspendControllerTest016: start";
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     std::vector<std::string> tmp = sources->getSourceKeys();
     EXPECT_TRUE(tmp.size() != 0);
-    GTEST_LOG_(INFO) << "PowerSuspendControllerTest016:  end";
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest014:  end";
 }
 } // namespace

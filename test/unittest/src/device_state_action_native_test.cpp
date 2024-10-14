@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ void DeviceStateActionCallback(uint32_t trigger) {}
  */
 HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is start!");
+    POWER_HILOGD(LABEL_TEST, "DeviceStateActionNative001::fun is start!");
     auto deviceStateAction = std::make_shared<DeviceStateAction>();
     SuspendCallback1 sd = DeviceStateActionCallback;
     deviceStateAction->RegisterCallback(sd);
@@ -73,6 +73,6 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_SUSPEND);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_OFF, reason);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_ON, reason);
-    POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is end!");
+    POWER_HILOGD(LABEL_TEST, "DeviceStateActionNative001::fun is end!");
 }
 } // namespace
