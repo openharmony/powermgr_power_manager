@@ -27,7 +27,7 @@ int TakeOverShutdownCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     POWER_HILOGD(FEATURE_SHUTDOWN, "cmd=%{public}d, flags=%{public}d", code, option.GetFlags());
-    const int32_t DFX_DELAY_S = 10;
+    const int32_t DFX_DELAY_S = 60;
     const int32_t INVALID_ID = 0;
     int32_t id = HiviewDFX::XCollie::GetInstance().SetTimer(
         "PowerShutdownCallback", DFX_DELAY_S, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
