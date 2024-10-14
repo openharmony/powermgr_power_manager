@@ -33,14 +33,15 @@ static const std::string SYSTEM_POWER_WAKEUP_CONFIG_FILE = "/system/etc/power_co
 static const uint32_t SINGLE_CLICK = static_cast<uint32_t>(WakeUpAction::CLICK_SINGLE);
 static const uint32_t DOUBLE_CLICK = static_cast<uint32_t>(WakeUpAction::CLICK_DOUBLE);
 } // namespace
+bool g_isFirstSettingUpdated = true;
 
 std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
 {
     std::shared_ptr<WakeupSources> parseSources;
-    bool isSettingUpdated = SettingHelper::IsWakeupSourcesSettingValid();
-    POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isSettingUpdated);
+    bool isWakeupSourcesSettingValid = SettingHelper::IsWakeupSourcesSettingValid();
+    POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isWakeupSourcesSettingValid);
     std::string configJsonStr;
-    if (isSettingUpdated) {
+    if (isWakeupSourcesSettingValid) {
         configJsonStr = SettingHelper::GetSettingWakeupSources();
     } else {
         std::string targetPath;
@@ -54,10 +55,12 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
         std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
         configJsonStr = fileStringStr;
     }
+    g_isFirstSettingUpdated = true;
     parseSources = ParseSources(configJsonStr);
     if (parseSources != nullptr) {
         SettingHelper::SetSettingWakeupSources(configJsonStr);
     }
+    g_isFirstSettingUpdated = false;
     return parseSources;
 }
 
@@ -139,13 +142,15 @@ bool WakeupSourceParser::ParseSourcesProc(
         return false;
     }
 
-    if (!enable) {
-        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
+    if (!enable && g_isFirstSettingUpdated) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK
+            && (!SettingHelper::IsWakeupDoubleSettingValid())) {
             SettingHelper::SetSettingWakeupDouble(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting wakeupDoubleClick enable=%{public}d", enable);
         }
 
-        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
+        if (wakeupDeviceType == WakeupDeviceType::WAKEUP_DEVICE_PICKUP
+            && (!SettingHelper::IsWakeupPickupSettingValid())) {
             SettingHelper::SetSettingWakeupPickup(enable);
             POWER_HILOGI(FEATURE_WAKEUP, "the setting pickup enable=%{public}d", enable);
         }

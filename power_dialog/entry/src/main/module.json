@@ -56,6 +56,26 @@
         "label": "InjectNoticeAbility",
         "visible": false,
         "type": "service"
+      },
+      {
+        "name": "CapsuleWindowAbility",
+        "srcEntry": "./ets/UiExtensionAbility/CapsuleWindowAbility.ets",
+        "type": "sys/commonUI",
+        "exported": false,
+        "label": "CapsuleWindowAbility",
+        "skills": [
+          {
+            "actions": [
+              "action.systemui.plugin.STATUS_BAR"
+            ]
+          }
+        ],
+        "metadata": [
+          {
+            "name": "action.systemui.plugin.STATUS_BAR",
+            "value": "plugin_capsule_my_inject"
+          }
+        ]
       }
     ],
     "requestPermissions": [
