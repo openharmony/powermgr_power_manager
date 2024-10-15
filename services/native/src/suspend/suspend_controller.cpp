@@ -16,7 +16,7 @@
 #include "suspend_controller.h"
 #include <datetime_ex.h>
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-#include <display_manager.h>
+#include <display_manager_lite.h>
 #endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
@@ -27,7 +27,7 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-#include <screen_manager.h>
+#include <screen_manager_lite.h>
 #endif
 #include "power_log.h"
 #include "power_mgr_service.h"
@@ -479,8 +479,8 @@ std::shared_ptr<SuspendMonitor> SuspendController::GetSpecifiedSuspendMonitor(Su
 void SuspendController::PowerOffInternalScreen(SuspendDeviceType type)
 {
     using namespace OHOS::Rosen;
-    uint64_t screenId = DisplayManager::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManager::GetInstance().SetScreenPowerById(
+    uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
+    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(
         screenId, ScreenPowerState::POWER_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
     POWER_HILOGI(FEATURE_SUSPEND,
         "Power off internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d", type,
@@ -490,7 +490,7 @@ void SuspendController::PowerOffInternalScreen(SuspendDeviceType type)
 void SuspendController::PowerOffAllScreens(SuspendDeviceType type)
 {
     using namespace OHOS::Rosen;
-    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(
+    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(
         ScreenPowerState::POWER_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
     POWER_HILOGI(FEATURE_SUSPEND, "Power off all screens, type = %{public}u, ret = %{public}d", type, ret);
 }
