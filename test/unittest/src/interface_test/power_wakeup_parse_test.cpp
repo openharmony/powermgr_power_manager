@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,8 +110,8 @@ void TestPowerWakeup(PowerMgrService* pmsTest_)
  */
 HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 start");
-    GTEST_LOG_(INFO) << "PowerSuspendParse001: start";
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupParse001 start");
+    GTEST_LOG_(INFO) << "PowerWakeupParse001: start";
     std::string str = SYSTEM_POWER_WAKEUP_FILE;
 
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -126,6 +126,6 @@ HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
     TestPowerWakeup(pmsTest_);
 
     GTEST_LOG_(INFO) << "PowerWakeupParse001:  end";
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 end");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupParse001 end");
 }
 } // namespace

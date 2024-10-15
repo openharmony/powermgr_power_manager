@@ -51,8 +51,8 @@ namespace {
  */
 HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerGetControllerMockTest001 start");
     GTEST_LOG_(INFO) << "PowerGetControllerMockTest001: start";
+    POWER_HILOGD(LABEL_TEST, "PowerGetControllerMockTest001 start");
     std::shared_ptr<PowerStateMachine> stateMachine = g_service->GetPowerStateMachine();
     std::shared_ptr<WakeupController> wakeupController_ = std::make_shared<WakeupController>(stateMachine);
     EXPECT_TRUE(wakeupController_ != nullptr);
@@ -65,7 +65,7 @@ HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Lev
     callback->OnInputEvent(keyEvent);
     EXPECT_TRUE(callback != nullptr);
     delete callback;
-    POWER_HILOGI(LABEL_TEST, "PowerGetControllerMockTest001 end");
+    POWER_HILOGD(LABEL_TEST, "PowerGetControllerMockTest001 end");
     GTEST_LOG_(INFO) << "PowerGetControllerMockTest001:  end";
 }
 } // namespace

@@ -34,12 +34,12 @@ constexpr int32_t app1Uid = 9;
 
 namespace {
 /**
- * @tc.name: RunningLockScenarioTest019
+ * @tc.name: RunningLockScenarioTest001
  * @tc.desc: Test runninglock single app scenario
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest019, TestSize.Level1)
+HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest001, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
@@ -60,12 +60,12 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockScenarioTest020
+ * @tc.name: RunningLockScenarioTest002
  * @tc.desc: Test runninglock single app scenario with proxy
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest020, TestSize.Level1)
+HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest002, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
@@ -98,12 +98,12 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockScenarioTest021
+ * @tc.name: RunningLockScenarioTest003
  * @tc.desc: Test runninglock multi apps scenario with proxy
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest021, TestSize.Level1)
+HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest003, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
@@ -149,12 +149,12 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: RunningLockScenarioTest022
+ * @tc.name: RunningLockScenarioTest004
  * @tc.desc: Test runninglock multi apps scenario with proxy
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest022, TestSize.Level1)
+HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest004, TestSize.Level1)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
@@ -166,7 +166,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest022, TestSize.Level1)
     std::vector<int32_t> workSource11 { app0Uid, app1Uid };
 
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
-        "background.test022", RunningLockType::RUNNINGLOCK_BACKGROUND);
+        "background.test004", RunningLockType::RUNNINGLOCK_BACKGROUND);
     ASSERT_NE(runningLock, nullptr);
     runningLock->Lock();
     // open app0

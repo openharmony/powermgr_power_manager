@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start.");
+    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start.");
     g_stateAction = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
@@ -67,21 +67,21 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI6MWC0
  */
-HWTEST_F(PowerMgrMockTest, PowerMgrMock003, TestSize.Level2)
+HWTEST_F(PowerMgrMockTest, PowerMgrMock001, TestSize.Level2)
 {
-    GTEST_LOG_(INFO) << "PowerMgrMock003: start.";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003:Start.");
+    GTEST_LOG_(INFO) << "PowerMgrMock001: start.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock001:Start.");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock003: Failed to get PowerMgrService";
+        GTEST_LOG_(INFO) << "PowerMgrMock001: Failed to get PowerMgrService";
     }
 
     EXPECT_CALL(*g_powerAction, Reboot(std::string("test"))).Times(1);
     pms->RebootDeviceForDeprecated(std::string("test"));
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003:End.");
-    GTEST_LOG_(INFO) << "PowerMgrMock003: end.";
+    POWER_HILOGD(LABEL_TEST, "PowerMgrMock001:End.");
+    GTEST_LOG_(INFO) << "PowerMgrMock001: end.";
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
 }
 }

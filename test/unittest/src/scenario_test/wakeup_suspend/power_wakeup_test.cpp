@@ -74,7 +74,7 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest001: start");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: start");
     g_service->WakeupControllerInit();
     g_service->SuspendControllerInit();
     g_service->OverrideScreenOffTime(5000);
@@ -103,6 +103,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
     sleep(2);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->RestoreScreenOffTime();
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: end");
 }
 
 /**
@@ -112,7 +113,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest002: start");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002: start");
 
     g_service->WakeupControllerInit();
     g_service->SuspendControllerInit();
@@ -133,6 +134,6 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
     sleep(1);
     EXPECT_TRUE(g_service->IsScreenOn());
 
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupTest002: end");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002: end");
 }
 } // namespace
