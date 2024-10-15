@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,41 +55,96 @@ void PowerStateMachineTest::TearDown(void)
 
 namespace {
 /**
- * @tc.name: PowerStateMachine003
+ * @tc.name: PowerStateMachine001
  * @tc.desc: test Suspend Device in proxy
  * @tc.type: FUNC
  */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
+HWTEST_F (PowerStateMachineTest, PowerStateMachine001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is start!");
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine001::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerStateMachine003: Suspend Device start.";
+    GTEST_LOG_(INFO) << "PowerStateMachine001: Suspend Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     // Wakeup Device before test
-    GTEST_LOG_(INFO) << "PowerStateMachine003: Wakeup Device before test.";
+    GTEST_LOG_(INFO) << "PowerStateMachine001: Wakeup Device before test.";
     powerMgrClient.WakeupDevice();
     usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine003: Prepare Fail, Screen is OFF.";
-    GTEST_LOG_(INFO) << "PowerStateMachine003: Screen is On, Begin to Suspend Device!";
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine001: Prepare Fail, Screen is OFF.";
+    GTEST_LOG_(INFO) << "PowerStateMachine001: Screen is On, Begin to Suspend Device!";
 
     powerMgrClient.SuspendDevice();
 
     sleep(REFRESHACTIVITY_WAIT_TIME_S);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine003: Suspend Device Fail, Screen is On";
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine001: Suspend Device Fail, Screen is On";
 
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is end!");
-    GTEST_LOG_(INFO) << "PowerStateMachine003: Suspend Device end.";
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine001::fun is end!");
+    GTEST_LOG_(INFO) << "PowerStateMachine001: Suspend Device end.";
+}
+
+/**
+ * @tc.name: PowerStateMachine002
+ * @tc.desc: test WakeupDevice(int64_t timeMs) in proxy
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerStateMachineTest, PowerStateMachine002, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine002::fun is start!");
+    sleep(SLEEP_WAIT_TIME_S);
+    GTEST_LOG_(INFO) << "PowerStateMachine002: Wakeup Device start.";
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    // Suspend Device before test
+    GTEST_LOG_(INFO) << "PowerStateMachine002: Suspend Device before test.";
+    powerMgrClient.SuspendDevice();
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine002: Prepare Fail, Screen is On.";
+    GTEST_LOG_(INFO) << "PowerStateMachine002: Screen is Off, Begin to Wakeup Device!";
+
+    powerMgrClient.WakeupDevice();
+
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine002: Wakeup Device Fail, Screen is Off";
+
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine002::fun is end!");
+    GTEST_LOG_(INFO) << "PowerStateMachine002: Wakeup Device end.";
+}
+
+/**
+ * @tc.name: PowerStateMachine003
+ * @tc.desc: test IsScreenOn in proxy
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
+{
+    sleep(SLEEP_WAIT_TIME_S);
+    GTEST_LOG_(INFO) << "PowerStateMachine003: IsScreenOn start.";
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    for (int i = 0; i < 3; i++) {
+        if (powerMgrClient.IsScreenOn()) {
+            powerMgrClient.SuspendDevice();
+            usleep(SLEEP_WAIT_TIME_MS);
+            EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine003" << i
+                << ": Suspend Device Fail, Screen is On";
+        } else {
+            powerMgrClient.WakeupDevice();
+            usleep(SLEEP_WAIT_TIME_MS);
+            EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine003" << i
+                << ": Wakeup Device Fail, Screen is Off";
+        }
+    }
+
+    GTEST_LOG_(INFO) << "PowerStateMachine003: IsScreenOn end.";
 }
 
 /**
  * @tc.name: PowerStateMachine004
- * @tc.desc: test WakeupDevice(int64_t timeMs) in proxy
+ * @tc.desc: test WakeupDevice(int64_t timeMs, const WakeupDeviceType reason, const std::string& details) in proxy
  * @tc.type: FUNC
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -101,119 +156,64 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine004: Prepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine004: Screen is Off, Begin to Wakeup Device!";
 
-    powerMgrClient.WakeupDevice();
+    // Check illegal para details
+    GTEST_LOG_(INFO) << "PowerStateMachine004: Check illegal para details Begin!";
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Check details test Fail, Screen is Off.";
+
+    // Suspend Device before test
+    GTEST_LOG_(INFO) << "PowerStateMachine004: Suspend Device before real test.";
+    powerMgrClient.SuspendDevice();
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine004: Real test tprepare Fail, Screen is On.";
+    GTEST_LOG_(INFO) << "PowerStateMachine004: Screen is Off, Begin to Real Wakeup Device!";
+
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
 
     usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Wakeup Device Fail, Screen is Off";
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Real Wakeup Device Fail, Screen is Off";
 
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device end.";
 }
 
 /**
  * @tc.name: PowerStateMachine005
- * @tc.desc: test IsScreenOn in proxy
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
-{
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerStateMachine005: IsScreenOn start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    for (int i = 0; i < 3; i++) {
-        if (powerMgrClient.IsScreenOn()) {
-            powerMgrClient.SuspendDevice();
-            usleep(SLEEP_WAIT_TIME_MS);
-            EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine005_" << i
-                << ": Suspend Device Fail, Screen is On";
-        } else {
-            powerMgrClient.WakeupDevice();
-            usleep(SLEEP_WAIT_TIME_MS);
-            EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine005_" << i
-                << ": Wakeup Device Fail, Screen is Off";
-        }
-    }
-
-    GTEST_LOG_(INFO) << "PowerStateMachine05: IsScreenOn end.";
-}
-
-/**
- * @tc.name: PowerStateMachine006
- * @tc.desc: test WakeupDevice(int64_t timeMs, const WakeupDeviceType reason, const std::string& details) in proxy
- * @tc.type: FUNC
- */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine006, TestSize.Level0)
-{
-    sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device start.";
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-
-    // Suspend Device before test
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Suspend Device before test.";
-    powerMgrClient.SuspendDevice();
-    usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine006: Prepare Fail, Screen is On.";
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Screen is Off, Begin to Wakeup Device!";
-
-    // Check illegal para details
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Check illegal para details Begin!";
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
-    usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine006: Check details test Fail, Screen is Off.";
-
-    // Suspend Device before test
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Suspend Device before real test.";
-    powerMgrClient.SuspendDevice();
-    usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine006: Real test tprepare Fail, Screen is On.";
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Screen is Off, Begin to Real Wakeup Device!";
-
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
-
-    usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine006: Real Wakeup Device Fail, Screen is Off";
-
-    GTEST_LOG_(INFO) << "PowerStateMachine006: Wakeup Device end.";
-}
-
-/**
- * @tc.name: PowerStateMachine007
  * @tc.desc: test Suspend Device in proxy
  * @tc.type: FUNC
  * @tc.require: issueI6MZ3M
  */
-HWTEST_F (PowerStateMachineTest, PowerStateMachine007, TestSize.Level0)
+HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine007::fun is start!");
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine005::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_EQ(powerMgrClient.RestoreScreenOffTime(), PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine007::fun is end!");
+    POWER_HILOGD(LABEL_TEST, "PowerStateMachine005::fun is end!");
 }
 }
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(
+    POWER_HILOGD(
         LABEL_TEST, "PowerStateTest1Callback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
 }
 
 void PowerStateMachineTest::PowerStateTest1Callback::OnAsyncPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest1Callback::OnAsyncPowerStateChanged state = %{public}u.",
+    POWER_HILOGD(LABEL_TEST, "PowerStateTest1Callback::OnAsyncPowerStateChanged state = %{public}u.",
         static_cast<uint32_t>(state));
 }
 
 void PowerStateMachineTest::PowerStateTest2Callback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(
+    POWER_HILOGD(
         LABEL_TEST, "PowerStateTest2Callback::OnPowerStateChanged state = %{public}u.", static_cast<uint32_t>(state));
 }
 
 void PowerStateMachineTest::PowerStateTest2Callback::OnAsyncPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTest2Callback::OnAsyncPowerStateChanged state = %{public}u.",
+    POWER_HILOGD(LABEL_TEST, "PowerStateTest2Callback::OnAsyncPowerStateChanged state = %{public}u.",
         static_cast<uint32_t>(state));
 }
 
@@ -228,18 +228,18 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> cb1 = new PowerStateTest1Callback();
     powerMgrClient.RegisterPowerStateCallback(cb1);
-    POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 1.");
     {
         sptr<IPowerStateCallback> cb2 = new PowerStateTest2Callback();
         powerMgrClient.UnRegisterPowerStateCallback(cb2);
-        POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 2.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 2.");
         powerMgrClient.RegisterPowerStateCallback(cb2);
-        POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 3.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 3.");
         powerMgrClient.RegisterPowerStateCallback(cb2);
-        POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 4.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback001 4.");
     }
     EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(cb1));
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
 }
 
 /**
@@ -252,18 +252,18 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback002, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> cb1 = new PowerStateTest1Callback();
     powerMgrClient.RegisterPowerStateCallback(cb1, false);
-    POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 1.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateCallback002 1.");
     {
         sptr<IPowerStateCallback> cb2 = new PowerStateTest2Callback();
         powerMgrClient.UnRegisterPowerStateCallback(cb2);
-        POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 2.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback002 2.");
         powerMgrClient.RegisterPowerStateCallback(cb2, false);
-        POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 3.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback002 3.");
         powerMgrClient.RegisterPowerStateCallback(cb2, false);
-        POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 4.");
+        POWER_HILOGD(LABEL_TEST, "PowerStateCallback002 4.");
     }
     EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(cb1));
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 end.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 end.");
 }
 }
 

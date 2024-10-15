@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,12 +54,12 @@ void PowerMgrServiceMockParcelTest::TearDownTestCase()
 
 void PowerMgrServiceMockParcelTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
+    POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
 void PowerMgrServiceMockParcelTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
+    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
 }
 
 void PowerMgrServiceMockParcelTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)

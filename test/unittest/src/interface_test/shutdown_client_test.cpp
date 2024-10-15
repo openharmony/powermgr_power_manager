@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,13 +82,13 @@ bool ShutdownClientTest::TakeOverShutdownCallback::OnTakeOverShutdown(bool isReb
 }
 
 /**
- * @tc.name: RegisterShutdownCallback
+ * @tc.name: RegisterShutdownCallback001
  * @tc.desc: Test RegisterShutdownCallback
  * @tc.type: FUNC
  */
 HWTEST_F(ShutdownClientTest, RegisterShutdownCallback001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "RegisterShutdownCallback001 start");
+    POWER_HILOGD(LABEL_TEST, "RegisterShutdownCallback001 start");
     sptr<IAsyncShutdownCallback> asyncShutdownCallback = new AsyncShutdownCallback();
     sptr<ISyncShutdownCallback> syncShutdownCallback = new SyncShutdownCallback();
     sptr<ITakeOverShutdownCallback> takeOverShutdownCallback = new TakeOverShutdownCallback();
@@ -107,17 +107,17 @@ HWTEST_F(ShutdownClientTest, RegisterShutdownCallback001, TestSize.Level0)
     EXPECT_FALSE(g_isOnAsyncShutdown);
     EXPECT_FALSE(g_isOnSyncShutdown);
     EXPECT_TRUE(g_isOnTakeOverShutdown);
-    POWER_HILOGI(LABEL_TEST, "RegisterShutdownCallback001 end");
+    POWER_HILOGD(LABEL_TEST, "RegisterShutdownCallback001 end");
 }
 
 /**
- * @tc.name: UnRegisterShutdownCallback
+ * @tc.name: UnRegisterShutdownCallback001
  * @tc.desc: Test UnRegisterShutdownCallback
  * @tc.type: FUNC
  */
-HWTEST_F(ShutdownClientTest, UnRegisterShutdownCallback002, TestSize.Level0)
+HWTEST_F(ShutdownClientTest, UnRegisterShutdownCallback001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "UnRegisterShutdownCallback002 start");
+    POWER_HILOGD(LABEL_TEST, "UnRegisterShutdownCallback001 start");
     sptr<IAsyncShutdownCallback> asyncShutdownCallback = new AsyncShutdownCallback();
     sptr<ISyncShutdownCallback> syncShutdownCallback = new SyncShutdownCallback();
     sptr<ITakeOverShutdownCallback> takeOverShutdownCallback = new TakeOverShutdownCallback();
@@ -130,27 +130,27 @@ HWTEST_F(ShutdownClientTest, UnRegisterShutdownCallback002, TestSize.Level0)
     shutdownClient.UnRegisterShutdownCallback(takeOverShutdownCallback);
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.RebootDevice("UnRegisterShutdownCallback002");
+    powerMgrClient.RebootDevice("UnRegisterShutdownCallback001");
     EXPECT_FALSE(g_isOnAsyncShutdown);
     EXPECT_FALSE(g_isOnSyncShutdown);
     EXPECT_TRUE(g_isOnTakeOverShutdown);
 
-    powerMgrClient.ShutDownDevice("UnRegisterShutdownCallback002");
+    powerMgrClient.ShutDownDevice("UnRegisterShutdownCallback001");
     EXPECT_FALSE(g_isOnAsyncShutdown);
     EXPECT_FALSE(g_isOnSyncShutdown);
     EXPECT_TRUE(g_isOnTakeOverShutdown);
-    POWER_HILOGI(LABEL_TEST, "UnRegisterShutdownCallback002 end");
+    POWER_HILOGD(LABEL_TEST, "UnRegisterShutdownCallback001 end");
 }
 
 /**
- * @tc.name: AsyncShutdownCallbackStub
+ * @tc.name: AsyncShutdownCallbackStub001
  * @tc.desc: Test AsyncShutdownCallbackStub
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(ShutdownClientTest, AsyncShutdownCallbackStub003, TestSize.Level0)
+HWTEST_F(ShutdownClientTest, AsyncShutdownCallbackStub001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackStub003 start");
+    POWER_HILOGD(LABEL_TEST, "AsyncShutdownCallbackStub001 start");
     uint32_t code = 0;
     MessageParcel data;
     AsyncShutdownCallback asyncShutdownCallback;
@@ -159,18 +159,18 @@ HWTEST_F(ShutdownClientTest, AsyncShutdownCallbackStub003, TestSize.Level0)
     data.WriteInterfaceToken(AsyncShutdownCallback::GetDescriptor());
     int32_t ret = asyncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
     EXPECT_EQ(ret, ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackStub003 end");
+    POWER_HILOGD(LABEL_TEST, "AsyncShutdownCallbackStub001 end");
 }
 
 /**
- * @tc.name: SyncShutdownCallbackStub
+ * @tc.name: SyncShutdownCallbackStub001
  * @tc.desc: Test SyncShutdownCallbackStub
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(ShutdownClientTest, SyncShutdownCallbackStub004, TestSize.Level0)
+HWTEST_F(ShutdownClientTest, SyncShutdownCallbackStub001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackStub004 start");
+    POWER_HILOGD(LABEL_TEST, "SyncShutdownCallbackStub001 start");
     uint32_t code = 0;
     MessageParcel data;
     SyncShutdownCallback syncShutdownCallback;
@@ -179,18 +179,18 @@ HWTEST_F(ShutdownClientTest, SyncShutdownCallbackStub004, TestSize.Level0)
     data.WriteInterfaceToken(SyncShutdownCallback::GetDescriptor());
     int32_t ret = syncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
     EXPECT_EQ(ret, ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackStub004 end");
+    POWER_HILOGD(LABEL_TEST, "SyncShutdownCallbackStub001 end");
 }
 
 /**
- * @tc.name: TakeOverShutdownCallbackStub
+ * @tc.name: TakeOverShutdownCallbackStub001
  * @tc.desc: Test TakeOverShutdownCallbackStub
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub005, TestSize.Level0)
+HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub005 start");
+    POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub001 start");
     uint32_t code = 0;
     MessageParcel data;
     TakeOverShutdownCallback takeOverShutdownCallback;
@@ -199,18 +199,18 @@ HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub005, TestSize.Level0)
     EXPECT_EQ(ret, E_READ_PARCEL_ERROR);
     bool retVal = takeOverShutdownCallback.TakeOverShutdownCallbackStub::OnTakeOverShutdown(false);
     EXPECT_EQ(retVal, false);
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub005 end");
+    POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub001 end");
 }
 
 /**
- * @tc.name: AsyncShutdownOrRebootCallbackStub
+ * @tc.name: AsyncShutdownOrRebootCallbackStub001
  * @tc.desc: Test AsyncShutdownOrRebootCallbackStub
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ShutdownClientTest, AsyncShutdownOrRebootCallbackStub006, TestSize.Level0)
+HWTEST_F(ShutdownClientTest, AsyncShutdownOrRebootCallbackStub001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownOrRebootCallbackStub006 start");
+    POWER_HILOGD(LABEL_TEST, "AsyncShutdownOrRebootCallbackStub001 start");
     uint32_t code = 1;
     MessageParcel data;
     AsyncShutdownCallback asyncShutdownCallback;
@@ -220,18 +220,18 @@ HWTEST_F(ShutdownClientTest, AsyncShutdownOrRebootCallbackStub006, TestSize.Leve
     data.WriteBool(true);
     int32_t ret = asyncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
     EXPECT_EQ(ret, ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownOrRebootCallbackStub006 end");
+    POWER_HILOGD(LABEL_TEST, "AsyncShutdownOrRebootCallbackStub001 end");
 }
 
 /**
- * @tc.name: SyncShutdownOrRebootCallbackStub
+ * @tc.name: SyncShutdownOrRebootCallbackStub001
  * @tc.desc: Test SyncShutdownOrRebootCallbackStub
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ShutdownClientTest, SyncShutdownOrRebootCallbackStub007, TestSize.Level0)
+HWTEST_F(ShutdownClientTest, SyncShutdownOrRebootCallbackStub001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownOrRebootCallbackStub007 start");
+    POWER_HILOGD(LABEL_TEST, "SyncShutdownOrRebootCallbackStub001 start");
     uint32_t code = 1;
     MessageParcel data;
     SyncShutdownCallback syncShutdownCallback;
@@ -241,7 +241,7 @@ HWTEST_F(ShutdownClientTest, SyncShutdownOrRebootCallbackStub007, TestSize.Level
     data.WriteBool(true);
     int32_t ret = syncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
     EXPECT_EQ(ret, ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownOrRebootCallbackStub007 end");
+    POWER_HILOGD(LABEL_TEST, "SyncShutdownOrRebootCallbackStub001 end");
 }
 } // namespace UnitTest
 } // namespace PowerMgr
