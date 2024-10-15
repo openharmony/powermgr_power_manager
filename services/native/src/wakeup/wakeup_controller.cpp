@@ -465,14 +465,16 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if ((pms == nullptr || pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH)) {
+    if ((pms == nullptr || pms->IsScreenOn()) && (reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH) &&
+        (reason != WakeupDeviceType::WAKEUP_DEVICE_LID)) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] The Screen is on, ignore this event: %{public}d", reason);
         return;
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
-    if (stateMachine_->GetState() != PowerState::AWAKE || reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH) {
+    if (stateMachine_->GetState() != PowerState::AWAKE || reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH ||
+        reason == WakeupDeviceType::WAKEUP_DEVICE_LID) {
         SleepGuard sleepGuard(pms);
         Wakeup();
         SystemSuspendController::GetInstance().Wakeup();
