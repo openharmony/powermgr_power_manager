@@ -77,6 +77,14 @@ public:
         const std::string& detail = std::string("app call"));
 
     /**
+     * Wake up the device and set the screen on async.
+     *
+     * @param reason The reason for waking up the device, such as powerkey/plugin/application.
+     */
+    void WakeupDeviceAsync(WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
+        const std::string& detail = std::string("app call"));
+
+    /**
      * Refresh the screentimeout time, and keep the screen on. RefreshActivity works only when the screen is on.
      *
      * @param type The RefreshActivity type, such as touch/button/accessibility and so on.
