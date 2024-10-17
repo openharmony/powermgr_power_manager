@@ -227,13 +227,13 @@ int32_t WakeupController::SetWakeupDoubleClickSensor(bool enable)
     POWER_HILOGI(COMP_SVC, "enter SetWakeupDoubleClickSensor");
     void *handler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
     if (handler == nullptr) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "Dlopen failed, reason : %{public}s", dlerror());
+        POWER_HILOGE(COMP_SVC, "Dlopen failed, reason : %{public}s", dlerror());
         return ERR_FAILED;
     }
 
     Func PowerDoubleClickFlag = (Func)dlsym(handler, SET_WAKEUP_DOUBLE_CLICK_SENSOR);
     if (PowerDoubleClickFlag == nullptr) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "find function failed, reason : %{public}s", dlerror());
+        POWER_HILOGE(COMP_SVC, "find function failed, reason : %{public}s", dlerror());
         dlclose(handler);
         return ERR_FAILED;
     }
