@@ -62,7 +62,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         return ret;
     }
 
-    const int DFX_DELAY_S = 10;
+    const int DFX_DELAY_S = 60;
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("PowerMgrStub", DFX_DELAY_S, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_LOG);
 

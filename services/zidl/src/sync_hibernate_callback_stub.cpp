@@ -28,8 +28,8 @@ int SyncHibernateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
     MessageOption &option)
 {
     POWER_HILOGD(COMP_SVC, "cmd = %{public}d, flags= %{public}d", code, option.GetFlags());
-    const int DFX_DELAY_MS = 10000;
-    int id = HiviewDFX::XCollie::GetInstance().SetTimer("SyncHibernateCallbackStub", DFX_DELAY_MS, nullptr, nullptr,
+    const int DFX_DELAY_S = 60;
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("SyncHibernateCallbackStub", DFX_DELAY_S, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_LOG);
     std::u16string descripter = SyncHibernateCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
