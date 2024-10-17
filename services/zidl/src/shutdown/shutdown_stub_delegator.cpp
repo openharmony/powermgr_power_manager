@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-constexpr int32_t DFX_DELAY_S = 10;
+constexpr int32_t DFX_DELAY_S = 60;
 
 }
 int32_t ShutdownStubDelegator::HandleRemoteRequest(
