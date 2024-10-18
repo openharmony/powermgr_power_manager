@@ -59,6 +59,7 @@ public:
     virtual PowerErrors SetSuspendTag(const std::string& tag) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
+    virtual void WakeupDeviceAsync(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
     virtual PowerErrors OverrideScreenOffTime(int64_t timeout) = 0;
     virtual PowerErrors RestoreScreenOffTime() = 0;
