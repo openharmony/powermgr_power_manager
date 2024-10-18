@@ -1,0 +1,54 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../../powermgr.gni")
+
+ohos_shared_library("cj_running_lock_ffi") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  include_dirs = [
+    "${powermgr_framework_native}/",
+    "${powermgr_inner_api}/native/include",
+    "include",
+  ]
+
+  if (build_ohos_sdk) {
+    defines += [ "PREVIEWER" ]
+    sources = []
+  }
+
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+
+  sources = [
+    "src/cj_running_lock_ffi.cpp",
+    "src/cj_running_lock_impl.cpp",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "powermgr"
+  part_name = "power_manager"
+}
