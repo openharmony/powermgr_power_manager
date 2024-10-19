@@ -19,9 +19,7 @@
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 #include <display_manager_lite.h>
 #endif
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 #include <dlfcn.h>
-#endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -43,7 +41,7 @@ namespace PowerMgr {
 using namespace OHOS::MMI;
 namespace {
 sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
 const int32_t ERR_FAILED = -1;
 #endif
 
@@ -93,9 +91,7 @@ void WakeupController::Init()
 
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++) {
         POWER_HILOGI(FEATURE_WAKEUP, "registered type=%{public}u", (*source).GetReason());
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
-            SetOriginSettingValue((*source));
-#endif
+        SetOriginSettingValue((*source));
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
@@ -155,9 +151,9 @@ void WakeupController::UnregisterSettingsObserver()
     }
 }
 
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 void WakeupController::SetOriginSettingValue(WakeupSource& source)
 {
+#ifdef POWER_DOUBLECLICK_ENABLE
     if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK) {
         if (SettingHelper::IsWakeupDoubleSettingValid() == false) {
             POWER_HILOGI(COMP_SVC, "the origin doubleClick_enable is: %{public}d", source.IsEnable());
@@ -168,7 +164,10 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
 
         auto enable = SettingHelper::GetSettingWakeupDouble();
         SetWakeupDoubleClickSensor(enable);
-    } else if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
+    }
+#endif
+#ifdef POWER_PICKUP_ENABLE
+    if (source.GetReason() == WakeupDeviceType::WAKEUP_DEVICE_PICKUP) {
         if (!SettingHelper::IsWakeupPickupSettingValid()) {
             POWER_HILOGI(FEATURE_WAKEUP, "GetReason_WAKEUP_DEVICE_PICKUP,source enable=%{public}d", source.IsEnable());
             SettingHelper::SetSettingWakeupPickup(source.IsEnable());
@@ -179,8 +178,9 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
         auto enable = SettingHelper::GetSettingWakeupPickup();
         PickupConnectMotionConfig(enable);
     }
+#endif
 }
-
+#ifdef POWER_DOUBLECLICK_ENABLE
 void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
 {
     std::lock_guard lock(sourceUpdateMutex_);
@@ -241,7 +241,8 @@ int32_t WakeupController::SetWakeupDoubleClickSensor(bool enable)
     dlclose(handler);
     return resCode;
 }
-
+#endif
+#ifdef POWER_PICKUP_ENABLE
 static const char* SET_WAKEUP_MOTION_SUBSCRIBER_CONFIG = "PickupMotionSubscriber";
 static const char* SET_WAKEUP_MOTION_UNSUBSCRIBER_CONFIG = "PickupMotionUnsubscriber";
 typedef void(*FuncSubscriber)();

@@ -280,6 +280,7 @@ private:
     static std::atomic_bool isBootCompleted_;
 
     static void RegisterBootCompletedCallback();
+    static void PowerExternalAbilityInit();
     static bool IsDeveloperMode();
 #ifdef HAS_SENSORS_SENSOR_PART
     static void HallSensorCallback(SensorEvent* event);
