@@ -824,7 +824,7 @@ void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *even
     ProximityData* data = reinterpret_cast<ProximityData*>(event->data);
     int32_t distance = static_cast<int32_t>(data->distance);
 
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "Sensor Callback data->distance=%{public}d", distance);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Sensor Callback data->distance=%{public}d", distance);
     if (distance == PROXIMITY_CLOSE_SCALAR) {
         runningLock->SetProximity(PROXIMITY_CLOSE);
     } else if (distance == PROXIMITY_AWAY_SCALAR) {
@@ -844,7 +844,7 @@ RunningLockMgr::ProximityController::ProximityController()
     }
     for (int32_t i = 0; i < count; i++) {
         if (sensorInfo[i].sensorTypeId == SENSOR_TYPE_ID_PROXIMITY) {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "Support PROXIMITY sensor");
+            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Support PROXIMITY sensor");
             support_ = true;
             break;
         }
@@ -916,7 +916,7 @@ bool RunningLockMgr::ProximityController::IsClose()
 void RunningLockMgr::ProximityController::OnClose()
 {
     if (!enabled_ || IsClose()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or closed already");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or closed already");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -935,19 +935,21 @@ void RunningLockMgr::ProximityController::OnClose()
     auto runningLock = pms->GetRunningLockMgr();
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
         bool ret = stateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
         if (ret) {
             suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
                 static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
         }
+    } else {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Unholding PROXIMITY LOCK");
     }
 }
 
 void RunningLockMgr::ProximityController::OnAway()
 {
     if (!enabled_ || !IsClose()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or away already");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or away already");
         return;
     }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -965,9 +967,11 @@ void RunningLockMgr::ProximityController::OnAway()
     auto runningLock = pms->GetRunningLockMgr();
     if (runningLock->GetValidRunningLockNum(
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
         runningLock->PreprocessBeforeAwake();
         stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
+    } else {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Unholding PROXIMITY LOCK");
     }
 }
 
