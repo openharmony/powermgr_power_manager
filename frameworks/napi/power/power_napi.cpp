@@ -24,9 +24,6 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#define SHUT_STAGE_FRAMEWORK_START 1
-#define BOOT_DETECTOR_IOCTL_BASE 'B'
-#define SET_SHUT_STAGE _IOW(BOOT_DETECTOR_IOCTL_BASE, 106, int)
 #define SET_REBOOT _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
 
 namespace OHOS {
