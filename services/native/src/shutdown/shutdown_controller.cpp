@@ -36,6 +36,8 @@
 #endif
 #include <thread>
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
 #include "battery_srv_client.h"
@@ -123,6 +125,22 @@ static void WritePoweroffChargeFlag()
 }
 #endif
 
+static void SetFrameworkFinishBootStage(void)
+{
+    int fd = open("/dev/bbox", O_WRONLY);
+    if (fd < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "open /dev/bbox failed!");
+        return;
+    }
+    int stage = SHUT_STAGE_FRAMEWORK_FINISH;
+    int ret = ioctl(fd, SET_SHUT_STAGE, &stage);
+    if (ret < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
+    }
+    close(fd);
+    return;
+}
+
 void ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot)
 {
     if (started_) {
@@ -136,6 +154,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+    SetFrameworkFinishBootStage();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
