@@ -76,6 +76,7 @@ public:
         CHECK_USER_ACTIVITY_TIMEOUT_MSG = 0,
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG,
         CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG,
+        CHECK_PROXIMITY_SCREEN_OFF_MSG,
     };
 
     static void onSuspend();
@@ -280,8 +281,8 @@ private:
     };
 
     static std::string GetTransitResultString(TransitResult result);
-    void UpdateSettingStateFlag(const PowerState state, const StateChangeReason reason);
-    void RestoreSettingStateFlag(const PowerState state, const StateChangeReason reason);
+    void UpdateSettingStateFlag(PowerState state, StateChangeReason reason);
+    void RestoreSettingStateFlag();
     void InitStateMap();
     void EmplaceAwake();
     void EmplaceFreeze();
@@ -305,6 +306,7 @@ private:
     std::shared_ptr<StateController> GetStateController(PowerState state);
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
+    void HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason);
     bool HandlePreBrightState(StateChangeReason reason);
     bool IsPreBrightAuthReason(StateChangeReason reason);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
@@ -349,6 +351,7 @@ private:
     std::atomic<bool> settingOffStateFlag_ {false};
     std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
+    std::atomic<bool> proximityScreenOffTimerStarted_ {false};
 };
 } // namespace PowerMgr
 } // namespace OHOS
