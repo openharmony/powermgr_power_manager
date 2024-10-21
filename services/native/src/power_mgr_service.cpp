@@ -821,7 +821,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::SetSuspendTag(const std::string tag)
+PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
 {
     std::lock_guard lock(suspendMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
