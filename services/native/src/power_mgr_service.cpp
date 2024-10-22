@@ -73,7 +73,9 @@ constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
+#ifdef HAS_SENSORS_SENSOR_PART
 bool g_inLidMode = false;
+#endif
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
