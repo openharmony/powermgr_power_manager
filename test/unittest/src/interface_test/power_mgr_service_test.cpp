@@ -455,6 +455,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
 {
     constexpr const int64_t screenOffTime = 4000;
     constexpr const int64_t US_PER_MS = 1000;
+    constexpr const uint32_t DELAY_US = 500 * 1000;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
@@ -467,10 +468,12 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     // wait till going to DIM
     usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
-    // wait till going to INACTIVE
+    // wait till going to SLEEP
     usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_OFF_WAIT_TIME_MS) *
         US_PER_MS);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+    usleep(DELAY_US);
+    EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 end.");
 }
 
 /**
@@ -503,7 +506,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     auto checkingTask = [&powerMgrClient, &notified]() {
         while (!notified) {
             powerMgrClient.SuspendDevice();
-            EXPECT_EQ(powerMgrClient.GetState(), PowerState::INACTIVE);
+            usleep(OPERATION_DELAY_US);
+            EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
             usleep(OPERATION_DELAY_US);
             powerMgrClient.WakeupDevice();
             EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
