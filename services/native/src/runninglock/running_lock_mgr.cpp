@@ -41,8 +41,10 @@ const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
 sptr<IPowerRunninglockCallback> g_runningLockCallback = nullptr;
 const string INCALL_APP_BUNDLE_NAME = "com.ohos.callui";
+#ifdef HAS_SENSORS_SENSOR_PART
 constexpr uint32_t FOREGROUND_INCALL_DELAY_TIME_MS = 300;
 constexpr uint32_t BACKGROUND_INCALL_DELAY_TIME_MS = 800;
+#endif
 }
 
 RunningLockMgr::~RunningLockMgr() {}

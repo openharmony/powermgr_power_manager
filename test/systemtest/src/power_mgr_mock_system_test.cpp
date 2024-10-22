@@ -77,6 +77,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock106: Failed to get PowerMgrService";
     }
 
+#ifdef HAS_SENSORS_SENSOR_PART
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     pms->CreateRunningLock(token, info);
@@ -84,6 +85,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     pms->Lock(token);
     EXPECT_EQ(pms->IsUsed(token), true);
     pms->UnLock(token);
+#endif
 
     POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
     GTEST_LOG_(INFO) << "PowerMgrMock106: end";

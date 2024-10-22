@@ -260,7 +260,9 @@ public:
     void MockProximity(uint32_t status)
     {
         POWER_HILOGI(LABEL_TEST, "MockProximity: fun is start");
+#ifdef HAS_SENSORS_SENSOR_PART
         runningLockMgr_->SetProximity(status);
+#endif
         POWER_HILOGI(LABEL_TEST, "MockProximity: fun is end");
     }
     void MockSystemWakeup()
