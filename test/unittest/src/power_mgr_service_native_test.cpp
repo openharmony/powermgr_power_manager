@@ -136,7 +136,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNative003 begin.");
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_PICKUP_ENABLE
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
     EXPECT_TRUE(SettingHelper::pickUpObserver_ != nullptr);
@@ -275,10 +275,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNative011 begin.");
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
-    SettingHelper::IsWakeupPickupSettingValid();
+    SettingHelper::IsWakeupDoubleSettingValid();
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     EXPECT_TRUE(SettingHelper::doubleClickObserver_ == nullptr);
