@@ -30,6 +30,7 @@ public:
         DISABLE = 0,
         ENABLE = 1,
     };
+    static void UpdateCurrentUserId();
     static bool IsDisplayOffTimeSettingValid();
     static int64_t GetSettingDisplayOffTime(int64_t defaultVal);
     static void SetSettingDisplayOffTime(int64_t time);
