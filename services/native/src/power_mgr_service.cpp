@@ -150,8 +150,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
+        SettingHelper::UpdateCurrentUserId();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+        power->SubscribeCommonEvent();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
@@ -589,6 +591,9 @@ void PowerMgrService::OnStop()
 #ifdef MSDP_MOVEMENT_ENABLE
     UnRegisterMovementCallback();
 #endif
+    if (!OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriberPtr_)) {
+        POWER_HILOGE(COMP_SVC, "Power Onstop unregister to commonevent manager failed!");
+    }
 }
 
 void PowerMgrService::Reset()
@@ -1604,5 +1609,44 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<PointerEvent> pointerEve
 
 void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const {};
 #endif
+
+void PowerMgrService::SubscribeCommonEvent()
+{
+    using namespace OHOS::EventFwk;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::COMMON);
+    if (!subscriberPtr_) {
+        subscriberPtr_ = std::make_shared<PowerCommonEventSubscriber>(subscribeInfo);
+    }
+    bool result = CommonEventManager::SubscribeCommonEvent(subscriberPtr_);
+    if (!result) {
+        POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT_USER_SWITCHED failed");
+    }
+}
+
+void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
+{
+    std::string action = data.GetWant().GetAction();
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (power == nullptr) {
+        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+    if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        SettingHelper::UnregisterSettingWakeupDoubleObserver();
+        SettingHelper::UnregisterSettingWakeupPickupObserver();
+#endif
+        power->GetWakeupController()->UnregisterSettingsObserver();
+        SettingHelper::UpdateCurrentUserId();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        power->RegisterSettingObservers();
+        power->RegisterSettingWakeupPickupGestureObserver();
+#endif
+        power->WakeupControllerInit();
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

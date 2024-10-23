@@ -43,6 +43,7 @@ const int32_t ERR_FAILED = -1;
 #endif
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 }
+std::mutex WakeupController::sourceUpdateMutex_;
 
 /** WakeupController Implement */
 WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine)
@@ -70,10 +71,7 @@ WakeupController::~WakeupController()
         inputManager->RemoveMonitor(monitorId_);
     }
 #endif
-
-    if (g_wakeupSourcesKeyObserver) {
-        SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
-    }
+    UnregisterSettingsObserver();
 }
 
 void WakeupController::Init()
@@ -142,6 +140,14 @@ void WakeupController::RegisterSettingsObserver()
     POWER_HILOGI(FEATURE_POWER_STATE, "register setting observer fin");
 }
 
+void WakeupController::UnregisterSettingsObserver()
+{
+    if (g_wakeupSourcesKeyObserver) {
+        SettingHelper::UnregisterSettingObserver(g_wakeupSourcesKeyObserver);
+        g_wakeupSourcesKeyObserver = nullptr;
+    }
+}
+
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 void WakeupController::SetOriginSettingValue(WakeupSource& source)
 {
@@ -170,6 +176,7 @@ void WakeupController::SetOriginSettingValue(WakeupSource& source)
 
 void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
 {
+    std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     if (jsonStr.empty()) {
         POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
@@ -278,6 +285,7 @@ void WakeupController::PickupConnectMotionConfig(bool databaseSwitchValue)
 
 void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 {
+    std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     if (jsonStr.empty()) {
         POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
@@ -316,6 +324,7 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
 
 void WakeupController::ChangeLidWakeupSourceConfig(bool updataEnable)
 {
+    std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
     Json::Value root;
