@@ -78,8 +78,7 @@ bool AppManagerUtils::IsForegroundApplication(const std::string& appName)
             break;
         }
     }
-
-    POWER_HILOGI(FEATURE_UTIL, "IsForegroundApplication, ret: %{public}zu", static_cast<uint32_t>(IsForeground));
+    POWER_HILOGI(FEATURE_UTIL, "IsForegroundApplication, ret: %{public}u", static_cast<uint32_t>(IsForeground));
     return IsForeground;
 }
 

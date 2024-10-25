@@ -15,9 +15,9 @@
 
 #include "app_manager_utils.h"
 #include "power_log.h"
+#include <ability_manager_client.h>
 #include <string>
 #include <vector>
-#include <ability_manager_client.h>
 
 #ifdef __cplusplus
 extern "C" {
