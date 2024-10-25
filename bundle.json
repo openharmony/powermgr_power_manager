@@ -29,7 +29,8 @@
             "power_manager_feature_wakeup_action",
             "power_manager_feature_power_dialog",
             "power_manager_feature_enable_s4",
-            "power_manager_feature_doubleclick_or_pickup",
+            "power_manager_feature_doubleclick",
+            "power_manager_feature_pickup",
             "power_manager_feature_force_sleep_broadcast",
             "power_manager_feature_movement",
             "power_manager_feature_screen_on_timeout_check",
@@ -99,7 +100,6 @@
                 ],
                 "fwk_group": [
                     "//base/powermgr/power_manager/frameworks:power_napi",
-                    "//base/powermgr/power_manager/frameworks/cj:power_cj",
                     "//base/powermgr/power_manager/interfaces/inner_api:powermgr_client"
                 ],
                 "service_group": [
@@ -179,6 +179,25 @@
                         "setting_provider.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/utils/setting/include"
+                    }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/frameworks/cj/runninglock:cj_running_lock_ffi",
+                    "header": {
+                      "header_files": [
+                        "cj_running_lock_ffi.h",
+                        "cj_running_lock_impl.h"
+                      ],
+                      "header_base": "//base/powermgr/power_manager/frameworks/cj/runninglock/include"
+                    }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/frameworks/cj/power:cj_power_ffi",
+                    "header": {
+                      "header_files": [
+                        "power_ffi.h"
+                      ],
+                      "header_base": "//base/powermgr/power_manager/frameworks/cj/power/include"
                     }
                 }
             ],

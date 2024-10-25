@@ -157,7 +157,8 @@ enum class WakeupDeviceType : uint32_t {
     WAKEUP_DEVICE_INCOMING_CALL = 23,
     WAKEUP_DEVICE_SHELL = 24,
     WAKEUP_DEVICE_PICKUP = 25,
-    WAKEUP_DEVICE_MAX = 26,
+    WAKEUP_DEVICE_EXIT_SYSTEM_STR = 26, // STR: suspend to ram
+    WAKEUP_DEVICE_MAX = 27,
 };
 
 // SuspendDeviceType list
@@ -220,6 +221,7 @@ enum class StateChangeReason : uint32_t {
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK = 101,
+    STATE_CHANGE_REASON_EXIT_SYSTEM_STR = 102,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
 } // namespace PowerMgr
