@@ -101,7 +101,9 @@ void PowerMgrService::OnStart()
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
+#ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
+#endif
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
         return;
