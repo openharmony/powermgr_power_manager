@@ -123,12 +123,14 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     std::string message = "runninglock message";
     callbackProxy->HandleRunningLockMessage(message);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
+#ifdef HAS_SENSORS_SENSOR_PART
     RunningLockInfo info("test2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_FALSE(sptrProxy->CreateRunningLock(token, info) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->ReleaseRunningLock(token));
     EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
+#endif
 }
 
 /**

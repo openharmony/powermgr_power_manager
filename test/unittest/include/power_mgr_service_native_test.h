@@ -25,7 +25,9 @@
 #include "mock_power_action.h"
 #include "mock_state_action.h"
 #include "power_state_callback_stub.h"
+#ifdef HAS_SENSORS_SENSOR_PART
 #include "sensor_agent.h"
+#endif
 #include <gtest/gtest.h>
 
 namespace OHOS {

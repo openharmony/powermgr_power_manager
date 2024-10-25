@@ -87,7 +87,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
 HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend002: start";
-
+#ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMockSuspend002: Failed to get PowerMgrService";
@@ -110,6 +110,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     powerStateMachine->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS, false);
+#endif
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend002: end";
 }
 
