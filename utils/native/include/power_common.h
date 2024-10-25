@@ -22,6 +22,11 @@
 #include "power_log.h"
 #include "power_mgr_errors.h"
 
+#define SHUT_STAGE_FRAMEWORK_START 1
+#define SHUT_STAGE_FRAMEWORK_FINISH 2
+#define BOOT_DETECTOR_IOCTL_BASE 'B'
+#define SET_SHUT_STAGE _IOW(BOOT_DETECTOR_IOCTL_BASE, 106, int)
+
 namespace OHOS {
 namespace PowerMgr {
 #define RETURN_IF_WITH_RET(cond, retval) if (cond) {return (retval);}
