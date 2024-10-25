@@ -799,8 +799,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest036, TestSize.Level
     EXPECT_EQ(ret, true);
     ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND);
     EXPECT_EQ(ret, true);
+#ifdef HAS_SENSORS_SENSOR_PART
     ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_EQ(ret, true);
+#endif
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());

@@ -1025,8 +1025,10 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient040, TestSize.Level0)
     EXPECT_EQ(ret, true);
     ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND);
     EXPECT_EQ(ret, true);
+#ifdef HAS_SENSORS_SENSOR_PART
     ret = powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     EXPECT_EQ(ret, true);
+#endif
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
     powerMgrClient.SuspendDevice();

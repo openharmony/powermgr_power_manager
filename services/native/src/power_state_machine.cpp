@@ -1621,6 +1621,7 @@ void PowerStateMachine::RestoreSettingStateFlag()
 
 void PowerStateMachine::HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason)
 {
+#ifdef HAS_SENSORS_SENSOR_PART
     if (!proximityScreenOffTimerStarted_.load()) {
         return;
     }
@@ -1641,6 +1642,7 @@ void PowerStateMachine::HandleProximityScreenOffTimer(PowerState state, StateCha
             PowerUtils::GetReasonTypeString(reason).c_str());
         CancelDelayTimer(PowerStateMachine::CHECK_PROXIMITY_SCREEN_OFF_MSG);
     }
+#endif
 }
 
 bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)

@@ -74,15 +74,19 @@ public:
     void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
+#ifdef HAS_SENSORS_SENSOR_PART
     void SetProximity(uint32_t status);
     bool IsProximityClose();
+#endif
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
 private:
 
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
+#ifdef HAS_SENSORS_SENSOR_PART
     void InitLocksTypeProximity();
+#endif
     void InitLocksTypeCoordination();
 
     class LockCounter {
@@ -157,7 +161,9 @@ private:
     static uint64_t TransformLockid(const sptr<IRemoteObject>& remoteObj);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
+#ifdef HAS_SENSORS_SENSOR_PART
     void ProximityLockOn();
+#endif
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
 

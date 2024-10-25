@@ -287,9 +287,11 @@ HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
     std::shared_ptr<RunningLock> screenRunningLock = powerMgrClient.CreateRunningLock(
         "screen.test009", RunningLockType::RUNNINGLOCK_SCREEN);
     ASSERT_NE(screenRunningLock, nullptr);
+#ifdef HAS_SENSORS_SENSOR_PART
     std::shared_ptr<RunningLock> proximityRunningLock = powerMgrClient.CreateRunningLock(
         "proximity.test009", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
     ASSERT_NE(proximityRunningLock, nullptr);
+#endif
 
     pid_t curUid = getuid();
     pid_t curPid = getpid();
@@ -299,9 +301,11 @@ HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
     EXPECT_TRUE(screenRunningLock->IsUsed());
     screenRunningLock->UnLock();
 
+#ifdef HAS_SENSORS_SENSOR_PART
     proximityRunningLock->Lock();
     EXPECT_TRUE(proximityRunningLock->IsUsed());
     proximityRunningLock->UnLock();
+#endif
 
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     POWER_HILOGD(LABEL_TEST, "RunningLockTest009 end");

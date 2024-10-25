@@ -74,6 +74,7 @@ namespace {
 HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "RunningLockMockTest001 start.");
+#ifdef HAS_SENSORS_SENSOR_PART
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -120,6 +121,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 0);
     EXPECT_EQ(unlockActionCount, 0);
+#endif
     POWER_HILOGD(LABEL_TEST, "RunningLockMockTest001 end.");
 }
 
@@ -132,6 +134,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
 HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
 {
     POWER_HILOGD(LABEL_TEST, "RunningLockMockTest002 start.");
+#ifdef HAS_SENSORS_SENSOR_PART
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -166,6 +169,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 0);
     EXPECT_EQ(unlockActionCount, 0);
+#endif
     POWER_HILOGD(LABEL_TEST, "RunningLockMockTest002 end.");
 }
 
