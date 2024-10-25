@@ -57,6 +57,8 @@ const std::string DIALOG_CONFIG_PATH = "etc/systemui/poweroff_config.json";
 std::string ShutdownDialog::bundleName_ = "com.ohos.powerdialog";
 std::string ShutdownDialog::abilityName_ = "PowerUiExtensionAbility";
 std::string ShutdownDialog::uiExtensionType_ = "sysDialog/power";
+std::string ShutdownDialog::dialogBundleName_ = "com.ohos.systemui";
+std::string ShutdownDialog::dialogAbilityName_ = "com.ohos.systemui.dialog";
 
 ShutdownDialog::ShutdownDialog() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
 
@@ -123,7 +125,7 @@ bool ShutdownDialog::ConnectSystemUi()
     }
 
     Want want;
-    want.SetElementName("com.ohos.systemui", "com.ohos.systemui.dialog");
+    want.SetElementName(dialogBundleName_, dialogAbilityName_);
 
     void *handler = dlopen("libpower_ability.z.so", RTLD_NOW);
     if (handler == nullptr) {
@@ -182,10 +184,12 @@ void ShutdownDialog::LoadDialogConfig()
         POWER_HILOGE(COMP_UTILS, "json varibale not support");
         return;
     }
+
     bundleName_ = root["bundleName"].asString();
     abilityName_ = root["abilityName"].asString();
     uiExtensionType_ = root["uiExtensionType"].asString();
-
+    dialogBundleName_ = root["bundleName"].asString();
+    dialogAbilityName_ = "com.ohos.sceneboard.systemdialog";
     POWER_HILOGI(COMP_UTILS, "PowerOff variables have changed");
 }
 
