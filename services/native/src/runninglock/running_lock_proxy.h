@@ -51,6 +51,7 @@ public:
 private:
     std::string AssembleProxyKey(pid_t pid, pid_t uid);
     void ProxyInner(const sptr<IRemoteObject>& remoteObj, const std::string& bundleNames, RunningLockEvent event);
+    std::string GetRunningLockName(const sptr<IRemoteObject>& remoteObj);
     std::string MergeBundleName(const WksMap& wksMap);
     RunningLockProxyMap proxyMap_;
 };
