@@ -458,12 +458,14 @@ WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& det
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
     } else if (strcmp(details.c_str(), "incoming call") == 0) {
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL;
+    } else if (strcmp(details.c_str(), "fake_str_check_unlock") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR;
     } else if (strcmp(details.c_str(), "shell") == 0) {
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
     }
 
     if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
-        POWER_HILOGI(FEATURE_SUSPEND, "parsedType is %{public}d", static_cast<uint32_t>(parsedType));
+        POWER_HILOGI(FEATURE_WAKEUP, "Parsed wakeup type is %{public}d", static_cast<uint32_t>(parsedType));
     }
     return parsedType;
 }
@@ -1882,6 +1884,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_PICKUP:
             ret = StateChangeReason::STATE_CHANGE_REASON_PICKUP;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR:
+            ret = StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:

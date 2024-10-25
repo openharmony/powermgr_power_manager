@@ -79,6 +79,7 @@ public:
     virtual PowerErrors SetSuspendTag(const std::string& tag) override;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
+    virtual void WakeupDeviceAsync(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override {};
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
     bool RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
     virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
@@ -280,6 +281,7 @@ private:
     static std::atomic_bool isBootCompleted_;
 
     static void RegisterBootCompletedCallback();
+    static void PowerExternalAbilityInit();
     static bool IsDeveloperMode();
 #ifdef HAS_SENSORS_SENSOR_PART
     static void HallSensorCallback(SensorEvent* event);

@@ -528,6 +528,32 @@ PowerErrors PowerMgrProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType rea
     return static_cast<PowerErrors>(error);
 }
 
+void PowerMgrProxy::WakeupDeviceAsync(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF(remote == nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_WAKEUP, "Write descriptor failed");
+        return;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Int64, callTimeMs);
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, Uint32, static_cast<uint32_t>(reason));
+    RETURN_IF_WRITE_PARCEL_FAILED_NO_RET(data, String16, Str8ToStr16(details));
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::WAKEUP_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_WAKEUP, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return;
+    }
+}
+
 bool PowerMgrProxy::RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -466,7 +466,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest014, TestSize.Level
     POWER_HILOGD(LABEL_TEST, "PowerWakeupControllerTest014: end");
 }
 
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
 /**
  * @tc.name: PowerWakeupControllerTest015
  * @tc.desc: test switch to turn on the screen by double click
@@ -483,7 +483,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest015, TestSize.Level
     EXPECT_TRUE(resCode != -1);
     POWER_HILOGD(LABEL_TEST, "PowerWakeupControllerTest015: end");
 }
-
+#endif
+#ifdef POWER_PICKUP_ENABLE
 /**
  * @tc.name: PowerWakeupControllerTest016
  * @tc.desc: test switch to turn on the screen by raising your hand

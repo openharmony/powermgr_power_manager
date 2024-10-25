@@ -168,13 +168,29 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
+        PowerExternalAbilityInit();
+        power->KeepScreenOnInit();
+        isBootCompleted_ = true;
+    };
+    SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
+}
+
+void PowerMgrService::PowerExternalAbilityInit()
+{
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (power == nullptr) {
+        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
         // External screen listener must be registered after SuspendControllerInit and WakeupControllerInit
         power->RegisterExternalScreenListener();
 #endif
         power->VibratorInit();
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
         power->RegisterSettingWakeupDoubleClickObservers();
+#endif
+#ifdef POWER_PICKUP_ENABLE
         power->RegisterSettingWakeupPickupGestureObserver();
 #endif
 #ifndef CONFIG_FACTORY_MODE
@@ -184,10 +200,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
         POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
 #endif
         power->RegisterSettingPowerModeObservers();
-        power->KeepScreenOnInit();
-        isBootCompleted_ = true;
-    };
-    SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
 }
 
 void PowerMgrService::RegisterSettingPowerModeObservers()
@@ -252,7 +264,7 @@ void PowerMgrService::KeepScreenOn(bool isOpenOn)
     return;
 }
 
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
 void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupDoubleClickSettingUpdateFunc(key); };
@@ -271,7 +283,8 @@ bool PowerMgrService::GetSettingWakeupDoubleClick(const std::string& key)
 {
     return SettingHelper::GetSettingWakeupDouble(key);
 }
-
+#endif
+#ifdef POWER_PICKUP_ENABLE
 void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupPickupGestureSettingUpdateFunc(key);};
@@ -601,8 +614,10 @@ void PowerMgrService::OnStop()
 #ifdef MSDP_MOVEMENT_ENABLE
     RemoveSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
+#endif
+#ifdef POWER_PICKUP_ENABLE
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
     SettingHelper::UnRegisterSettingWakeupLidObserver();
@@ -1870,8 +1885,10 @@ void PowerMgrService::UnregisterAllSettingObserver()
         return;
     }
 
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
+#endif
+#ifdef POWER_PICKUP_ENABLE
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
     pms->GetWakeupController()->UnregisterSettingsObserver();
@@ -1894,8 +1911,10 @@ void PowerMgrService::RegisterAllSettingObserver()
         return;
     }
 
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+#ifdef POWER_DOUBLECLICK_ENABLE
     pms->RegisterSettingWakeupDoubleClickObservers();
+#endif
+#ifdef POWER_PICKUP_ENABLE
     pms->RegisterSettingWakeupPickupGestureObserver();
 #endif
     pms->WakeupControllerInit();
