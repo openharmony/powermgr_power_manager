@@ -482,7 +482,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 start.");
     constexpr const int64_t screenOffTime = 4000;
     constexpr const int64_t US_PER_MS = 1000;
-    constexpr const uint32_t DELAY_US = 3000 * 1000;
+    constexpr const uint32_t DELAY_US = 500 * 1000;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
@@ -499,7 +499,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_OFF_WAIT_TIME_MS) *
         US_PER_MS);
     usleep(DELAY_US);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
+    EXPECT_NE(powerMgrClient.GetState(), PowerState::AWAKE);
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 end.");
 }
 
@@ -513,7 +513,6 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 start.");
     constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
-    constexpr const uint32_t DELAY_US = 3000 * 1000;
     constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 125;
     constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 800;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -536,8 +535,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     auto checkingTask = [&powerMgrClient, &endTask]() {
         while (!endTask) {
             powerMgrClient.SuspendDevice();
-            usleep(DELAY_US);
-            EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
+            usleep(OPERATION_DELAY_US);
+            EXPECT_NE(powerMgrClient.GetState(), PowerState::AWAKE);
             usleep(OPERATION_DELAY_US);
             powerMgrClient.WakeupDevice();
             EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);

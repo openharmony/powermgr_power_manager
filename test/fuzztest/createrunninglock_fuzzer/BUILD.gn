@@ -67,10 +67,108 @@ ohos_fuzztest("CreateRunningLockFuzzTest") {
     "ipc:ipc_core",
     "power_manager:power_ffrt",
   ]
+  defines = []
+
+  if (has_hiviewdfx_hisysevent_part) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (has_hiviewdfx_hitrace_part) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (power_manager_feature_movement) {
+    defines += [ "MSDP_MOVEMENT_ENABLE" ]
+  }
+
+  if (use_libfuzzer) {
+    defines += [ "FUZZ_TEST" ]
+  }
+
+  if (power_manager_feature_screen_on_timeout_check) {
+    defines += [ "SCREEN_ON_TIMEOUT_CHECK" ]
+    external_deps += [
+      "ability_runtime:app_manager",
+      "window_manager:libwm",
+    ]
+  }
+
+  if (has_display_manager_part) {
+    defines += [ "HAS_DISPLAY_MANAGER" ]
+    external_deps += [
+      "display_manager:displaymgr",
+      "window_manager:libdm_lite",
+    ]
+  }
+
+  if (has_device_standby_part) {
+    external_deps += [ "device_standby:standby_innerkits" ]
+  }
+
+  if (has_multimodalinput_input_part) {
+    external_deps += [ "input:libmmi-client" ]
+  }
+
   if (has_sensors_sensor_part) {
     external_deps += [ "sensor:sensor_interface_native" ]
   }
-  if (has_hiviewdfx_hisysevent_part) {
-    external_deps += [ "hisysevent:libhisysevent" ]
+
+  if (power_manager_feature_poweroff_charge) {
+    external_deps += [ "battery_manager:batterysrv_client" ]
+
+    defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
+  }
+
+  if (power_manager_feature_doubleclick) {
+    defines += [ "POWER_DOUBLECLICK_ENABLE" ]
+  }
+
+  if (power_manager_feature_pickup) {
+    defines += [ "POWER_PICKUP_ENABLE" ]
+  }
+
+  if (power_manager_feature_wakeup_action) {
+    sources += [
+      "native/src/wakeup_action/wakeup_action_controller.cpp",
+      "native/src/wakeup_action/wakeup_action_source_parser.cpp",
+      "native/src/wakeup_action/wakeup_action_sources.cpp",
+    ]
+
+    defines += [ "POWER_MANAGER_WAKEUP_ACTION" ]
+  }
+
+  if (power_manager_feature_power_dialog) {
+    defines += [ "POWER_MANAGER_POWER_DIALOG" ]
+  }
+
+  if (power_manager_feature_enable_s4) {
+    sources += [ "native/src/hibernate/hibernate_controller.cpp" ]
+    defines += [ "POWER_MANAGER_POWER_ENABLE_S4" ]
+    external_deps += [
+      "init:libbegetutil",
+      "os_account:os_account_innerkits",
+    ]
+  }
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
+
+  if (power_manager_feature_charging_type_setting) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+  }
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_external_screen_management) {
+    defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
+  }
+
+  if (factory == true) {
+    defines += [ "CONFIG_FACTORY_MODE" ]
   }
 }
