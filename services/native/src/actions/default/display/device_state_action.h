@@ -37,6 +37,9 @@ public:
     DisplayState GetDisplayState() override;
     uint32_t SetDisplayState(DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
+    bool TryToCancelScreenOff() override;
+    void BeginPowerkeyScreenOff() override;
+    void EndPowerkeyScreenOff() override;
     void SetCoordinated(bool coordinated) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
     void RegisterCallback(std::function<void(uint32_t)>& callback) override;
@@ -52,6 +55,13 @@ private:
         std::function<void(uint32_t)> notify_ {nullptr};
         std::mutex notifyMutex_;
     };
+    bool IsInterruptingScreenOff(Rosen::PowerStateChangeReason dispReason);
+    std::mutex cancelScreenOffMutex_;
+    std::condition_variable cancelScreenOffCv_;
+    bool cancelScreenOffCvUnblocked_ {false};
+    bool interruptingScreenOff_ {false};
+    bool screenOffInterrupted_ {false};
+    bool screenOffStarted_ {false};
     Rosen::PowerStateChangeReason GetDmsReasonByPowerReason(StateChangeReason reason);
     bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};

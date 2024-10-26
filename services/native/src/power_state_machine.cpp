@@ -1613,6 +1613,21 @@ void PowerStateMachine::SetDisplaySuspend(bool enable)
     }
 }
 
+bool PowerStateMachine::TryToCancelScreenOff()
+{
+    return stateAction_->TryToCancelScreenOff();
+}
+
+void PowerStateMachine::BeginPowerkeyScreenOff()
+{
+    stateAction_->BeginPowerkeyScreenOff();
+}
+
+void PowerStateMachine::EndPowerkeyScreenOff()
+{
+    stateAction_->EndPowerkeyScreenOff();
+}
+
 StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType type)
 {
     StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;

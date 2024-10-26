@@ -43,6 +43,11 @@ DisplayState DefaultDeviceStateAction::GetDisplayState()
     return DisplayState::DISPLAY_UNKNOWN;
 }
 
+bool DefaultDeviceStateAction::TryToCancelScreenOff()
+{
+    return false;
+}
+
 uint32_t DefaultDeviceStateAction::SetDisplayState(const DisplayState state, StateChangeReason reason)
 {
     (void)state;
