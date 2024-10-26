@@ -202,6 +202,13 @@ PowerErrors PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::str
     return proxy_->WakeupDevice(GetTickCount(), reason, detail);
 }
 
+void PowerMgrClient::WakeupDeviceAsync(WakeupDeviceType reason, const std::string& detail)
+{
+    RETURN_IF(Connect() != ERR_OK);
+    POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDeviceAsync success");
+    return proxy_->WakeupDeviceAsync(GetTickCount(), reason, detail);
+}
+
 bool PowerMgrClient::RefreshActivity(UserActivityType type)
 {
     RETURN_IF_WITH_RET(Connect() != ERR_OK, false);

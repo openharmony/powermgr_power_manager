@@ -618,7 +618,8 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
     EXPECT_EQ(stateMachine->GetState(), PowerState::INACTIVE);
     runningLockMgr->UnLock(remoteObj);
 
-
+    // the minimum interval between RefreshActivity is 100 ms
+    usleep(100000);
     stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
     stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
