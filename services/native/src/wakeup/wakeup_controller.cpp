@@ -43,6 +43,7 @@ const int32_t ERR_FAILED = -1;
 #endif
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
+constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -493,14 +494,20 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 /* InputCallback achieve */
+bool InputCallback::IsRemoteEvent(std::shared_ptr<InputEvent> event) const
+{
+    return event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
+}
+
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
+    if (pms == nullptr || keyEvent == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
         return;
     }
-    if (keyEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+    // ignores remote event
+    if (IsRemoteEvent(keyEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -542,13 +549,13 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
+    if (pms == nullptr || pointerEvent == nullptr) {
         return;
     }
     if (!NonWindowEvent(pointerEvent)) {
         return;
     }
-    if (pointerEvent->HasFlag(InputEvent::EVENT_FLAG_SIMULATE) && pms->IsCollaborationState()) {
+    if (IsRemoteEvent(pointerEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -609,7 +616,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 {
     POWER_HILOGD(FEATURE_WAKEUP, "AxisEvent");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
+    if (pms == nullptr || axisEvent == nullptr) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
