@@ -31,6 +31,12 @@ sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::powerModeObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::lidObserver_ = nullptr;
 
+void SettingHelper::UpdateCurrentUserId()
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    settingProvider.UpdateCurrentUserId();
+}
+
 bool SettingHelper::IsWakeupPickupSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY);
