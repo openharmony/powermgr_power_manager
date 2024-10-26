@@ -41,6 +41,7 @@ sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
 const int32_t ERR_FAILED = -1;
 #endif
+
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 }
