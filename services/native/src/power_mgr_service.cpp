@@ -1662,7 +1662,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION, true);
-        POWER_HILOGD(FEATURE_INPUT, "remote key event in coordinated state, override screen off time");
+        POWER_HILOGD(FEATURE_INPUT, "remote Key event in coordinated state, override screen off time");
     }
 }
 
