@@ -68,6 +68,7 @@ static std::string g_wakeupReason = "";
 const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
 const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
+static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -185,23 +186,29 @@ void PowerMgrService::PowerExternalAbilityInit()
         return;
     }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-        // External screen listener must be registered after SuspendControllerInit and WakeupControllerInit
-        power->RegisterExternalScreenListener();
+    // External screen listener must be registered after SuspendControllerInit and WakeupControllerInit
+    power->RegisterExternalScreenListener();
 #endif
-        power->VibratorInit();
+    power->VibratorInit();
 #ifdef POWER_DOUBLECLICK_ENABLE
-        power->RegisterSettingWakeupDoubleClickObservers();
+    power->RegisterSettingWakeupDoubleClickObservers();
 #endif
 #ifdef POWER_PICKUP_ENABLE
-        power->RegisterSettingWakeupPickupGestureObserver();
+    power->RegisterSettingWakeupPickupGestureObserver();
 #endif
 #ifndef CONFIG_FACTORY_MODE
-        power->RegisterSettingWakeUpLidObserver();
-        POWER_HILOGI(COMP_SVC, "Allow subscribe Hall sensor");
+    power->RegisterSettingWakeUpLidObserver();
+    POWER_HILOGI(COMP_SVC, "Allow subscribe Hall sensor");
 #else
-        POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
+    POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
 #endif
-        power->RegisterSettingPowerModeObservers();
+    power->RegisterSettingPowerModeObservers();
+#ifdef POWER_MANAGER_ENABLE_USB_KEYBOARD_WAKEUP
+    power->RegisterUsbKeyboardWakeupCallback();
+#endif
+#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
+    power->RegisterSwitchSuspendCallback();
+#endif
 }
 
 void PowerMgrService::RegisterSettingPowerModeObservers()
@@ -630,6 +637,12 @@ void PowerMgrService::OnStop()
 #ifdef MSDP_MOVEMENT_ENABLE
     UnRegisterMovementCallback();
 #endif
+#ifdef POWER_MANAGER_ENABLE_USB_KEYBOARD_WAKEUP
+    UnregisterUsbKeyboardWakeupCallback();
+#endif
+#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
+    UnregisterSwitchSuspendCallback();
+#endif
 }
 
 void PowerMgrService::Reset()
@@ -699,7 +712,6 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 static const char* MOVEMENT_SUBSCRIBER_CONFIG = "RegisterMovementCallback";
 static const char* MOVEMENT_UNSUBSCRIBER_CONFIG = "UnRegisterMovementCallback";
 static const char* RESET_MOVEMENT_STATE_CONFIG = "ResetMovementState";
-static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 typedef void(*FuncMovementSubscriber)();
 typedef void(*FuncMovementUnsubscriber)();
 typedef void(*FuncResetMovementState)();
@@ -773,6 +785,153 @@ void PowerMgrService::ResetMovementState()
     POWER_HILOGI(COMP_SVC, "ResetMovementState Success");
     dlclose(resetMovementStateHandler);
     resetMovementStateHandler = nullptr;
+    return;
+}
+#endif
+
+#ifdef POWER_MANAGER_ENABLE_USB_KEYBOARD_WAKEUP
+static const char* REGISTER_USB_KEYBOARD_WAKEUP_CONFIG = "RegisterUsbKeyboardWakeupCallback";
+static const char* UNREGISTER_USB_KEYBOARD_WAKEUP_CONFIG = "UnregisterUsbKeyboardWakeupCallback";
+typedef void(*FuncRegisterUsbKeyboardWakeupCallback)(std::function<void()>);
+typedef void(*FuncUnregisterUsbKeyboardWakeupCallback)();
+
+void PowerMgrService::RegisterUsbKeyboardWakeupCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to RegisterUsbKeyboardWakeupCallback");
+    void *subscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (subscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen RegisterUsbKeyboardWakeupCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncRegisterUsbKeyboardWakeupCallback registerUsbKeyboardWakeupCallbackFlag =
+        reinterpret_cast<FuncRegisterUsbKeyboardWakeupCallback>(
+            dlsym(subscriberHandler, REGISTER_USB_KEYBOARD_WAKEUP_CONFIG));
+    if (registerUsbKeyboardWakeupCallbackFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "RegisterUsbKeyboardWakeupCallback is null, reason : %{public}s", dlerror());
+        dlclose(subscriberHandler);
+        subscriberHandler = nullptr;
+        return;
+    }
+    registerUsbKeyboardWakeupCallbackFlag([this] () {
+        POWER_HILOGI(COMP_SVC, "[UL_POWER] Usb Keyboard interrupt detected, begin to wakeup");
+        wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD);
+    });
+    POWER_HILOGI(COMP_SVC, "RegisterUsbKeyboardWakeupCallback Success");
+    dlclose(subscriberHandler);
+    subscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::UnregisterUsbKeyboardWakeupCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to UnregisterUsbKeyboardWakeupCallback");
+    void *unSubscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (unSubscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen UnregisterUsbKeyboardWakeupCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncUnregisterUsbKeyboardWakeupCallback unregisterUsbKeyboardWakeupCallbackFlag =
+        reinterpret_cast<FuncUnregisterUsbKeyboardWakeupCallback>(
+            dlsym(unSubscriberHandler, UNREGISTER_USB_KEYBOARD_WAKEUP_CONFIG));
+    if (unregisterUsbKeyboardWakeupCallbackFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "UnregisterUsbKeyboardWakeupCallback is null, reason : %{public}s", dlerror());
+        dlclose(unSubscriberHandler);
+        unSubscriberHandler = nullptr;
+        return;
+    }
+    unregisterUsbKeyboardWakeupCallbackFlag();
+    POWER_HILOGI(COMP_SVC, "UnregisterUsbKeyboardWakeupCallback Success");
+    dlclose(unSubscriberHandler);
+    unSubscriberHandler = nullptr;
+    return;
+}
+#endif
+
+#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
+static const char* REGISTER_SWITCH_SUSPEND_CONFIG = "RegisterSwitchSuspendCallback";
+static const char* UNREGISTER_SWITCH_SUSPEND_CONFIG = "UnregisterSwitchSuspendCallback";
+static const char* ON_CHARGE_STATE_CHANGED_CONFIG = "OnChargeStateChanged";
+typedef void(*FuncRegisterSwitchSuspendCallback)(std::function<void()>);
+typedef void(*FuncUnregisterSwitchSuspendCallback)();
+typedef void(*FuncOnChargeStateChanged)();
+
+void PowerMgrService::RegisterSwitchSuspendCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to RegisterSwitchSuspendCallback");
+    void *subscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (subscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen RegisterSwitchSuspendCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncRegisterSwitchSuspendCallback registerSwitchSuspendCallbackFlag =
+        reinterpret_cast<FuncRegisterSwitchSuspendCallback>(
+            dlsym(subscriberHandler, REGISTER_SWITCH_SUSPEND_CONFIG));
+    if (registerSwitchSuspendCallbackFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "RegisterSwitchSuspendCallback is null, reason : %{public}s", dlerror());
+        dlclose(subscriberHandler);
+        subscriberHandler = nullptr;
+        return;
+    }
+    registerSwitchSuspendCallbackFlag([this] () {
+        POWER_HILOGI(COMP_SVC, "[UL_POWER] Switch close detected, begin to suspend");
+        suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+    });
+    POWER_HILOGI(COMP_SVC, "RegisterSwitchSuspendCallback Success");
+    dlclose(subscriberHandler);
+    subscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::UnregisterSwitchSuspendCallback()
+{
+    POWER_HILOGI(COMP_SVC, "Start to UnregisterSwitchSuspendCallback");
+    void *unSubscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (unSubscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen UnregisterSwitchSuspendCallback failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncUnregisterSwitchSuspendCallback unregisterSwitchSuspendCallbackFlag =
+        reinterpret_cast<FuncUnregisterSwitchSuspendCallback>(
+            dlsym(unSubscriberHandler, UNREGISTER_SWITCH_SUSPEND_CONFIG));
+    if (unregisterSwitchSuspendCallbackFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "UnregisterSwitchSuspendCallback is null, reason : %{public}s", dlerror());
+        dlclose(unSubscriberHandler);
+        unSubscriberHandler = nullptr;
+        return;
+    }
+    unregisterSwitchSuspendCallbackFlag();
+    POWER_HILOGI(COMP_SVC, "UnregisterSwitchSuspendCallback Success");
+    dlclose(unSubscriberHandler);
+    unSubscriberHandler = nullptr;
+    return;
+}
+
+void PowerMgrService::OnChargeStateChanged()
+{
+    POWER_HILOGI(COMP_SVC, "Start to OnChargeStateChanged");
+    void *subscriberHandler = dlopen(POWER_MANAGER_EXT_PATH, RTLD_LAZY | RTLD_NODELETE);
+    if (subscriberHandler == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Dlopen OnChargeStateChanged failed, reason : %{public}s", dlerror());
+        return;
+    }
+
+    FuncOnChargeStateChanged onChargeStateChangedFlag =
+        reinterpret_cast<FuncOnChargeStateChanged>(
+            dlsym(subscriberHandler, ON_CHARGE_STATE_CHANGED_CONFIG));
+    if (onChargeStateChangedFlag == nullptr) {
+        POWER_HILOGE(COMP_SVC, "OnChargeStateChanged is null, reason : %{public}s", dlerror());
+        dlclose(subscriberHandler);
+        subscriberHandler = nullptr;
+        return;
+    }
+    onChargeStateChangedFlag();
+    POWER_HILOGI(COMP_SVC, "OnChargeStateChanged Success");
+    dlclose(subscriberHandler);
+    subscriberHandler = nullptr;
     return;
 }
 #endif
@@ -1985,6 +2144,10 @@ void PowerCommonEventSubscriber::OnPowerConnectStatusChanged(PowerConnectStatus 
         return;
     }
     stateMachine->DisplayOffTimeUpdateFunc();
+
+#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
+    power->OnChargeStateChanged(); // should be called after suspend sources settings updated
+#endif
 }
 #endif
 
