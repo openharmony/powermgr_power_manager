@@ -127,27 +127,8 @@ ohos_fuzztest("RefreshActivityFuzzTest") {
     defines += [ "POWER_PICKUP_ENABLE" ]
   }
 
-  if (power_manager_feature_wakeup_action) {
-    sources += [
-      "native/src/wakeup_action/wakeup_action_controller.cpp",
-      "native/src/wakeup_action/wakeup_action_source_parser.cpp",
-      "native/src/wakeup_action/wakeup_action_sources.cpp",
-    ]
-
-    defines += [ "POWER_MANAGER_WAKEUP_ACTION" ]
-  }
-
   if (power_manager_feature_power_dialog) {
     defines += [ "POWER_MANAGER_POWER_DIALOG" ]
-  }
-
-  if (power_manager_feature_enable_s4) {
-    sources += [ "native/src/hibernate/hibernate_controller.cpp" ]
-    defines += [ "POWER_MANAGER_POWER_ENABLE_S4" ]
-    external_deps += [
-      "init:libbegetutil",
-      "os_account:os_account_innerkits",
-    ]
   }
 
   if (power_manager_feature_force_sleep_broadcast) {
