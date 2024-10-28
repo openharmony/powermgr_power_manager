@@ -66,6 +66,8 @@ private:
     static std::string bundleName_;
     static std::string abilityName_;
     static std::string uiExtensionType_;
+    static std::string dialogBundleName_;
+    static std::string dialogAbilityName_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

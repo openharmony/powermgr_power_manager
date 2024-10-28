@@ -57,6 +57,8 @@ const std::string DIALOG_CONFIG_PATH = "etc/systemui/poweroff_config.json";
 std::string ShutdownDialog::bundleName_ = "com.ohos.powerdialog";
 std::string ShutdownDialog::abilityName_ = "PowerUiExtensionAbility";
 std::string ShutdownDialog::uiExtensionType_ = "sysDialog/power";
+std::string ShutdownDialog::dialogBundleName_ = "com.ohos.systemui";
+std::string ShutdownDialog::dialogAbilityName_ = "com.ohos.systemui.dialog";
 
 ShutdownDialog::ShutdownDialog() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
 
@@ -128,7 +130,7 @@ bool ShutdownDialog::ConnectSystemUi()
     }
 
     Want want;
-    want.SetElementName("com.ohos.systemui", "com.ohos.systemui.dialog");
+    want.SetElementName(dialogBundleName_, dialogAbilityName_);
     ErrCode result = ams->ConnectAbility(want, dialogConnectionCallback_, INVALID_USERID);
     if (result != ERR_OK) {
         POWER_HILOGW(FEATURE_SHUTDOWN, "ConnectAbility systemui dialog failed, result = %{public}d", result);
@@ -171,10 +173,12 @@ void ShutdownDialog::LoadDialogConfig()
         POWER_HILOGE(COMP_UTILS, "json varibale not support");
         return;
     }
+
     bundleName_ = root["bundleName"].asString();
     abilityName_ = root["abilityName"].asString();
     uiExtensionType_ = root["uiExtensionType"].asString();
-
+    dialogBundleName_ = root["bundleName"].asString();
+    dialogAbilityName_ = "com.ohos.sceneboard.systemdialog";
     POWER_HILOGI(COMP_UTILS, "PowerOff variables have changed");
 }
 
