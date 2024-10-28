@@ -220,6 +220,14 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
   }
 
+  if (power_manager_feature_usb_keyboard_wakeup) {
+    defines += [ "POWER_MANAGER_ENABLE_USB_KEYBOARD_WAKEUP" ]
+  }
+
+  if (power_manager_feature_switch_suspend) {
+    defines += [ "POWER_MANAGER_ENABLE_SWITCH_SUSPEND" ]
+  }
+
   if (factory == true) {
     defines += [ "CONFIG_FACTORY_MODE" ]
   }
