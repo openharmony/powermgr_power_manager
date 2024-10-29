@@ -106,7 +106,10 @@ void PowerMgrDumper::ShowUsage(std::string& result)
         .append("    -h: show this help.\n")
         .append("    -r: show the information of runninglock.\n")
         .append("    -s: show the information of power state machine.\n")
-        .append("    -d: show power off dialog.\n");
+        .append("    -d: show power off dialog.\n")
+        .append("    -k: subscribe long press powerkey event.\n")
+        .append("    -t: keep screen on.\n")
+        .append("    -f: restore screen off time.\n");
 }
 } // namespace PowerMgr
 } // namespace OHOS
