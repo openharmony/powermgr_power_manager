@@ -62,6 +62,13 @@ SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
     return *instance_;
 }
 
+void SettingProvider::CopyDataForUpdateScene()
+{
+    if (IsNeedDataMigrationCopy()) {
+        DataMigrationCopy();
+    }
+}
+
 ErrCode SettingProvider::GetIntValue(const std::string& key, int32_t& value)
 {
     int64_t valueLong;
@@ -119,6 +126,17 @@ bool SettingProvider::IsValidKey(const std::string& key)
         POWER_HILOGI(COMP_UTILS, "the getValue is:%{public}s", value.c_str());
     }
     POWER_HILOGI(COMP_UTILS, "the getRet is:%{public}u", ret);
+    return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
+}
+
+bool SettingProvider::IsValidKeyGlobal(const std::string& key)
+{
+    std::string value;
+    ErrCode ret = GetStringValueGlobal(key, value);
+    if (!value.empty()) {
+        POWER_HILOGI(COMP_UTILS, "the getValueGlobal is:%{public}s", value.c_str());
+    }
+    POWER_HILOGI(COMP_UTILS, "the getRetGlobal is:%{public}u", ret);
     return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
 }
 
@@ -298,6 +316,70 @@ Uri SettingProvider::AssembleUri(const std::string& key)
     }
     Uri uri(SETTING_URI_PROXY + "&key=" + key);
     return uri;
+}
+
+bool SettingProvider::IsNeedDataMigrationCopy()
+{
+    bool isNeedMigrationCopy = false;
+    if (IsValidKeyGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY)) {
+        if (!IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY)) {
+            isNeedMigrationCopy = true;
+        }
+    }
+    POWER_HILOGI(COMP_UTILS, "IsNeedDataMigrationCopy:(%{public}d)", isNeedMigrationCopy);
+    return isNeedMigrationCopy;
+}
+
+void SettingProvider::DataMigrationCopy()
+{
+    std::string value;
+    GetStringValueGlobal(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
+    PutStringValue(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
+    GetStringValueGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
+    PutStringValue(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
+    GetStringValueGlobal(SETTING_POWER_WAKEUP_SOURCES_KEY, value);
+    PutStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, value);
+}
+
+ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::string& value)
+{
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
+    if (helper == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_NO_INIT;
+    }
+    std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
+    Uri uri(SETTING_URI_PROXY + "&key=" + key);
+    auto resultSet = helper->Query(uri, predicates, columns);
+    ReleaseDataShareHelper(helper);
+    if (resultSet == nullptr) {
+        POWER_HILOGE(COMP_UTILS, "helper->Query return nullptr");
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t count;
+    resultSet->GetRowCount(count);
+    if (count == 0) {
+        POWER_HILOGW(COMP_UTILS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        resultSet->Close();
+        return ERR_NAME_NOT_FOUND;
+    }
+    const int32_t INDEX = 0;
+    resultSet->GoToRow(INDEX);
+    int32_t ret = resultSet->GetString(INDEX, value);
+    if (ret != NativeRdb::E_OK) {
+        POWER_HILOGW(COMP_UTILS, "resultSet->GetString return not ok, ret=%{public}d", ret);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        resultSet->Close();
+        return ERR_INVALID_VALUE;
+    }
+    resultSet->Close();
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
+    return ERR_OK;
 }
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)

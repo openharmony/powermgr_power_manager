@@ -328,6 +328,23 @@ HWTEST_F(PowerMgrUtilTest, SettingProvider005, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SettingProvider006
+ * @tc.desc: test CopyDataForUpdateScene func
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, SettingProvider006, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "SettingProvider006::fun is start!");
+    auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
+    settingProvider.CopyDataForUpdateScene();
+    static constexpr const char* SETTING_POWER_WAKEUP_PICKUP_KEY {"settings.power.wakeup_pick_up"};
+    bool isValidKeyGlobal = settingProvider.IsValidKeyGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY);
+    bool isValidKeyUser = settingProvider.IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY);
+    EXPECT_FALSE(isValidKeyGlobal && !isValidKeyUser);
+    POWER_HILOGD(LABEL_TEST, "SettingProvider006::fun is end!");
+}
+
+/**
  * @tc.name: Sysparam001
  * @tc.desc: test GetIntValue in proxy
  * @tc.type: FUNC
