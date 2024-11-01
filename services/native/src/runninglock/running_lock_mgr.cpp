@@ -203,6 +203,19 @@ void RunningLockMgr::InitLocksTypeProximity()
 }
 #endif
 
+void RunningLockMgr::AsyncWakeup()
+{
+    FFRTTask asyncWakeup = []() {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Coordination unlock wakeup device, pms is nullptr");
+            return;
+        }
+        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "EndCollaboration");
+    };
+    FFRTUtils::SubmitTask(asyncWakeup);
+}
+
 void RunningLockMgr::InitLocksTypeCoordination()
 {
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_COORDINATION,
@@ -237,8 +250,8 @@ void RunningLockMgr::InitLocksTypeCoordination()
                 stateAction->SetCoordinated(true);
             } else {
                 stateAction->SetCoordinated(false);
-                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
                 result = counter->Decrease(backgroundLockParam);
+                AsyncWakeup();
             }
             return result;
         })
