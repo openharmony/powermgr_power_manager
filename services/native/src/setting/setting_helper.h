@@ -31,6 +31,9 @@ public:
         ENABLE = 1,
     };
     static void UpdateCurrentUserId();
+#ifdef POWER_PICKUP_ENABLE
+    static void CopyDataForUpdateScene();
+#endif
     static void UnregisterSettingObserver(sptr<SettingObserver>& observer);
     static bool IsDisplayOffTimeSettingValid();
     static bool IsSuspendSourcesSettingValid();
