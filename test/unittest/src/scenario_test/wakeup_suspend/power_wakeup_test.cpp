@@ -101,6 +101,10 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
 
     sleep(2);
+    //wake it up when the screen goes off after timeout
+    g_service->RefreshActivity(
+        static_cast<int64_t>(std::chrono::system_clock::now().time_since_epoch().count()),
+            UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->RestoreScreenOffTime();
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: end");
