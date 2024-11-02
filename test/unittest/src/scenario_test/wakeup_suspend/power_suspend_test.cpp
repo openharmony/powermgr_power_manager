@@ -79,6 +79,10 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(2);
     // the second powerkey event would interrupt the transition to INACTIVE
+    //wake it up when the screen goes off after timeout
+    g_service->RefreshActivity(
+        static_cast<int64_t>(std::chrono::system_clock::now().time_since_epoch().count()),
+            UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
     EXPECT_TRUE(g_service->IsScreenOn());
 
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
