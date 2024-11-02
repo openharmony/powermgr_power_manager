@@ -26,7 +26,7 @@ extern "C" {
     FFI_EXPORT bool FfiOHOSRunningLockIsHolding(int64_t id, int32_t *ret);
     FFI_EXPORT void FfiOHOSRunningLockUnhold(int64_t id, int32_t *ret);
     FFI_EXPORT bool FfiOHOSRunningLockIsSupported(int32_t num_type, int32_t *ret);
-    FFI_EXPORT int64_t FfiOHOSRunningLockCreate(std::string name, int32_t num_type, int32_t *ret);
+    FFI_EXPORT int64_t FfiOHOSRunningLockCreate(char *name, int32_t num_type, int32_t *ret);
 }
 
 #endif // RUNNING_LOCK_FFI_H
