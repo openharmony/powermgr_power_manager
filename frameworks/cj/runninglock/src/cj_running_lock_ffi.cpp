@@ -65,7 +65,7 @@ bool FfiOHOSRunningLockIsSupported(int32_t num_type, int32_t *ret)
            (type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
 }
 
-int64_t FfiOHOSRunningLockCreate(std::string name, int32_t num_type, int32_t *ret)
+int64_t FfiOHOSRunningLockCreate(char *name, int32_t num_type, int32_t *ret)
 {
     auto native = FFI::FFIData::Create<CJRunningLock>(name, num_type);
     int64_t id = native->GetID();
