@@ -31,6 +31,9 @@ public:
         ENABLE = 1,
     };
     static void UpdateCurrentUserId();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    static void CopyDataForUpdateScene();
+#endif
     static bool IsDisplayOffTimeSettingValid();
     static int64_t GetSettingDisplayOffTime(int64_t defaultVal);
     static void SetSettingDisplayOffTime(int64_t time);
