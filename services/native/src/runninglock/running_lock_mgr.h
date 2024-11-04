@@ -73,7 +73,6 @@ public:
     void UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
     void ResetRunningLocks();
     bool IsUsed(const sptr<IRemoteObject>& remoteObj);
-    void AsyncWakeup();
     static constexpr uint32_t CHECK_TIMEOUT_INTERVAL_MS = 60 * 1000;
 #ifdef HAS_SENSORS_SENSOR_PART
     void SetProximity(uint32_t status);
@@ -83,6 +82,7 @@ public:
     void EnableMock(IRunningLockAction* mockAction);
 private:
 
+    void AsyncWakeup();
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
 #ifdef HAS_SENSORS_SENSOR_PART
