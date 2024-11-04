@@ -82,6 +82,7 @@ public:
     void EnableMock(IRunningLockAction* mockAction);
 private:
 
+    void AsyncWakeup();
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
 #ifdef HAS_SENSORS_SENSOR_PART
