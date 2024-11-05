@@ -2048,6 +2048,13 @@ void PowerMgrService::UnregisterAllSettingObserver()
         POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
         return;
     }
+    auto stateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    auto wakeupController = pms->GetWakeupController();
+    if (stateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get stateMachine, suspendController or wakeupController fail");
+        return;
+    }
 
 #ifdef POWER_DOUBLECLICK_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
@@ -2055,14 +2062,9 @@ void PowerMgrService::UnregisterAllSettingObserver()
 #ifdef POWER_PICKUP_ENABLE
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
-    pms->GetWakeupController()->UnregisterSettingsObserver();
+    wakeupController->UnregisterSettingsObserver();
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    pms->GetSuspendController()->UnregisterSettingsObserver();
-    auto stateMachine = pms->GetPowerStateMachine();
-    if (stateMachine == nullptr) {
-        POWER_HILOGE(COMP_SVC, "get PowerStateMachine fail");
-        return;
-    }
+    suspendController->UnregisterSettingsObserver();
     stateMachine->UnregisterDisplayOffTimeObserver();
 #endif
 }
