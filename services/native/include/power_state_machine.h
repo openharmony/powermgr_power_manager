@@ -289,12 +289,15 @@ private:
     class ScreenChangeCheck {
     public:
         ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
-        void Finish(TransitResult result);
+        ~ScreenChangeCheck() noexcept;
+        void SetReportTimerStartFlag(bool flag) const;
+        void ReportSysEvent(const std::string& msg) const;
+
     private:
-        void Report(const std::string &msg);
-        std::shared_ptr<FFRTTimer> timer_ {nullptr};
         pid_t pid_ {-1};
         pid_t uid_ {-1};
+        mutable bool isReportTimerStarted_ {false};
+        std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
         PowerState state_;
         StateChangeReason reason_;
     };
