@@ -161,6 +161,11 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::str
 bool SuspendSourceParser::ParseSourcesProc(
     std::shared_ptr<SuspendSources>& parseSources, Json::Value& valueObj, std::string& key)
 {
+    if (parseSources == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "parseSources is nullptr");
+        return false;
+    }
+
     SuspendDeviceType suspendDeviceType = SuspendSources::mapSuspendDeviceType(key);
     if (suspendDeviceType == SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN) {
         return false;
