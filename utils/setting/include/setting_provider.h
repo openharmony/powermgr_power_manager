@@ -40,6 +40,7 @@ public:
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);
     void UpdateCurrentUserId();
+    void CopyDataForUpdateScene();
 
 protected:
     ~SettingProvider() override;
@@ -69,6 +70,10 @@ private:
     static Uri AssembleUri(const std::string& key);
     static bool IsNeedMultiUser(const std::string& key);
     static std::string ReplaceUserIdForUri(int32_t userId);
+    bool IsNeedDataMigrationCopy();
+    void DataMigrationCopy();
+    ErrCode GetStringValueGlobal(const std::string& key, std::string& value);
+    bool IsValidKeyGlobal(const std::string& key);
 };
 } // namespace PowerMgr
 } // namespace OHOS

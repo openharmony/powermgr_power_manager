@@ -36,7 +36,13 @@ void SettingHelper::UpdateCurrentUserId()
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     settingProvider.UpdateCurrentUserId();
 }
-
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+void SettingHelper::CopyDataForUpdateScene()
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    settingProvider.CopyDataForUpdateScene();
+}
+#endif
 bool SettingHelper::IsWakeupPickupSettingValid()
 {
     return SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY);
