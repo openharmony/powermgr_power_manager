@@ -30,7 +30,7 @@ ohos_app("power_dialog_hap") {
   part_name = "prebuilt_hap"
   module_install_dir = "app/com.ohos.powerdialog"
 
-  js_build_mode = "debug"
+  js_build_mode = "release"
   sdk_home = "//prebuilts/ohos-sdk/linux"
   sdk_type_name = [ "sdk.dir" ]
   assemble_type = "assembleHap"
