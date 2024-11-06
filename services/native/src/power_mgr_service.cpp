@@ -154,6 +154,9 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
         SettingHelper::UpdateCurrentUserId();
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+        SettingHelper::CopyDataForUpdateScene();
+#endif
         power->SuspendControllerInit();
         power->WakeupControllerInit();
         power->SubscribeCommonEvent();
