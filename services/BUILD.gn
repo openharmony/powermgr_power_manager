@@ -137,7 +137,7 @@ ohos_shared_library("powermgrservice") {
     defines += [ "HAS_DISPLAY_MANAGER" ]
     external_deps += [
       "display_manager:displaymgr",
-      "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   }
 

@@ -19,7 +19,8 @@
 #include "iremote_broker.h"
 #include "power_common.h"
 #include "power_mgr_factory.h"
-#include "screen_manager.h"
+#include "screen_manager_lite.h"
+#include "parameters.h"
 
 #include <algorithm>
 #include <cinttypes>
@@ -181,7 +182,7 @@ void ShutdownController::PublishShutdownEvent() const
 void ShutdownController::TurnOffScreen()
 {
     POWER_HILOGD(FEATURE_SHUTDOWN, "Turn off screen before shutdown");
-    bool ret = Rosen::ScreenManager::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
+    bool ret = Rosen::ScreenManagerLite::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
         Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN);
     POWER_HILOGI(FEATURE_SHUTDOWN, "Turn off screen before shutting down, ret = %{public}d", ret);
 }
