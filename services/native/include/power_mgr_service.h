@@ -183,9 +183,7 @@ public:
     bool IsPowerConnected();
     void UpdateSettingInvalidDisplayOffTime();
 #endif
-#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
     void OnChargeStateChanged();
-#endif
 
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
@@ -341,14 +339,8 @@ private:
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsSupportSensor(SensorTypeId);
 #endif
-#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
-    void RegisterSwitchSuspendCallback();
-    void UnregisterSwitchSuspendCallback();
-#endif
-#ifdef POWER_MANAGER_ENABLE_USB_KEYBOARD_WAKEUP
-    void RegisterUsbKeyboardWakeupCallback();
-    void UnregisterUsbKeyboardWakeupCallback();
-#endif
+    void RegisterExternalCallback();
+    void UnregisterExternalCallback();
 
     bool ready_ {false};
     std::mutex wakeupMutex_;
