@@ -30,8 +30,6 @@ declare_args() {
   power_manager_feature_movement = true
   power_manager_feature_charging_type_setting = false
   power_manager_feature_external_screen_management = false
-  power_manager_feature_usb_keyboard_wakeup = false
-  power_manager_feature_switch_suspend = false
 }
 
 defines = []

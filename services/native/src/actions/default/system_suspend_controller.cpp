@@ -26,6 +26,7 @@ namespace PowerMgr {
 namespace {
 const std::string HDI_SERVICE_NAME = "power_interface_service";
 constexpr uint32_t RETRY_TIME = 1000;
+constexpr int32_t ERR_FAILED = -1;
 } // namespace
 using namespace OHOS::HDI::Power::V1_2;
 
@@ -224,6 +225,24 @@ void SystemSuspendController::GetWakeupReason(std::string& reason)
         return;
     }
     powerInterface_->GetWakeupReason(reason);
+}
+
+int32_t SystemSuspendController::SetPowerConfig(const std::string& sceneName, const std::string& value)
+{
+    if (powerInterface_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return ERR_FAILED;
+    }
+    return powerInterface_->SetPowerConfig(sceneName, value);
+}
+
+int32_t SystemSuspendController::GetPowerConfig(const std::string& sceneName, std::string& value)
+{
+    if (powerInterface_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return ERR_FAILED;
+    }
+    return powerInterface_->GetPowerConfig(sceneName, value);
 }
 
 int32_t SystemSuspendController::PowerHdfCallback::OnSuspend()
