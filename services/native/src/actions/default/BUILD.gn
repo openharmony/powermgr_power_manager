@@ -73,7 +73,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
     public_configs += [ ":powermgr_display_actions_impl_public_config" ]
     external_deps += [
       "display_manager:displaymgr",
-      "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   } else {
     sources += [ "display/default_device_state_action.cpp" ]

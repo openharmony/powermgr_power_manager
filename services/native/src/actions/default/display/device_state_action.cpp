@@ -137,7 +137,7 @@ bool DeviceStateAction::TryToCancelScreenOff()
         return true;
     }
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]calling TryToCancelScreenOff");
-    screenOffInterrupted_ = DisplayManager::GetInstance().TryToCancelScreenOff();
+    screenOffInterrupted_ = DisplayManagerLite::GetInstance().TryToCancelScreenOff();
     return screenOffInterrupted_;
 }
 
@@ -180,14 +180,14 @@ bool DeviceStateAction::IsInterruptingScreenOff(PowerStateChangeReason dispReaso
         } else {
             // Otherwise calls SuspendBegin before unblocking TryToCancelScreenOff to reduce the possibility for
             // TryToCancelScreenOff to fail.
-            DisplayManager::GetInstance().SuspendBegin(dispReason);
+            DisplayManagerLite::GetInstance().SuspendBegin(dispReason);
         }
         cancelScreenOffCvUnblocked_ = true;
         lock.unlock();
         cancelScreenOffCv_.notify_all();
     } else {
         // not in the process of a powerkey screen off, calls SuspendBegin as usual
-        DisplayManager::GetInstance().SuspendBegin(dispReason);
+        DisplayManagerLite::GetInstance().SuspendBegin(dispReason);
     }
     return ret;
 }
@@ -213,7 +213,7 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
             if (currentState == DisplayState::DISPLAY_OFF) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
-                DisplayManager::GetInstance().WakeUpBegin(dispReason);
+                DisplayManagerLite::GetInstance().WakeUpBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);
             }
             break;
@@ -276,14 +276,14 @@ void DeviceStateAction::DisplayPowerCallback::OnDisplayStateChanged(uint32_t dis
     switch (state) {
         case DisplayPowerMgr::DisplayState::DISPLAY_ON: {
             std::string identity = IPCSkeleton::ResetCallingIdentity();
-            DisplayManager::GetInstance().WakeUpEnd();
+            DisplayManagerLite::GetInstance().WakeUpEnd();
             IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_ON_DONE);
             break;
         }
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF: {
             std::string identity = IPCSkeleton::ResetCallingIdentity();
-            DisplayManager::GetInstance().SuspendEnd();
+            DisplayManagerLite::GetInstance().SuspendEnd();
             IPCSkeleton::SetCallingIdentity(identity);
             NotifyDisplayActionDone(DISPLAY_OFF_DONE);
             break;

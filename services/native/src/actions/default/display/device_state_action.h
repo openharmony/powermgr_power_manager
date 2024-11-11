@@ -17,7 +17,7 @@
 #define POWERMGR_DEVICE_STATE_ACTION_H
 
 #include "dm_common.h"
-#include "display_manager.h"
+#include "display_manager_lite.h"
 
 #include "actions/idevice_state_action.h"
 #include "display_power_callback_stub.h"
