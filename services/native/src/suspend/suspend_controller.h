@@ -93,8 +93,8 @@ private:
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
 
-    void TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks, const std::string& priority,
-        bool isWakeup);
+    void TriggerSyncSleepCallbackInner(
+        SleepCallbackHolder::SleepCallbackContainerType& callbacks, const std::string& priority, bool isWakeup);
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     std::vector<SuspendSource> sourceList_;
