@@ -102,8 +102,8 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
     }
 }
 
-void SuspendController::TriggerSyncSleepCallbackInner(std::set<sptr<ISyncSleepCallback>>& callbacks,
-    const std::string& priority, bool isWakeup)
+void SuspendController::TriggerSyncSleepCallbackInner(
+    SleepCallbackHolder::SleepCallbackContainerType& callbacks, const std::string& priority, bool isWakeup)
 {
     uint32_t id = 0;
     for (auto &callback : callbacks) {
