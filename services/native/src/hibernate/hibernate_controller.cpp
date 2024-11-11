@@ -14,6 +14,7 @@
  */
 
 #include "hibernate_controller.h"
+#include "power_log.h"
 #include "system_suspend_controller.h"
 
 namespace OHOS {
@@ -32,7 +33,10 @@ void HibernateController::RegisterSyncHibernateCallback(const sptr<ISyncHibernat
 void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    callbacks_.erase(cb);
+    size_t eraseNum = callbacks_.erase(cb);
+    if (eraseNum == 0) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Cannot remove the hibernate callback");
+    }
 }
 
 void HibernateController::PreHibernate() const
