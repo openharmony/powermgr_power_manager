@@ -43,19 +43,19 @@ void SleepCallbackHolder::AddCallback(const sptr<ISyncSleepCallback>& callback, 
     }
 }
 
-std::set<sptr<ISyncSleepCallback>> SleepCallbackHolder::GetHighPriorityCallbacks()
+SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetHighPriorityCallbacks()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return highPriorityCallbacks_;
 }
 
-std::set<sptr<ISyncSleepCallback>> SleepCallbackHolder::GetDefaultPriorityCallbacks()
+SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetDefaultPriorityCallbacks()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return defaultPriorityCallbacks_;
 }
 
-std::set<sptr<ISyncSleepCallback>> SleepCallbackHolder::GetLowPriorityCallbacks()
+SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetLowPriorityCallbacks()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return lowPriorityCallbacks_;
@@ -70,10 +70,11 @@ void SleepCallbackHolder::RemoveCallback(const sptr<ISyncSleepCallback>& callbac
 }
 
 void SleepCallbackHolder::RemoveCallback(
-    std::set<sptr<ISyncSleepCallback>>& callbacks, const sptr<ISyncSleepCallback>& callback)
+    SleepCallbackHolder::SleepCallbackContainerType& callbacks, const sptr<ISyncSleepCallback>& callback)
 {
     auto iter = callbacks.find(callback);
     if (iter == callbacks.end()) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Cannot find the sleep callback");
         return;
     }
     callbacks.erase(iter);
