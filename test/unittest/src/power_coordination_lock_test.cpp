@@ -46,6 +46,7 @@ constexpr int32_t RETRY_WAIT_TIME_MS = 100;
 constexpr int32_t WAIT_STATE_TIME_MS = 500;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_MS = 2000;
 constexpr int32_t OVER_TIME_SCREEN_OFF_TIME_TEST_MS = 2000 + 2000;
+constexpr int32_t WAIT_WAKEUP_TIME_MS = 800;
 constexpr int32_t WAIT_SUSPEND_TIME_MS = 2000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 bool g_screenOnEvent = false;
@@ -395,7 +396,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
 
     runninglock->UnLock();
     EXPECT_FALSE(runninglock->IsUsed());
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep((WAIT_EVENT_TIME_MS + WAIT_WAKEUP_TIME_MS) * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
     EXPECT_FALSE(g_inactiveCallback);
@@ -456,7 +457,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
 
     runninglock->UnLock();
     EXPECT_FALSE(runninglock->IsUsed());
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep((WAIT_EVENT_TIME_MS + WAIT_WAKEUP_TIME_MS) * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
     EXPECT_FALSE(g_inactiveCallback);
@@ -571,7 +572,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Lev
 
     runninglockTwo->UnLock();
     EXPECT_FALSE(runninglockTwo->IsUsed());
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep((WAIT_EVENT_TIME_MS + WAIT_WAKEUP_TIME_MS) * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
     EXPECT_FALSE(g_inactiveCallback);
@@ -624,7 +625,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
 
     runninglock->UnLock();
     EXPECT_FALSE(runninglock->IsUsed());
-    usleep(WAIT_EVENT_TIME_MS * US_PER_MS);
+    usleep((WAIT_EVENT_TIME_MS + WAIT_WAKEUP_TIME_MS) * US_PER_MS);
 
     EXPECT_FALSE(g_screenOffEvent);
     EXPECT_FALSE(g_inactiveCallback);
