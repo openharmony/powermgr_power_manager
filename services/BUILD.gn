@@ -220,6 +220,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
   }
 
+  if (power_manager_feature_block_long_press) {
+    defines += [ "POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS" ]
+  }
+
   if (factory == true) {
     defines += [ "CONFIG_FACTORY_MODE" ]
   }
