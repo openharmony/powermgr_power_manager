@@ -56,7 +56,8 @@ constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-constexpr uint32_t HIBERNATE_DELAY_MS = 5500;
+constexpr uint32_t POST_HIBERNATE_CLEARMEM_DELAY_US = 2000000;
+constexpr uint32_t HIBERNATE_DELAY_MS = 3500;
 static int64_t g_preHibernateStart = 0;
 #endif
 }
@@ -741,6 +742,9 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
         ret = false;
+    }
+    if (ret && clearMemory) {
+        usleep(POST_HIBERNATE_CLEARMEM_DELAY_US);
     }
     return ret;
 }
