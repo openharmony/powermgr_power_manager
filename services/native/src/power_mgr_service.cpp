@@ -100,7 +100,7 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
-    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
@@ -170,7 +170,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
-        power->SubscribeCommonEvent();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
@@ -680,10 +679,8 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s Add",
         systemAbilityId, deviceId.c_str());
-    if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            this->GetPowerModeModule().InitPowerMode();
-        }
+    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        SubscribeCommonEvent();
     }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
@@ -1963,6 +1960,7 @@ void PowerMgrService::SubscribeCommonEvent()
     using namespace OHOS::EventFwk;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
@@ -2096,6 +2094,7 @@ void PowerCommonEventSubscriber::OnPowerConnectStatusChanged(PowerConnectStatus 
 void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
+    POWER_HILOGI(COMP_SVC, "Power OnReceiveEvent:%{public}s", action.c_str());
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
@@ -2105,6 +2104,10 @@ void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEven
         pms->UnregisterAllSettingObserver();    // unregister old user observer
         SettingHelper::UpdateCurrentUserId();   // update user Id
         pms->RegisterAllSettingObserver();      // register new user observer
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY) {
+        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
+            pms->GetPowerModeModule().InitPowerMode();
+        }
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED) {
         OnPowerConnectStatusChanged(PowerConnectStatus::POWER_CONNECT_AC);
