@@ -77,7 +77,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
-    sleep(2);
+    sleep(4);
     // the second powerkey event would interrupt the transition to INACTIVE
     //wake it up when the screen goes off after timeout
     g_service->RefreshActivity(
@@ -110,7 +110,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
     auto inputManager = MMI::InputManager::GetInstance();
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
-    sleep(2);
+    sleep(4);
     EXPECT_FALSE(g_service->IsScreenOn());
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: end");
 }
