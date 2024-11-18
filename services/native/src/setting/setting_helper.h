@@ -105,6 +105,9 @@ public:
     static bool GetSettingWakeupLid(const std::string& key = SETTING_POWER_WAKEUP_LID_KEY);
     static void SetSettingWakeupLid(bool enable);
     static bool IsWakeupLidSettingValid();
+#ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
+    static const std::string GetBlockLongPress();
+#endif
 
 private:
     static bool IsSettingKeyValid(const std::string& key);
@@ -126,6 +129,10 @@ private:
 #else
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
+#endif
+
+#ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
+    static constexpr const char* SETTING_POWER_BLOCK_LONG_PRESS_KEY {"settings.power.block_long_press"};
 #endif
     static constexpr const char* SETTING_AUTO_ADJUST_BRIGHTNESS_KEY {"settings.display.auto_screen_brightness"};
     static constexpr const char* SETTING_BRIGHTNESS_KEY {"settings.display.screen_brightness_status"};

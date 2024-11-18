@@ -560,5 +560,18 @@ void SettingHelper::SetSettingWakeupLid(bool enable)
     int32_t value = enable ? WAKEUP_SOURCE_OPEN : WAKEUP_SOURCE_CLOSE;
     SetSettingIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
 }
+
+#ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
+const std::string SettingHelper::GetBlockLongPress()
+{
+    SettingProvider& SettingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    std::string longPress;
+    ErrCode ret = settingProvider.GetStringValue(SETTING_POWER_BLOCK_LONG_PRESS_KEY, longPress);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting power long press key failed, ret =%{public}d", ret);
+    }
+    return longPress;
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
