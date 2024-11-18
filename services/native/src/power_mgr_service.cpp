@@ -112,6 +112,7 @@ void PowerMgrService::OnStart()
         return;
     }
     ready_ = true;
+    system::SetParameter("bootevent.powermgr.ready", "true");
     POWER_HILOGI(COMP_SVC, "Add system ability success");
 }
 
