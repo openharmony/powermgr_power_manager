@@ -36,6 +36,10 @@
 #include "power_mgr_service.h"
 #include "power_vibrator.h"
 
+#ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
+#include "setting_helper.h"
+#endif
+
 using namespace OHOS::MMI;
 using namespace OHOS::AAFwk;
 
@@ -52,6 +56,9 @@ std::atomic_bool g_longPressShow = false;
 int32_t g_retryCount = 1;
 sptr<IRemoteObject> g_remoteObject = nullptr;
 const std::string DIALOG_CONFIG_PATH = "etc/systemui/poweroff_config.json";
+#ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
+const std::string BLOCK_LONG_PRESS = "1";
+#endif
 } // namespace
 
 std::string ShutdownDialog::bundleName_ = "com.ohos.powerdialog";
@@ -81,6 +88,14 @@ void ShutdownDialog::KeyMonitorInit()
     longPressId_ =
         InputManager::GetInstance()->SubscribeKeyEvent(keyOption, [this](std::shared_ptr<KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_SHUTDOWN, "Receive long press powerkey");
+#ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
+            //If the power button is shielded, the shutdown screen is not displayed.
+            auto longPress = SettingHelper::GetBlockLongPress();
+            if (longPress == BLOCK_LONG_PRESS) {
+                POWER_HILOGI(FEATURE_SHUTDOWN, "need block power.");
+                return;
+            }
+#endif
             ConnectSystemUi();
             StartVibrator();
         });
