@@ -96,9 +96,9 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
     keyEventKeyboard->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     keyEventKeyboard->SetKeyCode(MMI::KeyEvent::KEYCODE_0);
 
-    inputManager->SimulateInputEvent(keyEventKeyboard);
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
+    inputManager->SimulateInputEvent(keyEventKeyboard);
 
     sleep(2);
     //wake it up when the screen goes off after timeout
