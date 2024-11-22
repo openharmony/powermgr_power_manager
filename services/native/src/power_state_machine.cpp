@@ -530,7 +530,7 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
 
     StateChangeReason reason = GetReasonByWakeType(type);
     if (!timeoutTriggered && IsPreBrightAuthReason(reason)) {
-        POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+        POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
             PowerUtils::GetReasonTypeString(reason).c_str());
         CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
     }
@@ -1662,11 +1662,11 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
                     detail, pkgName, true);
             };
             if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
-                POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+                POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
                     PowerUtils::GetReasonTypeString(reason).c_str());
                 CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
             }
-            POWER_HILOGD(FEATURE_POWER_STATE, "Start pre-bright-auth timer");
+            POWER_HILOGI(FEATURE_POWER_STATE, "Start pre-bright-auth timer");
             ffrtTimer_->SetTimer(TIMER_ID_PRE_BRIGHT_AUTH, authFailTask, PRE_BRIGHT_AUTH_TIMER_DELAY_MS);
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_STARTED, std::memory_order_relaxed);
             ret = true;
@@ -1676,9 +1676,10 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_FINISHED, std::memory_order_relaxed);
             ret = true;
         }
+        POWER_HILOGW(FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling pright auth result");
     } else {
         if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
-            POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+            POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
             CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
         }
@@ -1741,10 +1742,6 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     }
 
     HandleProximityScreenOffTimer(state, reason);
-    if (!HandlePreBrightState(reason)) {
-        return false;
-    }
-
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
@@ -2046,6 +2043,11 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         RecordFailure(owner->currentState_, reason, TransitResult::LOCKING);
         return TransitResult::LOCKING;
     }
+
+    if (!owner->HandlePreBrightState(reason)) {
+        return TransitResult::PRE_BRIGHT_ERR;
+    }
+
     TransitResult ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
         bool needNotify = NeedNotify(owner->currentState_);

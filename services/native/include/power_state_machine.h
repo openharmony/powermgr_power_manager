@@ -61,6 +61,7 @@ enum class TransitResult {
     DISPLAY_ON_ERR = 4,
     DISPLAY_OFF_ERR = 5,
     FORBID_TRANSIT = 6,
+    PRE_BRIGHT_ERR = 7,
     OTHER_ERR = 99
 };
 
