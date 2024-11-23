@@ -1893,6 +1893,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR:
             ret = StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH:
+            ret = StateChangeReason::STATE_CHANGE_REASON_TP_TOUCH;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;
@@ -1937,6 +1940,9 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND:
             ret = StateChangeReason::STATE_CHANGE_REASON_SYSTEM;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER:
+            ret = StateChangeReason::STATE_CHANGE_REASON_TP_COVER;
             break;
         default:
             break;

@@ -685,6 +685,9 @@ const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSourc
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH:
             monitor = std::static_pointer_cast<SuspendMonitor>(std::make_shared<SwitchSuspendMonitor>(source));
             break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER:
+            monitor = std::static_pointer_cast<SuspendMonitor>(std::make_shared<TPCoverSuspendMonitor>(source));
+            break;
         default:
             POWER_HILOGE(FEATURE_SUSPEND, "CreateMonitor : Invalid reason=%{public}d", reason);
             break;
@@ -824,5 +827,47 @@ bool SwitchSuspendMonitor::Init()
 }
 
 void SwitchSuspendMonitor::Cancel() {}
+
+/** TPCoverSuspendMonitor Implement */
+
+bool TPCoverSuspendMonitor::Init()
+{
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    if (TPCoverReleaseId_ >= 0) {
+        return true;
+    }
+    std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+    std::set<int32_t> preKeys;
+    keyOption->SetPreKeys(preKeys);
+    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_SLEEP);
+    keyOption->SetFinalKeyDownDuration(0);
+    std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
+    TPCoverReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
+        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            std::shared_ptr<TPCoverSuspendMonitor> strong = weak.lock();
+            if (!strong) {
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] TPCoverSuspendMonitor is invaild, return");
+                return;
+            }
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
+            strong->Notify();
+        });
+    POWER_HILOGI(FEATURE_SUSPEND, "TPCoverReleaseId_=%{public}d", TPCoverReleaseId_);
+    return TPCoverReleaseId_ >= 0 ? true : false;
+#else
+    return false;
+#endif
+}
+
+void TPCoverSuspendMonitor::Cancel()
+{
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    if (TPCoverReleaseId_ >= 0) {
+        POWER_HILOGI(FEATURE_SUSPEND, "UnsubscribeKeyEvent: TPCoverSuspendMonitor");
+        InputManager::GetInstance()->UnsubscribeKeyEvent(TPCoverReleaseId_);
+        TPCoverReleaseId_ = -1;
+    }
+#endif
+}
 } // namespace PowerMgr
 } // namespace OHOS

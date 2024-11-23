@@ -242,6 +242,14 @@ public:
     void Cancel() override;
 };
 
+class TPTouchWakeupMonitor : public WakeupMonitor {
+public:
+    explicit TPTouchWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
+    ~TPTouchWakeupMonitor() override = default;
+    bool Init() override;
+    void Cancel() override;
+};
+
 } // namespace PowerMgr
 } // namespace OHOS
 

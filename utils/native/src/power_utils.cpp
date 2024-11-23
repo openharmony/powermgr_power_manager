@@ -97,6 +97,10 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("PICKUP");
         case StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR:
             return std::string("EXIT_SYSTEM_STR");
+        case StateChangeReason::STATE_CHANGE_REASON_TP_TOUCH:
+            return std::string("TP_TOUCH");
+        case StateChangeReason::STATE_CHANGE_REASON_TP_COVER:
+            return std::string("TP_COVER");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:

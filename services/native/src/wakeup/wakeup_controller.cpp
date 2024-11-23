@@ -569,6 +569,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK;
     } else if (keyCode == KeyEvent::KEYCODE_STYLUS_SCREEN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
+    } else if (keyCode == KeyEvent::KEYCODE_WAKEUP) {
+        wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH;
     }
 
     if (isKeyboardKeycode(keyCode)) {
@@ -782,6 +784,9 @@ std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source
         case WakeupDeviceType::WAKEUP_DEVICE_PICKUP:
             monitor = std::static_pointer_cast<WakeupMonitor>(std::make_shared<PickupWakeupMonitor>(source));
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH:
+            monitor = std::static_pointer_cast<WakeupMonitor>(std::make_shared<TPTouchWakeupMonitor>(source));
+            break;
         default:
             POWER_HILOGE(FEATURE_WAKEUP, "CreateMonitor : Invalid reason=%{public}d", reason);
             break;
@@ -921,5 +926,14 @@ bool PickupWakeupMonitor::Init()
 }
 
 void PickupWakeupMonitor::Cancel() {}
+
+/** TPTouchWakeupMonitor Implement */
+
+bool TPTouchWakeupMonitor::Init()
+{
+    return true;
+}
+
+void TPTouchWakeupMonitor::Cancel() {}
 } // namespace PowerMgr
 } // namespace OHOS
