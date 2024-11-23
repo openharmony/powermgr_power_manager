@@ -14,5 +14,9 @@
     "switch": {
         "action": 1,
         "delayMs": 0
+    },
+    "tp_cover": {
+        "action": 1,
+        "delayMs": 0
     }
 }

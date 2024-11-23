@@ -61,6 +61,10 @@ WakeupDeviceType WakeupSources::mapWakeupDeviceType(const std::string& key, uint
         return WakeupDeviceType::WAKEUP_DEVICE_PICKUP;
     }
 
+    if (key == WakeupSources::TP_TOUCH_KEY) {
+        return WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH;
+    }
+
     return WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
 }
 

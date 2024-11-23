@@ -26,5 +26,8 @@
     },
     "pickup": {
         "enable": false
+    },
+    "tp_touch": {
+        "enable": true
     }
 }
