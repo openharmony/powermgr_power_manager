@@ -241,11 +241,6 @@ public:
         powerStateMachine_->SetSleepTime(time);
     }
 
-    inline PowerModeModule& GetPowerModeModule()
-    {
-        return powerModeModule_;
-    }
-    
     void EnableMock(IDeviceStateAction* powerState, IDeviceStateAction* shutdownState, IDevicePowerAction* powerAction,
         IRunningLockAction* lockAction)
     {
@@ -325,6 +320,11 @@ private:
         std::string interfaceName_;
         CallbackType callback_;
     };
+
+    inline PowerModeModule& GetPowerModeModule()
+    {
+        return powerModeModule_;
+    }
 
     bool Init();
     bool PowerStateMachineInit();
