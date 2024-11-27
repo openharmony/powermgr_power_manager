@@ -29,13 +29,13 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
     g_powerState = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
     g_service->EnableMock(g_powerState, g_shutdownState, g_powerAction, g_lockAction);
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:End");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:End");
 }
 
 void PowerMgrMockSystemTest::SetUpTestCase(void)
@@ -62,19 +62,19 @@ void PowerMgrMockSystemTest::TearDown(void)
 
 namespace {
 /**
- * @tc.name: PowerMgrMock106
+ * @tc.name: PowerMgrMock001
  * @tc.desc: test proximity RunningLock by mock
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
+HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock001, TestSize.Level2)
 {
-    GTEST_LOG_(INFO) << "PowerMgrMock106: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:Start");
+    GTEST_LOG_(INFO) << "PowerMgrMock001: start";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMock106: Failed to get PowerMgrService";
+        GTEST_LOG_(INFO) << "PowerMgrMock001: Failed to get PowerMgrService";
     }
 
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -87,7 +87,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock106, TestSize.Level2)
     pms->UnLock(token);
 #endif
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock106:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock106: end";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End");
+    GTEST_LOG_(INFO) << "PowerMgrMock001: end";
 }
 }

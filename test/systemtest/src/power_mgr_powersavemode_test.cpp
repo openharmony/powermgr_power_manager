@@ -47,9 +47,12 @@ std::string g_action = "";
 constexpr int64_t TIME_OUT = 1;
 } // namespace
 
+static uint32_t g_i = 0;
+static int g_judgeNum = 2;
+
 void PowerMgrPowerSavemodeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
 }
 
 void PowerMgrPowerSavemodeTest::SetUpTestCase(void)
@@ -69,15 +72,15 @@ namespace {
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_001: SetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_001 start.");
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_001 fail to SetDeviceMode";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_001 end.");
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_001 fail to SetDeviceMode";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_001 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_001: SetDeviceMode end.";
 }
 
@@ -90,14 +93,14 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_001, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_002, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_002 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = PowerMode::PERFORMANCE_MODE;
-    PowerMode mode1 = PowerMode::PERFORMANCE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_002 fail to SetDeviceMode";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_002 end.");
+    PowerMode modeFirst = PowerMode::PERFORMANCE_MODE;
+    PowerMode modeSecond = PowerMode::PERFORMANCE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_002 fail to SetDeviceMode";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_002 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode end.";
 }
 
@@ -110,14 +113,14 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_002, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_003, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_003: SetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_003 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::EXTREME_POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_003 fail to SetDeviceMode";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_003 end.");
+    PowerMode modeFirst = PowerMode::EXTREME_POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::EXTREME_POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_003 fail to SetDeviceMode";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_003 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_003: SetDeviceMode end.";
 }
 
@@ -130,14 +133,15 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_003, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_004, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_004: SetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_004 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_004 start.");
+    int PARM_ONE = 1;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = static_cast<PowerMode>(1);
-    PowerMode mode1 = static_cast<PowerMode>(1);
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_NE(mode, mode1) << "PowerSavemode_004 fail to SetDeviceMode abnormal";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_004 end.");
+    PowerMode modeFirst = static_cast<PowerMode>(PARM_ONE);
+    PowerMode modeSecond = static_cast<PowerMode>(PARM_ONE);
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_NE(modeFirst, modeSecond) << "PowerSavemode_004 fail to SetDeviceMode abnormal";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_004 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_004: SetDeviceMode end.";
 }
 
@@ -150,16 +154,16 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_004, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_005, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_005: SetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_005 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_005 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::EXTREME_POWER_SAVE_MODE;
+    PowerMode modeFirst = PowerMode::EXTREME_POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::EXTREME_POWER_SAVE_MODE;
     for (int i = 0; i < 100; i++) {
-        powerMgrClient.SetDeviceMode(mode);
+        powerMgrClient.SetDeviceMode(modeFirst);
     }
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_005 fail to SetDeviceMode";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_005 end.");
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_005 fail to SetDeviceMode";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_005 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_005: SetDeviceMode end.";
 }
 
@@ -172,13 +176,14 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_005, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_006, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_006: GetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_006 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_006 start.");
+    int PARM_ZERO = 0;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = static_cast<PowerMode>(0);
-    PowerMode mode1 = PowerMode::NORMAL_MODE;
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_NE(mode, mode1) << "PowerSavemode_006 fail to GetDeviceMode";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_006 end.");
+    PowerMode modeFirst = static_cast<PowerMode>(PARM_ZERO);
+    PowerMode modeSecond = PowerMode::NORMAL_MODE;
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_NE(modeFirst, modeSecond) << "PowerSavemode_006 fail to GetDeviceMode";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_006 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_006: GetDeviceMode end.";
 }
 
@@ -191,16 +196,16 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_006, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_007, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_007: GetDeviceMode start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_007 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_007 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
     for (int i = 0; i < 100; i++) {
-        mode = powerMgrClient.GetDeviceMode();
+        modeFirst = powerMgrClient.GetDeviceMode();
     }
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_007 fail to GetDeviceMode";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_007 start.");
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_007 fail to GetDeviceMode";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_007 start.");
     GTEST_LOG_(INFO) << "PowerSavemode_007: GetDeviceMode end.";
 }
 
@@ -213,16 +218,16 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_007, TestSize.Level2)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_008, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_008: RegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_008 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_008 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
-    powerMgrClient.RegisterPowerModeCallback(cb1);
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_008 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_008 end.");
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
+    powerMgrClient.RegisterPowerModeCallback(callBack);
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_008 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_008 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_008: RegisterPowerModeCallback end.";
 }
 
@@ -235,17 +240,18 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_008, TestSize.Level0)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_009, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_009: RegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_009 Start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_009 Start.");
+    int PARM_ONE = 1;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
-    powerMgrClient.RegisterPowerModeCallback(cb1);
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
+    powerMgrClient.RegisterPowerModeCallback(callBack);
 
-    PowerMode mode = static_cast<PowerMode>(1);
-    PowerMode mode1 = static_cast<PowerMode>(1);
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_NE(mode, mode1) << "PowerSavemode_009 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_009 end.");
+    PowerMode modeFirst = static_cast<PowerMode>(PARM_ONE);
+    PowerMode modeSecond = static_cast<PowerMode>(PARM_ONE);
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_NE(modeFirst, modeSecond) << "PowerSavemode_009 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_009 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_009: RegisterPowerModeCallback end.";
 }
 
@@ -258,18 +264,18 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_009, TestSize.Level0)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_010, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_010: RegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_010 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_010 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
     for (int i = 0; i < 100; i++) {
-        powerMgrClient.RegisterPowerModeCallback(cb1);
+        powerMgrClient.RegisterPowerModeCallback(callBack);
     }
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_010 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_010 end.");
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_010 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_010 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_010: RegisterPowerModeCallback end.";
 }
 
@@ -282,16 +288,16 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_010, TestSize.Level0)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_011, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_011: UnRegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_011 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_011 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
-    powerMgrClient.UnRegisterPowerModeCallback(cb1);
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_011 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_011 end.");
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
+    powerMgrClient.UnRegisterPowerModeCallback(callBack);
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_011 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_011 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_011: UnRegisterPowerModeCallback end.";
 }
 
@@ -304,16 +310,17 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_011, TestSize.Level0)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_012, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_012: UnRegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_012 UnRegisterPowerModeCallback start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_012 UnRegisterPowerModeCallback start.");
+    int PARM_ONE = 1;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
-    powerMgrClient.UnRegisterPowerModeCallback(cb1);
-    PowerMode mode = static_cast<PowerMode>(1);
-    PowerMode mode1 = static_cast<PowerMode>(1);
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_NE(mode, mode1) << "PowerSavemode_012 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_012 UnRegisterPowerModeCallback end.");
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
+    powerMgrClient.UnRegisterPowerModeCallback(callBack);
+    PowerMode modeFirst = static_cast<PowerMode>(PARM_ONE);
+    PowerMode modeSecond = static_cast<PowerMode>(PARM_ONE);
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_NE(modeFirst, modeSecond) << "PowerSavemode_012 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_012 UnRegisterPowerModeCallback end.");
     GTEST_LOG_(INFO) << "PowerSavemode_012: UnRegisterPowerModeCallback end.";
 }
 
@@ -326,19 +333,18 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_012, TestSize.Level0)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_013, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_013: UnRegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_013 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_013 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    const sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
     for (int i = 0; i < 100; i++) {
-        powerMgrClient.UnRegisterPowerModeCallback(cb1);
+        powerMgrClient.UnRegisterPowerModeCallback(callBack);
     }
-
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    mode = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode, mode1) << "PowerSavemode_013 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_013 end.");
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    PowerMode modeSecond = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeFirst, modeSecond) << "PowerSavemode_013 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_013 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_013: UnRegisterPowerModeCallback end.";
 }
 } // namespace
@@ -346,22 +352,19 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_013, TestSize.Level0)
 PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::CommonEventServiCesSystemTest(
     const CommonEventSubscribeInfo& subscriberInfo) : CommonEventSubscriber(subscriberInfo)
 {
-    POWER_HILOGD(LABEL_TEST, "subscribe.");
+    POWER_HILOGI(LABEL_TEST, "CommonEventSubscriber.");
 }
-
-static uint32_t g_i = 0;
-static int g_judgeNum = 2;
 
 void PowerMgrPowerSavemodeTest::CommonEventServiCesSystemTest::OnReceiveEvent(const CommonEventData& data)
 {
     std::string action = data.GetWant().GetAction();
     if (action == CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED) {
-        POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
+        POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
         g_i = g_judgeNum;
     }
     uint32_t j = 2;
     EXPECT_EQ(g_i, j) << "PowerSavemode_022 fail to PowerModeCallback";
-    POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
+    POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
 }
 
 class CommonEventSaveModeTest : public EventFwk::CommonEventSubscriber {
@@ -411,7 +414,7 @@ namespace {
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_014, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_014: UnRegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_014 UnRegisterPowerModeCallback start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_014 UnRegisterPowerModeCallback start.");
     bool result = false;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
@@ -424,7 +427,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_014, TestSize.Level0)
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_014 UnRegisterPowerModeCallback end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_014 UnRegisterPowerModeCallback end.");
     GTEST_LOG_(INFO) << "PowerSavemode_014: UnRegisterPowerModeCallback end.";
 }
 
@@ -437,7 +440,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_014, TestSize.Level0)
 HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_015, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_015: UnRegisterPowerModeCallback start.";
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_015 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_015 start.");
     bool result = false;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
@@ -449,8 +452,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_015, TestSize.Level0)
     PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
-    POWER_HILOGD(LABEL_TEST, "PowerSavemode_015 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_015 end.");
     GTEST_LOG_(INFO) << "PowerSavemode_015: UnRegisterPowerModeCallback start.";
 }
-
 } // namespace

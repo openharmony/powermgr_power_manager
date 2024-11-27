@@ -36,49 +36,49 @@ using namespace std;
 
 void PowerDeviceModeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
 }
 
 void PowerDeviceModeTest::PowerModeTest2Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest2Callback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTest2Callback::OnPowerModeChanged.");
 }
 
 namespace {
 /**
- * @tc.name: PowerStateCallback001
+ * @tc.name: PowerDeviceModeCallback001
  * @tc.desc: test PowerStateCallback
  * @tc.type: FUNC
  */
 HWTEST_F (PowerDeviceModeTest, PowerDeviceModeCallback001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerDeviceModeTest::PowerDeviceModeCallback001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerDeviceModeTest::PowerDeviceModeCallback001 start.");
     bool ret = 0;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
-    ret = powerMgrClient.RegisterPowerModeCallback(cb1);
+    sptr<IPowerModeCallback> callBackFirst = new PowerModeTest1Callback();
+    ret = powerMgrClient.RegisterPowerModeCallback(callBackFirst);
     EXPECT_TRUE(ret);
     ret = 0;
-    POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 1.");
+    POWER_HILOGI(LABEL_TEST, "PowerDeviceModeCallback001 1.");
     {
-        sptr<IPowerModeCallback> cb2 = new PowerModeTest2Callback();
-        ret = powerMgrClient.UnRegisterPowerModeCallback(cb2);
+        sptr<IPowerModeCallback> callBackSecond = new PowerModeTest2Callback();
+        ret = powerMgrClient.UnRegisterPowerModeCallback(callBackSecond);
         EXPECT_TRUE(ret);
         ret = 0;
-        POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 2.");
-        ret = powerMgrClient.RegisterPowerModeCallback(cb2);
+        POWER_HILOGI(LABEL_TEST, "PowerDeviceModeCallback001 2.");
+        ret = powerMgrClient.RegisterPowerModeCallback(callBackSecond);
         EXPECT_TRUE(ret);
         ret = 0;
-        POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 3.");
-        ret = powerMgrClient.RegisterPowerModeCallback(cb2);
+        POWER_HILOGI(LABEL_TEST, "PowerDeviceModeCallback001 3.");
+        ret = powerMgrClient.RegisterPowerModeCallback(callBackSecond);
         EXPECT_TRUE(ret);
         ret = 0;
-        POWER_HILOGD(LABEL_TEST, "PowerDeviceModeCallback001 4.");
+        POWER_HILOGI(LABEL_TEST, "PowerDeviceModeCallback001 4.");
     }
-    ret = powerMgrClient.UnRegisterPowerModeCallback(cb1);
+    ret = powerMgrClient.UnRegisterPowerModeCallback(callBackFirst);
     EXPECT_TRUE(ret);
     ret = 0;
-    POWER_HILOGD(LABEL_TEST, "PowerDeviceModeTest::PowerDeviceModeCallback001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerDeviceModeTest::PowerDeviceModeCallback001 end.");
 }
 
 /**
@@ -88,17 +88,17 @@ HWTEST_F (PowerDeviceModeTest, PowerDeviceModeCallback001, TestSize.Level0)
  */
 HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "SetDeviceModeTest001 start");
+    POWER_HILOGI(LABEL_TEST, "SetDeviceModeTest001 start");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "SetDeviceModeTest001: SetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
-    PowerMode mode1 = powerMgrClient.GetDeviceMode();
-    PowerMode mode = PowerMode::POWER_SAVE_MODE;
-    powerMgrClient.SetDeviceMode(mode);
-    EXPECT_EQ(powerMgrClient.GetDeviceMode(), mode);
-    powerMgrClient.SetDeviceMode(mode1);
-    POWER_HILOGD(LABEL_TEST, "SetDeviceModeTest001 end");
+    PowerMode modeSecond = powerMgrClient.GetDeviceMode();
+    PowerMode modeFirst = PowerMode::POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(modeFirst);
+    EXPECT_EQ(powerMgrClient.GetDeviceMode(), modeFirst);
+    powerMgrClient.SetDeviceMode(modeSecond);
+    POWER_HILOGI(LABEL_TEST, "SetDeviceModeTest001 end");
     GTEST_LOG_(INFO) << "SetDeviceModeTest001: SetDeviceMode end.";
 }
 
@@ -109,19 +109,19 @@ HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
  */
 HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "GetDeviceModeTest001 start");
-    PowerMode mode = PowerMode::NORMAL_MODE;
-    PowerMode mode1 = PowerMode::NORMAL_MODE;
-    PowerMode mode2 = PowerMode::NORMAL_MODE;
+    POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 start");
+    PowerMode modeFirst = PowerMode::NORMAL_MODE;
+    PowerMode modeSecond = PowerMode::NORMAL_MODE;
+    PowerMode modeThird = PowerMode::NORMAL_MODE;
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    mode = powerMgrClient.GetDeviceMode();
+    modeFirst = powerMgrClient.GetDeviceMode();
 
-    powerMgrClient.SetDeviceMode(mode1);
-    mode2 = powerMgrClient.GetDeviceMode();
-    EXPECT_EQ(mode1, mode2);
-    powerMgrClient.SetDeviceMode(mode);
-    POWER_HILOGD(LABEL_TEST, "GetDeviceModeTest001 end");
+    powerMgrClient.SetDeviceMode(modeSecond);
+    modeThird = powerMgrClient.GetDeviceMode();
+    EXPECT_EQ(modeSecond, modeThird);
+    powerMgrClient.SetDeviceMode(modeFirst);
+    POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 end");
 }
 }

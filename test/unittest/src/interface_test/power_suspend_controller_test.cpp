@@ -58,11 +58,11 @@ public:
     {
         auto controller = controller_.lock();
         if (controller == nullptr) {
-            POWER_HILOGD(FEATURE_SUSPEND, "OnPowerStateChanged: No controller");
+            POWER_HILOGI(FEATURE_SUSPEND, "OnPowerStateChanged: No controller");
             return;
         }
         if (state == PowerState::AWAKE) {
-            POWER_HILOGD(FEATURE_SUSPEND, "Turn awake, stop sleep timer");
+            POWER_HILOGI(FEATURE_SUSPEND, "Turn awake, stop sleep timer");
             controller->StopSleep();
         }
     }
@@ -80,6 +80,7 @@ namespace {
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest001 start.");
     GTEST_LOG_(INFO) << "PowerSuspend001: start";
     g_service->SuspendControllerInit();
     g_service->WakeupControllerInit();
@@ -89,6 +90,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest001, TestSize.Lev
     auto controller = callback->controller_.lock();
     EXPECT_EQ(controller, nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest001:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest001 end.");
 }
 
 /**
@@ -99,6 +101,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest001, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest002, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest002 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest002: start";
     sleep(SLEEP_WAIT_TIME_S);
     g_service->SuspendControllerInit();
@@ -106,6 +109,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest002, TestSize.Lev
     auto monitor = g_service->suspendController_->monitorMap_[SuspendDeviceType ::SUSPEND_DEVICE_REASON_POWER_KEY];
     EXPECT_TRUE(monitor != nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest002:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest002 end.");
 }
 
 /**
@@ -116,12 +120,13 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest002, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest003, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest003 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest003: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->RegisterSettingsObserver();
     EXPECT_TRUE(g_service->suspendController_ != nullptr);
-
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest003:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest003 end.");
 }
 
 /**
@@ -132,11 +137,13 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest003, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest004, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest004 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest004: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->Execute();
     EXPECT_TRUE(g_service->suspendController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest004:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest004 end.");
 }
 
 /**
@@ -147,13 +154,14 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest004, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest005, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest005 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest005: start";
     g_service->SuspendControllerInit();
-
     SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_STR, 1, 0);
     std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(source);
     EXPECT_TRUE(monitor == nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest005:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest005 end.");
 }
 
 /**
@@ -164,6 +172,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest005, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest006, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest006 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest006: start";
     g_service->SuspendControllerInit();
     std::string key = " ";
@@ -171,6 +180,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest006, TestSize.Lev
     EXPECT_TRUE(static_cast<uint32_t>(suspendDeviceType) ==
         static_cast<uint32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN));
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest006:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest006 end.");
 }
 
 /**
@@ -181,16 +191,16 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest006, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest007, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest007 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest007: start";
-
     g_service->SuspendControllerInit();
     g_service->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
     g_service->suspendController_->RecordPowerKeyDown();
     EXPECT_TRUE(
         g_service->suspendController_->stateMachine_->stateAction_->GetDisplayState() == DisplayState::DISPLAY_OFF);
     g_service->suspendController_->powerkeyDownWhenScreenOff_ = false;
-    
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest007:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest007 end.");
 }
 
 /**
@@ -201,6 +211,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest007, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest008, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest008 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest008: start";
 
     g_service->SuspendControllerInit();
@@ -208,6 +219,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest008, TestSize.Lev
     EXPECT_TRUE(powerKeyDown == false);
 
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest008:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest008 end.");
 }
 
 /**
@@ -218,6 +230,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest008, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest009: start";
 
     g_service->SuspendControllerInit();
@@ -246,6 +259,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Lev
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::FREEZE);
 
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest009:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009 end.");
 }
 
 /**
@@ -256,6 +270,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest010, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest010 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest010: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->HandleAction(
@@ -264,6 +279,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest010, TestSize.Lev
         static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest010:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest010 end.");
 }
 
 /**
@@ -274,6 +290,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest010, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest011 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest011: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->stateMachine_->controllerMap_.clear();
@@ -281,6 +298,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011, TestSize.Lev
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP);
     g_service->suspendController_->stateMachine_->InitStateMap();
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest011:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest011 end.");
 }
 
 /**
@@ -291,6 +309,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest012: start";
     g_service->SuspendControllerInit();
     g_service->suspendController_->stateMachine_->controllerMap_.clear();
@@ -299,6 +318,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012, TestSize.Lev
     g_service->suspendController_->stateMachine_->InitStateMap();
 
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest012:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012 end.");
 }
 
 /**
@@ -309,10 +329,12 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest013, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest013 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest013: start";
     g_service->SuspendControllerInit();
     EXPECT_TRUE(g_service->suspendController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest013:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest013 end.");
 }
 
 /**
@@ -323,10 +345,12 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest013, TestSize.Lev
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest014, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest014 start.");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest014: start";
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources();
     std::vector<std::string> tmp = sources->getSourceKeys();
     EXPECT_TRUE(tmp.size() != 0);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest014:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest014 end.");
 }
 } // namespace

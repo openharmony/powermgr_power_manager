@@ -51,7 +51,7 @@ namespace {
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework001 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework001: test system-level sleep level enumeration is start";
     EXPECT_TRUE(static_cast<uint32_t>(PowerState::AWAKE) == AWAKE) << "PowerState AWAKE correct";
     EXPECT_TRUE(static_cast<uint32_t>(PowerState::FREEZE) == FREEZE) << "PowerState FREEZE correct";
@@ -62,7 +62,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework001, TestSize.Le
     EXPECT_TRUE(static_cast<uint32_t>(PowerState::HIBERNATE) == HIBERNATE) << "PowerState HIBERNATE correct";
     EXPECT_TRUE(static_cast<uint32_t>(PowerState::SHUTDOWN) == SHUTDOWN) << "PowerState HIBERNATE correct";
     GTEST_LOG_(INFO) << "PowerStateLevelFramework001: test system-level sleep level enumeration is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework001 end.");
 }
 
 /**
@@ -73,13 +73,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework001, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework002, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework002 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework002: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::AWAKE);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework002: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework002 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework002 end.");
 }
 
 /**
@@ -90,13 +90,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework002, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework003, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework003 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework003: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::FREEZE);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework003: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework003 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework003 end.");
 }
 
 /**
@@ -107,13 +107,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework003, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework004, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework004 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework004 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework004: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::INACTIVE);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework004: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework004 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework004 end.");
 }
 
 /**
@@ -124,13 +124,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework004, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework005, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework005 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework005 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework005: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::STAND_BY, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::STAND_BY);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework005: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework005 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework005 end.");
 }
 
 /**
@@ -141,13 +141,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework005, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework006, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework006 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework006 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework006: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::DOZE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::DOZE);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework006: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework006 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework006 end.");
 }
 
 /**
@@ -158,13 +158,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework006, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework007, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework007 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework007 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework007: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::SLEEP, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::SLEEP);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework007: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework007 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework007 end.");
 }
 
 /**
@@ -175,13 +175,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework007, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework008, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework008 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework008 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework008: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::HIBERNATE);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework008: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework008 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework008 end.");
 }
 
 /**
@@ -192,13 +192,13 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework008, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework009, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework009 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework009 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework009: power state replacement is start";
     auto ret = g_stateMachineTest->SetState(PowerState::SHUTDOWN, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::SHUTDOWN);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework009: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework009 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework009 end.");
 }
 
 /**
@@ -209,7 +209,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework009, TestSize.Le
  */
 HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework010, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework010 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework010 start.");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework010: power state replacement is start";
     std::string result;
     g_stateMachineTest->DumpInfo(result);
@@ -224,6 +224,6 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework010, TestSize.Le
     EXPECT_TRUE(result.find("SHUTDOWN") != 0);
     GTEST_LOG_(INFO) << "dumpinfo:" << result;
     GTEST_LOG_(INFO) << "PowerStateLevelFramework010: power state replacement is end";
-    POWER_HILOGD(LABEL_TEST, "PowerStateLevelFramework010 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework010 end.");
 }
 }

@@ -35,7 +35,7 @@ using namespace std;
 
 void PowerRegisterCallbackModeTest::PowerModeTest1Callback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTest1Callback::OnPowerModeChanged.");
 }
 
 namespace {
@@ -46,7 +46,7 @@ namespace {
  */
 HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerRegisterCallbackModeCallback001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
     powerMgrClient.RegisterPowerModeCallback(cb1);
@@ -54,6 +54,6 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     PowerMode mode = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     EXPECT_EQ(mode, powerMgrClient.GetDeviceMode());
-    POWER_HILOGD(LABEL_TEST, "PowerRegisterCallbackModeCallback001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 end.");
 }
 }
