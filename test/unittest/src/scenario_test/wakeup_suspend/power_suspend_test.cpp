@@ -26,7 +26,7 @@
 #include <input_manager.h>
 #include <securec.h>
 
-#include "power_mgr_service.h"
+#include "power_mgr_client.h"
 #include "power_state_callback_stub.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
@@ -35,22 +35,8 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
-static sptr<PowerMgrService> g_service;
-static constexpr int SLEEP_WAIT_TIME_S = 2;
-
-void PowerSuspendTest::SetUpTestCase(void)
-{
-    g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    g_service->OnStart();
-    g_service->WakeupControllerInit();
-    g_service->SuspendControllerInit();
-}
-
-void PowerSuspendTest::TearDownTestCase(void)
-{
-    g_service->OnStop();
-    DelayedSpSingleton<PowerMgrService>::DestroyInstance();
-}
+static constexpr int32_t SLEEP_WAIT_TIME_S = 2;
+static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
 
 namespace {
 /**
@@ -61,9 +47,9 @@ namespace {
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: start");
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
-    EXPECT_TRUE(g_service->IsScreenOn());
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     auto inputManager = MMI::InputManager::GetInstance();
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
@@ -77,13 +63,10 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
-    sleep(4);
+    powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_TIME_MS);
+    sleep(3);
     // the second powerkey event would interrupt the transition to INACTIVE
-    //wake it up when the screen goes off after timeout
-    g_service->RefreshActivity(
-        static_cast<int64_t>(std::chrono::system_clock::now().time_since_epoch().count()),
-            UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
-    EXPECT_TRUE(g_service->IsScreenOn());
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
 }
@@ -95,11 +78,10 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
 HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: start");
-    g_service->WakeupDevice(
-        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
-    EXPECT_TRUE(g_service->IsScreenOn());
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
-    
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
     keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
@@ -111,7 +93,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(4);
-    EXPECT_FALSE(g_service->IsScreenOn());
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: end");
 }
 } // namespace

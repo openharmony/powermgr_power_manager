@@ -27,8 +27,6 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerWakeupTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
 };
 } // namespace PowerMgr
 } // namespace OHOS
