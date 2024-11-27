@@ -24,7 +24,7 @@
 #include <input_manager.h>
 #include <securec.h>
 
-#include "power_mgr_service.h"
+#include "power_mgr_client.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
 #include "json/reader.h"
@@ -33,26 +33,14 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
-static sptr<PowerMgrService> g_service;
+
 static constexpr int32_t SLEEP_WAIT_TIME_S = 2;
 static constexpr int32_t SLEEP_WAIT_TIME_MS = 400;
 static constexpr int32_t DISPLAY_OFF_TIME_MS = 600;
 static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
+static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
 static const std::string TEST_DEVICE_ID = "test_device_id";
-
-void PowerWakeupTest::SetUpTestCase(void)
-{
-    g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    g_service->OnStart();
-    g_service->OnAddSystemAbility(DISPLAY_POWER_MANAGER_ID, TEST_DEVICE_ID);
-}
-
-void PowerWakeupTest::TearDownTestCase(void)
-{
-    g_service->OnStop();
-    DelayedSpSingleton<PowerMgrService>::DestroyInstance();
-}
 
 namespace {
 MMI::PointerEvent::PointerItem CreatePointerItem(
@@ -75,12 +63,10 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
 HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: start");
-    g_service->WakeupControllerInit();
-    g_service->SuspendControllerInit();
-    g_service->OverrideScreenOffTime(5000);
-    g_service->SuspendDevice(
-        static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_FALSE(g_service->IsScreenOn());
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_TIME_MS);
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
 
     auto inputManager = MMI::InputManager::GetInstance();
 
@@ -99,14 +85,10 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     inputManager->SimulateInputEvent(keyEventKeyboard);
-
+    powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_TIME_MS);
     sleep(2);
-    //wake it up when the screen goes off after timeout
-    g_service->RefreshActivity(
-        static_cast<int64_t>(std::chrono::system_clock::now().time_since_epoch().count()),
-            UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
-    EXPECT_TRUE(g_service->IsScreenOn());
-    g_service->RestoreScreenOffTime();
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+    powerMgrClient.RestoreScreenOffTime();
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: end");
 }
 
@@ -118,12 +100,9 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
 HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
 {
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002: start");
-
-    g_service->WakeupControllerInit();
-    g_service->SuspendControllerInit();
-    g_service->SuspendDevice(
-        static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    EXPECT_FALSE(g_service->IsScreenOn());
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
 
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
     keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
@@ -136,7 +115,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(1);
-    EXPECT_TRUE(g_service->IsScreenOn());
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002: end");
 }
