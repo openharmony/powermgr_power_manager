@@ -79,7 +79,7 @@ namespace {
  */
 HWTEST_F(PowerScreenOnMockTest, PowerScreenOnMockTest001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerScreenOnMockTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerScreenOnMockTest001 start.");
     GTEST_LOG_(INFO) << "PowerScreenOnMockTest001: start";
 
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -93,7 +93,7 @@ HWTEST_F(PowerScreenOnMockTest, PowerScreenOnMockTest001, TestSize.Level0)
     EXPECT_TRUE(pmsTest_ != nullptr);
 
     sleep(SLEEP_WAIT_TIME_S);
-    POWER_HILOGD(LABEL_TEST, "PowerScreenOnMockTest001 end.");
-    GTEST_LOG_(INFO) << "PowerScreenOnMockTest001:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerScreenOnMockTest001 end.");
+    GTEST_LOG_(INFO) << "PowerScreenOnMockTest001: end";
 }
 } // namespace
