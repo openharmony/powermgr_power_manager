@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr int32_t MAX_PARAM_NUM = 2000;
 constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 PowerErrors PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
@@ -231,6 +232,10 @@ bool PowerMgrProxy::QueryRunningLockLists(std::map<std::string, RunningLockInfo>
         return false;
     }
     int32_t num = reply.ReadInt32();
+    if (num < 0 || num > MAX_PARAM_NUM) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "num exceed limit, num=%{public}d", num);
+        return false;
+    }
     for (int i = 0; i < num; i++) {
         std::string key = reply.ReadString();
         RunningLockInfo* info = reply.ReadParcelable<RunningLockInfo>();
