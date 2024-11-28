@@ -25,23 +25,29 @@ namespace OHOS {
 namespace PowerMgr {
 class SleepCallbackHolder final : public DelayedRefSingleton<SleepCallbackHolder> {
     DECLARE_DELAYED_REF_SINGLETON(SleepCallbackHolder);
-
-public:
     DISALLOW_COPY_AND_MOVE(SleepCallbackHolder);
+public:
+    struct SleepCallbackCompare {
+        bool operator()(const sptr<ISyncSleepCallback>& lhs, const sptr<ISyncSleepCallback>& rhs) const
+        {
+            return lhs->AsObject() < rhs->AsObject();
+        }
+    };
+
+    using SleepCallbackContainerType = std::set<sptr<ISyncSleepCallback>, SleepCallbackCompare>;
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
-
-    std::set<sptr<ISyncSleepCallback>> GetHighPriorityCallbacks();
-    std::set<sptr<ISyncSleepCallback>> GetDefaultPriorityCallbacks();
-    std::set<sptr<ISyncSleepCallback>> GetLowPriorityCallbacks();
+    SleepCallbackContainerType GetHighPriorityCallbacks();
+    SleepCallbackContainerType GetDefaultPriorityCallbacks();
+    SleepCallbackContainerType GetLowPriorityCallbacks();
 
 private:
-    static void RemoveCallback(std::set<sptr<ISyncSleepCallback>>& callbacks, const sptr<ISyncSleepCallback>& callback);
+    static void RemoveCallback(SleepCallbackContainerType& callbacks, const sptr<ISyncSleepCallback>& callback);
 
     std::mutex mutex_;
-    std::set<sptr<ISyncSleepCallback>> highPriorityCallbacks_;
-    std::set<sptr<ISyncSleepCallback>> defaultPriorityCallbacks_;
-    std::set<sptr<ISyncSleepCallback>> lowPriorityCallbacks_;
+    SleepCallbackContainerType highPriorityCallbacks_;
+    SleepCallbackContainerType defaultPriorityCallbacks_;
+    SleepCallbackContainerType lowPriorityCallbacks_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
