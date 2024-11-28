@@ -24,7 +24,15 @@ namespace OHOS {
 namespace PowerMgr {
 class HibernateController {
 public:
-    HibernateController(){};
+    struct HibernateCallbackCompare {
+        bool operator()(const sptr<ISyncHibernateCallback>& lhs, const sptr<ISyncHibernateCallback>& rhs) const
+        {
+            return lhs->AsObject() < rhs->AsObject();
+        }
+    };
+    using HibernateCallbackContainerType = std::set<sptr<ISyncHibernateCallback>, HibernateCallbackCompare>;
+
+    HibernateController() {};
     virtual ~HibernateController() = default;
 
     virtual bool Hibernate(bool clearMemory);
@@ -35,7 +43,7 @@ public:
 
 private:
     std::mutex mutex_;
-    std::set<sptr<ISyncHibernateCallback>> callbacks_;
+    HibernateCallbackContainerType callbacks_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
