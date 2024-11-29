@@ -35,6 +35,7 @@
 #include "ffrt_utils.h"
 #include "permission.h"
 #include "power_common.h"
+#include "power_ext_intf_wrapper.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
 #include "power_xcollie.h"
@@ -138,6 +139,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
             POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
             return;
         }
+        PowerExtIntfWrapper::Instance().Init();
         auto powerStateMachine = power->GetPowerStateMachine();
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
@@ -600,6 +602,7 @@ void PowerMgrService::OnStop()
 #ifdef MSDP_MOVEMENT_ENABLE
     UnRegisterMovementCallback();
 #endif
+    PowerExtIntfWrapper::Instance().DeInit();
 }
 
 void PowerMgrService::Reset()
