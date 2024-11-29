@@ -37,7 +37,8 @@
             "power_manager_feature_dialog_path",
             "power_manager_feature_charging_type_setting",
             "power_manager_feature_external_screen_management",
-            "power_manager_feature_block_long_press"
+            "power_manager_feature_block_long_press",
+            "power_manager_feature_judging_takeover_shutdown"
         ],
         "adapted_system_type": [
             "standard"
