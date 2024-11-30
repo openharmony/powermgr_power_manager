@@ -1907,6 +1907,12 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
         static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
 
     if (isSwitchOpen && isScreenOn) {
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+        if (!powerStateMachine->IsHibernating()) {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens");
+            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN);
+        }
+#endif
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
         pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN, "ScreenConnected");
