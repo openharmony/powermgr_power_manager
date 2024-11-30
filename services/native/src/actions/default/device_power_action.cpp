@@ -17,6 +17,7 @@
 
 #include <string>
 #include "init_reboot.h"
+#include "power_ext_intf_wrapper.h"
 #include "power_log.h"
 
 namespace {
@@ -30,15 +31,19 @@ namespace OHOS {
 namespace PowerMgr {
 void DevicePowerAction::Reboot(const std::string& reason)
 {
-    std::string rebootReason = Updater(reason);
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Reboot executing");
-    DoReboot(rebootReason.c_str());
+    std::string rebootCmd;
+    auto ret = PowerExtIntfWrapper::Instance().GetRebootCommand(reason, rebootCmd);
+    if (ret != PowerExtIntfWrapper::ErrCode::ERR_OK) {
+        rebootCmd = Updater(reason);
+    }
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Reboot command: %{public}s", rebootCmd.c_str());
+    DoRebootExt(rebootCmd.c_str(), reason.c_str());
 }
 
 void DevicePowerAction::Shutdown(const std::string& reason)
 {
     POWER_HILOGI(FEATURE_SHUTDOWN, "Shutdown executing");
-    DoReboot(SHUTDOWN_CMD.c_str());
+    DoRebootExt(SHUTDOWN_CMD.c_str(), reason.c_str());
 }
 
 std::string DevicePowerAction::Updater(const std::string& reason)
