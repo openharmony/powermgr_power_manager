@@ -145,6 +145,11 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::str
         return parseSources;
     }
 
+    if (root.isNull() || !root.isObject()) {
+        POWER_HILOGE(FEATURE_SUSPEND, "json root invalid[%{public}s]", jsonStr.c_str());
+        return parseSources;
+    }
+
     Json::Value::Members members = root.getMemberNames();
     for (auto iter = members.begin(); iter != members.end(); iter++) {
         std::string key = *iter;
@@ -173,7 +178,7 @@ bool SuspendSourceParser::ParseSourcesProc(
 
     uint32_t action = 0;
     uint32_t delayMs = 0;
-    if (valueObj.isObject()) {
+    if (!valueObj.isNull() && valueObj.isObject()) {
         Json::Value actionValue = valueObj[SuspendSource::ACTION_KEY];
         Json::Value delayValue = valueObj[SuspendSource::DELAY_KEY];
         if (actionValue.isUInt() && delayValue.isUInt()) {
