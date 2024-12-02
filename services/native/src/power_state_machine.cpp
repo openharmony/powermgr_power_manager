@@ -1651,7 +1651,7 @@ void PowerStateMachine::HandleProximityScreenOffTimer(PowerState state, StateCha
 #endif
 }
 
-bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
+bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChangeReason reason)
 {
     bool ret = false;
     PowerStateMachine::PreBrightState curState = preBrightState_.load();
@@ -1680,14 +1680,17 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_FINISHED, std::memory_order_relaxed);
             ret = true;
         }
-        POWER_HILOGW(FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling pright auth result");
+        POWER_HILOGW(
+            FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
     } else {
-        if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
+        if (targetState != PowerState::SLEEP && curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
             POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
             CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
         }
-        preBrightState_.store(PowerStateMachine::PRE_BRIGHT_UNSTART, std::memory_order_relaxed);
+        if (targetState != PowerState::SLEEP) {
+            preBrightState_.store(PowerStateMachine::PRE_BRIGHT_UNSTART, std::memory_order_relaxed);
+        }
         ret = true;
     }
     POWER_HILOGD(FEATURE_WAKEUP, "Pre bright state: %{public}u", static_cast<uint32_t>(preBrightState_.load()));
@@ -2048,7 +2051,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::LOCKING;
     }
 
-    if (!owner->HandlePreBrightState(reason)) {
+    if (!owner->HandlePreBrightState(state_, reason)) {
         return TransitResult::PRE_BRIGHT_ERR;
     }
 
