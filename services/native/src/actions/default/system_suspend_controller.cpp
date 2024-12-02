@@ -108,17 +108,20 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
 
 void SystemSuspendController::AllowAutoSleep()
 {
+    std::lock_guard lock(mutex_);
     allowSleepTask_ = true;
 }
 
 void SystemSuspendController::DisallowAutoSleep()
 {
+    std::lock_guard lock(mutex_);
     allowSleepTask_ = false;
 }
 
 void SystemSuspendController::Suspend(
     const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force)
 {
+    std::lock_guard lock(mutex_);
     POWER_HILOGI(COMP_SVC, "The hdf interface, force=%{public}u", static_cast<uint32_t>(force));
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
@@ -135,6 +138,7 @@ void SystemSuspendController::Suspend(
 
 void SystemSuspendController::Wakeup()
 {
+    std::lock_guard lock(mutex_);
     if (powerInterface_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
