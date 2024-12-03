@@ -331,7 +331,7 @@ private:
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
     void HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason);
-    bool HandlePreBrightState(StateChangeReason reason);
+    bool HandlePreBrightState(PowerState targetState, StateChangeReason reason);
     bool IsPreBrightAuthReason(StateChangeReason reason);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     bool NeedShowScreenLocks(PowerState state);
