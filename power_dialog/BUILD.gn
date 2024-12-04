@@ -26,8 +26,8 @@ ohos_app("power_dialog_hap") {
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "power_dialog"
 
-  subsystem_name = "applications"
-  part_name = "prebuilt_hap"
+  subsystem_name = "powermgr"
+  part_name = "power_manager"
   module_install_dir = "app/com.ohos.powerdialog"
 
   js_build_mode = "release"
