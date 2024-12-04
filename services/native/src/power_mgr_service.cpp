@@ -71,6 +71,7 @@ const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
+constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 10000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
@@ -956,6 +957,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     if (suspendController_) {
         suspendController_->StopSleep();
     }
+    SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Shutdown(reason);
@@ -1001,7 +1003,7 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
-    WakeupRunningLock wakeupRunningLock;
+    BackgroundRunningLock wakeupRunningLock("PowerMgrWakeupLock", WAKEUP_LOCK_TIMEOUT_MS);
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
     return PowerErrors::ERR_OK;
 }
@@ -1127,6 +1129,8 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
+    BackgroundRunningLock hibernateGuard(
+        "hibernateGuard", HIBERNATE_GUARD_TIMEOUT_MS); // avoid hibernate breaked by S3/ULSR
     HibernateControllerInit();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
@@ -1612,19 +1616,19 @@ void PowerMgrService::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallbac
     shutdownController_->RemoveCallback(callback);
 }
 
-PowerMgrService::WakeupRunningLock::WakeupRunningLock()
+PowerMgrService::BackgroundRunningLock::BackgroundRunningLock(std::string name, int32_t timeOutMs)
 {
     token_ = new (std::nothrow) RunningLockTokenStub();
     if (token_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
-    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    RunningLockInfo info = {name, OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
     pms->CreateRunningLock(token_, info);
-    pms->Lock(token_, WAKEUP_LOCK_TIMEOUT_MS);
+    pms->Lock(token_, timeOutMs);
 }
 
-PowerMgrService::WakeupRunningLock::~WakeupRunningLock()
+PowerMgrService::BackgroundRunningLock::~BackgroundRunningLock()
 {
     if (token_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "token_ is nullptr");
@@ -2067,10 +2071,10 @@ int64_t PowerMgrService::GetSettingDisplayOffTime(int64_t defaultTime)
 void PowerMgrService::UpdateSettingInvalidDisplayOffTime()
 {
     if (!SettingHelper::IsSettingDisplayAcScreenOffTimeValid()) {
-        SettingHelper::SetSettingDisplayAcScreenOffTime(DEFAULT_AC_DISPLAY_OFF_TIME_MS);
+        SettingHelper::SetSettingDisplayAcScreenOffTime(PowerStateMachine::DEFAULT_AC_DISPLAY_OFF_TIME_MS);
     }
     if (!SettingHelper::IsSettingDisplayDcScreenOffTimeValid()) {
-        SettingHelper::SetSettingDisplayDcScreenOffTime(DEFAULT_DC_DISPLAY_OFF_TIME_MS);
+        SettingHelper::SetSettingDisplayDcScreenOffTime(PowerStateMachine::DEFAULT_DC_DISPLAY_OFF_TIME_MS);
     }
 }
 
@@ -2097,9 +2101,7 @@ void PowerCommonEventSubscriber::OnPowerConnectStatusChanged(PowerConnectStatus 
     }
     stateMachine->DisplayOffTimeUpdateFunc();
 
-#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
     power->OnChargeStateChanged(); // should be called after suspend sources settings updated
-#endif
 }
 #endif
 
