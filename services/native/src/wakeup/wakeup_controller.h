@@ -168,6 +168,7 @@ public:
 
 private:
     int32_t powerkeyShortPressId_ {-1};
+    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent);
 };
 
 class KeyboardWakeupMonitor : public WakeupMonitor {
