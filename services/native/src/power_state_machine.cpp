@@ -121,6 +121,7 @@ void PowerStateMachine::InitTransitMap()
 {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::vector<PowerState> awake { PowerState::SLEEP };
+    std::vector<PowerState> hibernate { PowerState::SLEEP };
 #else
     std::vector<PowerState> awake { PowerState::SLEEP, PowerState::HIBERNATE };
 #endif
@@ -130,6 +131,9 @@ void PowerStateMachine::InitTransitMap()
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
     forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(hibernate.begin(), hibernate.end()));
+#endif
 
     allowMapByReason_.insert({
         {

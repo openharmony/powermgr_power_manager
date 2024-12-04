@@ -298,10 +298,10 @@ private:
         virtual void OnChange(uint64_t screenId) override {}
     };
 #endif
-    class WakeupRunningLock {
+    class BackgroundRunningLock {
     public:
-        WakeupRunningLock();
-        ~WakeupRunningLock();
+        BackgroundRunningLock(std::string name, int32_t timeOutMs);
+        ~BackgroundRunningLock();
     private:
         sptr<IRemoteObject> token_ {nullptr};
     };
