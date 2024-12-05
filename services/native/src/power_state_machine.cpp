@@ -815,7 +815,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         hibernating_ = false;
         return false;
     }
-    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, GetPreHibernateDelay());
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, 0);
     return true;
 }
 #endif
