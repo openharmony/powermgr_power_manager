@@ -30,7 +30,7 @@ public:
     const std::string& GetKey();
 
     using UpdateFunc = std::function<void(const std::string&)>;
-    void SetUpdateFunc(UpdateFunc& func);
+    void SetUpdateFunc(const UpdateFunc& func);
 private:
     std::string key_ {};
     UpdateFunc update_ = nullptr;

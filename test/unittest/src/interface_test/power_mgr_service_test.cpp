@@ -25,10 +25,15 @@
 #include <string_ex.h>
 #include <system_ability_definition.h>
 
+#include "accesstoken_kit.h"
+#include "mock_state_action.h"
+#include "nativetoken_kit.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_utils.h"
+#include "setting_helper.h"
+#include "token_setproc.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -37,6 +42,7 @@ using namespace std;
 
 void PowerMgrServiceTest::SetUpTestCase(void)
 {
+    DelayedSpSingleton<PowerMgrService>::GetInstance()->OnStart();
 }
 
 void PowerMgrServiceTest::TearDownTestCase(void)
@@ -54,6 +60,7 @@ void PowerMgrServiceTest::TearDown(void)
 namespace {
 constexpr const int64_t STATE_WAIT_TIME_MS = 300;
 constexpr const int64_t STATE_OFF_WAIT_TIME_MS = 2000;
+
 /**
  * @tc.name: PowerMgrService001
  * @tc.desc: Test PowerMgrService service ready.
@@ -443,11 +450,9 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService022 start.");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService022 fail to get PowerMgrService";
-    pmsTest_->OnStart();
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     auto runningLockMgr = pmsTest_->GetRunningLockMgr();
 
-    pmsTest_.GetRefPtr()->IncStrongRef(pmsTest_.GetRefPtr());
     RunningLockParam runningLockParam;
     runningLockParam.name = "runninglock_screen_on";
     runningLockParam.type = RunningLockType::RUNNINGLOCK_SCREEN;
@@ -519,7 +524,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     uint32_t PARM_TEN = 10;
     constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
-    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 125;
+    constexpr const uint32_t EXTREMELY_SHORT_SCREEN_OFF_TIME_MS = 200;
     constexpr const uint32_t SHORT_SCREEN_OFF_TIME_MS = 800;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SHORT_SCREEN_OFF_TIME_MS);
@@ -578,7 +583,6 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 start.");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService025 failed to get PowerMgrService";
-    pmsTest_->OnStart();
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService025 failed to get PowerStateMachine";
 
@@ -612,7 +616,6 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 start.");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService026 failed to get PowerMgrService";
-    pmsTest_->OnStart();
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService026 failed to get PowerStateMachine";
 
@@ -628,5 +631,126 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
 
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 end.");
+}
+
+/**
+ * @tc.name: PowerMgrService027
+ * @tc.desc: Test entering doze state
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService027, TestSize.Level2)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService027 start.");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService027 failed to get PowerMgrService";
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService027 failed to get PowerStateMachine";
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    // will be managed by a unique_ptr in EnableMock
+    stateMaschine_->EnableMock(stateActionMock);
+
+    pmsTest_->SetEnableDoze(false);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_));
+    // prevent powerStateMachine from correcting its state (default action is to return 0 i.e DISPLAY_OFF)
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true);
+    EXPECT_EQ(stateMaschine_->GetState(), PowerState::INACTIVE);
+
+    pmsTest_->SetEnableDoze(true);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_DOZE, ::testing::_));
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true);
+    EXPECT_EQ(stateMaschine_->GetState(), PowerState::INACTIVE);
+    // release mock object
+    auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
+    stateAction.reset();
+}
+
+/**
+ * @tc.name: PowerMgrService028
+ * @tc.desc: Test switching doze state
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService028, TestSize.Level2)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService028 start.");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService028 failed to get PowerMgrService";
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService028 failed to get PowerStateMachine";
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMaschine_->EnableMock(stateActionMock);
+
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_DOZE, ::testing::_))
+        .Times(0);
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "display_doze");
+
+    EXPECT_CALL(*stateActionMock,
+        SetDisplayState(
+            DisplayState::DISPLAY_DOZE_SUSPEND, StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE));
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_DOZE));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "display_doze_suspend");
+
+    EXPECT_CALL(*stateActionMock,
+        SetDisplayState(DisplayState::DISPLAY_DOZE, StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE));
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_DOZE_SUSPEND));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "display_doze");
+    auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
+    stateAction.reset();
+}
+
+/**
+ * @tc.name: PowerMgrService029
+ * @tc.desc: Test observing doze switch
+ * @tc.type: FUNC
+ */
+void AddPermission()
+{
+    const char* perms[1];
+    perms[0] = "ohos.permission.MANAGE_SECURE_SETTINGS";
+    NativeTokenInfoParams info = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .dcaps = 0,
+        .perms = perms,
+        .acls = NULL,
+        .processName = "powermgr",
+        .aplStr = "system_core",
+    };
+    SetSelfTokenID(GetAccessTokenId(&info));
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
+
+HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 start.");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService029 failed to get PowerMgrService";
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService029 failed to get PowerStateMachine";
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMaschine_->EnableMock(stateActionMock);
+    AddPermission();
+    SettingHelper::RegisterAodSwitchObserver();
+
+    ErrCode ret = SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", "0", true);
+    EXPECT_EQ(ret, ERR_OK);
+    sleep(1);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_));
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true);
+    EXPECT_EQ(stateMaschine_->GetState(), PowerState::INACTIVE);
+
+    ret = SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", "1", true);
+    EXPECT_EQ(ret, ERR_OK);
+    sleep(1);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_DOZE, ::testing::_));
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true);
+    EXPECT_EQ(stateMaschine_->GetState(), PowerState::INACTIVE);
+    auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
+    stateAction.reset();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 end.");
 }
 }

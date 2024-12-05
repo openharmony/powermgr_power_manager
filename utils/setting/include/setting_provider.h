@@ -35,7 +35,7 @@ public:
     ErrCode PutLongValue(const std::string& key, int64_t value, bool needNotify = true);
     ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
     bool IsValidKey(const std::string& key);
-    sptr<SettingObserver> CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func);
+    sptr<SettingObserver> CreateObserver(const std::string& key, const SettingObserver::UpdateFunc& func);
     static void ExecRegisterCb(const sptr<SettingObserver>& observer);
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);
@@ -68,7 +68,7 @@ private:
     static constexpr const char* SETTING_POWER_MODE_KEY  {"settings.power.smart_mode_status"};
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
-    static SettingProvider* instance_;
+    static std::atomic<SettingProvider*> instance_;
     static std::mutex settingMutex_;
     static sptr<IRemoteObject> remoteObj_;
     static int32_t currentUserId_;

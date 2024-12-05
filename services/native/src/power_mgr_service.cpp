@@ -702,6 +702,7 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
             this->GetPowerModeModule().InitPowerMode();
         }
+        SettingHelper::RegisterAodSwitchObserver();
     }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
@@ -1022,7 +1023,16 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
+
     BackgroundRunningLock wakeupRunningLock("PowerMgrWakeupLock", WAKEUP_LOCK_TIMEOUT_MS);
+    if (details == "display_doze") {
+        bool ret = powerStateMachine_->SetDozeMode(false);
+        return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+    }
+    if (details == "display_doze_suspend") {
+        bool ret = powerStateMachine_->SetDozeMode(true);
+        return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+    }
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
     return PowerErrors::ERR_OK;
 }
@@ -1838,6 +1848,15 @@ PowerErrors PowerMgrService::LockScreenAfterTimingOut(
     localMutex.unlock();
     powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
     return PowerErrors::ERR_OK;
+}
+
+void PowerMgrService::SetEnableDoze(bool enable)
+{
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        return;
+    }
+    stateMachine->SetEnableDoze(enable);
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART

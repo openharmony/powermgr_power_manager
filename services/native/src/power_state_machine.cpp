@@ -262,7 +262,15 @@ void PowerStateMachine::EmplaceAwake()
             DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(reason);
 #endif
             mDeviceState_.screenState.lastOnTime = GetTickCount();
-            uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
+            auto targetState = DisplayState::DISPLAY_ON;
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+                if (isDozeEnabled_) {
+                    targetState = DisplayState::DISPLAY_DOZE;
+                } else {
+                    targetState = DisplayState::DISPLAY_OFF;
+                }
+            }
+            uint32_t ret = this->stateAction_->SetDisplayState(targetState, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_ON_ERR;
@@ -298,9 +306,8 @@ void PowerStateMachine::EmplaceInactive()
 #endif
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
-            if (enableDisplaySuspend_) {
-                POWER_HILOGI(FEATURE_POWER_STATE, "Display suspend enabled");
-                state = DisplayState::DISPLAY_SUSPEND;
+            if (isDozeEnabled_.load(std::memory_order_relaxed)) {
+                state = DisplayState::DISPLAY_DOZE;
             }
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
             if (ret != ActionResult::SUCCESS) {
@@ -1304,6 +1311,24 @@ void PowerStateMachine::LockScreenAfterTimingOut(bool enabled, bool checkScreenO
     enabledTimingOutLockScreen_.store(enabled, std::memory_order_relaxed);
     enabledTimingOutLockScreenCheckLock_.store(checkScreenOnLock, std::memory_order_relaxed);
     enabledScreenOffEvent_.store(sendScreenOffEvent, std::memory_order_relaxed);
+}
+
+void PowerStateMachine::SetEnableDoze(bool enable)
+{
+    isDozeEnabled_.store(enable, std::memory_order_relaxed);
+}
+
+bool PowerStateMachine::SetDozeMode(bool suspend)
+{
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    if (IsScreenOn()) {
+        POWER_HILOGW(FEATURE_POWER_STATE, "the screen is on, not allowed to set doze mode");
+        return false;
+    }
+    uint32_t ret =
+        this->stateAction_->SetDisplayState(suspend ? DisplayState::DISPLAY_DOZE_SUSPEND : DisplayState::DISPLAY_DOZE,
+            StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE);
+    return ret == ActionResult::SUCCESS;
 }
 
 bool PowerStateMachine::CheckRunningLock(PowerState state)
