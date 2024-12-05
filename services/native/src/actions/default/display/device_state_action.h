@@ -55,7 +55,9 @@ private:
         std::function<void(uint32_t)> notify_ {nullptr};
         std::mutex notifyMutex_;
     };
+    DisplayPowerMgr::DisplayState GetDisplayPowerMgrDisplayState(DisplayState state);
     bool IsInterruptingScreenOff(Rosen::PowerStateChangeReason dispReason);
+    bool IsOnState(DisplayState state);
     std::mutex cancelScreenOffMutex_;
     std::condition_variable cancelScreenOffCv_;
     bool cancelScreenOffCvUnblocked_ {false};

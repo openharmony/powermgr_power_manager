@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr const char* SETTING_AOD_WATCH_SWITCH_KEY {"hw_aod_watch_switch"};
 class SettingHelper {
 public:
     enum class SwitchStatus : int32_t {
@@ -30,6 +31,7 @@ public:
         DISABLE = 0,
         ENABLE = 1,
     };
+    static void RegisterAodSwitchObserver();
     static void UpdateCurrentUserId();
 #ifdef POWER_PICKUP_ENABLE
     static void CopyDataForUpdateScene();

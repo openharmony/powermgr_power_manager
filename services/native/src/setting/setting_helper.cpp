@@ -16,6 +16,7 @@
 #include "setting_helper.h"
 
 #include "power_log.h"
+#include "power_mgr_service.h"
 #include "power_utils.h"
 #include <cinttypes>
 #include <system_ability_definition.h>
@@ -31,6 +32,26 @@ sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::powerModeObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::lidObserver_ = nullptr;
 
+void SettingHelper::RegisterAodSwitchObserver()
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(-1);
+    static sptr<SettingObserver> observer =
+        settingProvider.CreateObserver(SETTING_AOD_WATCH_SWITCH_KEY, [](const std::string& key) -> void {
+            if (key != SETTING_AOD_WATCH_SWITCH_KEY) {
+                return;
+            }
+            std::string result = SettingHelper::GetSettingStringValue(key);
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (!pms) {
+                return;
+            }
+            pms->SetEnableDoze(result == "1" ? true : false);
+        });
+    ErrCode ret = settingProvider.RegisterObserver(observer);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "%{public}s failed", __func__);
+    }
+}
 void SettingHelper::UpdateCurrentUserId()
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
