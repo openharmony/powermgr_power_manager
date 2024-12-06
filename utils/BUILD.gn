@@ -46,6 +46,7 @@ ohos_source_set("power_utils") {
     "c_utils:utils",
     "hicollie:libhicollie",
     "hilog:libhilog",
+    "window_manager:libdm_lite",
   ]
 
   subsystem_name = "powermgr"
