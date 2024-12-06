@@ -95,6 +95,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("TIMEOUT_NO_SCREEN_LOCK");
         case StateChangeReason::STATE_CHANGE_REASON_PICKUP:
             return std::string("PICKUP");
+        case StateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT:
+            return std::string("SCREEN_CONNECT");
         case StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR:
             return std::string("EXIT_SYSTEM_STR");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
@@ -182,6 +184,98 @@ const std::string PowerUtils::GetRunningLockTypeString(RunningLockType type)
             break;
     }
     return "UNKNOWN";
+}
+
+Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeReason reason)
+{
+    using namespace Rosen;
+    PowerStateChangeReason dmsReason = static_cast<PowerStateChangeReason>(reason);
+    switch (reason) {
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_SWITCH:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT;
+            break;
+        default:
+            break;
+    }
+    POWER_HILOGI(FEATURE_POWER_STATE, "The reason to DMS is = %{public}d", static_cast<uint32_t>(dmsReason));
+    return dmsReason;
+}
+
+StateChangeReason PowerUtils::GetReasonByUserActivity(UserActivityType type)
+{
+    StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
+    switch (type) {
+        case UserActivityType::USER_ACTIVITY_TYPE_BUTTON:
+            ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
+            break;
+        case UserActivityType::USER_ACTIVITY_TYPE_TOUCH:
+            ret = StateChangeReason::STATE_CHANGE_REASON_TOUCH;
+            break;
+        case UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY:
+            ret = StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY;
+            break;
+        case UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE:
+            ret = StateChangeReason::STATE_CHANGE_REASON_APPLICATION;
+            break;
+        case UserActivityType::USER_ACTIVITY_TYPE_SWITCH:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH;
+            break;
+        case UserActivityType::USER_ACTIVITY_TYPE_CABLE:
+            ret = StateChangeReason::STATE_CHANGE_REASON_CABLE;
+            break;
+        case UserActivityType::USER_ACTIVITY_TYPE_ATTENTION: // fall through
+        case UserActivityType::USER_ACTIVITY_TYPE_OTHER:     // fall through
+        default:
+            break;
+    }
+    return ret;
+}
+
+WakeupDeviceType PowerUtils::ParseWakeupDeviceType(const std::string& details)
+{
+    WakeupDeviceType parsedType = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION;
+
+    if (strcmp(details.c_str(), "pre_bright") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT;
+    } else if (strcmp(details.c_str(), "pre_bright_auth_success") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS;
+    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_on") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_off") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    } else if (strcmp(details.c_str(), "incoming call") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL;
+    } else if (strcmp(details.c_str(), "fake_str_check_unlock") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR;
+    } else if (strcmp(details.c_str(), "shell") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
+    }
+
+    if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Parsed wakeup type is %{public}d", static_cast<uint32_t>(parsedType));
+    }
+    return parsedType;
 }
 
 const std::string PowerUtils::JsonToSimpleStr(const std::string& json)

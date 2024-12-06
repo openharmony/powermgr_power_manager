@@ -449,32 +449,6 @@ void PowerStateMachine::SuspendDeviceInner(
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
 }
 
-WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& details)
-{
-    WakeupDeviceType parsedType = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION;
-
-    if (strcmp(details.c_str(), "pre_bright") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT;
-    } else if (strcmp(details.c_str(), "pre_bright_auth_success") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS;
-    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_on") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
-    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_off") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    } else if (strcmp(details.c_str(), "incoming call") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL;
-    } else if (strcmp(details.c_str(), "fake_str_check_unlock") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR;
-    } else if (strcmp(details.c_str(), "shell") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
-    }
-
-    if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
-        POWER_HILOGI(FEATURE_WAKEUP, "Parsed wakeup type is %{public}d", static_cast<uint32_t>(parsedType));
-    }
-    return parsedType;
-}
-
 bool PowerStateMachine::IsPreBrightAuthReason(StateChangeReason reason)
 {
     bool ret = false;
@@ -591,7 +565,7 @@ void PowerStateMachine::WakeupDeviceInner(
     }
 
     if (type == WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
-        type = ParseWakeupDeviceType(details);
+        type = PowerUtils::ParseWakeupDeviceType(details);
     }
 
     if (IsPreBrightWakeUp(type)) {
@@ -1801,30 +1775,6 @@ void PowerStateMachine::EndPowerkeyScreenOff()
     stateAction_->EndPowerkeyScreenOff();
 }
 
-StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType type)
-{
-    StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
-    switch (type) {
-        case UserActivityType::USER_ACTIVITY_TYPE_BUTTON:
-            ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_TOUCH:
-            ret = StateChangeReason::STATE_CHANGE_REASON_TOUCH;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY:
-            ret = StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE:
-            ret = StateChangeReason::STATE_CHANGE_REASON_APPLICATION;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_ATTENTION: // fall through
-        case UserActivityType::USER_ACTIVITY_TYPE_OTHER:     // fall through
-        default:
-            break;
-    }
-    return ret;
-}
-
 StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
 {
     POWER_HILOGD(FEATURE_WAKEUP, "WakeupDeviceType :%{public}u", type);
@@ -1896,6 +1846,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR:
             ret = StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:

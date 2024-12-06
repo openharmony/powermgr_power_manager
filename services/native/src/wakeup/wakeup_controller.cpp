@@ -32,6 +32,7 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
+#include "power_utils.h"
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
@@ -675,19 +676,22 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
 {
     using namespace OHOS::Rosen;
+    auto changeReason = stateMachine_->GetReasonByWakeType(type);
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
     uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(
-        screenId, ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
-    POWER_HILOGI(FEATURE_WAKEUP, "Power on internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d",
-        type, static_cast<uint32_t>(screenId), ret);
+    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, ScreenPowerState::POWER_ON, dmsReason);
+    POWER_HILOGI(FEATURE_WAKEUP,
+        "Power on internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
+        static_cast<uint32_t>(screenId), ret);
 }
 
 void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
 {
     using namespace OHOS::Rosen;
-    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(
-        ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
-    POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, type = %{public}u, ret = %{public}d", type, ret);
+    auto changeReason = stateMachine_->GetReasonByWakeType(type);
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
+    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON, dmsReason);
+    POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }
 
 bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) const

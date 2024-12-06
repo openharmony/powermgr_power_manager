@@ -152,10 +152,8 @@ public:
     void BeginPowerkeyScreenOff();
     void EndPowerkeyScreenOff();
     void SetDisplaySuspend(bool enable);
-    StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasonBySuspendType(SuspendDeviceType type);
-    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     int32_t GetExternalScreenNumber() const;
     void IncreaseExternalScreenNumber();
