@@ -79,6 +79,9 @@ SysParam::BootCompletedCallback g_bootCompletedCallback;
 #ifdef HAS_SENSORS_SENSOR_PART
 bool g_inLidMode = false;
 #endif
+#ifdef POWER_PICKUP_ENABLE
+bool g_isPickUpOpen = false;
+#endif
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
@@ -105,6 +108,9 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
+#endif
+#ifdef POWER_PICKUP_ENABLE
+    AddSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
 #endif
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
@@ -305,6 +311,7 @@ void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
 void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
 {
     bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
+    g_isPickUpOpen = isSettingEnable;
     WakeupController::PickupConnectMotionConfig(isSettingEnable);
     POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
     WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
@@ -625,6 +632,9 @@ void PowerMgrService::OnStop()
 #ifdef MSDP_MOVEMENT_ENABLE
     RemoveSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
+#ifdef POWER_PICKUP_ENABLE
+    RemoveSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
+#endif
 #ifdef POWER_DOUBLECLICK_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
 #endif
@@ -702,6 +712,12 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         }
         power->UnRegisterMovementCallback();
         power->RegisterMovementCallback();
+    }
+#endif
+#ifdef POWER_PICKUP_ENABLE
+    if (systemAbilityId == MSDP_MOTION_SERVICE_ID && g_isPickUpOpen == true) {
+        WakeupController::PickupConnectMotionConfig(false);
+        WakeupController::PickupConnectMotionConfig(true);
     }
 #endif
 }
