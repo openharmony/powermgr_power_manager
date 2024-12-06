@@ -18,6 +18,9 @@
 
 #include <vector>
 #include "interface_loader.h"
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+#include "power_state_machine_info.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -46,6 +49,13 @@ public:
     }
 
     ErrCode GetRebootCommand(const std::string& rebootReason, std::string& rebootCmd) const;
+
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+    void SetScreenOnEventRules(StateChangeReason reason);
+    void PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames);
+    bool NotifyScreenOnEventAgain(WakeupDeviceType reason, std::vector<std::string> bundleNames);
+    void NotifyOperateEventAfterScreenOn(std::vector<std::string> bundleNames);
+#endif
 
 private:
     PowerExtIntfWrapper(const std::string& libPath, const std::vector<std::string>& symbolArr)

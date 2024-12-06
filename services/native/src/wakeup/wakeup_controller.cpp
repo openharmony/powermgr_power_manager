@@ -35,6 +35,8 @@
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
+#include "customized_screen_event_rules.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -578,6 +580,20 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     }
 }
 
+bool InputCallback::TouchEventAfterScreenOn(std::shared_ptr<PointerEvent> pointerEvent, PowerState state) const
+{
+    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+        int32_t sourceType1 = pointerEvent->GetSourceType();
+        if (sourceType1 == PointerEvent::POINTER_ACTION_DOWN) {
+            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->NotifyOperateEventAfterScreenOn();
+        }
+#endif
+        return true;
+    }
+    return false;
+}
+
 void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -594,7 +610,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
 
     PowerState state = pms->GetState();
-    if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
+    if (TouchEventAfterScreenOn(pointerEvent, state)) {
         return;
     }
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
@@ -716,6 +732,9 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
 #endif
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->NotifyScreenOnEventAgain(reason);
+#endif
         return true;
     }
 
