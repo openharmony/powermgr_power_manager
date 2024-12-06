@@ -17,6 +17,7 @@ config("private_config") {
   include_dirs = [
     "include",
     "../native/include",
+    "${powermgr_inner_api}/native/include",
   ]
 }
 
@@ -41,12 +42,20 @@ ohos_source_set("power_intf_wrapper") {
 
   public_configs = [ ":public_config" ]
 
-  deps = [ "${powermgr_utils_path}/lib_loader:power_lib_loader" ]
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/lib_loader:power_lib_loader",
+  ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  if (power_manager_feature_watch_limit_screen_common_event_publish) {
+    defines +=
+        [ "POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES" ]
+  }
 
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"

@@ -38,6 +38,7 @@
 #ifdef MSDP_MOVEMENT_ENABLE
 #include <dlfcn.h>
 #endif
+#include "customized_screen_event_rules.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -251,6 +252,9 @@ void PowerStateMachine::EmplaceAwake()
                 "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON",
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+#endif
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(reason);
 #endif
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             uint32_t ret = this->stateAction_->SetDisplayState(DisplayState::DISPLAY_ON, reason);
@@ -992,6 +996,8 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
 
     switch (state) {
         case PowerState::AWAKE: {
+            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
+                notify, PowerState::AWAKE, callTime);
             notify->PublishScreenOnEvents(callTime);
             isAwakeNotified_.store(true, std::memory_order_relaxed);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -1005,6 +1011,8 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
             break;
         }
         case PowerState::INACTIVE: {
+            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
+                notify, PowerState::INACTIVE, callTime);
             notify->PublishScreenOffEvents(callTime);
             isAwakeNotified_.store(false, std::memory_order_relaxed);
             break;
