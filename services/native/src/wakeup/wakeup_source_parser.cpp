@@ -101,6 +101,11 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::strin
         return parseSources;
     }
 
+    if (root.isNull() || !root.isObject()) {
+        POWER_HILOGE(FEATURE_WAKEUP, "json root invalid[%{public}s]", jsonStr.c_str());
+        return parseSources;
+    }
+
     Json::Value::Members members = root.getMemberNames();
     for (auto iter = members.begin(); iter != members.end(); iter++) {
         std::string key = *iter;
@@ -122,7 +127,7 @@ bool WakeupSourceParser::ParseSourcesProc(
     bool enable = true;
     uint32_t click = DOUBLE_CLICK;
     WakeupDeviceType wakeupDeviceType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
-    if (valueObj.isObject()) {
+    if (!valueObj.isNull() && valueObj.isObject()) {
         Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
         Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
         if (!clickValue.isNull() && clickValue.isUInt()) {
