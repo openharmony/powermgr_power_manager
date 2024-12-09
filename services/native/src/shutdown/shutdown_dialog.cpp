@@ -142,7 +142,7 @@ bool ShutdownDialog::ConnectSystemUi()
     Want want;
     want.SetElementName(dialogBundleName_, dialogAbilityName_);
 
-    void *handler = dlopen("libpower_ability.z.so", RTLD_NOW);
+    void *handler = dlopen("libpower_ability.z.so", RTLD_NOW | RTLD_NODELETE);
     if (handler == nullptr) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "dlopen libpower_ability.z.so failed, reason : %{public}s", dlerror());
         return false;
