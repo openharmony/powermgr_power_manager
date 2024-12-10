@@ -274,6 +274,9 @@ public:
     {
         return shutdownController_;
     }
+#ifdef HAS_SENSORS_SENSOR_PART
+    static bool isInLidMode_;
+#endif
 
 private:
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
