@@ -70,6 +70,9 @@ auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
 bool g_inLidMode = false;
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+bool g_isPickUpOpen = false;
+#endif
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
@@ -96,6 +99,9 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
+#endif
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    AddSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
 #endif
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
@@ -273,6 +279,7 @@ void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
 void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
 {
     bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
+    g_isPickUpOpen = isSettingEnable;
     WakeupController::PickupConnectMotionConfig(isSettingEnable);
     POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
     WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
@@ -591,6 +598,7 @@ void PowerMgrService::OnStop()
     RemoveSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    RemoveSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     SettingHelper::UnregisterSettingWakeupPickupObserver();
 #endif
@@ -660,6 +668,12 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         }
         power->UnRegisterMovementCallback();
         power->RegisterMovementCallback();
+    }
+#endif
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    if (systemAbilityId == MSDP_MOTION_SERVICE_ID && g_isPickUpOpen == true) {
+        WakeupController::PickupConnectMotionConfig(false);
+        WakeupController::PickupConnectMotionConfig(true);
     }
 #endif
 }
