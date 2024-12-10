@@ -1639,7 +1639,7 @@ PowerMgrService::BackgroundRunningLock::BackgroundRunningLock(std::string name, 
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
-    RunningLockInfo info = {name, OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    RunningLockInfo info = {name, OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND};
     pms->CreateRunningLock(token_, info);
     pms->Lock(token_, timeOutMs);
 }

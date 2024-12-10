@@ -121,7 +121,7 @@ private:
 };
 #endif
 
-class WakeupMonitor : public std::enable_shared_from_this<WakeupMonitor> {
+class WakeupMonitor {
 public:
     static std::shared_ptr<WakeupMonitor> CreateMonitor(WakeupSource& source);
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
@@ -159,7 +159,7 @@ protected:
     WakeupListener listener_;
 };
 
-class PowerkeyWakeupMonitor : public WakeupMonitor {
+class PowerkeyWakeupMonitor : public WakeupMonitor, public std::enable_shared_from_this<PowerkeyWakeupMonitor> {
 public:
     explicit PowerkeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
     ~PowerkeyWakeupMonitor() override = default;
