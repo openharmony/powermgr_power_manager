@@ -726,11 +726,7 @@ bool PowerkeyWakeupMonitor::Init()
             // sync with the end of powerkey screen off task
             ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
             suspendController->RecordPowerKeyDown(poweroffInterrupted);
-            if (strong) {
-                strong->Notify();
-            } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
-            }
+            strong->Notify();
         });
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
