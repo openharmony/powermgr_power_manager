@@ -21,6 +21,7 @@
 #include "display_power_mgr_client.h"
 #include "power_log.h"
 #include "power_state_machine_info.h"
+#include "power_utils.h"
 #include "system_suspend_controller.h"
 
 using namespace std;
@@ -82,35 +83,6 @@ DisplayState DeviceStateAction::GetDisplayState()
             break;
     }
     return ret;
-}
-
-PowerStateChangeReason DeviceStateAction::GetDmsReasonByPowerReason(StateChangeReason reason)
-{
-    PowerStateChangeReason dmsReason = static_cast<PowerStateChangeReason>(reason);
-    switch (reason) {
-        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
-            break;
-        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
-            break;
-        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
-            break;
-        case StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-            break;
-        case StateChangeReason::STATE_CHANGE_REASON_POWER_KEY:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
-            break;
-        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION;
-            break;
-        default:
-            break;
-    }
-    POWER_HILOGI(FEATURE_POWER_STATE, "The reason to DMS is = %{public}d", static_cast<uint32_t>(dmsReason));
-    return dmsReason;
 }
 
 bool DeviceStateAction::TryToCancelScreenOff()
@@ -207,7 +179,7 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
         currentState = DisplayState::DISPLAY_ON;
     }
     DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-    PowerStateChangeReason dispReason = GetDmsReasonByPowerReason(reason);
+    PowerStateChangeReason dispReason = PowerUtils::GetDmsReasonByPowerReason(reason);
     switch (state) {
         case DisplayState::DISPLAY_ON: {
             dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;

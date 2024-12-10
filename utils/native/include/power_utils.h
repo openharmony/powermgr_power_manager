@@ -16,6 +16,7 @@
 #ifndef POWER_UTILS_H
 #define POWER_UTILS_H
 
+#include "dm_common.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 
@@ -27,6 +28,9 @@ public:
     static const std::string GetPowerStateString(PowerState state);
     static const std::string GetDisplayStateString(DisplayState state);
     static const std::string GetRunningLockTypeString(RunningLockType type);
+    static Rosen::PowerStateChangeReason GetDmsReasonByPowerReason(StateChangeReason reason);
+    static StateChangeReason GetReasonByUserActivity(UserActivityType type);
+    static WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     static const std::string JsonToSimpleStr(const std::string& json);
     static bool IsForegroundApplication(const std::string& appName);
 };
