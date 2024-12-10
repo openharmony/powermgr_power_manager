@@ -1,0 +1,15 @@
+{
+    "description": "Run the lock timeout",
+    "environment": [
+      {
+        "type": "device",
+        "label": "phone"
+      }
+    ],
+    "driver": {
+      "type": "DeviceTest",
+      "py_file": [
+        "testcases/level0/SUB_RUNNINGLOCK_TIMEOUT_TEST.py"
+      ]
+    }
+}
