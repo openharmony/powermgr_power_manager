@@ -109,6 +109,7 @@ public:
 
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) = 0;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) = 0;
+    virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgr");
 };

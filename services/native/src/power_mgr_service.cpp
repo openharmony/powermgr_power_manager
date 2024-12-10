@@ -2141,5 +2141,17 @@ void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEven
 #endif
     }
 }
+
+PowerErrors PowerMgrService::IsRunningLockEnabled(const RunningLockType type, bool& result)
+{
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    std::lock_guard lock(lockMutex_);
+    uint32_t num = runningLockMgr_->GetValidRunningLockNum(type);
+    POWER_HILOGI(COMP_SVC, "Hold running lock type:%{public}u, num:%{public}u", static_cast<uint32_t>(type), num);
+    result = num > 0 ? true : false;
+    return PowerErrors::ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

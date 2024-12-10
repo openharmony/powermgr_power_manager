@@ -192,6 +192,14 @@ public:
     std::string Dump(const std::vector<std::string>& args);
     PowerErrors GetError();
 
+    /**
+     * Check whether the type of running lock is enabled
+     * @param type The type of running lock for query if it is enabled
+     * @param result The result of whether the type of running lock is enabled
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result);
+
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:
 #endif
