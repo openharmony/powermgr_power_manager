@@ -203,6 +203,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UPDATE_WORK_SOURCE):
             ret = UpdateWorkSourceStub(data);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_RUNNINGLOCK_ENABLED):
+            ret = IsRunningLockEnabledStub(data, reply);
+            break;
         default:
             ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -233,7 +236,7 @@ int32_t PowerMgrStub::ReleaseRunningLockStub(MessageParcel& data)
 
 int32_t PowerMgrStub::IsRunningLockTypeSupportedStub(MessageParcel& data, MessageParcel& reply)
 {
-    auto type = static_cast<uint32_t >(RunningLockType::RUNNINGLOCK_BUTT);
+    auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
     bool ret = false;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
     ret = IsRunningLockTypeSupported(static_cast<RunningLockType>(type));
@@ -751,6 +754,17 @@ int32_t PowerMgrStub::LockScreenAfterTimingOutStub(MessageParcel& data, MessageP
     }
     PowerErrors ret = LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent, token);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(ret), E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::IsRunningLockEnabledStub(MessageParcel& data, MessageParcel& reply)
+{
+    auto type = static_cast<uint32_t>(RunningLockType::RUNNINGLOCK_BUTT);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, type, E_READ_PARCEL_ERROR);
+    bool result = false;
+    PowerErrors error = IsRunningLockEnabled(static_cast<RunningLockType>(type), result);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Bool, result, E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
 } // namespace PowerMgr

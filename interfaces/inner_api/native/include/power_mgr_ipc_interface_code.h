@@ -64,7 +64,8 @@ enum class PowerMgrInterfaceCode {
     SET_SUSPEND_TAG,
     REG_SYNC_HIBERNATE_CALLBACK,
     UNREG_SYNC_HIBERNATE_CALLBACK,
-    UPDATE_WORK_SOURCE
+    UPDATE_WORK_SOURCE,
+    IS_RUNNINGLOCK_ENABLED
 };
 } // space PowerMgr
 } // namespace OHOS
