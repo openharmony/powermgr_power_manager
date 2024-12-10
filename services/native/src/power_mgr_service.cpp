@@ -73,6 +73,7 @@ static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 10000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
+constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
@@ -1931,14 +1932,15 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
 
     if (isSwitchOpen && isScreenOn) {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-        if (!powerStateMachine->IsHibernating()) {
+        // not power on virtual screen
+        if (!powerStateMachine->IsHibernating() && screenId < VIRTUAL_SCREEN_START_ID) {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens");
-            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN);
+            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
         }
 #endif
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
-        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN, "ScreenConnected");
+        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT, "ScreenConnected");
     } else if (!isSwitchOpen && !isScreenOn) {
         POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power off all screens when switch is closed");
         suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
@@ -1946,7 +1948,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
         if (curExternalScreenNum > 1) {
             // When the power state is ON and there are 2 external screens or more, power off closed internal screen
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens except for the closed internal screen");
-            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN);
+            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
             suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         }
     }
