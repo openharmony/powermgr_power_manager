@@ -142,7 +142,7 @@ bool ShutdownDialog::ConnectSystemUi()
     Want want;
     want.SetElementName(dialogBundleName_, dialogAbilityName_);
 
-    void *handler = dlopen("libpower_ability.z.so", RTLD_NOW);
+    void *handler = dlopen("libpower_ability.z.so", RTLD_NOW | RTLD_NODELETE);
     if (handler == nullptr) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "dlopen libpower_ability.z.so failed, reason : %{public}s", dlerror());
         return false;
@@ -194,6 +194,11 @@ void ShutdownDialog::LoadDialogConfig()
         return;
     }
 
+    if (root.isNull() || !root.isObject()) {
+        POWER_HILOGE(COMP_UTILS, "json root invalid[%{public}s]", contentStr.c_str());
+        return;
+    }
+    
     if (!root["bundleName"].isString() ||
         !root["abilityName"].isString() || !root["uiExtensionType"].isString()) {
         POWER_HILOGE(COMP_UTILS, "json varibale not support");

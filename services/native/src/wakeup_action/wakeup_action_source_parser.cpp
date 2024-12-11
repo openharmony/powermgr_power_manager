@@ -86,6 +86,11 @@ std::shared_ptr<WakeupActionSources> WakeupActionSourceParser::ParseSources(cons
         return parseSources;
     }
 
+    if (root.isNull() || !root.isObject()) {
+        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json root invalid[%{public}s]", jsonStr.c_str());
+        return parseSources;
+    }
+    
     Json::Value::Members members = root.getMemberNames();
     for (auto iter = members.begin(); iter != members.end(); iter++) {
         std::string key = *iter;
@@ -105,7 +110,7 @@ bool WakeupActionSourceParser::ParseSourcesProc(
 {
     std::string scene{""};
     uint32_t action = 0;
-    if (valueObj.isObject()) {
+    if (!valueObj.isNull() && valueObj.isObject()) {
         Json::Value sceneValue = valueObj[WakeupActionSource::SCENE_KEY];
         Json::Value actionValue = valueObj[WakeupActionSource::ACTION_KEY];
         if (sceneValue.isString()) {

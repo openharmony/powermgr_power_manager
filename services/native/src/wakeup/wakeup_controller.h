@@ -159,7 +159,7 @@ protected:
     WakeupListener listener_;
 };
 
-class PowerkeyWakeupMonitor : public WakeupMonitor {
+class PowerkeyWakeupMonitor : public WakeupMonitor, public std::enable_shared_from_this<PowerkeyWakeupMonitor> {
 public:
     explicit PowerkeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
     ~PowerkeyWakeupMonitor() override = default;
@@ -168,6 +168,7 @@ public:
 
 private:
     int32_t powerkeyShortPressId_ {-1};
+    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent);
 };
 
 class KeyboardWakeupMonitor : public WakeupMonitor {

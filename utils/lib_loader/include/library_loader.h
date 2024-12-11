@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef POWER_WAKEUP_TEST_H
-#define POWER_WAKEUP_TEST_H
+#ifndef POWERMGR_UTILS_LIB_LOADER_LIBRARY_LOADER_H
+#define POWERMGR_UTILS_LIB_LOADER_LIBRARY_LOADER_H
 
-#include <gtest/gtest.h>
-
-#ifdef POWERMGR_GTEST
-#define private   public
-#define protected public
-#endif
+#include <dlfcn.h>
+#include <nocopyable.h>
+#include <string>
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerWakeupTest : public testing::Test {
+class LibraryLoader : public NoCopyable {
 public:
+    explicit LibraryLoader(const std::string& libPath, int32_t flags = RTLD_LAZY | RTLD_NODELETE);
+    virtual ~LibraryLoader() noexcept;
+    void* LoadInterface(const char* symbolName);
+
+private:
+    const std::string libPath_;
+    void* libHandle_ {nullptr};
 };
+
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWER_WAKEUP_TEST_H
+#endif // POWERMGR_UTILS_LIB_LOADER_LIBRARY_LOADER_H

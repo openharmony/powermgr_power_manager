@@ -63,6 +63,8 @@ private:
     void Prepare(bool isReboot);
     void TurnOffScreen();
     void PublishShutdownEvent() const;
+    bool TakeOverShutdownAction(const std::string& reason, bool isReboot);
+    bool AllowedToBeTakenOver(const std::string& reason) const;
 
     static bool TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
     static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);

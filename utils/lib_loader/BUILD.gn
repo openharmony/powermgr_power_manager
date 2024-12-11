@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,42 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("../powermgr.gni")
+import("//base/powermgr/power_manager/powermgr.gni")
 
-config("utils_config") {
-  include_dirs = [ "native/include" ]
+config("private_config") {
+  include_dirs = [
+    "include",
+    "../native/include",
+  ]
 }
 
-declare_args() {
-  power_manager_feature_coverage = false
+config("public_config") {
+  include_dirs = [ "include" ]
 }
 
-config("coverage_flags") {
-  if (power_manager_feature_coverage) {
-    cflags = [ "--coverage" ]
-    cflags_cc += [ "--coverage" ]
-    ldflags = [ "--coverage" ]
+ohos_source_set("power_lib_loader") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
   }
-}
+  branch_protector_ret = "pac_ret"
 
-ohos_source_set("power_utils") {
   sources = [
-    "native/src/power_utils.cpp",
-    "native/src/power_xcollie.cpp",
+    "src/interface_loader.cpp",
+    "src/library_loader.cpp",
   ]
 
-  include_dirs = [ "${powermgr_inner_api}/native/include" ]
+  configs = [
+    ":private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
 
-  configs = [ "${powermgr_utils_path}:coverage_flags" ]
-
-  public_configs = [ ":utils_config" ]
+  public_configs = [ ":public_config" ]
 
   external_deps = [
     "c_utils:utils",
-    "hicollie:libhicollie",
     "hilog:libhilog",
-    "window_manager:libdm_lite",
   ]
 
   subsystem_name = "powermgr"

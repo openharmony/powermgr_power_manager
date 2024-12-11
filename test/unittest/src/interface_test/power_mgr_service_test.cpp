@@ -28,6 +28,7 @@
 #include "power_common.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
+#include "power_utils.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -610,14 +611,14 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
     ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService026 failed to get PowerStateMachine";
 
-    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("incoming call"), WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL);
-    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("shell"), WakeupDeviceType::WAKEUP_DEVICE_SHELL);
-    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright"), WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT);
-    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright_auth_success"),
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("incoming call"), WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL);
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("shell"), WakeupDeviceType::WAKEUP_DEVICE_SHELL);
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("pre_bright"), WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT);
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("pre_bright_auth_success"),
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS);
-    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright_auth_fail_screen_on"),
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("pre_bright_auth_fail_screen_on"),
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON);
-    EXPECT_EQ(stateMaschine_->ParseWakeupDeviceType("pre_bright_auth_fail_screen_off"),
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("pre_bright_auth_fail_screen_off"),
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
 
     pmsTest_->OnStop();

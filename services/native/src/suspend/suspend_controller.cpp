@@ -32,6 +32,7 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
+#include "power_utils.h"
 #include "setting_helper.h"
 #include "system_suspend_controller.h"
 #include "wakeup_controller.h"
@@ -483,20 +484,22 @@ std::shared_ptr<SuspendMonitor> SuspendController::GetSpecifiedSuspendMonitor(Su
 void SuspendController::PowerOffInternalScreen(SuspendDeviceType type)
 {
     using namespace OHOS::Rosen;
+    auto changeReason = stateMachine_->GetReasonBySuspendType(type);
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
     uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(
-        screenId, ScreenPowerState::POWER_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, ScreenPowerState::POWER_OFF, dmsReason);
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Power off internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d", type,
+        "Power off internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
         static_cast<uint32_t>(screenId), ret);
 }
 
 void SuspendController::PowerOffAllScreens(SuspendDeviceType type)
 {
     using namespace OHOS::Rosen;
-    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(
-        ScreenPowerState::POWER_OFF, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
-    POWER_HILOGI(FEATURE_SUSPEND, "Power off all screens, type = %{public}u, ret = %{public}d", type, ret);
+    auto changeReason = stateMachine_->GetReasonBySuspendType(type);
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
+    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF, dmsReason);
+    POWER_HILOGI(FEATURE_SUSPEND, "Power off all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }
 
 bool SuspendController::IsPowerOffInernalScreenOnlyScene(

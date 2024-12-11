@@ -32,6 +32,7 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
+#include "power_utils.h"
 #include "setting_helper.h"
 #include "suspend_controller.h"
 #include "system_suspend_controller.h"
@@ -458,13 +459,6 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
     }
 #endif
 
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    if (IsLowCapacityWakeup(reason)) {
-        ProcessLowCapacityWakeup();
-        return;
-    }
-#endif
-
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
@@ -684,19 +678,22 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
 {
     using namespace OHOS::Rosen;
+    auto changeReason = stateMachine_->GetReasonByWakeType(type);
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
     uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(
-        screenId, ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
-    POWER_HILOGI(FEATURE_WAKEUP, "Power on internal screen, type = %{public}u, screenId = %{public}u, ret = %{public}d",
-        type, static_cast<uint32_t>(screenId), ret);
+    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, ScreenPowerState::POWER_ON, dmsReason);
+    POWER_HILOGI(FEATURE_WAKEUP,
+        "Power on internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
+        static_cast<uint32_t>(screenId), ret);
 }
 
 void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
 {
     using namespace OHOS::Rosen;
-    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(
-        ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH);
-    POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, type = %{public}u, ret = %{public}d", type, ret);
+    auto changeReason = stateMachine_->GetReasonByWakeType(type);
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
+    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON, dmsReason);
+    POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }
 
 bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) const
@@ -808,34 +805,63 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
+    std::weak_ptr<PowerkeyWakeupMonitor> weak = weak_from_this();
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
-
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            if (pms == nullptr) {
+        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            std::shared_ptr<PowerkeyWakeupMonitor> strong = weak.lock();
+            if (!strong) {
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
                 return;
             }
-            pms->RefreshActivityInner(
-                static_cast<int64_t>(time(nullptr)), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
-            std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
-            bool poweroffInterrupted = false;
-            if (PowerKeySuspendMonitor::powerkeyScreenOff_.load()) {
-                auto stateMachine = pms->GetPowerStateMachine();
-                if (!stateMachine) {
-                    POWER_HILOGE(FEATURE_WAKEUP, "TryToCancelScreenOff, state machine is nullptr");
-                } else {
-                    poweroffInterrupted = stateMachine->TryToCancelScreenOff();
-                }
-            }
-            // sync with the end of powerkey screen off task
-            ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
-            suspendController->RecordPowerKeyDown(poweroffInterrupted);
-            Notify();
+
+            strong->ReceivePowerkeyCallback(keyEvent);
         });
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
     return powerkeyShortPressId_ >= 0 ? true : false;
+}
+
+void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
+
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] PowerMgrService is nullptr");
+        return;
+    }
+    int64_t now = static_cast<int64_t>(time(nullptr));
+    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+
+    std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    if (wakeupController == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupController is nullptr");
+        return;
+    }
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    if (wakeupController->IsLowCapacityWakeup(reason)) {
+        wakeupController->ProcessLowCapacityWakeup();
+        return;
+    }
+#endif
+    std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] suspendController is nullptr");
+        return;
+    }
+    bool poweroffInterrupted = false;
+    if (PowerKeySuspendMonitor::powerkeyScreenOff_.load()) {
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (!stateMachine) {
+            POWER_HILOGE(FEATURE_WAKEUP, "TryToCancelScreenOff, state machine is nullptr");
+        } else {
+            poweroffInterrupted = stateMachine->TryToCancelScreenOff();
+        }
+    }
+    // sync with the end of powerkey screen off task
+    ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
+    suspendController->RecordPowerKeyDown(poweroffInterrupted);
+    Notify();
 }
 
 void PowerkeyWakeupMonitor::Cancel()

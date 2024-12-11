@@ -37,7 +37,8 @@
             "power_manager_feature_dialog_path",
             "power_manager_feature_charging_type_setting",
             "power_manager_feature_external_screen_management",
-            "power_manager_feature_block_long_press"
+            "power_manager_feature_block_long_press",
+            "power_manager_feature_judging_takeover_shutdown"
         ],
         "adapted_system_type": [
             "standard"
@@ -97,7 +98,8 @@
                     "//base/powermgr/power_manager/utils/shell:power-shell",
                     "//base/powermgr/power_manager/utils/param:power_sysparam",
                     "//base/powermgr/power_manager/utils/permission:power_permission",
-                    "//base/powermgr/power_manager/utils/setting:power_setting"
+                    "//base/powermgr/power_manager/utils/setting:power_setting",
+                    "//base/powermgr/power_manager/power_dialog:dialog_hap"
                 ],
                 "fwk_group": [
                     "//base/powermgr/power_manager/frameworks:power_napi",

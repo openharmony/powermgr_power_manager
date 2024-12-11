@@ -117,14 +117,12 @@ napi_value Power::IsScreenOn(napi_env env, napi_callback_info info)
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
     NAPI_ASSERT(env, (status == napi_ok), "Failed to get cb info");
 
-    auto asyncCallbackInfo = new PowerAsyncCallbackInfo();
+    std::unique_ptr<PowerAsyncCallbackInfo> asyncCallbackInfo = std::make_unique<PowerAsyncCallbackInfo>();
     if (asyncCallbackInfo == nullptr) {
         POWER_HILOGE(COMP_FWK, "Failed to create asyncCallbackInfo");
         return nullptr;
     }
     asyncCallbackInfo->env = env;
-
-    std::unique_ptr<PowerAsyncCallbackInfo> asCallbackInfoPtr(asyncCallbackInfo);
     napi_valuetype type;
     if (argc == 1) {
         NAPI_CALL(env, napi_typeof(env, args[0], &type));
@@ -142,7 +140,7 @@ napi_value Power::IsScreenOn(napi_env env, napi_callback_info info)
         POWER_HILOGD(COMP_FWK, "callbackRef is not null");
         napi_get_undefined(env, &result);
     }
-    IsScreenOnCallBack(env, asCallbackInfoPtr);
+    IsScreenOnCallBack(env, asyncCallbackInfo);
     return result;
 }
 
