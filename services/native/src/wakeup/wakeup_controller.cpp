@@ -800,22 +800,16 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
-    auto weak = weak_from_this();
+    std::weak_ptr<PowerkeyWakeupMonitor> weak = weak_from_this();
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
-        keyOption, [weak, this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            auto strong = weak.lock();
+        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            std::shared_ptr<PowerkeyWakeupMonitor> strong = weak.lock();
             if (!strong) {
                 POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
                 return;
             }
 
-            ReceivePowerkeyCallback(keyEvent);
-
-            if (strong) {
-                strong->Notify();
-            } else {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
-            }
+            strong->ReceivePowerkeyCallback(keyEvent);
         });
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
@@ -862,6 +856,7 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
     // sync with the end of powerkey screen off task
     ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
     suspendController->RecordPowerKeyDown(poweroffInterrupted);
+    Notify();
 }
 
 void PowerkeyWakeupMonitor::Cancel()
