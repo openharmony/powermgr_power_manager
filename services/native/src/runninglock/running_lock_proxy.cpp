@@ -211,7 +211,7 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
         auto& tokenWksMap = proxyItem.second;
         for (auto& tokenWksItem : tokenWksMap) {
             if (GetRunningLockName(tokenWksItem.first).find(OFFLOAD_RUNNING_NAME) != std::string::npos) {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
+                POWER_HILOGD(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
                 continue;
             }
             auto& wksMap = tokenWksItem.second.first;
@@ -251,7 +251,7 @@ bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
         auto& tokenWksMap = proxyItem.second;
         for (auto& tokenWksItem : tokenWksMap) {
             if (GetRunningLockName(tokenWksItem.first).find(OFFLOAD_RUNNING_NAME) != std::string::npos) {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
+                POWER_HILOGD(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
                 continue;
             }
             auto& wksMap = tokenWksItem.second.first;
