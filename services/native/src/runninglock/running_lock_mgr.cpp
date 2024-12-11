@@ -119,12 +119,8 @@ void RunningLockMgr::InitLocksTypeBackground()
     std::function<int32_t(bool, RunningLockParam)> activate =
         [this](bool active, RunningLockParam lockInnerParam) -> int32_t {
         if (active) {
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Background runningLock active, type=%{public}d name=%{public}s",
-                lockInnerParam.type, lockInnerParam.name.c_str());
             return runningLockAction_->Lock(lockInnerParam);
         } else {
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "Background runningLock inactive, type=%{public}d name=%{public}s",
-                lockInnerParam.type, lockInnerParam.name.c_str());
             return runningLockAction_->Unlock(lockInnerParam);
         }
     };
@@ -287,8 +283,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInnerByName(
             lockInner = iter.second;
         }
         auto& lockParam = iter.second->GetParam();
-        result.append(" lockid=").append(ToString(lockParam.lockid))
-            .append(" name=").append(lockParam.name);
+        result.append(" name=").append(lockParam.name);
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "DumpInfo: %{public}s", result.c_str());
     return lockInner;
@@ -301,8 +296,8 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "CreateRunningLock name:%{public}s, type:%{public}d, lockid:%{public}s",
-        lockInner->GetName().c_str(), lockInner->GetType(), std::to_string(runningLockParam.lockid).c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "CreateRunningLock name:%{public}s, type:%{public}d",
+        lockInner->GetName().c_str(), lockInner->GetType());
     {
         std::lock_guard<std::mutex> lock(mutex_);
         runningLocks_.emplace(remoteObj, lockInner);
@@ -319,9 +314,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj, const std:
     bool result = false;
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        auto lockid = TransformLockid(remoteObj);
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
-            std::to_string(lockid).c_str());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
         lockInner = GetRunningLockInnerByName(name);
         if (lockInner == nullptr) {
             POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
@@ -439,14 +432,12 @@ bool RunningLockMgr::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 {
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        auto lockid = TransformLockid(remoteObj);
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
-            std::to_string(lockid).c_str());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "try UpdateWorkSource, name: %{public}s, type: %{public}d lockid: %{public}s",
-        lockInnerParam.name.c_str(), lockInnerParam.type, std::to_string(lockInnerParam.lockid).c_str());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "try UpdateWorkSource, name: %{public}s, type: %{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type);
     runninglockProxy_->UpdateWorkSource(lockInner->GetPid(), lockInner->GetUid(), remoteObj, workSources);
     return true;
 }
@@ -458,14 +449,12 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 #endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        auto lockid = TransformLockid(remoteObj);
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
-            std::to_string(lockid).c_str());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "try Lock, name: %{public}s, type: %{public}d lockid: %{public}s",
-        lockInnerParam.name.c_str(), lockInnerParam.type, std::to_string(lockInnerParam.lockid).c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "try Lock, name: %{public}s, type: %{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->IsProxied()) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
         return false;
@@ -504,9 +493,7 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
 #endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        auto lockid = TransformLockid(remoteObj);
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr, lockid=%{public}s", __func__,
-            std::to_string(lockid).c_str());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
         lockInner = GetRunningLockInnerByName(name);
         if (lockInner == nullptr) {
             POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
@@ -518,8 +505,8 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
         runninglockProxy_->UpdateProxyState(lockInner->GetPid(), lockInner->GetUid(), remoteObj, false);
     }
     auto lockInnerParam = lockInner->GetParam();
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "try UnLock, name: %{public}s, type: %{public}d lockid: %{public}s",
-        lockInnerParam.name.c_str(), lockInnerParam.type, std::to_string(lockInnerParam.lockid).c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "try UnLock, name: %{public}s, type: %{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock is already disabled, name=%{public}s", lockInner->GetName().c_str());
         return false;
@@ -631,7 +618,9 @@ void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerP
             .append(" BUNDLENAME=").append(bundleName)
             .append(" TAG=").append(tag)
             .append(" TIMESTAMP=").append(std::to_string(timestamp));
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "runninglock message: %{public}s", message.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "runninglock message: PID=%{public}d UID=%{public}d TYPE=%{public}d "
+        "NAME=%{public}s BUNDLENAME=%{public}s TAG=%{public}s",
+        pid, uid, type, lockInnerParam.name.c_str(), bundleName.c_str(), tag.c_str());
     if (g_runningLockCallback != nullptr) {
         g_runningLockCallback->HandleRunningLockMessage(message);
     }
@@ -680,8 +669,8 @@ void RunningLockMgr::LockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "try LockInnerByProxy, name: %{public}s, type: %{public}d lockid: %{public}s",
-        lockInnerParam.name.c_str(), lockInnerParam.type, std::to_string(lockInnerParam.lockid).c_str());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "try LockInnerByProxy, name: %{public}s, type: %{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type);
     RunningLockState lastState = lockInner->GetState();
     if (lastState == RunningLockState::RUNNINGLOCK_STATE_PROXIED) {
         lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
@@ -698,8 +687,8 @@ void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "try UnlockInnerByProxy, name: %{public}s, type: %{public}d lockid: %{public}s",
-        lockInnerParam.name.c_str(), lockInnerParam.type, std::to_string(lockInnerParam.lockid).c_str());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "try UnlockInnerByProxy, name: %{public}s, type: %{public}d",
+        lockInnerParam.name.c_str(), lockInnerParam.type);
     UnLock(remoteObj);
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_PROXIED);
 }
