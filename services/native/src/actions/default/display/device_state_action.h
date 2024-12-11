@@ -16,8 +16,8 @@
 #ifndef POWERMGR_DEVICE_STATE_ACTION_H
 #define POWERMGR_DEVICE_STATE_ACTION_H
 
-#include "dm_common.h"
 #include "display_manager_lite.h"
+#include "dm_common.h"
 
 #include "actions/idevice_state_action.h"
 #include "display_power_callback_stub.h"
@@ -62,7 +62,6 @@ private:
     bool interruptingScreenOff_ {false};
     bool screenOffInterrupted_ {false};
     bool screenOffStarted_ {false};
-    Rosen::PowerStateChangeReason GetDmsReasonByPowerReason(StateChangeReason reason);
     bool isRegister_ {false};
     sptr<DisplayPowerCallback> dispCallback_ {nullptr};
     std::function<void(uint32_t)> actionCallback_ {nullptr};

@@ -179,21 +179,24 @@ void RunningLockMgr::InitLocksTypeProximity()
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
             [this](bool active, [[maybe_unused]] RunningLockParam runningLockParam) -> int32_t {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL action start");
+            FFRTTask task = [this] {
+                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+                if (pms == nullptr) {
+                    return;
+                }
+                auto stateMachine = pms->GetPowerStateMachine();
+                if (stateMachine == nullptr) {
+                    return;
+                }
+                PreprocessBeforeAwake();
+                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+            };
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
                 proximityController_.Enable();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
-                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-                if (pms == nullptr) {
-                    return RUNNINGLOCK_FAILURE;
-                }
-                auto stateMachine = pms->GetPowerStateMachine();
-                if (stateMachine == nullptr) {
-                    return RUNNINGLOCK_FAILURE;
-                }
-                PreprocessBeforeAwake();
-                stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+                FFRTUtils::SubmitTask(task);
                 proximityController_.Disable();
                 proximityController_.Clear();
             }

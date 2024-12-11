@@ -61,6 +61,7 @@ enum class TransitResult {
     DISPLAY_ON_ERR = 4,
     DISPLAY_OFF_ERR = 5,
     FORBID_TRANSIT = 6,
+    PRE_BRIGHT_ERR = 7,
     OTHER_ERR = 99
 };
 
@@ -151,10 +152,8 @@ public:
     void BeginPowerkeyScreenOff();
     void EndPowerkeyScreenOff();
     void SetDisplaySuspend(bool enable);
-    StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasonBySuspendType(SuspendDeviceType type);
-    WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     int32_t GetExternalScreenNumber() const;
     void IncreaseExternalScreenNumber();
@@ -330,7 +329,7 @@ private:
     void ResetScreenOffPreTimeForSwing(int64_t displayOffTime);
     void ShowCurrentScreenLocks();
     void HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason);
-    bool HandlePreBrightState(StateChangeReason reason);
+    bool HandlePreBrightState(PowerState targetState, StateChangeReason reason);
     bool IsPreBrightAuthReason(StateChangeReason reason);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     bool NeedShowScreenLocks(PowerState state);

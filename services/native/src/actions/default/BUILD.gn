@@ -53,7 +53,12 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   public_configs = [ ":powermgr_actions_impl_public_config" ]
 
-  deps = [ "${powermgr_utils_path}/ffrt:power_ffrt" ]
+  deps = [
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper",
+    "${powermgr_utils_path}/lib_loader:power_lib_loader",
+  ]
 
   external_deps = [
     "c_utils:utils",

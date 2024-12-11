@@ -37,6 +37,7 @@
 #include "ffrt_utils.h"
 #include "permission.h"
 #include "power_common.h"
+#include "power_ext_intf_wrapper.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
 #include "power_xcollie.h"
@@ -70,12 +71,17 @@ const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
+constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 10000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
+constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
 #ifdef HAS_SENSORS_SENSOR_PART
 bool g_inLidMode = false;
+#endif
+#ifdef POWER_PICKUP_ENABLE
+bool g_isPickUpOpen = false;
 #endif
 } // namespace
 
@@ -100,9 +106,12 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
-    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
+#endif
+#ifdef POWER_PICKUP_ENABLE
+    AddSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
 #endif
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
@@ -152,6 +161,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
             POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
             return;
         }
+        PowerExtIntfWrapper::Instance().Init();
         auto powerStateMachine = power->GetPowerStateMachine();
         SettingHelper::UpdateCurrentUserId(); // update setting user id before get setting values
 #ifdef POWER_PICKUP_ENABLE
@@ -171,6 +181,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->InputMonitorInit();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
+        power->SubscribeCommonEvent();
 #ifdef POWER_MANAGER_WAKEUP_ACTION
         power->WakeupActionControllerInit();
 #endif
@@ -301,6 +312,7 @@ void PowerMgrService::RegisterSettingWakeupPickupGestureObserver()
 void PowerMgrService::WakeupPickupGestureSettingUpdateFunc(const std::string& key)
 {
     bool isSettingEnable = SettingHelper::GetSettingWakeupPickup(key);
+    g_isPickUpOpen = isSettingEnable;
     WakeupController::PickupConnectMotionConfig(isSettingEnable);
     POWER_HILOGI(COMP_SVC, "PickupConnectMotionConfig done, isSettingEnable=%{public}d", isSettingEnable);
     WakeupController::ChangePickupWakeupSourceConfig(isSettingEnable);
@@ -621,6 +633,9 @@ void PowerMgrService::OnStop()
 #ifdef MSDP_MOVEMENT_ENABLE
     RemoveSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
 #endif
+#ifdef POWER_PICKUP_ENABLE
+    RemoveSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
+#endif
 #ifdef POWER_DOUBLECLICK_ENABLE
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
 #endif
@@ -636,6 +651,7 @@ void PowerMgrService::OnStop()
     UnRegisterMovementCallback();
 #endif
     UnregisterExternalCallback();
+    PowerExtIntfWrapper::Instance().DeInit();
 }
 
 void PowerMgrService::Reset()
@@ -680,8 +696,10 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s Add",
         systemAbilityId, deviceId.c_str());
-    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        SubscribeCommonEvent();
+    if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
+            this->GetPowerModeModule().InitPowerMode();
+        }
     }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
@@ -695,6 +713,12 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         }
         power->UnRegisterMovementCallback();
         power->RegisterMovementCallback();
+    }
+#endif
+#ifdef POWER_PICKUP_ENABLE
+    if (systemAbilityId == MSDP_MOTION_SERVICE_ID && g_isPickUpOpen == true) {
+        WakeupController::PickupConnectMotionConfig(false);
+        WakeupController::PickupConnectMotionConfig(true);
     }
 #endif
 }
@@ -950,6 +974,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     if (suspendController_) {
         suspendController_->StopSleep();
     }
+    SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
 
     POWER_HILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Shutdown(reason);
@@ -995,7 +1020,7 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
-    WakeupRunningLock wakeupRunningLock;
+    BackgroundRunningLock wakeupRunningLock("PowerMgrWakeupLock", WAKEUP_LOCK_TIMEOUT_MS);
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
     return PowerErrors::ERR_OK;
 }
@@ -1121,6 +1146,8 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory)
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
         pid, uid, static_cast<int>(clearMemory));
+    BackgroundRunningLock hibernateGuard(
+        "hibernateGuard", HIBERNATE_GUARD_TIMEOUT_MS); // avoid hibernate breaked by S3/ULSR
     HibernateControllerInit();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
@@ -1606,19 +1633,19 @@ void PowerMgrService::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallbac
     shutdownController_->RemoveCallback(callback);
 }
 
-PowerMgrService::WakeupRunningLock::WakeupRunningLock()
+PowerMgrService::BackgroundRunningLock::BackgroundRunningLock(std::string name, int32_t timeOutMs)
 {
     token_ = new (std::nothrow) RunningLockTokenStub();
     if (token_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
-    RunningLockInfo info = {"PowerMgrWakeupLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK};
+    RunningLockInfo info = {name, OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND};
     pms->CreateRunningLock(token_, info);
-    pms->Lock(token_, WAKEUP_LOCK_TIMEOUT_MS);
+    pms->Lock(token_, timeOutMs);
 }
 
-PowerMgrService::WakeupRunningLock::~WakeupRunningLock()
+PowerMgrService::BackgroundRunningLock::~BackgroundRunningLock()
 {
     if (token_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "token_ is nullptr");
@@ -1904,9 +1931,16 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
         static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
 
     if (isSwitchOpen && isScreenOn) {
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+        // not power on virtual screen
+        if (!powerStateMachine->IsHibernating() && screenId < VIRTUAL_SCREEN_START_ID) {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens");
+            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
+        }
+#endif
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
-        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN, "ScreenConnected");
+        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT, "ScreenConnected");
     } else if (!isSwitchOpen && !isScreenOn) {
         POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power off all screens when switch is closed");
         suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
@@ -1914,7 +1948,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
         if (curExternalScreenNum > 1) {
             // When the power state is ON and there are 2 external screens or more, power off closed internal screen
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens except for the closed internal screen");
-            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN);
+            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
             suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         }
     }
@@ -1961,7 +1995,6 @@ void PowerMgrService::SubscribeCommonEvent()
     using namespace OHOS::EventFwk;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
@@ -2056,10 +2089,10 @@ int64_t PowerMgrService::GetSettingDisplayOffTime(int64_t defaultTime)
 void PowerMgrService::UpdateSettingInvalidDisplayOffTime()
 {
     if (!SettingHelper::IsSettingDisplayAcScreenOffTimeValid()) {
-        SettingHelper::SetSettingDisplayAcScreenOffTime(DEFAULT_AC_DISPLAY_OFF_TIME_MS);
+        SettingHelper::SetSettingDisplayAcScreenOffTime(PowerStateMachine::DEFAULT_AC_DISPLAY_OFF_TIME_MS);
     }
     if (!SettingHelper::IsSettingDisplayDcScreenOffTimeValid()) {
-        SettingHelper::SetSettingDisplayDcScreenOffTime(DEFAULT_DC_DISPLAY_OFF_TIME_MS);
+        SettingHelper::SetSettingDisplayDcScreenOffTime(PowerStateMachine::DEFAULT_DC_DISPLAY_OFF_TIME_MS);
     }
 }
 
@@ -2086,16 +2119,13 @@ void PowerCommonEventSubscriber::OnPowerConnectStatusChanged(PowerConnectStatus 
     }
     stateMachine->DisplayOffTimeUpdateFunc();
 
-#ifdef POWER_MANAGER_ENABLE_SWITCH_SUSPEND
     power->OnChargeStateChanged(); // should be called after suspend sources settings updated
-#endif
 }
 #endif
 
 void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    POWER_HILOGI(COMP_SVC, "Power OnReceiveEvent:%{public}s", action.c_str());
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
@@ -2105,10 +2135,6 @@ void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEven
         pms->UnregisterAllSettingObserver();    // unregister old user observer
         SettingHelper::UpdateCurrentUserId();   // update user Id
         pms->RegisterAllSettingObserver();      // register new user observer
-    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY) {
-        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            pms->GetPowerModeModule().InitPowerMode();
-        }
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED) {
         OnPowerConnectStatusChanged(PowerConnectStatus::POWER_CONNECT_AC);

@@ -21,8 +21,6 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerSuspendTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
 };
 } // namespace PowerMgr
 } // namespace OHOS

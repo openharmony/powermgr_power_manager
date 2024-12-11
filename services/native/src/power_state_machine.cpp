@@ -121,6 +121,7 @@ void PowerStateMachine::InitTransitMap()
 {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::vector<PowerState> awake { PowerState::SLEEP };
+    std::vector<PowerState> hibernate { PowerState::SLEEP };
 #else
     std::vector<PowerState> awake { PowerState::SLEEP, PowerState::HIBERNATE };
 #endif
@@ -130,6 +131,9 @@ void PowerStateMachine::InitTransitMap()
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
     forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(hibernate.begin(), hibernate.end()));
+#endif
 
     allowMapByReason_.insert({
         {
@@ -445,32 +449,6 @@ void PowerStateMachine::SuspendDeviceInner(
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
 }
 
-WakeupDeviceType PowerStateMachine::ParseWakeupDeviceType(const std::string& details)
-{
-    WakeupDeviceType parsedType = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION;
-
-    if (strcmp(details.c_str(), "pre_bright") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT;
-    } else if (strcmp(details.c_str(), "pre_bright_auth_success") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS;
-    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_on") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
-    } else if (strcmp(details.c_str(), "pre_bright_auth_fail_screen_off") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    } else if (strcmp(details.c_str(), "incoming call") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL;
-    } else if (strcmp(details.c_str(), "fake_str_check_unlock") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR;
-    } else if (strcmp(details.c_str(), "shell") == 0) {
-        parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
-    }
-
-    if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
-        POWER_HILOGI(FEATURE_WAKEUP, "Parsed wakeup type is %{public}d", static_cast<uint32_t>(parsedType));
-    }
-    return parsedType;
-}
-
 bool PowerStateMachine::IsPreBrightAuthReason(StateChangeReason reason)
 {
     bool ret = false;
@@ -531,7 +509,7 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
 
     StateChangeReason reason = GetReasonByWakeType(type);
     if (!timeoutTriggered && IsPreBrightAuthReason(reason)) {
-        POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+        POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
             PowerUtils::GetReasonTypeString(reason).c_str());
         CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
     }
@@ -587,7 +565,7 @@ void PowerStateMachine::WakeupDeviceInner(
     }
 
     if (type == WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
-        type = ParseWakeupDeviceType(details);
+        type = PowerUtils::ParseWakeupDeviceType(details);
     }
 
     if (IsPreBrightWakeUp(type)) {
@@ -811,7 +789,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         hibernating_ = false;
         return false;
     }
-    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, GetPreHibernateDelay());
+    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, 0);
     return true;
 }
 #endif
@@ -1651,7 +1629,7 @@ void PowerStateMachine::HandleProximityScreenOffTimer(PowerState state, StateCha
 #endif
 }
 
-bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
+bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChangeReason reason)
 {
     bool ret = false;
     PowerStateMachine::PreBrightState curState = preBrightState_.load();
@@ -1666,11 +1644,11 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
                     detail, pkgName, true);
             };
             if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
-                POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+                POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
                     PowerUtils::GetReasonTypeString(reason).c_str());
                 CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
             }
-            POWER_HILOGD(FEATURE_POWER_STATE, "Start pre-bright-auth timer");
+            POWER_HILOGI(FEATURE_POWER_STATE, "Start pre-bright-auth timer");
             ffrtTimer_->SetTimer(TIMER_ID_PRE_BRIGHT_AUTH, authFailTask, PRE_BRIGHT_AUTH_TIMER_DELAY_MS);
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_STARTED, std::memory_order_relaxed);
             ret = true;
@@ -1680,13 +1658,17 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_FINISHED, std::memory_order_relaxed);
             ret = true;
         }
+        POWER_HILOGW(
+            FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
     } else {
-        if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
-            POWER_HILOGD(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
+        if (targetState != PowerState::SLEEP && curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
+            POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
                 PowerUtils::GetReasonTypeString(reason).c_str());
             CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
         }
-        preBrightState_.store(PowerStateMachine::PRE_BRIGHT_UNSTART, std::memory_order_relaxed);
+        if (targetState != PowerState::SLEEP) {
+            preBrightState_.store(PowerStateMachine::PRE_BRIGHT_UNSTART, std::memory_order_relaxed);
+        }
         ret = true;
     }
     POWER_HILOGD(FEATURE_WAKEUP, "Pre bright state: %{public}u", static_cast<uint32_t>(preBrightState_.load()));
@@ -1745,10 +1727,6 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     }
 
     HandleProximityScreenOffTimer(state, reason);
-    if (!HandlePreBrightState(reason)) {
-        return false;
-    }
-
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "StateController is not init");
@@ -1795,30 +1773,6 @@ void PowerStateMachine::BeginPowerkeyScreenOff()
 void PowerStateMachine::EndPowerkeyScreenOff()
 {
     stateAction_->EndPowerkeyScreenOff();
-}
-
-StateChangeReason PowerStateMachine::GetReasonByUserActivity(UserActivityType type)
-{
-    StateChangeReason ret = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
-    switch (type) {
-        case UserActivityType::USER_ACTIVITY_TYPE_BUTTON:
-            ret = StateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_TOUCH:
-            ret = StateChangeReason::STATE_CHANGE_REASON_TOUCH;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY:
-            ret = StateChangeReason::STATE_CHANGE_REASON_ACCESSIBILITY;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE:
-            ret = StateChangeReason::STATE_CHANGE_REASON_APPLICATION;
-            break;
-        case UserActivityType::USER_ACTIVITY_TYPE_ATTENTION: // fall through
-        case UserActivityType::USER_ACTIVITY_TYPE_OTHER:     // fall through
-        default:
-            break;
-    }
-    return ret;
 }
 
 StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
@@ -1892,6 +1846,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR:
             ret = StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH:
             ret = StateChangeReason::STATE_CHANGE_REASON_TP_TOUCH;
@@ -2056,6 +2013,11 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         RecordFailure(owner->currentState_, reason, TransitResult::LOCKING);
         return TransitResult::LOCKING;
     }
+
+    if (!owner->HandlePreBrightState(state_, reason)) {
+        return TransitResult::PRE_BRIGHT_ERR;
+    }
+
     TransitResult ret = action_(reason);
     if (ret == TransitResult::SUCCESS) {
         bool needNotify = NeedNotify(owner->currentState_);
