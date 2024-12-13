@@ -38,6 +38,10 @@ SuspendDeviceType SuspendSources::mapSuspendDeviceType(const std::string& key)
         return SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
     }
 
+    if (key == SuspendSources::TP_COVER_KEY) {
+        return SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER;
+    }
+
     return SuspendDeviceType::SUSPEND_DEVICE_REASON_MIN;
 }
 
