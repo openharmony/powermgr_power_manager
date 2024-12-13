@@ -168,6 +168,11 @@ void ShutdownDialog::LoadDialogConfig()
         return;
     }
 
+    if (root.isNull() || !root.isObject()) {
+        POWER_HILOGE(COMP_UTILS, "json root invalid[%{public}s]", contentStr.c_str());
+        return;
+    }
+    
     if (!root["bundleName"].isString() ||
         !root["abilityName"].isString() || !root["uiExtensionType"].isString()) {
         POWER_HILOGE(COMP_UTILS, "json varibale not support");
