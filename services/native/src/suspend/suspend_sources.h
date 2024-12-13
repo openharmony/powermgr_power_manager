@@ -71,6 +71,7 @@ public:
     static const constexpr char* TIMEOUT_KEY = "timeout";
     static const constexpr char* LID_KEY = "lid";
     static const constexpr char* SWITCH_KEY = "switch";
+    static const constexpr char* TP_COVER_KEY = "tp_cover";
     SuspendSources() = default;
     ~SuspendSources() = default;
     static SuspendDeviceType mapSuspendDeviceType(const std::string& key);

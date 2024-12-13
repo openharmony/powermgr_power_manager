@@ -214,6 +214,15 @@ public:
     void Cancel() override;
 };
 
+class TPCoverSuspendMonitor : public SuspendMonitor, public std::enable_shared_from_this<TPCoverSuspendMonitor> {
+public:
+    explicit TPCoverSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
+    ~TPCoverSuspendMonitor() override = default;
+    bool Init() override;
+    void Cancel() override;
+    int32_t TPCoverReleaseId_ {-1};
+};
+
 } // namespace PowerMgr
 } // namespace OHOS
 
