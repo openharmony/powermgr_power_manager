@@ -54,17 +54,17 @@ void PowerMgrServiceMockParcelTest::TearDownTestCase()
 
 void PowerMgrServiceMockParcelTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
 void PowerMgrServiceMockParcelTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged.");
 }
 
 void PowerMgrServiceMockParcelTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+    POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**
@@ -75,6 +75,7 @@ namespace {
  */
 HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSize.Level2)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest001 start.");
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo runningLockInfo;
@@ -92,6 +93,7 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
     EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLock(true, pid, uid));
     EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLocks(true, {std::make_pair(pid, uid)}));
     EXPECT_FALSE(g_powerMgrServiceProxy->ResetRunningLocks());
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest001 end.");
 }
 
 /**
@@ -102,8 +104,10 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
  */
 HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSize.Level2)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest002 start.");
+    int32_t PARM_ONE = 1;
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
-    int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
+    int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + PARM_ONE;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
     EXPECT_EQ(g_powerMgrServiceProxy->SuspendDevice(0, abnormaltype, false), PowerErrors::ERR_CONNECTION_FAIL);
     auto error = g_powerMgrServiceProxy->WakeupDevice(GetTickCount(),
@@ -120,6 +124,7 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSi
     EXPECT_EQ(g_powerMgrServiceProxy->SetDeviceMode(setMode), PowerErrors::ERR_CONNECTION_FAIL);
     PowerMode getMode = g_powerMgrServiceProxy->GetDeviceMode();
     EXPECT_TRUE(getMode == setMode);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest002 end.");
 }
 
 /**
@@ -130,6 +135,7 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSi
  */
 HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSize.Level2)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest003 start.");
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     sptr<IPowerStateCallback> stateCb = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCb = new PowerModeTestCallback();
@@ -152,5 +158,6 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSi
     std::string errorCode = "remote error";
     std::string actualDebugInfo = g_powerMgrServiceProxy->ShellDump(dumpArgs, dumpArgs.size());
     EXPECT_EQ(errorCode, actualDebugInfo);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest003 end.");
 }
 } // namespace

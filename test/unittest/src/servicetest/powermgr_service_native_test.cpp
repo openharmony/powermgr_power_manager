@@ -61,22 +61,22 @@ void PowerMgrServiceNativeTest::TearDownTestCase()
 
 void PowerMgrServiceNativeTest::PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged");
 }
 
 void PowerMgrServiceNativeTest::PowerStateTestCallback::OnPowerStateChanged(PowerState state)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::OnPowerStateChanged");
 }
 
 void PowerMgrServiceNativeTest::ScreenOffPreTestCallback::OnScreenStateChanged(uint32_t state)
 {
-    POWER_HILOGD(LABEL_TEST, "ScreenOffPreTestCallback::OnScreenStateChanged.");
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreTestCallback::OnScreenStateChanged.");
 }
 
 void PowerMgrServiceNativeTest::PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
+    POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 namespace {
 /**
@@ -87,17 +87,18 @@ namespace {
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest001, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest001::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest001::fun is start");
+    int32_t PARM_TWO = 2;
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount());
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest001::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest001::fun is end");
 }
 
 /**
@@ -108,17 +109,18 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest001, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest002, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest002::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest002::fun is start");
+    int32_t PARM_TWO = 2;
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_BUTTON);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest002::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest002::fun is end");
 }
 
 /**
@@ -129,17 +131,18 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest002, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest003, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest003::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest003::fun is start");
+    int32_t PARM_TWO = 2;
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_TOUCH);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest003::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest003::fun is end");
 }
 
 /**
@@ -150,17 +153,18 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest003, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest004, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest004::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest004::fun is start");
+    int32_t PARM_TWO = 2;
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest004::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest004::fun is end");
 }
 
 /**
@@ -171,19 +175,20 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest004, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest005, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest005::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest005::fun is start");
+    int32_t PARM_TWO = 2;
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest005::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest005::fun is end");
 }
 
 /**
@@ -194,19 +199,20 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest005, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest006, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest006::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest006::fun is start");
+    int32_t PARM_TWO = 2;
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE);
-    sleep(SCREEN_OFF_WAIT_TIME_S / 2);
+    sleep(SCREEN_OFF_WAIT_TIME_S / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest006::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest006::fun is end");
 }
 
 /**
@@ -217,18 +223,19 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest006, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest007, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest007::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest007::fun is start");
+    int32_t PARM_TWO = 2;
     UserActivityType abnormaltype = UserActivityType(9);
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
-    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2);
+    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->RefreshActivity(GetTickCount(), abnormaltype);
-    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / 2);
+    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / PARM_TWO);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest007::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest007::fun is end");
 }
 
 /**
@@ -239,7 +246,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest007, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest008, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest008::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest008::fun is start");
     int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
     WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
 
@@ -248,7 +255,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest008, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), abnormaltype);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest008::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest008::fun is end");
 }
 
 /**
@@ -259,7 +266,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest008, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest009, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest009::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest009::fun is start");
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
 
@@ -269,7 +276,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest009, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
 
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest009::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest009::fun is end");
 }
 
 /**
@@ -280,7 +287,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest009, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest010:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest010:Start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     int32_t time = SLEEP_WAIT_TIME_MS;
@@ -306,7 +313,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest010:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest010:End");
 }
 
 /**
@@ -317,7 +324,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest011:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest011:Start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     int32_t time = SLEEP_WAIT_TIME_MS;
@@ -340,7 +347,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest011:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest011:End");
 }
 
 /**
@@ -351,7 +358,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest012:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest012:Start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     int32_t time = SLEEP_WAIT_TIME_MS;
@@ -374,7 +381,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest012:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest012:End");
 }
 
 /**
@@ -385,14 +392,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest013, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest013::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest013::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     g_powerMgrServiceProxy->SetDisplaySuspend(true);
 
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
     g_powerMgrServiceProxy->SetDisplaySuspend(false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest013::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest013::fun is end");
 }
 
 /**
@@ -403,13 +410,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest013, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest014, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest014::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest014::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest014::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest014::fun is end");
 }
 
 /**
@@ -420,13 +427,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest014, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest015, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest015::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest015::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest015::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest015::fun is end");
 }
 
 /**
@@ -437,13 +444,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest015, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest016, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest016::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest016::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest016::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest016::fun is end");
 }
 
 /**
@@ -454,13 +461,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest016, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest017, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest017::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest017::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_LID, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest017::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest017::fun is end");
 }
 
 /**
@@ -471,13 +478,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest017, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest018, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest018::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest018::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest018::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest018::fun is end");
 }
 
 /**
@@ -488,13 +495,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest018, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest019, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest019::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest019::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest019::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest019::fun is end");
 }
 
 /**
@@ -505,13 +512,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest019, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest020, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest020::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest020::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest020::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest020::fun is end");
 }
 
 /**
@@ -522,14 +529,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest020, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest021, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest021::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest021::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(
         GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_ACCESSIBILITY, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest021::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest021::fun is end");
 }
 
 /**
@@ -540,14 +547,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest021, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest022, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest022::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest022::fun is start");
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
 
     g_powerMgrServiceProxy->SuspendDevice(
         GetTickCount(), SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND, false);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest022::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest022::fun is end");
 }
 
 /**
@@ -558,14 +565,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest022, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest023, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest023::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest023::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest023::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest023::fun is end");
 }
 
 /**
@@ -576,14 +583,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest023, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest024, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest024::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest024::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest024::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest024::fun is end");
 }
 
 /**
@@ -594,14 +601,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest024, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest025, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest025::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest025::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest025::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest025::fun is end");
 }
 
 /**
@@ -612,14 +619,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest025, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest026, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest026::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest026::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest026::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest026::fun is end");
 }
 
 /**
@@ -630,14 +637,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest026, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest027, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest027::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest027::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_GESTURE);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest027::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest027::fun is end");
 }
 
 /**
@@ -648,14 +655,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest027, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest028, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest028::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest028::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_CAMERA_LAUNCH);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest028::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest028::fun is end");
 }
 
 /**
@@ -666,14 +673,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest028, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest029, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest029::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest029::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_WAKE_KEY);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest029::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest029::fun is end");
 }
 
 /**
@@ -684,14 +691,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest029, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest030, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest030::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest030::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_WAKE_MOTION);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest030::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest030::fun is end");
 }
 
 /**
@@ -702,14 +709,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest030, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest031, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest031::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest031::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_HDMI);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest031::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest031::fun is end");
 }
 
 /**
@@ -720,14 +727,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest031, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest032, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest032::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest032::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_LID);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest032::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest032::fun is end");
 }
 
 /**
@@ -738,14 +745,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest032, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest033, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest033::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest033::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest033::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest033::fun is end");
 }
 
 /**
@@ -756,14 +763,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest033, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest034, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest034::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest034::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest034::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest034::fun is end");
 }
 
 /**
@@ -774,14 +781,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest034, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest035, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest035::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest035::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_MOUSE);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest035::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest035::fun is end");
 }
 
 /**
@@ -792,7 +799,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest035, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest036, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest036:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest036:Start");
     auto ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_EQ(ret, false);
     ret = g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN);
@@ -807,7 +814,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest036, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest036:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest036:End");
 }
 
 /**
@@ -818,7 +825,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest036, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest037, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest037:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest037:Start");
     sptr<IPowerStateCallback> stateCallback = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
     sptr<IScreenOffPreCallback> screenOffPreCallback = new ScreenOffPreTestCallback();
@@ -832,7 +839,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest037, TestSize.Level
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterScreenStateCallback(screenOffPreCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCallback));
     EXPECT_TRUE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCallback));
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest037:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest037:End");
 }
 
 /**
@@ -843,7 +850,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest037, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest038, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest038:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest038:Start");
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     std::vector<std::string> dumpArgsNone {};
     std::vector<std::string> dumpArgsHelp {};
@@ -859,7 +866,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest038, TestSize.Level
     std::string helpDebugInfo = g_powerMgrServiceProxy->ShellDump(dumpArgsHelp, dumpArgsHelp.size());
     auto helpIndex = helpDebugInfo.find(expectedDebugInfo);
     EXPECT_TRUE(helpIndex != string::npos);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest038:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest038:End");
 }
 
 /**
@@ -870,11 +877,11 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest038, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest039::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest039::fun is start");
     bool standby = false;
     auto error = g_powerMgrServiceProxy->IsStandby(standby);
     EXPECT_TRUE(error == PowerErrors::ERR_OK);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest039::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest039::fun is end");
 }
 
 /**
@@ -885,14 +892,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest040::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest040::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest040::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest040::fun is end");
 }
 
 /**
@@ -903,13 +910,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PEN);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest041::fun is end");
 }
 } // namespace

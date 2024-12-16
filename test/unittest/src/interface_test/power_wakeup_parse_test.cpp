@@ -110,7 +110,7 @@ void TestPowerWakeup(PowerMgrService* pmsTest_)
  */
 HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupParse001 start");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 start");
     GTEST_LOG_(INFO) << "PowerWakeupParse001: start";
     std::string str = SYSTEM_POWER_WAKEUP_FILE;
 
@@ -126,6 +126,6 @@ HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
     TestPowerWakeup(pmsTest_);
 
     GTEST_LOG_(INFO) << "PowerWakeupParse001:  end";
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupParse001 end");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 end");
 }
 } // namespace

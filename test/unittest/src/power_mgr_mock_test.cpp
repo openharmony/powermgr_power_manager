@@ -30,7 +30,7 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start.");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start.");
     g_stateAction = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
@@ -70,8 +70,7 @@ namespace {
 HWTEST_F(PowerMgrMockTest, PowerMgrMock001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock001: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock001:Start.");
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:Start.");
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock001: Failed to get PowerMgrService";
@@ -79,9 +78,8 @@ HWTEST_F(PowerMgrMockTest, PowerMgrMock001, TestSize.Level2)
 
     EXPECT_CALL(*g_powerAction, Reboot(std::string("test"))).Times(1);
     pms->RebootDeviceForDeprecated(std::string("test"));
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock001:End.");
-    GTEST_LOG_(INFO) << "PowerMgrMock001: end.";
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End.");
+    GTEST_LOG_(INFO) << "PowerMgrMock001: end.";
 }
 }
