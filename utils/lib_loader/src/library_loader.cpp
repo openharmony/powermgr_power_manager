@@ -27,7 +27,7 @@ LibraryLoader::LibraryLoader(const std::string& libPath, int32_t flags) : libPat
         if (libHandle_ != nullptr) {
             return;
         }
-        POWER_HILOGE(COMP_SVC, "Failed to dlopen %{public}s, reason: %{public}s, try again (%{public}u)",
+        POWER_HILOGE(COMP_SVC, "Failed to dlopen %{public}s, reason: %{public}s, try again(%{public}u)",
             libPath_.c_str(), dlerror(), i + 1);
     }
 }
@@ -42,7 +42,7 @@ LibraryLoader::~LibraryLoader() noexcept
         if (ret == 0) {
             break;
         }
-        POWER_HILOGE(COMP_SVC, "Failed to dlclose %{public}s, reason: %{public}s, try again (%{public}u)",
+        POWER_HILOGE(COMP_SVC, "Failed to dlclose %{public}s, reason: %{public}s, try again(%{public}u)",
             libPath_.c_str(), dlerror(), i + 1);
     }
     libHandle_ = nullptr;
@@ -51,7 +51,7 @@ LibraryLoader::~LibraryLoader() noexcept
 void* LibraryLoader::LoadInterface(const char* symbolName)
 {
     if (libHandle_ == nullptr || symbolName == nullptr) {
-        POWER_HILOGE(COMP_SVC, "library handle or symbol name is nullptr");
+        POWER_HILOGE(COMP_SVC, "library handle or symbol name is invalid");
         return nullptr;
     }
     for (uint32_t i = 0; i < FAILURE_RETRY_TIMES; ++i) {
@@ -59,8 +59,8 @@ void* LibraryLoader::LoadInterface(const char* symbolName)
         if (funcPtr != nullptr) {
             return funcPtr;
         }
-        POWER_HILOGE(COMP_SVC, "Failed to dlsym %{public}s, reason: %{public}s, try again (%{public}u)",
-            libPath_.c_str(), dlerror(), i + 1);
+        POWER_HILOGE(COMP_SVC, "Failed to dlsym %{public}s, reason: %{public}s, try again(%{public}u)", symbolName,
+            dlerror(), i + 1);
     }
     return nullptr;
 }
