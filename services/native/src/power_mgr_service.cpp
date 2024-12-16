@@ -163,10 +163,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
         }
         PowerExtIntfWrapper::Instance().Init();
         auto powerStateMachine = power->GetPowerStateMachine();
-        SettingHelper::UpdateCurrentUserId(); // update setting user id before get setting values
 #ifdef POWER_PICKUP_ENABLE
         SettingHelper::CopyDataForUpdateScene();
 #endif
+        SettingHelper::UpdateCurrentUserId(); // update setting user id before get setting values
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
         power->PowerConnectStatusInit();
         power->UpdateSettingInvalidDisplayOffTime(); // update setting value if invalid before register
