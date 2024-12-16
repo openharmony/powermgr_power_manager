@@ -26,6 +26,7 @@
 #include <input_manager.h>
 #include <securec.h>
 
+#include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
@@ -109,6 +110,7 @@ void TestPowerSuspend(PowerMgrService* pmsTest_)
  */
 HWTEST_F(PowerSuspendParseTest, PowerSuspendParse001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendParse001 start.");
     GTEST_LOG_(INFO) << "PowerSuspendParse001: start";
     std::string str = SYSTEM_POWER_SUSPEND_FILE;
 
@@ -123,5 +125,6 @@ HWTEST_F(PowerSuspendParseTest, PowerSuspendParse001, TestSize.Level0)
 
     TestPowerSuspend(pmsTest_);
     GTEST_LOG_(INFO) << "PowerSuspendParse001:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendParse001 end.");
 }
 } // namespace

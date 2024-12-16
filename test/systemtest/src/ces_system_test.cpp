@@ -43,9 +43,9 @@ void CesSystemTest::CommonEventServiCesSystemTest::OnReceiveEvent(const CommonEv
 {
     std::string action = data.GetWant().GetAction();
     if (action == CommonEventSupport::COMMON_EVENT_SHUTDOWN) {
-        POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
+        POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent.");
     }
-    POWER_HILOGD(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
+    POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
 }
 
 void CesSystemTest::SetUpTestCase()
@@ -62,12 +62,13 @@ void CesSystemTest::TearDown()
 
 namespace {
 /*
- * @tc.number: CES_SubscriptionEvent_0100
+ * @tc.number: CES_SubscriptionEvent_01
  * @tc.name: SubscribeCommonEvent
  * @tc.desc: Verify the function when the input string is normal
  */
-HWTEST_F(CesSystemTest, CES_SubscriptionEvent_0100, Function | MediumTest | Level1)
+HWTEST_F(CesSystemTest, CES_SubscriptionEvent_01, Function | MediumTest | Level1)
 {
+    POWER_HILOGI(LABEL_TEST, "CES_SubscriptionEvent_01 start");
     bool result = false;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SHUTDOWN);
@@ -75,12 +76,13 @@ HWTEST_F(CesSystemTest, CES_SubscriptionEvent_0100, Function | MediumTest | Leve
     auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
     result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
     EXPECT_TRUE(result);
-    GTEST_LOG_(INFO) << "CES_SubscriptionEvent_0100: ShutDownDevice start.";
+    GTEST_LOG_(INFO) << "CES_SubscriptionEvent_01: ShutDownDevice start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     if (false) {
         powerMgrClient.ShutDownDevice(string("ShutDownDeviceTest001"));
         sleep(SLEEP_WAIT_TIME_S);
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
+    POWER_HILOGI(LABEL_TEST, "CES_SubscriptionEvent_01 end");
 }
 }

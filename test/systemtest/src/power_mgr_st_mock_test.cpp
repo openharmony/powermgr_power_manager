@@ -30,13 +30,13 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
     g_stateAction = new MockStateAction();
     g_shutdownState = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
     g_service->EnableMock(g_stateAction, g_shutdownState, g_powerAction, g_lockAction);
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:End");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:End");
 }
 
 void PowerMgrSTMockTest::SetUpTestCase(void)
@@ -74,7 +74,7 @@ constexpr int32_t TEST_TIMES = 1000;
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock001: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock001:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -83,10 +83,9 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock001, TestSize.Level2)
 
     EXPECT_CALL(*g_powerAction, Reboot(std::string("test"))).Times(1);
     pms->RebootDevice(std::string("test"));
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock001:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock001: end";
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End");
+    GTEST_LOG_(INFO) << "PowerMgrMock001: end";
 }
 
 /**
@@ -98,7 +97,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock001, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock002, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock002: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock002:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock002:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -107,10 +106,9 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock002, TestSize.Level2)
 
     EXPECT_CALL(*g_powerAction, Shutdown(std::string("test"))).Times(1);
     pms->ShutDownDevice(std::string("test"));
-
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock002:End");
-    GTEST_LOG_(INFO) << "PowerMgrMock002: end";
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock002:End");
+    GTEST_LOG_(INFO) << "PowerMgrMock002: end";
 }
 
 /**
@@ -122,17 +120,17 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock002, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock003, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock003: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock003:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock003: Failed to get PowerMgrService";
     }
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock003:forcesuspend");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003:forcesuspend");
     EXPECT_EQ(pms->ForceSuspendDevice(0), PowerErrors::ERR_OK);
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock003:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003:End");
     GTEST_LOG_(INFO) << "PowerMgrMock003: end";
 }
 
@@ -145,7 +143,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock003, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock004, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock004: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock004:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock004:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -162,7 +160,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock004, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), false);
 
     pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock004:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock004:End");
     GTEST_LOG_(INFO) << "PowerMgrMock004: end";
 }
 
@@ -175,7 +173,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock004, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock005, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock005: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock005:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock005:Start");
 #ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -193,7 +191,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock005, TestSize.Level2)
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock005:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock005:End");
     GTEST_LOG_(INFO) << "PowerMgrMock005: end";
 }
 
@@ -206,18 +204,18 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock005, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock006, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock006: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock006:Start");
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock006:Start");
+    int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock006: Failed to get PowerMgrService";
     }
 
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
-    pms->ForceSuspendDevice(0);
+    pms->SuspendDevice(PARM_ZERO, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    pms->ForceSuspendDevice(PARM_ZERO);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock006:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock006:End");
     GTEST_LOG_(INFO) << "PowerMgrMock006: end";
 }
 
@@ -230,7 +228,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock006, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock007, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock007: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock007:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock007:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -250,7 +248,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock007, TestSize.Level2)
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock007:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock007:End");
     GTEST_LOG_(INFO) << "PowerMgrMock007: end";
 }
 
@@ -263,7 +261,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock007, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock008, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock008: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock008:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock008:Start");
 
 #ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -299,7 +297,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock008, TestSize.Level2)
 
     pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock008:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock008:End");
     GTEST_LOG_(INFO) << "PowerMgrMock008: end";
 }
 
@@ -312,7 +310,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock008, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock009, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock009: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock009:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock009:Start");
 #ifdef HAS_SENSORS_SENSOR_PART
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -340,7 +338,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock009, TestSize.Level2)
 
     pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock009:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock009:End");
     GTEST_LOG_(INFO) << "PowerMgrMock009: end";
 }
 
@@ -353,7 +351,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock009, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock010, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock010: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock010:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock010:Start");
 
 #ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -371,7 +369,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock010, TestSize.Level2)
     pms->UnLock(token);
 
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock010:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock010:End");
     GTEST_LOG_(INFO) << "PowerMgrMock010: end";
 }
 
@@ -384,7 +382,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock010, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock011, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock011: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock011:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock011:Start");
 
 #ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -403,7 +401,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock011, TestSize.Level2)
     pms->UnLock(token);
 
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock011:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock011:End");
     GTEST_LOG_(INFO) << "PowerMgrMock011: end";
 }
 
@@ -416,7 +414,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock011, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock012, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock012: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock012:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock012:Start");
 #ifdef HAS_SENSORS_SENSOR_PART
     int i;
 
@@ -441,7 +439,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock012, TestSize.Level2)
 
     pms->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS);
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock012:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock012:End");
     GTEST_LOG_(INFO) << "PowerMgrMock012: end";
 }
 
@@ -454,7 +452,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock012, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock013, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock013: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock013:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock013:Start");
 
 #ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -474,7 +472,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock013, TestSize.Level2)
     EXPECT_EQ(pms->IsUsed(token), false);
 
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock013:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock013:End");
     GTEST_LOG_(INFO) << "PowerMgrMock013: end";
 }
 
@@ -487,7 +485,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock013, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock014, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock014: start";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock014:Start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock014:Start");
 
 #ifdef HAS_SENSORS_SENSOR_PART
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -507,7 +505,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock014, TestSize.Level2)
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
 
 #endif
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock014:End");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock014:End");
     GTEST_LOG_(INFO) << "PowerMgrMock014: end";
 }
 
@@ -520,7 +518,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock014, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock015, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock015: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock015:Start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock015:Start.");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pms != nullptr);
@@ -540,7 +538,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock015, TestSize.Level2)
     pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_TRUE(pms->GetState() == PowerState::INACTIVE || pms->GetState() == PowerState::SLEEP);
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock015:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock015:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock015: end.";
 }
 
@@ -553,13 +551,13 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock015, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock016, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock016: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock016:Start.");
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock016:Start.");
+    int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pms != nullptr);
 
     // Set the power status to AWAKE
-    pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("PowerMgrMock016"));
+    pms->WakeupDevice(PARM_ZERO, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("PowerMgrMock016"));
     EXPECT_TRUE(pms->GetState() == PowerState::AWAKE);
 
     // Analog display return DISPLAY_OFF
@@ -570,10 +568,10 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock016, TestSize.Level2)
         .Times(::testing::AtLeast(1))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     // The status is changed to display status OFF, and the screen is off again
-    pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("PowerMgrMock016_Again"));
+    pms->WakeupDevice(PARM_ZERO, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("PowerMgrMock016_Again"));
     EXPECT_TRUE(pms->GetState() == PowerState::AWAKE);
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock016:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock016:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock016: end.";
 }
 
@@ -586,7 +584,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock016, TestSize.Level2)
 HWTEST_F(PowerMgrSTMockTest, PowerMgrMock017, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock017: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock017:Start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock017:Start.");
 
     vector<PowerState> sleepStates { PowerState::SLEEP, PowerState::HIBERNATE };
 
@@ -612,7 +610,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock017, TestSize.Level2)
         EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
     }
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrMock017:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock017:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock017: end.";
 }
 } // namespace

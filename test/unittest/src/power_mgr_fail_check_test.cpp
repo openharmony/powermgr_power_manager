@@ -29,7 +29,7 @@ static MockLockAction* g_lockAction;
 
 static void ResetMockAction()
 {
-    POWER_HILOGD(LABEL_TEST, "ResetMockAction:Start.");
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start.");
     g_stateAction = new MockStateAction();
     g_powerAction = new MockPowerAction();
     g_lockAction = new MockLockAction();
@@ -68,8 +68,8 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck001:Start.");
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck001:Start.");
+    int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrFailCheck001: Failed to get PowerMgrService";
@@ -78,7 +78,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::FAILED));
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
+    pms->SuspendDevice(PARM_ZERO, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
 
     std::vector<std::string> args;
     std::string str("-s");
@@ -87,7 +87,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
     GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
-    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck001:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck001:End.");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: end.";
 }
 
@@ -100,18 +100,18 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002:  start.";
-    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck002:Start.");
-
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck002:Start.");
+    int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrFailCheck002: Failed to get PowerMgrService";
     }
 
-    pms->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
+    pms->SuspendDevice(PARM_ZERO, SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .Times(1)
         .WillOnce(::testing::Return(ActionResult::FAILED));
-    pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
+    pms->WakeupDevice(PARM_ZERO, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
 
     std::vector<std::string> args;
     std::string str("-s");
@@ -120,7 +120,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
     GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
-    POWER_HILOGD(LABEL_TEST, "PowerMgrFailCheck002:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck002:End.");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002: end.";
 }
 } // namespace

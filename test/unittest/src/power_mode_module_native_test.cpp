@@ -38,7 +38,7 @@ void PowerModeModuleNativeTest::TearDown()
 
 void PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
 namespace {
@@ -50,7 +50,7 @@ using ModeActionPolicy = std::function<void(bool)>;
  */
 HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModeModuleNativeTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest001 start.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     powerModeModuleTest->mode_ = PowerMode::PERFORMANCE_MODE;
     powerModeModuleTest->PublishPowerModeEvent();
@@ -84,7 +84,7 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
                                             make_shared<PowerModeModule::CallbackManager>();
     powerModeModuleManager->OnRemoteDied(nullptr);
 
-    POWER_HILOGD(LABEL_TEST, "PowerModeModuleNativeTest001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest001 end.");
 }
 
 /**
@@ -94,7 +94,7 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
  */
 HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerModePolicyNativeTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerModePolicyNativeTest001 start.");
     PowerModePolicy *powerModePolicyTest = new PowerModePolicy();
     EXPECT_TRUE(powerModePolicyTest->GetPowerModeValuePolicy(MODEITEM) == INIT_VALUE_FALSE);
     EXPECT_TRUE(powerModePolicyTest->GetPolicyFromMap(MODEITEM) == INIT_VALUE_FALSE);
@@ -103,6 +103,6 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest001, TestSize.Leve
     ModeActionPolicy action;
     powerModePolicyTest->AddAction(MODEITEM, action);
 
-    POWER_HILOGD(LABEL_TEST, "PowerModePolicyNativeTest001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerModePolicyNativeTest001 end.");
 }
 }
