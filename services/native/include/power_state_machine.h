@@ -133,6 +133,7 @@ public:
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);
     WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
+    static void DisplayOffTimeUpdateFunc();
 
     // only use for test
     int64_t GetLastSuspendDeviceTime() const

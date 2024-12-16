@@ -192,6 +192,16 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
+  if (power_manager_feature_charging_type_setting) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+  }
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
   if (factory == true) {
     defines += [ "CONFIG_FACTORY_MODE" ]
   }

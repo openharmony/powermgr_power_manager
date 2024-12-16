@@ -384,8 +384,22 @@ ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::strin
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)
 {
-    return key == SETTING_POWER_WAKEUP_DOUBLE_KEY || key == SETTING_POWER_WAKEUP_PICKUP_KEY ||
-           key == SETTING_POWER_WAKEUP_SOURCES_KEY;
+    std::vector<std::string> needMultiUserStrVec {
+        SETTING_POWER_WAKEUP_DOUBLE_KEY,
+        SETTING_POWER_WAKEUP_PICKUP_KEY,
+        SETTING_POWER_WAKEUP_SOURCES_KEY,
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+        SETTING_DISPLAY_AC_OFF_TIME_KEY,
+        SETTING_DISPLAY_DC_OFF_TIME_KEY,
+        SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
+        SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
+#endif
+    };
+    
+    if (std::count(needMultiUserStrVec.begin(), needMultiUserStrVec.end(), key)) {
+        return true;
+    }
+    return false;
 }
 
 std::string SettingProvider::ReplaceUserIdForUri(int32_t userId)

@@ -61,6 +61,8 @@ private:
     void GetSettingSwitchState(uint32_t& switchId, int32_t& value); // from setting
     int32_t GetPolicyFromMap(uint32_t type);
     void SavePowerModeRecoverMap();
+    int64_t GetSettingDisplayOffTime(int64_t defaultVal);
+
     std::mutex policyMutex_;
     std::mutex actionMapMutex_;
 };
