@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+
 class PowerExtIntfWrapper final : public NoCopyable {
 public:
     enum class ErrCode : uint32_t {

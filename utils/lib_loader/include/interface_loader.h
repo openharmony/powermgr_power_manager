@@ -16,10 +16,10 @@
 #ifndef POWERMGR_UTILS_LIB_LOADER_INTERFACE_LOADER_H
 #define POWERMGR_UTILS_LIB_LOADER_INTERFACE_LOADER_H
 
-#include "library_loader.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "library_loader.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -39,5 +39,6 @@ private:
 };
 
 } // namespace PowerMgr
-} // namespace OHOS
-#endif // POWERMGR_UTILS_LIB_LOADER_INTERFACE_LOADER_H
+}
+
+#endif
