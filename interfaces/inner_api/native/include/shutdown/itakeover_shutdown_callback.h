@@ -18,6 +18,7 @@
 
 #include <iremote_broker.h>
 #include "shutdown_priority.h"
+#include "takeover_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -26,11 +27,19 @@ public:
     /**
      * This callback interface is executed when the system is shut down or restarted.
      *
-     * @param isReboot true: reboot. false: shutdown.
-     * @return true: Take over, the shutdown or restart will be interrupted.
-     * false: No takeover is required, the system continues to shut down or restart.
+     * @param info takeover info.
+     * @return true: Take over, the shutdown or restart or hibernate will be interrupted.
+     * false: No takeover is required, the system continues to shut down or restart or hibernate.
      */
-    virtual bool OnTakeOverShutdown(bool isReboot) = 0;
+    virtual bool OnTakeOverShutdown(const TakeOverInfo& info) = 0;
+    /**
+     * This callback interface is executed when the system is shut down or restarted.
+     *
+     * @param info takeover info.
+     * @return true: Take over, the shutdown or restart or hibernate will be interrupted.
+     * false: No takeover is required, he system continues to shut down or restart or hibernate.
+     */
+    virtual bool OnTakeOverHibernate(const TakeOverInfo& info) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.ITakeOverShutdownCallback");
 };
 } // namespace PowerMgr

@@ -45,6 +45,9 @@ int TakeOverShutdownCallbackStub::OnRemoteRequest(
     int32_t ret = ERR_OK;
     if (code == static_cast<uint32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_SHUTDOWN)) {
         ret = OnTakeOverShutdownCallbackStub(data, reply);
+    } else if (code ==
+        static_cast<uint32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_HIBERNATE)) {
+        ret = OnTakeOverHibernateCallbackStub(data, reply);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -54,9 +57,24 @@ int TakeOverShutdownCallbackStub::OnRemoteRequest(
 
 int32_t TakeOverShutdownCallbackStub::OnTakeOverShutdownCallbackStub(MessageParcel& data, MessageParcel& reply)
 {
-    bool isReboot;
-    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, isReboot, E_READ_PARCEL_ERROR);
-    int32_t isTakeOver = OnTakeOverShutdown(isReboot);
+    TakeOverInfo *info = data.ReadParcelable<TakeOverInfo>();
+    bool isTakeOver = false;
+    if (info != nullptr) {
+        isTakeOver = OnTakeOverShutdown(*info);
+        delete info;
+    }
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Bool, isTakeOver, E_WRITE_PARCEL_ERROR);
+    return ERR_OK;
+}
+
+int32_t TakeOverShutdownCallbackStub::OnTakeOverHibernateCallbackStub(MessageParcel& data, MessageParcel& reply)
+{
+    TakeOverInfo *info = data.ReadParcelable<TakeOverInfo>();
+    bool isTakeOver = false;
+    if (info != nullptr) {
+        isTakeOver = OnTakeOverHibernate(*info);
+        delete info;
+    }
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Bool, isTakeOver, E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }

@@ -279,26 +279,52 @@ void ShutdownController::RemoveCallback(const sptr<ISyncShutdownCallback>& callb
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
-bool ShutdownController::TriggerTakeOverShutdownCallback(bool isReboot)
+bool ShutdownController::TriggerTakeOverShutdownCallback(const TakeOverInfo& info)
 {
     bool isTakeover = false;
     auto highPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighPriorityCallbacks();
-    isTakeover = TriggerTakeOverShutdownCallbackInner(highPriorityCallbacks, isReboot);
+    isTakeover = TriggerTakeOverShutdownCallbackInner(highPriorityCallbacks, info);
     RETURN_IF_WITH_RET(isTakeover, true);
     auto defaultPriorityCallbacks = takeoverShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
-    isTakeover = TriggerTakeOverShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
+    isTakeover = TriggerTakeOverShutdownCallbackInner(defaultPriorityCallbacks, info);
     RETURN_IF_WITH_RET(isTakeover, true);
     auto lowPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowPriorityCallbacks();
-    isTakeover = TriggerTakeOverShutdownCallbackInner(lowPriorityCallbacks, isReboot);
+    isTakeover = TriggerTakeOverShutdownCallbackInner(lowPriorityCallbacks, info);
     return isTakeover;
 }
 
-bool ShutdownController::TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
+bool ShutdownController::TriggerTakeOverHibernateCallback(const TakeOverInfo& info)
+{
+    bool isTakeover = false;
+    auto highPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighPriorityCallbacks();
+    isTakeover = TriggerTakeOverHibernateCallbackInner(highPriorityCallbacks, info);
+    RETURN_IF_WITH_RET(isTakeover, true);
+    auto defaultPriorityCallbacks = takeoverShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
+    isTakeover = TriggerTakeOverHibernateCallbackInner(defaultPriorityCallbacks, info);
+    RETURN_IF_WITH_RET(isTakeover, true);
+    auto lowPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowPriorityCallbacks();
+    isTakeover = TriggerTakeOverHibernateCallbackInner(lowPriorityCallbacks, info);
+    return isTakeover;
+}
+
+bool ShutdownController::TriggerTakeOverShutdownCallbackInner(
+    std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info)
 {
     bool isTakeover = false;
     for (const auto& obj : callbacks) {
         auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
-        isTakeover = callback->OnTakeOverShutdown(isReboot);
+        isTakeover = callback->OnTakeOverShutdown(info);
+    }
+    return isTakeover;
+}
+
+bool ShutdownController::TriggerTakeOverHibernateCallbackInner(
+    std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info)
+{
+    bool isTakeover = false;
+    for (const auto& obj : callbacks) {
+        auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
+        isTakeover = callback->OnTakeOverHibernate(info);
     }
     return isTakeover;
 }
@@ -354,7 +380,7 @@ void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteO
 bool ShutdownController::TakeOverShutdownAction(const std::string& reason, bool isReboot)
 {
     if (AllowedToBeTakenOver(reason)) {
-        return TriggerTakeOverShutdownCallback(isReboot);
+        return TriggerTakeOverShutdownCallback(TakeOverInfo(reason, isReboot));
     }
     return false;
 }

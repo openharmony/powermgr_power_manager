@@ -42,7 +42,8 @@ public:
     class TakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
         ~TakeOverShutdownCallback() override = default;
-        bool OnTakeOverShutdown(bool isReboot) override;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
+        bool OnTakeOverHibernate(const TakeOverInfo& info) override;
     };
 protected:
     static void SetUpTestCase();
