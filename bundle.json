@@ -131,6 +131,7 @@
                         "shutdown/shutdown_client.h",
                         "shutdown/shutdown_priority.h",
                         "shutdown/sync_shutdown_callback_stub.h",
+                        "shutdown/takeover_info.h",
                         "shutdown/takeover_shutdown_callback_stub.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"

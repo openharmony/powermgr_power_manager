@@ -25,6 +25,7 @@
 #include "shutdown/iasync_shutdown_callback.h"
 #include "shutdown/isync_shutdown_callback.h"
 #include "shutdown/itakeover_shutdown_callback.h"
+#include "shutdown/takeover_info.h"
 #include "shutdown_callback_holer.h"
 
 namespace OHOS {
@@ -53,7 +54,8 @@ public:
     void RemoveCallback(const sptr<IAsyncShutdownCallback>& callback);
     void RemoveCallback(const sptr<ISyncShutdownCallback>& callback);
 
-    bool TriggerTakeOverShutdownCallback(bool isReboot);
+    bool TriggerTakeOverShutdownCallback(const TakeOverInfo& info);
+    bool TriggerTakeOverHibernateCallback(const TakeOverInfo& info);
     void TriggerAsyncShutdownCallback(bool isReboot);
     void TriggerSyncShutdownCallback(bool isReboot);
 
@@ -66,7 +68,10 @@ private:
     bool TakeOverShutdownAction(const std::string& reason, bool isReboot);
     bool AllowedToBeTakenOver(const std::string& reason) const;
 
-    static bool TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
+    static bool TriggerTakeOverShutdownCallbackInner(
+        std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info);
+    static bool TriggerTakeOverHibernateCallbackInner(
+        std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info);
     static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
     static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
 

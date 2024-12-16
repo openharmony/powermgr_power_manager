@@ -22,6 +22,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
+enum class HibernateStatus {
+    HIBERNATE_SUCCESS = 0,
+    HIBERNATE_FAILURE,
+    HIBERNATE_INVALID_STATUS,
+};
 class HibernateController {
 public:
     struct HibernateCallbackCompare {
@@ -35,7 +40,7 @@ public:
     HibernateController() {};
     virtual ~HibernateController() = default;
 
-    virtual bool Hibernate(bool clearMemory);
+    virtual HibernateStatus Hibernate(bool clearMemory);
     virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
     virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
     virtual void PreHibernate() const;
