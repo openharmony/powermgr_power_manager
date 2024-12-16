@@ -14,7 +14,7 @@
  */
 
 #include "power_mode_policy.h"
-
+#include "power_mgr_service.h"
 #include "power_log.h"
 #include "power_save_mode.h"
 #include "singleton.h"
@@ -105,6 +105,16 @@ void PowerModePolicy::ReadPowerModePolicy(uint32_t mode)
     }
 }
 
+int64_t PowerModePolicy::GetSettingDisplayOffTime(int64_t defaultVal)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "get PowerMgrService fail");
+        return defaultVal;
+    }
+    return pms->GetSettingDisplayOffTime(defaultVal);
+}
+
 void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
 {
     int32_t defaultVal = INIT_VALUE_FALSE;
@@ -122,8 +132,7 @@ void PowerModePolicy::GetSettingSwitchState(uint32_t& switchId, int32_t& value)
             defaultVal = SettingHelper::GetSettingIntellVoice(defaultVal);
             break;
         case PowerModePolicy::ServiceType::DISPLAY_OFFTIME: {
-            int64_t displayOfftime = INIT_VALUE_FALSE;
-            displayOfftime = SettingHelper::GetSettingDisplayOffTime(INIT_VALUE_FALSE);
+            int64_t displayOfftime = GetSettingDisplayOffTime(static_cast<int64_t>(defaultVal));
             defaultVal = static_cast<int32_t>(displayOfftime);
             break;
         }

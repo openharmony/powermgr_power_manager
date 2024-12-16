@@ -23,6 +23,9 @@
 #include "setting_helper.h"
 #include "json/reader.h"
 #include "json/value.h"
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+#include "power_mgr_service.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -34,9 +37,53 @@ static const std::string SYSTEM_POWER_SUSPEND_CONFIG_FILE = "/system/etc/power_c
 static const uint32_t ILLEGAL_ACTION = static_cast<uint32_t>(SuspendAction::ACTION_INVALID);
 } // namespace
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
 {
-    std::shared_ptr<SuspendSources> parseSources;
+    std::shared_ptr<SuspendSources> parseSources{nullptr};
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "get PowerMgrService fail");
+        return parseSources;
+    }
+    bool isPowerConnected = pms->IsPowerConnected();
+    bool isSettingAcValid = SettingHelper::IsSettingAcSuspendSourcesValid();
+    bool isSettingDcValid = SettingHelper::IsSettingDcSuspendSourcesValid();
+    std::string configJsonStr;
+
+    if (!isSettingAcValid || !isSettingDcValid) {
+        std::string targetPath;
+        bool ret = GetTargetPath(targetPath);
+        if (ret == false) {
+            POWER_HILOGE(FEATURE_SUSPEND, "GetTargetPath fail");
+            return parseSources;
+        }
+        POWER_HILOGI(FEATURE_SUSPEND, "use targetPath=%{public}s", targetPath.c_str());
+        std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
+        std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
+
+        if (!isSettingAcValid) {
+            SettingHelper::SetSettingAcSuspendSources(fileStringStr);
+        }
+        if (!isSettingDcValid) {
+            SettingHelper::SetSettingDcSuspendSources(fileStringStr);
+        }
+        configJsonStr = fileStringStr;
+    }
+    
+    if (isPowerConnected && isSettingAcValid) {
+        configJsonStr = SettingHelper::GetSettingAcSuspendSources();
+    } else if (!isPowerConnected && isSettingDcValid) {
+        configJsonStr = SettingHelper::GetSettingDcSuspendSources();
+    }
+
+    parseSources = ParseSources(configJsonStr);
+    return parseSources;
+}
+#else
+std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
+{
+    std::shared_ptr<SuspendSources> parseSources{nullptr};
     bool isSettingUpdated = SettingHelper::IsSuspendSourcesSettingValid();
     POWER_HILOGI(FEATURE_SUSPEND, "ParseSources setting=%{public}d", isSettingUpdated);
     std::string configJsonStr;
@@ -59,6 +106,7 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     }
     return parseSources;
 }
+#endif
 
 bool SuspendSourceParser::GetTargetPath(std::string& targetPath)
 {
@@ -137,14 +185,11 @@ bool SuspendSourceParser::ParseSourcesProc(
         }
     }
 
-    POWER_HILOGI(FEATURE_SUSPEND, "key=%{public}s, type=%{public}u, action=%{public}u, delayMs=%{public}u",
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "ParseSourcesProc key=%{public}s, type=%{public}u, action=%{public}u, delayMs=%{public}u",
         key.c_str(), suspendDeviceType, action, delayMs);
-
-    if (action != 0) {
-        SuspendSource suspendSource = SuspendSource(suspendDeviceType, action, delayMs);
-        parseSources->PutSource(suspendSource);
-    }
-
+    SuspendSource suspendSource = SuspendSource(suspendDeviceType, action, delayMs);
+    parseSources->PutSource(suspendSource);
     return true;
 }
 
