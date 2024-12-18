@@ -29,6 +29,7 @@
 #include "power_common.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
+#include "power_mgr_notify.h"
 
 namespace OHOS {
 namespace PowerMgr {
