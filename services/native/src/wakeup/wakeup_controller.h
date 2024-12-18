@@ -115,6 +115,8 @@ public:
     virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
     bool NonWindowEvent(const std::shared_ptr<PointerEvent>& pointerEvent) const;
+    bool TouchEventAfterScreenOn(std::shared_ptr<PointerEvent> pointerEvent, PowerState state) const;
+
 private:
     bool isRemoteEvent(std::shared_ptr<InputEvent> event) const;
     bool isKeyboardKeycode(int32_t keyCode) const;

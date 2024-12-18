@@ -22,6 +22,10 @@ namespace {
 const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 const std::vector<std::string> ALL_POWER_EXT_INTF_SYMBOL = {
     "GetRebootCommand",
+    "SetScreenOnEventRules",
+    "PublishCustomizedScreenEvent",
+    "NotifyScreenOnEventAgain",
+    "NotifyOperateEventAfterScreenOn",
 };
 } // namespace
 
@@ -43,6 +47,54 @@ PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::GetRebootCommand(
     rebootCmd = getRebootCommandFunc(rebootReason);
     return PowerExtIntfWrapper::ErrCode::ERR_OK;
 }
+
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+void PowerExtIntfWrapper::SetScreenOnEventRules(StateChangeReason reason)
+{
+    POWER_HILOGI(COMP_SVC, "Enter SetScreenOnEventRules wrapper");
+    void *funcPtr = intfLoader_.QueryInterface("SetScreenOnEventRules");
+    if (funcPtr == nullptr) {
+        return;
+    }
+    auto setScreenOnEventRulesFunc = reinterpret_cast<void (*)(const StateChangeReason)>(funcPtr);
+    setScreenOnEventRulesFunc(reason);
+}
+
+void PowerExtIntfWrapper::PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames)
+{
+    POWER_HILOGI(COMP_SVC, "Enter PublishCustomizedScreenEvent wrapper");
+    void *funcPtr = intfLoader_.QueryInterface("PublishCustomizedScreenEvent");
+    if (funcPtr == nullptr) {
+        return;
+    }
+    auto publishCustomizedScreenEventFunc =
+        reinterpret_cast<void (*)(PowerState, std::vector<std::string>)>(funcPtr);
+    publishCustomizedScreenEventFunc(state, bundleNames);
+}
+
+bool PowerExtIntfWrapper::NotifyScreenOnEventAgain(WakeupDeviceType reason, std::vector<std::string> bundleNames)
+{
+    POWER_HILOGI(COMP_SVC, "Enter NotifyScreenOnEventAgain wrapper");
+    void *funcPtr = intfLoader_.QueryInterface("NotifyScreenOnEventAgain");
+    if (funcPtr == nullptr) {
+        return false;
+    }
+    auto notifyScreenOnEventAgain =
+        reinterpret_cast<bool (*)(WakeupDeviceType, std::vector<std::string>)>(funcPtr);
+    return notifyScreenOnEventAgain(reason, bundleNames);
+}
+
+void PowerExtIntfWrapper::NotifyOperateEventAfterScreenOn(std::vector<std::string> bundleNames)
+{
+    POWER_HILOGI(COMP_SVC, "Enter NotifyOperateEventAfterScreenOn wrapper");
+    void *funcPtr = intfLoader_.QueryInterface("NotifyOperateEventAfterScreenOn");
+    if (funcPtr == nullptr) {
+        return;
+    }
+    auto notifyOperateEventAfterScreenOnFunc = reinterpret_cast<void (*)(std::vector<std::string>)>(funcPtr);
+    notifyOperateEventAfterScreenOnFunc(bundleNames);
+}
+#endif
 
 } // namespace PowerMgr
 } // namespace OHOS

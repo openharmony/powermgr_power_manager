@@ -31,6 +31,7 @@ config("powermgr_private_config") {
     "native/src/wakeup",
     "native/src/hibernate",
     "native/src/screenoffpre",
+    "native/src/watch_customized_screen_common_event",
   ]
 
   if (power_manager_feature_wakeup_action) {
@@ -72,6 +73,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/wakeup/wakeup_controller.cpp",
     "native/src/wakeup/wakeup_source_parser.cpp",
     "native/src/wakeup/wakeup_sources.cpp",
+    "native/src/watch_customized_screen_common_event/customized_screen_event_rules.cpp",
   ]
 
   configs = [
@@ -88,6 +90,7 @@ ohos_shared_library("powermgrservice") {
     ":powermgr_stub",
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/appmgr:power_appmgr",
     "${powermgr_utils_path}/ffrt:power_ffrt",
     "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper",
     "${powermgr_utils_path}/lib_loader:power_lib_loader",
@@ -232,6 +235,11 @@ ohos_shared_library("powermgrservice") {
 
   if (power_manager_feature_judging_takeover_shutdown) {
     defines += [ "POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN" ]
+  }
+
+  if (power_manager_feature_watch_limit_screen_common_event_publish) {
+    defines +=
+        [ "POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES" ]
   }
 
   subsystem_name = "powermgr"
