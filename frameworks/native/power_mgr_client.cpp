@@ -487,5 +487,11 @@ PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, boo
     return ret;
 }
 
+PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, bool& result)
+{
+    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy_->IsRunningLockEnabled(type, result);
+}
+
 } // namespace PowerMgr
 } // namespace OHOS
