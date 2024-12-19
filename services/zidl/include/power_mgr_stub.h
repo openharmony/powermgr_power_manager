@@ -80,6 +80,7 @@ private:
     int32_t IsStandbyStub(MessageParcel& data, MessageParcel& reply);
     int32_t SetForceTimingOutStub(MessageParcel& data, MessageParcel& reply);
     int32_t LockScreenAfterTimingOutStub(MessageParcel& data, MessageParcel& reply);
+    int32_t IsRunningLockEnabledStub(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -54,7 +54,7 @@ PowerErrors PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteOb
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -175,7 +175,7 @@ PowerErrors PowerMgrProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t ti
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
     return static_cast<PowerErrors>(error);
 }
@@ -205,7 +205,7 @@ PowerErrors PowerMgrProxy::UnLock(const sptr<IRemoteObject>& remoteObj, const st
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
     return static_cast<PowerErrors>(error);
 }
@@ -386,7 +386,7 @@ PowerErrors PowerMgrProxy::RebootDevice(const std::string& reason)
         POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -414,7 +414,7 @@ PowerErrors PowerMgrProxy::RebootDeviceForDeprecated(const std::string& reason)
         POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -441,7 +441,7 @@ PowerErrors PowerMgrProxy::ShutDownDevice(const std::string& reason)
         POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -468,7 +468,7 @@ PowerErrors PowerMgrProxy::SetSuspendTag(const std::string& tag)
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -498,7 +498,7 @@ PowerErrors PowerMgrProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType r
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -528,7 +528,7 @@ PowerErrors PowerMgrProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType rea
         POWER_HILOGE(FEATURE_WAKEUP, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -610,7 +610,7 @@ PowerErrors PowerMgrProxy::OverrideScreenOffTime(int64_t timeout)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -637,7 +637,7 @@ PowerErrors PowerMgrProxy::RestoreScreenOffTime()
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -1182,7 +1182,7 @@ PowerErrors PowerMgrProxy::SetDeviceMode(const PowerMode& mode)
         POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
     return static_cast<PowerErrors>(error);
 }
@@ -1271,7 +1271,7 @@ PowerErrors PowerMgrProxy::IsStandby(bool& isStandby)
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    int32_t error;
+    int32_t error = ERR_OK;
 
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
@@ -1304,7 +1304,7 @@ PowerErrors PowerMgrProxy::SetForceTimingOut(bool enabled, const sptr<IRemoteObj
         POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
     return static_cast<PowerErrors>(error);
 }
@@ -1334,7 +1334,7 @@ PowerErrors PowerMgrProxy::LockScreenAfterTimingOut(
         POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error;
+    int32_t error = ERR_OK;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
     return static_cast<PowerErrors>(error);
 }
@@ -1385,6 +1385,35 @@ void PowerMgrProxy::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>
     RETURN_IF(remote == nullptr);
     auto delegator = std::make_unique<ShutdownProxyDelegator>(remote, PowerMgrProxy::GetDescriptor());
     delegator->UnRegisterShutdownCallback(callback);
+}
+
+PowerErrors PowerMgrProxy::IsRunningLockEnabled(const RunningLockType type, bool& result)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Uint32, static_cast<uint32_t>(type), PowerErrors::ERR_CONNECTION_FAIL);
+
+    int ret = remote->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_RUNNINGLOCK_ENABLED), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    int32_t error = ERR_OK;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, result, PowerErrors::ERR_CONNECTION_FAIL);
+    return static_cast<PowerErrors>(error);
 }
 } // namespace PowerMgr
 } // namespace OHOS

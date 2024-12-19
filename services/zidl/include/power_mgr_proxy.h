@@ -104,6 +104,7 @@ public:
     virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
     virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
     virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) override;
+    virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
 
 private:
     static inline BrokerDelegator<PowerMgrProxy> delegator_;

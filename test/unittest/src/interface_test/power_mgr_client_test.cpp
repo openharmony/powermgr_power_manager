@@ -1362,4 +1362,25 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient055, TestSize.Level0)
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient055::fun is end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient056
+ * @tc.desc: test IsRunningLockEnabled
+ * @tc.type: FUNC
+ * @tc.require: #IBADHF
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient056, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient056::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto runningLock = powerMgrClient.CreateRunningLock("runninglockScreen", RunningLockType::RUNNINGLOCK_SCREEN);
+    runningLock->Lock();
+    usleep(SLEEP_AFTER_LOCK_TIME_US);
+    bool result = false;
+    PowerErrors error = powerMgrClient.IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN, result);
+    POWER_HILOGD(LABEL_TEST, "IsRunningLockEnabled error %{public}d", static_cast<int32_t>(error));
+    EXPECT_TRUE(result) << "PowerMgrClient056: IsRunningLockEnabled Fail, result is false" ;
+    runningLock->UnLock();
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient056::fun is end!");
+}
 } // namespace
