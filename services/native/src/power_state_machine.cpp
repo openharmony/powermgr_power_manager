@@ -180,13 +180,18 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
     if (isForbidden) {
         return false;
     }
-    // prevent the double click and pickup to light up the screen when calling or sporting
+    // prevent the double click or pickup to light up the screen when calling or sporting or lid is close
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
              reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
 #ifdef HAS_SENSORS_SENSOR_PART
         if (IsProximityClose()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "Double-click or pickup isn't allowed to wakeup device when proximity is close.");
+            return false;
+        }
+        // prevent the pickup to light up the screen when lid is close
+        if (PowerMgrService::isInLidMode_ == true && reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "Pickup isn't allowed to wakeup device when lid is close.");
             return false;
         }
 #endif
