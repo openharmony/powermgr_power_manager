@@ -124,6 +124,10 @@ void WakeupController::RegisterSettingsObserver()
         POWER_HILOGI(COMP_SVC, "start setting string update");
         std::string jsonStr = SettingHelper::GetSettingWakeupSources();
         std::shared_ptr<WakeupSources> sources = WakeupSourceParser::ParseSources(jsonStr);
+        if (sources->GetParseErrorFlag()) {
+            POWER_HILOGI(FEATURE_WAKEUP, "Parse failed, call GetWakeupSourcesByConfig again");
+            sources = WakeupSourceParser::ParseSources(WakeupSourceParser::GetWakeupSourcesByConfig());
+        }
         std::vector<WakeupSource> updateSourceList = sources->GetSourceList();
         if (updateSourceList.size() == 0) {
             return;
