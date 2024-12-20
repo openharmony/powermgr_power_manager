@@ -17,6 +17,8 @@
 #define POWERMGR_UTILS_LIB_LOADER_INTERFACE_LOADER_H
 
 #include "library_loader.h"
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -34,8 +36,9 @@ public:
 private:
     bool LoadAllInterfaces();
 
-    bool isInited_ {false};
     std::unordered_map<std::string, void*> interfaces_;
+    mutable std::shared_mutex shMutex_;
+    bool isInited_ {false};
 };
 
 } // namespace PowerMgr
