@@ -131,6 +131,7 @@ public:
         bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
 
+    void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) override;
 

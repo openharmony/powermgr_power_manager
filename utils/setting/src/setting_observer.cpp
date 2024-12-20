@@ -37,7 +37,7 @@ const std::string& SettingObserver::GetKey()
     return key_;
 }
 
-void SettingObserver::SetUpdateFunc(UpdateFunc& func)
+void SettingObserver::SetUpdateFunc(const UpdateFunc& func)
 {
     update_ = func;
 }
