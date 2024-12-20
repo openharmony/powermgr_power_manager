@@ -73,6 +73,12 @@ DisplayState DeviceStateAction::GetDisplayState()
         case DisplayPowerMgr::DisplayState::DISPLAY_OFF:
             ret = DisplayState::DISPLAY_OFF;
             break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_DOZE:
+            ret = DisplayState::DISPLAY_DOZE;
+            break;
+        case DisplayPowerMgr::DisplayState::DISPLAY_DOZE_SUSPEND:
+            ret = DisplayState::DISPLAY_DOZE_SUSPEND;
+            break;
         case DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND:
             ret = DisplayState::DISPLAY_SUSPEND;
             break;
@@ -164,10 +170,44 @@ bool DeviceStateAction::IsInterruptingScreenOff(PowerStateChangeReason dispReaso
     return ret;
 }
 
+DisplayPowerMgr::DisplayState DeviceStateAction::GetDisplayPowerMgrDisplayState(DisplayState state)
+{
+    DisplayPowerMgr::DisplayState ret = DisplayPowerMgr::DisplayState::DISPLAY_UNKNOWN;
+    switch (state) {
+        case DisplayState::DISPLAY_ON:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_ON;
+            break;
+        case DisplayState::DISPLAY_DIM:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_DIM;
+            break;
+        case DisplayState::DISPLAY_OFF:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
+            break;
+        case DisplayState::DISPLAY_DOZE:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_DOZE;
+            break;
+        case DisplayState::DISPLAY_DOZE_SUSPEND:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_DOZE_SUSPEND;
+            break;
+        case DisplayState::DISPLAY_SUSPEND:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND;
+            break;
+        default:
+            ret = DisplayPowerMgr::DisplayState::DISPLAY_UNKNOWN;
+            break;
+    }
+    return ret;
+}
+
+bool DeviceStateAction::IsOnState(DisplayState state)
+{
+    return state == DisplayState::DISPLAY_ON || state == DisplayState::DISPLAY_DIM;
+}
+
 uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReason reason)
 {
     DisplayState currentState = GetDisplayState();
-    if (state == currentState) {
+    if (state == currentState && reason != StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Already in state: %{public}d", static_cast<uint32_t>(state));
         return ActionResult::SUCCESS;
     }
@@ -175,27 +215,22 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
         isRegister_ = DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
     }
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
-        state = DisplayState::DISPLAY_OFF;
         currentState = DisplayState::DISPLAY_ON;
     }
-    DisplayPowerMgr::DisplayState dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
+    DisplayPowerMgr::DisplayState dispState = GetDisplayPowerMgrDisplayState(state);
     PowerStateChangeReason dispReason = PowerUtils::GetDmsReasonByPowerReason(reason);
     switch (state) {
         case DisplayState::DISPLAY_ON: {
-            dispState = DisplayPowerMgr::DisplayState::DISPLAY_ON;
-            if (currentState == DisplayState::DISPLAY_OFF) {
+            if (!IsOnState(currentState)) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 DisplayManagerLite::GetInstance().WakeUpBegin(dispReason);
                 IPCSkeleton::SetCallingIdentity(identity);
             }
             break;
         }
-        case DisplayState::DISPLAY_DIM:
-            dispState = DisplayPowerMgr::DisplayState::DISPLAY_DIM;
-            break;
+        case DisplayState::DISPLAY_DOZE:
         case DisplayState::DISPLAY_OFF: {
-            dispState = DisplayPowerMgr::DisplayState::DISPLAY_OFF;
-            if (currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) {
+            if (IsOnState(currentState)) {
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 // SuspendBegin is processed inside IsInterruptingScreenOff
                 if (IsInterruptingScreenOff(dispReason)) {
@@ -205,9 +240,6 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
             }
             break;
         }
-        case DisplayState::DISPLAY_SUSPEND:
-            dispState = DisplayPowerMgr::DisplayState::DISPLAY_SUSPEND;
-            break;
         default:
             break;
     }

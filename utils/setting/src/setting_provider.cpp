@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-SettingProvider* SettingProvider::instance_;
+std::atomic<SettingProvider*> SettingProvider::instance_ {nullptr};
 std::mutex SettingProvider::settingMutex_;
 sptr<IRemoteObject> SettingProvider::remoteObj_;
 const int32_t INITIAL_USER_ID = 100;
@@ -52,11 +52,14 @@ SettingProvider::~SettingProvider()
 
 SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
 {
-    if (instance_ == nullptr) {
+    SettingProvider* tmp = instance_.load(std::memory_order_acquire);
+    if (tmp == nullptr) {
         std::lock_guard<std::mutex> lock(settingMutex_);
-        if (instance_ == nullptr) {
-            instance_ = new SettingProvider();
+        tmp = instance_.load(std::memory_order_relaxed);
+        if (tmp == nullptr) {
             Initialize(systemAbilityId);
+            tmp = new SettingProvider();
+            instance_.store(tmp, std::memory_order_release);
         }
     }
     return *instance_;
@@ -140,7 +143,7 @@ bool SettingProvider::IsValidKeyGlobal(const std::string& key)
     return (ret != ERR_NAME_NOT_FOUND) && (!value.empty());
 }
 
-sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, SettingObserver::UpdateFunc& func)
+sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, const SettingObserver::UpdateFunc& func)
 {
     sptr<SettingObserver> observer = new SettingObserver();
     observer->SetKey(key);
@@ -202,9 +205,9 @@ void SettingProvider::Initialize(int32_t systemAbilityId)
     auto remoteObj = sam->GetSystemAbility(systemAbilityId);
     if (remoteObj == nullptr) {
         POWER_HILOGE(COMP_UTILS, "GetSystemAbility return nullptr, systemAbilityId=%{public}d", systemAbilityId);
-        return;
+        remoteObj = sptr<IPCObjectStub>::MakeSptr(u"ohos.powermgr.utils.setting_provider");
     }
-    remoteObj_ = remoteObj;
+    remoteObj_ = std::move(remoteObj);
 }
 
 ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& value)

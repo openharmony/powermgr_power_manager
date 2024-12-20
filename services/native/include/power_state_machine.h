@@ -207,6 +207,8 @@ public:
     void SetForceTimingOut(bool enabled);
     void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent);
     bool IsSettingState(PowerState state);
+    void SetEnableDoze(bool enable);
+    bool SetDozeMode(bool suspend);
 
 private:
     enum PreBrightState : uint32_t {
@@ -376,6 +378,7 @@ private:
     std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<PreBrightState> preBrightState_ {PRE_BRIGHT_UNSTART};
     std::atomic<bool> proximityScreenOffTimerStarted_ {false};
+    std::atomic<bool> isDozeEnabled_ {false};
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     std::atomic<int32_t> externalScreenNumber_ {0};
 #endif
