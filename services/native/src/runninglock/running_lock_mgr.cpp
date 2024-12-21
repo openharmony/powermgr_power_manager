@@ -355,7 +355,8 @@ bool RunningLockMgr::IsSceneRunningLockType(RunningLockType type)
 bool RunningLockMgr::NeedNotify(RunningLockType type)
 {
     return IsSceneRunningLockType(type) ||
-        type == RunningLockType::RUNNINGLOCK_SCREEN;
+        type == RunningLockType::RUNNINGLOCK_SCREEN ||
+        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
 }
 
 void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
