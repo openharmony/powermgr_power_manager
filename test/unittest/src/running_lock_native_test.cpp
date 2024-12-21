@@ -684,7 +684,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
     runningLockMgr->DumpInfo(result);
 
     RunningLockParam runningLockParam {0,
-        "runninglockNativeTest023", "", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO, TIMEOUTMS, PID, UID};
+        "runninglockNativeTest022", "", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO, TIMEOUTMS, PID, UID};
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
     runningLockMgr->Lock(token);
@@ -694,5 +694,44 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
 
     EXPECT_FALSE(runningLockMgr->ReleaseLock(token));
     POWER_HILOGD(LABEL_TEST, "RunningLockNative022 end");
+}
+
+/**
+ * @tc.name: RunningLockNative023
+ * @tc.desc: test NeedNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative023 start");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
+    stateMachine->RefreshActivityInner(UID, PID, userActivityType, true);
+
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    IRunningLockAction *runLockAction = new RunningLockAction();
+
+    RunningLockParam runningLockParam0 {0,
+        "runninglockNativeTest023_1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
+    sptr<IRemoteObject> token0 = new RunningLockTokenStub();
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token0, runningLockParam0) != nullptr);
+    runningLockMgr->Lock(token0);
+    EXPECT_TRUE(runningLockMgr->NeedNotify(RunningLockType::RUNNINGLOCK_SCREEN));
+    runningLockMgr->UnLock(token0);
+    EXPECT_FALSE(runningLockMgr->ReleaseLock(token0));
+
+    RunningLockParam runningLockParam1 {0, "runninglockNativeTest023_2", "",
+        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
+    sptr<IRemoteObject> token1 = new RunningLockTokenStub();
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token1, runningLockParam1) != nullptr);
+    runningLockMgr->Lock(token1);
+    EXPECT_TRUE(runningLockMgr->NeedNotify(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL));
+    runningLockMgr->UnLock(token1);
+    EXPECT_FALSE(runningLockMgr->ReleaseLock(token1));
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative023 end");
 }
 } // namespace
