@@ -43,7 +43,7 @@ public:
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") = 0;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) = 0;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
-        const std::map<int32_t, std::string>& workSources) = 0;
+        const std::vector<int32_t>& workSources) = 0;
     virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
     virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") = 0;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
