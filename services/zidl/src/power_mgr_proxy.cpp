@@ -118,7 +118,7 @@ bool PowerMgrProxy::IsRunningLockTypeSupported(RunningLockType type)
 }
 
 bool PowerMgrProxy::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
-    const std::map<int32_t, std::string>& workSources)
+    const std::vector<int32_t>& workSources)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
@@ -136,8 +136,7 @@ bool PowerMgrProxy::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     uint32_t size = workSources.size();
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Uint32, size, false);
     for (const auto& wks : workSources) {
-        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, wks.first, false);
-        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, wks.second, false);
+        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int32, wks, false);
     }
 
     int ret = remote->SendRequest(

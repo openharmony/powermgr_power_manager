@@ -61,7 +61,6 @@ public:
 private:
     PowerErrors Create();
     void Release();
-    std::string GetBundleNameByUid(const int32_t uid);
     std::mutex mutex_;
     RunningLockInfo runningLockInfo_;
     sptr<IRemoteObject> token_;

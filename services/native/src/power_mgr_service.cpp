@@ -1266,14 +1266,19 @@ bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 }
 
 bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
-    const std::map<int32_t, std::string>& workSources)
+    const std::vector<int32_t>& workSources)
 {
     PowerXCollie powerXCollie("PowerMgrService::UpdateWorkSource", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
+    std::map<int32_t, std::string> wks;
+    for (const auto& uid : workSources) {
+        std::string bundleName = GetBundleNameByUid(uid);
+        wks.emplace(std::make_pair(uid, bundleName));
+    }
     std::lock_guard lock(lockMutex_);
-    runningLockMgr_->UpdateWorkSource(remoteObj, workSources);
+    runningLockMgr_->UpdateWorkSource(remoteObj, wks);
     return true;
 }
 
