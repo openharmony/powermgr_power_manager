@@ -57,8 +57,11 @@ void SystemSuspendController::RegisterHdiStatusListener()
                 };
                 FFRTUtils::SubmitTask(task);
                 POWER_HILOGI(COMP_SVC, "power interface service start");
-            } else if (status.status == SERVIE_STATUS_STOP && powerInterface_) {
-                powerInterface_ = nullptr;
+            } else if (status.status == SERVIE_STATUS_STOP) {
+                std::lock_guard lock(interfaceMutex_);
+                if (powerInterface_) {
+                    powerInterface_ = nullptr;
+                }
                 POWER_HILOGW(COMP_SVC, "power interface service stop, unregister interface");
             }
         }));
@@ -73,33 +76,46 @@ void SystemSuspendController::RegisterHdiStatusListener()
     }
 }
 
+sptr<IPowerInterface> SystemSuspendController::GetPowerInterface()
+{
+    std::lock_guard lock(interfaceMutex_);
+    if (powerInterface_ == nullptr) {
+        powerInterface_ = IPowerInterface::Get();
+        RETURN_IF_WITH_RET(powerInterface_ == nullptr, nullptr);
+    }
+    return powerInterface_;
+}
+
 void SystemSuspendController::RegisterPowerHdiCallback()
 {
     POWER_HILOGD(COMP_SVC, "register power hdi callback");
-    if (powerInterface_ == nullptr) {
-        powerInterface_ = IPowerInterface::Get();
-        RETURN_IF_WITH_LOG(powerInterface_ == nullptr, "failed to get power hdi interface");
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return;
     }
     sptr<IPowerHdiCallback> callback = new PowerHdiCallback();
-    powerInterface_->RegisterCallback(callback);
+    powerInterface->RegisterCallback(callback);
     POWER_HILOGD(COMP_SVC, "register power hdi callback end");
 }
 
 void SystemSuspendController::UnRegisterPowerHdiCallback()
 {
     POWER_HILOGD(COMP_SVC, "unregister power hdi callback");
-    if (powerInterface_ == nullptr) {
-        powerInterface_ = IPowerInterface::Get();
-        RETURN_IF_WITH_LOG(powerInterface_ == nullptr, "failed to get power hdi interface");
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return;
     }
     sptr<IPowerHdiCallback> callback = nullptr;
-    powerInterface_->RegisterCallback(callback);
+    powerInterface->RegisterCallback(callback);
     POWER_HILOGD(COMP_SVC, "unregister power hdi callback end");
 }
 
 void SystemSuspendController::SetSuspendTag(const std::string& tag)
 {
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
@@ -107,18 +123,16 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SET_SUSPEND_TAG", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "TAG", tag);
 #endif
-    powerInterface_->SetSuspendTag(tag);
+    powerInterface->SetSuspendTag(tag);
 }
 
 void SystemSuspendController::AllowAutoSleep()
 {
-    std::lock_guard lock(mutex_);
     allowSleepTask_ = true;
 }
 
 void SystemSuspendController::DisallowAutoSleep()
 {
-    std::lock_guard lock(mutex_);
     allowSleepTask_ = false;
 }
 
@@ -127,7 +141,8 @@ void SystemSuspendController::Suspend(
 {
     std::lock_guard lock(mutex_);
     POWER_HILOGI(COMP_SVC, "The hdf interface, force=%{public}u", static_cast<uint32_t>(force));
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
@@ -136,16 +151,17 @@ void SystemSuspendController::Suspend(
         "TYPE", static_cast<int32_t>(1));
 #endif
     if (force) {
-        powerInterface_->ForceSuspend();
+        powerInterface->ForceSuspend();
     } else if (allowSleepTask_.load()) {
-        powerInterface_->StartSuspend();
+        powerInterface->StartSuspend();
     }
 }
 
 void SystemSuspendController::Wakeup()
 {
     std::lock_guard lock(mutex_);
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
@@ -153,13 +169,14 @@ void SystemSuspendController::Wakeup()
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "TYPE", static_cast<int32_t>(0));
 #endif
-    powerInterface_->StopSuspend();
+    powerInterface->StopSuspend();
 }
 
 bool SystemSuspendController::Hibernate()
 {
     POWER_HILOGI(COMP_SVC, "SystemSuspendController hibernate begin.");
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return false;
     }
@@ -167,7 +184,7 @@ bool SystemSuspendController::Hibernate()
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_HIBERNATE",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
 #endif
-    int32_t ret = powerInterface_->Hibernate();
+    int32_t ret = powerInterface->Hibernate();
     if (ret != HDF_SUCCESS) {
         POWER_HILOGE(COMP_SVC, "SystemSuspendController hibernate failed.");
         return false;
@@ -189,64 +206,70 @@ OHOS::HDI::Power::V1_2::RunningLockInfo SystemSuspendController::FillRunningLock
 
 int32_t SystemSuspendController::AcquireRunningLock(const RunningLockParam& param)
 {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
     int32_t status = RUNNINGLOCK_FAILURE;
-    if (powerInterface_ == nullptr) {
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return status;
     }
     OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo = FillRunningLockInfo(param);
-    status = powerInterface_->HoldRunningLockExt(filledInfo,
+    status = powerInterface->HoldRunningLockExt(filledInfo,
         param.lockid, param.bundleName);
     return status;
 }
 
 int32_t SystemSuspendController::ReleaseRunningLock(const RunningLockParam& param)
 {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
     int32_t status = RUNNINGLOCK_FAILURE;
-    if (powerInterface_ == nullptr) {
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return status;
     }
     OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo = FillRunningLockInfo(param);
-    status = powerInterface_->UnholdRunningLockExt(filledInfo,
+    status = powerInterface->UnholdRunningLockExt(filledInfo,
         param.lockid, param.bundleName);
     return status;
 }
 
 void SystemSuspendController::Dump(std::string& info)
 {
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
-    powerInterface_->PowerDump(info);
+    powerInterface->PowerDump(info);
 }
 
 void SystemSuspendController::GetWakeupReason(std::string& reason)
 {
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return;
     }
-    powerInterface_->GetWakeupReason(reason);
+    powerInterface->GetWakeupReason(reason);
 }
 
 int32_t SystemSuspendController::SetPowerConfig(const std::string& sceneName, const std::string& value)
 {
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return ERR_FAILED;
     }
-    return powerInterface_->SetPowerConfig(sceneName, value);
+    return powerInterface->SetPowerConfig(sceneName, value);
 }
 
 int32_t SystemSuspendController::GetPowerConfig(const std::string& sceneName, std::string& value)
 {
-    if (powerInterface_ == nullptr) {
+    sptr<IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return ERR_FAILED;
     }
-    return powerInterface_->GetPowerConfig(sceneName, value);
+    return powerInterface->GetPowerConfig(sceneName, value);
 }
 
 int32_t SystemSuspendController::PowerHdfCallback::OnSuspend()
