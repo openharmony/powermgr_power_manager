@@ -742,9 +742,27 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     }
     return ret;
 }
-#endif
 
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
+void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus status)
+{
+    bool hibernateRes = (status == HibernateStatus::HIBERNATE_SUCCESS);
+    if (hibernateRes) {
+        switchOpen_ = true;
+    }
+    hibernating_ = false;
+    if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
+    }
+    if (clearMemory) {
+        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+        }
+    }
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto hibernateController = pms->GetHibernateController();
+    hibernateController->PostHibernate(hibernateRes);
+}
+
 uint32_t PowerStateMachine::GetPreHibernateDelay()
 {
     int64_t preHibernateEnd = GetTickCount();
@@ -753,17 +771,28 @@ uint32_t PowerStateMachine::GetPreHibernateDelay()
     POWER_HILOGI(FEATURE_SUSPEND, "preHibernateDelay = %{public}u", preHibernateDelay);
     return preHibernateDelay;
 }
-#endif
 
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto hibernateController = pms->GetHibernateController();
-    if (hibernateController == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "PowerMgr service is nullptr");
         return false;
+    }
+    auto hibernateController = pms->GetHibernateController();
+    auto shutdownController = pms->GetShutdownController();
+    if (hibernateController == nullptr || shutdownController == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "hibernate or shutdown controller is nullptr.");
+        return false;
+    }
+    if (clearMemory) {
+        // do takeover only when user presses "shutdown" menu
+        bool takenOver = shutdownController->TriggerTakeOverHibernateCallback(TakeOverInfo("hibernate", clearMemory));
+        if (takenOver) {
+            POWER_HILOGE(FEATURE_SUSPEND, "Hibernating is taken over by OnTakeOverHibernate callback");
+            return true;
+        }
     }
     if (hibernating_) {
         POWER_HILOGE(FEATURE_SUSPEND, "the device is hibernating, please try again later.");
@@ -778,26 +807,14 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
     }
 
     FFRTTask task = [hibernateController, this, clearMemory, pms]() {
-        bool success = hibernateController->Hibernate(clearMemory);
-        if (!success && clearMemory) {
+        HibernateStatus status = hibernateController->Hibernate(clearMemory);
+        if (status != HibernateStatus::HIBERNATE_SUCCESS && clearMemory) {
             POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
             pms->ShutDownDevice("shutdown_by_user");
             hibernating_ = false;
             return;
         }
-        if (success) {
-            switchOpen_ = true;
-        }
-        hibernating_ = false;
-        if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-            POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
-        }
-        if (clearMemory) {
-            if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
-                POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
-            }
-        }
-        hibernateController->PostHibernate(success);
+        RestoreHibernate(clearMemory, status);
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
     if (ffrtTimer_ == nullptr) {

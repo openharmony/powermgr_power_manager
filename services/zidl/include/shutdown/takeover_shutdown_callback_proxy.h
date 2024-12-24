@@ -30,7 +30,8 @@ public:
     {
     }
     ~TakeOverShutdownCallbackProxy() override = default;
-    virtual bool OnTakeOverShutdown(bool isReboot) override;
+    virtual bool OnTakeOverShutdown(const TakeOverInfo& info) override;
+    virtual bool OnTakeOverHibernate(const TakeOverInfo& info) override;
 
 private:
     static inline BrokerDelegator<TakeOverShutdownCallbackProxy> delegator_;
