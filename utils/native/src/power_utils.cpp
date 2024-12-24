@@ -295,7 +295,7 @@ const std::string PowerUtils::JsonToSimpleStr(const std::string& json)
 
 bool PowerUtils::IsForegroundApplication(const std::string& appName)
 {
-    void* handler = dlopen("libpower_ability.z.so", RTLD_NOW);
+    void* handler = dlopen("libpower_ability.z.so", RTLD_NOW | RTLD_NODELETE);
     if (handler == nullptr) {
         POWER_HILOGE(FEATURE_UTIL, "dlopen libpower_ability.z.so failed, reason : %{public}s", dlerror());
         return false;
