@@ -65,9 +65,12 @@ private:
         std::function<void()> onWakeup_;
     };
     OHOS::HDI::Power::V1_2::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
+    using IPowerInterface = OHOS::HDI::Power::V1_2::IPowerInterface;
+    sptr<IPowerInterface> GetPowerInterface();
     std::mutex mutex_;
+    std::mutex interfaceMutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
-    sptr<OHOS::HDI::Power::V1_2::IPowerInterface> powerInterface_ { nullptr };
+    sptr<IPowerInterface> powerInterface_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
     std::atomic<bool> allowSleepTask_ {false};
