@@ -31,13 +31,19 @@ public:
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
-    bool OnTakeOverShutdown(bool isReboot) override
+    bool OnTakeOverShutdown(const TakeOverInfo& info) override
+    {
+        return false;
+    }
+
+    bool OnTakeOverHibernate(const TakeOverInfo& info) override
     {
         return false;
     }
 
 private:
     int32_t OnTakeOverShutdownCallbackStub(MessageParcel& data, MessageParcel& reply);
+    int32_t OnTakeOverHibernateCallbackStub(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace PowerMgr
 } // namespace OHOS

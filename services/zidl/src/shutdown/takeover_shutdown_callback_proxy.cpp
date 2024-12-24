@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(bool isReboot)
+bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(const TakeOverInfo& info)
 {
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, false);
@@ -37,7 +37,7 @@ bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(bool isReboot)
         return false;
     }
 
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, isReboot, false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Parcelable, &info, false);
 
     int ret = remote->SendRequest(
         static_cast<int32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_SHUTDOWN),
@@ -52,5 +52,33 @@ bool TakeOverShutdownCallbackProxy::OnTakeOverShutdown(bool isReboot)
     return isTakeOver;
 }
 
+bool TakeOverShutdownCallbackProxy::OnTakeOverHibernate(const TakeOverInfo& info)
+{
+    sptr<IRemoteObject> remote = Remote();
+    RETURN_IF_WITH_RET(remote == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(TakeOverShutdownCallbackProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
+        return false;
+    }
+
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Parcelable, &info, false);
+
+    int ret = remote->SendRequest(
+        static_cast<int32_t>(PowerMgr::TakeoverShutdownCallbackInterfaceCode::CMD_ON_TAKEOVER_HIBERNATE),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "SendRequest is failed, ret=%{public}d", ret);
+        return false;
+    }
+
+    bool isTakeOver = false;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, isTakeOver, false);
+    return isTakeOver;
+}
 } // namespace PowerMgr
 } // namespace OHOS

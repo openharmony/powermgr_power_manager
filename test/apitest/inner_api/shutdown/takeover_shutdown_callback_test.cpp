@@ -36,6 +36,7 @@ bool g_isReboot;
 bool g_isHighPriority;
 bool g_isDefaultPriority;
 bool g_isLowPriority;
+bool g_clearMemory = false;
 }
 using namespace testing::ext;
 
@@ -58,6 +59,7 @@ void TakeOverShutdownCallbackTest::SetUp()
     g_isHighPriority = false;
     g_isDefaultPriority = false;
     g_isLowPriority = false;
+    g_clearMemory = false;
     g_mockPowerAction = new MockPowerAction();
     g_mockStateAction = new MockStateAction();
     auto shutdownController = g_service->GetShutdownController();
@@ -67,29 +69,35 @@ void TakeOverShutdownCallbackTest::SetUp()
 void TakeOverShutdownCallbackTest::TearDown()
 {}
 
-bool TakeOverShutdownCallbackTest::TakeOverShutdownCallback::OnTakeOverShutdown(bool isReboot)
+bool TakeOverShutdownCallbackTest::TakeOverShutdownCallback::OnTakeOverShutdown(const TakeOverInfo& info)
 {
-    POWER_HILOGI(LABEL_TEST, "OnTakeOverShutdown called, isReboot=%{public}d", isReboot);
-    g_isReboot = isReboot;
+    POWER_HILOGI(LABEL_TEST, "OnTakeOverShutdown called, reason=%{public}s, intfParam=%{public}d", info.reason_.c_str(),
+        info.intfParam_);
+    g_isReboot = info.intfParam_;
     g_isDefaultPriority = true;
     return true; // Take over the shutdown
 }
 
-bool TakeOverShutdownCallbackTest::HighPriorityTakeOverShutdownCallback::OnTakeOverShutdown(bool isReboot)
+bool TakeOverShutdownCallbackTest::HighPriorityTakeOverShutdownCallback::OnTakeOverShutdown(const TakeOverInfo& info)
 {
+    POWER_HILOGI(LABEL_TEST, "OnTakeOverShutdown called, reason=%{public}s, intfParam=%{public}d", info.reason_.c_str(),
+        info.intfParam_);
     g_isHighPriority = true;
     return true; // Take over the shutdown
 }
 
-bool TakeOverShutdownCallbackTest::LowPriorityTakeOverShutdownCallback::OnTakeOverShutdown(bool isReboot)
+bool TakeOverShutdownCallbackTest::LowPriorityTakeOverShutdownCallback::OnTakeOverShutdown(const TakeOverInfo& info)
 {
+    POWER_HILOGI(LABEL_TEST, "OnTakeOverShutdown called, reason=%{public}s, intfParam=%{public}d", info.reason_.c_str(),
+        info.intfParam_);
     g_isLowPriority = true;
     return true; // Take over the shutdown
 }
 
-bool TakeOverShutdownCallbackTest::NotTakeOverShutdownCallback::OnTakeOverShutdown(bool isReboot)
+bool TakeOverShutdownCallbackTest::NotTakeOverShutdownCallback::OnTakeOverShutdown(const TakeOverInfo& info)
 {
-    POWER_HILOGI(LABEL_TEST, "OnTakeOverShutdown called, isReboot=%{public}d", isReboot);
+    POWER_HILOGI(LABEL_TEST, "OnTakeOverShutdown called, reason=%{public}s, intfParam=%{public}d", info.reason_.c_str(),
+        info.intfParam_);
     return false; // Do not take over the shutdown
 }
 

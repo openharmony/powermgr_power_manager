@@ -21,6 +21,7 @@ namespace OHOS {
 namespace PowerMgr {
 enum class TakeoverShutdownCallbackInterfaceCode {
     CMD_ON_TAKEOVER_SHUTDOWN = 0,
+    CMD_ON_TAKEOVER_HIBERNATE,
 };
 } // space PowerMgr
 } // namespace OHOS

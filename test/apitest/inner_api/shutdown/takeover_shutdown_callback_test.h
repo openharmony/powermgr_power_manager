@@ -28,24 +28,24 @@ public:
     class TakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
         ~TakeOverShutdownCallback() override = default;
-        bool OnTakeOverShutdown(bool isReboot) override;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
     };
 
     class HighPriorityTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
         ~HighPriorityTakeOverShutdownCallback() override = default;
-        bool OnTakeOverShutdown(bool isReboot) override;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
     };
 
     class LowPriorityTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
         ~LowPriorityTakeOverShutdownCallback() override = default;
-        bool OnTakeOverShutdown(bool isReboot) override;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
     };
 
     class NotTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
         ~NotTakeOverShutdownCallback() override = default;
-        bool OnTakeOverShutdown(bool isReboot) override;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
     };
 
 protected:

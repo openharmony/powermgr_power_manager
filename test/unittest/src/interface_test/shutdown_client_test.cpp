@@ -32,6 +32,7 @@ MessageOption g_option;
 bool g_isOnAsyncShutdown = false;
 bool g_isOnSyncShutdown = false;
 bool g_isOnTakeOverShutdown = false;
+bool g_isOnTakeOverHibernate = false;
 bool g_isOnAsyncShutdownOrReboot = false;
 bool g_isOnSyncShutdownOrReboot = false;
 }
@@ -75,9 +76,15 @@ void ShutdownClientTest::SyncShutdownCallback::OnSyncShutdownOrReboot(bool isReb
     g_isOnSyncShutdownOrReboot = isReboot;
 }
 
-bool ShutdownClientTest::TakeOverShutdownCallback::OnTakeOverShutdown(bool isReboot)
+bool ShutdownClientTest::TakeOverShutdownCallback::OnTakeOverShutdown(const TakeOverInfo& info)
 {
     g_isOnTakeOverShutdown = true;
+    return true;
+}
+
+bool ShutdownClientTest::TakeOverShutdownCallback::OnTakeOverHibernate(const TakeOverInfo& info)
+{
+    g_isOnTakeOverHibernate = true;
     return true;
 }
 
@@ -186,20 +193,52 @@ HWTEST_F(ShutdownClientTest, SyncShutdownCallbackStub001, TestSize.Level0)
  * @tc.name: TakeOverShutdownCallbackStub001
  * @tc.desc: Test TakeOverShutdownCallbackStub
  * @tc.type: FUNC
- * @tc.require: issueI7MNRN
+ * @tc.require:
  */
 HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub001 start");
-    uint32_t code = 0;
+    uint32_t code = 0; // CMD_ON_TAKEOVER_SHUTDOWN
     MessageParcel data;
+    MessageParcel reply;
+    TakeOverInfo info("TakeOverShutdownCallbackStub001", false);
     TakeOverShutdownCallback takeOverShutdownCallback;
     data.WriteInterfaceToken(TakeOverShutdownCallback::GetDescriptor());
-    int32_t ret = takeOverShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
-    EXPECT_EQ(ret, E_READ_PARCEL_ERROR);
-    bool retVal = takeOverShutdownCallback.TakeOverShutdownCallbackStub::OnTakeOverShutdown(false);
+    data.WriteParcelable(&info);
+    int32_t ret = takeOverShutdownCallback.OnRemoteRequest(code, data, reply, g_option);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(reply.ReadBool(), true);
+    EXPECT_EQ(g_isOnTakeOverShutdown, true);
+    bool retVal = takeOverShutdownCallback.TakeOverShutdownCallbackStub::OnTakeOverShutdown(
+        {"TakeOverShutdownCallbackStub001", false});
     EXPECT_EQ(retVal, false);
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub001 end");
+}
+
+/**
+ * @tc.name: TakeOverShutdownCallbackStub002
+ * @tc.desc: Test TakeOverShutdownCallbackStub
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub002, TestSize.Level0)
+{
+    POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub002 start");
+    uint32_t code = 1; // CMD_ON_TAKEOVER_HIBERNATE
+    MessageParcel data;
+    MessageParcel reply;
+    TakeOverInfo info("TakeOverShutdownCallbackStub002", false);
+    TakeOverShutdownCallback takeOverShutdownCallback;
+    data.WriteInterfaceToken(TakeOverShutdownCallback::GetDescriptor());
+    data.WriteParcelable(&info);
+    int32_t ret = takeOverShutdownCallback.OnRemoteRequest(code, data, reply, g_option);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(reply.ReadBool(), true);
+    EXPECT_EQ(g_isOnTakeOverHibernate, true);
+    bool retVal = takeOverShutdownCallback.TakeOverShutdownCallbackStub::OnTakeOverHibernate(
+        {"TakeOverShutdownCallbackStub002", false});
+    EXPECT_EQ(retVal, false);
+    POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub002 end");
 }
 
 /**
