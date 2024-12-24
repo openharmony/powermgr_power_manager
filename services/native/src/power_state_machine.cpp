@@ -1344,7 +1344,7 @@ void PowerStateMachine::SetEnableDoze(bool enable)
     isDozeEnabled_.store(enable, std::memory_order_relaxed);
 }
 
-bool PowerStateMachine::SetDozeMode(bool suspend)
+bool PowerStateMachine::SetDozeMode(DisplayState state)
 {
     std::lock_guard<std::mutex> lock(stateMutex_);
     if (IsScreenOn()) {
@@ -1352,8 +1352,7 @@ bool PowerStateMachine::SetDozeMode(bool suspend)
         return false;
     }
     uint32_t ret =
-        this->stateAction_->SetDisplayState(suspend ? DisplayState::DISPLAY_DOZE_SUSPEND : DisplayState::DISPLAY_DOZE,
-            StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE);
+        this->stateAction_->SetDisplayState(state, StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE);
     return ret == ActionResult::SUCCESS;
 }
 
