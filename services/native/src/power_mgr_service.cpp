@@ -161,10 +161,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
         power->SwitchSubscriberInit();
         power->InputMonitorInit();
-        SettingHelper::UpdateCurrentUserId();
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
         SettingHelper::CopyDataForUpdateScene();
 #endif
+        SettingHelper::UpdateCurrentUserId();
         power->SuspendControllerInit();
         power->WakeupControllerInit();
         power->SubscribeCommonEvent();

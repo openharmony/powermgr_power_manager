@@ -59,6 +59,9 @@ private:
 
 class WakeupSources {
 public:
+    WakeupSources() = default;
+    ~WakeupSources() = default;
+
     static const constexpr char* POWERKEY_KEY = "powerkey";
     static const constexpr char* MOUSE_KEY = "mouse";
     static const constexpr char* KEYBOARD_KEY = "keyborad";
@@ -71,17 +74,25 @@ public:
     static const constexpr uint32_t SINGLE_CLICK = 1;
     static const constexpr uint32_t DOUBLC_CLICK = 2;
 
-    WakeupSources() = default;
-    ~WakeupSources() = default;
     static WakeupDeviceType mapWakeupDeviceType(const std::string& key, uint32_t click);
     static std::vector<std::string> getSourceKeys();
     void PutSource(WakeupSource& source);
     std::vector<WakeupSource> GetSourceList();
+    bool GetParseErrorFlag() const
+    {
+        return parseErrorFlag_;
+    }
+
+    void SetParseErrorFlag(bool flag)
+    {
+        parseErrorFlag_ = flag;
+    }
 
 private:
+    static std::mutex sourceKeysMutex_;
     std::vector<WakeupSource> sourceList_;
     std::mutex sourceListMutex_;
-    static std::mutex sourceKeysMutex_;
+    bool parseErrorFlag_ {false};
 };
 
 } // namespace PowerMgr
