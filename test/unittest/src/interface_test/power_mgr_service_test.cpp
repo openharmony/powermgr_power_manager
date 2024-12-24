@@ -696,6 +696,11 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService028, TestSize.Level2)
         SetDisplayState(DisplayState::DISPLAY_DOZE, StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE));
     EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_DOZE_SUSPEND));
     pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "display_doze");
+
+    EXPECT_CALL(*stateActionMock,
+        SetDisplayState(DisplayState::DISPLAY_OFF, StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE));
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillOnce(::testing::Return(DisplayState::DISPLAY_DOZE));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "display_off");
     auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
     stateAction.reset();
 }
@@ -707,11 +712,12 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService028, TestSize.Level2)
  */
 void AddPermission()
 {
-    const char* perms[1];
+    const char* perms[2];
     perms[0] = "ohos.permission.MANAGE_SECURE_SETTINGS";
+    perms[1] = "ohos.permission.MANAGE_SETTINGS";
     NativeTokenInfoParams info = {
         .dcapsNum = 0,
-        .permsNum = 1,
+        .permsNum = 2,
         .dcaps = 0,
         .perms = perms,
         .acls = NULL,
@@ -733,7 +739,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
     stateMaschine_->EnableMock(stateActionMock);
     AddPermission();
     SettingHelper::RegisterAodSwitchObserver();
-
+    std::string originalValue {"0"};
+    SettingProvider::GetInstance(-1).GetStringValue("hw_aod_watch_switch", originalValue);
     ErrCode ret = SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", "0", true);
     EXPECT_EQ(ret, ERR_OK);
     sleep(1);
@@ -751,6 +758,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
     EXPECT_EQ(stateMaschine_->GetState(), PowerState::INACTIVE);
     auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
     stateAction.reset();
+    SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", originalValue, true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 end.");
 }
 }
