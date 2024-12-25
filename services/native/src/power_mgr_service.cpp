@@ -34,8 +34,8 @@
 #include "ability_manager_client.h"
 #include "ffrt_utils.h"
 #include "permission.h"
-#include "power_common.h"
 #include "power_ext_intf_wrapper.h"
+#include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
 #include "power_xcollie.h"
@@ -51,6 +51,9 @@
 #endif
 #ifdef MSDP_MOVEMENT_ENABLE
 #include <dlfcn.h>
+#endif
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+#include "battery_srv_client.h"
 #endif
 
 using namespace OHOS::AppExecFwk;
@@ -147,6 +150,10 @@ void PowerMgrService::RegisterBootCompletedCallback()
         }
         PowerExtIntfWrapper::Instance().Init();
         auto powerStateMachine = power->GetPowerStateMachine();
+        SettingHelper::UpdateCurrentUserId(); // update setting user id before get setting values
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+        power->PowerConnectStatusInit();
+#endif
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
 #ifdef POWER_MANAGER_POWER_DIALOG
@@ -173,7 +180,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
         power->VibratorInit();
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
-        power->RegisterSettingObservers();
+        power->RegisterSettingWakeupDoubleClickObservers();
         power->RegisterSettingWakeupPickupGestureObserver();
 #endif
         power->RegisterSettingPowerModeObservers();
@@ -246,11 +253,6 @@ void PowerMgrService::KeepScreenOn(bool isOpenOn)
 }
 
 #ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
-void PowerMgrService::RegisterSettingObservers()
-{
-    RegisterSettingWakeupDoubleClickObservers();
-}
-
 void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupDoubleClickSettingUpdateFunc(key); };
@@ -1558,6 +1560,31 @@ void PowerMgrService::WakeupActionControllerInit()
 }
 #endif
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+void PowerMgrService::PowerConnectStatusInit()
+{
+    auto pluggedType = BatterySrvClient::GetInstance().GetPluggedType();
+    if (pluggedType == BatteryPluggedType::PLUGGED_TYPE_BUTT) {
+        POWER_HILOGE(COMP_SVC, "BatterySrvClient GetPluggedType error");
+        SetPowerConnectStatus(PowerConnectStatus::POWER_CONNECT_INVALID);
+    } else if ((pluggedType == BatteryPluggedType::PLUGGED_TYPE_AC) ||
+        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_USB) ||
+        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS)) {
+        SetPowerConnectStatus(PowerConnectStatus::POWER_CONNECT_AC);
+    } else {
+        SetPowerConnectStatus(PowerConnectStatus::POWER_CONNECT_DC);
+    }
+}
+
+bool PowerMgrService::IsPowerConnected()
+{
+    if (GetPowerConnectStatus() == PowerConnectStatus::POWER_CONNECT_INVALID) {
+        PowerConnectStatusInit(); // try to init again if invalid
+    }
+    return GetPowerConnectStatus() == PowerConnectStatus::POWER_CONNECT_AC;
+}
+#endif
+
 void PowerMgrService::VibratorInit()
 {
     std::shared_ptr<PowerVibrator> vibrator = PowerVibrator::GetInstance();
@@ -1719,6 +1746,10 @@ void PowerMgrService::SubscribeCommonEvent()
     using namespace OHOS::EventFwk;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+#endif
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::COMMON);
     if (!subscriberPtr_) {
@@ -1726,30 +1757,143 @@ void PowerMgrService::SubscribeCommonEvent()
     }
     bool result = CommonEventManager::SubscribeCommonEvent(subscriberPtr_);
     if (!result) {
-        POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT_USER_SWITCHED failed");
+        POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT failed");
     }
 }
+
+void PowerMgrService::UnregisterAllSettingObserver()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    SettingHelper::UnregisterSettingWakeupDoubleObserver();
+    SettingHelper::UnregisterSettingWakeupPickupObserver();
+#endif
+    pms->GetWakeupController()->UnregisterSettingsObserver();
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    pms->GetSuspendController()->UnregisterSettingsObserver();
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerStateMachine fail");
+        return;
+    }
+    stateMachine->UnregisterDisplayOffTimeObserver();
+#endif
+}
+
+void PowerMgrService::RegisterAllSettingObserver()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+
+#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
+    pms->RegisterSettingWakeupDoubleClickObservers();
+    pms->RegisterSettingWakeupPickupGestureObserver();
+#endif
+    pms->WakeupControllerInit();
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    pms->SuspendControllerInit();
+    pms->UpdateSettingInvalidDisplayOffTime(); // update setting value if invalid before register
+    auto stateMachine = pms->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerStateMachine fail");
+        return;
+    }
+    stateMachine->RegisterDisplayOffTimeObserver();
+#endif
+}
+
+int64_t PowerMgrService::GetSettingDisplayOffTime(int64_t defaultTime)
+{
+    int64_t settingTime = defaultTime;
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "get PowerMgrService fail");
+        return settingTime;
+    }
+    if (pms->IsPowerConnected()) {
+        settingTime = SettingHelper::GetSettingDisplayAcScreenOffTime(defaultTime);
+    } else {
+        settingTime = SettingHelper::GetSettingDisplayDcScreenOffTime(defaultTime);
+    }
+#else
+    settingTime = SettingHelper::GetSettingDisplayOffTime(defaultTime);
+#endif
+    return settingTime;
+}
+
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+void PowerMgrService::UpdateSettingInvalidDisplayOffTime()
+{
+    if (SettingHelper::IsSettingDisplayAcScreenOffTimeValid() &&
+        SettingHelper::IsSettingDisplayDcScreenOffTimeValid()) {
+        return;
+    }
+
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (power == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+    auto stateMachine = power->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerStateMachine fail");
+        return;
+    }
+    stateMachine->SetDisplayOffTime(DEFAULT_DISPLAY_OFF_TIME, true);
+}
+
+void PowerCommonEventSubscriber::OnPowerConnectStatusChanged(PowerConnectStatus status)
+{
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (power == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+        return;
+    }
+    power->SetPowerConnectStatus(status);
+
+    auto suspendController = power->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get suspendController fail");
+        return;
+    }
+    suspendController->UpdateSuspendSources();
+
+    auto stateMachine = power->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get PowerStateMachine fail");
+        return;
+    }
+    stateMachine->DisplayOffTimeUpdateFunc();
+}
+#endif
 
 void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (power == nullptr) {
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
         POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
         return;
     }
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
-        SettingHelper::UnregisterSettingWakeupDoubleObserver();
-        SettingHelper::UnregisterSettingWakeupPickupObserver();
+        pms->UnregisterAllSettingObserver();    // unregister old user observer
+        SettingHelper::UpdateCurrentUserId();   // update user Id
+        pms->RegisterAllSettingObserver();      // register new user observer
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED) {
+        OnPowerConnectStatusChanged(PowerConnectStatus::POWER_CONNECT_AC);
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED) {
+        OnPowerConnectStatusChanged(PowerConnectStatus::POWER_CONNECT_DC);
 #endif
-        power->GetWakeupController()->UnregisterSettingsObserver();
-        SettingHelper::UpdateCurrentUserId();
-#ifdef POWER_WAKEUPDOUBLE_OR_PICKUP_ENABLE
-        power->RegisterSettingObservers();
-        power->RegisterSettingWakeupPickupGestureObserver();
-#endif
-        power->WakeupControllerInit();
     }
 }
 } // namespace PowerMgr
