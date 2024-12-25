@@ -189,6 +189,7 @@ void PowerCoordinationLockTest::TearDownTestCase(void)
 void PowerCoordinationLockTest::TearDown(void)
 {
     ResetTriggeredFlag();
+    sleep(1); //wait for async wakeup task to be done
 }
 
 namespace {
