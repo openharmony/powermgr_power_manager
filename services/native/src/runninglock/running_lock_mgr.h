@@ -80,6 +80,7 @@ public:
     void EnableMock(IRunningLockAction* mockAction);
 private:
 
+    void AsyncWakeup();
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
     void InitLocksTypeProximity();
