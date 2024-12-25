@@ -499,6 +499,24 @@ bool InputCallback::IsRemoteEvent(std::shared_ptr<InputEvent> event) const
     return event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
 }
 
+bool InputCallback::isKeyboardKeycode(int32_t keyCode) const
+{
+    if ((keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN
+        && keyCode != KeyEvent::KEYCODE_F1)
+        || (keyCode == KeyEvent::KEYCODE_BRIGHTNESS_DOWN) // F1 hotkey
+        || (keyCode == KeyEvent::KEYCODE_BRIGHTNESS_UP) // F2 hotkey
+        || (keyCode == KeyEvent::KEYCODE_FN) // F3 hotkey
+        || (keyCode == KeyEvent::KEYCODE_VOLUME_MUTE) // F4 hotkey
+        || (keyCode == KeyEvent::KEYCODE_SOUND) // sound
+        || (keyCode == KeyEvent::KEYCODE_MUTE) // F7 hotkey
+        || (keyCode == KeyEvent::KEYCODE_SWITCHVIDEOMODE) // F8 hotkey
+        || (keyCode == KeyEvent::KEYCODE_SEARCH) // F9 hotkey
+        || (keyCode == KeyEvent::KEYCODE_ASSISTANT)) { // assistant
+        return true;
+    }
+    return false;
+}
+
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -531,8 +549,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
     }
 
-    if (keyCode >= KeyEvent::KEYCODE_0 && keyCode <= KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN
-        && keyCode != KeyEvent::KEYCODE_F1) {
+    if (isKeyboardKeycode(keyCode)) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
         if (wakeupController->CheckEventReciveTime(wakeupType) ||
             keyEvent->GetKeyAction() == KeyEvent::KEY_ACTION_UP) {
@@ -697,8 +714,14 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
+    auto weak = weak_from_this();
     powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            auto strong = weak.lock();
+            if (!strong) {
+                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
+                return;
+            }
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
 
             auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -720,7 +743,7 @@ bool PowerkeyWakeupMonitor::Init()
             // sync with the end of powerkey screen off task
             ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
             suspendController->RecordPowerKeyDown(poweroffInterrupted);
-            Notify();
+            strong->Notify();
         });
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
