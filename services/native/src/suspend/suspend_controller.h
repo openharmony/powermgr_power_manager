@@ -47,6 +47,7 @@ public:
     void Init();
     void ExecSuspendMonitorByReason(SuspendDeviceType reason);
     void RegisterSettingsObserver();
+    void UnregisterSettingsObserver();
     void Execute();
     void Cancel();
     void StopSleep();
@@ -59,6 +60,7 @@ public:
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
     void TriggerSyncSleepCallback(bool isWakeup);
+    void UpdateSuspendSources();
 
     std::shared_ptr<PowerStateMachine> GetStateMachine() const
     {
