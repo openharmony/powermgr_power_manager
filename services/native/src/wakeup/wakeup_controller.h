@@ -107,10 +107,11 @@ public:
 
 private:
     bool IsRemoteEvent(std::shared_ptr<InputEvent> event) const;
+    bool isKeyboardKeycode(int32_t keyCode) const;
 };
 #endif
 
-class WakeupMonitor {
+class WakeupMonitor : public std::enable_shared_from_this<WakeupMonitor> {
 public:
     static std::shared_ptr<WakeupMonitor> CreateMonitor(WakeupSource& source);
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;

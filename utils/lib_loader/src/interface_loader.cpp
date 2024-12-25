@@ -40,7 +40,7 @@ InterfaceLoader::~InterfaceLoader() noexcept
 bool InterfaceLoader::Init()
 {
     bool ret = LoadAllInterfaces();
-    POWER_HILOGE(COMP_SVC, "Interface loading result: %{public}u", static_cast<uint32_t>(ret));
+    POWER_HILOGI(COMP_SVC, "Interface loading result: %{public}u", static_cast<uint32_t>(ret));
     if (ret) {
         isInited_ = true;
     }
