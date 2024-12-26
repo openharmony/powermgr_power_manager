@@ -1,0 +1,15 @@
+{
+    "description": "Turn on the AOD on/off screen",
+    "environment": [
+      {
+        "type": "device",
+        "label": "phone"
+      }
+    ],
+    "driver": {
+      "type": "DeviceTest",
+      "py_file": [
+        "testcases/level0/SUB_SCREEN_STATE_WITH_AOD_TEST.py"
+      ]
+    }
+}
