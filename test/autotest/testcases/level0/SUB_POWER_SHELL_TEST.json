@@ -1,0 +1,15 @@
+{
+    "description": "power-shell basic functions",
+    "environment": [
+      {
+        "type": "device",
+        "label": "phone"
+      }
+    ],
+    "driver": {
+      "type": "DeviceTest",
+      "py_file": [
+        "testcases/level0/SUB_POWER_SHELL_TEST.py"
+      ]
+    }
+}
