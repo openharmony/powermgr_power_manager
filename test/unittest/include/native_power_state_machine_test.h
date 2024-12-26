@@ -39,6 +39,11 @@ constexpr int64_t CALLTIMEMS = 1;
 constexpr pid_t PID = 1;
 constexpr uint32_t MAXTYPE = 77;
 constexpr int64_t TIMEOUT = 7;
+#ifdef HAS_SENSORS_SENSOR_PART
+constexpr int64_t SUSCALLTIMEMS = 3;
+constexpr int SLEEP_WAIT_TIME_S = 6;
+constexpr int SLEEP_WAIT_TIME_MS = 500;
+#endif
 
 class NativePowerStateMachineTest : public testing::Test {
 public:
