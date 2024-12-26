@@ -19,6 +19,10 @@
 
 #include "actions/irunning_lock_action.h"
 
+#ifdef HAS_SENSORS_SENSOR_PART
+#include "proximity_controller_base.h"
+#endif
+
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
@@ -393,6 +397,51 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
     pmsTest->UnRegisterExternalScreenListener();
 #endif
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func ended!");
+}
+
+/**
+ * @tc.name: NativePowerStateMachine010
+ * @tc.desc: test ProximityNormalController in powerStateMachine
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "NativePowerStateMachine010: Suspend Device start.";
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010::fun is start!");
+#ifdef HAS_SENSORS_SENSOR_PART
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    SuspendDeviceType reasonSDT = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION;
+    SensorEvent *event = new SensorEvent();
+    event->data = new uint8_t(0);
+    ProximityData* data = reinterpret_cast<ProximityData*>(event->data);
+    event->sensorTypeId = SENSOR_TYPE_ID_PROXIMITY;
+    EXPECT_TRUE(pmsTest->SuspendDevice(SUSCALLTIMEMS, reasonSDT, false) == PowerErrors::ERR_OK);
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false) << "NativePowerStateMachine010: Suspend Device Fail, Screen is On";
+    sleep(SLEEP_WAIT_TIME_S);
+    stateMachine->proximityNormalController_.Disable();
+    data->distance = 0;
+    stateMachine->proximityNormalController_.RecordSensorCallback(event);
+    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_PICKUP, "NativePowerStateMachine010");
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false)
+        << "NativePowerStateMachine010: Prevent Pickup Wakeup Device When Proximity Is Close Fail, Screen is On";
+    data->distance = 5;
+    stateMachine->proximityNormalController_.RecordSensorCallback(event);
+    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_PICKUP, "NativePowerStateMachine010");
+    usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true)
+        << "NativePowerStateMachine010: Pickup Wakeup Device When Proximity Is Away Fail, Screen is Off";
+    delete event->data;
+    event->data = nullptr;
+    data = nullptr;
+    delete event;
+    event = nullptr;
+#endif
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010::fun is end!");
+    GTEST_LOG_(INFO) << "NativePowerStateMachine010: Suspend Device end.";
 }
 
 } // namespace

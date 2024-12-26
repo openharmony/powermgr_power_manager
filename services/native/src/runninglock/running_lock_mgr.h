@@ -28,7 +28,7 @@
 #include "running_lock_info.h"
 #include "ipower_runninglock_callback.h"
 #ifdef HAS_SENSORS_SENSOR_PART
-#include "sensor_agent.h"
+#include "proximity_controller_base.h"
 #endif
 
 namespace OHOS {
@@ -114,38 +114,14 @@ private:
     };
 
 #ifdef HAS_SENSORS_SENSOR_PART
-    class ProximityController {
+    class ProximityController : public ProximityControllerBase {
     public:
-        ProximityController();
-        ~ProximityController();
-        void Enable();
-        void Disable();
-        bool IsEnabled()
-        {
-            return enabled_;
-        }
-        bool IsSupported()
-        {
-            return support_;
-        }
-        bool IsClose();
+        ProximityController(const std::string& name = "RunningLock", SensorCallbackFunc
+            callback = &ProximityController::RecordSensorCallback) : ProximityControllerBase(name, callback) {}
+        ~ProximityController() {}
         void OnClose();
         void OnAway();
-        uint32_t GetStatus()
-        {
-            return status_;
-        }
-        void Clear();
         static void RecordSensorCallback(SensorEvent *event);
-    private:
-        static const int32_t PROXIMITY_CLOSE_SCALAR = 0;
-        static const int32_t PROXIMITY_AWAY_SCALAR = 5;
-        static const uint32_t SAMPLING_RATE =  100000000;
-        bool support_ {false};
-        bool enabled_ {false};
-        bool isClose_ {false};
-        uint32_t status_ {0};
-        SensorUser user_;
     };
     ProximityController proximityController_;
 #endif
