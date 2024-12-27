@@ -199,13 +199,20 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
     if (isForbidden) {
         return false;
     }
-    // prevent the double click or pickup to light up the screen when calling or sporting or lid is close
+    // prevent the double click or pickup to light up the screen when calling or sporting or proximity is close
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
              reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
 #ifdef HAS_SENSORS_SENSOR_PART
         if (IsProximityClose()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
-                "Double-click or pickup isn't allowed to wakeup device when proximity is close.");
+                "Double-click or pickup isn't allowed to wakeup device when proximity is close during calling.");
+            return false;
+        }
+        // prevent the pickup to light up the screen when proximity is close out of calling
+        if (ProximityNormalController::isInactiveClose_ == true &&
+            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+            POWER_HILOGI(FEATURE_POWER_STATE,
+                "Pickup isn't allowed to wakeup device when proximity is close out of calling.");
             return false;
         }
         // prevent the pickup to light up the screen when lid is close
@@ -2082,6 +2089,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         if (needNotify) {
             owner->NotifyPowerStateChanged(owner->currentState_, reason);
         }
+        owner->proximityNormalController_.ActivateValidProximitySensor(owner->currentState_);
     } else if (IsReallyFailed(reason)) {
         RecordFailure(owner->currentState_, reason, ret);
     }

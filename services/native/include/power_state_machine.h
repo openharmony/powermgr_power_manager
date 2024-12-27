@@ -30,6 +30,7 @@
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
+#include "proximity_controller_base.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -383,6 +384,12 @@ private:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     std::atomic<int32_t> externalScreenNumber_ {0};
 #endif
+#ifndef POWER_UT_ENABLE
+private:
+#else
+public:
+#endif
+    ProximityNormalController proximityNormalController_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
