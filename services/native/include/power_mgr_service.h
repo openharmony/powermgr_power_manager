@@ -95,7 +95,7 @@ public:
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;
     virtual bool IsRunningLockTypeSupported(RunningLockType type) override;
     virtual bool UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
-        const std::map<int32_t, std::string>& workSources) override;
+        const std::vector<int32_t>& workSources) override;
     virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
     virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;
     virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
