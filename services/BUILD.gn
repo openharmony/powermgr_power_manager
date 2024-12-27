@@ -57,6 +57,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mode_policy.cpp",
     "native/src/power_save_mode.cpp",
     "native/src/power_state_machine.cpp",
+    "native/src/proximity_controller_base.cpp",
     "native/src/runninglock/running_lock_inner.cpp",
     "native/src/runninglock/running_lock_mgr.cpp",
     "native/src/runninglock/running_lock_proxy.cpp",
