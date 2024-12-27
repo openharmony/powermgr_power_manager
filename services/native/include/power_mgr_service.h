@@ -273,6 +273,9 @@ public:
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::shared_ptr<WakeupActionController> wakeupActionController_ = nullptr;
 #endif
+#ifdef HAS_SENSORS_SENSOR_PART
+    static bool isInLidMode_;
+#endif
 
 private:
     class WakeupRunningLock {
