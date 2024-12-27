@@ -256,13 +256,9 @@ int32_t PowerMgrStub::UpdateWorkSourceStub(MessageParcel& data)
     if (size > PARAM_MAX_SIZE) {
         return E_EXCEED_PARAM_LIMIT;
     }
-    std::map<int32_t, std::string> workSources;
+    std::vector<int32_t> workSources(size);
     for (uint32_t i = 0; i < size; ++i) {
-        int32_t uid = 0;
-        std::string bundleName;
-        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int32, uid, E_READ_PARCEL_ERROR);
-        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, String, bundleName, E_READ_PARCEL_ERROR);
-        workSources[uid] = bundleName;
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int32, workSources[i], E_READ_PARCEL_ERROR);
     }
     UpdateWorkSource(remoteObj, workSources);
     return ERR_OK;
