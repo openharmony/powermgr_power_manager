@@ -384,11 +384,6 @@ private:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     std::atomic<int32_t> externalScreenNumber_ {0};
 #endif
-#ifndef POWER_UT_ENABLE
-private:
-#else
-public:
-#endif
     ProximityNormalController proximityNormalController_;
 };
 } // namespace PowerMgr
