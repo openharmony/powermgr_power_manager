@@ -100,7 +100,7 @@ void PowerMgrService::OnStart()
         return;
     }
     if (!Init()) {
-        POWER_HILOGE(COMP_SVC, "Call init fail");
+        POWER_HILOGE(COMP_SVC, "powermgr service init fail");
         return;
     }
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
@@ -116,6 +116,7 @@ void PowerMgrService::OnStart()
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
 #endif
+    PowerExtIntfWrapper::Instance().Init();
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
         return;
@@ -127,7 +128,7 @@ void PowerMgrService::OnStart()
 
 bool PowerMgrService::Init()
 {
-    POWER_HILOGI(COMP_SVC, "Init start");
+    POWER_HILOGI(COMP_SVC, "powermgr service init start");
     if (!ffrtTimer_) {
         ffrtTimer_ = std::make_shared<FFRTTimer>("power_manager_ffrt_queue");
     }
@@ -148,7 +149,7 @@ bool PowerMgrService::Init()
         screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
         screenOffPreController_->Init();
     }
-    POWER_HILOGI(COMP_SVC, "Init success");
+    POWER_HILOGI(COMP_SVC, "powermgr service init success");
     return true;
 }
 
@@ -161,7 +162,6 @@ void PowerMgrService::RegisterBootCompletedCallback()
             POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
             return;
         }
-        PowerExtIntfWrapper::Instance().Init();
         auto powerStateMachine = power->GetPowerStateMachine();
 #ifdef POWER_PICKUP_ENABLE
         SettingHelper::CopyDataForUpdateScene();
@@ -653,7 +653,9 @@ void PowerMgrService::OnStop()
     UnRegisterMovementCallback();
 #endif
     UnregisterExternalCallback();
+#ifndef FUZZ_TEST
     PowerExtIntfWrapper::Instance().DeInit();
+#endif
 }
 
 void PowerMgrService::Reset()
