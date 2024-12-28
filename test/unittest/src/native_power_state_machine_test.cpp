@@ -19,10 +19,6 @@
 
 #include "actions/irunning_lock_action.h"
 
-#ifdef HAS_SENSORS_SENSOR_PART
-#include "proximity_controller_base.h"
-#endif
-
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
