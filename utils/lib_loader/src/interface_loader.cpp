@@ -34,13 +34,18 @@ InterfaceLoader::InterfaceLoader(const std::string& libPath, const std::vector<s
 
 InterfaceLoader::~InterfaceLoader() noexcept
 {
-    DeInit();
+    POWER_HILOGI(COMP_SVC, "InterfaceLoader instance destroyed");
 }
 
 bool InterfaceLoader::Init()
 {
+    std::unique_lock lock(shMutex_);
+    if (isInited_) {
+        POWER_HILOGW(COMP_SVC, "Interface already loaded");
+        return true;
+    }
     bool ret = LoadAllInterfaces();
-    POWER_HILOGE(COMP_SVC, "Interface loading result: %{public}u", static_cast<uint32_t>(ret));
+    POWER_HILOGI(COMP_SVC, "Interface loading result: %{public}u", static_cast<uint32_t>(ret));
     if (ret) {
         isInited_ = true;
     }
@@ -49,6 +54,7 @@ bool InterfaceLoader::Init()
 
 void InterfaceLoader::DeInit()
 {
+    std::unique_lock lock(shMutex_);
     if (isInited_) {
         isInited_ = false;
         interfaces_.clear();
@@ -57,12 +63,14 @@ void InterfaceLoader::DeInit()
 
 void* InterfaceLoader::QueryInterface(const std::string& symbol) const
 {
+    std::shared_lock lock(shMutex_);
     if (!isInited_) {
         POWER_HILOGE(COMP_SVC, "Interface not loading or loading failed");
         return nullptr;
     }
     auto iter = interfaces_.find(symbol);
-    if (iter == interfaces_.end()) {
+    if (iter == interfaces_.end() || iter->second == nullptr) {
+        POWER_HILOGE(COMP_SVC, "%{public}s symbol not found", symbol.c_str());
         return nullptr;
     }
     return iter->second;
@@ -73,10 +81,9 @@ bool InterfaceLoader::LoadAllInterfaces()
     void* curFunc = nullptr;
     for (auto iter = interfaces_.begin(); iter != interfaces_.end(); ++iter) {
         curFunc = LoadInterface(iter->first.c_str());
-        if (curFunc == nullptr) {
-            return false;
+        if (curFunc != nullptr) {
+            iter->second = curFunc;
         }
-        iter->second = curFunc;
     }
     return true;
 }
