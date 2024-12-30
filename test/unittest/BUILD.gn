@@ -599,8 +599,6 @@ ohos_unittest("power_state_machine_native_test") {
   ]
 
   external_deps = deps_ex
-
-  defines += [ "POWER_UT_ENABLE" ]
 }
 
 ohos_unittest("test_running_lock_native") {
