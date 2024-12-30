@@ -27,10 +27,12 @@ const std::vector<std::string> ALL_POWER_EXT_INTF_SYMBOL = {
     "UnSubscribeScreenLockCommonEvent",
     "BlockHibernateUntilScrLckReady",
 #endif
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     "SetScreenOnEventRules",
     "PublishCustomizedScreenEvent",
     "NotifyScreenOnEventAgain",
     "NotifyOperateEventAfterScreenOn",
+#endif
 };
 } // namespace
 
