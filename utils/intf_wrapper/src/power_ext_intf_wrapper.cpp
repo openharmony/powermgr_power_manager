@@ -22,6 +22,11 @@ namespace {
 const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 const std::vector<std::string> ALL_POWER_EXT_INTF_SYMBOL = {
     "GetRebootCommand",
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    "SubscribeScreenLockCommonEvent",
+    "UnSubscribeScreenLockCommonEvent",
+    "BlockHibernateUntilScrLckReady",
+#endif
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     "SetScreenOnEventRules",
     "PublishCustomizedScreenEvent",
@@ -47,6 +52,39 @@ PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::GetRebootCommand(
     }
     auto getRebootCommandFunc = reinterpret_cast<const char* (*)(const std::string&)>(funcPtr);
     rebootCmd = getRebootCommandFunc(rebootReason);
+    return PowerExtIntfWrapper::ErrCode::ERR_OK;
+}
+
+PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::SubscribeScreenLockCommonEvent() const
+{
+    void* funcPtr = intfLoader_.QueryInterface("SubscribeScreenLockCommonEvent");
+    if (funcPtr == nullptr) {
+        return PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND;
+    }
+    auto subscribeScrLockEventFunc = reinterpret_cast<void (*)(void)>(funcPtr);
+    subscribeScrLockEventFunc();
+    return PowerExtIntfWrapper::ErrCode::ERR_OK;
+}
+
+PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::UnSubscribeScreenLockCommonEvent() const
+{
+    void* funcPtr = intfLoader_.QueryInterface("UnSubscribeScreenLockCommonEvent");
+    if (funcPtr == nullptr) {
+        return PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND;
+    }
+    auto unSubscribeScrLockEventFunc = reinterpret_cast<void (*)(void)>(funcPtr);
+    unSubscribeScrLockEventFunc();
+    return PowerExtIntfWrapper::ErrCode::ERR_OK;
+}
+
+PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::BlockHibernateUntilScrLckReady() const
+{
+    void* funcPtr = intfLoader_.QueryInterface("BlockHibernateUntilScrLckReady");
+    if (funcPtr == nullptr) {
+        return PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND;
+    }
+    auto blockHibernateFunc = reinterpret_cast<void (*)(void)>(funcPtr);
+    blockHibernateFunc();
     return PowerExtIntfWrapper::ErrCode::ERR_OK;
 }
 
