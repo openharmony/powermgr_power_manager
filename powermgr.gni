@@ -62,6 +62,10 @@ if (!defined(global_parts_info) ||
   has_multimodalinput_input_part = false
 }
 
+if (power_manager_feature_enable_s4) {
+  defines += [ "POWER_MANAGER_POWER_ENABLE_S4" ]
+}
+
 ability_runtime_path = "//foundation/ability/ability_runtime"
 
 ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"

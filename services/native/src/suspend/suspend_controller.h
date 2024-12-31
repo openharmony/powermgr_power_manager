@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #ifndef POWERMGR_SUSPEND_CONTROLLER_H
 #define POWERMGR_SUSPEND_CONTROLLER_H
 

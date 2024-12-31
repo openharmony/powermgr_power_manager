@@ -47,6 +47,9 @@ public:
     }
 
     ErrCode GetRebootCommand(const std::string& rebootReason, std::string& rebootCmd) const;
+    ErrCode SubscribeScreenLockCommonEvent() const;
+    ErrCode UnSubscribeScreenLockCommonEvent() const;
+    ErrCode BlockHibernateUntilScrLckReady() const;
 
 private:
     PowerExtIntfWrapper(const std::string& libPath, const std::vector<std::string>& symbolArr)

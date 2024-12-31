@@ -20,7 +20,7 @@
 #include <datetime_ex.h>
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
-
+#include "power_ext_intf_wrapper.h"
 #include "power_hitrace.h"
 #include "power_mode_policy.h"
 #include "power_mgr_factory.h"
@@ -698,6 +698,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {
+        PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
         if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
             return false;
@@ -711,14 +712,14 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "activate os account failed.");
             return false;
         }
-    }
-    hibernateController->PreHibernate();
-    if (clearMemory) {
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
             return false;
         }
+        PowerExtIntfWrapper::Instance().BlockHibernateUntilScrLckReady();
+        PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
     }
+    hibernateController->PreHibernate();
 
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
