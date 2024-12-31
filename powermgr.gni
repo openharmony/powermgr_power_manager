@@ -36,6 +36,11 @@ declare_args() {
 }
 
 defines = []
+
+if (power_manager_feature_enable_s4) {
+  defines += [ "POWER_MANAGER_POWER_ENABLE_S4" ]
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.powermgr_display_manager)) {
   has_display_manager_part = true
