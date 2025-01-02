@@ -173,6 +173,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
         powerStateMachine->RegisterDisplayOffTimeObserver();
         powerStateMachine->InitState();
+        SettingHelper::RegisterAodSwitchObserver();
 #ifdef POWER_MANAGER_POWER_DIALOG
         power->GetShutdownDialog().LoadDialogConfig();
         power->GetShutdownDialog().KeyMonitorInit();
@@ -704,7 +705,6 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
             this->GetPowerModeModule().InitPowerMode();
         }
-        SettingHelper::RegisterAodSwitchObserver();
     }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
         RegisterBootCompletedCallback();
@@ -1028,11 +1028,15 @@ PowerErrors PowerMgrService::WakeupDevice(int64_t callTimeMs, WakeupDeviceType r
 
     BackgroundRunningLock wakeupRunningLock("PowerMgrWakeupLock", WAKEUP_LOCK_TIMEOUT_MS);
     if (details == "display_doze") {
-        bool ret = powerStateMachine_->SetDozeMode(false);
+        bool ret = powerStateMachine_->SetDozeMode(DisplayState::DISPLAY_DOZE);
         return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
     }
     if (details == "display_doze_suspend") {
-        bool ret = powerStateMachine_->SetDozeMode(true);
+        bool ret = powerStateMachine_->SetDozeMode(DisplayState::DISPLAY_DOZE_SUSPEND);
+        return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+    }
+    if (details == "display_off") {
+        bool ret = powerStateMachine_->SetDozeMode(DisplayState::DISPLAY_OFF);
         return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
     }
     powerStateMachine_->WakeupDeviceInner(pid, callTimeMs, reason, details, "OHOS");
