@@ -209,7 +209,7 @@ public:
     void LockScreenAfterTimingOut(bool enabled, bool checkScreenOnLock, bool sendScreenOffEvent);
     bool IsSettingState(PowerState state);
     void SetEnableDoze(bool enable);
-    bool SetDozeMode(bool suspend);
+    bool SetDozeMode(DisplayState state);
 
 private:
     enum PreBrightState : uint32_t {
