@@ -2042,7 +2042,7 @@ bool PowerStateMachine::StateController::NeedNotify(PowerState currentState)
         auto suspendController = (pms != nullptr ? pms->GetSuspendController() : nullptr);
 
         if (suspendController == nullptr) {
-            POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, can't get force sleeping flag")
+            POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, can't get force sleeping flag");
         } else if (suspendController->GetForceSleepingFlag()) {
             return true;
         }
