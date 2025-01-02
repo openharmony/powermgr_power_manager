@@ -126,10 +126,12 @@ void PowerStateMachine::InitTransitMap()
     std::vector<PowerState> awake { PowerState::SLEEP, PowerState::HIBERNATE };
 #endif
     std::vector<PowerState> inactive { PowerState::DIM };
+    std::vector<PowerState> dim { PowerState::SLEEP };
     std::vector<PowerState> sleep { PowerState::DIM };
 
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
+    forbidMap_.emplace(PowerState::DIM, std::set<PowerState>(dim.begin(), dim.end()));
     forbidMap_.emplace(PowerState::SLEEP, std::set<PowerState>(sleep.begin(), sleep.end()));
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(hibernate.begin(), hibernate.end()));
