@@ -2123,7 +2123,7 @@ bool PowerStateMachine::StateController::CheckState()
     }
     auto state = GetState();
     if (state == PowerState::DIM ||
-#define POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
         state == PowerState::SLEEP ||
 #endif
         state == PowerState::AWAKE) {
