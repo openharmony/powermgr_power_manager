@@ -2036,6 +2036,20 @@ void PowerStateMachine::DumpInfo(std::string& result)
 
 bool PowerStateMachine::StateController::NeedNotify(PowerState currentState)
 {
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    // need notify when SLEEP->SLEEP if force sleeping flag is set
+    if (currentState == PowerState::SLEEP && GetState() == PowerState::SLEEP) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        auto suspendController = (pms != nullptr ? pms->GetSuspendController() : nullptr);
+
+        if (suspendController == nullptr) {
+            POWER_HILOGE(FEATURE_POWER_STATE, "suspendController is nullptr, can't get force sleeping flag");
+        } else if (suspendController->GetForceSleepingFlag()) {
+            return true;
+        }
+    }
+#endif
+
     if (currentState == GetState()) {
         return false;
     }
@@ -2109,7 +2123,11 @@ bool PowerStateMachine::StateController::CheckState()
         return false;
     }
     auto state = GetState();
-    if (state == PowerState::DIM || state == PowerState::AWAKE) {
+    if (state == PowerState::DIM ||
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+        state == PowerState::SLEEP ||
+#endif
+        state == PowerState::AWAKE) {
         return true;
     }
     POWER_HILOGD(FEATURE_POWER_STATE, "state: %{public}u, currentState_: %{public}u", state, owner->currentState_);
