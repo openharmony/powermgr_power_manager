@@ -547,7 +547,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         return;
     }
     // ignores remote event
-    if (isRemoteEvent(keyEvent)) {
+    if (pms->IsCollaborationState() && isRemoteEvent(keyEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -610,7 +610,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (!NonWindowEvent(pointerEvent)) {
         return;
     }
-    if (isRemoteEvent(pointerEvent)) {
+    if (pms->IsCollaborationState() && isRemoteEvent(pointerEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
