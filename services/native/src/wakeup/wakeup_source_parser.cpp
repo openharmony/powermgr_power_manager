@@ -37,31 +37,39 @@ bool g_isFirstSettingUpdated = true;
 
 std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
 {
-    std::shared_ptr<WakeupSources> parseSources;
     bool isWakeupSourcesSettingValid = SettingHelper::IsWakeupSourcesSettingValid();
     POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isWakeupSourcesSettingValid);
     std::string configJsonStr;
     if (isWakeupSourcesSettingValid) {
         configJsonStr = SettingHelper::GetSettingWakeupSources();
     } else {
-        std::string targetPath;
-        bool ret = GetTargetPath(targetPath);
-        if (ret == false) {
-            return parseSources;
-        }
-
-        POWER_HILOGI(FEATURE_WAKEUP, "use targetPath=%{public}s", targetPath.c_str());
-        std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
-        std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
-        configJsonStr = fileStringStr;
+        configJsonStr = GetWakeupSourcesByConfig();
     }
     g_isFirstSettingUpdated = true;
-    parseSources = ParseSources(configJsonStr);
+    std::shared_ptr<WakeupSources> parseSources = ParseSources(configJsonStr);
+    if (parseSources->GetParseErrorFlag()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "call GetWakeupSourcesByConfig again");
+        configJsonStr = GetWakeupSourcesByConfig();
+        parseSources = ParseSources(configJsonStr);
+    }
     if (parseSources != nullptr) {
         SettingHelper::SetSettingWakeupSources(configJsonStr);
     }
     g_isFirstSettingUpdated = false;
     return parseSources;
+}
+
+const std::string WakeupSourceParser::GetWakeupSourcesByConfig()
+{
+    std::string targetPath;
+    bool ret = GetTargetPath(targetPath);
+    if (ret == false) {
+        return "";
+    }
+
+    POWER_HILOGI(FEATURE_WAKEUP, "use targetPath=%{public}s", targetPath.c_str());
+    std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
+    return std::string(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
 }
 
 bool WakeupSourceParser::GetTargetPath(std::string& targetPath)
@@ -98,11 +106,13 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::strin
     std::string errors;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
         POWER_HILOGE(FEATURE_WAKEUP, "json parse error");
+        parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
 
     if (root.isNull() || !root.isObject()) {
         POWER_HILOGE(FEATURE_WAKEUP, "json root invalid[%{public}s]", jsonStr.c_str());
+        parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
 
