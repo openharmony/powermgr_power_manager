@@ -62,6 +62,8 @@ constexpr uint32_t POST_HIBERNATE_CLEARMEM_DELAY_US = 2000000;
 constexpr uint32_t HIBERNATE_DELAY_MS = 3500;
 static int64_t g_preHibernateStart = 0;
 #endif
+pid_t g_callSetForceTimingOutPid = 0;
+pid_t g_callSetForceTimingOutUid = 0;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
     : pms_(pms), ffrtTimer_(ffrtTimer), currentState_(PowerState::UNKNOWN)
@@ -1299,6 +1301,13 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     PowerState curState = GetState();
+    if (!enabled) {
+        g_callSetForceTimingOutPid = 0;
+        g_callSetForceTimingOutUid = 0;
+    } else {
+        g_callSetForceTimingOutPid = pid;
+        g_callSetForceTimingOutUid = uid;
+    }
     POWER_HILOGI(FEATURE_RUNNING_LOCK,
         "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, PowerState=%{public}u, "
         "PID=%{public}d, UID=%{public}d",
@@ -1799,6 +1808,8 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     }
     if (IsTimeoutReason(reason) && forceTimingOut_.load()) {
         force = true;
+        POWER_HILOGI(FEATURE_POWER_STATE, "Call SetForceTimingOut PID=%{public}d, UID=%{public}d",
+            g_callSetForceTimingOutPid, g_callSetForceTimingOutUid);
     }
     UpdateSettingStateFlag(state, reason);
     TransitResult ret = pController->TransitTo(reason, force);
