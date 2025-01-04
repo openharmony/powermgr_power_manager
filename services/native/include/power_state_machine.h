@@ -320,7 +320,7 @@ private:
     void EmplaceShutdown();
     void EmplaceDim();
     void InitTransitMap();
-    bool CanTransitTo(PowerState to, StateChangeReason reason);
+    bool CanTransitTo(PowerState from, PowerState to, StateChangeReason reason);
     void NotifyPowerStateChanged(PowerState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
@@ -345,6 +345,7 @@ private:
 #ifdef HAS_SENSORS_SENSOR_PART
     bool IsProximityClose();
 #endif
+    void StartSleepTimer(PowerState from);
 
     const wptr<PowerMgrService> pms_;
     std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
