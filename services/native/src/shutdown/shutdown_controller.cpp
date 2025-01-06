@@ -38,6 +38,7 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <vector>
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
 #include "battery_srv_client.h"
@@ -52,6 +53,9 @@ namespace PowerMgr {
 namespace {
 const time_t MAX_TIMEOUT_SEC = 30;
 const std::string REASON_POWEROFF_CHARGE_DISABLE = "POWEROFF_CHARGE_DISABLE";
+#ifdef POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN
+const vector<string> REASONS_DISABLE_TAKE_OVER = {"LowCapacity", "HibernateFail"};
+#endif
 
 enum PowerEventType {
     DEFAULT = 0,
@@ -60,8 +64,8 @@ enum PowerEventType {
     SUSPEND = 3,
     HIBERNATE = 4
 };
-
 }
+
 ShutdownController::ShutdownController() : started_(false)
 {
     POWER_HILOGD(FEATURE_SHUTDOWN, "Instance create");
@@ -388,7 +392,8 @@ bool ShutdownController::TakeOverShutdownAction(const std::string& reason, bool 
 bool ShutdownController::AllowedToBeTakenOver(const std::string& reason) const
 {
 #ifdef POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN
-    if (reason == "LowCapacity") {
+    if (find(REASONS_DISABLE_TAKE_OVER.cbegin(), REASONS_DISABLE_TAKE_OVER.cend(), reason)
+        != REASONS_DISABLE_TAKE_OVER.cend()) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "forbid to takeover shutdown, reason:%{public}s", reason.c_str());
         return false;
     }
