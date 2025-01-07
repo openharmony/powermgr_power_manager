@@ -69,10 +69,12 @@ constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
-bool g_inLidMode = false;
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
+#ifdef HAS_SENSORS_SENSOR_PART
+    bool PowerMgrService::isInLidMode_ = false;
+#endif
 using namespace MMI;
 
 PowerMgrService::PowerMgrService() : SystemAbility(POWER_MANAGER_SERVICE_ID, true) {}
@@ -357,6 +359,7 @@ void PowerMgrService::HallSensorSubscriberInit()
         POWER_HILOGW(FEATURE_INPUT, "strcpy_s error");
         return;
     }
+    isInLidMode_ = false;
     sensorUser_.userData = nullptr;
     sensorUser_.callback = &HallSensorCallback;
     SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
@@ -409,15 +412,15 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
 
     if (status & LID_CLOSED_HALL_FLAG) {
         POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received, begin to suspend");
-        g_inLidMode = true;
+        isInLidMode_ = true;
         SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
         suspendController->ExecSuspendMonitorByReason(reason);
     } else {
-        if (!g_inLidMode) {
+        if (!isInLidMode_) {
             return;
         }
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Lid open event received, begin to wakeup");
-        g_inLidMode = false;
+        isInLidMode_ = false;
         WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_LID;
         wakeupController->ExecWakeupMonitorByReason(reason);
     }
@@ -432,6 +435,7 @@ void PowerMgrService::HallSensorSubscriberCancel()
         DeactivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
         UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
     }
+    isInLidMode_ = false;
 #endif
 }
 

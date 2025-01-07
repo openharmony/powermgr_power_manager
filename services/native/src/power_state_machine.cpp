@@ -174,19 +174,26 @@ bool PowerStateMachine::IsMovementStateOn()
 }
 #endif
 
-bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
+bool PowerStateMachine::CanTransitTo(PowerState from, PowerState to, StateChangeReason reason)
 {
     bool isForbidden = forbidMap_.count(currentState_) && forbidMap_[currentState_].count(to);
     if (isForbidden) {
         return false;
     }
-    // prevent the double click and pickup to light up the screen when calling or sporting
+    // prevent the double click or pickup to light up the screen when calling or sporting or lid is close
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
              reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
 #ifdef HAS_SENSORS_SENSOR_PART
         if (IsProximityClose()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "Double-click or pickup isn't allowed to wakeup device when proximity is close.");
+            StartSleepTimer(from);
+            return false;
+        }
+        // prevent the pickup to light up the screen when lid is close
+        if (PowerMgrService::isInLidMode_ == true && reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "Pickup isn't allowed to wakeup device when lid is close.");
+            StartSleepTimer(from);
             return false;
         }
 #endif
@@ -194,6 +201,7 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
         if (IsMovementStateOn()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "Double-click or pickup isn't allowed to wakeup device when movement state is on.");
+            StartSleepTimer(from);
             return false;
         }
 #endif
@@ -201,6 +209,15 @@ bool PowerStateMachine::CanTransitTo(PowerState to, StateChangeReason reason)
     bool isAllowed = (!allowMapByReason_.count(reason) ||
         (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
     return isAllowed;
+}
+
+void PowerStateMachine::StartSleepTimer(PowerState from)
+{
+    if (from == PowerState::SLEEP) {
+        uint32_t delay = 0;
+        POWER_HILOGI(FEATURE_POWER_STATE, "Double-click or pickup isn't allowed to wakeup device, SetAutoSuspend");
+        SetAutoSuspend(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, delay);
+    }
 }
 
 void PowerStateMachine::InitState()
@@ -1867,7 +1884,8 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         return TransitResult::ALREADY_IN_STATE;
     }
 
-    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT && !owner->CanTransitTo(state_, reason)) {
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_INIT &&
+        !owner->CanTransitTo(owner->currentState_, state_, reason)) {
         POWER_HILOGD(FEATURE_POWER_STATE, "Block Transit from %{public}s to %{public}s",
             PowerUtils::GetPowerStateString(owner->currentState_).c_str(),
             PowerUtils::GetPowerStateString(state_).c_str());
