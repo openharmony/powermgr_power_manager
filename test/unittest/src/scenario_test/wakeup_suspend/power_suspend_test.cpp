@@ -41,12 +41,38 @@ static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
 namespace {
 /**
  * @tc.name: PowerSuspendTest001
- * @tc.desc: test simulate powerkey event when screenon
+ * @tc.desc: test simulate powerkey event once when screenon
  * @tc.type: FUNC
  */
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: start");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
+
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
+    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+
+    auto inputManager = MMI::InputManager::GetInstance();
+    inputManager->SimulateInputEvent(keyEventPowerkeyDown);
+    inputManager->SimulateInputEvent(keyEventPowerkeyUp);
+    sleep(4);
+    EXPECT_FALSE(powerMgrClient.IsScreenOn());
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
+}
+/**
+ * @tc.name: PowerSuspendTest002
+ * @tc.desc: test simulate powerkey event when screenon
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
@@ -68,32 +94,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     // the second powerkey event would interrupt the transition to INACTIVE
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
-}
-/**
- * @tc.name: PowerSuspendTest002
- * @tc.desc: test simulate powerkey event once when screenon
- * @tc.type: FUNC
- */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: start");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
-    EXPECT_TRUE(powerMgrClient.IsScreenOn());
-
-    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
-    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
-    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
-    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
-    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
-
-    auto inputManager = MMI::InputManager::GetInstance();
-    inputManager->SimulateInputEvent(keyEventPowerkeyDown);
-    inputManager->SimulateInputEvent(keyEventPowerkeyUp);
-    sleep(4);
-    EXPECT_FALSE(powerMgrClient.IsScreenOn());
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: end");
 }
 } // namespace
