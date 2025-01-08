@@ -245,7 +245,7 @@ bool PowerStateMachine::CanTransitTo(PowerState from, PowerState to, StateChange
 
 void PowerStateMachine::StartSleepTimer(PowerState from)
 {
-    if (from == PowerState::SLEEP || from == PowerState::INACTIVE) {
+    if (from == PowerState::SLEEP) {
         uint32_t delay = 0;
         POWER_HILOGI(FEATURE_POWER_STATE, "Double-click or pickup isn't allowed to wakeup device, SetAutoSuspend");
         SetAutoSuspend(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, delay);
