@@ -241,6 +241,9 @@ public:
     {
         return shutdownController_;
     }
+#ifdef HAS_SENSORS_SENSOR_PART
+    static bool isInLidMode_;
+#endif
 
     std::shared_ptr<SuspendController> suspendController_ = nullptr;
     std::shared_ptr<WakeupController> wakeupController_ = nullptr;
