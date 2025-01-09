@@ -51,6 +51,8 @@ constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
 constexpr uint32_t HIBERNATE_DELAY_MS = 5000;
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
+pid_t g_callSetForceTimingOutPid = 0;
+pid_t g_callSetForceTimingOutUid = 0;
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms) : pms_(pms), currentState_(PowerState::UNKNOWN)
 {
@@ -1226,6 +1228,13 @@ void PowerStateMachine::SetForceTimingOut(bool enabled)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     PowerState curState = GetState();
+    if (!enabled) {
+        g_callSetForceTimingOutPid = 0;
+        g_callSetForceTimingOutUid = 0;
+    } else {
+        g_callSetForceTimingOutPid = pid;
+        g_callSetForceTimingOutUid = uid;
+    }
     POWER_HILOGI(FEATURE_RUNNING_LOCK,
         "SetForceTimingOut: %{public}s -> %{public}s, screenOnLockActive=%{public}s, PowerState=%{public}u, "
         "PID=%{public}d, UID=%{public}d",
@@ -1644,6 +1653,8 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
             reason == StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) &&
         forceTimingOut_.load()) {
         force = true;
+        POWER_HILOGI(FEATURE_POWER_STATE, "Call SetForceTimingOut PID=%{public}d, UID=%{public}d",
+            g_callSetForceTimingOutPid, g_callSetForceTimingOutUid);
     }
     UpdateSettingStateFlag(state, reason);
     TransitResult ret = pController->TransitTo(reason, force);
