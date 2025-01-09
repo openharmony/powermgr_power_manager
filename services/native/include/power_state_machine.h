@@ -179,6 +179,14 @@ public:
     {
         return mDeviceState_.lastWakeupEventTime;
     }
+    void SetSwitchAction(uint32_t value)
+    {
+        switchActionValue_ = value;
+    }
+    uint32_t GetSwitchAction()
+    {
+        return switchActionValue_;
+    }
     void SetSwitchState(bool switchOpen)
     {
         switchOpen_ = switchOpen;
@@ -365,6 +373,7 @@ private:
     bool enableDisplaySuspend_ {false};
     bool isScreenOffTimeOverride_ {false};
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
+    uint32_t switchActionValue_ {2}; // default value is 2 (stand for ACTION_FORCE_SUSPEND)
     std::atomic<bool> switchOpen_ {true};
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::atomic<bool> hibernating_ {false};

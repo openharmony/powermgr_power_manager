@@ -718,9 +718,9 @@ void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
 
 bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) const
 {
-    bool isScreenOn = stateMachine_->IsScreenOn();
-    if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && isScreenOn &&
-        stateMachine_->GetExternalScreenNumber() > 0) {
+    // switch action 0 menas only doing poweroff when closing switch
+    if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && stateMachine_->GetSwitchAction() == 0 &&
+        stateMachine_->GetExternalScreenNumber() > 0 && stateMachine_->IsScreenOn()) {
         return true;
     }
     return false;
