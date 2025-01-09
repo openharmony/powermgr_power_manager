@@ -34,6 +34,10 @@ public:
     void PublishEnterForceSleepEvents(int64_t eventTime);
     void PublishExitForceSleepEvents(int64_t eventTime);
 #endif
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    void PublishEnterHibernateEvent(int64_t eventTime);
+    void PublishExitHibernateEvent(int64_t eventTime);
+#endif
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
