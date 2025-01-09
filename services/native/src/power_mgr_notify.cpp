@@ -89,5 +89,41 @@ void PowerMgrNotify::PublishExitForceSleepEvents(int64_t eventTime)
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", exitForceSleepWant_->GetAction().c_str());
 }
 #endif
+
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+void PowerMgrNotify::PublishEnterHibernateEvent(int64_t eventTime)
+{
+    std::string action = CommonEventSupport::COMMON_EVENT_ENTER_HIBERNATE;
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld", action.c_str(),
+        static_cast<long long>(eventTime));
+    CommonEventPublishInfo publishInfo;
+    publishInfo.SetOrdered(false);
+    IntentWant enterHibernateWant;
+    enterHibernateWant.SetAction(action);
+    CommonEventData event(enterHibernateWant);
+    if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s fail", action.c_str());
+        return;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", action.c_str());
+}
+
+void PowerMgrNotify::PublishExitHibernateEvent(int64_t eventTime)
+{
+    std::string action = CommonEventSupport::COMMON_EVENT_EXIT_HIBERNATE;
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld", action.c_str(),
+        static_cast<long long>(eventTime));
+    CommonEventPublishInfo publishInfo;
+    publishInfo.SetOrdered(false);
+    IntentWant exitHibernateWant;
+    exitHibernateWant.SetAction(action);
+    CommonEventData event(exitHibernateWant);
+    if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s fail", action.c_str());
+        return;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", action.c_str());
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
