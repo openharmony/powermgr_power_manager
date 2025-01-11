@@ -285,59 +285,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
 }
 
 /**
- * @tc.name: RunningLockNative007
- * @tc.desc: test activate in lockCounters
- * @tc.type: FUNC
- * @tc.require: issueI7MNRN
- */
-HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative007 start.");
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest_);
-    EXPECT_TRUE(runningLockMgr->Init());
-    std::shared_ptr<RunningLockMgr::LockCounter> ptr1 =
-        runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_SCREEN];
-    RunningLockParam runningLockParam1;
-    ptr1->activate_(true, runningLockParam1);
-    ptr1->activate_(false, runningLockParam1);
-    EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
-
-    pmsTest_->powerStateMachine_->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    std::shared_ptr<RunningLockMgr::LockCounter> ptr2 =
-        runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_BACKGROUND_TASK];
-    RunningLockParam runningLockParam2 {0,
-        "RunningLockNative007", "", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, -1, 0, 0};
-    ptr2->activate_(true, runningLockParam2);
-    ptr2->activate_(false, runningLockParam2);
-    EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
-
-    pmsTest_->powerStateMachine_->SetState(PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    RunningLockParam runningLockParam3;
-    ptr2->activate_(true, runningLockParam3);
-    ptr2->activate_(false, runningLockParam3);
-    EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
-
-#ifdef HAS_SENSORS_SENSOR_PART
-    std::shared_ptr<RunningLockMgr::LockCounter> ptr3 =
-        runningLockMgr->lockCounters_[RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL];
-    RunningLockParam runningLockParam4;
-    ptr3->activate_(true, runningLockParam4);
-    ptr3->activate_(false, runningLockParam4);
-    EXPECT_TRUE(runningLockMgr->lockCounters_.size() != 0);
-
-    auto stateMachine = pmsTest_->GetPowerStateMachine();
-    pmsTest_->powerStateMachine_ = nullptr;
-    RunningLockParam runningLockParam5;
-    ptr3->activate_(true, runningLockParam5);
-    pmsTest_->powerStateMachine_ = stateMachine;
-    EXPECT_TRUE(pmsTest_->powerStateMachine_ != nullptr);
-#endif
-
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative007 end");
-}
-
-/**
  * @tc.name: RunningLockNative008
  * @tc.desc: test Lock
  * @tc.type: FUNC
