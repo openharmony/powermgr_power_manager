@@ -324,11 +324,18 @@ Uri SettingProvider::AssembleUri(const std::string& key)
 bool SettingProvider::IsNeedDataMigrationCopy()
 {
     bool isNeedMigrationCopy = false;
-    if (IsValidKeyGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY)) {
-        if (!IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY)) {
-            isNeedMigrationCopy = true;
+    do {
+        if (!(IsValidKeyGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY) && !IsValidKey(SETTING_POWER_WAKEUP_PICKUP_KEY))) {
+            break;
         }
-    }
+        if (!(IsValidKeyGlobal(SETTING_POWER_WAKEUP_DOUBLE_KEY) && !IsValidKey(SETTING_POWER_WAKEUP_DOUBLE_KEY))) {
+            break;
+        }
+        if (!(IsValidKeyGlobal(SETTING_POWER_WAKEUP_SOURCES_KEY) && !IsValidKey(SETTING_POWER_WAKEUP_SOURCES_KEY))) {
+            break;
+        }
+        isNeedMigrationCopy = true;
+    } while (0);
     POWER_HILOGI(COMP_UTILS, "IsNeedDataMigrationCopy:(%{public}d)", isNeedMigrationCopy);
     return isNeedMigrationCopy;
 }
@@ -336,12 +343,15 @@ bool SettingProvider::IsNeedDataMigrationCopy()
 void SettingProvider::DataMigrationCopy()
 {
     std::string value;
-    GetStringValueGlobal(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
-    PutStringValue(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
-    GetStringValueGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
-    PutStringValue(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
-    GetStringValueGlobal(SETTING_POWER_WAKEUP_SOURCES_KEY, value);
-    PutStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, value);
+    if (GetStringValueGlobal(SETTING_POWER_WAKEUP_DOUBLE_KEY, value) == ERR_OK) {
+        PutStringValue(SETTING_POWER_WAKEUP_DOUBLE_KEY, value);
+    }
+    if (GetStringValueGlobal(SETTING_POWER_WAKEUP_PICKUP_KEY, value) == ERR_OK) {
+        PutStringValue(SETTING_POWER_WAKEUP_PICKUP_KEY, value);
+    }
+    if (GetStringValueGlobal(SETTING_POWER_WAKEUP_SOURCES_KEY, value) == ERR_OK) {
+        PutStringValue(SETTING_POWER_WAKEUP_SOURCES_KEY, value);
+    }
 }
 
 ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::string& value)
