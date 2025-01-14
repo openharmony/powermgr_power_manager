@@ -708,7 +708,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     }
     SystemSuspendController::GetInstance().Wakeup();
     bool ret = true;
-    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+    if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HIBERNATE, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
     if (clearMemory) {

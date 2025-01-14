@@ -106,6 +106,9 @@ PowerStateChangeReason DeviceStateAction::GetDmsReasonByPowerReason(StateChangeR
         case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION;
             break;
+        case StateChangeReason::STATE_CHANGE_REASON_HIBERNATE:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_HIBERNATE;
+            break;
         default:
             break;
     }
