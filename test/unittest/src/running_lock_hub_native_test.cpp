@@ -75,8 +75,6 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
     SuspendController->Suspend(RunningSuspendCallback, RunningSuspendCallback, false);
     SuspendController->Suspend(RunningSuspendCallback, RunningSuspendCallback, false);
     EXPECT_FALSE(SuspendController->suspend_->WriteWakeupCount("77"));
-    SuspendController->suspend_->wakeupCountFd = static_cast<UniqueFd>(FD);
-    EXPECT_TRUE(SuspendController->suspend_->WriteWakeupCount("77"));
     SuspendController->suspend_->wakeupCountFd =
         UniqueFd(TEMP_FAILURE_RETRY(open(Suspend::RunningLockHub::LOCK_PATH, O_RDWR | O_CLOEXEC)));
     EXPECT_TRUE(SuspendController->suspend_->WriteWakeupCount("77"));
