@@ -347,16 +347,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
     g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
-    powerStateMachine->DecreaseExternalScreenNumber();
-    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 0);
+    powerStateMachine->SetExternalScreenNumber(0);
 
     // case 2: isSwitchOpen:true, isScreenOn:false
     g_pmsTest->SuspendDevice(GetTickCount(), SuspendDevice::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
     g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
-    powerStateMachine->DecreaseExternalScreenNumber();
-    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 0);
+    powerStateMachine->SetExternalScreenNumber(0);
 
     // case 3: isSwitchOpen:false, isScreenOn:false
     powerStateMachine->SetSwitchState(false);
@@ -364,8 +362,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
     g_pmsTest->externalScreenListener_->OnConnect(SCREEN_A_ID);
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
-    powerStateMachine->DecreaseExternalScreenNumber();
-    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 0);
+    powerStateMachine->SetExternalScreenNumber(0);
 
     // Unregister screen listener
     g_pmsTest->UnRegisterExternalScreenListener();
@@ -396,8 +393,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
     powerStateMachine->SetSwitchState(true);
     g_pmsTest->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_SWITCH, "PowerMgrServiceNative015");
-    powerStateMachine->IncreaseExternalScreenNumber();
-    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 1);
+    powerStateMachine->SetExternalScreenNumber(1);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
     g_pmsTest->externalScreenListener_->OnDisconnect(SCREEN_A_ID);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
@@ -405,8 +401,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
     // case 2: isSwitchOpen:true, isScreenOn:false
     g_pmsTest->SuspendDevice(GetTickCount(), SuspendDevice::SUSPEND_DEVICE_REASON_POWER_KEY, false);
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
-    powerStateMachine->IncreaseExternalScreenNumber();
-    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 1);
+    powerStateMachine->SetExternalScreenNumber(1);
     g_pmsTest->externalScreenListener_->OnDisconnect(SCREEN_A_ID);
     EXPECT_FALSE(powerStateMachine->IsScreenOn());
 
@@ -416,8 +411,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_SWITCH, "PowerMgrServiceNative015");
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
-    powerStateMachine->IncreaseExternalScreenNumber();
-    EXPECT_EQ(powerStateMachine->GetExternalScreenNumber(), 1);
+    powerStateMachine->SetExternalScreenNumber(1);
     // Mock close switch to suspend device when switch's action is configured as ACTION_NONE
     powerStateMachine->SetSwitchState(false);
     auto suspendController = g_service->GetSuspendController();

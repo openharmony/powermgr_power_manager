@@ -249,6 +249,29 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
     return ret ? ActionResult::SUCCESS : ActionResult::FAILED;
 }
 
+void DeviceStateAction::SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason)
+{
+    POWER_HILOGI(
+        FEATURE_POWER_STATE, "SetInternalScreenDisplayPower, state=%{public}u, reason=%{public}u", state, reason);
+    Rosen::ScreenPowerState status = Rosen::ScreenPowerState::INVALID_STATE;
+    switch (state) {
+        case DisplayState::DISPLAY_ON:
+            status = Rosen::ScreenPowerState::POWER_ON;
+            break;
+        case DisplayState::DISPLAY_OFF:
+            status = Rosen::ScreenPowerState::POWER_OFF;
+            break;
+        default:
+            break;
+    }
+
+    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(reason);
+    uint64_t screenId = Rosen::DisplayManagerLite::GetInstance().GetInternalScreenId();
+    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, status, dmsReason);
+    POWER_HILOGI(FEATURE_POWER_STATE,
+        "SetInternalScreenDisplayPower, state=%{public}u, reason=%{public}u, ret = %{public}d", state, reason, ret);
+}
+
 void DeviceStateAction::SetCoordinated(bool coordinated)
 {
     coordinated_ = coordinated;

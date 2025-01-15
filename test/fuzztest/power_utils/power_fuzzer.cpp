@@ -69,6 +69,11 @@ public:
     {
         return 0;
     }
+    virtual void SetInternalScreenDisplayPower(
+        [[maybe_unused]] DisplayState state, [[maybe_unused]] StateChangeReason reason)
+    {
+        return;
+    }
     virtual bool TryToCancelScreenOff()
     {
         return false;

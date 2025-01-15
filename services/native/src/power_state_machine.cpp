@@ -300,6 +300,11 @@ void PowerStateMachine::EmplaceAwake()
                     targetState = DisplayState::DISPLAY_OFF;
                 }
             }
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen()) {
+                this->stateAction_->SetInternalScreenDisplayPower(DisplayState::DISPLAY_ON, reason);
+            }
+#endif
             uint32_t ret = this->stateAction_->SetDisplayState(targetState, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
@@ -1574,28 +1579,6 @@ int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
     return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
 }
 
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    int32_t PowerStateMachine::GetExternalScreenNumber() const
-    {
-        return externalScreenNumber_.load();
-    }
-
-    void PowerStateMachine::IncreaseExternalScreenNumber()
-    {
-        ++externalScreenNumber_;
-    }
-
-    void PowerStateMachine::DecreaseExternalScreenNumber()
-    {
-        int32_t curNum = externalScreenNumber_.load();
-        if (curNum == 0) {
-            POWER_HILOGW(COMP_SVC, "No external screen already");
-            return;
-        }
-        --externalScreenNumber_;
-    }
-#endif
-
 bool PowerStateMachine::IsSettingState(PowerState state)
 {
     int64_t flag = settingStateFlag_.load();
@@ -1962,6 +1945,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH:
             ret = StateChangeReason::STATE_CHANGE_REASON_TP_TOUCH;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_EX_SCREEN_INIT:
+            ret = StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;
@@ -2009,6 +1995,9 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER:
             ret = StateChangeReason::STATE_CHANGE_REASON_TP_COVER;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_EX_SCREEN_INIT:
+            ret = StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT;
             break;
         default:
             break;

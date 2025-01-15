@@ -55,6 +55,12 @@ uint32_t DefaultDeviceStateAction::SetDisplayState(const DisplayState state, Sta
     return ActionResult::SUCCESS;
 }
 
+void DefaultDeviceStateAction::SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason)
+{
+    (void)state;
+    (void)reason;
+}
+
 void DefaultDeviceStateAction::SetCoordinated(bool coordinated)
 {
     (void)coordinated;

@@ -36,6 +36,7 @@ public:
     void EndPowerkeyScreenOff() override {};
     uint32_t SetDisplayState(DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
+    void SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason) override;
     void SetCoordinated(bool coordinated) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
     void RegisterCallback(std::function<void(uint32_t)>& callback) override;
