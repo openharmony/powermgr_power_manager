@@ -141,6 +141,7 @@ public:
     void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) override;
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    void ExternalScreenInit();
     void RegisterExternalScreenListener();
     void UnRegisterExternalScreenListener();
 #endif
