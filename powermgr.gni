@@ -33,6 +33,7 @@ declare_args() {
   power_manager_feature_block_long_press = false
   power_manager_feature_judging_takeover_shutdown = false
   power_manager_feature_watch_limit_screen_common_event_publish = false
+  power_manager_feature_watch_update_adapt = false
 }
 
 defines = []
