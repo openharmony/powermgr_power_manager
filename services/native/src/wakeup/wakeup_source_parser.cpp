@@ -41,7 +41,15 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources()
     POWER_HILOGI(FEATURE_WAKEUP, "ParseSources setting=%{public}d", isWakeupSourcesSettingValid);
     std::string configJsonStr;
     if (isWakeupSourcesSettingValid) {
-        configJsonStr = SettingHelper::GetSettingWakeupSources();
+        std::string sourcesSettingStr = SettingHelper::GetSettingWakeupSources();
+        configJsonStr = sourcesSettingStr;
+#ifdef POWER_MANAGER_ENABLE_WATCH_UPDATE_ADAPT
+        // this branch means use config file for update scene in watch
+        if (sourcesSettingStr.find(WakeupSources::TP_TOUCH_KEY) == std::string::npos) {
+            configJsonStr = GetWakeupSourcesByConfig();
+            POWER_HILOGW(FEATURE_WAKEUP, "update scene need use (config file)");
+        }
+#endif
     } else {
         configJsonStr = GetWakeupSourcesByConfig();
     }

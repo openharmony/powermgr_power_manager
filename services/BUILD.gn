@@ -242,6 +242,10 @@ ohos_shared_library("powermgrservice") {
         [ "POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES" ]
   }
 
+  if (power_manager_feature_watch_update_adapt) {
+    defines += [ "POWER_MANAGER_ENABLE_WATCH_UPDATE_ADAPT" ]
+  }
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }
