@@ -103,6 +103,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("TP_TOUCH");
         case StateChangeReason::STATE_CHANGE_REASON_TP_COVER:
             return std::string("TP_COVER");
+        case StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT:
+            return std::string("EX_SCREEN_INIT");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:
@@ -221,6 +223,9 @@ Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeR
             break;
         case StateChangeReason::STATE_CHANGE_REASON_HIBERNATE:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_HIBERNATE;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT;
             break;
         default:
             break;

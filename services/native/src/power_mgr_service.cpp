@@ -202,7 +202,9 @@ void PowerMgrService::PowerExternalAbilityInit()
     }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     // External screen listener must be registered after SuspendControllerInit and WakeupControllerInit
+    power->UnRegisterExternalScreenListener();
     power->RegisterExternalScreenListener();
+    power->ExternalScreenInit();
 #endif
     power->VibratorInit();
 #ifdef POWER_DOUBLECLICK_ENABLE
@@ -1918,6 +1920,35 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) co
 #endif
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void PowerMgrService::ExternalScreenInit()
+{
+    auto stateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    auto wakeupController = pms->GetWakeupController();
+    if (stateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Get important instance error");
+        return;
+    }
+
+    std::vector<uint64_t> screenIds;
+    auto ret = Rosen::ScreenManagerLite::GetInstance().GetPhysicalScreenIds(screenIds);
+    if (ret != Rosen::DMError::DM_OK) {
+        POWER_HILOGE(COMP_SVC, "Failed to get physical screen ids");
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "Number of current physical screen is %{public}u", static_cast<uint32_t>(screenIds.size()));
+    if (screenIds.size() <= 1) { // there's at least a main screen, we only care about external screen
+        return;
+    }
+
+    stateMachine->SetExternalScreenNumber(static_cast<int32_t>(screenIds.size()) - 1);
+    if (stateMachine->IsScreenOn()) {
+        wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_EX_SCREEN_INIT);
+    } else {
+        suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_EX_SCREEN_INIT);
+    }
+}
+
 void PowerMgrService::RegisterExternalScreenListener()
 {
     if (externalScreenListener_ != nullptr) {
@@ -1944,17 +1975,21 @@ void PowerMgrService::UnRegisterExternalScreenListener()
 
 void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
 {
+    if (screenId >= VIRTUAL_SCREEN_START_ID) {
+        POWER_HILOGI(
+            COMP_SVC, "Ignore virtual screen connecting event, screenId: %{public}u", static_cast<uint32_t>(screenId));
+        return;
+    }
     auto powerStateMachine = pms->GetPowerStateMachine();
     auto suspendController = pms->GetSuspendController();
     auto wakeupController = pms->GetWakeupController();
     if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
-        POWER_HILOGE(
-            COMP_SVC, "OnConnect: get important instance error, screenId:%{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "Get important instance error, screenId: %{public}u", static_cast<uint32_t>(screenId));
         return;
     }
 
-    powerStateMachine->IncreaseExternalScreenNumber();
-    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber();
+    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber() + 1;
+    powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
     bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
     POWER_HILOGI(COMP_SVC,
@@ -1964,17 +1999,16 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
 
     if (isSwitchOpen && isScreenOn) {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-        // not power on virtual screen
-        if (!powerStateMachine->IsHibernating() && screenId < VIRTUAL_SCREEN_START_ID) {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power on all screens");
-            wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
+        if (powerStateMachine->IsHibernating()) {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power the screen while hibernating");
+            return;
         }
 #endif
+        wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
         pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT, "ScreenConnected");
     } else if (!isSwitchOpen && !isScreenOn) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Power off all screens when switch is closed");
         suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     } else {
         if (curExternalScreenNum > 1) {
@@ -1988,16 +2022,20 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
 
 void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
 {
-    auto powerStateMachine = pms->GetPowerStateMachine();
-    auto suspendController = pms->GetSuspendController();
-    if (powerStateMachine == nullptr || suspendController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "OnDisconnect: get important instance error, screenId:%{public}u",
+    if (screenId >= VIRTUAL_SCREEN_START_ID) {
+        POWER_HILOGI(COMP_SVC, "Ignore virtual screen disconnecting event, screenId: %{public}u",
             static_cast<uint32_t>(screenId));
         return;
     }
+    auto powerStateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    if (powerStateMachine == nullptr || suspendController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Get important instance error, screenId:%{public}u", static_cast<uint32_t>(screenId));
+        return;
+    }
 
-    powerStateMachine->DecreaseExternalScreenNumber();
-    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber();
+    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber() - 1;
+    powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
     bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
     POWER_HILOGI(COMP_SVC,

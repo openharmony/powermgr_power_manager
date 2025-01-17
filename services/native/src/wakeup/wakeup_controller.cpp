@@ -485,7 +485,6 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
         if (suspendController != nullptr && !stateMachine_->IsSwitchOpen() &&
             stateMachine_->GetExternalScreenNumber() > 0) {
-            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power off closed internal screen only when the device is AWAKE");
             suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         }
 #endif
@@ -738,7 +737,7 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
 {
     bool skipWakeup = !stateMachine_->IsSwitchOpen();
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    skipWakeup = skipWakeup && (stateMachine_->GetExternalScreenNumber() == 0);
+    skipWakeup = skipWakeup && (stateMachine_->GetExternalScreenNumber() <= 0);
 #endif
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);

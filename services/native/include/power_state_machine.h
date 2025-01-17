@@ -157,9 +157,14 @@ public:
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasonBySuspendType(SuspendDeviceType type);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    int32_t GetExternalScreenNumber() const;
-    void IncreaseExternalScreenNumber();
-    void DecreaseExternalScreenNumber();
+    int32_t GetExternalScreenNumber() const
+    {
+        return externalScreenNumber_;
+    }
+    void SetExternalScreenNumber(int32_t exScreenNumber)
+    {
+        externalScreenNumber_ = exScreenNumber;
+    }
 #endif
 
     // only use for test
