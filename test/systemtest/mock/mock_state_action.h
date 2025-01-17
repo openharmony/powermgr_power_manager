@@ -35,6 +35,7 @@ public:
     MOCK_METHOD3(RefreshActivity, void(int64_t callTimeMs, UserActivityType type, uint32_t flags));
     MOCK_METHOD0(GetDisplayState, DisplayState());
     MOCK_METHOD2(SetDisplayState, uint32_t(DisplayState state, StateChangeReason reason));
+    MOCK_METHOD2(SetInternalScreenDisplayPower, void(DisplayState state, StateChangeReason reason));
     MOCK_METHOD1(SetCoordinated, void(bool coordinated));
     MOCK_METHOD3(GoToSleep, uint32_t(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force));
     MOCK_METHOD1(RegisterCallback, void(std::function<void(uint32_t)>& callback));
