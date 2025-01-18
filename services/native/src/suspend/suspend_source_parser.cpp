@@ -88,17 +88,17 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     POWER_HILOGI(FEATURE_SUSPEND, "ParseSources setting=%{public}d", isSettingUpdated);
     std::string configJsonStr;
     if (isSettingUpdated) {
-        configJsonStr = SettingHelper::GetSettingSuspendSources();
-    } else {
-        std::string targetPath;
-        bool ret = GetTargetPath(targetPath);
-        if (ret == false) {
-            return parseSources;
+        std::string sourcesSettingStr = SettingHelper::GetSettingSuspendSources();
+        configJsonStr = sourcesSettingStr;
+#ifdef POWER_MANAGER_ENABLE_WATCH_UPDATE_ADAPT
+        // this branch means use config file for update scene in watch
+        if (sourcesSettingStr.find(SuspendSources::TP_COVER_KEY) == std::string::npos) {
+            configJsonStr = GetSuspendSourcesByConfig();
+            POWER_HILOGW(FEATURE_SUSPEND, "update scene need use (config file)");
         }
-        POWER_HILOGI(FEATURE_SUSPEND, "use targetPath=%{public}s", targetPath.c_str());
-        std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
-        std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
-        configJsonStr = fileStringStr;
+#endif
+    } else {
+        configJsonStr = GetSuspendSourcesByConfig();
     }
     parseSources = ParseSources(configJsonStr);
     if (parseSources != nullptr) {
@@ -107,6 +107,18 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     return parseSources;
 }
 #endif
+
+const std::string SuspendSourceParser::GetSuspendSourcesByConfig()
+{
+    std::string targetPath;
+    bool ret = GetTargetPath(targetPath);
+    if (ret == false) {
+        return "";
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "use targetPath=%{public}s", targetPath.c_str());
+    std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
+    return std::string(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
+}
 
 bool SuspendSourceParser::GetTargetPath(std::string& targetPath)
 {
