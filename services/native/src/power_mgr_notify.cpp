@@ -32,16 +32,26 @@ void PowerMgrNotify::RegisterPublishEvents()
         return;
     }
     publishInfo_ = new (std::nothrow)CommonEventPublishInfo();
-    publishInfo_->SetOrdered(false);
+    if (publishInfo_ != nullptr) {
+        publishInfo_->SetOrdered(false);
+    }
     screenOffWant_ = new (std::nothrow)IntentWant();
-    screenOffWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    if (screenOffWant_ != nullptr) {
+        screenOffWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    }
     screenOnWant_ = new (std::nothrow)IntentWant();
-    screenOnWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    if (screenOnWant_ != nullptr) {
+        screenOnWant_->SetAction(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    }
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     enterForceSleepWant_ = new (std::nothrow)IntentWant();
-    enterForceSleepWant_->SetAction(CommonEventSupport::COMMON_EVENT_ENTER_FORCE_SLEEP);
+    if (enterForceSleepWant_ != nullptr) {
+        enterForceSleepWant_->SetAction(CommonEventSupport::COMMON_EVENT_ENTER_FORCE_SLEEP);
+    }
     exitForceSleepWant_ = new (std::nothrow)IntentWant();
-    exitForceSleepWant_->SetAction(CommonEventSupport::COMMON_EVENT_EXIT_FORCE_SLEEP);
+    if (exitForceSleepWant_ != nullptr) {
+        exitForceSleepWant_->SetAction(CommonEventSupport::COMMON_EVENT_EXIT_FORCE_SLEEP);
+    }
 #endif
 }
 
@@ -57,6 +67,10 @@ void PowerMgrNotify::PublishEvents(int64_t eventTime, sptr<IntentWant> want)
 
 void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
 {
+    if (screenOffWant_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
+        return;
+    }
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         screenOffWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, screenOffWant_);
@@ -65,6 +79,10 @@ void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
 
 void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
 {
+    if (screenOnWant_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
+        return;
+    }
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         screenOnWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, screenOnWant_);
@@ -74,6 +92,10 @@ void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
 void PowerMgrNotify::PublishEnterForceSleepEvents(int64_t eventTime)
 {
+    if (enterForceSleepWant_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
+        return;
+    }
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         enterForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, enterForceSleepWant_);
@@ -83,6 +105,10 @@ void PowerMgrNotify::PublishEnterForceSleepEvents(int64_t eventTime)
 
 void PowerMgrNotify::PublishExitForceSleepEvents(int64_t eventTime)
 {
+    if (exitForceSleepWant_ == nullptr) {
+        POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
+        return;
+    }
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         exitForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime));
     PublishEvents(eventTime, exitForceSleepWant_);
