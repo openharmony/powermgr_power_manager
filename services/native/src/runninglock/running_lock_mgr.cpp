@@ -483,6 +483,9 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
             counter->GetType(), counter->GetCount());
         return false;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    lockInner->SetBeginTime(GetTickCount());
+#endif
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     return true;
 }
@@ -527,8 +530,24 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
             counter->GetType(), counter->GetCount());
         return false;
     }
+    WriteHiSysEvent(lockInner);
     lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
     return true;
+}
+
+void RunningLockMgr::WriteHiSysEvent(std::shared_ptr<RunningLockInner>& lockInner)
+{
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    constexpr int64_t APP_HOLD_RUNNINGLOCK_TIMEOUT = 7200000;
+    int64_t endTimeMs = GetTickCount();
+    int64_t beginTimeMs = lockInner->GetBeginTime();
+    if (endTimeMs - beginTimeMs > APP_HOLD_RUNNINGLOCK_TIMEOUT) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "app hold runninglock timeout=%{public}lld", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "APP_HOLD_RUNNINGLOCK_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", lockInner->GetPid(), "UID", lockInner->GetUid(),
+            "TYPE", static_cast<int32_t>(lockInner->GetParam().type), "NAME", lockInner->GetParam().name);
+    }
+#endif
 }
 
 void RunningLockMgr::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
