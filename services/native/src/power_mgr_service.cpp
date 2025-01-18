@@ -1292,6 +1292,12 @@ bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 
 PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    constexpr int64_t RUNNINGLOCK_TIMEOUT_MS = 50;
+    int64_t beginTimeMs = GetTickCount();
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+#endif
     PowerXCollie powerXCollie("PowerMgrService::Lock", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1307,11 +1313,25 @@ PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t 
         };
         RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(remoteObj, task, timeOutMs);
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    int64_t endTimeMs = GetTickCount();
+    if (endTimeMs - beginTimeMs > RUNNINGLOCK_TIMEOUT_MS) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock interface timeout=%{public}lld", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid);
+    }
+#endif
     return PowerErrors::ERR_OK;
 }
 
 PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    constexpr int64_t RUNNINGLOCK_TIMEOUT_MS = 50;
+    int64_t beginTimeMs = GetTickCount();
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+#endif
     PowerXCollie powerXCollie("PowerMgrService::UnLock", true);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1319,6 +1339,14 @@ PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const 
     std::lock_guard lock(lockMutex_);
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
     runningLockMgr_->UnLock(remoteObj, name);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    int64_t endTimeMs = GetTickCount();
+    if (endTimeMs - beginTimeMs > RUNNINGLOCK_TIMEOUT_MS) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLock interface timeout=%{public}lld", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid);
+    }
+#endif
     return PowerErrors::ERR_OK;
 }
 
