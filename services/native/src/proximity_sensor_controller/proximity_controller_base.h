@@ -30,7 +30,6 @@ class ProximityControllerBase {
 public:
     ProximityControllerBase(const std::string& name, SensorCallbackFunc callback);
     virtual ~ProximityControllerBase();
-#ifdef HAS_SENSORS_SENSOR_PART
     void Enable();
     void Disable();
     bool IsEnabled()
@@ -47,10 +46,8 @@ public:
         return status_;
     }
     void Clear();
-#endif
 
 protected:
-#ifdef HAS_SENSORS_SENSOR_PART
     static const int32_t PROXIMITY_CLOSE_SCALAR = 0;
     static const int32_t PROXIMITY_AWAY_SCALAR = 5;
     static const uint32_t SAMPLING_RATE =  100000000;
@@ -59,25 +56,24 @@ protected:
     bool isClose_ {false};
     uint32_t status_ {0};
     SensorUser user_ {};
-#endif
 };
 
 class ProximityNormalController : public ProximityControllerBase {
 public:
-    ProximityNormalController(const std::string& name = "ProximityNormalController", SensorCallbackFunc
+    explicit ProximityNormalController(const std::string& name = "ProximityNormalController", SensorCallbackFunc
         callback = &ProximityNormalController::RecordSensorCallback) : ProximityControllerBase(name, callback) {}
-    ~ProximityNormalController() {}
+    ~ProximityNormalController() override {}
     void ActivateValidProximitySensor(PowerState state);
-#ifdef HAS_SENSORS_SENSOR_PART
     static void RecordSensorCallback(SensorEvent *event);
-    static bool isInactiveClose_;
-#endif
-    
+    static bool IsInactiveClose()
+    {
+        return isInactiveClose_;
+    }
+
 private:
-#ifdef HAS_SENSORS_SENSOR_PART
     bool proximitySensorEnabled_ {false};
     static std::mutex userMutex_;
-#endif
+    static bool isInactiveClose_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

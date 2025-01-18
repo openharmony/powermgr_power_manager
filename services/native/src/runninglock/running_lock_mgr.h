@@ -116,9 +116,9 @@ private:
 #ifdef HAS_SENSORS_SENSOR_PART
     class ProximityController : public ProximityControllerBase {
     public:
-        ProximityController(const std::string& name = "RunningLock", SensorCallbackFunc
+        explicit ProximityController(const std::string& name = "RunningLock", SensorCallbackFunc
             callback = &ProximityController::RecordSensorCallback) : ProximityControllerBase(name, callback) {}
-        ~ProximityController() {}
+        ~ProximityController() override {}
         void OnClose();
         void OnAway();
         static void RecordSensorCallback(SensorEvent *event);

@@ -215,8 +215,7 @@ bool PowerStateMachine::CanTransitTo(PowerState from, PowerState to, StateChange
             return false;
         }
         // prevent the pickup to light up the screen when proximity is close out of calling
-        if (ProximityNormalController::isInactiveClose_ == true &&
-            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+        if (ProximityNormalController::IsInactiveClose() && reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "Pickup isn't allowed to wakeup device when proximity is close out of calling.");
             StartSleepTimer(from);
