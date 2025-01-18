@@ -18,13 +18,12 @@
 #include "ffrt_utils.h"
 #include "power_log.h"
 #include "errors.h"
+#include "setting_helper.h"
 
 namespace OHOS {
 namespace PowerMgr {
-#ifdef HAS_SENSORS_SENSOR_PART
 std::mutex ProximityNormalController::userMutex_;
 bool ProximityNormalController::isInactiveClose_ = false;
-#endif
 
 ProximityControllerBase::ProximityControllerBase(const std::string& name, SensorCallbackFunc callback)
 {
@@ -119,9 +118,11 @@ void ProximityControllerBase::Clear()
 {
     isClose_ = false;
 }
+#endif
 
 void ProximityNormalController::RecordSensorCallback(SensorEvent *event)
 {
+#ifdef POWER_PROXIMITY_PICKUP_ENABLE
     POWER_HILOGD(FEATURE_POWER_STATE, "Sensor Callback come in");
     if (event == nullptr) {
         POWER_HILOGW(FEATURE_POWER_STATE, "Sensor event is nullptr");
@@ -143,16 +144,20 @@ void ProximityNormalController::RecordSensorCallback(SensorEvent *event)
     } else if (distance == PROXIMITY_AWAY_SCALAR) {
         isInactiveClose_ = false;
     }
-}
 #endif
+}
 
 void ProximityNormalController::ActivateValidProximitySensor(PowerState state)
 {
-#ifdef HAS_SENSORS_SENSOR_PART
-    if (support_ == true && state == PowerState::INACTIVE) {
+#ifdef POWER_PROXIMITY_PICKUP_ENABLE
+    if (support_ == false) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "PROXIMITY sensor not support, ActivateValidProximitySensor failed");
+        return;
+    }
+    if (state == PowerState::INACTIVE) {
         if (proximitySensorEnabled_) {
             POWER_HILOGI(FEATURE_POWER_STATE, "Proximity Sensor is already on");
-        } else {
+        } else if (SettingHelper::GetSettingWakeupPickup()) {
             FFRTTask task = [this] {
                 std::lock_guard lock(userMutex_);
                 Enable();
@@ -160,7 +165,7 @@ void ProximityNormalController::ActivateValidProximitySensor(PowerState state)
             FFRTUtils::SubmitTask(task);
             proximitySensorEnabled_ = true;
         }
-    } else if (support_ == true && state == PowerState::AWAKE) {
+    } else if (state == PowerState::AWAKE) {
         if (!proximitySensorEnabled_) {
             POWER_HILOGI(FEATURE_POWER_STATE, "Proximity Sensor is already off");
         } else {

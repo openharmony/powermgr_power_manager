@@ -24,6 +24,7 @@ config("powermgr_public_config") {
 config("powermgr_private_config") {
   include_dirs = [
     "native/src",
+    "native/src/proximity_sensor_controller",
     "native/src/runninglock",
     "native/src/setting",
     "native/src/shutdown",
@@ -57,7 +58,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mode_policy.cpp",
     "native/src/power_save_mode.cpp",
     "native/src/power_state_machine.cpp",
-    "native/src/proximity_controller_base.cpp",
+    "native/src/proximity_sensor_controller/proximity_controller_base.cpp",
     "native/src/runninglock/running_lock_inner.cpp",
     "native/src/runninglock/running_lock_mgr.cpp",
     "native/src/runninglock/running_lock_proxy.cpp",
@@ -183,6 +184,9 @@ ohos_shared_library("powermgrservice") {
 
   if (power_manager_feature_pickup) {
     defines += [ "POWER_PICKUP_ENABLE" ]
+    if (has_sensors_sensor_part) {
+      defines += [ "POWER_PROXIMITY_PICKUP_ENABLE" ]
+    }
   }
 
   if (power_manager_feature_wakeup_action) {
