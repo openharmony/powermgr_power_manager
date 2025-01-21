@@ -209,6 +209,11 @@ void SuspendController::UpdateSuspendSources()
     jsonStr = SettingHelper::GetSettingSuspendSources();
 #endif
     std::shared_ptr<SuspendSources> sources = SuspendSourceParser::ParseSources(jsonStr);
+    if (sources->GetParseErrorFlag()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Parse failed, call GetSuspendSourcesByConfig again");
+        jsonStr = SuspendSourceParser::GetSuspendSourcesByConfig();
+        sources = SuspendSourceParser::ParseSources(jsonStr);
+    }
     if (sources == nullptr) {
         POWER_HILOGE(COMP_SVC, "get SuspendSources fail");
         return;
