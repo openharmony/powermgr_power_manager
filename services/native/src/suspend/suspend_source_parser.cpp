@@ -52,15 +52,7 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     std::string configJsonStr;
 
     if (!isSettingAcValid || !isSettingDcValid) {
-        std::string targetPath;
-        bool ret = GetTargetPath(targetPath);
-        if (ret == false) {
-            POWER_HILOGE(FEATURE_SUSPEND, "GetTargetPath fail");
-            return parseSources;
-        }
-        POWER_HILOGI(FEATURE_SUSPEND, "use targetPath=%{public}s", targetPath.c_str());
-        std::ifstream inputStream(targetPath.c_str(), std::ios::in | std::ios::binary);
-        std::string fileStringStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
+        std::string fileStringStr = GetSuspendSourcesByConfig();
 
         if (!isSettingAcValid) {
             SettingHelper::SetSettingAcSuspendSources(fileStringStr);
@@ -78,6 +70,11 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
     }
 
     parseSources = ParseSources(configJsonStr);
+    if (parseSources->GetParseErrorFlag()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "call GetSuspendSourcesByConfig again");
+        configJsonStr = GetSuspendSourcesByConfig();
+        parseSources = ParseSources(configJsonStr);
+    }
     return parseSources;
 }
 #else
@@ -101,6 +98,11 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
         configJsonStr = GetSuspendSourcesByConfig();
     }
     parseSources = ParseSources(configJsonStr);
+    if (parseSources->GetParseErrorFlag()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "call GetSuspendSourcesByConfig again");
+        configJsonStr = GetSuspendSourcesByConfig();
+        parseSources = ParseSources(configJsonStr);
+    }
     if (parseSources != nullptr) {
         SettingHelper::SetSettingSuspendSources(configJsonStr);
     }
@@ -113,6 +115,7 @@ const std::string SuspendSourceParser::GetSuspendSourcesByConfig()
     std::string targetPath;
     bool ret = GetTargetPath(targetPath);
     if (ret == false) {
+        POWER_HILOGE(FEATURE_SUSPEND, "GetTargetPath fail");
         return "";
     }
     POWER_HILOGI(FEATURE_SUSPEND, "use targetPath=%{public}s", targetPath.c_str());
@@ -154,11 +157,13 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::str
     std::string errors;
     if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
         POWER_HILOGE(FEATURE_SUSPEND, "json parse error");
+        parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
 
     if (root.isNull() || !root.isObject()) {
         POWER_HILOGE(FEATURE_SUSPEND, "json root invalid[%{public}s]", jsonStr.c_str());
+        parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
 

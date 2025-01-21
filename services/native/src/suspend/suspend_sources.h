@@ -67,22 +67,34 @@ private:
 
 class SuspendSources {
 public:
+    SuspendSources() = default;
+    ~SuspendSources() = default;
+
     static const constexpr char* POWERKEY_KEY = "powerkey";
     static const constexpr char* TIMEOUT_KEY = "timeout";
     static const constexpr char* LID_KEY = "lid";
     static const constexpr char* SWITCH_KEY = "switch";
     static const constexpr char* TP_COVER_KEY = "tp_cover";
-    SuspendSources() = default;
-    ~SuspendSources() = default;
+
     static SuspendDeviceType mapSuspendDeviceType(const std::string& key);
     static std::vector<std::string> getSourceKeys();
     void PutSource(SuspendSource& source);
     std::vector<SuspendSource> GetSourceList();
+    bool GetParseErrorFlag() const
+    {
+        return parseErrorFlag_;
+    }
+
+    void SetParseErrorFlag(bool flag)
+    {
+        parseErrorFlag_ = flag;
+    }
 
 private:
+    static std::mutex sourceKeysMutex_;
     std::vector<SuspendSource> sourceList_;
     std::mutex sourceListMutex_;
-    static std::mutex sourceKeysMutex_;
+    bool parseErrorFlag_ {false};
 };
 
 } // namespace PowerMgr
