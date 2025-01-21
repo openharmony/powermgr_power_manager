@@ -1797,7 +1797,7 @@ PowerErrors PowerMgrService::IsStandby(bool& isStandby)
     if (code == ERR_OK) {
         return PowerErrors::ERR_OK;
     }
-    return PowerErrors::ERR_CONNECTION_FAIL;
+    return PowerErrors::ERR_FAILURE;
 #else
     return PowerErrors::ERR_OK;
 #endif

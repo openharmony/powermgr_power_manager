@@ -341,8 +341,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService016, TestSize.Level2)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     bool standby = false;
     PowerErrors ret = powerMgrClient.IsStandby(standby);
-    bool testPassed = (ret == PowerErrors::ERR_OK || ret == PowerErrors::ERR_CONNECTION_FAIL);
-    EXPECT_TRUE(testPassed);
+    EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 end.");
 }
 

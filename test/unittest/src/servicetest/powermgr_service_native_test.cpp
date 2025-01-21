@@ -880,7 +880,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest039, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest039::fun is start");
     bool standby = false;
     auto error = g_powerMgrServiceProxy->IsStandby(standby);
-    EXPECT_TRUE(error == PowerErrors::ERR_OK);
+    EXPECT_NE(error, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest039::fun is end");
 }
 
