@@ -1184,7 +1184,12 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient046, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.Hibernate(true);
+    PowerErrors ret = powerMgrClient.Hibernate(true);
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is end!");
 }
 
@@ -1198,7 +1203,12 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient047::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.Hibernate(false);
+    PowerErrors ret = powerMgrClient.Hibernate(false);
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient047::fun is end!");
 }
 
@@ -1297,7 +1307,9 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient052, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient052::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+    // parameter is nullptr
+    EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient052::fun is end!");
 }
 
@@ -1311,7 +1323,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient053, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient053::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
+    bool ret = powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
+    EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient053::fun is end!");
 }
 
