@@ -49,6 +49,18 @@ public:
         return runningLockParam_.bundleName;
     }
 
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    void SetBeginTime(int64_t beginTimeMs)
+    {
+        beginTimeMs_ = beginTimeMs;
+    }
+
+    int64_t GetBeginTime()
+    {
+        return beginTimeMs_;
+    }
+#endif
+
     void SetBundleName(const std::string& bundleName)
     {
         runningLockParam_.bundleName = bundleName;
@@ -105,6 +117,9 @@ private:
     RunningLockParam runningLockParam_;
     RunningLockState state_ = RunningLockState::RUNNINGLOCK_STATE_DISABLE;
     int64_t lockTimeMs_ = 0;
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    int64_t beginTimeMs_ = 0;
+#endif
 };
 } // namespace PowerMgr
 } // namespace OHOS

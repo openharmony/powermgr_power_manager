@@ -53,6 +53,7 @@ public:
         const std::map<int32_t, std::string>& workSources);
     bool Lock(const sptr<IRemoteObject>& remoteObj);
     bool UnLock(const sptr<IRemoteObject> remoteObj, const std::string& name = "");
+    void WriteHiSysEvent(std::shared_ptr<RunningLockInner>& lockInner);
     void RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
