@@ -156,7 +156,7 @@ void ProximityNormalController::ActivateValidProximitySensor(PowerState state)
     }
     if (state == PowerState::INACTIVE) {
         if (proximitySensorEnabled_) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "Proximity Sensor is already on");
+            POWER_HILOGI(FEATURE_POWER_STATE, "PROXIMITY sensor is already on");
         } else if (SettingHelper::GetSettingWakeupPickup()) {
             FFRTTask task = [this] {
                 std::lock_guard lock(userMutex_);
@@ -164,10 +164,12 @@ void ProximityNormalController::ActivateValidProximitySensor(PowerState state)
             };
             FFRTUtils::SubmitTask(task);
             proximitySensorEnabled_ = true;
+        } else {
+            POWER_HILOGI(FEATURE_POWER_STATE, "Pickup wakeup device is disable, skip PROXIMITY sensor Enable");
         }
     } else if (state == PowerState::AWAKE) {
         if (!proximitySensorEnabled_) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "Proximity Sensor is already off");
+            POWER_HILOGI(FEATURE_POWER_STATE, "PROXIMITY sensor is already off");
         } else {
             FFRTTask task = [this] {
                 std::lock_guard lock(userMutex_);
