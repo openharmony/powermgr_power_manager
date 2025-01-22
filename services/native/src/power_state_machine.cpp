@@ -1977,6 +1977,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_EX_SCREEN_INIT:
             ret = StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_ABNORMAL_SCREEN_CONNECT:
+            ret = StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;

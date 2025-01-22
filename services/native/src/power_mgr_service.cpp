@@ -1969,9 +1969,16 @@ void PowerMgrService::ExternalScreenInit()
         return;
     }
 
+    bool isSwitchOpen = stateMachine->IsSwitchOpen();
+    bool isScreenOn = stateMachine->IsScreenOn();
     stateMachine->SetExternalScreenNumber(static_cast<int32_t>(screenIds.size()) - 1);
-    if (stateMachine->IsScreenOn()) {
+    POWER_HILOGI(
+        COMP_SVC, "Init external screen, isSwitchOpen: %{public}d, isScreenOn: %{public}d", isSwitchOpen, isScreenOn);
+    if (isScreenOn) {
         wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_EX_SCREEN_INIT);
+        if (!isSwitchOpen) {
+            suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+        }
     } else {
         suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_EX_SCREEN_INIT);
     }
@@ -1979,26 +1986,38 @@ void PowerMgrService::ExternalScreenInit()
 
 void PowerMgrService::RegisterExternalScreenListener()
 {
-    if (externalScreenListener_ != nullptr) {
-        POWER_HILOGI(COMP_SVC, "External screen listener has already been registered");
-        return;
+    auto ret = Rosen::DMError::DM_OK;
+    if (externalScreenListener_ == nullptr) {
+        externalScreenListener_ = sptr<ExternalScreenListener>::MakeSptr();
+        ret = Rosen::ScreenManagerLite::GetInstance().RegisterScreenListener(externalScreenListener_);
+        POWER_HILOGI(COMP_SVC, "Register external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
     }
 
-    externalScreenListener_ = sptr<ExternalScreenListener>::MakeSptr();
-    Rosen::DMError ret = Rosen::ScreenManagerLite::GetInstance().RegisterScreenListener(externalScreenListener_);
-    POWER_HILOGI(COMP_SVC, "Register external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+    if (abnormalExScreenListener_ == nullptr) {
+        abnormalExScreenListener_ = sptr<AbnormalExternalScreenConnectListener>::MakeSptr();
+        ret = Rosen::ScreenManagerLite::GetInstance().RegisterAbnormalScreenConnectChangeListener(
+            abnormalExScreenListener_);
+        POWER_HILOGI(
+            COMP_SVC, "Register abnormal external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+    }
 }
 
 void PowerMgrService::UnRegisterExternalScreenListener()
 {
-    if (externalScreenListener_ == nullptr) {
-        POWER_HILOGI(COMP_SVC, "No need to unregister external screen listener");
-        return;
+    auto ret = Rosen::DMError::DM_OK;
+    if (externalScreenListener_ != nullptr) {
+        ret = Rosen::ScreenManagerLite::GetInstance().UnregisterScreenListener(externalScreenListener_);
+        externalScreenListener_ = nullptr;
+        POWER_HILOGI(COMP_SVC, "Unregister external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
     }
 
-    Rosen::DMError ret = Rosen::ScreenManagerLite::GetInstance().UnregisterScreenListener(externalScreenListener_);
-    externalScreenListener_ = nullptr;
-    POWER_HILOGI(COMP_SVC, "Unregister external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+    if (abnormalExScreenListener_ != nullptr) {
+        ret = Rosen::ScreenManagerLite::GetInstance().UnregisterAbnormalScreenConnectChangeListener(
+            abnormalExScreenListener_);
+        abnormalExScreenListener_ = nullptr;
+        POWER_HILOGI(
+            COMP_SVC, "Unregister abnormal external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+    }
 }
 
 void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
@@ -2026,12 +2045,6 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
         static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
 
     if (isSwitchOpen && isScreenOn) {
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-        if (powerStateMachine->IsHibernating()) {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power the screen while hibernating");
-            return;
-        }
-#endif
         wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
@@ -2083,6 +2096,35 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
             POWER_HILOGI(FEATURE_SUSPEND,
                 "[UL_POWER] Refresh device rather than suspend device when there's still external screen");
             pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
+        }
+    }
+}
+
+void PowerMgrService::AbnormalExternalScreenConnectListener::NotifyAbnormalScreenConnectChange(uint64_t screenId)
+{
+    if (screenId >= VIRTUAL_SCREEN_START_ID) {
+        POWER_HILOGI(COMP_SVC, "Ignore virtual screen abnormal connecting event, screenId: %{public}u",
+            static_cast<uint32_t>(screenId));
+        return;
+    }
+    auto powerStateMachine = pms->GetPowerStateMachine();
+    auto suspendController = pms->GetSuspendController();
+    auto wakeupController = pms->GetWakeupController();
+    if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "Get important instance error, screenId: %{public}u", static_cast<uint32_t>(screenId));
+        return;
+    }
+
+    bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
+    bool isScreenOn = powerStateMachine->IsScreenOn();
+    POWER_HILOGI(COMP_SVC,
+        "Received abnormal external screen connecting event, screenId: %{public}u, isSwitchOpen: %{public}d, "
+        "isScreenOn: %{public}d",
+        static_cast<uint32_t>(screenId), isSwitchOpen, isScreenOn);
+    if (isScreenOn) {
+        wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_ABNORMAL_SCREEN_CONNECT);
+        if (!isSwitchOpen) {
+            suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         }
     }
 }
