@@ -497,7 +497,7 @@ void SuspendController::PowerOffInternalScreen(SuspendDeviceType type)
     uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
     bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, ScreenPowerState::POWER_OFF, dmsReason);
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Power off internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
+        "[UL_POWER] Power off internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
         static_cast<uint32_t>(screenId), ret);
 }
 
@@ -507,7 +507,8 @@ void SuspendController::PowerOffAllScreens(SuspendDeviceType type)
     auto changeReason = stateMachine_->GetReasonBySuspendType(type);
     auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
     bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF, dmsReason);
-    POWER_HILOGI(FEATURE_SUSPEND, "Power off all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
+    POWER_HILOGI(
+        FEATURE_SUSPEND, "[UL_POWER] Power off all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }
 
 bool SuspendController::IsPowerOffInernalScreenOnlyScene(

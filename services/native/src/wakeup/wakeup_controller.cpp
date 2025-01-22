@@ -696,22 +696,40 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
 {
-    using namespace OHOS::Rosen;
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    if (stateMachine_->IsHibernating()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power the internal screen while hibernating");
+        return;
+    }
+#endif
+    if (!stateMachine_->IsSwitchOpen()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power the internal screen while switch is close");
+        return;
+    }
+
     auto changeReason = stateMachine_->GetReasonByWakeType(type);
     auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
-    uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, ScreenPowerState::POWER_ON, dmsReason);
+    uint64_t screenId = Rosen::DisplayManagerLite::GetInstance().GetInternalScreenId();
+    bool ret = Rosen::DisplayManagerLite::GetInstance().SetScreenPowerById(
+        screenId, Rosen::ScreenPowerState::POWER_ON, dmsReason);
     POWER_HILOGI(FEATURE_WAKEUP,
-        "Power on internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
+        "[UL_POWER] Power on internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
         static_cast<uint32_t>(screenId), ret);
 }
 
 void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
 {
-    using namespace OHOS::Rosen;
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    if (stateMachine_->IsHibernating()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power all the screen while hibernating");
+        return;
+    }
+#endif
+
     auto changeReason = stateMachine_->GetReasonByWakeType(type);
     auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
-    bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON, dmsReason);
+    bool ret =
+        Rosen::ScreenManagerLite::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_ON, dmsReason);
     POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }
 

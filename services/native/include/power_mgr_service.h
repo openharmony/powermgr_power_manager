@@ -303,6 +303,11 @@ private:
         virtual void OnDisconnect(uint64_t screenId) override;
         virtual void OnChange(uint64_t screenId) override {}
     };
+    class AbnormalExternalScreenConnectListener
+        : public Rosen::ScreenManagerLite::IAbnormalScreenConnectChangeListener {
+    public:
+        virtual void NotifyAbnormalScreenConnectChange(uint64_t screenId) override;
+    };
 #endif
     class BackgroundRunningLock {
     public:
@@ -379,6 +384,7 @@ private:
 #endif
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     sptr<Rosen::ScreenManagerLite::IScreenListener> externalScreenListener_ {nullptr};
+    sptr<Rosen::ScreenManagerLite::IAbnormalScreenConnectChangeListener> abnormalExScreenListener_ {nullptr};
 #endif
     PowerModeModule powerModeModule_;
     ShutdownDialog shutdownDialog_;
