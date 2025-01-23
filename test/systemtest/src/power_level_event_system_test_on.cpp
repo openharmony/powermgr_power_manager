@@ -93,15 +93,15 @@ shared_ptr<CommonEventScreenOnTest> CommonEventScreenOnTest::RegisterEvent()
 
 namespace {
 /**
- * @tc.name: PowerSavemode_001
+ * @tc.name: PowerLevelEventSystemTestOn_001
  * @tc.desc: ReceiveEvent
  * @tc.type: FUNC
  * @tc.require: issueI5HUVS
  */
-HWTEST_F(PowerLevelEventSystemTestOn, PowerSavemode_001, TestSize.Level0)
+HWTEST_F(PowerLevelEventSystemTestOn, PowerLevelEventSystemTestOn_001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerSavemode_001 start");
-    GTEST_LOG_(INFO) << "PowerSavemode_001 start";
+    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOn_001 start");
+    GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOn_001 start";
     shared_ptr<CommonEventScreenOnTest> subscriber = CommonEventScreenOnTest::RegisterEvent();
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION);
@@ -112,6 +112,7 @@ HWTEST_F(PowerLevelEventSystemTestOn, PowerSavemode_001, TestSize.Level0)
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_ON, g_action);
-    POWER_HILOGI(LABEL_TEST, "PowerSavemode_001 end");
+    GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOn_001 end";
+    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOn_001 end");
 }
 } // namespace
