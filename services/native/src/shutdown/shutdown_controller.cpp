@@ -33,6 +33,7 @@
 #include <hisysevent.h>
 #include <thread>
 #include <dlfcn.h>
+#include <vector>
 
 #ifdef POWER_MANAGER_POWEROFF_CHARGE
 #include "battery_srv_client.h"
@@ -47,6 +48,9 @@ namespace PowerMgr {
 namespace {
 const time_t MAX_TIMEOUT_SEC = 30;
 const std::string REASON_POWEROFF_CHARGE_DISABLE = "POWEROFF_CHARGE_DISABLE";
+#ifdef POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN
+const vector<string> REASONS_DISABLE_TAKE_OVER = {"LowCapacity", "HibernateFail"};
+#endif
 }
 ShutdownController::ShutdownController() : started_(false)
 {
@@ -118,7 +122,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     started_ = true;
-    bool isTakeOver = TriggerTakeOverShutdownCallback(isReboot);
+    bool isTakeOver = TakeOverShutdownAction(reason, isReboot);
     if (isTakeOver) {
         started_ = false;
         return;
@@ -308,6 +312,28 @@ void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteO
             POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
         }
     }
+}
+
+bool ShutdownController::TakeOverShutdownAction(const std::string& reason, bool isReboot)
+{
+    if (AllowedToBeTakenOver(reason)) {
+        return TriggerTakeOverShutdownCallback(isReboot);
+    }
+    return false;
+}
+
+bool ShutdownController::AllowedToBeTakenOver(const std::string& reason) const
+{
+#ifdef POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN
+    if (find(REASONS_DISABLE_TAKE_OVER.cbegin(), REASONS_DISABLE_TAKE_OVER.cend(), reason)
+        != REASONS_DISABLE_TAKE_OVER.cend()) {
+        POWER_HILOGI(FEATURE_SHUTDOWN, "forbid to takeover shutdown, reason:%{public}s", reason.c_str());
+        return false;
+    }
+    return true;
+#endif
+    (void)reason;
+    return true;
 }
 } // namespace PowerMgr
 } // namespace OHOS
