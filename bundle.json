@@ -33,7 +33,8 @@
             "power_manager_feature_force_sleep_broadcast",
             "power_manager_feature_movement",
             "power_manager_feature_dialog_path",
-            "power_manager_feature_charging_type_setting"
+            "power_manager_feature_charging_type_setting",
+            "power_manager_feature_judging_takeover_shutdown"
         ],
         "adapted_system_type": [
             "standard"
