@@ -46,6 +46,8 @@ deps_ex = [
   "c_utils:utils",
   "common_event_service:cesfwk_innerkits",
   "ffrt:libffrt",
+  "googletest:gmock_main",
+  "googletest:gtest_main",
   "hilog:libhilog",
   "input:libmmi-client",
   "ipc:ipc_core",
@@ -144,6 +146,36 @@ ohos_systemtest("test_power_mgr_powersavemode") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = deps_ex
+}
+
+################################powersetdevicemode################################
+
+ohos_systemtest("test_power_mgr_powersetdevicemode") {
+  module_out_path = module_output_path
+
+  sources = [ "src/power_mgr_setdevicemode_test.cpp" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
 
   external_deps = deps_ex
@@ -341,6 +373,7 @@ group("systemtest_powermgr") {
     ":test_power_level_event_system_test_on",
     ":test_power_mgr_mock_system",
     ":test_power_mgr_powersavemode",
+    ":test_power_mgr_powersetdevicemode",
     ":test_power_mgr_shutdown_fast",
     ":test_power_mgr_system",
     ":test_power_st_mgr_mock",

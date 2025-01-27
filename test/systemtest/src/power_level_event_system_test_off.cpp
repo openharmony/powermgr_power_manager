@@ -92,15 +92,15 @@ shared_ptr<CommonEventScreenOffTest> CommonEventScreenOffTest::RegisterEvent()
 
 namespace {
 /**
- * @tc.name: PowerSavemode_001
+ * @tc.name: PowerLevelEventSystemTestOff_001
  * @tc.desc: ReceiveEvent
  * @tc.type: FUNC
  * @tc.require: issueI5HUVS
  */
-HWTEST_F(PowerLevelEventSystemTestOff, PowerSavemode_001, TestSize.Level0)
+HWTEST_F(PowerLevelEventSystemTestOff, PowerLevelEventSystemTestOff_001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerSavemode_001 start");
-    GTEST_LOG_(INFO) << "PowerSavemode_001 start";
+    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 start");
+    GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOff_001 start";
     shared_ptr<CommonEventScreenOffTest> subscriber = CommonEventScreenOffTest::RegisterEvent();
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
@@ -111,6 +111,7 @@ HWTEST_F(PowerLevelEventSystemTestOff, PowerSavemode_001, TestSize.Level0)
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_OFF, g_action);
-    POWER_HILOGI(LABEL_TEST, "PowerSavemode_001 end");
+    GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOff_001 end";
+    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 end");
 }
 } // namespace
