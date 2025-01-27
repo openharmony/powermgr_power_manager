@@ -340,7 +340,8 @@ void PowerStateMachine::EmplaceInactive()
 #endif
             mDeviceState_.screenState.lastOffTime = GetTickCount();
             DisplayState state = DisplayState::DISPLAY_OFF;
-            if (isDozeEnabled_.load(std::memory_order_relaxed)) {
+            if (reason != StateChangeReason::STATE_CHANGE_REASON_SWITCH_SENSORHUB
+                && isDozeEnabled_.load(std::memory_order_relaxed)) {
                 state = DisplayState::DISPLAY_DOZE;
             }
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
@@ -2001,8 +2002,7 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT:
             ret = (enabledTimingOutLockScreen_.load() &&
-                      (!enabledTimingOutLockScreenCheckLock_.load() ||
-                          CheckRunningLock(PowerState::INACTIVE))) ?
+                  (!enabledTimingOutLockScreenCheckLock_.load() || CheckRunningLock(PowerState::INACTIVE))) ?
                 StateChangeReason::STATE_CHANGE_REASON_TIMEOUT :
                 StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK;
             break;
@@ -2030,6 +2030,9 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_REASON_EX_SCREEN_INIT:
             ret = StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_SWITCH_SENSORHUB:
+            ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH_SENSORHUB;
             break;
         default:
             break;
