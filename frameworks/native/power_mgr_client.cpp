@@ -56,6 +56,7 @@ PowerMgrClient::~PowerMgrClient()
         auto remoteObject = proxy_->AsObject();
         if (remoteObject != nullptr) {
             remoteObject->RemoveDeathRecipient(deathRecipient_);
+            proxy_ = nullptr;
         }
     }
 }
@@ -70,6 +71,16 @@ PowerMgrClient& PowerMgrClient::GetInstance()
         }
     }
     return *instance;
+}
+
+void PowerMgrClient::DestroyDeathRecipient()
+{
+    RETURN_IF(proxy_ == nullptr);
+    auto remoteObject = proxy_->AsObject();
+    if (remoteObject != nullptr) {
+        remoteObject->RemoveDeathRecipient(deathRecipient_);
+        proxy_ = nullptr;
+    }
 }
 
 ErrCode PowerMgrClient::Connect()
