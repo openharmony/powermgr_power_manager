@@ -287,9 +287,6 @@ void PowerStateMachine::EmplaceAwake()
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON",
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
 #endif
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(reason);
-#endif
             mDeviceState_.screenState.lastOnTime = GetTickCount();
             auto targetState = DisplayState::DISPLAY_ON;
             if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
@@ -626,6 +623,11 @@ void PowerStateMachine::WakeupDeviceInner(
 
     // Call legacy wakeup, Check the screen state
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+    if (!pms->IsScreenOn() && GetReasonByWakeType(type) == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(GetReasonByWakeType(type));
+    }
+#endif
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_WAKEUP, "Stop sleep ffrt task");
