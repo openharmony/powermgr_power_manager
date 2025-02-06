@@ -474,13 +474,13 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
         Wakeup();
         SystemSuspendController::GetInstance().Wakeup();
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
-        auto suspendController = pms->GetSuspendController();
-        if (suspendController != nullptr && stateMachine_->GetState() == PowerState::SLEEP) {
-            POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
-            suspendController->TriggerSyncSleepCallback(true);
-        }
         if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
+        }
+        auto suspendController = pms->GetSuspendController();
+        if (suspendController != nullptr && stateMachine_->GetState() == PowerState::AWAKE) {
+            POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
+            suspendController->TriggerSyncSleepCallback(true);
         }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
         if (suspendController != nullptr && !stateMachine_->IsSwitchOpen() &&
