@@ -23,6 +23,7 @@ const TAG = 'InjectNotice';
 const getConnectId = (...args): string => {
     return args.join('-');
 };
+const INJECT_NOTICE_INTERFACE_TOKEN = 'ohos.multimodalinput.IInjectNotice';
 
 export enum CmdCode {
     OPEN_NOTICE = 0,
@@ -45,6 +46,13 @@ export class InjectNoticeStub extends rpc.RemoteObject {
         console.debug(TAG, `onRemoteRequest start deviceInfo.deviceType:${deviceInfo.deviceType}`);
         const connectId = getConnectId(rpc.IPCSkeleton.getCallingPid(), rpc.IPCSkeleton.getCallingTokenId());
         console.info(TAG, `onRemoteRequest start ${connectId}`);
+        let token: string = data.readInterfaceToken();
+        if (token != INJECT_NOTICE_INTERFACE_TOKEN) {
+            reply.writeInt(-1);
+            reply.writeString('the token does not match');
+            return true;
+        }
+
         if (deviceInfo.deviceType === '2in1') {
             return this.handlePC(code, data, reply, option);
         }
