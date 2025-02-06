@@ -88,9 +88,9 @@ void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
 
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
-    POWER_HILOGI(FEATURE_SUSPEND,
-        "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d",
-        isWakeup, onForceSleep == true);
+    std::lock_guard lock(sleepCbMutex_);
+    POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d", isWakeup,
+        onForceSleep == true);
     auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
     TriggerSyncSleepCallbackInner(highPriorityCallbacks, "High", isWakeup);
     auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
@@ -606,7 +606,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
     }
     bool ret = stateMachine_->SetState(
         PowerState::SLEEP, stateMachine_->GetReasonBySuspendType(reason));
-    if (ret) {
+    if (ret && stateMachine_->GetState() == PowerState::SLEEP) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, set sleep timer");
         TriggerSyncSleepCallback(false);
         SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, false);
@@ -640,7 +640,11 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         TriggerSyncSleepCallback(false);
 
         FFRTTask task = [this, reason] {
-            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+            if (stateMachine_->GetState() == PowerState::SLEEP) {
+                SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+            } else {
+                POWER_HILOGE(FEATURE_SUSPEND, "Don't suspend, power state is not sleep");
+            }
         };
         if (ffrtTimer_ != nullptr) {
             ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
