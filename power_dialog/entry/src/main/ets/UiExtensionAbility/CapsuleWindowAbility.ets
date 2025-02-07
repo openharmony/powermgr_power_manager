@@ -48,6 +48,5 @@ export default class CapsuleWindowAbility extends UIExtensionAbility {
       }
 
       onDestroy() {
-
       }
 }
