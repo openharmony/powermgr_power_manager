@@ -261,6 +261,7 @@ class InjectNoticeUtil {
       'height': 30,
       'width': 30,
     };
+    let imageSource: image.ImageSource;
     try {
       let svgData = resourceManager.getMediaContentSync($r('app.media.capsule_icon34'));
       let opts: image.DecodingOptions = {
@@ -271,7 +272,7 @@ class InjectNoticeUtil {
         'desiredSize': defaultSize,
         'desiredPixelFormat': 3,
       };
-      let imageSource = image.createImageSource(svgData.buffer);
+      imageSource = image.createImageSource(svgData.buffer);
       let svImage: image.PixelMap | null = null;
       svImage = await imageSource.createPixelMap(opts);
       this.capsuleIcon = svImage;
