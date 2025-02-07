@@ -21,11 +21,11 @@ const TAG = 'CapsuleWindowAbility';
 
 export default class CapsuleWindowAbility extends UIExtensionAbility {
 
-    onCreate(): void{
+    onCreate(): void {
         console.info(TAG, 'onCreate');
     }
 
-    onSessionCreate(want: Want, session: UIExtensionContentSession){
+    onSessionCreate(want: Want, session: UIExtensionContentSession) {
         try {
           console.info(TAG, 'onSessionCreate want:', JSON.stringify(want));
           console.info(TAG, 'onSessionCreate session:', JSON.stringify(session), 'session isNUll:', session == null);
@@ -38,16 +38,16 @@ export default class CapsuleWindowAbility extends UIExtensionAbility {
         }
       }
 
-      onForeground(){
+      onForeground() {
       }
 
-      onBackground(){
+      onBackground() {
       }
 
-      onSessionDestroy(session: UIExtensionContentSession){
+      onSessionDestroy(session: UIExtensionContentSession) {
       }
 
-      onDestroy(){
+      onDestroy() {
 
       }
 }
