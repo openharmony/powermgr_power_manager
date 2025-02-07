@@ -47,7 +47,7 @@ export class InjectNoticeStub extends rpc.RemoteObject {
         const connectId = getConnectId(rpc.IPCSkeleton.getCallingPid(), rpc.IPCSkeleton.getCallingTokenId());
         console.info(TAG, `onRemoteRequest start ${connectId}`);
         let token: string = data.readInterfaceToken();
-        if (token != INJECT_NOTICE_INTERFACE_TOKEN) {
+        if (token !== INJECT_NOTICE_INTERFACE_TOKEN) {
             reply.writeInt(-1);
             reply.writeString('the token does not match');
             return true;
