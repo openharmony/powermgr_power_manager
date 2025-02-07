@@ -288,7 +288,7 @@ class InjectNoticeUtil {
     try {
       this.capsuleIcon?.release();
       this.capsuleIcon = null;
-    } catch(error) {
+    } catch (error) {
       console.error(TAG, 'unInit fail:', error);
     }
   }

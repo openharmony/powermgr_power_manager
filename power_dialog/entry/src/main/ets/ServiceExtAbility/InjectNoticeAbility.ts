@@ -42,12 +42,14 @@ export default class InjectNoticeAbility extends extension {
   }
 
   onConnect(want): rpc.RemoteObject {
+    let ret: rpc.RemoteObject = null;
     try {
       console.debug(TAG, 'onConnect want: ' + JSON.stringify(want));
-      return new notice_sub.InjectNoticeStub('InjectNoticeStub');
+      ret = new notice_sub.InjectNoticeStub('InjectNoticeStub');
     } catch (e) {
       console.error(TAG, 'InjectNoticeAbility onConnect', e);
     }
+    return ret;
   }
 
   onDisconnect(want): void {
