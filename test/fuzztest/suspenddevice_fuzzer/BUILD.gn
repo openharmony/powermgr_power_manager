@@ -113,10 +113,10 @@ ohos_fuzztest("SuspendDeviceFuzzTest") {
     external_deps += [ "sensor:sensor_interface_native" ]
   }
 
-  if (power_manager_feature_poweroff_charge) {
-    external_deps += [ "battery_manager:batterysrv_client" ]
-
+  if (power_manager_feature_poweroff_charge && defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
     defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
   }
 
   if (power_manager_feature_doubleclick) {
@@ -135,13 +135,10 @@ ohos_fuzztest("SuspendDeviceFuzzTest") {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
-  if (power_manager_feature_charging_type_setting) {
-    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
-  }
-
   if (power_manager_feature_charging_type_setting &&
       defined(global_parts_info) &&
       defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
     external_deps += [ "battery_manager:batterysrv_client" ]
   }
 
