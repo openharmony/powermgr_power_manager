@@ -215,6 +215,9 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
         isRegister_ = DisplayPowerMgrClient::GetInstance().RegisterCallback(dispCallback_);
     }
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        if (currentState == DisplayState::DISPLAY_ON || currentState == DisplayState::DISPLAY_DIM) {
+            return ActionResult::SUCCESS;
+        }
         currentState = DisplayState::DISPLAY_ON;
     }
     DisplayPowerMgr::DisplayState dispState = GetDisplayPowerMgrDisplayState(state);
