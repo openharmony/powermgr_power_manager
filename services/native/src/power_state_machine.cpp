@@ -166,6 +166,14 @@ void PowerStateMachine::InitTransitMap()
                 {PowerState::AWAKE, {PowerState::INACTIVE}}
             }
         },
+        {
+            StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE,
+            {
+                {PowerState::AWAKE, {PowerState::INACTIVE}},
+                {PowerState::INACTIVE, {PowerState::SLEEP}},
+                {PowerState::HIBERNATE, {PowerState::INACTIVE}},
+            }
+        },
     });
 }
 
@@ -791,7 +799,7 @@ uint32_t PowerStateMachine::GetPreHibernateDelay()
 }
 
 void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus status,
-    std::shared_ptr<HibernateController>& hibernateController, std::shared_ptr<PowerMgrNotify>& notify)
+    const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify)
 {
     // hibernateController and notify already judge empty
     bool hibernateRes = (status == HibernateStatus::HIBERNATE_SUCCESS);
@@ -814,18 +822,46 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
     hibernateController->PostHibernate(hibernateRes);
 }
 
-FFRTTask PowerStateMachine::CreateHibernateFfrtTask(bool clearMemory, sptr<PowerMgrService>& pms,
-    std::shared_ptr<HibernateController>& hibernateController, std::shared_ptr<PowerMgrNotify>& notify)
+void PowerStateMachine::RollbackHibernate(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms)
 {
-    // pms, hibernateController and notify already judge empty
-    FFRTTask task = [this, clearMemory, pms, hibernateController, notify]() {
-        HibernateStatus status = hibernateController->Hibernate(clearMemory);
-        if (status != HibernateStatus::HIBERNATE_SUCCESS && clearMemory) {
-            POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
-            pms->ShutDownDevice("HibernateFail");
-            hibernating_ = false;
+    bool isSwitchOpen = IsSwitchOpen();
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "Try to rollback hibernate, originalPowerState=%{public}d, clearMemory=%{public}d, isSwitchOpen=%{public}d",
+        originalState, clearMemory, isSwitchOpen);
+    hibernating_ = false;
+    if (clearMemory) {
+        pms->ShutDownDevice("HibernateFail");
+        return;
+    }
+    SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE, true);
+    if (originalState == PowerState::SLEEP) {
+        if (!isSwitchOpen) {
+            pms->SetSuspendTag("ulsr");
+        }
+        auto suspendController = pms->GetSuspendController();
+        if (suspendController != nullptr) {
+            suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_ROLLBACK_HIBERNATE,
+                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+        }
+    }
+}
+
+FFRTTask PowerStateMachine::CreateHibernateFfrtTask(PowerState originalState, bool clearMemory,
+    const sptr<PowerMgrService>& pms, const std::shared_ptr<PowerMgrNotify>& notify)
+{
+    // pms and notify already judge empty
+    FFRTTask task = [this, originalState, clearMemory, pms, notify]() {
+        HibernateStatus status = HibernateStatus::HIBERNATE_FAILURE;
+        auto hibernateController = pms->GetHibernateController();
+        if (hibernateController != nullptr) {
+            status = hibernateController->Hibernate(clearMemory);
+        }
+        if (status != HibernateStatus::HIBERNATE_SUCCESS) {
+            POWER_HILOGE(FEATURE_SUSPEND, "do hibernate failed, start to rollback");
+            RollbackHibernate(originalState, clearMemory, pms);
             return;
         }
+
         RestoreHibernate(clearMemory, status, hibernateController, notify);
         POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
     };
@@ -864,17 +900,18 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
     }
     hibernating_ = true;
 
+    PowerState originalState = GetState();
     int64_t enterTime = GetTickCount();
     notify->PublishEnterHibernateEvent(enterTime);
 
-    if (!PrepareHibernate(clearMemory) && clearMemory) {
-        POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, shutdown begin.");
-        pms->ShutDownDevice("HibernateFail");
-        hibernating_ = false;
+    bool ret = PrepareHibernate(clearMemory);
+    if (!ret) {
+        POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, start to rollback");
+        RollbackHibernate(originalState, clearMemory, pms);
         return true;
     }
 
-    FFRTTask task = CreateHibernateFfrtTask(clearMemory, pms, hibernateController, notify);
+    FFRTTask task = CreateHibernateFfrtTask(originalState, clearMemory, pms, notify);
     ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, 0);
     return true;
 }
@@ -2035,6 +2072,9 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_SWITCH_SENSORHUB:
             ret = StateChangeReason::STATE_CHANGE_REASON_SWITCH_SENSORHUB;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_ROLLBACK_HIBERNATE:
+            ret = StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE;
             break;
         default:
             break;
