@@ -194,7 +194,7 @@ class InjectNoticeUtil {
     });
     console.debug(TAG, 'cancelAuthorization end');
   }
- 
+
   subscribe(): void {
     console.debug(TAG, 'subscribe begin');
     if (this.commonEventSubscriber === null) {
@@ -248,7 +248,7 @@ class InjectNoticeUtil {
       injectNoticeUtil.cancelNotificationById(NOTICE_ID);
     }
    }
- 
+
    async initCapsuleIcon(): Promise<void> {
     console.debug(TAG, `initCapsuleIcon begin`);
     if (this.capsuleIcon != null) {
@@ -261,20 +261,37 @@ class InjectNoticeUtil {
       'height': 30,
       'width': 30,
     };
-    let svgData = resourceManager.getMediaContentSync($r('app.media.capsule_icon34'));
-    let opts: image.DecodingOptions = {
-      'index': 0,
-      'sampleSize': 1,
-      'rotate' :0,
-      'editable': true,
-      'desiredSize': defaultSize,
-      'desiredPixelFormat': 3,
-    };
-    let imageSource = image.createImageSource(svgData.buffer);
-    let svImage: image.PixelMap | null = null;
-    svImage = await imageSource.createPixelMap(opts);
-    this.capsuleIcon = svImage;
+    let imageSource: image.ImageSource;
+    try {
+      let svgData = resourceManager.getMediaContentSync($r('app.media.capsule_icon34'));
+      let opts: image.DecodingOptions = {
+        'index': 0,
+        'sampleSize': 1,
+        'rotate' :0,
+        'editable': true,
+        'desiredSize': defaultSize,
+        'desiredPixelFormat': 3,
+      };
+      imageSource = image.createImageSource(svgData.buffer);
+      let svImage: image.PixelMap | null = null;
+      svImage = await imageSource.createPixelMap(opts);
+      this.capsuleIcon = svImage;
+    } catch (error) {
+      let err = error as Base.BusinessError;
+      console.error(TAG + `initCapsuleIcon fail: ${JSON.stringify(err)}`);
+    } finally {
+      imageSource?.release();
+    }
     console.debug(TAG, `initCapsuleIcon end vaule: ${this.capsuleIcon}`);
+  }
+
+  unInit(): void {
+    try {
+      this.capsuleIcon?.release();
+      this.capsuleIcon = null;
+    } catch (error) {
+      console.error(TAG, 'unInit fail:', error);
+    }
   }
 }
 
