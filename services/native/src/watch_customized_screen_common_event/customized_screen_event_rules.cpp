@@ -23,38 +23,48 @@ namespace OHOS {
 namespace PowerMgr {
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
 static std::vector<std::string> bundleNames{};
+static StateChangeReason defaultReason = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+
 
 std::vector<std::string> CustomizedScreenEventRules::GetForegroundBundleNames()
 {
     if (!bundleNames.empty()) {
-        return bundleNames;
+        bundleNames.clear();
+        bundleNames.shrink_to_fit();
     }
     std::vector<OHOS::AppExecFwk::AppStateData> appList;
     AppManagerUtils::GetForegroundApplications(appList);
     for (const auto &curApp : appList) {
-        bundleNames.push_back(curApp.bundleName);
+        if (std::find(bundleNames.begin(), bundleNames.end(), cuiApp.bundleName) == bundleNames.end()) {
+            bundleNames.push_back(curApp.bundleName);
+        }
     }
     return bundleNames;
 }
 
 void CustomizedScreenEventRules::SetScreenOnEventRules(StateChangeReason reason)
 {
+    defaultReason = reason;
     PowerExtIntfWrapper::Instance().SetScreenOnEventRules(reason);
 }
 
 void CustomizedScreenEventRules::PublishCustomizedScreenEvent(PowerState state)
 {
-    PowerExtIntfWrapper::Instance().PublishCustomizedScreenEvent(state, GetForegroundBundleNames());
+    if (defaultReason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+        PowerExtIntfWrapper::Instance().PublishCustomizedScreenEvent(state, GetForegroundBundleNames());
+    } else {
+        PowerExtIntfWrapper::Instance().PublishCustomizedScreenEvent(state, bundleNames);
+    }
 }
 
 bool CustomizedScreenEventRules::NotifyScreenOnEventAgain(WakeupDeviceType reason)
 {
-    return PowerExtIntfWrapper::Instance().NotifyScreenOnEventAgain(reason, GetForegroundBundleNames());
+    return PowerExtIntfWrapper::Instance().NotifyScreenOnEventAgain(reason, bundleNames);
 }
 
 void CustomizedScreenEventRules::NotifyOperateEventAfterScreenOn()
 {
-    PowerExtIntfWrapper::Instance().NotifyOperateEventAfterScreenOn(GetForegroundBundleNames());
+    PowerExtIntfWrapper::Instance().NotifyOperateEventAfterScreenOn(bundleNames);
 }
 #endif
 
