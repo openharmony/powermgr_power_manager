@@ -538,11 +538,11 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
 void RunningLockMgr::WriteHiSysEvent(std::shared_ptr<RunningLockInner>& lockInner)
 {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    constexpr int64_t APP_HOLD_RUNNINGLOCK_TIMEOUT = 7200000;
-    int64_t endTimeMs = GetTickCount();
-    int64_t beginTimeMs = lockInner->GetBeginTime();
+    constexpr int32_t APP_HOLD_RUNNINGLOCK_TIMEOUT = 7200000;
+    int32_t endTimeMs = GetTickCount();
+    int32_t beginTimeMs = lockInner->GetBeginTime();
     if (endTimeMs - beginTimeMs > APP_HOLD_RUNNINGLOCK_TIMEOUT) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "app hold runninglock timeout=%{public}lld", (endTimeMs - beginTimeMs));
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "app hold runninglock timeout=%{public}d", (endTimeMs - beginTimeMs));
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "APP_HOLD_RUNNINGLOCK_TIMEOUT",
             HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", lockInner->GetPid(), "UID", lockInner->GetUid(),
             "TYPE", static_cast<int32_t>(lockInner->GetParam().type), "NAME", lockInner->GetParam().name);
