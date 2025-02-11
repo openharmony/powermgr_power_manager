@@ -129,7 +129,8 @@ public:
     void BeginPowerkeyScreenOff();
     void EndPowerkeyScreenOff();
     void SetDisplaySuspend(bool enable);
-    void WriteHiSysEvent(TransitResult ret, StateChangeReason reason, int64_t beginTimeMs, PowerState state);
+    void WriteHiSysEvent(TransitResult ret, StateChangeReason reason, int32_t beginTimeMs, PowerState state);
+    bool IsTransitFailed(TransitResult ret);
     StateChangeReason GetReasonByUserActivity(UserActivityType type);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasionBySuspendType(SuspendDeviceType type);

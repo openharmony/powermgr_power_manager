@@ -1646,7 +1646,7 @@ bool PowerStateMachine::HandlePreBrightState(StateChangeReason reason)
 bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, bool force)
 {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    int64_t beginTimeMs = GetTickCount();
+    int32_t beginTimeMs = GetTickCount();
 #endif
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
@@ -1683,26 +1683,42 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
 }
 
 void PowerStateMachine::WriteHiSysEvent(TransitResult ret, StateChangeReason reason,
-    int64_t beginTimeMs, PowerState state)
+    int32_t beginTimeMs, PowerState state)
 {
-    constexpr int64_t SETSTATE_ON_TIMEOUT_MS = 400;
-    constexpr int64_t SETSTATE_OFF_TIMEOUT_MS = 1000;
-    if (ret != TransitResult::SUCCESS) {
+    constexpr int32_t SETSTATE_ON_TIMEOUT_MS = 400;
+    constexpr int32_t SETSTATE_OFF_TIMEOUT_MS = 1000;
+    constexpr int32_t pid = 0;
+    constexpr int32_t uid = 0;
+    if (IsTransitFailed(ret)) {
         POWER_HILOGI(FEATURE_POWER_STATE, "screen state transit result=%{public}d", ret);
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON_OFF_RESULT",
-            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PACKAGE_NAME", "powermgr", "PROCESS_NAME",
-            "PowerStateMachine", "TRANSIT_RESULT", static_cast<int32_t>(ret),
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_STATE_TRANSIT_FAILED",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TRANSIT_RESULT", static_cast<int32_t>(ret),
             "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
     }
-    int64_t endTimeMs = GetTickCount();
-    std::string msg = "SetState Time Consuming Over 400MS";
-    if ((endTimeMs - beginTimeMs > SETSTATE_ON_TIMEOUT_MS && state == PowerState::AWAKE) ||
-        ((endTimeMs - beginTimeMs > SETSTATE_ON_TIMEOUT_MS) && (endTimeMs - beginTimeMs
-        < SETSTATE_OFF_TIMEOUT_MS) && (state == PowerState::INACTIVE))) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "set state timeout=%{public}lld", (endTimeMs - beginTimeMs));
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SETSTATE_TIMEOUT",
-            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PACKAGE_NAME", "powermgr", "PROCESS_NAME",
-            "PowerStateMachine", "MSG", msg, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+    int32_t endTimeMs = GetTickCount();
+    if (endTimeMs - beginTimeMs > SETSTATE_ON_TIMEOUT_MS && state == PowerState::AWAKE) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "set state on timeout=%{public}d", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid, "TYPE",
+            static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_SETSTATE_ON),
+            "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+    } else if ((endTimeMs - beginTimeMs > SETSTATE_ON_TIMEOUT_MS) &&
+        (endTimeMs - beginTimeMs < SETSTATE_OFF_TIMEOUT_MS) && (state == PowerState::INACTIVE)) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "set state off timeout=%{public}d", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid, "TYPE",
+            static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_SETSTATE_OFF),
+            "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+    }
+}
+
+bool PowerStateMachine::IsTransitFailed(TransitResult ret)
+{
+    if (ret != TransitResult::SUCCESS && ret != TransitResult::LOCKING
+        && ret != TransitResult::DISPLAY_OFF_ERR && ret != TransitResult::FORBID_TRANSIT) {
+        return true;
+    } else {
+        return false;
     }
 }
 
