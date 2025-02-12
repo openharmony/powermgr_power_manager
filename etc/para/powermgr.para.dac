@@ -11,4 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+bootevent.powermgr.ready = powermgr:powermgr:0775
 persist.powermgr. = powermgr:powermgr:0775
