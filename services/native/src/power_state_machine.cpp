@@ -204,13 +204,15 @@ bool PowerStateMachine::CanTransitTo(PowerState from, PowerState to, StateChange
     if (isForbidden) {
         return false;
     }
-    // prevent the double click or pickup to light up the screen when calling or sporting or proximity is close
+    // prevent the double click or pickup or usb plug to light up the screen
+    // when calling or sporting or proximity is close
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
-             reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) && to == PowerState::AWAKE) {
+        reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP ||
+        reason == StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE) && to == PowerState::AWAKE) {
 #ifdef HAS_SENSORS_SENSOR_PART
         if (IsProximityClose()) {
-            POWER_HILOGI(FEATURE_POWER_STATE,
-                "Double-click or pickup isn't allowed to wakeup device when proximity is close during calling.");
+            POWER_HILOGI(FEATURE_POWER_STATE, "Double-click or pickup or "
+                "usb plug isn't allowed to wakeup device when proximity is close during calling.");
             StartSleepTimer(from);
             return false;
         }
@@ -229,7 +231,8 @@ bool PowerStateMachine::CanTransitTo(PowerState from, PowerState to, StateChange
         }
 #endif
 #ifdef MSDP_MOVEMENT_ENABLE
-        if (IsMovementStateOn()) {
+        if (IsMovementStateOn() && (reason == StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK ||
+            reason == StateChangeReason::STATE_CHANGE_REASON_PICKUP)) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "Double-click or pickup isn't allowed to wakeup device when movement state is on.");
             StartSleepTimer(from);
@@ -1998,6 +2001,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_ABNORMAL_SCREEN_CONNECT:
             ret = StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
