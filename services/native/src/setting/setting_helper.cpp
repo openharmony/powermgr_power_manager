@@ -26,6 +26,7 @@ namespace PowerMgr {
 namespace {
 constexpr int32_t WAKEUP_SOURCE_OPEN = 1;
 constexpr int32_t WAKEUP_SOURCE_CLOSE = 0;
+constexpr int32_t MIN_DISPLAY_OFF_TIME_MS = 1000;
 }
 sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
@@ -213,7 +214,12 @@ bool SettingHelper::IsSettingDisplayAcScreenOffTimeValid()
 
 int64_t SettingHelper::GetSettingDisplayAcScreenOffTime(int64_t defaultVal)
 {
-    return GetSettingLongValue(SETTING_DISPLAY_AC_OFF_TIME_KEY, defaultVal);
+    int64_t value = GetSettingLongValue(SETTING_DISPLAY_AC_OFF_TIME_KEY, defaultVal);
+    if (value <= MIN_DISPLAY_OFF_TIME_MS) {
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}lld)ms, use defaultVal", __func__, value);
+        value = defaultVal;
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingDisplayAcScreenOffTime(int64_t time)
@@ -233,7 +239,12 @@ bool SettingHelper::IsSettingDisplayDcScreenOffTimeValid()
 
 int64_t SettingHelper::GetSettingDisplayDcScreenOffTime(int64_t defaultVal)
 {
-    return GetSettingLongValue(SETTING_DISPLAY_DC_OFF_TIME_KEY, defaultVal);
+    int64_t value = GetSettingLongValue(SETTING_DISPLAY_DC_OFF_TIME_KEY, defaultVal);
+    if (value <= MIN_DISPLAY_OFF_TIME_MS) {
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}lld)ms, use defaultVal", __func__, value);
+        value = defaultVal;
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingDisplayDcScreenOffTime(int64_t time)
@@ -253,7 +264,12 @@ bool SettingHelper::IsDisplayOffTimeSettingValid()
 
 int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
 {
-    return GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, defaultVal);
+    int64_t value = GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, defaultVal);
+    if (value <= MIN_DISPLAY_OFF_TIME_MS) {
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}lld)ms, use defaultVal", __func__, value);
+        value = defaultVal;
+    }
+    return value;
 }
 
 void SettingHelper::SetSettingDisplayOffTime(int64_t time)

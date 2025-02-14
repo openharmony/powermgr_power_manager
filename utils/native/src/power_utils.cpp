@@ -109,6 +109,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("ABNORMAL_SCREEN_CONNECT");
         case StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE:
             return std::string("ROLLBACK_HIBERNATE");
+        case StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE:
+            return std::string("PLUG_CHANGE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:

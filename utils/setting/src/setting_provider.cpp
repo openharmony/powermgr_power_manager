@@ -90,7 +90,14 @@ ErrCode SettingProvider::GetLongValue(const std::string& key, int64_t& value)
     if (ret != ERR_OK) {
         return ret;
     }
-    value = static_cast<int64_t>(strtoll(valueStr.c_str(), nullptr, 10));
+    char* endptr = nullptr;
+    int64_t result = static_cast<int64_t>(strtoll(valueStr.c_str(), &endptr, 10));
+    if (endptr == nullptr || *endptr != '\0') {
+        POWER_HILOGE(COMP_UTILS, "GetLongValue error! key:%{public}s, value:%{public}s",
+            key.c_str(), valueStr.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    value = result;
     return ERR_OK;
 }
 
