@@ -58,7 +58,7 @@ export class CapsuleUtil {
     console.debug(TAG, `pushToPluginMgr push content: ${JSON.stringify(pushData)} `);
     PluginMgr.push(pushData, logInfo);
   }
-  
+
   public processCapsule(isVisible: boolean): void {
     this.pushToPluginMgr({
       requestVisible: isVisible,

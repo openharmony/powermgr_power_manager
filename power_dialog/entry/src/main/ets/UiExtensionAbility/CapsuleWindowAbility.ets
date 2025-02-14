@@ -26,16 +26,16 @@ export default class CapsuleWindowAbility extends UIExtensionAbility {
     }
 
     onSessionCreate(want: Want, session: UIExtensionContentSession) {
-        console.info(TAG, 'onSessionCreate want:', JSON.stringify(want));
-        console.info(TAG, 'onSessionCreate session:', JSON.stringify(session), 'session isNUll:', session == null);
         try {
+          console.info(TAG, 'onSessionCreate want:', JSON.stringify(want));
+          console.info(TAG, 'onSessionCreate session:', JSON.stringify(session), 'session isNUll:', session == null);
           let para: Record<string, UIExtensionContentSession> = { 'session': session };
           let storage: LocalStorage = new LocalStorage(para);
           session.loadContent('pages/pluginWindow', storage);
           session.setWindowBackgroundColor('#00000000');
         } catch (err) {
           console.error(TAG, `Failed to load the content. Cause code: ${err}`);
-      };
+        }
       }
 
       onForeground() {

@@ -31,19 +31,25 @@ export default class InjectNoticeAbility extends extension {
    * Lifecycle function, called back when a service extension is started for initialization.
    */
   onCreate(want): void {
-    console.debug(TAG, 'InjectNoticeAbility onCreate' + JSON.stringify(want));
-    GlobalContext.getContext().setObject('appcontext', this.context.getApplicationContext());
     try {
+      console.debug(TAG, 'InjectNoticeAbility onCreate' + JSON.stringify(want));
+      GlobalContext.getContext().setObject('appcontext', this.context.getApplicationContext());
       injectNoticeUtil.init();
     } catch (e) {
-      console.error(TAG, 'InjectNoticeAbility onCreate' + want.abilityName);
+      console.error(TAG, 'InjectNoticeAbility onCreate', e);
     }
     console.debug(TAG, 'InjectNoticeAbility onCreate end');
   }
 
   onConnect(want): rpc.RemoteObject {
-    console.debug(TAG, 'onConnect want: ' + JSON.stringify(want));
-    return new notice_sub.InjectNoticeStub('InjectNoticeStub');
+    let ret: rpc.RemoteObject = null;
+    try {
+      console.debug(TAG, 'onConnect want: ' + JSON.stringify(want));
+      ret = new notice_sub.InjectNoticeStub('InjectNoticeStub');
+    } catch (e) {
+      console.error(TAG, 'InjectNoticeAbility onConnect', e);
+    }
+    return ret;
   }
 
   onDisconnect(want): void {
@@ -54,15 +60,19 @@ export default class InjectNoticeAbility extends extension {
    * Lifecycle function, called back when a service extension is started or recall.
    */
   onRequest(want, startId): void {
-    console.debug(TAG, `onRequest startId: ${startId} want:${JSON.stringify(want)}`);
-    if ('noticeId' in want.parameters) {
-      console.debug(TAG, `onRequest noticeId has value`);
-      if (want.parameters.noticeId === NOTICE_ID) {
-        console.debug(TAG, `onRequest startId: ${startId} close notice`);
-        injectNoticeUtil.cancelAuthorization();
-        injectNoticeUtil.cancelNotificationById(NOTICE_ID);
-        return;
+    try {
+      console.debug(TAG, `onRequest startId: ${startId} want:${JSON.stringify(want)}`);
+      if ('noticeId' in want.parameters) {
+        console.debug(TAG, `onRequest noticeId has value`);
+        if (want.parameters.noticeId === NOTICE_ID) {
+          console.debug(TAG, `onRequest startId: ${startId} close notice`);
+          injectNoticeUtil.cancelAuthorization();
+          injectNoticeUtil.cancelNotificationById(NOTICE_ID);
+          return;
+        }
       }
+    } catch (e) {
+      console.error(TAG, 'InjectNoticeAbility onRequest', e);
     }
   }
   /**
@@ -70,6 +80,7 @@ export default class InjectNoticeAbility extends extension {
    */
   onDestroy(): void {
     console.debug(TAG, 'onDestroy.');
+    injectNoticeUtil.unInit();
   }
 
   private isSystemAbility(callingTokenId: number): boolean {
