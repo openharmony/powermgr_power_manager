@@ -107,6 +107,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("EX_SCREEN_INIT");
         case StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT:
             return std::string("ABNORMAL_SCREEN_CONNECT");
+        case StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE:
+            return std::string("ROLLBACK_HIBERNATE");
         case StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE:
             return std::string("PLUG_CHANGE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
@@ -233,6 +235,9 @@ Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeR
             break;
         case StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE;
             break;
         default:
             break;

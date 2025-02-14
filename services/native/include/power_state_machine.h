@@ -355,9 +355,10 @@ private:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool PrepareHibernate(bool clearMemory);
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
-        std::shared_ptr<HibernateController>& hibernateController, std::shared_ptr<PowerMgrNotify>& notify);
-    FFRTTask CreateHibernateFfrtTask(bool clearMemory, sptr<PowerMgrService>& pms,
-        std::shared_ptr<HibernateController>& hibernateController, std::shared_ptr<PowerMgrNotify>& notify);
+        const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
+    void RollbackHibernate(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms);
+    FFRTTask CreateHibernateFfrtTask(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms,
+        const std::shared_ptr<PowerMgrNotify>& notify);
     uint32_t GetPreHibernateDelay();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
