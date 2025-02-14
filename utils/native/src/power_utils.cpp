@@ -107,6 +107,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("EX_SCREEN_INIT");
         case StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT:
             return std::string("ABNORMAL_SCREEN_CONNECT");
+        case StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE:
+            return std::string("PLUG_CHANGE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:
