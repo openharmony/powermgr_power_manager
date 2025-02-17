@@ -744,13 +744,63 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
 #endif
 
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus status,
+    std::shared_ptr<HibernateController>& hibernateController, std::shared_ptr<PowerMgrNotify>& notify)
+{
+    // hibernateController and notify already judge empty
+    bool hibernateRes = (status == HibernateStatus::HIBERNATE_SUCCESS);
+    if (hibernateRes) {
+        switchOpen_ = true;
+    }
+    hibernating_ = false;
+
+    int64_t exitTime = GetTickCount();
+    notify->PublishExitHibernateEvent(exitTime);
+
+    if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
+    }
+    if (clearMemory) {
+        if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
+        }
+    }
+    hibernateController->PostHibernate(hibernateRes);
+}
+
+FFRTTask PowerStateMachine::CreateHibernateFfrtTask(bool clearMemory, sptr<PowerMgrService>& pms,
+    std::shared_ptr<HibernateController>& hibernateController, std::shared_ptr<PowerMgrNotify>& notify)
+{
+    // pms, hibernateController and notify already judge empty
+    FFRTTask task = [this, clearMemory, pms, hibernateController, notify]() {
+        HibernateStatus status = hibernateController->Hibernate(clearMemory);
+        if (status != HibernateStatus::HIBERNATE_SUCCESS && clearMemory) {
+            POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
+            pms->ShutDownDevice("HibernateFail");
+            hibernating_ = false;
+            return;
+        }
+        RestoreHibernate(clearMemory, status, hibernateController, notify);
+        POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
+    };
+    return task;
+}
+
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "PowerMgr service is nullptr");
+        return false;
+    }
+    auto shutdownController = pms->GetShutdownController();
     auto hibernateController = pms->GetHibernateController();
-    if (hibernateController == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "hibernateController is nullptr.");
+    auto notify = pms->GetPowerMgrNotify();
+    if (shutdownController == nullptr || hibernateController == nullptr ||
+        notify == nullptr || ffrtTimer_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND,
+            "shutdown controller or hibernate controller or notify or ffrtTimer_ is nullptr.");
         return false;
     }
     if (hibernating_) {
@@ -758,6 +808,10 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         return false;
     }
     hibernating_ = true;
+
+    int64_t enterTime = GetTickCount();
+    notify->PublishEnterHibernateEvent(enterTime);
+
     if (!PrepareHibernate(clearMemory) && clearMemory) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, shutdown begin.");
         pms->ShutDownDevice("shutdown_by_user");
@@ -765,34 +819,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         return true;
     }
 
-    FFRTTask task = [hibernateController, this, clearMemory, pms]() {
-        bool success = hibernateController->Hibernate(clearMemory);
-        if (!success && clearMemory) {
-            POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
-            pms->ShutDownDevice("shutdown_by_user");
-            hibernating_ = false;
-            return;
-        }
-        if (success) {
-            switchOpen_ = true;
-        }
-        if (clearMemory) {
-            if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "false")) {
-                POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
-            }
-        }
-        hibernating_ = false;
-        if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
-            POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
-        }
-        hibernateController->PostHibernate();
-        POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
-    };
-    if (ffrtTimer_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "ffrtTimer is null");
-        hibernating_ = false;
-        return false;
-    }
+    FFRTTask task = CreateHibernateFfrtTask(clearMemory, pms, hibernateController, notify);
     ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, HIBERNATE_DELAY_MS);
     return true;
 }
