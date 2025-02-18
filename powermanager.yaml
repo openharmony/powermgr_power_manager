@@ -59,24 +59,17 @@ STATE_CORRECTION:
   DISPLAY_STATE: {type: INT32, desc: the display state}
   MSG: {type: STRING, desc: correct error information}
 
-SETSTATE_TIMEOUT:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: setstate timeout information}
-  PACKAGE_NAME: {type: STRING, desc: call package name}
-  PROCESS_NAME: {type: STRING, desc: call process name}
-  MSG: {type: STRING, desc: setstate timeout message}
-  REASON: {type: STRING, desc: screen on reason}
-
-SCREEN_ON_OFF_RESULT:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: screen state transit result information}
-  PACKAGE_NAME: {type: STRING, desc: call package name}
-  PROCESS_NAME: {type: STRING, desc: call process name}
-  TRANSIT_RESULT: {type: INT32, desc: screen state transit result}
-  REASON: {type: STRING, desc: screen on reason}
-
-RUNNINGLOCK_TIMEOUT:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: runninglock timeout information}
+INTERFACE_CONSUMING_TIMEOUT:
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: setstate and runninglock timeout information}
   PID: {type: INT32, desc: session pid}
   UID: {type: INT32, desc: session uid}
+  TYPE: {type: INT32, desc: timeout interface type}
+  REASON: {type: STRING, desc: screen on reason}
+
+SCREEN_STATE_TRANSIT_FAILED:
+  __BASE: {type: FAULT, level: CRITICAL, desc: screen state transit result information}
+  TRANSIT_RESULT: {type: INT32, desc: screen state transit result}
+  REASON: {type: STRING, desc: screen on reason}
 
 APP_HOLD_RUNNINGLOCK_TIMEOUT:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: app hold runninglock timeout information}
