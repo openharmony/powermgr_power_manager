@@ -15,6 +15,8 @@
 
 #include "power_state_machine.h"
 
+#include <future>
+#include <thread>
 #include <algorithm>
 #include <cinttypes>
 #include <datetime_ex.h>
@@ -60,7 +62,9 @@ constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
 constexpr uint32_t POST_HIBERNATE_CLEARMEM_DELAY_US = 2000000;
 constexpr uint32_t HIBERNATE_DELAY_MS = 3500;
+constexpr int32_t PREPARE_HIBERNATE_TIMEOUT_MS = 30000;
 static int64_t g_preHibernateStart = 0;
+std::atomic_bool g_prepareResult = true;
 #endif
 pid_t g_callSetForceTimingOutPid = 0;
 pid_t g_callSetForceTimingOutUid = 0;
@@ -760,6 +764,8 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     g_preHibernateStart = GetTickCount();
     if (clearMemory) {
         PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
+
+        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate begin.");
         if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
             return false;
@@ -773,6 +779,8 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "activate os account failed.");
             return false;
         }
+        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate end.");
+
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
             return false;
@@ -781,6 +789,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
         PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
     }
     hibernateController->PreHibernate();
+    POWER_HILOGI(FEATURE_SUSPEND, "Hibernate sync callback end.");
 
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
@@ -790,6 +799,28 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
         usleep(POST_HIBERNATE_CLEARMEM_DELAY_US);
     }
     return ret;
+}
+
+bool PowerStateMachine::PrepareHibernateWithTimeout(bool clearMemory)
+{
+    auto prepareCallback = [=]() {
+        g_prepareResult = PrepareHibernate(clearMemory);
+    };
+
+    std::packaged_task<void()> callbackTask(prepareCallback);
+    std::future<void> fut = callbackTask.get_future();
+    std::make_unique<std::thread>(std::move(callbackTask))->detach();
+
+    POWER_HILOGI(FEATURE_SUSPEND, "Waiting for the prepare hibrenate execution complete...");
+    std::future_status status = fut.wail_for(std::chrono::milliseconds(PREPARE_HIBERNATE_TIMEOUT_MS));
+    if (status == std::future_status::timeout) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Prepare hibrenate execution timeout");
+        g_prepareResult = false;
+    }
+    bool prepareResult = g_prepareResult.load(); // avoid g_prepareResult changed after timeout
+    POWER_HILOGI(
+        FEATURE_SUSPEND, "Prepare hibrenate execution is complete, prepareResult: %{public}d", prepareResult);
+    return prepareResult;
 }
 
 uint32_t PowerStateMachine::GetPreHibernateDelay()
@@ -822,6 +853,7 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE false failed.");
         }
     }
+    PowerExtIntfWrapper::Instance().OnHibernateEnd(hibernateRes);
     hibernateController->PostHibernate(hibernateRes);
 }
 
@@ -907,7 +939,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
     int64_t enterTime = GetTickCount();
     notify->PublishEnterHibernateEvent(enterTime);
 
-    bool ret = PrepareHibernate(clearMemory);
+    bool ret = PrepareHibernateWithTimeout(clearMemory);
     if (!ret) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, start to rollback");
         RollbackHibernate(originalState, clearMemory, pms);

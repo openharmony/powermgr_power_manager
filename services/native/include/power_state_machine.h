@@ -354,6 +354,7 @@ private:
     bool NeedShowScreenLocks(PowerState state);
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool PrepareHibernate(bool clearMemory);
+    bool PrepareHibernateWithTimeout(bool clearMemory);
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
         const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
     void RollbackHibernate(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms);
