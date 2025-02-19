@@ -26,6 +26,7 @@ const std::vector<std::string> ALL_POWER_EXT_INTF_SYMBOL = {
     "SubscribeScreenLockCommonEvent",
     "UnSubscribeScreenLockCommonEvent",
     "BlockHibernateUntilScrLckReady",
+    "OnHibernateEnd",
 #endif
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     "SetScreenOnEventRules",
@@ -86,6 +87,17 @@ PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::BlockHibernateUntilScrLckReady
     auto blockHibernateFunc = reinterpret_cast<void (*)(void)>(funcPtr);
     blockHibernateFunc();
     return PowerExtIntfWrapper::ErrCode::ERR_OK;
+}
+
+void PowerExtIntfWrapper::OnHibernateEnd(bool hibernateResult)
+{
+    POWER_HILOGI(COMP_SVC, "Enter OnHibernateEnd wrapper");
+    void *funcPtr = intfLoader_.QueryInterface("OnHibernateEnd");
+    if (funcPtr == nullptr) {
+        return;
+    }
+    auto OnHibernateEndFunc = reinterpret_cast<void (*)(bool)>(funcPtr);
+    OnHibernateEndFunc(hibernateResult);
 }
 
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
