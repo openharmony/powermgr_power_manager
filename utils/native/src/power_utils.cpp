@@ -95,6 +95,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("TIMEOUT_NO_SCREEN_LOCK");
         case StateChangeReason::STATE_CHANGE_REASON_PICKUP:
             return std::string("PICKUP");
+        case StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE:
+            return std::string("PLUG_CHANGE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
         default:
