@@ -52,6 +52,7 @@ public:
     ErrCode SubscribeScreenLockCommonEvent() const;
     ErrCode UnSubscribeScreenLockCommonEvent() const;
     ErrCode BlockHibernateUntilScrLckReady() const;
+    void OnHibernateEnd(bool hibernateResult);
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     void SetScreenOnEventRules(StateChangeReason reason);
     void PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames);
