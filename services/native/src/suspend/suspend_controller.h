@@ -118,6 +118,7 @@ private:
     uint32_t sleepType_ {0};
     bool powerkeyDownWhenScreenOff_ = false;
     std::mutex mutex_;
+    std::mutex sleepCbMutex_;
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
