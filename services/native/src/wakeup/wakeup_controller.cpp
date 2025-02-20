@@ -863,6 +863,9 @@ bool PowerkeyWakeupMonitor::Init()
 
 void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
 {
+#ifndef POWER_MANAGER_ALLOW_INTERRUPTING_POWERKEY_OFF
+    ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
+#endif
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Received powerkey down");
 
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();

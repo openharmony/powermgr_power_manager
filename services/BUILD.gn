@@ -247,6 +247,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_ENABLE_WATCH_UPDATE_ADAPT" ]
   }
 
+  if (power_manager_feature_allow_interrupting_powerkey_off) {
+    defines += [ "POWER_MANAGER_ALLOW_INTERRUPTING_POWERKEY_OFF" ]
+  }
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }
