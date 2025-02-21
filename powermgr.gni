@@ -98,6 +98,14 @@ if (!defined(global_parts_info) ||
   has_dfx_hiview_part = false
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.ability_ability_runtime)) {
+  has_ability_runtime_part = true
+  defines += [ "HAS_ABILITY_RUNTIME_PART" ]
+} else {
+  has_ability_runtime_part = false
+}
+
 ability_runtime_path = "//foundation/ability/ability_runtime"
 
 ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
