@@ -157,7 +157,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         started_ = false;
         return;
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
+    POWER_KHILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
     SetFrameworkFinishBootStage();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
@@ -211,17 +211,17 @@ void ShutdownController::Prepare(bool isReboot)
 
 void ShutdownController::PublishShutdownEvent() const
 {
-    POWER_HILOGD(FEATURE_SHUTDOWN, "Start of publishing shutdown event");
+    POWER_KHILOGI(FEATURE_SHUTDOWN, "Start of publishing shutdown event");
     CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(false);
     IntentWant shutdownWant;
     shutdownWant.SetAction(CommonEventSupport::COMMON_EVENT_SHUTDOWN);
     CommonEventData event(shutdownWant);
     if (!CommonEventManager::PublishCommonEvent(event, publishInfo, nullptr)) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "Publish the shutdown event fail");
+        POWER_KHILOGE(FEATURE_SHUTDOWN, "Publish the shutdown event fail");
         return;
     }
-    POWER_HILOGD(FEATURE_SHUTDOWN, "End of publishing shutdown event");
+    POWER_KHILOGI(FEATURE_SHUTDOWN, "End of publishing shutdown event");
 }
 
 void ShutdownController::TurnOffScreen()
@@ -370,13 +370,16 @@ void ShutdownController::TriggerSyncShutdownCallback(bool isReboot)
 void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
 {
     for (auto &obj : callbacks) {
+        auto pidUid = syncShutdownCallbackHolder_->FindCallbackPidUid(obj);
         sptr<ISyncShutdownCallback> callback = iface_cast<ISyncShutdownCallback>(obj);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
+            POWER_KHILOGI(
+                FEATURE_SHUTDOWN, "calling callback pid=%{public}d uid=%{public}d", pidUid.first, pidUid.second);
             callback->OnSyncShutdown();
             callback->OnSyncShutdownOrReboot(isReboot);
             int64_t cost = GetTickCount() - start;
-            POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
+            POWER_KHILOGI(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
         }
     }
 }
