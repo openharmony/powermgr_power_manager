@@ -198,10 +198,7 @@ private:
     class PowerMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         explicit PowerMgrDeathRecipient(PowerMgrClient& client) : client_(client) {}
-        virtual ~PowerMgrDeathRecipient()
-        {
-            client_.DestroyDeathRecipient();
-        }
+        ~PowerMgrDeathRecipient() = default;
         void OnRemoteDied(const wptr<IRemoteObject>& remote);
 
     private:
@@ -210,7 +207,6 @@ private:
     };
 
     ErrCode Connect();
-    void DestroyDeathRecipient();
     void ResetProxy(const wptr<IRemoteObject>& remote);
     sptr<IPowerMgr> proxy_ {nullptr};
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
