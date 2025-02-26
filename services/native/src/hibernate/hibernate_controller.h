@@ -47,6 +47,7 @@ public:
     virtual void PostHibernate(bool hibernateResult = false) const;
 
 private:
+    bool prepared_ {false};
     std::mutex mutex_;
     HibernateCallbackContainerType callbacks_;
 };
