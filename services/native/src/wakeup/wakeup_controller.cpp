@@ -50,6 +50,7 @@ const int32_t ERR_FAILED = -1;
 
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
+constexpr int32_t OTHER_SYSTEM_DEVICE_ID = 0xAAAAAAFE;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -517,7 +518,11 @@ void WakeupController::ControlListener(WakeupDeviceType reason)
 /* InputCallback achieve */
 bool InputCallback::isRemoteEvent(std::shared_ptr<InputEvent> event) const
 {
-    return event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    bool isCollaborationEvent =
+        pms && pms->IsCollaborationState() && event->GetDeviceId() == COLLABORATION_REMOTE_DEVICE_ID;
+    bool isFromOtherSource = event->GetDeviceId() == OTHER_SYSTEM_DEVICE_ID;
+    return isCollaborationEvent || isFromOtherSource;
 }
 
 bool InputCallback::isKeyboardKeycode(int32_t keyCode) const
@@ -546,7 +551,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         return;
     }
     // ignores remote event
-    if (pms->IsCollaborationState() && isRemoteEvent(keyEvent)) {
+    if (isRemoteEvent(keyEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
@@ -609,7 +614,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     if (!NonWindowEvent(pointerEvent)) {
         return;
     }
-    if (pms->IsCollaborationState() && isRemoteEvent(pointerEvent)) {
+    if (isRemoteEvent(pointerEvent)) {
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
