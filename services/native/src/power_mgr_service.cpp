@@ -2050,7 +2050,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
         wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
-        pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT, "ScreenConnected");
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Skip wakeup by external screen connected when screen off");
     } else if (!isSwitchOpen && !isScreenOn) {
         suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     } else {

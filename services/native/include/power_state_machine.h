@@ -358,8 +358,6 @@ private:
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
         const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
     void RollbackHibernate(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms);
-    FFRTTask CreateHibernateFfrtTask(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms,
-        const std::shared_ptr<PowerMgrNotify>& notify);
     uint32_t GetPreHibernateDelay();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
