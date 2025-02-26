@@ -49,10 +49,16 @@ void HibernateController::PreHibernate() const
             cb->OnSyncHibernate();
         }
     }
+    prepared_ = true;
 }
 
 void HibernateController::PostHibernate(bool hibernateResult) const
 {
+    if (!prepared_) {
+        POWER_HILOGE(FEATURE_SUSPEND, "No need to run OnSyncWakeup");
+        return;
+    }
+    prepared_ = false;
     for (const auto &cb : callbacks_) {
         if (cb != nullptr) {
             cb->OnSyncWakeup(hibernateResult);
