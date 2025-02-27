@@ -17,7 +17,9 @@
 #define POWERMGR_POWER_MANAGER_SHUTDOWN_CALLBACK_HOLER_H
 
 #include <set>
+#include <map>
 
+#include "ipc_skeleton.h"
 #include "iremote_object.h"
 #include "shutdown/shutdown_priority.h"
 
@@ -32,14 +34,18 @@ public:
     std::set<sptr<IRemoteObject>> GetHighPriorityCallbacks();
     std::set<sptr<IRemoteObject>> GetDefaultPriorityCallbacks();
     std::set<sptr<IRemoteObject>> GetLowPriorityCallbacks();
+    std::pair<int32_t, int32_t> FindCallbackPidUid(const sptr<IRemoteObject>& callback);
 
 private:
     static void RemoveCallback(std::set<sptr<IRemoteObject>>& callbacks, const sptr<IRemoteObject>& callback);
+    void AddCallbackPidUid(const sptr<IRemoteObject>& callback);
+    void RemoveCallbackPidUid(const sptr<IRemoteObject>& callback);
 
     std::mutex mutex_;
     std::set<sptr<IRemoteObject>> highPriorityCallbacks_;
     std::set<sptr<IRemoteObject>> defaultPriorityCallbacks_;
     std::set<sptr<IRemoteObject>> lowPriorityCallbacks_;
+    std::map<sptr<IRemoteObject>, std::pair<int32_t, int32_t>> cachedRegister_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
