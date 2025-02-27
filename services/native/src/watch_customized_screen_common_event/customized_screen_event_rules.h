@@ -25,7 +25,9 @@
 #include <chrono>
 #include <ctime>
 #include <dlfcn.h>
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
 #include "app_manager_utils.h"
+#endif
 namespace OHOS {
 namespace PowerMgr {
 class CustomizedScreenEventRules : public DelayedSingleton<CustomizedScreenEventRules> {
