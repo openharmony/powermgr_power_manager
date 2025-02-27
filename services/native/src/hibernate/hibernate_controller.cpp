@@ -42,7 +42,7 @@ void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibern
     }
 }
 
-void HibernateController::PreHibernate() const
+void HibernateController::PreHibernate()
 {
     for (const auto &cb : callbacks_) {
         if (cb != nullptr) {
@@ -52,7 +52,7 @@ void HibernateController::PreHibernate() const
     prepared_ = true;
 }
 
-void HibernateController::PostHibernate(bool hibernateResult) const
+void HibernateController::PostHibernate(bool hibernateResult)
 {
     if (!prepared_) {
         POWER_HILOGE(FEATURE_SUSPEND, "No need to run OnSyncWakeup");

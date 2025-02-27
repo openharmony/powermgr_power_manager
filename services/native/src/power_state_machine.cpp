@@ -804,15 +804,15 @@ bool PowerStateMachine::PrepareHibernateWithTimeout(bool clearMemory)
     std::future<void> fut = callbackTask.get_future();
     std::make_unique<std::thread>(std::move(callbackTask))->detach();
 
-    POWER_HILOGI(FEATURE_SUSPEND, "Waiting for the prepare hibrenate execution complete...");
-    std::future_status status = fut.wail_for(std::chrono::milliseconds(PREPARE_HIBERNATE_TIMEOUT_MS));
+    POWER_HILOGI(FEATURE_SUSPEND, "Waiting for the prepare hibernate execution complete...");
+    std::future_status status = fut.wait_for(std::chrono::milliseconds(PREPARE_HIBERNATE_TIMEOUT_MS));
     if (status == std::future_status::timeout) {
-        POWER_HILOGE(FEATURE_SUSPEND, "Prepare hibrenate execution timeout");
+        POWER_HILOGE(FEATURE_SUSPEND, "Prepare hibernate execution timeout");
         g_prepareResult = false;
     }
     bool prepareResult = g_prepareResult.load(); // avoid g_prepareResult changed after timeout
     POWER_HILOGI(
-        FEATURE_SUSPEND, "Prepare hibrenate execution is complete, prepareResult: %{public}d", prepareResult);
+        FEATURE_SUSPEND, "Prepare hibernate execution is complete, prepareResult: %{public}d", prepareResult);
     return prepareResult;
 }
 
@@ -879,28 +879,6 @@ void PowerStateMachine::RollbackHibernate(PowerState originalState, bool clearMe
     }
 }
 
-FFRTTask PowerStateMachine::CreateHibernateFfrtTask(PowerState originalState, bool clearMemory,
-    const sptr<PowerMgrService>& pms, const std::shared_ptr<PowerMgrNotify>& notify)
-{
-    // pms and notify already judge empty
-    FFRTTask task = [this, originalState, clearMemory, pms, notify]() {
-        HibernateStatus status = HibernateStatus::HIBERNATE_FAILURE;
-        auto hibernateController = pms->GetHibernateController();
-        if (hibernateController != nullptr) {
-            status = hibernateController->Hibernate(clearMemory);
-        }
-        if (status != HibernateStatus::HIBERNATE_SUCCESS) {
-            POWER_HILOGE(FEATURE_SUSPEND, "do hibernate failed, start to rollback");
-            RollbackHibernate(originalState, clearMemory, pms);
-            return;
-        }
-
-        RestoreHibernate(clearMemory, status, hibernateController, notify);
-        POWER_HILOGI(FEATURE_SUSPEND, "power mgr machine hibernate end.");
-    };
-    return task;
-}
-
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
@@ -912,10 +890,8 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
     auto shutdownController = pms->GetShutdownController();
     auto hibernateController = pms->GetHibernateController();
     auto notify = pms->GetPowerMgrNotify();
-    if (shutdownController == nullptr || hibernateController == nullptr ||
-        notify == nullptr || ffrtTimer_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND,
-            "shutdown controller or hibernate controller or notify or ffrtTimer_ is nullptr.");
+    if (shutdownController == nullptr || hibernateController == nullptr || notify == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "shutdown controller or hibernate controller or notify is nullptr.");
         return false;
     }
 
@@ -934,7 +910,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 
     hibernating_ = true;
     PowerState originalState = GetState();
-    notify->PublishEnterHibernateEvent( GetTickCount());
+    notify->PublishEnterHibernateEvent(GetTickCount());
 
     bool ret = PrepareHibernateWithTimeout(clearMemory);
     if (!ret) {
@@ -942,9 +918,15 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         RollbackHibernate(originalState, clearMemory, pms);
         return true;
     }
-
-    FFRTTask task = CreateHibernateFfrtTask(originalState, clearMemory, pms, notify);
-    ffrtTimer_->SetTimer(TIMER_ID_HIBERNATE, task, 0);
+    HibernateStatus status = hibernateController->Hibernate(clearMemory);
+    if (status != HibernateStatus::HIBERNATE_SUCCESS) {
+        POWER_HILOGE(FEATURE_SUSPEND, "do hibernate failed, start to rollback");
+        RollbackHibernate(originalState, clearMemory, pms);
+        return true;
+    }
+    SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
+    RestoreHibernate(clearMemory, status, hibernateController, notify);
+    POWER_HILOGI(FEATURE_SUSPEND, "HibernateInner end.");
     return true;
 }
 #endif
