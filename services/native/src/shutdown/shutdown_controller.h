@@ -73,7 +73,7 @@ private:
     static bool TriggerTakeOverHibernateCallbackInner(
         std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info);
     static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
-    static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
+    void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
 
     sptr<ShutdownCallbackHolder> takeoverShutdownCallbackHolder_;
     sptr<ShutdownCallbackHolder> asyncShutdownCallbackHolder_;
