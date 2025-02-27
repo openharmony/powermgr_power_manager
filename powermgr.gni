@@ -28,6 +28,7 @@ declare_args() {
   power_manager_feature_force_sleep_broadcast = false
   power_manager_feature_movement = true
   power_manager_feature_charging_type_setting = false
+  power_manager_feature_judging_takeover_shutdown = false
 }
 
 cflags_cc = []

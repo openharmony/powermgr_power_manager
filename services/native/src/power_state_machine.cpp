@@ -763,7 +763,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
     hibernating_ = true;
     if (!PrepareHibernate(clearMemory) && clearMemory) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, shutdown begin.");
-        pms->ShutDownDevice("shutdown_by_user");
+        pms->ShutDownDevice("HibernateFail");
         hibernating_ = false;
         return true;
     }
@@ -772,7 +772,7 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         bool success = hibernateController->Hibernate(clearMemory);
         if (!success && clearMemory) {
             POWER_HILOGE(FEATURE_SUSPEND, "hibernate failed, shutdown begin.");
-            pms->ShutDownDevice("shutdown_by_user");
+            pms->ShutDownDevice("HibernateFail");
             hibernating_ = false;
             return;
         }

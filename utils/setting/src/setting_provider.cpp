@@ -202,7 +202,7 @@ void SettingProvider::Initialize(int32_t systemAbilityId)
     auto remoteObj = sam->GetSystemAbility(systemAbilityId);
     if (remoteObj == nullptr) {
         POWER_HILOGE(COMP_UTILS, "GetSystemAbility return nullptr, systemAbilityId=%{public}d", systemAbilityId);
-        return;
+        remoteObj = sptr<IPCObjectStub>::MakeSptr(u"ohos.powermgr.utils.setting_provider");
     }
     remoteObj_ = remoteObj;
 }
