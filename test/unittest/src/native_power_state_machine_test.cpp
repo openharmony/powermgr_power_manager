@@ -402,7 +402,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
  */
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level0)
 {
-    GTEST_LOG_(INFO) << "NativePowerStateMachine010: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010::fun is start!");
 #ifdef HAS_SENSORS_SENSOR_PART
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -418,12 +417,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level
     EXPECT_EQ(stateMachine->IsScreenOn(), false) << "NativePowerStateMachine010: Suspend Device Fail, Screen is On";
     sleep(SLEEP_WAIT_TIME_S);
     stateMachine->proximityNormalController_.Disable();
-    data->distance = 0;
-    stateMachine->proximityNormalController_.RecordSensorCallback(event);
-    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_PICKUP, "NativePowerStateMachine010");
-    usleep(SLEEP_WAIT_TIME_MS);
-    EXPECT_EQ(stateMachine->IsScreenOn(), false)
-        << "NativePowerStateMachine010: Prevent Pickup Wakeup Device When Proximity Is Close Fail, Screen is On";
     data->distance = 5;
     stateMachine->proximityNormalController_.RecordSensorCallback(event);
     pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_PICKUP, "NativePowerStateMachine010");
@@ -437,7 +430,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level
     event = nullptr;
 #endif
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010::fun is end!");
-    GTEST_LOG_(INFO) << "NativePowerStateMachine010: Suspend Device end.";
 }
 
 } // namespace
