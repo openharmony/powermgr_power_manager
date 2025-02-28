@@ -371,12 +371,16 @@ group("systemtest_powermgr") {
   deps = [
     ":test_power_level_event_system_test_off",
     ":test_power_level_event_system_test_on",
-    ":test_power_mgr_mock_system",
     ":test_power_mgr_powersavemode",
     ":test_power_mgr_powersetdevicemode",
     ":test_power_mgr_shutdown_fast",
     ":test_power_mgr_system",
-    ":test_power_st_mgr_mock",
-    ":test_power_st_mgr_mock_suspend",
   ]
+  if (!power_manager_feature_enable_s4) {
+    deps += [
+      ":test_power_mgr_mock_system",
+      ":test_power_st_mgr_mock",
+      ":test_power_st_mgr_mock_suspend",
+    ]
+  }
 }
