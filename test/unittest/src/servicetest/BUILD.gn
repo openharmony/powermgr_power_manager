@@ -127,8 +127,10 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":powermgr_native_mock_parcel_test",
-    ":powermgr_native_test",
-  ]
+  if (!power_manager_feature_enable_s4) {
+    deps = [
+      ":powermgr_native_mock_parcel_test",
+      ":powermgr_native_test",
+    ]
+  }
 }
