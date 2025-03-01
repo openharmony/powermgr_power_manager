@@ -16,6 +16,7 @@
 #include <cinttypes>
 #include "cj_running_lock_ffi.h"
 #include "cj_running_lock_impl.h"
+#include "power_log.h"
 #include "power_mgr_client.h"
 #include "running_lock.h"
 #include "running_lock_info.h"
@@ -26,11 +27,18 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace RunningLockFfi {
 using namespace OHOS::PowerMgr;
+
+namespace {
+const constexpr int32_t ERR_OTHER = -1;
+const constexpr int64_t INVALID_FFIDATA_ID = 0;
+}
+
 extern "C" {
 void FfiOHOSRunningLockHold(int64_t id, int32_t timeout, int32_t *ret)
 {
     auto runningLock = FFI::FFIData::GetData<CJRunningLock>(id)->GetRunningLock();
-    if (!runningLock) {
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr, id=%{public}" PRId64, id);
         *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         return;
     }
@@ -40,18 +48,19 @@ void FfiOHOSRunningLockHold(int64_t id, int32_t timeout, int32_t *ret)
 bool FfiOHOSRunningLockIsHolding(int64_t id, int32_t *ret)
 {
     auto runningLock = FFI::FFIData::GetData<CJRunningLock>(id)->GetRunningLock();
-    if (!runningLock) {
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr, id=%{public}" PRId64, id);
         *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         return false;
     }
-    bool result = runningLock->IsUsed();
-    return result;
+    return runningLock->IsUsed();
 }
 
 void FfiOHOSRunningLockUnhold(int64_t id, int32_t *ret)
 {
     auto runningLock = FFI::FFIData::GetData<CJRunningLock>(id)->GetRunningLock();
-    if (!runningLock) {
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr, id=%{public}" PRId64, id);
         *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         return;
     }
@@ -68,12 +77,13 @@ bool FfiOHOSRunningLockIsSupported(int32_t num_type, int32_t *ret)
 int64_t FfiOHOSRunningLockCreate(char *name, int32_t num_type, int32_t *ret)
 {
     auto native = FFI::FFIData::Create<CJRunningLock>(name, num_type);
-    int64_t id = native->GetID();
     if (native == nullptr) {
-        *ret = static_cast<int32_t>(FFI::FFIData::GetData<CJRunningLock>(id)->GetError());
-        return 0;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "create ffidata failed, name=%{public}s", name);
+        *ret = ERR_OTHER;
+        return INVALID_FFIDATA_ID;
     }
-    return id;
+    *ret = static_cast<int32_t>(native->GetError());
+    return native->GetID();
 }
 }
 
