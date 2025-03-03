@@ -158,7 +158,9 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         return;
     }
     POWER_KHILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
-    SetFrameworkFinishBootStage();
+    if (reason != "test_case") {
+        SetFrameworkFinishBootStage();
+    }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
