@@ -66,7 +66,7 @@ public:
      * @param reason The reason why will you suspend the device, such as timeout/powerkey/forcesuspend and so on.
      */
     PowerErrors SuspendDevice(SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-        bool suspendImmed = false);
+        bool suspendImmed = false, const std::string& apiVersion = "-1");
 
     /**
      * Wake up the device and set the screen on.
@@ -74,7 +74,7 @@ public:
      * @param reason The reason for waking up the device, such as powerkey/plugin/application.
      */
     PowerErrors WakeupDevice(WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
-        const std::string& detail = std::string("app call"));
+        const std::string& detail = std::string("app call"), const std::string& apiVersion = "-1");
 
     /**
      * Wake up the device and set the screen on async.
@@ -97,12 +97,12 @@ public:
      * Windows overwrite timeout
      * @param timeout Specifies the timeout duration.
      */
-    PowerErrors OverrideScreenOffTime(int64_t timeout);
+    PowerErrors OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion = "-1");
 
     /**
      * Windows restores timeout
      */
-    PowerErrors RestoreScreenOffTime();
+    PowerErrors RestoreScreenOffTime(const std::string& apiVersion = "-1");
 
     /**
      * Check whether the device screen is on. The result may be true or false, depending on the system state.
@@ -128,7 +128,7 @@ public:
     /**
      * Forcibly suspend the device into deepsleep, and return the suspend result.
      */
-    PowerErrors ForceSuspendDevice();
+    PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
     /**
      * Check whether the type of running lock is supported
@@ -144,7 +144,7 @@ public:
      * Hibernate the device.
      * @param clearMemory Indicates whether to clear the memory before the device hibernates.
      */
-    PowerErrors Hibernate(bool clearMemory);
+    PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion = "-1");
 
     /* Set the device mode.
      *
