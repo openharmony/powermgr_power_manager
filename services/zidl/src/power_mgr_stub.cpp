@@ -93,7 +93,7 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
             ret = OverrideScreenOffTimeStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME):
-            ret = RestoreScreenOffTimeStub(reply);
+            ret = RestoreScreenOffTimeStub(data, reply);
             break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GET_STATE):
             ret = GetStateStub(reply);
@@ -387,8 +387,9 @@ int32_t PowerMgrStub::WakeupDeviceStub(MessageParcel& data, MessageParcel& reply
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int64, time, E_READ_PARCEL_ERROR);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, reason, E_READ_PARCEL_ERROR);
     std::string details = Str16ToStr8(data.ReadString16());
+    std::string apiVersion = Str16ToStr8(data.ReadString16());
 
-    PowerErrors error = WakeupDevice(time, static_cast<WakeupDeviceType>(reason), details);
+    PowerErrors error = WakeupDevice(time, static_cast<WakeupDeviceType>(reason), details, apiVersion);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
@@ -402,8 +403,9 @@ int32_t PowerMgrStub::SuspendDeviceStub(MessageParcel& data, MessageParcel& repl
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int64, time, E_READ_PARCEL_ERROR);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, reason, E_READ_PARCEL_ERROR);
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, suspendImmed, E_READ_PARCEL_ERROR);
+    std::string apiVersion = Str16ToStr8(data.ReadString16());
 
-    PowerErrors error = SuspendDevice(time, static_cast<SuspendDeviceType>(reason), suspendImmed);
+    PowerErrors error = SuspendDevice(time, static_cast<SuspendDeviceType>(reason), suspendImmed, apiVersion);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(reply, Int32, static_cast<int32_t>(error), E_WRITE_PARCEL_ERROR);
     return ERR_OK;
 }
@@ -427,8 +429,9 @@ int32_t PowerMgrStub::OverrideScreenOffTimeStub(MessageParcel& data, MessageParc
     int64_t timeout = 0;
 
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int64, timeout, E_READ_PARCEL_ERROR);
+    std::string apiVersion = Str16ToStr8(data.ReadString16());
 
-    PowerErrors error = OverrideScreenOffTime(timeout);
+    PowerErrors error = OverrideScreenOffTime(timeout, apiVersion);
     if (!reply.WriteInt32(static_cast<int32_t>(error))) {
         POWER_HILOGE(COMP_FWK, "WriteInt32 fail");
         return E_WRITE_PARCEL_ERROR;
@@ -436,9 +439,10 @@ int32_t PowerMgrStub::OverrideScreenOffTimeStub(MessageParcel& data, MessageParc
     return ERR_OK;
 }
 
-int32_t PowerMgrStub::RestoreScreenOffTimeStub(MessageParcel& reply)
+int32_t PowerMgrStub::RestoreScreenOffTimeStub(MessageParcel& data, MessageParcel& reply)
 {
-    PowerErrors error = RestoreScreenOffTime();
+    std::string apiVersion = Str16ToStr8(data.ReadString16());
+    PowerErrors error = RestoreScreenOffTime(apiVersion);
     if (!reply.WriteInt32(static_cast<int32_t>(error))) {
         POWER_HILOGE(COMP_FWK, "WriteInt32 fail");
         return E_WRITE_PARCEL_ERROR;
@@ -451,9 +455,10 @@ int32_t PowerMgrStub::ForceSuspendDeviceStub(MessageParcel& data, MessageParcel&
     int64_t time = 0;
 
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Int64, time, E_READ_PARCEL_ERROR);
+    std::string apiVersion = Str16ToStr8(data.ReadString16());
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(data.ReadRemoteObject());
 
-    PowerErrors error = ForceSuspendDevice(time);
+    PowerErrors error = ForceSuspendDevice(time, apiVersion);
     int result = static_cast<int>(error);
     if (powerProxy != nullptr) {
         powerProxy->SendAsyncReply(result);
@@ -645,9 +650,10 @@ int32_t PowerMgrStub::HibernateStub(MessageParcel& data, MessageParcel& reply)
 {
     bool clearMemory = false;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, E_READ_PARCEL_ERROR);
+    std::string apiVersion = Str16ToStr8(data.ReadString16());
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(data.ReadRemoteObject());
 
-    PowerErrors error = Hibernate(clearMemory);
+    PowerErrors error = Hibernate(clearMemory, apiVersion);
     int result = static_cast<int>(error);
     if (powerProxy != nullptr) {
         powerProxy->SendAsyncReply(result);
