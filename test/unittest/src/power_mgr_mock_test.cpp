@@ -76,8 +76,8 @@ HWTEST_F(PowerMgrMockTest, PowerMgrMock001, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock001: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_powerAction, Reboot(std::string("test"))).Times(1);
-    pms->RebootDeviceForDeprecated(std::string("test"));
+    EXPECT_CALL(*g_powerAction, Reboot(std::string("test_case"))).Times(1);
+    pms->RebootDeviceForDeprecated(std::string("test_case"));
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock001: end.";

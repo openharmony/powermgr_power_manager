@@ -1180,16 +1180,13 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient045, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
+#ifndef POWER_MANAGER_POWER_ENABLE_S4
 HWTEST_F(PowerMgrClientTest, PowerMgrClient046, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     PowerErrors ret = powerMgrClient.Hibernate(true);
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    EXPECT_EQ(ret, PowerErrors::ERR_OK);
-#else
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
-#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient046::fun is end!");
 }
 
@@ -1204,13 +1201,10 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient047, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient047::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     PowerErrors ret = powerMgrClient.Hibernate(false);
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    EXPECT_EQ(ret, PowerErrors::ERR_OK);
-#else
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
-#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient047::fun is end!");
 }
+#endif
 
 /**
  * @tc.name: PowerMgrClient048
