@@ -115,12 +115,12 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Lev
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
-    EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_reboot"))).Times(0);
-    powerMgrClient.RebootDevice("test_reboot"); // reboot will be taken over
+    EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_case"))).Times(0);
+    powerMgrClient.RebootDevice("test_case"); // reboot will be taken over
     EXPECT_TRUE(g_isReboot); // The callback param will be true for reboot
 
-    EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_shutdown"))).Times(0);
-    powerMgrClient.ShutDownDevice("test_shutdown"); // shutdown will be taken over
+    EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(0);
+    powerMgrClient.ShutDownDevice("test_case"); // shutdown will be taken over
     EXPECT_FALSE(g_isReboot); // The callback param will be false for shutdown
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback001 end");
 }
@@ -140,7 +140,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Le
     shutdownClient.RegisterShutdownCallback(defaultPriorityCallback, ShutdownPriority::DEFAULT);
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.ShutDownDevice("test_shutdown"); // shutdown will be taken over
+    powerMgrClient.ShutDownDevice("test_case"); // shutdown will be taken over
 
     EXPECT_TRUE(g_isDefaultPriority); // Default priority callback will be called
     EXPECT_FALSE(g_isLowPriority); // Low Priority callback will not be called
@@ -162,7 +162,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Lev
     shutdownClient.RegisterShutdownCallback(highPriorityCallback, ShutdownPriority::HIGH);
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.ShutDownDevice("test_shutdown"); // shutdown will be taken over
+    powerMgrClient.ShutDownDevice("test_case"); // shutdown will be taken over
 
     EXPECT_TRUE(g_isHighPriority); // High priority callback will be called
     EXPECT_FALSE(g_isLowPriority); // Low Priority callback will not be called
@@ -184,7 +184,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Lev
     shutdownClient.RegisterShutdownCallback(highPriorityCallback, ShutdownPriority::HIGH);
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.ShutDownDevice("test_shutdown"); // shutdown will be taken over
+    powerMgrClient.ShutDownDevice("test_case"); // shutdown will be taken over
 
     EXPECT_TRUE(g_isHighPriority); // High priority callback will be called
     EXPECT_FALSE(g_isDefaultPriority); // Default Priority callback will not be called
@@ -204,11 +204,11 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback005, TestSize.Lev
     shutdownClient.RegisterShutdownCallback(notTakeOverCallback);
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_reboot"))).Times(1);
-    powerMgrClient.RebootDevice("test_reboot"); // reboot will not be taken over
+    EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_case"))).Times(1);
+    powerMgrClient.RebootDevice("test_case"); // reboot will not be taken over
 
-    EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_shutdown"))).Times(1);
-    powerMgrClient.ShutDownDevice("test_shutdown"); // shutdown will not be taken over
+    EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(1);
+    powerMgrClient.ShutDownDevice("test_case"); // shutdown will not be taken over
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback005 end");
 }
 } // namespace UnitTest

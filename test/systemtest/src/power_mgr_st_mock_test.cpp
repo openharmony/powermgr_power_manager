@@ -81,8 +81,8 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock001, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock001: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_powerAction, Reboot(std::string("test"))).Times(1);
-    pms->RebootDevice(std::string("test"));
+    EXPECT_CALL(*g_powerAction, Reboot(std::string("test_case"))).Times(1);
+    pms->RebootDevice(std::string("test_case"));
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End");
     GTEST_LOG_(INFO) << "PowerMgrMock001: end";
@@ -104,8 +104,8 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock002, TestSize.Level2)
         GTEST_LOG_(INFO) << "PowerMgrMock002: Failed to get PowerMgrService";
     }
 
-    EXPECT_CALL(*g_powerAction, Shutdown(std::string("test"))).Times(1);
-    pms->ShutDownDevice(std::string("test"));
+    EXPECT_CALL(*g_powerAction, Shutdown(std::string("test_case"))).Times(1);
+    pms->ShutDownDevice(std::string("test_case"));
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock002:End");
     GTEST_LOG_(INFO) << "PowerMgrMock002: end";
