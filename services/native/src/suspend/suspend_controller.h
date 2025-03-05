@@ -124,6 +124,7 @@ private:
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     std::atomic<bool> forceSleeping_ {false};
 #endif
+    sptr<IPowerStateCallback> suspendPowerStateCallback_ {nullptr};
 };
 
 class SuspendMonitor {
