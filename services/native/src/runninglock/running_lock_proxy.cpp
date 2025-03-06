@@ -23,6 +23,7 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 static const std::string OFFLOAD_RUNNING_NAME = "AudioOffloadBackgroudPlay";
+static const std::string FAST_RUNNING_NAME = "AudioFastBackgroundPlay";
 }
 void RunningLockProxy::AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj)
 {
@@ -214,6 +215,12 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
                 POWER_HILOGD(FEATURE_RUNNING_LOCK, "AudioOffloadBackgroudPlay runninglock skip");
                 continue;
             }
+#ifdef POWER_MANAGER_AUDIO_LOCK_UNPROXY
+            if (GetRunningLockName(tokenWksItem.first).find(FAST_RUNNING_NAME) != std::string::npos) {
+                POWER_HILOGD(FEATURE_RUNNING_LOCK, "AudioFastBackgroundPlay runninglock skip");
+                continue;
+            }
+#endif
             auto& wksMap = tokenWksItem.second.first;
             if (wksMap.find(uid) != wksMap.end() && !wksMap[uid].second) {
                 wksMap[uid].second = true;
