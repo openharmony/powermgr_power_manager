@@ -251,6 +251,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_ALLOW_INTERRUPTING_POWERKEY_OFF" ]
   }
 
+  if (power_manager_feature_watch_boot_completed) {
+    defines += [ "POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED" ]
+  }
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }
