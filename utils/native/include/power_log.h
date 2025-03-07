@@ -46,6 +46,26 @@ namespace PowerMgr {
 #undef POWER_HILOGD
 #endif
 
+#ifdef POWER_KHILOGF
+#undef POWER_KHILOGF
+#endif
+
+#ifdef POWER_KHILOGE
+#undef POWER_KHILOGE
+#endif
+
+#ifdef POWER_KHILOGW
+#undef POWER_KHILOGW
+#endif
+
+#ifdef POWER_KHILOGI
+#undef POWER_KHILOGI
+#endif
+
+#ifdef POWER_KHILOGD
+#undef POWER_KHILOGD
+#endif
+
 namespace {
 // Power manager reserved domain id range
 constexpr unsigned int POWER_DOMAIN_ID_START = 0xD002900;
@@ -145,6 +165,42 @@ static const PowerManagerLogLabelDomain POWER_LABEL[LABEL_END] = {
 #define POWER_HILOGD(domain, ...) \
     ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
 
+constexpr OHOS::HiviewDFX::HiLogLabel POWER_KERNEL_LABEL = {
+    LOG_KMSG,
+    DOMAIN_SERVICE,
+    "POWER"
+};
+
+#define POWER_KHILOGF(domain, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Fatal(POWER_KERNEL_LABEL, __VA_ARGS__); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+    } while (0)
+
+#define POWER_KHILOGE(domain, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Error(POWER_KERNEL_LABEL, __VA_ARGS__); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+    } while (0)
+
+#define POWER_KHILOGW(domain, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Warn(POWER_KERNEL_LABEL, __VA_ARGS__); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+    } while (0)
+
+#define POWER_KHILOGI(domain, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Info(POWER_KERNEL_LABEL, __VA_ARGS__); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+    } while (0)
+
+#define POWER_KHILOGD(domain, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Debug(POWER_KERNEL_LABEL, __VA_ARGS__); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+    } while (0)
+
 } // namespace PowerMgr
 } // namespace OHOS
 
@@ -155,6 +211,12 @@ static const PowerManagerLogLabelDomain POWER_LABEL[LABEL_END] = {
 #define POWER_HILOGW(...)
 #define POWER_HILOGI(...)
 #define POWER_HILOGD(...)
+
+#define POWER_KHILOGF(...)
+#define POWER_KHILOGE(...)
+#define POWER_KHILOGW(...)
+#define POWER_KHILOGI(...)
+#define POWER_KHILOGD(...)
 
 #endif // CONFIG_HILOG
 

@@ -66,7 +66,7 @@ private:
 
     static bool TriggerTakeOverShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
     static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
-    static void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
+    void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
 
     sptr<ShutdownCallbackHolder> takeoverShutdownCallbackHolder_;
     sptr<ShutdownCallbackHolder> asyncShutdownCallbackHolder_;
