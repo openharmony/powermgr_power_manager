@@ -31,6 +31,7 @@ public:
     static bool GetTargetPath(std::string& targetPath);
     static bool ParseSourcesProc(
         std::shared_ptr<SuspendSources> &parseSources,  Json::Value& valueObj, std::string& key);
+    static const std::string GetSuspendSourcesByConfig();
 };
 } // namespace PowerMgr
 } // namespace OHOS
