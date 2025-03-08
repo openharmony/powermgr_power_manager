@@ -96,10 +96,10 @@ void RunningLockMgr::InitLocksTypeScreen()
                 return RUNNINGLOCK_FAILURE;
             }
             if (active) {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_SCREEN active");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "SL active");
                 pms->RefreshActivityInner(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE, true);
             } else {
-                POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_SCREEN inactive");
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "SL inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {
                     stateMachine->ResetInactiveTimer();
                 } else {
@@ -294,7 +294,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     if (lockInner == nullptr) {
         return nullptr;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Create name:%{public}s, type:%{public}d",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "CrtN:%{public}s,T:%{public}d",
         lockInner->GetName().c_str(), lockInner->GetType());
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -312,14 +312,14 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj, const std:
     bool result = false;
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RInner=null");
         lockInner = GetRunningLockInnerByName(name);
         if (lockInner == nullptr) {
             POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
             return result;
         }
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Release name:%{public}s, type:%{public}d, bundleName:%{public}s",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "RlsN:%{public}s,T:%{public}d,B:%{public}s",
         lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
     UnLock(remoteObj);
     {
@@ -448,23 +448,22 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 #endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LInner=null");
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "try Lock, name: %{public}s, type: %{public}d",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockN:%{public}s,T:%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->IsProxied()) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
         return false;
     }
     if (!IsValidType(lockInnerParam.type)) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock type is invalid");
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "type is invalid");
         return false;
     }
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock is already enabled name=%{public}s",
-            lockInner->GetName().c_str());
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Locked N=%{public}s", lockInner->GetName().c_str());
         return false;
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
@@ -472,7 +471,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     }
     auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type, type=%{public}d", lockInnerParam.type);
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type:%{public}d", lockInnerParam.type);
         return false;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
@@ -495,7 +494,7 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
 #endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "%{public}s:LockInner is nullptr", __func__);
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "UnInner=null");
         lockInner = GetRunningLockInnerByName(name);
         if (lockInner == nullptr) {
             POWER_HILOGD(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
@@ -507,7 +506,7 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
         runninglockProxy_->UpdateProxyState(lockInner->GetPid(), lockInner->GetUid(), remoteObj, false);
     }
     auto lockInnerParam = lockInner->GetParam();
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "try UnLock, name: %{public}s, type: %{public}d",
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLockN:%{public}s,T:%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock is already disabled, name=%{public}s", lockInner->GetName().c_str());
@@ -683,7 +682,7 @@ void RunningLockMgr::LockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner)
 {
     if (!lockInner->IsProxied()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "LockInnerByProxy UnProxied");
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Lock UnProxied");
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
@@ -701,7 +700,7 @@ void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
 {
     RunningLockState lastState = lockInner->GetState();
     if (lastState == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UnlockInnerByProxy Disable");
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Unlock Disable");
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
@@ -853,7 +852,7 @@ void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *even
     ProximityData* data = reinterpret_cast<ProximityData*>(event->data);
     int32_t distance = static_cast<int32_t>(data->distance);
 
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Sensor Callback data->distance=%{public}d", distance);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "SensorD=%{public}d", distance);
     if (distance == PROXIMITY_CLOSE_SCALAR) {
         runningLock->SetProximity(PROXIMITY_CLOSE);
     } else if (distance == PROXIMITY_AWAY_SCALAR) {
