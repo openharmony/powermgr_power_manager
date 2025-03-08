@@ -138,7 +138,7 @@ void ProximityNormalController::RecordSensorCallback(SensorEvent *event)
         return;
     }
     int32_t distance = static_cast<int32_t>(data->distance);
-    POWER_HILOGI(FEATURE_POWER_STATE, "Sensor Callback data->distance=%{public}d", distance);
+    POWER_HILOGI(FEATURE_POWER_STATE, "SensorD=%{public}d", distance);
     if (distance == PROXIMITY_CLOSE_SCALAR) {
         isInactiveClose_ = true;
     } else if (distance == PROXIMITY_AWAY_SCALAR) {

@@ -234,7 +234,7 @@ bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
 bool RunningLockProxy::DecreaseProxyCnt(pid_t pid, pid_t uid)
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "DecreaseProxyCnt proxykey=%{public}s", proxyKey.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Deproxykey=%{public}s", proxyKey.c_str());
     auto proxyIter = proxyMap_.find(proxyKey);
     if (proxyIter != proxyMap_.end()) {
         auto& tokenWksMap = proxyIter->second;
