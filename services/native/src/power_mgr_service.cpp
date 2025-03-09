@@ -1017,6 +1017,15 @@ PowerErrors PowerMgrService::SuspendDevice(
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+
+#ifdef POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED
+    if (isBootCompleted_ == false) {
+        POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
+            pid, uid);
+        return PowerErrors::ERR_FAILURE;
+    }
+#endif
+    
     if (shutdownController_->IsShuttingDown()) {
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
         return PowerErrors::ERR_OK;
@@ -1041,6 +1050,15 @@ PowerErrors PowerMgrService::WakeupDevice(
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
+
+#ifdef POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED
+    if (isBootCompleted_ == false) {
+        POWER_HILOGI(FEATURE_WAKEUP, "WakeupDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
+            pid, uid);
+        return PowerErrors::ERR_FAILURE;
+    }
+#endif
+
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
 
     BackgroundRunningLock wakeupRunningLock("WakeupLock", WAKEUP_LOCK_TIMEOUT_MS);
