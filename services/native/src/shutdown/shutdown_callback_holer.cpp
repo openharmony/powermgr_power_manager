@@ -55,6 +55,14 @@ void ShutdownCallbackHolder::AddCallback(const sptr<IRemoteObject>& callback, Sh
             break;
         }
     }
+    AddCallbackPidUid(callback);
+}
+
+void ShutdownCallbackHolder::AddCallbackPidUid(const sptr<IRemoteObject>& callback)
+{
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    cachedRegister_.emplace(callback, std::make_pair(pid, uid));
 }
 
 std::set<sptr<IRemoteObject>> ShutdownCallbackHolder::GetHighPriorityCallbacks()
@@ -81,6 +89,7 @@ void ShutdownCallbackHolder::RemoveCallback(const sptr<IRemoteObject>& callback)
     RemoveCallback(lowPriorityCallbacks_, callback);
     RemoveCallback(defaultPriorityCallbacks_, callback);
     RemoveCallback(highPriorityCallbacks_, callback);
+    RemoveCallbackPidUid(callback);
 }
 
 void ShutdownCallbackHolder::RemoveCallback(
@@ -91,6 +100,26 @@ void ShutdownCallbackHolder::RemoveCallback(
         return;
     }
     callbacks.erase(iter);
+}
+
+void ShutdownCallbackHolder::RemoveCallbackPidUid(const sptr<IRemoteObject>& callback)
+{
+    auto iter = cachedRegister_.find(callback);
+    if (iter == cachedRegister_.end()) {
+        return;
+    }
+    cachedRegister_.erase(iter);
+}
+
+std::pair<int32_t, int32_t> ShutdownCallbackHolder::FindCallbackPidUid(const sptr<IRemoteObject>& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    auto iter = cachedRegister_.find(callback);
+    if (iter != cachedRegister_.end()) {
+        return iter->second;
+    } else {
+        return std::make_pair(0, 0);
+    }
 }
 
 } // namespace PowerMgr
