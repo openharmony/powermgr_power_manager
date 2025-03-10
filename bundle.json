@@ -21,6 +21,7 @@
         ],
         "features": [
             "power_manager_feature_allow_interrupting_powerkey_off",
+            "power_manager_feature_tv_dreaming",
             "power_manager_feature_poweroff_charge",
             "power_manager_feature_runninglock",
             "power_manager_feature_shutdown_reboot",
