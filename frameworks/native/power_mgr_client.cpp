@@ -74,36 +74,41 @@ PowerMgrClient& PowerMgrClient::GetInstance()
 
 ErrCode PowerMgrClient::Connect()
 {
+    return ERR_OK;
+}
+
+sptr<IPowerMgr> PowerMgrClient::GetPowerMgrProxy()
+{
     std::lock_guard<std::mutex> lock(mutex_);
     if (proxy_ != nullptr) {
-        return ERR_OK;
+        return proxy_;
     }
 
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sam == nullptr) {
         POWER_HILOGE(COMP_FWK, "Failed to obtain SystemAbilityMgr");
-        return E_GET_SYSTEM_ABILITY_MANAGER_FAILED;
+        return proxy_;
     }
     sptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
     if (remoteObject_ == nullptr) {
         POWER_HILOGE(COMP_FWK, "Check SystemAbility failed");
-        return E_GET_POWER_SERVICE_FAILED;
+        return proxy_;
     }
 
     sptr<IRemoteObject::DeathRecipient> drt = new(std::nothrow) PowerMgrDeathRecipient(*this);
     if (drt == nullptr) {
         POWER_HILOGE(COMP_FWK, "Failed to create PowerMgrDeathRecipient");
-        return ERR_NO_MEMORY;
+        return proxy_;
     }
     if ((remoteObject_->IsProxyObject()) && (!remoteObject_->AddDeathRecipient(drt))) {
         POWER_HILOGE(COMP_FWK, "Add death recipient to PowerMgr service failed");
-        return E_ADD_DEATH_RECIPIENT_FAILED;
+        return proxy_;
     }
 
     proxy_ = iface_cast<IPowerMgr>(remoteObject_);
     deathRecipient_ = drt;
     POWER_HILOGI(COMP_FWK, "Connecting PowerMgrService success, pid=%{public}d", getpid());
-    return ERR_OK;
+    return proxy_;
 }
 
 void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
@@ -116,9 +121,10 @@ void PowerMgrClient::PowerMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObje
     uint32_t retryCount = 0;
     while (++retryCount <= CONNECT_RETRY_COUNT) {
         usleep(CONNECT_RETRY_MS);
-        ret = client_.Connect();
-        if (ret == ERR_OK) {
+        sptr<IPowerMgr> proxy = client_.GetPowerMgrProxy();
+        if (proxy != nullptr) {
             POWER_HILOGI(COMP_FWK, "retry connect success, count %{public}d", retryCount);
+            ret = ERR_OK;
             break;
         }
         POWER_HILOGI(COMP_FWK, "retry connect failed, count %{public}d", retryCount);
@@ -141,7 +147,9 @@ void PowerMgrClient::RecoverRunningLocks()
         }
         std::shared_ptr<RunningLock> lock = runningLock.lock();
         if (lock != nullptr) {
-            lock->Recover(proxy_);
+            sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+            RETURN_IF(proxy == nullptr);
+            lock->Recover(proxy);
         }
     }
 }
@@ -165,56 +173,64 @@ void PowerMgrClient::ResetProxy(const wptr<IRemoteObject>& remote)
 
 PowerErrors PowerMgrClient::RebootDevice(const std::string& reason)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->RebootDevice(reason);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy->RebootDevice(reason);
 }
 
 PowerErrors PowerMgrClient::RebootDeviceForDeprecated(const std::string& reason)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->RebootDeviceForDeprecated(reason);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy->RebootDeviceForDeprecated(reason);
 }
 
 PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->ShutDownDevice(reason);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy->ShutDownDevice(reason);
 }
 
 PowerErrors PowerMgrClient::SetSuspendTag(const std::string &tag)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(FEATURE_SUSPEND, "Set suspend tag: %{public}s", tag.c_str());
-    return proxy_->SetSuspendTag(tag);
+    return proxy->SetSuspendTag(tag);
 }
 
 PowerErrors PowerMgrClient::SuspendDevice(
     SuspendDeviceType reason, bool suspendImmed, const std::string& apiVersion)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGD(FEATURE_SUSPEND, " Calling SuspendDevice success");
-    return proxy_->SuspendDevice(GetTickCount(), reason, suspendImmed, apiVersion);
+    return proxy->SuspendDevice(GetTickCount(), reason, suspendImmed, apiVersion);
 }
 
 PowerErrors PowerMgrClient::WakeupDevice(
     WakeupDeviceType reason, const std::string& detail, const std::string& apiVersion)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
-    return proxy_->WakeupDevice(GetTickCount(), reason, detail, apiVersion);
+    return proxy->WakeupDevice(GetTickCount(), reason, detail, apiVersion);
 }
 
 void PowerMgrClient::WakeupDeviceAsync(WakeupDeviceType reason, const std::string& detail)
 {
-    RETURN_IF(Connect() != ERR_OK);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF(proxy == nullptr);
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDeviceAsync success");
-    return proxy_->WakeupDeviceAsync(GetTickCount(), reason, detail);
+    return proxy->WakeupDeviceAsync(GetTickCount(), reason, detail);
 }
 
 bool PowerMgrClient::RefreshActivity(UserActivityType type)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    bool ret = proxy_->RefreshActivity(GetTickCount(), type, true);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    bool ret = proxy->RefreshActivity(GetTickCount(), type, true);
     POWER_HILOGD(FEATURE_ACTIVITY, "Calling RefreshActivity Success");
     return ret;
 }
@@ -225,16 +241,18 @@ PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::st
         POWER_HILOGW(COMP_FWK, "Invalid timeout, timeout=%{public}" PRId64 "", timeout);
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->OverrideScreenOffTime(timeout, apiVersion);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy->OverrideScreenOffTime(timeout, apiVersion);
     POWER_HILOGD(COMP_FWK, "Calling OverrideScreenOffTime Success");
     return ret;
 }
 
 PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->RestoreScreenOffTime(apiVersion);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy->RestoreScreenOffTime(apiVersion);
     POWER_HILOGD(COMP_FWK, "Calling RestoreScreenOffTime Success");
     return ret;
 }
@@ -242,23 +260,26 @@ PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
 bool PowerMgrClient::IsRunningLockTypeSupported(RunningLockType type)
 {
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "RunningLockType=%{public}u", type);
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    return proxy_->IsRunningLockTypeSupported(type);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    return proxy->IsRunningLockTypeSupported(type);
 }
 
 PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->ForceSuspendDevice(GetTickCount(), apiVersion);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy->ForceSuspendDevice(GetTickCount(), apiVersion);
     POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDevice Success");
     return ret;
 }
 
 bool PowerMgrClient::IsScreenOn(bool needPrintLog)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
     bool ret = false;
-    ret = proxy_->IsScreenOn(needPrintLog);
+    ret = proxy->IsScreenOn(needPrintLog);
     if (needPrintLog) {
         POWER_HILOGI(COMP_FWK, "IsScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
     } else {
@@ -269,35 +290,39 @@ bool PowerMgrClient::IsScreenOn(bool needPrintLog)
 
 bool PowerMgrClient::IsFoldScreenOn()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
     bool ret = false;
-    ret = proxy_->IsFoldScreenOn();
+    ret = proxy->IsFoldScreenOn();
     POWER_HILOGI(COMP_FWK, "IsFoldScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
     return ret;
 }
 
 bool PowerMgrClient::IsCollaborationScreenOn()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
     bool ret = false;
-    ret = proxy_->IsCollaborationScreenOn();
+    ret = proxy->IsCollaborationScreenOn();
     POWER_HILOGI(COMP_FWK, "IsCollaborationScreenOn=%{public}d, caller pid=%{public}d", ret, getpid());
     return ret;
 }
 
 PowerState PowerMgrClient::GetState()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerState::UNKNOWN);
-    return proxy_->GetState();
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerState::UNKNOWN);
+    return proxy->GetState();
 }
 
 std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string& name, RunningLockType type)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, nullptr);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, nullptr);
 
     uint32_t nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
     std::string nameExt = name.substr(0, nameLen) + "_" + std::to_string(GetTickCount());
-    std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy_, nameExt, type);
+    std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy, nameExt, type);
     if (runningLock == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create RunningLock record");
         return nullptr;
@@ -318,140 +343,160 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
 
 bool PowerMgrClient::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    return proxy_->ProxyRunningLock(isProxied, pid, uid);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    return proxy->ProxyRunningLock(isProxied, pid, uid);
 }
 
 bool PowerMgrClient::ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    return proxy_->ProxyRunningLocks(isProxied, processInfos);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    return proxy->ProxyRunningLocks(isProxied, processInfos);
 }
 
 bool PowerMgrClient::ResetRunningLocks()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    return proxy_->ResetRunningLocks();
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    return proxy->ResetRunningLocks();
 }
 
 bool PowerMgrClient::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->RegisterPowerStateCallback(callback, isSync);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->RegisterPowerStateCallback(callback, isSync);
     return ret;
 }
 
 bool PowerMgrClient::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->UnRegisterPowerStateCallback(callback);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->UnRegisterPowerStateCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->RegisterSyncSleepCallback(callback, priority);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->RegisterSyncSleepCallback(callback, priority);
     return ret;
 }
 
 bool PowerMgrClient::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->UnRegisterSyncSleepCallback(callback);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->UnRegisterSyncSleepCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->RegisterSyncHibernateCallback(callback);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->RegisterSyncHibernateCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->UnRegisterSyncHibernateCallback(callback);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->UnRegisterSyncHibernateCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->RegisterPowerModeCallback(callback);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->RegisterPowerModeCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
-    bool ret = proxy_->UnRegisterPowerModeCallback(callback);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
+    bool ret = proxy->UnRegisterPowerModeCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback)
 {
-    RETURN_IF_WITH_RET((remainTime <= 0) || (callback == nullptr) || (Connect() != ERR_OK), false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((remainTime <= 0) || (callback == nullptr) || (proxy == nullptr), false);
     POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "Register screen off pre Callback by client");
-    bool ret = proxy_->RegisterScreenStateCallback(remainTime, callback);
+    bool ret = proxy->RegisterScreenStateCallback(remainTime, callback);
     return ret;
 }
 
 bool PowerMgrClient::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
     POWER_HILOGI(FEATURE_SCREEN_OFF_PRE, "Unregister screen off pre Callback by client");
-    bool ret = proxy_->UnRegisterScreenStateCallback(callback);
+    bool ret = proxy->UnRegisterScreenStateCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Register running lock Callback by client");
-    bool ret = proxy_->RegisterRunningLockCallback(callback);
+    bool ret = proxy->RegisterRunningLockCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
 {
-    RETURN_IF_WITH_RET((callback == nullptr) || (Connect() != ERR_OK), false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Unregister running lock Callback by client");
-    bool ret = proxy_->UnRegisterRunningLockCallback(callback);
+    bool ret = proxy->UnRegisterRunningLockCallback(callback);
     return ret;
 }
 
 bool PowerMgrClient::SetDisplaySuspend(bool enable)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
-    bool ret = proxy_->SetDisplaySuspend(enable);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    bool ret = proxy->SetDisplaySuspend(enable);
     return ret;
 }
 
 PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& apiVersion)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->Hibernate(clearMemory, apiVersion);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy->Hibernate(clearMemory, apiVersion);
 }
 
 PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->SetDeviceMode(mode);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy->SetDeviceMode(mode);
 }
 
 PowerMode PowerMgrClient::GetDeviceMode()
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, static_cast<PowerMode>(0));
-    return static_cast<PowerMode>(proxy_->GetDeviceMode());
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, static_cast<PowerMode>(0));
+    return static_cast<PowerMode>(proxy->GetDeviceMode());
 }
 
 std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
 {
     std::string error = "can't connect service";
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, error);
-    return proxy_->ShellDump(args, args.size());
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, error);
+    return proxy->ShellDump(args, args.size());
 }
 
 PowerErrors PowerMgrClient::GetError()
@@ -463,36 +508,41 @@ PowerErrors PowerMgrClient::GetError()
 
 PowerErrors PowerMgrClient::IsStandby(bool& isStandby)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->IsStandby(isStandby);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy->IsStandby(isStandby);
     return ret;
 }
 
 bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, false);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Query running lock lists by client");
-    return proxy_->QueryRunningLockLists(runningLockLists);
+    return proxy->QueryRunningLockLists(runningLockLists);
 }
 
 PowerErrors PowerMgrClient::SetForceTimingOut(bool enabled)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->SetForceTimingOut(enabled, token_);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy->SetForceTimingOut(enabled, token_);
     return ret;
 }
 
 PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent, token_);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    PowerErrors ret = proxy->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent, token_);
     return ret;
 }
 
 PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, bool& result)
 {
-    RETURN_IF_WITH_RET(Connect() != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy_->IsRunningLockEnabled(type, result);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    return proxy->IsRunningLockEnabled(type, result);
 }
 
 } // namespace PowerMgr
