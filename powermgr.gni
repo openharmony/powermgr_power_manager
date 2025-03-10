@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 
 declare_args() {
   power_manager_feature_allow_interrupting_powerkey_off = true
+  power_manager_feature_tv_dreaming = false
   power_manager_feature_poweroff_charge = false
   power_manager_feature_runninglock = true
   power_manager_feature_shutdown_reboot = true

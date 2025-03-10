@@ -127,6 +127,10 @@ ohos_shared_library("powermgrservice") {
     "samgr:samgr_proxy",
   ]
 
+  if (power_manager_feature_tv_dreaming) {
+    defines += [ "POWER_MANAGER_TV_DREAMING" ]
+  }
+
   if (has_hiviewdfx_hisysevent_part) {
     external_deps += [ "hisysevent:libhisysevent" ]
   }
