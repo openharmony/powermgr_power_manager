@@ -35,7 +35,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_001 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
+    EXPECT_TRUE(powerMgrClient.GetPowerMgrProxy() != nullptr);
 
     std::shared_ptr<IRemoteObject::DeathRecipient> deathRecipient =
     std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>(powerMgrClient);
@@ -56,7 +56,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_002 start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
+    EXPECT_TRUE(powerMgrClient.GetPowerMgrProxy() != nullptr);
 
     std::shared_ptr<IRemoteObject::DeathRecipient> deathRecipient =
     std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>(powerMgrClient);
