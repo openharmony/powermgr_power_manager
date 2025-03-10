@@ -1908,22 +1908,22 @@ void PowerStateMachine::WriteHiSysEvent(TransitResult ret, StateChangeReason rea
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
             HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid, "TYPE",
             static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_SETSTATE_ON),
-            "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+            "REASON", PowerUtils::GetReasonTypeString(reason).c_str(), "TIME", (endTimeMs - beginTimeMs));
     } else if ((endTimeMs - beginTimeMs > SETSTATE_ON_TIMEOUT_MS) &&
         (endTimeMs - beginTimeMs < SETSTATE_OFF_TIMEOUT_MS) && (state == PowerState::INACTIVE)) {
         POWER_HILOGI(FEATURE_POWER_STATE, "set state off timeout=%{public}d", (endTimeMs - beginTimeMs));
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
             HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid, "TYPE",
             static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_SETSTATE_OFF),
-            "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
+            "REASON", PowerUtils::GetReasonTypeString(reason).c_str(), "TIME", (endTimeMs - beginTimeMs));
     }
 #endif
 }
 
 bool PowerStateMachine::IsTransitFailed(TransitResult ret)
 {
-    if (ret != TransitResult::SUCCESS && ret != TransitResult::LOCKING
-        && ret != TransitResult::DISPLAY_OFF_ERR && ret != TransitResult::FORBID_TRANSIT) {
+    if (ret != TransitResult::SUCCESS && ret != TransitResult::LOCKING && ret != TransitResult::DISPLAY_OFF_ERR
+        && ret != TransitResult::FORBID_TRANSIT && ret != TransitResult::DISPLAY_ON_ERR) {
         return true;
     } else {
         return false;
