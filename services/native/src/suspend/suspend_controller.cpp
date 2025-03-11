@@ -164,12 +164,18 @@ void SuspendController::Init()
             g_monitorMutex.unlock();
         }
     }
-    sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
+
+    sptr<SuspendPowerStateCallback> callback = new SuspendPowerStateCallback(shared_from_this());
     stateMachine_->RegisterPowerStateCallback(callback);
+    if (suspendPowerStateCallback_ != nullptr) {
+        stateMachine_->UnRegisterPowerStateCallback(suspendPowerStateCallback_);
+    }
+    suspendPowerStateCallback_ = callback;
+
     RegisterSettingsObserver();
 }
 
