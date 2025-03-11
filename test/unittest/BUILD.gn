@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("../../powermgr.gni")
 import("../powermgr_test.gni")
 
-module_output_path = "${powermgr_part_name}/powermgr_native"
+module_output_path = "power_manager/power_manager"
 
 ###############################################################################
 config("module_private_config") {
