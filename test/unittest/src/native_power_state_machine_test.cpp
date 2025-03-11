@@ -268,8 +268,11 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
     stateMachineController->RecordFailure(PowerState::INACTIVE, trigger, failReason);
     failReason = TransitResult::OTHER_ERR;
     stateMachineController->RecordFailure(PowerState::INACTIVE, trigger, failReason);
-
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    EXPECT_TRUE(stateMachineController->TransitTo(trigger, false) == TransitResult::LOCKING);
+#else
     EXPECT_TRUE(stateMachineController->TransitTo(trigger, false) == TransitResult::ALREADY_IN_STATE);
+#endif
     stateMachine->SetDisplayOffTime(TIME, false);
 
     auto stateMachineController2 = std::make_shared<PowerStateMachine::StateController>(

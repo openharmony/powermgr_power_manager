@@ -113,11 +113,9 @@ ohos_unittest("sync_shutdown_callback_test") {
 
 group("unittest") {
   testonly = true
-  if (!power_manager_feature_enable_s4) {
-    deps = [
-      ":async_shutdown_callback_test",
-      ":sync_shutdown_callback_test",
-      ":takeover_shutdown_callback_test",
-    ]
-  }
+  deps = [
+    ":async_shutdown_callback_test",
+    ":sync_shutdown_callback_test",
+    ":takeover_shutdown_callback_test",
+  ]
 }
