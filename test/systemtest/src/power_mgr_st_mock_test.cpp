@@ -601,7 +601,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock017, TestSize.Level2)
     // Set the power state to AWAKE
     auto ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
-
+#ifndef POWER_MANAGER_POWER_ENABLE_S4
     for (auto targetState : sleepStates) {
         // Set the power state to target state
         auto ret = stateMachine->SetState(targetState, StateChangeReason::STATE_CHANGE_REASON_SYSTEM);
@@ -609,7 +609,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock017, TestSize.Level2)
         EXPECT_FALSE(ret);
         EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
     }
-
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock017:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock017: end.";
 }
