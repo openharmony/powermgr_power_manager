@@ -65,6 +65,7 @@ INTERFACE_CONSUMING_TIMEOUT:
   UID: {type: INT32, desc: session uid}
   TYPE: {type: INT32, desc: timeout interface type}
   REASON: {type: STRING, desc: screen on reason}
+  TIME: {type: INT32, desc: interface time consuming}
 
 SCREEN_STATE_TRANSIT_FAILED:
   __BASE: {type: FAULT, level: CRITICAL, desc: screen state transit result information}
