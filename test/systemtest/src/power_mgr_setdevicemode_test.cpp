@@ -120,7 +120,7 @@ namespace {
 HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSetdevicemode_001: UnRegisterPowerModeCallback start.";
-    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_001 UnRegisterPowerModeCallback start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_001 function start!");
     bool result = false;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
@@ -133,7 +133,7 @@ HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_001, TestSize.Level0)
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
 
-    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_001 UnRegisterPowerModeCallback end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_001 function end!");
     GTEST_LOG_(INFO) << "PowerSetdevicemode_001: UnRegisterPowerModeCallback end.";
 }
 
@@ -146,7 +146,7 @@ HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_001, TestSize.Level0)
 HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_002, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "PowerSetdevicemode_002: UnRegisterPowerModeCallback start.";
-    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_002 function start!");
     bool result = false;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
@@ -158,7 +158,7 @@ HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_002, TestSize.Level0)
     PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode);
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
-    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_002 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_002 function end!");
     GTEST_LOG_(INFO) << "PowerSetdevicemode_002: UnRegisterPowerModeCallback start.";
 }
 } // namespace
