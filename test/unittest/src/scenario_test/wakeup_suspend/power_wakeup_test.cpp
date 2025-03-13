@@ -62,7 +62,7 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: start");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_TIME_MS);
     powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
@@ -89,7 +89,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
     sleep(2);
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     powerMgrClient.RestoreScreenOffTime();
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001: end");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001 function end!");
 }
 
 /**
@@ -99,7 +99,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
  */
 HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002: start");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
@@ -117,6 +117,6 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
     sleep(1);
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
-    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002: end");
+    POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002 function end!");
 }
 } // namespace

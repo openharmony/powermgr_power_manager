@@ -68,12 +68,12 @@ constexpr const int64_t STATE_OFF_WAIT_TIME_MS = 2000;
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrService001 start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService001 function start!");
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     ASSERT_TRUE(sam != nullptr) << "PowerMgrService01 fail to get GetSystemAbilityManager";
     sptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
     ASSERT_TRUE(remoteObject_ != nullptr) << "GetSystemAbility failed.";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrService001 end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService001 function end!");
 }
 
 /**
@@ -83,7 +83,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService001, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrService002 start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService002 function start!");
     if (false) {
         auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
         ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService02 fail to get PowerMgrService";
@@ -97,7 +97,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService002, TestSize.Level0)
         pmsTest_->OnStop();
         ASSERT_TRUE(!pmsTest_->IsServiceReady()) << "SetUpTestCase pmsTest_ stop fail";
     }
-    POWER_HILOGI(LABEL_TEST, "PowerMgrService002 end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService002 function end!");
 }
 
 /**
@@ -107,7 +107,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService002, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 function start!");
     uint32_t PARM_THREE = 3;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -115,7 +115,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
     sleep(PARM_THREE);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService003: Prepare Fail, Screen is ON.";
     EXPECT_EQ(powerMgrClient.RestoreScreenOffTime(), PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 function end!");
 }
 
 /**
@@ -125,13 +125,13 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService004: Prepare Fail, Screen is ON.";
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 function end!");
 }
 
 /**
@@ -141,13 +141,13 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService004, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService005: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 function end!");
 }
 
 /**
@@ -157,7 +157,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 function start!");
     uint32_t PARM_THREE = 3;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -165,7 +165,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     sleep(PARM_THREE);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService006: Prepare Fail, Screen is ON.";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 function end!");
 }
 
 /**
@@ -175,14 +175,14 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService007 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService007 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService007: Prepare Fail, Screen is ON.";
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService007 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService007 function end!");
 }
 
 /**
@@ -192,14 +192,14 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService008: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 function end!");
 }
 
 /**
@@ -209,7 +209,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 function start!");
     uint32_t PARM_TWO = 2;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
@@ -218,7 +218,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
     sleep(PARM_TWO);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService009: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 function end!");
 }
 
 /**
@@ -228,14 +228,14 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService010: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 function end!");
 }
 
 /**
@@ -245,14 +245,14 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);;
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService011: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 function end!");
 }
 
 /**
@@ -262,7 +262,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 function start!");
     uint32_t PARM_TWO = 2;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
@@ -272,7 +272,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
     sleep(PARM_TWO);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService012: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 function end!");
 }
 
 /**
@@ -282,7 +282,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
@@ -290,7 +290,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService013: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 function end!");
 }
 
 /**
@@ -300,7 +300,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
@@ -308,7 +308,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService014: Prepare Fail, Screen is OFF.";
     
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 function end!");
 }
 
 /**
@@ -319,14 +319,14 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService015, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService015 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService015 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::vector<std::string> dumpArgs {};
     std::string expectedDebugInfo = "Power manager dump options";
     std::string actualDebugInfo = powerMgrClient.Dump(dumpArgs);
     auto index = actualDebugInfo.find(expectedDebugInfo);
     EXPECT_TRUE(index != string::npos);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService015 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService015 function end!");
 }
 
 /**
@@ -337,12 +337,12 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService015, TestSize.Level2)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService016, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     bool standby = false;
     PowerErrors ret = powerMgrClient.IsStandby(standby);
     EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService016 function end!");
 }
 
 /**
@@ -353,12 +353,12 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService016, TestSize.Level2)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService017 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService017 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::map<std::string, RunningLockInfo> runningLockLists;
     bool ret = powerMgrClient.QueryRunningLockLists(runningLockLists);
     EXPECT_EQ(ret, true);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService017 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService017 function end!");
 }
 
 /**
@@ -368,14 +368,14 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService017, TestSize.Level2)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock = powerMgrClient.CreateRunningLock("runninglock", RunningLockType::RUNNINGLOCK_SCREEN);
     ASSERT_TRUE(runningLock != nullptr);
     runningLock->Lock();
     ASSERT_TRUE(runningLock->IsUsed()) << "runningLock->IsUsed() != true";
     runningLock->UnLock();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 function end!");
 }
 
 /**
@@ -385,7 +385,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
@@ -395,7 +395,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 function end!");
 }
 
 /**
@@ -405,7 +405,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
@@ -416,7 +416,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
         powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_on");
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 function end!");
 }
 
 /**
@@ -426,7 +426,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
@@ -436,7 +436,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_fail_screen_off");
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 function end!");
 }
 
 /**
@@ -446,7 +446,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService022 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService022 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService022 fail to get PowerMgrService";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
@@ -478,7 +478,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     // wait runninglock async task to end, otherwise it will interfere with the next test case
     pmsTest_->OnStop();
     ffrt::wait();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService022 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService022 function end!");
 }
 
 /**
@@ -488,7 +488,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
  */
 HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 function start!");
     constexpr const int64_t screenOffTime = 4000;
     constexpr const int64_t US_PER_MS = 1000;
     constexpr const uint32_t DELAY_US = 500 * 1000;
@@ -509,7 +509,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
         US_PER_MS);
     usleep(DELAY_US);
     EXPECT_NE(powerMgrClient.GetState(), PowerState::AWAKE);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 function end!");
 }
 
 /**
@@ -519,7 +519,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 function start!");
     uint32_t PARM_TEN = 10;
     constexpr const uint32_t TESTING_DURATION_S = 10;
     constexpr const uint32_t OPERATION_DELAY_US = 500 * 1000;
@@ -569,7 +569,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     for (auto& thread : refreshThreads) {
         thread.join();
     }
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService024 function end!");
 }
 
 /**
@@ -579,7 +579,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService025 failed to get PowerMgrService";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
@@ -602,7 +602,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_SHELL),
         StateChangeReason::STATE_CHANGE_REASON_SHELL);
     pmsTest_->OnStop();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 function end!");
 }
 
 /**
@@ -612,7 +612,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService026 failed to get PowerMgrService";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
@@ -629,7 +629,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
 
     pmsTest_->OnStop();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 function end!");
 }
 
 /**
@@ -639,7 +639,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService027, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService027 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService027 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService027 failed to get PowerMgrService";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
@@ -663,6 +663,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService027, TestSize.Level2)
     // release mock object
     auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
     stateAction.reset();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService027 function end!");
 }
 
 /**
@@ -672,7 +673,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService027, TestSize.Level2)
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService028, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService028 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService028 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService028 failed to get PowerMgrService";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
@@ -702,6 +703,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService028, TestSize.Level2)
     pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "display_off");
     auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
     stateAction.reset();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService028 function end!");
 }
 
 /**
@@ -729,7 +731,7 @@ void AddPermission()
 
 HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService029 failed to get PowerMgrService";
     auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
@@ -758,6 +760,6 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
     auto& stateAction = const_cast<std::shared_ptr<IDeviceStateAction>&>(stateMaschine_->GetStateAction());
     stateAction.reset();
     SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", originalValue, true);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 function end!");
 }
 }

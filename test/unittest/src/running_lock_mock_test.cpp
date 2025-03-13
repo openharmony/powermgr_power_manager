@@ -73,7 +73,7 @@ namespace {
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 function start!");
 #ifdef HAS_SENSORS_SENSOR_PART
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
@@ -122,7 +122,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
     EXPECT_EQ(lockActionCount, 0);
     EXPECT_EQ(unlockActionCount, 0);
 #endif
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 function end!");
 }
 
 /**
@@ -133,7 +133,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 function start!");
 #ifdef HAS_SENSORS_SENSOR_PART
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
@@ -170,7 +170,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
     EXPECT_EQ(lockActionCount, 0);
     EXPECT_EQ(unlockActionCount, 0);
 #endif
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 function end!");
 }
 
 /**
@@ -181,7 +181,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest003, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -229,7 +229,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest003, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 2);
     EXPECT_EQ(unlockActionCount, 2);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 function end!");
 }
 
 /**
@@ -240,7 +240,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest003, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest004, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -288,7 +288,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest004, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 2);
     EXPECT_EQ(unlockActionCount, 2);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 function end!");
 }
 
 /**
@@ -299,7 +299,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest004, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest005, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -348,7 +348,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest005, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 2);
     EXPECT_EQ(unlockActionCount, 2);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 function end!");
 }
 
 /**
@@ -359,7 +359,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest005, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest006, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -418,7 +418,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest006, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 3);
     EXPECT_EQ(unlockActionCount, 3);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 function end!");
 }
 
 /**
@@ -429,7 +429,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest006, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -488,7 +488,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
 
     EXPECT_EQ(lockActionCount, 3);
     EXPECT_EQ(unlockActionCount, 3);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 function end!");
 }
 
 /**
@@ -499,7 +499,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -545,7 +545,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
     g_powerService->UnLock(runninglockToken);
     g_powerService->ReleaseRunningLock(runninglockToken);
     EXPECT_EQ(unlockActionCount, 2);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 function end!");
 }
 
 /**
@@ -556,7 +556,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -613,7 +613,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
 
     g_powerService->ReleaseRunningLock(phoneToken);
     g_powerService->ReleaseRunningLock(notifyToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 function end!");
 }
 
 /**
@@ -624,7 +624,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest010 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest010 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -683,7 +683,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
     g_powerService->UnLock(sportToken);
     g_powerService->ReleaseRunningLock(audioToken);
     g_powerService->ReleaseRunningLock(sportToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest010 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest010 function end!");
 }
 
 /**
@@ -694,7 +694,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -740,7 +740,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
 
     g_powerService->UnLock(naviToken);
     g_powerService->ReleaseRunningLock(naviToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 function end!");
 }
 
 /**
@@ -751,7 +751,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -797,7 +797,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
 
     g_powerService->UnLock(taskToken);
     g_powerService->ReleaseRunningLock(taskToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 function end!");
 }
 
 /**
@@ -808,7 +808,7 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
  */
 HWTEST_F (RunningLockMockTest, RunningLockMockTest013, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
@@ -854,6 +854,6 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest013, TestSize.Level2)
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
 
     EXPECT_EQ(lockActionCount, 1);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 function end!");
 }
 }

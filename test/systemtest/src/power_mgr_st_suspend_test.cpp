@@ -62,7 +62,7 @@ namespace {
 HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: start";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend001 function start!");
     int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -74,7 +74,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
     suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend001 function end!");
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: end";
 }
 
@@ -87,7 +87,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
 HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend002: start";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend002 function start!");
 #ifdef HAS_SENSORS_SENSOR_PART
     int64_t PARM_ZERO = 0;
     int PARM_THREE = 3;
@@ -114,7 +114,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
 
     powerStateMachine->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS, false);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend002 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend002 function end!");
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend002: end";
 }
 
@@ -127,7 +127,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
 HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock003, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock003: start";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003 function start!");
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock003: Failed to get PowerMgrService";
@@ -151,7 +151,7 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock003, TestSize.Level2)
 
     EXPECT_EQ(pms->IsUsed(token), false);
     EXPECT_EQ(PowerState::SLEEP, pms->GetState());
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock003 function end!");
     GTEST_LOG_(INFO) << "PowerMgrMock003: end";
 }
 } // namespace

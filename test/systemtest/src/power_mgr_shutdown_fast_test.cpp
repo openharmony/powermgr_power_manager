@@ -107,7 +107,7 @@ namespace {
  */
 HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_001 function start!");
     auto eventPtr = std::make_unique<PowerMgrShutDownFast::CommonEventServiceSystemTest>();
     auto subscriberPtr = eventPtr->OnRegisterEvent(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
 
@@ -122,7 +122,7 @@ HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_001, TestSize.Level2)
     EXPECT_TRUE(powerMgrClient.GetState() == PowerState::INACTIVE ||
         powerMgrClient.GetState() == PowerState::SLEEP);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_OFF, g_action);
-    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_001 function end!");
 }
 
 /**
@@ -133,7 +133,7 @@ HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_001, TestSize.Level2)
  */
 HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_002, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_002 function start!");
     auto eventPtr = std::make_unique<PowerMgrShutDownFast::CommonEventServiceSystemTest>();
     auto subscriberPtr = eventPtr->OnRegisterEvent(CommonEventSupport::COMMON_EVENT_SHUTDOWN);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -143,6 +143,6 @@ HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_002, TestSize.Level2)
     EXPECT_TRUE(powerMgrClient.GetState() == PowerState::INACTIVE ||
         powerMgrClient.GetState() == PowerState::SLEEP);
     EXPECT_TRUE(g_action.empty());
-    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_002 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_002 function end!");
 }
 }

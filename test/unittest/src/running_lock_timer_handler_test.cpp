@@ -39,7 +39,7 @@ using namespace testing::ext;
  */
 HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer001 start");
+    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer001 function start!");
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer001: start";
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     int count = 1;
@@ -51,8 +51,8 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer001, TestSize.Leve
     EXPECT_TRUE(ret);
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_EQ(COUNT_RESULT, count);
-    GTEST_LOG_(INFO) << "RegisterRunningLockTimer001:  end";
-    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer001 end");
+    GTEST_LOG_(INFO) << "RegisterRunningLockTimer001: end";
+    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer001 function end!");
 }
 
 
@@ -64,7 +64,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer001, TestSize.Leve
  */
 HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer002 start");
+    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer002 function start!");
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer002: start";
     std::shared_ptr<RunningLock> runningLock1 =
         std::make_shared<RunningLock>(nullptr, "runninglock_Timer_test1",
@@ -86,8 +86,8 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Leve
     EXPECT_TRUE(!runningLock2->IsUsed());
     runningLock1->UnLock();
     runningLock2->UnLock();
-    GTEST_LOG_(INFO) << "RegisterRunningLockTimer002:  end";
-    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer002 end");
+    GTEST_LOG_(INFO) << "RegisterRunningLockTimer002: end";
+    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer002 function end!");
 }
 
 /**
@@ -98,7 +98,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Leve
  */
 HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer003 start");
+    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer003 function start!");
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer003: start";
     std::shared_ptr<RunningLock> runningLock1 =
         std::make_shared<RunningLock>(nullptr, "runninglock_Timer_test3",
@@ -120,7 +120,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Leve
     runningLock1->UnLock();
     runningLock2->UnLock();
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer003: end";
-    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer003 end");
+    POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer003 function end!");
 }
 
 /**
@@ -131,7 +131,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Leve
  */
 HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer001 start");
+    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer001 function start!");
     GTEST_LOG_(INFO) << "UnregisterRunningLockTimer001: start";
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     int count = 1;
@@ -144,8 +144,8 @@ HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer001, TestSize.Le
     ret = RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(token);
     EXPECT_TRUE(ret);
     EXPECT_NE(COUNT_RESULT, count);
-    GTEST_LOG_(INFO) << "UnregisterRunningLockTimer001:  end";
-    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer001 end");
+    GTEST_LOG_(INFO) << "UnregisterRunningLockTimer001: end";
+    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer001 function end!");
 }
 
 /**
@@ -156,7 +156,7 @@ HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer001, TestSize.Le
  */
 HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer002 start");
+    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer002 function start!");
     GTEST_LOG_(INFO) << "UnregisterRunningLockTimer002: start";
     std::shared_ptr<RunningLockTimerHandler> runningLockTimerHandler =
         std::make_shared<RunningLockTimerHandler>();
@@ -176,8 +176,8 @@ HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer002, TestSize.Le
     runningLockTimerHandler.reset();
     EXPECT_NE(COUNT_RESULT, count1);
     EXPECT_NE(COUNT_RESULT, count2);
-    GTEST_LOG_(INFO) << "UnregisterRunningLockTimer002:  end";
-    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer002 end");
+    GTEST_LOG_(INFO) << "UnregisterRunningLockTimer002: end";
+    POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer002 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr

@@ -60,7 +60,7 @@ namespace {
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
     EXPECT_FALSE(powerMgrClient.IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_SCREEN));
@@ -79,7 +79,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
     powerMgrClient.SuspendDevice(abnormaltype, false);
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(100) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest001 function end!");
 }
 
 /**
@@ -90,7 +90,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest002, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
     powerMgrClient.SetDeviceMode(mode1);
@@ -110,7 +110,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest002, TestSize.Level2)
     std::string errCode = "can't connect service";
     std::string actualDebugInfo = powerMgrClient.Dump(dumpArgs);
     EXPECT_EQ(actualDebugInfo, errCode);
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest002 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest002 function end!");
 }
 
 /**
@@ -121,13 +121,13 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest002, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest003, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest003 function start!");
     Parcel parcel;
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_BACKGROUND);
     EXPECT_FALSE(info.ReadFromParcel(parcel));
     EXPECT_FALSE(info.Marshalling(parcel));
     EXPECT_FALSE(info.Unmarshalling(parcel));
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest003 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest003 function end!");
 }
 
 /**
@@ -138,7 +138,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest003, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest004 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest004 function start!");
     pid_t uid = 0;
     pid_t pid = 0;
     sptr<IPCObjectStub> remote = new IPCObjectStub();
@@ -152,7 +152,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
     sptrProxy->Lock(token);
     sptrProxy->UnLock(token);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest004 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest004 function end!");
 }
 
 /**
@@ -163,7 +163,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest005 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest005 function start!");
     bool ret = 0;
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
@@ -183,7 +183,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(cb5));
     EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(nullptr));
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest005 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest005 function end!");
 }
 
 /**
@@ -194,7 +194,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 function start!");
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
@@ -219,7 +219,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     std::string errCode = "remote error";
     std::string actualDebugInfo = sptrProxy->ShellDump(dumpArgs, dumpArgs.size());
     EXPECT_EQ(actualDebugInfo, errCode);
-    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 function end!");
 }
 
 /**
@@ -230,9 +230,9 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
  */
 HWTEST_F (MockParcelTest, PowerUtilMockParcelTest001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerUtilMockParcelTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerUtilMockParcelTest001 function start!");
     EXPECT_TRUE(Permission::IsSystem());
     EXPECT_TRUE(Permission::IsPermissionGranted(""));
-    POWER_HILOGI(LABEL_TEST, "PowerUtilMockParcelTest001 end.");
+    POWER_HILOGI(LABEL_TEST, "PowerUtilMockParcelTest001 function end!");
 }
 } // namespace

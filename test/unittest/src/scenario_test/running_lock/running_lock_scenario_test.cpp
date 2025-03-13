@@ -42,7 +42,7 @@ namespace {
  */
 HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest001, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest001 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -59,7 +59,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest001, TestSize.Level1)
 
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest001 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest001 function end!");
 }
 
 /**
@@ -70,7 +70,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest001, TestSize.Level1)
  */
 HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest002, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest002 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -99,7 +99,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest002, TestSize.Level1)
 
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest002 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest002 function end!");
 }
 
 /**
@@ -110,7 +110,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest002, TestSize.Level1)
  */
 HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest003, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest003 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest003 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -152,7 +152,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest003, TestSize.Level1)
 
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest003 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest003 function end!");
 }
 
 /**
@@ -163,7 +163,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest003, TestSize.Level1)
  */
 HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest004, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest004 start.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest004 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -202,6 +202,6 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest004, TestSize.Level1)
 
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
-    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest004 end.");
+    POWER_HILOGI(LABEL_TEST, "RunningLockScenarioTest004 function end!");
 }
 } // namespace
