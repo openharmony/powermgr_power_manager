@@ -137,13 +137,13 @@ static bool WaitingCallback(bool &isPriority)
 }
 
 /**
- * @tc.name: AsyncShutdownCallbackk001
+ * @tc.name: AsyncShutdownCallback001
  * @tc.desc: Test asynchronous shutdown callback for shutdown and reboot
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk001, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackk001 start");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback001 function start!");
     auto callback = new AsyncShutdownCallback();
     g_service->RegisterShutdownCallback(callback, ShutdownPriority::DEFAULT);
     auto callback2 = new AsyncShutdownOrRebootCallback();
@@ -154,17 +154,17 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk001, TestSize.Level0)
 
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(WaitingCallback(g_isDefaultPriority));
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback001 end");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback001 function end!");
 }
 
 /**
- * @tc.name: AsyncShutdownCallbackk002
+ * @tc.name: AsyncShutdownCallback002
  * @tc.desc: Test the low and default priority of asynchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk002, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackk002 start");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback002 function start!");
     auto lowPriorityCallback = new LowPriorityAsyncShutdownCallback();
     g_service->RegisterShutdownCallback(lowPriorityCallback, ShutdownPriority::LOW);
     auto defaultPriorityCallback = new AsyncShutdownCallback();
@@ -173,17 +173,17 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk002, TestSize.Level0)
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(WaitingCallback(g_isDefaultPriority));
     EXPECT_TRUE(WaitingCallback(g_isLowPriority));
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackk002 end");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback002 function end!");
 }
 
 /**
- * @tc.name: AsyncShutdownCallbackk003
+ * @tc.name: AsyncShutdownCallback003
  * @tc.desc: Test the low and high priority of asynchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk003, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackk003 start");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback003 function start!");
     auto lowPriorityCallback = new LowPriorityAsyncShutdownCallback();
     g_service->RegisterShutdownCallback(lowPriorityCallback, ShutdownPriority::LOW);
     auto highPriorityCallback = new HighPriorityAsyncShutdownCallback();
@@ -192,7 +192,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk003, TestSize.Level0)
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(WaitingCallback(g_isHighPriority));
     EXPECT_TRUE(WaitingCallback(g_isLowPriority));
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallbackk003 end");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback003 function end!");
 }
 
 /**
@@ -202,7 +202,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallbackk003, TestSize.Level0)
  */
 HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback004 start");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback004 function start!");
     auto defaultPriorityCallback = new AsyncShutdownCallback();
     g_service->RegisterShutdownCallback(defaultPriorityCallback, ShutdownPriority::DEFAULT);
     auto highPriorityCallback = new HighPriorityAsyncShutdownCallback();
@@ -211,7 +211,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback004, TestSize.Level0)
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(WaitingCallback(g_isHighPriority));
     EXPECT_TRUE(WaitingCallback(g_isDefaultPriority));
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback004 end");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback004 function end!");
 }
 
 /**
@@ -221,7 +221,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback004, TestSize.Level0)
  */
 HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 start");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 function start!");
     auto notAsyncCallback = new NotAsyncShutdownCallback();
     g_service->RegisterShutdownCallback(notAsyncCallback, ShutdownPriority::DEFAULT);
 
@@ -233,7 +233,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level0)
 
     // wait for detached threads to finish
     sleep(1);
-    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 end");
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr
