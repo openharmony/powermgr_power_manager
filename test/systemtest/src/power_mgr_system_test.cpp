@@ -81,11 +81,11 @@ namespace {
  */
 HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_001 function start!");
     PowerMode mode = PowerMode::POWER_SAVE_MODE;
     SetPolicyMode(static_cast<uint32_t>(mode));
     EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_001 fail to SetDeviceMode";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_001 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_001 function end!");
 }
 
 /**
@@ -95,11 +95,11 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_001, TestSize.Level2)
  */
 HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_002, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_002 function start!");
     PowerMode mode = PowerMode::POWER_MODE_MIN;
     SetPolicyMode(static_cast<uint32_t>(mode));
     EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_002 fail to SetDeviceMode";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_002 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_002 function end!");
 }
 
 /**
@@ -109,11 +109,11 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_002, TestSize.Level2)
  */
 HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_003, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_003 function start!");
     PowerMode mode = PowerMode::PERFORMANCE_MODE;
     SetPolicyMode(static_cast<uint32_t>(mode));
     EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_003 fail to SetDeviceMode";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_003 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_003 function end!");
 }
 
 /**
@@ -123,10 +123,10 @@ HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_003, TestSize.Level2)
  */
 HWTEST_F(PowerMgrSystemTest, PowerMgrSystemTest_004, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_004 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_004 function start!");
     PowerMode mode = PowerMode::EXTREME_POWER_SAVE_MODE;
     SetPolicyMode(static_cast<uint32_t>(mode));
     EXPECT_EQ(g_sleepTime, g_getSleepTimeResult) << "PowerMgrSystemTest_004 fail to SetDeviceMode";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_004 start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSystemTest_004 function end!");
 }
 } // namespace

@@ -41,7 +41,7 @@ namespace {
  */
 HWTEST_F (RunningLockTest, RunningLockTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest001 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     ASSERT_TRUE(runningLock1 != nullptr);
@@ -52,7 +52,7 @@ HWTEST_F (RunningLockTest, RunningLockTest001, TestSize.Level0)
 
     runningLock1->UnLock();
     ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest001 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest001 function end!");
 }
 
 /**
@@ -62,7 +62,7 @@ HWTEST_F (RunningLockTest, RunningLockTest001, TestSize.Level0)
  */
 HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest002 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     ASSERT_TRUE(runningLock1 != nullptr);
@@ -82,7 +82,7 @@ HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
     ASSERT_TRUE(runningLock1->IsUsed()) << "runningLock1->IsUsed() != true";
     // wait 100ms
     usleep(100000);
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest002 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest002 function end!");
 }
 
 /**
@@ -92,7 +92,7 @@ HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest003, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest003 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest003 function start!");
     if (false) {
         auto& powerMgrClient = PowerMgrClient::GetInstance();
         auto runningLock1 = powerMgrClient.CreateRunningLock("runninglock005",
@@ -125,7 +125,7 @@ HWTEST_F (RunningLockTest, RunningLockTest003, TestSize.Level1)
         ASSERT_TRUE(!runningLock1->IsUsed()) << "runningLock1->IsUsed() != false";
         POWER_HILOGI(LABEL_TEST, "PowerMgrUnitTest::RunningLockInnerKit005 5");
     }
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest003 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest003 function end!");
 }
 
 /**
@@ -136,7 +136,7 @@ HWTEST_F (RunningLockTest, RunningLockTest003, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest004, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest004 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest004 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
         "background", RunningLockType::RUNNINGLOCK_BACKGROUND);
@@ -164,7 +164,7 @@ HWTEST_F (RunningLockTest, RunningLockTest004, TestSize.Level1)
 
     runningLock = powerMgrClient.CreateRunningLock("butt", RunningLockType::RUNNINGLOCK_BUTT);
     EXPECT_EQ(runningLock, nullptr);
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest004 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest004 function end!");
 }
 
 /**
@@ -175,7 +175,7 @@ HWTEST_F (RunningLockTest, RunningLockTest004, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest005, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest005 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest005 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
         "background.test005", RunningLockType::RUNNINGLOCK_BACKGROUND);
@@ -188,7 +188,7 @@ HWTEST_F (RunningLockTest, RunningLockTest005, TestSize.Level1)
     EXPECT_FALSE(runningLock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     runningLock->UnLock();
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest005 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest005 function end!");
 }
 
 /**
@@ -199,7 +199,7 @@ HWTEST_F (RunningLockTest, RunningLockTest005, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest006, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest006 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest006 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
         "background.test006", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -217,7 +217,7 @@ HWTEST_F (RunningLockTest, RunningLockTest006, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     EXPECT_TRUE(runningLock->IsUsed());
     runningLock->UnLock();
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest006 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest006 function end!");
 }
 
 /**
@@ -228,7 +228,7 @@ HWTEST_F (RunningLockTest, RunningLockTest006, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest007 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest007 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock(
         "background.test007", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -247,7 +247,7 @@ HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest007 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest007 function end!");
 }
 
 /**
@@ -258,7 +258,7 @@ HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest008 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest008 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -271,7 +271,7 @@ HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
     runningLock->Lock();
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     runningLock->UnLock();
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest008 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest008 function end!");
 }
 
 /**
@@ -282,7 +282,7 @@ HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest009 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest009 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::shared_ptr<RunningLock> screenRunningLock = powerMgrClient.CreateRunningLock(
         "screen.test009", RunningLockType::RUNNINGLOCK_SCREEN);
@@ -308,7 +308,7 @@ HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
 #endif
 
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest009 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest009 function end!");
 }
 
 /**
@@ -319,13 +319,13 @@ HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest010, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest010 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest010 function start!");
     pid_t curUid = 1;
     pid_t curPid = -1;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_FALSE(powerMgrClient.ProxyRunningLock(true, curPid, curUid));
     EXPECT_FALSE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest010 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest010 function end!");
 }
 
 /**
@@ -336,7 +336,7 @@ HWTEST_F (RunningLockTest, RunningLockTest010, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest011, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest011 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest011 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
     pid_t pid = 1;
     pid_t uid = -1;
@@ -344,7 +344,7 @@ HWTEST_F (RunningLockTest, RunningLockTest011, TestSize.Level1)
     runninglockProxy->AddRunningLock(0, 0, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest011 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest011 function end!");
 }
 
 /**
@@ -355,7 +355,7 @@ HWTEST_F (RunningLockTest, RunningLockTest011, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest012, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest012 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest012 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
     pid_t pid = 1;
     pid_t uid = -1;
@@ -365,7 +365,7 @@ HWTEST_F (RunningLockTest, RunningLockTest012, TestSize.Level1)
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(0, 0));
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(0, 0));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest012 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest012 function end!");
 }
 
 /**
@@ -376,14 +376,14 @@ HWTEST_F (RunningLockTest, RunningLockTest012, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest013, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest013 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest013 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
     pid_t pid = 1;
     pid_t uid = -1;
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest013 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest013 function end!");
 }
 
 /**
@@ -394,14 +394,14 @@ HWTEST_F (RunningLockTest, RunningLockTest013, TestSize.Level1)
  */
 HWTEST_F(RunningLockTest, RunningLockTest014, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest014 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest014 function start!");
     pid_t curUid = getuid();
     pid_t curPid = getpid();
     std::vector<std::pair<pid_t, pid_t>> processInfos;
     processInfos.push_back(std::pair<pid_t, pid_t>(curPid, curUid));
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_TRUE(powerMgrClient.ProxyRunningLocks(true, processInfos));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest014 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest014 function end!");
 }
 
 /**
@@ -412,7 +412,7 @@ HWTEST_F(RunningLockTest, RunningLockTest014, TestSize.Level1)
  */
 HWTEST_F(RunningLockTest, RunningLockTest015, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest015 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest015 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pms->OnStart();
@@ -432,7 +432,7 @@ HWTEST_F(RunningLockTest, RunningLockTest015, TestSize.Level1)
     EXPECT_TRUE(infos.count(token) == 0);
     runninglock1.Recover(ptr);
     EXPECT_TRUE(infos.count(token) > 0);
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest015 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest015 function end!");
 }
 
 /**
@@ -443,7 +443,7 @@ HWTEST_F(RunningLockTest, RunningLockTest015, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest016, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest016 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest016 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -458,7 +458,7 @@ HWTEST_F (RunningLockTest, RunningLockTest016, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, curUid));
     EXPECT_TRUE(runningLock->IsUsed());
     runningLock->UnLock();
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest016 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest016 function end!");
 }
 
 /**
@@ -469,7 +469,7 @@ HWTEST_F (RunningLockTest, RunningLockTest016, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest017, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest017 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest017 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     pid_t curUid = getuid();
@@ -486,7 +486,7 @@ HWTEST_F (RunningLockTest, RunningLockTest017, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, 0));
     EXPECT_TRUE(runningLock->IsUsed());
     runningLock->UnLock();
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest017 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest017 function end!");
 }
 
 /**
@@ -497,7 +497,7 @@ HWTEST_F (RunningLockTest, RunningLockTest017, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest018, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest018 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest018 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
     pid_t pid = 1;
     pid_t uid = -1;
@@ -510,7 +510,7 @@ HWTEST_F (RunningLockTest, RunningLockTest018, TestSize.Level1)
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest018 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest018 function end!");
 }
 
 /**
@@ -521,7 +521,7 @@ HWTEST_F (RunningLockTest, RunningLockTest018, TestSize.Level1)
  */
 HWTEST_F (RunningLockTest, RunningLockTest019, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest019 start");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest019 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
     pid_t pid = 1;
     pid_t uid = -1;
@@ -536,6 +536,6 @@ HWTEST_F (RunningLockTest, RunningLockTest019, TestSize.Level1)
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest019 end");
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest019 function end!");
 }
 } // namespace

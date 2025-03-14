@@ -99,7 +99,7 @@ namespace {
  */
 HWTEST_F(PowerLevelEventSystemTestOff, PowerLevelEventSystemTestOff_001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 start");
+    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 function start!");
     GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOff_001 start";
     shared_ptr<CommonEventScreenOffTest> subscriber = CommonEventScreenOffTest::RegisterEvent();
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -112,6 +112,6 @@ HWTEST_F(PowerLevelEventSystemTestOff, PowerLevelEventSystemTestOff_001, TestSiz
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
     EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_OFF, g_action);
     GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOff_001 end";
-    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 end");
+    POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 function end!");
 }
 } // namespace

@@ -104,13 +104,13 @@ void SyncShutdownCallbackTest::NotSyncShutdownOrRebootCallback::OnSyncShutdownOr
 }
 
 /**
- * @tc.name: SyncShutdownCallbackk001
+ * @tc.name: SyncShutdownCallback001
  * @tc.desc: Test synchronous shutdown callback for shutdown and reboot
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk001, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackk001 start");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback001 function start!");
     auto callback = new SyncShutdownCallback();
     g_service->RegisterShutdownCallback(callback, ShutdownPriority::DEFAULT);
 
@@ -122,17 +122,17 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk001, TestSize.Level0)
 
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(g_isDefaultPriority);
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback001 end");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback001 function end!");
 }
 
 /**
- * @tc.name: SyncShutdownCallbackk002
+ * @tc.name: SyncShutdownCallback002
  * @tc.desc: Test the low and default priority of synchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk002, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackk002 start");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback002 function start!");
     auto lowPriorityCallback = new LowPrioritySyncShutdownCallback();
     g_service->RegisterShutdownCallback(lowPriorityCallback, ShutdownPriority::LOW);
     auto defaultPriorityCallback = new SyncShutdownCallback();
@@ -141,17 +141,17 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk002, TestSize.Level0)
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(g_isDefaultPriority);
     EXPECT_TRUE(g_isLowPriority);
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackk002 end");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback002 function end!");
 }
 
 /**
- * @tc.name: SyncShutdownCallbackk003
+ * @tc.name: SyncShutdownCallback003
  * @tc.desc: Test the low and high priority of synchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk003, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackk003 start");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback003 function start!");
     auto lowPriorityCallback = new LowPrioritySyncShutdownCallback();
     g_service->RegisterShutdownCallback(lowPriorityCallback, ShutdownPriority::LOW);
     auto highPriorityCallback = new HighPrioritySyncShutdownCallback();
@@ -160,7 +160,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk003, TestSize.Level0)
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(g_isHighPriority);
     EXPECT_TRUE(g_isLowPriority);
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallbackk003 end");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback003 function end!");
 }
 
 /**
@@ -170,7 +170,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallbackk003, TestSize.Level0)
  */
 HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback004 start");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback004 function start!");
     auto defaultPriorityCallback = new SyncShutdownCallback();
     g_service->RegisterShutdownCallback(defaultPriorityCallback, ShutdownPriority::DEFAULT);
     auto highPriorityCallback = new HighPrioritySyncShutdownCallback();
@@ -179,7 +179,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback004, TestSize.Level0)
     g_service->ShutDownDevice("test_case");
     EXPECT_TRUE(g_isHighPriority);
     EXPECT_TRUE(g_isDefaultPriority);
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback004 end");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback004 function end!");
 }
 
 /**
@@ -189,7 +189,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback004, TestSize.Level0)
  */
 HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 start");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 function start!");
     auto notSyncCallback = new NotSyncShutdownCallback();
     g_service->RegisterShutdownCallback(notSyncCallback, ShutdownPriority::DEFAULT);
 
@@ -198,7 +198,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level0)
 
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(::testing::AtLeast(1));
     g_service->ShutDownDevice("test_case");
-    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 end");
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr

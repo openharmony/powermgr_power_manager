@@ -108,7 +108,7 @@ bool TakeOverShutdownCallbackTest::NotTakeOverShutdownCallback::OnTakeOverShutdo
  */
 HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback001 start");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback001 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
     auto callback = new TakeOverShutdownCallback();
     shutdownClient.RegisterShutdownCallback(callback);
@@ -122,7 +122,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Lev
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(0);
     powerMgrClient.ShutDownDevice("test_case"); // shutdown will be taken over
     EXPECT_FALSE(g_isReboot); // The callback param will be false for shutdown
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback001 end");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback001 function end!");
 }
 
 /**
@@ -132,7 +132,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Lev
  */
 HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback002 start");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback002 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
     auto lowPriorityCallback = new LowPriorityTakeOverShutdownCallback();
     shutdownClient.RegisterShutdownCallback(lowPriorityCallback, ShutdownPriority::LOW);
@@ -144,7 +144,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Le
 
     EXPECT_TRUE(g_isDefaultPriority); // Default priority callback will be called
     EXPECT_FALSE(g_isLowPriority); // Low Priority callback will not be called
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback002 end");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback002 function end!");
 }
 
 /**
@@ -154,7 +154,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Le
  */
 HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback003 start");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback003 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
     auto lowPriorityCallback = new LowPriorityTakeOverShutdownCallback();
     shutdownClient.RegisterShutdownCallback(lowPriorityCallback, ShutdownPriority::LOW);
@@ -166,7 +166,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Lev
 
     EXPECT_TRUE(g_isHighPriority); // High priority callback will be called
     EXPECT_FALSE(g_isLowPriority); // Low Priority callback will not be called
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback003 end");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback003 function end!");
 }
 
 /**
@@ -176,7 +176,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Lev
  */
 HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback004 start");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback004 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
     auto defaultPriorityCallback = new TakeOverShutdownCallback();
     shutdownClient.RegisterShutdownCallback(defaultPriorityCallback, ShutdownPriority::DEFAULT);
@@ -188,7 +188,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Lev
 
     EXPECT_TRUE(g_isHighPriority); // High priority callback will be called
     EXPECT_FALSE(g_isDefaultPriority); // Default Priority callback will not be called
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback004 end");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback004 function end!");
 }
 
 /**
@@ -198,7 +198,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Lev
  */
 HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback005 start");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback005 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
     auto notTakeOverCallback = new NotTakeOverShutdownCallback();
     shutdownClient.RegisterShutdownCallback(notTakeOverCallback);
@@ -209,7 +209,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback005, TestSize.Lev
 
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(1);
     powerMgrClient.ShutDownDevice("test_case"); // shutdown will not be taken over
-    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback005 end");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback005 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr

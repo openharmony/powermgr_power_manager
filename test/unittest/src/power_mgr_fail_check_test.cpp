@@ -68,7 +68,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: start.";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck001:Start.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck001 function start!");
     int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -87,7 +87,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
     GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck001:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck001 function end!");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck001: end.";
 }
 
@@ -99,8 +99,8 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck001, TestSize.Level2)
 HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
 {
     sleep(NEXT_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "PowerMgrFailCheck002:  start.";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck002:Start.");
+    GTEST_LOG_(INFO) << "PowerMgrFailCheck002: start.";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck002 function start!");
     int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -120,7 +120,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrFailCheck002, TestSize.Level2)
     GTEST_LOG_(INFO) << dumpInfo;
 
     ResetMockAction();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck002:End.");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrFailCheck002 function end!");
     GTEST_LOG_(INFO) << "PowerMgrFailCheck002: end.";
 }
 } // namespace

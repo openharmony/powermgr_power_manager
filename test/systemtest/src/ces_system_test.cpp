@@ -68,7 +68,7 @@ namespace {
  */
 HWTEST_F(CesSystemTest, CES_SubscriptionEvent_01, Function | MediumTest | Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "CES_SubscriptionEvent_01 start");
+    POWER_HILOGI(LABEL_TEST, "CES_SubscriptionEvent_01 function start!");
     bool result = false;
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SHUTDOWN);
@@ -83,6 +83,6 @@ HWTEST_F(CesSystemTest, CES_SubscriptionEvent_01, Function | MediumTest | Level1
         sleep(SLEEP_WAIT_TIME_S);
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
-    POWER_HILOGI(LABEL_TEST, "CES_SubscriptionEvent_01 end");
+    POWER_HILOGI(LABEL_TEST, "CES_SubscriptionEvent_01 function end!");
 }
 }
