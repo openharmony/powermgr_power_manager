@@ -43,10 +43,11 @@ public:
     virtual HibernateStatus Hibernate(bool clearMemory);
     virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
     virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
-    virtual void PreHibernate() const;
-    virtual void PostHibernate(bool hibernateResult = false) const;
+    virtual void PreHibernate();
+    virtual void PostHibernate(bool hibernateResult = false);
 
 private:
+    bool prepared_ {false};
     std::mutex mutex_;
     HibernateCallbackContainerType callbacks_;
 };
