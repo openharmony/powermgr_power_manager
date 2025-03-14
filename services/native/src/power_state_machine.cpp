@@ -834,9 +834,7 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
         switchOpen_ = true;
     }
     hibernating_ = false;
-
-    int64_t exitTime = GetTickCount();
-    notify->PublishExitHibernateEvent(exitTime);
+    notify->PublishExitHibernateEvent(GetTickCount());
 
     if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
@@ -858,8 +856,15 @@ void PowerStateMachine::RollbackHibernate(PowerState originalState, bool clearMe
         originalState, clearMemory, isSwitchOpen);
     hibernating_ = false;
     if (clearMemory) {
+        // Ready to shutdown, so no need to publish common event and run PostHibernate
         pms->ShutDownDevice("HibernateFail");
         return;
+    }
+    if (pms->GetPowerMgrNotify() != nullptr) {
+        pms->GetPowerMgrNotify()->PublishExitHibernateEvent(GetTickCount());
+    }
+    if (pms->GetHibernateController() != nullptr) {
+        pms->GetHibernateController()->PostHibernate(false);
     }
     SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE, true);
     if (originalState == PowerState::SLEEP) {
@@ -902,10 +907,10 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "the device is hibernating, please try again later.");
         return false;
     }
+
     hibernating_ = true;
     PowerState originalState = GetState();
-    int64_t enterTime = GetTickCount();
-    notify->PublishEnterHibernateEvent(enterTime);
+    notify->PublishEnterHibernateEvent(GetTickCount());
 
     bool ret = PrepareHibernateWithTimeout(clearMemory);
     if (!ret) {
