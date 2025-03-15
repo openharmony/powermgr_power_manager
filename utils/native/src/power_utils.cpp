@@ -239,6 +239,12 @@ Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeR
         case StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE;
             break;
+        case StateChangeReason::STATE_CHANGE_REASON_START_DREAM:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_END_DREAM:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+            break;
         default:
             break;
     }
@@ -294,6 +300,8 @@ WakeupDeviceType PowerUtils::ParseWakeupDeviceType(const std::string& details)
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR;
     } else if (strcmp(details.c_str(), "shell") == 0) {
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
+    } else if (strcmp(details.c_str(), "end_dream") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_END_DREAM;
     }
 
     if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {
