@@ -42,6 +42,7 @@
 #include <dlfcn.h>
 #endif
 #include "customized_screen_event_rules.h"
+#include "display_manager_lite.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -497,12 +498,44 @@ void PowerStateMachine::SuspendDeviceInner(
     } else {
         POWER_HILOGD(FEATURE_SUSPEND, "Do not suspend device, screen state is ignored");
     }
-
+#ifdef POWER_MANAGER_TV_DREAMING
+    if (type == SuspendDeviceType::SUSPEND_DEVICE_START_DREAM) {
+        SetDreamingState(GetReasonBySuspendType(type));
+        return;
+    }
+#endif
     if (SetState(PowerState::INACTIVE, GetReasonBySuspendType(type), true)) {
         uint32_t delay = 0;
         SetAutoSuspend(type, delay);
     }
     POWER_HILOGD(FEATURE_SUSPEND, "Suspend device finish");
+}
+
+bool PowerStateMachine::SetDreamingState(StateChangeReason reason)
+{
+#ifdef POWER_MANAGER_TV_DREAMING
+    Rosen::PowerStateChangeReason dispReason = PowerUtils::GetDmsReasonByPowerReason(reason);
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
+        if (isDreaming_) {
+            POWER_HILOGW(FEATURE_POWER_STATE, "[UL_POWER] is dreaming now");
+            return false;
+        }
+        bool isSuccess = Rosen::DisplayManagerLite::GetInstance().SuspendBegin(dispReason);
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] start dreaming success=%{public}d", isSuccess);
+        isDreaming_ = isSuccess;
+        return isSuccess;
+    } else if (reason == StateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
+        if (!isDreaming_) {
+            POWER_HILOGW(FEATURE_POWER_STATE, "[UL_POWER] is not dreaming now");
+            return false;
+        }
+        bool isSuccess = Rosen::DisplayManagerLite::GetInstance().WakeUpBegin(dispReason);
+        POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] end dreaming success=%{public}d", isSuccess);
+        isDreaming_ = !isSuccess;
+        return isSuccess;
+    }
+#endif
+    return false;
 }
 
 bool PowerStateMachine::IsPreBrightAuthReason(StateChangeReason reason)
@@ -636,6 +669,14 @@ void PowerStateMachine::WakeupDeviceInner(
         DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(GetReasonByWakeType(type));
     }
 #endif
+
+#ifdef POWER_MANAGER_TV_DREAMING
+    if (type == WakeupDeviceType::WAKEUP_DEVICE_END_DREAM) {
+        SetDreamingState(GetReasonByWakeType(type));
+        return;
+    }
+#endif
+
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
         POWER_HILOGI(FEATURE_WAKEUP, "Stop sleep ffrt task");
@@ -1890,6 +1931,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         PowerUtils::GetPowerStateString(state).c_str(), ret);
     RestoreSettingStateFlag();
     WriteHiSysEvent(ret, reason, beginTimeMs, state);
+#ifdef POWER_MANAGER_TV_DREAMING
+    if ((state == PowerState::INACTIVE || state == PowerState::DIM) && ret == TransitResult::SUCCESS) {
+        isDreaming_ = false;
+    }
+#endif
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 
@@ -2057,6 +2103,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_TENT_MODE_CHANGE:
             ret = StateChangeReason::STATE_CHANGE_REASON_TENT_MODE;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_END_DREAM:
+            ret = StateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;
@@ -2112,6 +2161,9 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_ROLLBACK_HIBERNATE:
             ret = StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_START_DREAM:
+            ret = StateChangeReason::STATE_CHANGE_REASON_START_DREAM;
             break;
         default:
             break;
