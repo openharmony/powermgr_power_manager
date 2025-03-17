@@ -2095,7 +2095,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
     int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber() + 1;
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
     bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
-    bool isScreenOn = powerStateMachine->IsScreenOn();
+    bool isScreenOn = powerStateMachine->IsScreenOnAcqLock();
     POWER_HILOGI(COMP_SVC,
         "External screen is connected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
         "%{public}d, isScreenOn: %{public}d",
