@@ -996,6 +996,14 @@ bool PowerStateMachine::IsScreenOn(bool needPrintLog)
     return isScreenOn;
 }
 
+bool PowerStateMachine::IsScreenOnAcqLock()
+{
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    DisplayState state = stateAction_->GetDisplayState();
+    bool isScreenOn = (state == DisplayState::DISPLAY_ON) || (state == DisplayState::DISPLAY_DIM);
+    return isScreenOn;
+}
+
 bool PowerStateMachine::IsFoldScreenOn()
 {
     POWER_HILOGI(FEATURE_POWER_STATE,

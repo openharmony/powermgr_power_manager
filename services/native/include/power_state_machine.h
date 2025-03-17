@@ -120,6 +120,7 @@ public:
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn(bool needPrintLog = true);
+    bool IsScreenOnAcqLock();
     bool IsFoldScreenOn();
     bool IsCollaborationScreenOn();
     bool CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason) const;
