@@ -690,6 +690,18 @@ void SuspendController::Reset()
     ffrtTimer_.reset();
 }
 
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+bool SuspendController::GetLowCapacityPowerKeyFlag()
+{
+    return isLowCapacityPowerKey_;
+}
+
+void SuspendController::SetLowCapacityPowerKeyFlag(bool flag)
+{
+    isLowCapacityPowerKey_ = flag;
+}
+#endif
+
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
     SuspendDeviceType reason = source.GetReason();
@@ -735,42 +747,62 @@ bool PowerKeySuspendMonitor::Init()
     keyOption->SetFinalKeyDownDuration(0);
     powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
-
-            static int64_t lastPowerkeyUpTime = 0;
-            int64_t currTime = GetTickCount();
-            if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within 350ms, skip. "
-                    "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyUpTime);
-                return;
-            }
-            lastPowerkeyUpTime = currTime;
-
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            if (pms == nullptr) {
-                return;
-            }
-            std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
-            if (suspendController->GetPowerkeyDownWhenScreenOff()) {
-                POWER_HILOGI(FEATURE_SUSPEND,
-                    "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");
-                return;
-            }
-            auto powerkeyScreenOffTask = [*this]() mutable {
-                Notify();
-                powerkeyScreenOff_ = false;
-                EndPowerkeyScreenOff();
-            };
-            BeginPowerkeyScreenOff();
-            powerkeyScreenOff_ = true;
-            ffrt::submit(powerkeyScreenOffTask, {}, {&powerkeyScreenOff_});
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER]submitted screen off ffrt task");
+            ReceivePowerkeyCallback(keyEvent);
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 #else
     return false;
 #endif
+}
+
+void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
+
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] PowerMgrService is nullptr");
+        return;
+    }
+    std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] suspendController is nullptr");
+        return;
+    }
+
+#if POWER_MANAGER_WAKEUP_ACTION
+    bool isLowCapacityPowerKey = suspendController->GetLowCapacityPowerKeyFlag();
+    if (isLowCapacityPowerKey) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] skip low capacity powerkey up");
+        suspendController->SetLowCapacityPowerKeyFlag(false);
+        return;
+    }
+#endif
+
+    static int64_t lastPowerkeyUpTime = 0;
+    int64_t currTime = GetTickCount();
+    if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within 350ms, skip. "
+            "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyUpTime);
+        return;
+    }
+    lastPowerkeyUpTime = currTime;
+
+    if (suspendController->GetPowerkeyDownWhenScreenOff()) {
+        POWER_HILOGI(FEATURE_SUSPEND,
+            "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");
+        return;
+    }
+    auto powerkeyScreenOffTask = [*this]() mutable {
+        Notify();
+        powerkeyScreenOff_ = false;
+        EndPowerkeyScreenOff();
+    };
+    BeginPowerkeyScreenOff();
+    powerkeyScreenOff_ = true;
+    ffrt::submit(powerkeyScreenOffTask, {}, {&powerkeyScreenOff_});
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] submitted screen off ffrt task");
 }
 
 void PowerKeySuspendMonitor::BeginPowerkeyScreenOff() const
