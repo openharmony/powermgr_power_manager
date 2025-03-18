@@ -886,17 +886,21 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupController is nullptr");
         return;
     }
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    if (wakeupController->IsLowCapacityWakeup(reason)) {
-        wakeupController->ProcessLowCapacityWakeup();
-        return;
-    }
-#endif
     std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
     if (suspendController == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] suspendController is nullptr");
         return;
     }
+
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    if (wakeupController->IsLowCapacityWakeup(reason)) {
+        wakeupController->ProcessLowCapacityWakeup();
+        suspendController->SetLowCapacityPowerKeyFlag(true);
+        return;
+    }
+    suspendController->SetLowCapacityPowerKeyFlag(false);
+#endif
+
     bool poweroffInterrupted = false;
     if (PowerKeySuspendMonitor::powerkeyScreenOff_.load()) {
         auto stateMachine = pms->GetPowerStateMachine();
