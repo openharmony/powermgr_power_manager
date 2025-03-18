@@ -75,7 +75,7 @@ constexpr unsigned int TEST_DOMAIN_ID = 0xD000F00;
 
 enum PowerManagerLogLabel {
     // Component labels, you can add if needed
-    COMP_APP = 0,
+    COMP_LOCK = 0,
     COMP_FWK = 1,
     COMP_SVC = 2,
     COMP_HDI = 3,
@@ -102,7 +102,7 @@ enum PowerManagerLogLabel {
 };
 
 enum PowerManagerLogDomain {
-    DOMAIN_APP = POWER_DOMAIN_ID_START + COMP_APP, // 0xD002900
+    DOMAIN_LOCK = POWER_DOMAIN_ID_START + COMP_LOCK, // 0xD002900
     DOMAIN_FRAMEWORK, // 0xD002901
     DOMAIN_SERVICE, // 0xD002902
     DOMAIN_HDI, // 0xD002903
@@ -132,7 +132,7 @@ struct PowerManagerLogLabelDomain {
 
 // Keep the sequence and length same as PowerManagerLogDomain
 static const PowerManagerLogLabelDomain POWER_LABEL[LABEL_END] = {
-    {DOMAIN_APP,                  "PowerApp"},
+    {DOMAIN_LOCK,                  "PowerLock"},
     {DOMAIN_FRAMEWORK,            "PowerFwk"},
     {DOMAIN_SERVICE,              "PowerSvc"},
     {DOMAIN_HDI,                  "PowerHdi"},

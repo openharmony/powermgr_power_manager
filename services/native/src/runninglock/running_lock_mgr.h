@@ -67,7 +67,8 @@ public:
     {
         return runningLocks_;
     }
-    static void NotifyRunningLockChanged(const RunningLockParam& lockInnerParam, const std::string &tag);
+    static void NotifyRunningLockChanged(const RunningLockParam& lockInnerParam,
+        const std::string &tag, const std::string &logTag);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     void ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
     void LockInnerByProxy(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner);
