@@ -143,6 +143,7 @@ void RunningLock::Release()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "RProxy=null");
         return;
     }
+    // ReleaseRunningLock
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "RlsN=%{public}s", runningLockInfo_.name.c_str());
     proxy->ReleaseRunningLock(token_, runningLockInfo_.name);
 }
