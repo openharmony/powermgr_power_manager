@@ -144,15 +144,15 @@ void RunningLockProxy::ProxyInner(const sptr<IRemoteObject>& remoteObj,
     lockInner->SetBundleName(bundleNames);
     switch (event) {
         case RunningLockEvent::RUNNINGLOCK_UPDATE:
-            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
+            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE", "UP");
             break;
         case RunningLockEvent::RUNNINGLOCK_PROXY:
-            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
+            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE", "UP");
             rlmgr->UnlockInnerByProxy(remoteObj, lockInner);
             break;
         case RunningLockEvent::RUNNINGLOCK_UNPROXY:
             rlmgr->LockInnerByProxy(remoteObj, lockInner);
-            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE");
+            rlmgr->NotifyRunningLockChanged(lockInner->GetParam(), "DUBAI_TAG_RUNNINGLOCK_UPDATE", "UP");
             break;
         default:
             break;
@@ -196,7 +196,8 @@ std::string RunningLockProxy::MergeBundleName(const WksMap& wksMap)
 bool RunningLockProxy::IncreaseProxyCnt(pid_t pid, pid_t uid)
 {
     std::string proxyKey = AssembleProxyKey(pid, uid);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "IncreaseProxyCnt proxykey=%{public}s", proxyKey.c_str());
+    // IncreaseProxyCnt proxykey
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Inproxykey=%{public}s", proxyKey.c_str());
     auto proxyIter = proxyMap_.find(proxyKey);
     if (proxyIter != proxyMap_.end()) {
         auto& tokenWksMap = proxyIter->second;
