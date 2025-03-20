@@ -30,12 +30,14 @@
 #include "suspend_source_parser.h"
 #include "suspend_sources.h"
 #include "sleep_callback_holder.h"
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+#include "i_input_event_consumer.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
 
 using SuspendListener = std::function<void(SuspendDeviceType, uint32_t, uint32_t)>;
-
 class SuspendMonitor;
 class SuspendEventHandler;
 class SuspendController : public std::enable_shared_from_this<SuspendController> {
@@ -91,6 +93,10 @@ public:
         return forceSleeping_.load();
     }
 #endif
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    bool GetLowCapacityPowerKeyFlag();
+    void SetLowCapacityPowerKeyFlag(bool flag);
+#endif
 
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
@@ -125,6 +131,9 @@ private:
     std::atomic<bool> forceSleeping_ {false};
 #endif
     sptr<IPowerStateCallback> suspendPowerStateCallback_ {nullptr};
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    std::atomic<bool> isLowCapacityPowerKey_ {false};
+#endif
 };
 
 class SuspendMonitor {
@@ -186,6 +195,7 @@ public:
 private:
     void BeginPowerkeyScreenOff() const;
     void EndPowerkeyScreenOff() const;
+    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent);
     static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     int32_t powerkeyReleaseId_ {-1};
