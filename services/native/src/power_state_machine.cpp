@@ -1781,7 +1781,7 @@ void PowerStateMachine::UpdateSettingStateFlag(PowerState state, StateChangeReas
 {
     if ((reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
         reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) &&
-        state != PowerState::AWAKE) {
+        GetState() != PowerState::AWAKE) {
         settingOnStateFlag_ = false;
         settingOffStateFlag_ = true;
         return;
