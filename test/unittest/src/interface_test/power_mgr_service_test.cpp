@@ -762,4 +762,32 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
     SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", originalValue, true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 function end!");
 }
+
+
+#ifdef POWER_MANAGER_TV_DREAMING
+/**
+ * @tc.name: PowerMgrService030
+ * @tc.desc: Test dream state
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient056, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService030 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService030 failed to get PowerMgrService";
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService030 failed to get PowerStateMachine";
+    stateMaschine_->Init();
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true); // reset dream state
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_START_DREAM, true); // set dream from interface
+    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "start_dream");
+    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "end_dream");
+    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService030 function end!");
+}
+#endif
 }

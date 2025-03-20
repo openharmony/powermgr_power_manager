@@ -671,6 +671,10 @@ void PowerStateMachine::WakeupDeviceInner(
 #endif
 
 #ifdef POWER_MANAGER_TV_DREAMING
+    if (details == "start_dream") {
+        SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM);
+        return;
+    }
     if (type == WakeupDeviceType::WAKEUP_DEVICE_END_DREAM) {
         SetDreamingState(GetReasonByWakeType(type));
         return;
