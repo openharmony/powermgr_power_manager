@@ -318,6 +318,9 @@ bool ShutdownController::TriggerTakeOverShutdownCallbackInner(
 {
     bool isTakeover = false;
     for (const auto& obj : callbacks) {
+        auto pidUid = takeoverShutdownCallbackHolder_->FindCallbackPidUid(obj);
+        // ITakeOverShutdownCallback->OnTakeOverShutdown calling pid uid
+        POWER_HILOGI(FEATURE_SHUTDOWN, "TOScb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
         isTakeover = callback->OnTakeOverShutdown(info);
     }
@@ -329,6 +332,9 @@ bool ShutdownController::TriggerTakeOverHibernateCallbackInner(
 {
     bool isTakeover = false;
     for (const auto& obj : callbacks) {
+        auto pidUid = takeoverShutdownCallbackHolder_->FindCallbackPidUid(obj);
+        // ITakeOverShutdownCallback->OnTakeOverHibernate calling pid uid
+        POWER_HILOGI(FEATURE_SHUTDOWN, "TOHcb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
         isTakeover = callback->OnTakeOverHibernate(info);
     }
@@ -376,12 +382,12 @@ void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteO
         sptr<ISyncShutdownCallback> callback = iface_cast<ISyncShutdownCallback>(obj);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
-            POWER_KHILOGI(
-                FEATURE_SHUTDOWN, "calling callback pid=%{public}d uid=%{public}d", pidUid.first, pidUid.second);
             callback->OnSyncShutdown();
             callback->OnSyncShutdownOrReboot(isReboot);
             int64_t cost = GetTickCount() - start;
-            POWER_KHILOGI(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
+            // ISyncShutdownCallback calling pid uid, cost time
+            POWER_KHILOGI(FEATURE_SHUTDOWN,
+                "ISUTcb P=%{public}dU=%{public}dT=%{public}" PRId64 "", pidUid.first, pidUid.second, cost);
         }
     }
 }

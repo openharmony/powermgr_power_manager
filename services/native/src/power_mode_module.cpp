@@ -291,8 +291,16 @@ void PowerModeModule::CallbackManager::AddCallback(const sptr<IPowerModeCallback
     if (retIt.second) {
         object->AddDeathRecipient(this);
     }
+    AddCallbackPidUid(object);
     POWER_HILOGD(FEATURE_POWER_MODE, "callbacks.size = %{public}zu, insertOk = %{public}d",
         callbacks_.size(), retIt.second);
+}
+
+void PowerModeModule::CallbackManager::AddCallbackPidUid(const sptr<IRemoteObject>& callback)
+{
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    cachedRegister_.emplace(callback, std::make_pair(pid, uid));
 }
 
 void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallback>& callback)
@@ -305,7 +313,16 @@ void PowerModeModule::CallbackManager::RemoveCallback(const sptr<IPowerModeCallb
         callbacks_.erase(it);
         object->RemoveDeathRecipient(this);
     }
+    RemoveCallbackPidUid(object);
     POWER_HILOGD(FEATURE_POWER_MODE, "callbacks.size = %{public}zu", callbacks_.size());
+}
+
+void PowerModeModule::CallbackManager::RemoveCallbackPidUid(const sptr<IRemoteObject>& callback)
+{
+    auto iter = cachedRegister_.find(callback);
+    if (iter != cachedRegister_.end()) {
+        cachedRegister_.erase(iter);
+    }
 }
 
 void PowerModeModule::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
@@ -315,14 +332,23 @@ void PowerModeModule::CallbackManager::OnRemoteDied(const wptr<IRemoteObject>& r
     RemoveCallback(iface_cast<IPowerModeCallback>(remote.promote()));
 }
 
+std::pair<int32_t, int32_t> PowerModeModule::CallbackManager::FindCallbackPidUid(
+    const sptr<IRemoteObject>& callback)
+{
+    auto iter = cachedRegister_.find(callback);
+    return (iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0);
+}
+
 void PowerModeModule::CallbackManager::WaitingCallback()
 {
     POWER_HILOGD(FEATURE_POWER_MODE, "Mode callback started");
     unique_lock<mutex> lock(mutex_);
     for (auto& obj: callbacks_) {
+        auto pidUid = FindCallbackPidUid(obj);
         sptr<IPowerModeCallback> callback = iface_cast<IPowerModeCallback>(obj);
         if (callback != nullptr) {
-            POWER_HILOGD(FEATURE_POWER_MODE, "Call IPowerModeCallback");
+            // IPowerModeCallback calling pid uid
+            POWER_HILOGI(FEATURE_POWER_MODE, "IPMcbP=%{public}dU=%{public}d", pidUid.first, pidUid.second);
             PowerMode mode = PowerMode::NORMAL_MODE;
             callback->OnPowerModeChanged(mode);
         }
