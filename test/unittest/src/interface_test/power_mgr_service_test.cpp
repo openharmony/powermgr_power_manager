@@ -26,11 +26,16 @@
 #include <system_ability_definition.h>
 
 #include "accesstoken_kit.h"
+#include "display_manager_lite.h"
 #include "mock_state_action.h"
 #include "nativetoken_kit.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
+#define private   public
+#define protected public
 #include "power_mgr_service.h"
+#undef private
+#undef protected
 #include "power_utils.h"
 #include "setting_helper.h"
 #include "token_setproc.h"
@@ -57,6 +62,30 @@ void PowerMgrServiceTest::TearDown(void)
 {
 }
 
+#ifdef POWER_MANAGER_TV_DREAMING
+class MockDisplayManagerLite : public Rosen::DisplayManagerLite {
+public:
+    bool SuspendBegin(Rosen::PowerStateChangeReason reason)
+    {
+        if (reason == Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
+            return true;
+        }
+        return DisplayManagerLite::SuspendBegin(reason);
+    }
+    bool WakeUpBegin(Rosen::PowerStateChangeReason reason)
+    {
+        if (reason == Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
+            return true;
+        }
+        return DisplayManagerLite::WakeUpBegin(reason);
+    }
+};
+Rosen::DisplayManagerLite& Rosen::DisplayManagerLite::GetInstance()
+{
+    static DisplayManagerLite instance;
+    return static_cast<MockDisplayManagerLite&>(instance);
+}
+#endif
 namespace {
 constexpr const int64_t STATE_WAIT_TIME_MS = 300;
 constexpr const int64_t STATE_OFF_WAIT_TIME_MS = 2000;
@@ -762,4 +791,32 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService029, TestSize.Level2)
     SettingProvider::GetInstance(-1).PutStringValue("hw_aod_watch_switch", originalValue, true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService029 function end!");
 }
+
+
+#ifdef POWER_MANAGER_TV_DREAMING
+/**
+ * @tc.name: PowerMgrService030
+ * @tc.desc: Test dream state
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest030, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService030 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService030 failed to get PowerMgrService";
+    auto stateMaschine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMaschine_ != nullptr) << "PowerMgrService030 failed to get PowerStateMachine";
+    stateMaschine_->Init();
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true); // reset dream state
+    pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_START_DREAM, true); // set dream from interface
+    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "start_dream");
+    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "end_dream");
+    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService030 function end!");
+}
+#endif
 }

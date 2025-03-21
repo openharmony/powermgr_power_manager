@@ -252,6 +252,10 @@ ohos_unittest("test_power_mgr_service") {
 
   sources = [ "src/interface_test/power_mgr_service_test.cpp" ]
 
+  if (power_manager_feature_tv_dreaming) {
+    defines += [ "POWER_MANAGER_TV_DREAMING" ]
+  }
+
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
