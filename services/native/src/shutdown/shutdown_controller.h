@@ -68,9 +68,9 @@ private:
     bool TakeOverShutdownAction(const std::string& reason, bool isReboot);
     bool AllowedToBeTakenOver(const std::string& reason) const;
 
-    static bool TriggerTakeOverShutdownCallbackInner(
+    bool TriggerTakeOverShutdownCallbackInner(
         std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info);
-    static bool TriggerTakeOverHibernateCallbackInner(
+    bool TriggerTakeOverHibernateCallbackInner(
         std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info);
     static void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
     void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);

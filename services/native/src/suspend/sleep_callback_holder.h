@@ -17,6 +17,9 @@
 #define POWERMGR_POWER_MANAGER_SLEEP_CALLBACK_HOLER_H
 
 #include <set>
+#include <map>
+
+#include "ipc_skeleton.h"
 #include <singleton.h>
 #include "iremote_object.h"
 #include "suspend/isync_sleep_callback.h"
@@ -35,19 +38,25 @@ public:
     };
 
     using SleepCallbackContainerType = std::set<sptr<ISyncSleepCallback>, SleepCallbackCompare>;
+    using SleepCallbackCachedRegister =
+        std::map<sptr<ISyncSleepCallback>, std::pair<int32_t, int32_t>, SleepCallbackCompare>;
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
     SleepCallbackContainerType GetHighPriorityCallbacks();
     SleepCallbackContainerType GetDefaultPriorityCallbacks();
     SleepCallbackContainerType GetLowPriorityCallbacks();
+    std::pair<int32_t, int32_t> FindCallbackPidUid(const sptr<ISyncSleepCallback>& callback);
 
 private:
     static void RemoveCallback(SleepCallbackContainerType& callbacks, const sptr<ISyncSleepCallback>& callback);
+    void AddCallbackPidUid(const sptr<ISyncSleepCallback>& callback);
+    void RemoveCallbackPidUid(const sptr<ISyncSleepCallback>& callback);
 
     std::mutex mutex_;
     SleepCallbackContainerType highPriorityCallbacks_;
     SleepCallbackContainerType defaultPriorityCallbacks_;
     SleepCallbackContainerType lowPriorityCallbacks_;
+    SleepCallbackCachedRegister cachedRegister_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

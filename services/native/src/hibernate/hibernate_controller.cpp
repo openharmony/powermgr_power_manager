@@ -31,6 +31,9 @@ void HibernateController::RegisterSyncHibernateCallback(const sptr<ISyncHibernat
 {
     std::lock_guard<std::mutex> lock(mutex_);
     callbacks_.insert(cb);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    cachedRegister_.emplace(cb, std::make_pair(pid, uid));
 }
 
 void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
@@ -40,12 +43,21 @@ void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibern
     if (eraseNum == 0) {
         POWER_HILOGE(FEATURE_SUSPEND, "Cannot remove the hibernate callback");
     }
+    auto iter = cachedRegister_.find(cb);
+    if (iter != cachedRegister_.end()) {
+        cachedRegister_.erase(iter);
+    }
 }
 
 void HibernateController::PreHibernate()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     for (const auto &cb : callbacks_) {
+        auto iter = cachedRegister_.find(cb);
+        auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
         if (cb != nullptr) {
+            // PreHibernate calling callback pid uid
+            POWER_HILOGI(FEATURE_SUSPEND, "PreCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
             cb->OnSyncHibernate();
         }
     }
@@ -54,13 +66,18 @@ void HibernateController::PreHibernate()
 
 void HibernateController::PostHibernate(bool hibernateResult)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!prepared_) {
         POWER_HILOGE(FEATURE_SUSPEND, "No need to run OnSyncWakeup");
         return;
     }
     prepared_ = false;
     for (const auto &cb : callbacks_) {
+        auto iter = cachedRegister_.find(cb);
+        auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
         if (cb != nullptr) {
+            // PostHibernate calling callback pid uid
+            POWER_HILOGI(FEATURE_SUSPEND, "PostCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
             cb->OnSyncWakeup(hibernateResult);
         }
     }

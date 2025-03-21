@@ -16,6 +16,8 @@
 #ifndef POWER_MODE_THREAD_H
 #define POWER_MODE_THREAD_H
 
+#include <map>
+#include "ipc_skeleton.h"
 #include <common_event_data.h>
 #include <common_event_manager.h>
 #include <common_event_publish_info.h>
@@ -53,8 +55,12 @@ private:
         void WaitingCallback();
 
     private:
+        void AddCallbackPidUid(const sptr<IRemoteObject>& callback);
+        void RemoveCallbackPidUid(const sptr<IRemoteObject>& callback);
+        std::pair<int32_t, int32_t> FindCallbackPidUid(const sptr<IRemoteObject>& callback);
         std::mutex mutex_;
         std::set<sptr<IRemoteObject>> callbacks_;
+        std::map<sptr<IRemoteObject>, std::pair<int32_t, int32_t>> cachedRegister_;
     };
 
     PowerMode mode_;
