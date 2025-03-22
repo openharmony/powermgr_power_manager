@@ -33,7 +33,7 @@ namespace {
 HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
+    EXPECT_TRUE(powerMgrClient.GetPowerMgrProxy() != nullptr);
 
     std::shared_ptr<IRemoteObject::DeathRecipient> deathRecipient =
     std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>(powerMgrClient);
@@ -52,7 +52,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
 HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level0)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_EQ(powerMgrClient.Connect(), ERR_OK);
+    EXPECT_TRUE(powerMgrClient.GetPowerMgrProxy() != nullptr);
 
     std::shared_ptr<IRemoteObject::DeathRecipient> deathRecipient =
     std::make_shared<PowerMgrClient::PowerMgrDeathRecipient>(powerMgrClient);
