@@ -207,6 +207,7 @@ private:
     };
 
     ErrCode Connect();
+    sptr<IPowerMgr> GetPowerMgrProxy();
     void ResetProxy(const wptr<IRemoteObject>& remote);
     sptr<IPowerMgr> proxy_ {nullptr};
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
