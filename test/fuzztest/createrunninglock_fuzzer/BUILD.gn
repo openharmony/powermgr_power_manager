@@ -67,6 +67,7 @@ ohos_fuzztest("CreateRunningLockFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "power_manager:power_ffrt",
+    "safwk:system_ability_fwk",
   ]
   defines = []
 
