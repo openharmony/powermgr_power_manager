@@ -67,6 +67,7 @@ ohos_fuzztest("SetForceTimingOutFuzzTest") {
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "power_manager:power_ffrt",
+    "safwk:system_ability_fwk",
   ]
   defines = []
 
