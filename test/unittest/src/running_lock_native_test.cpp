@@ -256,9 +256,9 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObj);
 
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_ADD", "AD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
 
 #ifdef HAS_SENSORS_SENSOR_PART
     auto runningLockMgrController = std::make_shared<RunningLockMgr::ProximityController>();
@@ -442,8 +442,8 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative013, TestSize.Level0)
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     RunningLockParam runningLockParam {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_ADD", "AD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative013 function end!");
 }
@@ -596,23 +596,23 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
     runningLockMgr->RegisterRunningLockCallback(callback1);
     RunningLockParam runningLockParam1 {0,
         "runninglockNativeTest1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, UNPID, UNUID};
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam1, "DUBAI_TAG_RUNNINGLOCK_ADD");
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam1, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam1, "DUBAI_TAG_RUNNINGLOCK_ADD", "AD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam1, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
 
     sptr<IPowerRunninglockCallback> callback2 =new PowerRunningLockTestCallback();
     runningLockMgr->RegisterRunningLockCallback(callback2);
 #ifdef HAS_SENSORS_SENSOR_PART
     RunningLockParam runningLockParam2 {0, "runninglockNativeTest2", "",
         RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, UNPID, UNUID};
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam2, "DUBAI_TAG_RUNNINGLOCK_ADD");
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam2, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam2, "DUBAI_TAG_RUNNINGLOCK_ADD", "AD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam2, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
 #endif
 
     runningLockMgr->UnRegisterRunningLockCallback(callback2);
     RunningLockParam runningLockParam3 {0, "runninglockNativeTest3", "",
         RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, TIMEOUTMS, UNPID, UNUID};
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam3, "DUBAI_TAG_RUNNINGLOCK_ADD");
-    runningLockMgr->NotifyRunningLockChanged(runningLockParam3, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam3, "DUBAI_TAG_RUNNINGLOCK_ADD", "AD");
+    runningLockMgr->NotifyRunningLockChanged(runningLockParam3, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
     EXPECT_TRUE(runningLockMgr != nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative020 function end!");
 }
