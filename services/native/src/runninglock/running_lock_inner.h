@@ -50,12 +50,12 @@ public:
     }
 
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    void SetBeginTime(int64_t beginTimeMs)
+    void SetBeginTime(int32_t beginTimeMs)
     {
         beginTimeMs_ = beginTimeMs;
     }
 
-    int64_t GetBeginTime()
+    int32_t GetBeginTime()
     {
         return beginTimeMs_;
     }
@@ -118,7 +118,7 @@ private:
     RunningLockState state_ = RunningLockState::RUNNINGLOCK_STATE_DISABLE;
     int64_t lockTimeMs_ = 0;
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    int64_t beginTimeMs_ = 0;
+    int32_t beginTimeMs_ = 0;
 #endif
 };
 } // namespace PowerMgr

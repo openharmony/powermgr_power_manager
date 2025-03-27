@@ -180,6 +180,14 @@ enum class SuspendDeviceType : uint32_t {
 #endif
 };
 
+enum class InterfaceTimeoutType : uint32_t {
+    INTERFACE_TIMEOUT_TYPE_RUNNINGLOCK_LOCK = 0,
+    INTERFACE_TIMEOUT_TYPE_RUNNINGLOCK_UNLOCK = 1,
+    INTERFACE_TIMEOUT_TYPE_SETSTATE_ON = 2,
+    INTERFACE_TIMEOUT_TYPE_SETSTATE_OFF = 3,
+    INTERFACE_TIMEOUT_TYPE_MAX = 10,
+};
+
 enum class StateChangeReason : uint32_t {
     STATE_CHANGE_REASON_INIT = 0,
     STATE_CHANGE_REASON_TIMEOUT = 1,

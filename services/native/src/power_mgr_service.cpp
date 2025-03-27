@@ -1112,8 +1112,8 @@ bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    constexpr int64_t RUNNINGLOCK_TIMEOUT_MS = 50;
-    int64_t beginTimeMs = GetTickCount();
+    constexpr int32_t RUNNINGLOCK_TIMEOUT_MS = 50;
+    int32_t beginTimeMs = GetTickCount();
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
 #endif
@@ -1133,11 +1133,12 @@ PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t 
         RunningLockTimerHandler::GetInstance().RegisterRunningLockTimer(remoteObj, task, timeOutMs);
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    int64_t endTimeMs = GetTickCount();
+    int32_t endTimeMs = GetTickCount();
     if (endTimeMs - beginTimeMs > RUNNINGLOCK_TIMEOUT_MS) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock interface timeout=%{public}lld", (endTimeMs - beginTimeMs));
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK_TIMEOUT",
-            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid);
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock interface timeout=%{public}d", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid, "TYPE",
+            static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_RUNNINGLOCK_LOCK), "REASON", "");
     }
 #endif
     return PowerErrors::ERR_OK;
@@ -1146,8 +1147,8 @@ PowerErrors PowerMgrService::Lock(const sptr<IRemoteObject>& remoteObj, int32_t 
 PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    constexpr int64_t RUNNINGLOCK_TIMEOUT_MS = 50;
-    int64_t beginTimeMs = GetTickCount();
+    constexpr int32_t RUNNINGLOCK_TIMEOUT_MS = 50;
+    int32_t beginTimeMs = GetTickCount();
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
 #endif
@@ -1159,11 +1160,12 @@ PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const 
     RunningLockTimerHandler::GetInstance().UnregisterRunningLockTimer(remoteObj);
     runningLockMgr_->UnLock(remoteObj, name);
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    int64_t endTimeMs = GetTickCount();
+    int32_t endTimeMs = GetTickCount();
     if (endTimeMs - beginTimeMs > RUNNINGLOCK_TIMEOUT_MS) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLock interface timeout=%{public}lld", (endTimeMs - beginTimeMs));
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK_TIMEOUT",
-            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid);
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLock interface timeout=%{public}d", (endTimeMs - beginTimeMs));
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid, "TYPE",
+            static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_RUNNINGLOCK_UNLOCK), "REASON", "");
     }
 #endif
     return PowerErrors::ERR_OK;
