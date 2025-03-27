@@ -37,7 +37,8 @@ bool RunningLockTimerHandler::RegisterRunningLockTimer(
     }
     uint32_t lastTimerId = GetRunningLockTimerId(token);
     if (lastTimerId != OHOS::Utils::TIMER_ERR_DEAL_FAILED) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunningLockTimer exist, unregister timerId=%{public}d", lastTimerId);
+        // RunningLockTimer exist, unregister timerId
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RLT exist,unregistId=%{public}d", lastTimerId);
         UnregisterTimer(lastTimerId);
     }
     bool once = true;
@@ -49,8 +50,8 @@ bool RunningLockTimerHandler::RegisterRunningLockTimer(
         }
         return false;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "AddRunningLockTimer timerid=%{public}u, timeoutMs=%{public}d",
-        curTimerId, timeoutMs);
+    // AddRunningLockTimer:timerid timeoutMs
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "Timerid=%{public}u,Ms=%{public}d", curTimerId, timeoutMs);
     AddRunningLockTimerMap(token, curTimerId);
     return true;
 }
@@ -60,7 +61,8 @@ bool RunningLockTimerHandler::UnregisterRunningLockTimer(const sptr<IRemoteObjec
     std::lock_guard<std::mutex> lock(mutex_);
     uint32_t timerId = GetRunningLockTimerId(token);
     if (timerId != OHOS::Utils::TIMER_ERR_DEAL_FAILED) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Running lock timer is exist, unregister timerId=%{public}d", timerId);
+        // Running lock timer is exist, unregister timerId
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "timer exist,unregistId=%{public}d", timerId);
         UnregisterTimer(timerId);
         RemoveRunningLockTimerMap(token);
     }

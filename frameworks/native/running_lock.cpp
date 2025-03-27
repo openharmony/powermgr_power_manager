@@ -60,7 +60,7 @@ PowerErrors RunningLock::Create()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "CProxy=null");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
     return proxy->CreateRunningLock(token_, runningLockInfo_);
@@ -78,7 +78,7 @@ ErrCode RunningLock::UpdateWorkSource(const std::vector<int32_t>& workSources)
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "UpProxy=null");
         return E_GET_POWER_SERVICE_FAILED;
     }
     std::map<int32_t, std::string> wks;
@@ -96,7 +96,7 @@ ErrCode RunningLock::Lock(int32_t timeOutMs)
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LProxy=null");
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side Lock call, timeOutMs=%{public}d", timeOutMs);
@@ -119,7 +119,7 @@ ErrCode RunningLock::UnLock()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "UnProxy=null");
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side UnLock call");
@@ -134,7 +134,7 @@ bool RunningLock::IsUsed()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "IProxy=null");
         return false;
     }
     bool ret = proxy->IsUsed(token_);
@@ -146,10 +146,11 @@ void RunningLock::Release()
 {
     sptr<IPowerMgr> proxy = proxy_.promote();
     if (proxy == nullptr) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Proxy is a null pointer");
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RProxy=null");
         return;
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "ReleaseRunningLock name=%{public}s", runningLockInfo_.name.c_str());
+    // ReleaseRunningLock
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "RlsN=%{public}s", runningLockInfo_.name.c_str());
     proxy->ReleaseRunningLock(token_, runningLockInfo_.name);
 }
 
@@ -157,7 +158,6 @@ std::string RunningLock::GetBundleNameByUid(const int32_t uid)
 {
     std::string bundleName = "";
     if (uid < OHOS::AppExecFwk::Constants::BASE_APP_UID) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "GetBundleNameByUid Invalid for uid=%{public}d", uid);
         return bundleName;
     }
     AppExecFwk::BundleMgrClient bundleObj;
