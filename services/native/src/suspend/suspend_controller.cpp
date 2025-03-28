@@ -108,13 +108,14 @@ void SuspendController::TriggerSyncSleepCallbackInner(
 {
     uint32_t id = 0;
     for (auto &callback : callbacks) {
+        auto pidUid = SleepCallbackHolder::GetInstance().FindCallbackPidUid(callback);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
             isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,
-                "Trigger %{public}s SyncSleepCallback[%{public}u] success, cost=%{public}" PRId64,
-                priority.c_str(), ++id, cost);
+                "Trigger %{public}s SyncSleepCb[%{public}u] success,P=%{public}dU=%{public}dT=%{public}" PRId64,
+                priority.c_str(), ++id, pidUid.first, pidUid.second, cost);
         }
     }
 }

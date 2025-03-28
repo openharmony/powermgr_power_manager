@@ -378,6 +378,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> syncPowerStateListeners_;
     std::set<const sptr<IPowerStateCallback>, classcomp> asyncPowerStateListeners_;
+    std::map<sptr<IPowerStateCallback>, std::pair<int32_t, int32_t>, classcomp> cachedRegister_;
     std::shared_ptr<IDeviceStateAction> stateAction_;
 
     std::atomic<int64_t> displayOffTime_ {DEFAULT_DISPLAY_OFF_TIME_MS};
