@@ -41,6 +41,14 @@ void SleepCallbackHolder::AddCallback(const sptr<ISyncSleepCallback>& callback, 
             break;
         }
     }
+    AddCallbackPidUid(callback);
+}
+
+void SleepCallbackHolder::AddCallbackPidUid(const sptr<ISyncSleepCallback>& callback)
+{
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    cachedRegister_.emplace(callback, std::make_pair(pid, uid));
 }
 
 SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetHighPriorityCallbacks()
@@ -67,6 +75,7 @@ void SleepCallbackHolder::RemoveCallback(const sptr<ISyncSleepCallback>& callbac
     RemoveCallback(lowPriorityCallbacks_, callback);
     RemoveCallback(defaultPriorityCallbacks_, callback);
     RemoveCallback(highPriorityCallbacks_, callback);
+    RemoveCallbackPidUid(callback);
 }
 
 void SleepCallbackHolder::RemoveCallback(
@@ -78,6 +87,21 @@ void SleepCallbackHolder::RemoveCallback(
         return;
     }
     callbacks.erase(iter);
+}
+
+void SleepCallbackHolder::RemoveCallbackPidUid(const sptr<ISyncSleepCallback>& callback)
+{
+    auto iter = cachedRegister_.find(callback);
+    if (iter != cachedRegister_.end()) {
+        cachedRegister_.erase(iter);
+    }
+}
+
+std::pair<int32_t, int32_t> SleepCallbackHolder::FindCallbackPidUid(const sptr<ISyncSleepCallback>& callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = cachedRegister_.find(callback);
+    return (iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0);
 }
 
 } // namespace PowerMgr

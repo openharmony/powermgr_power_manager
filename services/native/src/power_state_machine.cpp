@@ -1073,6 +1073,9 @@ void PowerStateMachine::RegisterPowerStateCallback(const sptr<IPowerStateCallbac
     if (result) {
         object->AddDeathRecipient(powerStateCBDeathRecipient_);
     }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    cachedRegister_.emplace(callback, std::make_pair(pid, uid));
 }
 
 void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
@@ -1096,6 +1099,9 @@ void PowerStateMachine::UnRegisterPowerStateCallback(const sptr<IPowerStateCallb
         }
         POWER_HILOGD(FEATURE_POWER_STATE, "async listeners.size = %{public}d, eraseNum = %{public}zu",
             static_cast<unsigned int>(asyncPowerStateListeners_.size()), eraseNum);
+    }
+    if (cachedRegister_.find(callback) != cachedRegister_.end()) {
+        cachedRegister_.erase(callback);
     }
 }
 
@@ -1136,7 +1142,14 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
     for (auto& listener : asyncPowerStateListeners_) {
         listener->OnAsyncPowerStateChanged(state);
     }
+#ifdef HAS_HIVIEWDFX_HITRACE_PART
+    PowerHitrace powerHitrace("StateListener");
+#endif
     for (auto& listener : syncPowerStateListeners_) {
+        auto iter = cachedRegister_.find(listener);
+        auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
+        // IPowerStateCallback calling pid uid
+        POWER_HILOGI(FEATURE_POWER_STATE, "IPSCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         listener->OnPowerStateChanged(state);
     }
 }
@@ -1571,8 +1584,12 @@ bool PowerStateMachine::IsRunningLockEnabled(RunningLockType type)
 
 void PowerStateMachine::SetDisplayOffTime(int64_t time, bool needUpdateSetting)
 {
-    POWER_HILOGI(FEATURE_POWER_STATE, "set display off time %{public}" PRId64 " -> %{public}" PRId64 "",
-        displayOffTime_.load(), time);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    // set display off time, calling pid uid, n=needUpdateSetting, i=isScreenOffTimeOverride_
+    POWER_HILOGI(FEATURE_POWER_STATE,
+        "setoff T%{public}" PRId64 "->%{public}" PRId64 "P:%{public}dU:%{public}dn=%{public}di=%{public}d",
+        displayOffTime_.load(), time, pid, uid, needUpdateSetting, isScreenOffTimeOverride_);
     displayOffTime_ = time;
     if (currentState_ == PowerState::AWAKE) {
         if (isScreenOffTimeOverride_ == true) {

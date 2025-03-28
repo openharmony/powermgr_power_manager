@@ -17,7 +17,9 @@
 #define POWERMGR_POWER_MANAGER_HIBERNATE_CONTROLLER_H
 
 #include <set>
+#include <map>
 
+#include "ipc_skeleton.h"
 #include "hibernate/isync_hibernate_callback.h"
 
 namespace OHOS {
@@ -36,7 +38,8 @@ public:
         }
     };
     using HibernateCallbackContainerType = std::set<sptr<ISyncHibernateCallback>, HibernateCallbackCompare>;
-
+    using HibernateCallbackCacheRegister =
+        std::map<sptr<ISyncHibernateCallback>, std::pair<int32_t, int32_t>, HibernateCallbackCompare>;
     HibernateController() {};
     virtual ~HibernateController() = default;
 
@@ -50,6 +53,7 @@ private:
     bool prepared_ {false};
     std::mutex mutex_;
     HibernateCallbackContainerType callbacks_;
+    HibernateCallbackCacheRegister cachedRegister_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
