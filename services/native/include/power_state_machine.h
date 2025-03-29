@@ -203,6 +203,7 @@ public:
     {
         return switchOpen_;
     }
+    bool IsSwitchOpenByPath();
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool IsHibernating() const
     {
