@@ -69,6 +69,7 @@ std::atomic_bool g_prepareResult = true;
 #endif
 pid_t g_callSetForceTimingOutPid = 0;
 pid_t g_callSetForceTimingOutUid = 0;
+const std::string LID_STATUS_SCENE_NAME = "lid_status";
 }
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
     : pms_(pms), ffrtTimer_(ffrtTimer), currentState_(PowerState::UNKNOWN)
@@ -2476,6 +2477,25 @@ bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason
         return false;
     }
     return true;
+}
+
+bool PowerStateMachine::IsSwitchOpenByPath()
+{
+    std::string value = "";
+    int32_t ret = SystemSuspendController::GetInstance().GetPowerConfig(LID_STATUS_SCENE_NAME, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "IsSwitchOpenByPath GetPowerConfig failed, ret: %{public}d", ret);
+        return IsSwitchOpen();
+    }
+    int32_t num = 0;
+    bool rst = StrToInt(value, num);
+    if (rst != true) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "IsSwitchOpenByPath StrToInt failed, value: %{public}s", value.c_str());
+        return IsSwitchOpen();
+    }
+    bool status = static_cast<bool>(num);
+    POWER_HILOGI(FEATURE_POWER_STATE, "IsSwitchOpenByPath status: %{public}d", status);
+    return status;
 }
 } // namespace PowerMgr
 } // namespace OHOS
