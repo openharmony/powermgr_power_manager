@@ -106,7 +106,7 @@ bool TakeOverShutdownCallbackTest::NotTakeOverShutdownCallback::OnTakeOverShutdo
  * @tc.desc: Test takeover shutdown callback for shutdown and reboot
  * @tc.type: FUNC
  */
-HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Level0)
+HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback001 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
@@ -130,7 +130,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback001, TestSize.Lev
  * @tc.desc: Test the low and default priority of takeover shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Level0)
+HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback002 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
@@ -152,7 +152,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, ITakeOverShutdownCallback002, TestSize.Le
  * @tc.desc: Test the low and high priority of takeover shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Level0)
+HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback003 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
@@ -174,7 +174,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback003, TestSize.Lev
  * @tc.desc: Test the default and high priority of takeover shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Level0)
+HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback004 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();
@@ -196,7 +196,7 @@ HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback004, TestSize.Lev
  * @tc.desc: Test do not takeover the shutdown
  * @tc.type: FUNC
  */
-HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback005, TestSize.Level0)
+HWTEST_F(TakeOverShutdownCallbackTest, TakeOverShutdownCallback005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallback005 function start!");
     auto& shutdownClient = ShutdownClient::GetInstance();

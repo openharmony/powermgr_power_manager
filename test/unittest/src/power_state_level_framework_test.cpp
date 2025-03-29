@@ -49,7 +49,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI6JSKU
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework001, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework001 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework001: test system-level sleep level enumeration is start";
@@ -71,7 +71,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework002, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework002 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework002: power state replacement is start";
@@ -88,7 +88,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework003, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework003 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework003: power state replacement is start";
@@ -105,7 +105,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework003, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework004, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework004 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework004: power state replacement is start";
@@ -122,7 +122,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework004, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework005, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework005 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework005: power state replacement is start";
@@ -139,7 +139,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework005, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework006, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework006, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework006 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework006: power state replacement is start";
@@ -156,7 +156,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework006, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework007, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework007, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework007 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework007: power state replacement is start";
@@ -173,7 +173,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework007, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework008, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework008 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework008: power state replacement is start";
@@ -190,7 +190,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework008, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework009, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework009, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework009 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework009: power state replacement is start";
@@ -207,7 +207,7 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework009, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI6OM1F
  */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework010, TestSize.Level0)
+HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework010 function start!");
     GTEST_LOG_(INFO) << "PowerStateLevelFramework010: power state replacement is start";

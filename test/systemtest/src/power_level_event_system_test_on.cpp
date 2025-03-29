@@ -98,7 +98,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5HUVS
  */
-HWTEST_F(PowerLevelEventSystemTestOn, PowerLevelEventSystemTestOn_001, TestSize.Level0)
+HWTEST_F(PowerLevelEventSystemTestOn, PowerLevelEventSystemTestOn_001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOn_001 function start!");
     GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOn_001 start";

@@ -46,7 +46,7 @@ void RunningSuspendCallback()
  * @tc.desc: test Acquire and Release inrunningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
+HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function start!");
     auto sc = std::make_shared<Suspend::SuspendController>();
@@ -67,7 +67,7 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level0)
  * @tc.desc: test Suspend inrunningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level0)
+HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002 function start!");
     auto SuspendController = std::make_shared<Suspend::SuspendController>();
