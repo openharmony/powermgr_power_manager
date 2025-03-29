@@ -135,7 +135,7 @@ namespace {
  * @tc.desc: test powermgr notify for screen Off
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
+HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest001: Test ScreenOFF Notification start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest001 function start!");
@@ -169,7 +169,7 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest001, TestSize.Level0)
  * @tc.desc: test powermgr notify for screen On
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level0)
+HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest002: Test ScreenOn Notification start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest002 function start!");

@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: test PowerStateCallback
  * @tc.type: FUNC
  */
-HWTEST_F (PowerDeviceModeTest, PowerDeviceModeCallback001, TestSize.Level0)
+HWTEST_F (PowerDeviceModeTest, PowerDeviceModeCallback001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerDeviceModeCallback001 function start!");
     bool ret = 0;
