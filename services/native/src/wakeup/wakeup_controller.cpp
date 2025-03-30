@@ -484,8 +484,8 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
             suspendController->TriggerSyncSleepCallback(true);
         }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-        if (suspendController != nullptr && !stateMachine_->IsSwitchOpen() &&
-            stateMachine_->GetExternalScreenNumber() > 0) {
+        if (suspendController != nullptr && stateMachine_->GetExternalScreenNumber() > 0 &&
+            !stateMachine_->IsSwitchOpenByPath()) {
             suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         }
 #endif
