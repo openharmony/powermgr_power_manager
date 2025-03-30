@@ -16,7 +16,10 @@ import("../powermgr.gni")
 
 group("apitest") {
   testonly = true
-  deps = [ "apitest/inner_api/ffrt:apitest" ]
+  deps = [
+    "apitest/inner_api/ffrt:apitest",
+    "apitest/inner_api/hookmgr:apitest",
+  ]
 }
 
 group("systemtest") {
@@ -33,6 +36,7 @@ group("unittest") {
   testonly = true
   deps = [
     "apitest/inner_api/ffrt:apitest",
+    "apitest/inner_api/hookmgr:apitest",
     "apitest/inner_api/shutdown:unittest",
     "unittest:unittest",
     "unittest/src/servicetest:unittest",
