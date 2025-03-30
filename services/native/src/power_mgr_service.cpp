@@ -15,6 +15,7 @@
 
 #include "power_mgr_service.h"
 
+#include <algorithm>
 #include <datetime_ex.h>
 #include <file_ex.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
@@ -26,6 +27,7 @@
 #endif
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
+#include <modulemgr.h>
 #include <securec.h>
 #include <string_ex.h>
 #include <system_ability_definition.h>
@@ -63,6 +65,12 @@ using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace PowerMgr {
 namespace {
+MODULE_MGR *g_moduleMgr = nullptr;
+#if (defined(__aarch64__) || defined(__x86_64__))
+const char* POWER_PLUGIN_AUTORUN_PATH = "/system/lib64/powerplugin/autorun";
+#else
+const char* POWER_PLUGIN_AUTORUN_PATH = "/system/lib32/powerplugin/autorun";
+#endif
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string REASON_POWER_KEY = "power_key";
 static std::string g_wakeupReason = "";
@@ -116,8 +124,10 @@ void PowerMgrService::OnStart()
 #endif
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
-#endif
     PowerExtIntfWrapper::Instance().Init();
+    g_moduleMgr = ModuleMgrScan(POWER_PLUGIN_AUTORUN_PATH);
+#endif
+    
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {
         POWER_HILOGE(COMP_SVC, "Register to system ability manager failed");
         return;
@@ -659,6 +669,7 @@ void PowerMgrService::OnStop()
     UnregisterExternalCallback();
 #ifndef FUZZ_TEST
     PowerExtIntfWrapper::Instance().DeInit();
+    ModuleMgrDestroy(g_moduleMgr);
 #endif
 }
 
@@ -2132,7 +2143,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
         return;
     }
 
-    int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber() - 1;
+    int32_t curExternalScreenNum = std::max(powerStateMachine->GetExternalScreenNumber() - 1, 0);
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
     bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
