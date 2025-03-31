@@ -37,7 +37,7 @@ using namespace testing::ext;
  * @tc.type: FUNC
  * @tc.require: issueI9C4GG
  */
-HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer001, TestSize.Level0)
+HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer001 function start!");
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer001: start";
@@ -62,7 +62,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: issueI9C4GG
  */
-HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Level0)
+HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer002 function start!");
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer002: start";
@@ -96,7 +96,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer002, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: issueI9C4GG
  */
-HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Level0)
+HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RegisterRunningLockTimer003 function start!");
     GTEST_LOG_(INFO) << "RegisterRunningLockTimer003: start";
@@ -129,7 +129,7 @@ HWTEST_F(RunningLockTimerHandlerTest, RegisterRunningLockTimer003, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: issueI9C4GG
  */
-HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer001, TestSize.Level0)
+HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer001 function start!");
     GTEST_LOG_(INFO) << "UnregisterRunningLockTimer001: start";
@@ -154,7 +154,7 @@ HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI9C4GG
  */
-HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer002, TestSize.Level0)
+HWTEST_F(RunningLockTimerHandlerTest, UnregisterRunningLockTimer002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "UnregisterRunningLockTimer002 function start!");
     GTEST_LOG_(INFO) << "UnregisterRunningLockTimer002: start";

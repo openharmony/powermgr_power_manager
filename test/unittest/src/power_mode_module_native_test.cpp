@@ -48,7 +48,7 @@ using ModeActionPolicy = std::function<void(bool)>;
  * @tc.name: PowerModeModuleNativeTest001
  * @tc.desc: test callback in PowerModeModule
  */
-HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Level0)
+HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest001 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
@@ -92,7 +92,7 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
  * @tc.desc: test GetPowerMode in PowerModePolicy
  * @tc.type: FUNC
  */
-HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest001, TestSize.Level0)
+HWTEST_F (PowerModeModuleNativeTest, PowerModePolicyNativeTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerModePolicyNativeTest001 function start!");
     PowerModePolicy *powerModePolicyTest = new PowerModePolicy();

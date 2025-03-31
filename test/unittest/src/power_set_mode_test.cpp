@@ -48,7 +48,7 @@ namespace {
  * @tc.desc: test SetDeviceMode in proxy
  * @tc.type: FUNC
  */
-HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
+HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SetModeTest001 function start!");
     sleep(SLEEP_WAIT_TIME_S);
@@ -81,7 +81,7 @@ HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level0)
  * @tc.desc: test StartXMlParse
  * @tc.type: FUNC
  */
-HWTEST_F (PowerSetModeTest, SaveModeTest001, TestSize.Level0)
+HWTEST_F (PowerSetModeTest, SaveModeTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SaveModeTest001 function start!");
     auto mode = std::make_shared<PowerSaveMode>();

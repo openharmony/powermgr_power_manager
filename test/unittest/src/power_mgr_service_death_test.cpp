@@ -31,7 +31,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI650CX
  */
-HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level0)
+HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -52,7 +52,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: issueI650CX
  */
-HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level0)
+HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();

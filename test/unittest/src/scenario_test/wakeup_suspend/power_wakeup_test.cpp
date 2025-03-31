@@ -60,7 +60,7 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
  * @tc.desc: test keyboard wakeup and powerkey pressed at the same time
  * @tc.type: FUNC
  */
-HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
+HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level1)
 {
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -97,7 +97,7 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level0)
  * @tc.desc: test simulate normal key event when screenoff
  * @tc.type: FUNC
  */
-HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level0)
+HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level1)
 {
     POWER_HILOGD(LABEL_TEST, "PowerWakeupTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();

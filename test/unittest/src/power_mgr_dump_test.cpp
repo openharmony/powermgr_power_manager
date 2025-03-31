@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: Test that args in PowerMgrDump is -i.
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level0)
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative001 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative001 fail to get PowerMgrService";
@@ -77,7 +77,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level0)
  * @tc.desc: Test that args in PowerMgrDump is -k.
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level0)
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative002 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative002 fail to get PowerMgrService";
@@ -94,7 +94,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level0)
  * @tc.desc: Test that args in PowerMgrDump is -r, -s, -a.
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative003 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative003 fail to get PowerMgrService";
@@ -115,7 +115,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level0)
  * @tc.desc: Test that args in PowerMgrDump is -h.
  * @tc.type: FUNC
  */
-HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level0)
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative004 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative004 fail to get PowerMgrService";

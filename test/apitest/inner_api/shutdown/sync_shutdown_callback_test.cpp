@@ -108,7 +108,7 @@ void SyncShutdownCallbackTest::NotSyncShutdownOrRebootCallback::OnSyncShutdownOr
  * @tc.desc: Test synchronous shutdown callback for shutdown and reboot
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback001, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback001 function start!");
     auto callback = new SyncShutdownCallback();
@@ -130,7 +130,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback001, TestSize.Level0)
  * @tc.desc: Test the low and default priority of synchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback002, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback002 function start!");
     auto lowPriorityCallback = new LowPrioritySyncShutdownCallback();
@@ -149,7 +149,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback002, TestSize.Level0)
  * @tc.desc: Test the low and high priority of synchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback003, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback003 function start!");
     auto lowPriorityCallback = new LowPrioritySyncShutdownCallback();
@@ -168,7 +168,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback003, TestSize.Level0)
  * @tc.desc: Test the default and high priority of synchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback004, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback004 function start!");
     auto defaultPriorityCallback = new SyncShutdownCallback();
@@ -187,7 +187,7 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback004, TestSize.Level0)
  * @tc.desc: Test do not synchronous shutdown
  * @tc.type: FUNC
  */
-HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level0)
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 function start!");
     auto notSyncCallback = new NotSyncShutdownCallback();

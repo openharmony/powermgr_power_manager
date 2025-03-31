@@ -215,7 +215,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_007, TestSize.Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_008, TestSize.Level0)
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_008: RegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_008 function start!");
@@ -237,7 +237,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_008, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_009, TestSize.Level0)
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_009: RegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_009 function start!");
@@ -261,7 +261,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_009, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_010, TestSize.Level0)
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_010, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_010: RegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_010 function start!");
@@ -285,7 +285,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_010, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_011, TestSize.Level0)
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_011, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_011: UnRegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_011 function start!");
@@ -307,7 +307,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_011, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_012, TestSize.Level0)
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_012, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_012: UnRegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_012 function start!");
@@ -330,7 +330,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_012, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_013, TestSize.Level0)
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_013, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSavemode_013: UnRegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_013 function start!");
