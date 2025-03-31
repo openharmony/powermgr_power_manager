@@ -141,7 +141,7 @@ static bool WaitingCallback(bool &isPriority)
  * @tc.desc: Test asynchronous shutdown callback for shutdown and reboot
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback001, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback001 function start!");
     auto callback = new AsyncShutdownCallback();
@@ -162,7 +162,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback001, TestSize.Level0)
  * @tc.desc: Test the low and default priority of asynchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback002, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback002 function start!");
     auto lowPriorityCallback = new LowPriorityAsyncShutdownCallback();
@@ -181,7 +181,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback002, TestSize.Level0)
  * @tc.desc: Test the low and high priority of asynchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback003, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback003 function start!");
     auto lowPriorityCallback = new LowPriorityAsyncShutdownCallback();
@@ -200,7 +200,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback003, TestSize.Level0)
  * @tc.desc: Test the default and high priority of asynchronous shutdown callback
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback004, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback004 function start!");
     auto defaultPriorityCallback = new AsyncShutdownCallback();
@@ -219,7 +219,7 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback004, TestSize.Level0)
  * @tc.desc: Test do not asynchronous shutdown
  * @tc.type: FUNC
  */
-HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level0)
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 function start!");
     auto notAsyncCallback = new NotAsyncShutdownCallback();

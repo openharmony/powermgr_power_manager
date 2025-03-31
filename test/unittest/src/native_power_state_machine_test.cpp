@@ -61,7 +61,7 @@ TransitResult TransitResultToStateChangeReason(StateChangeReason trigger)
  * @tc.desc: test init in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine001: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001 function start!");
@@ -99,7 +99,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level
  * @tc.desc: test callback in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002 function start!");
@@ -144,7 +144,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
  * @tc.desc: test suspendDeviceInner in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine003: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003 function start!");
@@ -189,7 +189,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level
  * @tc.desc: test refreshActivityInner and wakeupDeviceInner in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004 function start!");
@@ -246,7 +246,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level
  * @tc.desc: test recordFailure in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine005: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine005 function start!");
@@ -289,7 +289,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
  * @tc.desc: test recordFailure in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine006: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006 function start!");
@@ -316,7 +316,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level
  * @tc.desc: test init in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007 function start!");
@@ -353,7 +353,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level
  * @tc.desc: test duration of DIM state
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -376,7 +376,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
  * @tc.desc: test GetExternalScreenNumber
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -403,7 +403,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
  * @tc.desc: test ProximityNormalController in powerStateMachine
  * @tc.type: FUNC
  */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level0)
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function start!");
 #ifdef HAS_SENSORS_SENSOR_PART

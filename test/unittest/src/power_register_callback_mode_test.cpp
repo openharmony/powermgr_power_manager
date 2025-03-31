@@ -44,7 +44,7 @@ namespace {
  * @tc.desc: test PowerModeCallback
  * @tc.type: FUNC
  */
-HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, TestSize.Level0)
+HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();

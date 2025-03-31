@@ -37,7 +37,7 @@ void DeviceStateActionCallback(uint32_t trigger) {}
  * @tc.desc: test init in deviceStateAction
  * @tc.type: FUNC
  */
-HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level0)
+HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001 function start!");
     auto deviceStateAction = std::make_shared<DeviceStateAction>();

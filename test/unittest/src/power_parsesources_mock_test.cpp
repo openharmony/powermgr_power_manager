@@ -56,7 +56,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI7G6OY
  */
-HWTEST_F(PowerParseSourceMockTest, PowerParseSourceMockTest001, TestSize.Level0)
+HWTEST_F(PowerParseSourceMockTest, PowerParseSourceMockTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerParseSourceMockTest001 function start!");
     GTEST_LOG_(INFO) << "PowerParseSourceMockTest001: start";

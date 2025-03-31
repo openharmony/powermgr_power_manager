@@ -200,7 +200,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -234,7 +234,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -271,7 +271,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_003 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -306,7 +306,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_004 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -335,7 +335,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_004, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_005 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -362,7 +362,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_005, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_006 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -423,7 +423,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_006, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_007 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -477,7 +477,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_007, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_008 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -533,7 +533,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_008, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_009 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -591,7 +591,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_009, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_010 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -645,7 +645,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_010, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_011 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -713,7 +713,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_011, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI8JBT4
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_012, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_012, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_012 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -762,7 +762,7 @@ HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_012, TestSize.Lev
  * @tc.desc: test publishing screen off event
  * @tc.type: FUNC
  */
-HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_013, TestSize.Level0)
+HWTEST_F (PowerCoordinationLockTest, PowerCoordinationLockTest_013, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerCoordinationLockTest_013 function start!");
     int PARM_ZERO = 0;

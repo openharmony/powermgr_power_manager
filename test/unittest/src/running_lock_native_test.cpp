@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: test init in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -93,7 +93,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative001, TestSize.Level0)
  * @tc.desc: test proxyRunningLock in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -133,7 +133,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative002, TestSize.Level0)
  * @tc.desc: test enableMock and dumpInfo in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative003 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -168,7 +168,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative003, TestSize.Level0)
  * @tc.desc: test setProximity in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative004 function start!");
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -210,7 +210,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level0)
  * @tc.desc: test lock and unlock in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative005 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -244,7 +244,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative005, TestSize.Level0)
  * @tc.desc: test callback in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative006 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -290,7 +290,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative007 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -341,7 +341,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative008 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -360,7 +360,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative008, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative009, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative009, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative009 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -381,7 +381,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative009, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative010, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative010 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -399,7 +399,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative010, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative011, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative011, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative011 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -416,7 +416,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative011, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative012, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative012, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative012 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -433,7 +433,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative012, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative013, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative013, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative013 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -454,7 +454,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative013, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative014 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -475,7 +475,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative014, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative015, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative015, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative015 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -503,7 +503,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative015, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative016 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -529,7 +529,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative016, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative017 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -545,7 +545,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative017, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative018 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -561,7 +561,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative018, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative019, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative019, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative019 function start!");
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -586,7 +586,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative019, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI9C4GG
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative020 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -622,7 +622,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative020, TestSize.Level0)
  * @tc.desc: test the activation of screen-on-lock
  * @tc.type: FUNC
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
+HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative021 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -665,7 +665,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level0)
  * @tc.desc: test enableMock and dumpInfo in runningLockMgr
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative022, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative022 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -699,7 +699,7 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative022, TestSize.Level0)
  * @tc.desc: test NeedNotify
  * @tc.type: FUNC
  */
-HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level0)
+HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockNative023 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();

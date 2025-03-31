@@ -49,7 +49,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI7G6OY
  */
-HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Level0)
+HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerGetControllerMockTest001 function start!";
     POWER_HILOGI(LABEL_TEST, "PowerGetControllerMockTest001 start");

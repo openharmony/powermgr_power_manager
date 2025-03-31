@@ -117,7 +117,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_001, TestSize.Level0)
+HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSetdevicemode_001: UnRegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_001 function start!");
@@ -143,7 +143,7 @@ HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
-HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_002, TestSize.Level0)
+HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerSetdevicemode_002: UnRegisterPowerModeCallback start.";
     POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_002 function start!");

@@ -44,7 +44,7 @@ namespace {
  * @tc.desc: test simulate powerkey event once when screenon
  * @tc.type: FUNC
  */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
+HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -70,7 +70,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
  * @tc.desc: test simulate powerkey event when screenon
  * @tc.type: FUNC
  */
-HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
+HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();

@@ -82,7 +82,7 @@ namespace {
  * @tc.desc: test init in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function start!");
     g_pmsTest->HallSensorSubscriberInit();
@@ -106,7 +106,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
  * @tc.desc: test handleKeyEvent in powerMgrService
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 function start!");
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
@@ -133,7 +133,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
  * @tc.desc: test pickup register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 function start!");
 #ifdef POWER_PICKUP_ENABLE
@@ -152,7 +152,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
  * @tc.desc: test autobrightness register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
@@ -169,7 +169,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
  * @tc.desc: test brightness register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
@@ -186,7 +186,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level0)
  * @tc.desc: test vibrateState register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
@@ -204,7 +204,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level0)
  * @tc.desc: test autoWindowRotation register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
@@ -221,7 +221,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level0)
  * @tc.desc: test intellVoiceSetting register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
@@ -239,7 +239,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level0)
  * @tc.desc: test settingPowerMode register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 function start!");
     g_pmsTest->RegisterSettingPowerModeObservers();
@@ -256,7 +256,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level0)
  * @tc.desc: test settingWakeUpLid register
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 function start!");
     g_pmsTest->RegisterSettingWakeUpLidObserver();
@@ -272,7 +272,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
  * @tc.desc: test RegisterSettingWakeupDoubleClickObservers
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 function start!");
 #ifdef POWER_DOUBLECLICK_ENABLE
@@ -291,7 +291,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
  * @tc.desc: test RegisterMovementCallback
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 function start!");
 #ifdef MSDP_MOVEMENT_ENABLE
@@ -310,7 +310,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level0)
  * @tc.desc: test RegisterExternalScreenListener
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -327,7 +327,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level0)
  * @tc.desc: test ExternalScreenListener OnConnect
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -376,7 +376,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
  * @tc.desc: test ExternalScreenListener OnDisconnect
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT

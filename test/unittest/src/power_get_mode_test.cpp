@@ -39,7 +39,7 @@ namespace {
  * @tc.desc: test GetDeviceMode in proxy
  * @tc.type: FUNC
  */
-HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level0)
+HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 function start!");
     PowerMode modeFirst;

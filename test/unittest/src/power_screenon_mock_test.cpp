@@ -77,7 +77,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI7G6OY
  */
-HWTEST_F(PowerScreenOnMockTest, PowerScreenOnMockTest001, TestSize.Level0)
+HWTEST_F(PowerScreenOnMockTest, PowerScreenOnMockTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerScreenOnMockTest001 function start!");
     GTEST_LOG_(INFO) << "PowerScreenOnMockTest001: start";
