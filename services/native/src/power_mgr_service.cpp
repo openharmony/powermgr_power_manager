@@ -1249,7 +1249,7 @@ std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "get B for U=%{public}d,Err:%{public}d",
             uid, static_cast<int32_t>(res));
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "U=%{public}d,B=%{public}s", uid, tempBundleName.c_str());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "U=%{public}d,B=%{public}s", uid, tempBundleName.c_str());
     return tempBundleName;
 }
 
