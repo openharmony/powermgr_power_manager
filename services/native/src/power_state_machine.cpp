@@ -2003,8 +2003,7 @@ void PowerStateMachine::WriteHiSysEvent(TransitResult ret, StateChangeReason rea
 
 bool PowerStateMachine::IsTransitFailed(TransitResult ret)
 {
-    if (ret != TransitResult::SUCCESS && ret != TransitResult::LOCKING && ret != TransitResult::DISPLAY_OFF_ERR
-        && ret != TransitResult::FORBID_TRANSIT && ret != TransitResult::DISPLAY_ON_ERR) {
+    if (ret == TransitResult::OTHER_ERR) {
         return true;
     } else {
         return false;
