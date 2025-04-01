@@ -1033,10 +1033,10 @@ std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
     ErrCode res = bundleObj.GetNameForUid(uid, tempBundleName);
     IPCSkeleton::SetCallingIdentity(identity);
     if (res != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to get bundle name for uid=%{public}d, ErrCode=%{public}d",
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "get B for U=%{public}d,Err:%{public}d",
             uid, static_cast<int32_t>(res));
     }
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "bundle name for uid=%{public}d, name=%{public}s", uid, tempBundleName.c_str());
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "U=%{public}d,B=%{public}s", uid, tempBundleName.c_str());
     return tempBundleName;
 }
 
