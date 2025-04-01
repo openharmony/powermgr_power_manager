@@ -96,9 +96,11 @@ void RunningLockMgr::InitLocksTypeScreen()
                 return RUNNINGLOCK_FAILURE;
             }
             if (active) {
+                // RUNNINGLOCK_SCREEN active
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "SL active");
                 pms->RefreshActivityInner(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE, true);
             } else {
+                // RUNNINGLOCK_SCREEN inactive
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "SL inactive");
                 if (stateMachine->GetState() == PowerState::AWAKE) {
                     stateMachine->ResetInactiveTimer();
@@ -319,6 +321,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj, const std:
             return result;
         }
     }
+    // ReleaseLock name type bundleName
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "RlsN:%{public}s,T:%{public}d,B:%{public}s",
         lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
     UnLock(remoteObj);
@@ -452,6 +455,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
+    // try lock
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockN:%{public}s,T:%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->IsProxied()) {
@@ -463,6 +467,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
         return false;
     }
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
+        // Lock is already enabled
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Locked N=%{public}s", lockInner->GetName().c_str());
         return false;
     }
@@ -506,10 +511,12 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
         runninglockProxy_->UpdateProxyState(lockInner->GetPid(), lockInner->GetUid(), remoteObj, false);
     }
     auto lockInnerParam = lockInner->GetParam();
+    // try unlock
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLockN:%{public}s,T:%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock is already disabled, name=%{public}s", lockInner->GetName().c_str());
+        // Lock is already disabled
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLocked N=%{public}s", lockInner->GetName().c_str());
         return false;
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
@@ -615,7 +622,8 @@ bool RunningLockMgr::ExistValidRunningLock()
     return false;
 }
 
-void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerParam, const std::string &tag)
+void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerParam, const std::string &tag,
+    const std::string &logTag)
 {
     uint64_t lockid = lockInnerParam.lockid;
     int32_t pid = lockInnerParam.pid;
@@ -635,9 +643,9 @@ void RunningLockMgr::NotifyRunningLockChanged(const RunningLockParam& lockInnerP
             .append(" BUNDLENAME=").append(bundleName)
             .append(" TAG=").append(tag)
             .append(" TIMESTAMP=").append(std::to_string(timestamp));
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "runninglock message: PID=%{public}d UID=%{public}d TYPE=%{public}d "
-        "NAME=%{public}s BUNDLENAME=%{public}s TAG=%{public}s",
-        pid, uid, type, lockInnerParam.name.c_str(), bundleName.c_str(), tag.c_str());
+    // runninglock message
+    POWER_HILOGI(COMP_LOCK, "P=%{public}dU=%{public}dT=%{public}dN=%{public}sB=%{public}sTA=%{public}s",
+        pid, uid, type, lockInnerParam.name.c_str(), bundleName.c_str(), logTag.c_str());
     if (g_runningLockCallback != nullptr) {
         g_runningLockCallback->HandleRunningLockMessage(message);
     }
@@ -682,6 +690,7 @@ void RunningLockMgr::LockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     std::shared_ptr<RunningLockInner>& lockInner)
 {
     if (!lockInner->IsProxied()) {
+        // LockInnerByProxy failed, runninglock UnProxied
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Lock UnProxied");
         return;
     }
@@ -700,6 +709,7 @@ void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
 {
     RunningLockState lastState = lockInner->GetState();
     if (lastState == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
+        // UnlockInnerByProxy failed, runninglock Disable
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Unlock Disable");
         return;
     }
@@ -805,7 +815,7 @@ int32_t RunningLockMgr::LockCounter::Increase(const RunningLockParam& lockInnerP
         }
     }
     if (result == RUNNINGLOCK_SUCCESS  && NeedNotify(lockInnerParam.type)) {
-        NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_ADD");
+        NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_ADD", "AD");
     }
     return result;
 }
@@ -821,7 +831,7 @@ int32_t RunningLockMgr::LockCounter::Decrease(const RunningLockParam& lockInnerP
         }
     }
     if (result == RUNNINGLOCK_SUCCESS && NeedNotify(lockInnerParam.type)) {
-        NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE");
+        NotifyRunningLockChanged(lockInnerParam, "DUBAI_TAG_RUNNINGLOCK_REMOVE", "RE");
     }
     return result;
 }
