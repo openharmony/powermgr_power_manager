@@ -456,14 +456,18 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
     // try lock
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "LockN:%{public}s,T:%{public}d",
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "LockN:%{public}s,T:%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->IsProxied()) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied");
+        // Runninglock is proxied
+        POWER_HILOGW(FEATURE_RUNNING_LOCK,
+            "try lock proxied fail,N:%{public}s,T:%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
         return false;
     }
     if (!IsValidType(lockInnerParam.type)) {
-        POWER_HILOGW(FEATURE_RUNNING_LOCK, "type is invalid");
+        // Type is invalid
+        POWER_HILOGE(FEATURE_RUNNING_LOCK,
+            "try lock type fail,N:%{public}s,T:%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
         return false;
     }
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
@@ -476,13 +480,15 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     }
     auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Lock failed unsupported type:%{public}d", lockInnerParam.type);
+        // Lock failed unsupported
+        POWER_HILOGE(FEATURE_RUNNING_LOCK,
+            "try lock fail,N:%{public}s,T:%{public}d", lockInnerParam.name.c_str(), lockInnerParam.type);
         return false;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     if (counter->Increase(lockInnerParam) != RUNNINGLOCK_SUCCESS) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockCounter increase failed, type=%{public}d, count=%{public}d",
-            counter->GetType(), counter->GetCount());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "try lock increase fail,N:%{public}s,T:%{public}d,C:%{public}d",
+            lockInnerParam.name.c_str(), counter->GetType(), counter->GetCount());
         return false;
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
@@ -512,7 +518,7 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
     }
     auto lockInnerParam = lockInner->GetParam();
     // try unlock
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLockN:%{public}s,T:%{public}d",
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "UnLockN:%{public}s,T:%{public}d",
         lockInnerParam.name.c_str(), lockInnerParam.type);
     if (lockInner->GetState() == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
         // Lock is already disabled
@@ -524,14 +530,15 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
     }
     auto iterator = lockCounters_.find(lockInnerParam.type);
     if (iterator == lockCounters_.end()) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Unlock failed unsupported type, type=%{public}d",
-            lockInnerParam.type);
+        // Unlock failed unsupported type
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "try unlock fail,N:%{public}s,T:%{public}d",
+            lockInnerParam.name.c_str(), lockInnerParam.type);
         return false;
     }
     std::shared_ptr<LockCounter> counter = iterator->second;
     if (counter->Decrease(lockInnerParam)) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "LockCounter decrease failed, type=%{public}d, count=%{public}d",
-            counter->GetType(), counter->GetCount());
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "try unlock decrease fail,N:%{public}s,T:%{public}d,C:%{public}d",
+            lockInnerParam.name.c_str(), counter->GetType(), counter->GetCount());
         return false;
     }
     WriteHiSysEvent(lockInner);
