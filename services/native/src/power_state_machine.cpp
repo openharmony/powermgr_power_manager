@@ -1335,7 +1335,7 @@ bool PowerStateMachine::CheckRunningLock(PowerState state)
     if (state == PowerState::DIM) {
         // screen on lock need to block DIM state as well
         state = PowerState::INACTIVE;
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "check Screen on Lock for DIM state");
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "check Screen on Lock for DIM state");
     }
     auto iterator = lockMap_.find(state);
     if (iterator == lockMap_.end()) {
