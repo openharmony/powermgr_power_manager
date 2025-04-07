@@ -216,7 +216,7 @@ int64_t SettingHelper::GetSettingDisplayAcScreenOffTime(int64_t defaultVal)
 {
     int64_t value = GetSettingLongValue(SETTING_DISPLAY_AC_OFF_TIME_KEY, defaultVal);
     if (value >= 0 && value <= MIN_DISPLAY_OFF_TIME_MS) {
-        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}lld)ms, use defaultVal", __func__, value);
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}" PRId64 ")ms, use defaultVal", __func__, value);
         value = defaultVal;
     }
     return value;
@@ -241,7 +241,7 @@ int64_t SettingHelper::GetSettingDisplayDcScreenOffTime(int64_t defaultVal)
 {
     int64_t value = GetSettingLongValue(SETTING_DISPLAY_DC_OFF_TIME_KEY, defaultVal);
     if (value >= 0 && value <= MIN_DISPLAY_OFF_TIME_MS) {
-        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}lld)ms, use defaultVal", __func__, value);
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}" PRId64 ")ms, use defaultVal", __func__, value);
         value = defaultVal;
     }
     return value;
@@ -266,7 +266,7 @@ int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
 {
     int64_t value = GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, defaultVal);
     if (value <= MIN_DISPLAY_OFF_TIME_MS) {
-        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}lld)ms, use defaultVal", __func__, value);
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}" PRId64 ")ms, use defaultVal", __func__, value);
         value = defaultVal;
     }
     return value;
