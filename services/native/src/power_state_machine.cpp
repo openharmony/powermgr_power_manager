@@ -216,6 +216,11 @@ bool PowerStateMachine::CanTransitTo(PowerState from, PowerState to, StateChange
         }
 #endif
     }
+    if (reason == StateChangeReason::STATE_CHANGE_REASON_PROXIMITY && to == PowerState::INACTIVE &&
+        !IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL)) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "this proximity task is invalidated, directly return");
+        return false;
+    }
     bool isAllowed = (!allowMapByReason_.count(reason) ||
         (allowMapByReason_[reason].count(currentState_) && allowMapByReason_[reason][currentState_].count(to)));
     return isAllowed;
