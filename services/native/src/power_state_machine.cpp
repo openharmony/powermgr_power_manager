@@ -517,22 +517,12 @@ bool PowerStateMachine::SetDreamingState(StateChangeReason reason)
 #ifdef POWER_MANAGER_TV_DREAMING
     Rosen::PowerStateChangeReason dispReason = PowerUtils::GetDmsReasonByPowerReason(reason);
     if (reason == StateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
-        if (isDreaming_) {
-            POWER_HILOGW(FEATURE_POWER_STATE, "[UL_POWER] is dreaming now");
-            return false;
-        }
         bool isSuccess = Rosen::DisplayManagerLite::GetInstance().SuspendBegin(dispReason);
         POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] start dreaming success=%{public}d", isSuccess);
-        isDreaming_ = isSuccess;
         return isSuccess;
     } else if (reason == StateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
-        if (!isDreaming_) {
-            POWER_HILOGW(FEATURE_POWER_STATE, "[UL_POWER] is not dreaming now");
-            return false;
-        }
         bool isSuccess = Rosen::DisplayManagerLite::GetInstance().WakeUpBegin(dispReason);
         POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] end dreaming success=%{public}d", isSuccess);
-        isDreaming_ = !isSuccess;
         return isSuccess;
     }
 #endif
@@ -1961,11 +1951,6 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         PowerUtils::GetPowerStateString(state).c_str(), ret);
     RestoreSettingStateFlag();
     WriteHiSysEvent(ret, reason, beginTimeMs, state);
-#ifdef POWER_MANAGER_TV_DREAMING
-    if ((state == PowerState::INACTIVE || state == PowerState::DIM) && ret == TransitResult::SUCCESS) {
-        isDreaming_ = false;
-    }
-#endif
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 

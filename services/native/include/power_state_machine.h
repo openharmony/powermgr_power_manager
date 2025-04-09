@@ -408,7 +408,6 @@ private:
     std::atomic<int32_t> externalScreenNumber_ {0};
 #endif
     ProximityNormalController proximityNormalController_;
-    bool isDreaming_ {false};
     bool SetDreamingState(StateChangeReason reason);
 };
 } // namespace PowerMgr
