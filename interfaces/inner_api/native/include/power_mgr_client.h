@@ -143,8 +143,9 @@ public:
     /**
      * Hibernate the device.
      * @param clearMemory Indicates whether to clear the memory before the device hibernates.
+     * @param reasonn The reason for hibernate the device.
      */
-    PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion = "-1");
+    PowerErrors Hibernate(bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1");
 
     /* Set the device mode.
      *
