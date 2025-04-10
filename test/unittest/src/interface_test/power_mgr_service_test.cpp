@@ -140,6 +140,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
     uint32_t PARM_THREE = 3;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
+    usleep(50000);
     EXPECT_EQ(powerMgrClient.OverrideScreenOffTime(1000), PowerErrors::ERR_OK);
     sleep(PARM_THREE);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService003: Prepare Fail, Screen is ON.";
