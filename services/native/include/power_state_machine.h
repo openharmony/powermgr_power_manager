@@ -141,7 +141,7 @@ public:
     };
     bool ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs);
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-    bool HibernateInner(bool clearMemory);
+    bool HibernateInner(bool clearMemory, const std::string& reason);
 #endif
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
@@ -359,7 +359,7 @@ private:
     bool PrepareHibernateWithTimeout(bool clearMemory);
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
         const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
-    void RollbackHibernate(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms);
+    void RollbackHibernate(PowerState originalState, bool needShutdown, const sptr<PowerMgrService>& pms);
     uint32_t GetPreHibernateDelay();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART

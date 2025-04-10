@@ -894,14 +894,14 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
     hibernateController->PostHibernate(hibernateRes);
 }
 
-void PowerStateMachine::RollbackHibernate(PowerState originalState, bool clearMemory, const sptr<PowerMgrService>& pms)
+void PowerStateMachine::RollbackHibernate(PowerState originalState, bool needShutdown, const sptr<PowerMgrService>& pms)
 {
     bool isSwitchOpen = IsSwitchOpen();
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Try to rollback hibernate, originalPowerState=%{public}d, clearMemory=%{public}d, isSwitchOpen=%{public}d",
-        originalState, clearMemory, isSwitchOpen);
+        "Try to rollback hibernate, originalPowerState=%{public}d, needShutdown=%{public}d, isSwitchOpen=%{public}d",
+        originalState, needShutdown, isSwitchOpen);
     hibernating_ = false;
-    if (clearMemory) {
+    if (needShutdown) {
         // Ready to shutdown, so no need to publish common event and run PostHibernate
         pms->ShutDownDevice("HibernateFail");
         return;
@@ -925,7 +925,7 @@ void PowerStateMachine::RollbackHibernate(PowerState originalState, bool clearMe
     }
 }
 
-bool PowerStateMachine::HibernateInner(bool clearMemory)
+bool PowerStateMachine::HibernateInner(bool clearMemory, const std::string& reason)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -956,18 +956,19 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
 
     hibernating_ = true;
     PowerState originalState = GetState();
+    bool needShutdown = clearMemory || reason == "LowCapacity";
     notify->PublishEnterHibernateEvent(GetTickCount());
 
     bool ret = PrepareHibernateWithTimeout(clearMemory);
     if (!ret) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, start to rollback");
-        RollbackHibernate(originalState, clearMemory, pms);
+        RollbackHibernate(originalState, needShutdown, pms);
         return true;
     }
     HibernateStatus status = hibernateController->Hibernate(clearMemory);
     if (status != HibernateStatus::HIBERNATE_SUCCESS) {
         POWER_HILOGE(FEATURE_SUSPEND, "do hibernate failed, start to rollback");
-        RollbackHibernate(originalState, clearMemory, pms);
+        RollbackHibernate(originalState, needShutdown, pms);
         return true;
     }
     SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
