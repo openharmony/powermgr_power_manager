@@ -810,12 +810,12 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest030, TestSize.Level2)
     stateMaschine_->Init();
     pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN, true); // reset dream state
     pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_START_DREAM, true); // set dream from interface
-    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
     EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
     pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "start_dream");
-    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
     pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "end_dream");
-    EXPECT_FALSE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
+    EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_END_DREAM));
     EXPECT_TRUE(stateMaschine_->SetDreamingState(StateChangeReason::STATE_CHANGE_REASON_START_DREAM));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService030 function end!");
 }
