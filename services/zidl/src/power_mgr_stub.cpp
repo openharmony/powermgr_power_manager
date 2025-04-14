@@ -650,10 +650,11 @@ int32_t PowerMgrStub::HibernateStub(MessageParcel& data, MessageParcel& reply)
 {
     bool clearMemory = false;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, E_READ_PARCEL_ERROR);
+    std::string reason = Str16ToStr8(data.ReadString16());
     std::string apiVersion = Str16ToStr8(data.ReadString16());
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(data.ReadRemoteObject());
 
-    PowerErrors error = Hibernate(clearMemory, apiVersion);
+    PowerErrors error = Hibernate(clearMemory, reason, apiVersion);
     int result = static_cast<int>(error);
     if (powerProxy != nullptr) {
         powerProxy->SendAsyncReply(result);

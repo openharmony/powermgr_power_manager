@@ -470,11 +470,11 @@ bool PowerMgrClient::SetDisplaySuspend(bool enable)
     return ret;
 }
 
-PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& apiVersion)
+PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy->Hibernate(clearMemory, apiVersion);
+    return proxy->Hibernate(clearMemory, reason, apiVersion);
 }
 
 PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)

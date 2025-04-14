@@ -1149,7 +1149,7 @@ bool PowerMgrProxy::SetDisplaySuspend(bool enable)
     return true;
 }
 
-PowerErrors PowerMgrProxy::Hibernate(bool clearMemory, const std::string& apiVersion)
+PowerErrors PowerMgrProxy::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
 {
     RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
@@ -1165,8 +1165,8 @@ PowerErrors PowerMgrProxy::Hibernate(bool clearMemory, const std::string& apiVer
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String16, Str8ToStr16(reason), PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     data.WriteRemoteObject(asyncCallback->AsObject());
 

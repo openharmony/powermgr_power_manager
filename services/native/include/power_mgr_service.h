@@ -91,7 +91,8 @@ public:
     virtual bool IsFoldScreenOn() override;
     virtual bool IsCollaborationScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") override;
-    virtual PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion = "-1") override;
+    virtual PowerErrors Hibernate(
+        bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") override;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;

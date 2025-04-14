@@ -136,7 +136,7 @@ napi_value PowerNapi::Hibernate(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, argv[0], &clearMemory);
 
     int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
-    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, std::to_string(apiVersion));
+    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, "", std::to_string(apiVersion));
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "Hibernate failed.");
         error.ThrowError(env, code);

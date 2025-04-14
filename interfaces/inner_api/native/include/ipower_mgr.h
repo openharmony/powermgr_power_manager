@@ -88,7 +88,7 @@ public:
     virtual bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback) = 0;
 
     virtual bool SetDisplaySuspend(bool enable) = 0;
-    virtual PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion) = 0;
+    virtual PowerErrors Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion) = 0;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) = 0;
     virtual PowerMode GetDeviceMode() = 0;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;

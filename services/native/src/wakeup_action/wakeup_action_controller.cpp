@@ -109,6 +109,13 @@ void WakeupActionController::HandleHibernate(SuspendDeviceType reason)
         return;
     }
     POWER_HILOGI(FEATURE_WAKEUP_ACTION, "low capacity, hibernate begin, %{public}d", static_cast<int>(reason));
+
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_LOW_CAPACITY) {
+        if (pms->Hibernate(false, "LowCapacity") != PowerErrors::ERR_OK) {
+            POWER_HILOGE(FEATURE_WAKEUP_ACTION, "hibernate failed.");
+        }
+        return;
+    }
     if (pms->Hibernate(false) != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP_ACTION, "hibernate failed.");
     }
