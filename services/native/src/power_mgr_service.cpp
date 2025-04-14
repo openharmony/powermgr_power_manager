@@ -1196,7 +1196,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& apiVersion)
+PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate begin.");
     if (!Permission::IsSystem()) {
@@ -1217,8 +1217,8 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& apiV
         return PowerErrors::ERR_FAILURE;
     }
     POWER_HILOGI(FEATURE_SUSPEND,
-        "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d",
-        pid, uid, static_cast<int>(clearMemory));
+        "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d, reason: %{public}s",
+        pid, uid, static_cast<int>(clearMemory), reason.c_str());
     BackgroundRunningLock hibernateGuard(
         "hibernateGuard", HIBERNATE_GUARD_TIMEOUT_MS); // avoid hibernate breaked by S3/ULSR
     HibernateControllerInit();
@@ -1226,7 +1226,7 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& apiV
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
 #endif
-    bool ret = powerStateMachine_->HibernateInner(clearMemory);
+    bool ret = powerStateMachine_->HibernateInner(clearMemory, reason);
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 #else
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate interface not supported.");
