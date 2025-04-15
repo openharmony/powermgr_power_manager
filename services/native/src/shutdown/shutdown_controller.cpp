@@ -136,12 +136,19 @@ static void SetFrameworkFinishBootStage(void)
         POWER_HILOGE(FEATURE_SHUTDOWN, "open /dev/bbox failed!");
         return;
     }
+
+    fdsan_exchange_owner_tag(fd, 0, DOMAIN_FEATURE_SHUTDOWN);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown timeout");
+
     int stage = SHUT_STAGE_FRAMEWORK_FINISH;
     int ret = ioctl(fd, SET_SHUT_STAGE, &stage);
     if (ret < 0) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
     }
-    close(fd);
+
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown timeout mechanism finished.");
+    fdsan_close_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
+
     return;
 }
 

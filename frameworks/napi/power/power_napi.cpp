@@ -183,19 +183,27 @@ static void SetFrameworkBootStage(bool isReboot)
         POWER_HILOGE(FEATURE_SHUTDOWN, "open /dev/bbox failed!");
         return;
     }
+
+    fdsan_exchange_owner_tag(fd, 0, DOMAIN_FEATURE_SHUTDOWN);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown fw start timeout.");
+
     int rebootFlag = isReboot ? 1 : 0;
     int ret = ioctl(fd, SET_REBOOT, &rebootFlag);
     if (ret < 0) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "set reboot flag failed!");
-        close(fd);
+        fdsan_close_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
         return;
     }
+
     int stage = SHUT_STAGE_FRAMEWORK_START;
     ret = ioctl(fd, SET_SHUT_STAGE, &stage);
     if (ret < 0) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
     }
-    close(fd);
+
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown timeout mechanism started.");
+    fdsan_close_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
+
     return;
 }
 
