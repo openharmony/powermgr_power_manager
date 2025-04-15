@@ -185,6 +185,7 @@ static void SetFrameworkBootStage(bool isReboot)
     }
 
     fdsan_exchange_owner_tag(fd, 0, DOMAIN_FEATURE_SHUTDOWN);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown timeout.");
 
     int rebootFlag = isReboot ? 1 : 0;
     int ret = ioctl(fd, SET_REBOOT, &rebootFlag);
@@ -200,6 +201,7 @@ static void SetFrameworkBootStage(bool isReboot)
         POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
     }
 
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown timeout mechanism started.");
     fdsan_close_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
 
     return;
