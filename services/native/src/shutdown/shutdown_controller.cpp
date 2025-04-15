@@ -145,7 +145,7 @@ static void SetFrameworkFinishBootStage(void)
         POWER_HILOGE(FEATURE_SHUTDOWN, "set shut stage failed!");
     }
 
-    fdsan_closer_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
+    fdsan_close_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
 
     return;
 }
