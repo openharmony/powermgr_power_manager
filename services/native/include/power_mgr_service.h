@@ -291,7 +291,8 @@ private:
     static constexpr uint32_t HALL_SAMPLING_RATE = 100000000;
     static constexpr const char* SETTING_POWER_WAKEUP_DOUBLE_KEY {"settings.power.wakeup_double_click"};
     static std::atomic_bool isBootCompleted_;
-
+    static std::atomic_bool isNeedReInit_ ;
+    static std::atomic_bool displayManagerServiceCrash_;
     static void RegisterBootCompletedCallback();
     static void PowerExternalAbilityInit();
     static bool IsDeveloperMode();

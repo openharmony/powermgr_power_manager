@@ -268,7 +268,7 @@ void PowerStateMachine::StartSleepTimer(PowerState from)
 
 void PowerStateMachine::InitState()
 {
-    POWER_HILOGD(FEATURE_POWER_STATE, "Init power state");
+    POWER_HILOGI(FEATURE_POWER_STATE, "Init power state");
     if (IsScreenOn()) {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
