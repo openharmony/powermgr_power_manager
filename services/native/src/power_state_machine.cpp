@@ -26,7 +26,7 @@
 #include <ipc_skeleton.h>
 #include "power_ext_intf_wrapper.h"
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-#include "power_hitrace.h"
+#include "hitrace_meter.h"
 #endif
 #include "power_mode_policy.h"
 #include "power_mgr_factory.h"
@@ -482,7 +482,7 @@ void PowerStateMachine::SuspendDeviceInner(
     pid_t pid, int64_t callTimeMs, SuspendDeviceType type, bool suspendImmed, bool ignoreScreenState)
 {
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-    PowerHitrace powerHitrace("SuspendDevice");
+    HitraceScopedEx powerHitrace(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_POWER, "SuspendDevice");
 #endif
     if (type > SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX) {
         POWER_HILOGW(FEATURE_SUSPEND, "Invalid type: %{public}d", type);
@@ -628,7 +628,7 @@ void PowerStateMachine::WakeupDeviceInner(
     pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-    PowerHitrace powerHitrace("WakeupDevice");
+    HitraceScopedEx powerHitrace(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_POWER, "WakeupDevice");
 #endif
     if (type > WakeupDeviceType::WAKEUP_DEVICE_MAX) {
         POWER_HILOGW(FEATURE_WAKEUP, "Invalid type: %{public}d", type);
@@ -1135,7 +1135,7 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
         listener->OnAsyncPowerStateChanged(state);
     }
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-    PowerHitrace powerHitrace("StateListener");
+    HitraceScopedEx powerHitrace(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_POWER, "StateListener");
 #endif
     for (auto& listener : syncPowerStateListeners_) {
         auto iter = cachedRegister_.find(listener);

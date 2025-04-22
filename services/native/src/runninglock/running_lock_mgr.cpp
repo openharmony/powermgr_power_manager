@@ -23,7 +23,7 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-#include "power_hitrace.h"
+#include "hitrace_meter.h"
 #endif
 #include "ffrt_utils.h"
 #include "power_log.h"
@@ -447,7 +447,7 @@ bool RunningLockMgr::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
 bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 {
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-    PowerHitrace powerHitrace("RunningLock_Lock");
+    HitraceScopedEx powerHitrace(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_POWER, "RunningLock_Lock");
 #endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
@@ -501,7 +501,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::string& name)
 {
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
-    PowerHitrace powerHitrace("RunningLock_Unlock");
+    HitraceScopedEx powerHitrace(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_POWER, "RunningLock_Unlock");
 #endif
     auto lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
