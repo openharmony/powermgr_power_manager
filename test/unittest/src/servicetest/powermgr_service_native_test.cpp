@@ -347,6 +347,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsUsed(token), false);
     g_powerMgrServiceProxy->OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     EXPECT_TRUE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
+    sleep(2);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest011 function end!");
 }
 
