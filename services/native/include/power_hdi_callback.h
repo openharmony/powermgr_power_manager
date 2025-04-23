@@ -17,11 +17,11 @@
 #define POWERMGR_POWER_MANAGER_POWER_HDI_CALLBACK_H
 
 #include <cstdint>
-#include "v1_2/ipower_hdi_callback.h"
+#include "v1_3/ipower_hdi_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
-using namespace OHOS::HDI::Power::V1_2;
+using namespace OHOS::HDI::Power::V1_3;
 class PowerHdiCallback : public IPowerHdiCallback {
 public:
     virtual ~PowerHdiCallback() {}
@@ -29,6 +29,8 @@ public:
     int32_t OnSuspend() override;
 
     int32_t OnWakeup() override;
+
+    int32_t OnWakeupWithTag(int32_t suspendTag) override;
 };
 } // OHOS
 } // PowerMgr

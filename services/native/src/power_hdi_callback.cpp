@@ -16,7 +16,7 @@
 #include "power_hdi_callback.h"
 #include "hdf_base.h"
 
-using namespace OHOS::HDI::Power::V1_2;
+using namespace OHOS::HDI::Power::V1_3;
 
 namespace OHOS {
 namespace PowerMgr {
@@ -26,6 +26,11 @@ int32_t PowerHdiCallback::OnSuspend()
 }
 
 int32_t PowerHdiCallback::OnWakeup()
+{
+    return HDF_SUCCESS;
+}
+
+int32_t PowerHdiCallback::OnWakeupWithTag(int32_t suspendTag __attribute__((unused)))
 {
     return HDF_SUCCESS;
 }
