@@ -88,7 +88,7 @@ public:
 
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     static constexpr int32_t DEFAULT_AC_DISPLAY_OFF_TIME_MS = 600000;
-    static constexpr int32_t DEFAULT_DC_DISPLAY_OFF_TIME_MS = 300000
+    static constexpr int32_t DEFAULT_DC_DISPLAY_OFF_TIME_MS = 300000;
     static constexpr int32_t DEFAULT_DISPLAY_OFF_TIME_MS = DEFAULT_DC_DISPLAY_OFF_TIME_MS;
 #else
     static constexpr int32_t DEFAULT_DISPLAY_OFF_TIME_MS = 30000;

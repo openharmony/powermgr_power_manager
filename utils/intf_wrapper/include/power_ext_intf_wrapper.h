@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_UTILS_INTF_WRPAAER_POWER_EXT_INTF_WRAPPER_H
-#define POWERMGR_UTILS_INTF_WRPAAER_POWER_EXT_INTF_WRAPPER_H
+#ifndef POWERMGR_UTILS_INTF_WRAPPER_POWER_EXT_INTF_WRAPPER_H
+#define POWERMGR_UTILS_INTF_WRAPPER_POWER_EXT_INTF_WRAPPER_H
 
 #include <vector>
 #include "interface_loader.h"
@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+
 class PowerExtIntfWrapper final : public NoCopyable {
 public:
     enum class ErrCode : uint32_t {
@@ -69,4 +70,4 @@ private:
 
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_UTILS_INTF_WRPAAER_POWER_EXT_INTF_WRAPPER_H
+#endif // POWERMGR_UTILS_INTF_WRAPPER_POWER_EXT_INTF_WRAPPER_H

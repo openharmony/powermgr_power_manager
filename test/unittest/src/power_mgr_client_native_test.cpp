@@ -50,7 +50,7 @@ namespace {
  */
 HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative001::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     wptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(POWER_MANAGER_SERVICE_ID);
@@ -74,7 +74,7 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.RegisterScreenStateCallback(0, nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterScreenStateCallback(nullptr));
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative001::fun is end!");
 }
 
 /**
@@ -85,12 +85,12 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
  */
 HWTEST_F(PowerMgrClientNativeTest, RunningLockNative001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function start!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative001::fun is start!");
     std::shared_ptr<RunningLock> runningLock =
         std::make_shared<RunningLock>(nullptr, "runninglock1", RunningLockType::RUNNINGLOCK_SCREEN);
     runningLock->Create();
     EXPECT_TRUE(runningLock->UnLock() != ERR_OK);
     runningLock->Release();
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function end!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative001::fun is end!");
 }
 }

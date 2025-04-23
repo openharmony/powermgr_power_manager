@@ -84,14 +84,14 @@ public:
     virtual void WakeupDeviceAsync(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override {};
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
     bool RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight);
-    virtual PowerErrors OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion = "-1") override;
-    virtual PowerErrors RestoreScreenOffTime(const std::string& apiVersion = "-1") override;
+    virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
+    virtual PowerErrors RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual bool IsCollaborationScreenOn() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") override;
-    virtual PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion = "-1") override;
+    virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) override;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;

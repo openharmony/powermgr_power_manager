@@ -50,10 +50,6 @@ private:
     sptr<IntentWant> enterForceSleepWant_ {nullptr};
     sptr<IntentWant> exitForceSleepWant_ {nullptr};
 #endif
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    sptr<IntentWant> enterHibernateWant_ {nullptr};
-    sptr<IntentWant> exitHibernateWant_ {nullptr};
-#endif
     sptr<OHOS::EventFwk::CommonEventPublishInfo> publishInfo_ {nullptr};
 };
 } // namespace PowerMgr

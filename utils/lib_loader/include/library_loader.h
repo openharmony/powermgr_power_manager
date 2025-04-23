@@ -17,8 +17,8 @@
 #define POWERMGR_UTILS_LIB_LOADER_LIBRARY_LOADER_H
 
 #include <dlfcn.h>
-#include <nocopyable.h>
 #include <string>
+#include <nocopyable.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -35,4 +35,5 @@ private:
 
 } // namespace PowerMgr
 } // namespace OHOS
+
 #endif // POWERMGR_UTILS_LIB_LOADER_LIBRARY_LOADER_H

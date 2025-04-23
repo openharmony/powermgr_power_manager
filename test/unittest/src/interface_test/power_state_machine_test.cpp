@@ -61,7 +61,7 @@ namespace {
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine001::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine001: Suspend Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -78,7 +78,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine001, TestSize.Level0)
     sleep(REFRESHACTIVITY_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine001: Suspend Device Fail, Screen is On";
 
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine001::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine001: Suspend Device end.";
 }
 
@@ -89,7 +89,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine001, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine002 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine002::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "PowerStateMachine002: Wakeup Device start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -106,7 +106,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine002, TestSize.Level0)
     usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine002: Wakeup Device Fail, Screen is Off";
 
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine002 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine002::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine002: Wakeup Device end.";
 }
 
@@ -117,7 +117,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine002, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is start!");
     GTEST_LOG_(INFO) << "PowerStateMachine003: IsScreenOn start.";
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -135,7 +135,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
                 << ": Wakeup Device Fail, Screen is Off";
         }
     }
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine003::fun is end!");
     GTEST_LOG_(INFO) << "PowerStateMachine003: IsScreenOn end.";
 }
 
@@ -146,7 +146,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is start!");
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device start.";
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -175,7 +175,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
 
     usleep(SLEEP_WAIT_TIME_MS);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Real Wakeup Device Fail, Screen is Off";
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine004::fun is start!");
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device end.";
 }
 
@@ -187,11 +187,11 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateMachine005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine005 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine005::fun is start!");
     sleep(SLEEP_WAIT_TIME_S);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_EQ(powerMgrClient.RestoreScreenOffTime(), PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerStateMachine005 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateMachine005::fun is end!");
 }
 }
 
@@ -227,7 +227,7 @@ namespace {
  */
 HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> callBackFirst = new PowerStateTest1Callback();
     powerMgrClient.RegisterPowerStateCallback(callBackFirst);
@@ -242,7 +242,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
         POWER_HILOGI(LABEL_TEST, "PowerStateCallback001 4.");
     }
     EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(callBackFirst));
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback001 end.");
 }
 
 /**
@@ -252,7 +252,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback001, TestSize.Level0)
  */
 HWTEST_F (PowerStateMachineTest, PowerStateCallback002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 start.");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerStateCallback> callBackFirst = new PowerStateTest1Callback();
     powerMgrClient.RegisterPowerStateCallback(callBackFirst, false);
@@ -267,7 +267,7 @@ HWTEST_F (PowerStateMachineTest, PowerStateCallback002, TestSize.Level0)
         POWER_HILOGI(LABEL_TEST, "PowerStateCallback002 4.");
     }
     EXPECT_TRUE(powerMgrClient.UnRegisterPowerStateCallback(callBackFirst));
-    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerStateTestCallback::PowerStateCallback002 end.");
 }
 }
 

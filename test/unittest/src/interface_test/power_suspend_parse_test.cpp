@@ -110,7 +110,7 @@ void TestPowerSuspend(PowerMgrService* pmsTest_)
  */
 HWTEST_F(PowerSuspendParseTest, PowerSuspendParse001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendParse001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendParse001 start.");
     GTEST_LOG_(INFO) << "PowerSuspendParse001: start";
     std::string str = SYSTEM_POWER_SUSPEND_FILE;
 
@@ -124,7 +124,7 @@ HWTEST_F(PowerSuspendParseTest, PowerSuspendParse001, TestSize.Level0)
     pmsTest_->suspendController_->Init();
 
     TestPowerSuspend(pmsTest_);
-    GTEST_LOG_(INFO) << "PowerSuspendParse001: end";
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendParse001 function end!");
+    GTEST_LOG_(INFO) << "PowerSuspendParse001:  end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendParse001 end.");
 }
 } // namespace
