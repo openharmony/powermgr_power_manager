@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#include "power_hdi_callback.h"
-#include "hdf_base.h"
-#include "power_hookmgr.h"
+#ifndef POWERMGR_UTILS_HOOKMGR_POWER_HOOKMGR_H
+#define POWERMGR_UTILS_HOOKMGR_POWER_HOOKMGR_H
 
-using namespace OHOS::HDI::Power::V1_2;
+#include <cstdint>
+#include <hookmgr.h>
 
 namespace OHOS {
 namespace PowerMgr {
-int32_t PowerHdiCallback::OnSuspend()
-{
-    return HDF_SUCCESS;
-}
+enum class PowerHookStage : int32_t {
+    POWER_HDI_CALLBACK_WAKEUP = 0,
+    POWER_HOOK_STAGE_MAX = 1000,
+};
 
-int32_t PowerHdiCallback::OnWakeup()
-{
-    return HDF_SUCCESS;
-}
-} // OHOS
-} // PowerMgr
+HOOK_MGR* GetPowerHookMgr();
+} // namespace PowerMgr
+} // namespace OHOS
+
+#endif // POWERMGR_UTILS_HOOKMGR_POWER_HOOKMGR_H

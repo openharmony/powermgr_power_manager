@@ -1,0 +1,43 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../powermgr.gni")
+
+module_output_path = "power_manager/power_manager"
+
+config("module_private_config") {
+  visibility = [ ":*" ]
+}
+
+ohos_unittest("test_hookmgr_utils") {
+  module_out_path = module_output_path
+  sources = [ "./power_hookmgr_test.cpp" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+  deps = [ "${powermgr_utils_path}/hookmgr:power_hookmgr" ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+group("apitest") {
+  testonly = true
+  deps = [ ":test_hookmgr_utils" ]
+}
