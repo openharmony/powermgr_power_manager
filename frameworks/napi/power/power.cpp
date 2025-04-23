@@ -77,7 +77,7 @@ void Power::IsScreenOnCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackI
 {
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "IsScreenOn", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
+    napi_status ret = napi_create_async_work(
         env, nullptr, resource,
         [](napi_env env, void* data) {
             PowerAsyncCallbackInfo* asyncCallbackInfo = reinterpret_cast<PowerAsyncCallbackInfo*>(data);
@@ -102,7 +102,8 @@ void Power::IsScreenOnCallBack(napi_env env, std::unique_ptr<PowerAsyncCallbackI
             delete asyncCallbackInfo;
         },
         reinterpret_cast<void*>(asCallbackInfoPtr.get()), &asCallbackInfoPtr->asyncWork);
-    if (napi_ok == napi_queue_async_work_with_qos(env, asCallbackInfoPtr->asyncWork, napi_qos_utility)) {
+    if (napi_ok == napi_queue_async_work_with_qos(env, asCallbackInfoPtr->asyncWork, napi_qos_utility)
+            && ret == napi_ok) {
         asCallbackInfoPtr.release();
     }
 }
@@ -117,12 +118,14 @@ napi_value Power::IsScreenOn(napi_env env, napi_callback_info info)
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
     NAPI_ASSERT(env, (status == napi_ok), "Failed to get cb info");
 
-    std::unique_ptr<PowerAsyncCallbackInfo> asyncCallbackInfo = std::make_unique<PowerAsyncCallbackInfo>();
+    auto asyncCallbackInfo = new PowerAsyncCallbackInfo();
     if (asyncCallbackInfo == nullptr) {
         POWER_HILOGE(COMP_FWK, "Failed to create asyncCallbackInfo");
         return nullptr;
     }
     asyncCallbackInfo->env = env;
+
+    std::unique_ptr<PowerAsyncCallbackInfo> asCallbackInfoPtr(asyncCallbackInfo);
     napi_valuetype type;
     if (argc == 1) {
         NAPI_CALL(env, napi_typeof(env, args[0], &type));
@@ -140,7 +143,7 @@ napi_value Power::IsScreenOn(napi_env env, napi_callback_info info)
         POWER_HILOGD(COMP_FWK, "callbackRef is not null");
         napi_get_undefined(env, &result);
     }
-    IsScreenOnCallBack(env, asyncCallbackInfo);
+    IsScreenOnCallBack(env, asCallbackInfoPtr);
     return result;
 }
 

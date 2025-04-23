@@ -58,7 +58,7 @@ namespace {
  */
 HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest001 start.");
     PowerMode mode = PowerMode::NORMAL_MODE;
     sptr<MockPowerRemoteObject> remote = new MockPowerRemoteObject();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
@@ -76,7 +76,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->Lock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest001 end.");
 }
 
 /**
@@ -87,7 +87,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
  */
 HWTEST_F(PowerMockObjectTest, PowerMockObjectTest002, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest002 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest002 start.");
     pid_t uid = 0;
     pid_t pid = 0;
     sptr<MockPowerRemoteObject> remote = new MockPowerRemoteObject();
@@ -109,7 +109,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest002, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BACKGROUND));
     EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest002 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest002 end.");
 }
 
 /**
@@ -120,7 +120,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest002, TestSize.Level2)
  */
 HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest003 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest003 start.");
     sptr<MockPowerRemoteObject> remote = new MockPowerRemoteObject();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     std::shared_ptr<PowerRunningLockCallbackProxy> callbackProxy =
@@ -136,7 +136,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->UnLock(token) == PowerErrors::ERR_OK);
     EXPECT_FALSE(sptrProxy->IsUsed(token));
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest003 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest003 end.");
 }
 
 /**
@@ -147,7 +147,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest003, TestSize.Level2)
  */
 HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest004 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest004 start.");
     sptr<MockPowerRemoteObject> remote = new MockPowerRemoteObject();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
@@ -169,6 +169,6 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
     sptrProxy->RebootDeviceForDeprecated(" ");
     sptrProxy->ShutDownDevice(" ");
     EXPECT_FALSE(sptrProxy->ForceSuspendDevice(0) == PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest004 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest004 end.");
 }
 } // namespace

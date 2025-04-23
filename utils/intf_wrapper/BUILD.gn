@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,10 +42,9 @@ ohos_source_set("power_intf_wrapper") {
 
   public_configs = [ ":public_config" ]
 
-  deps = [
-    "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_utils_path}/lib_loader:power_lib_loader",
-  ]
+  deps = [ "${powermgr_utils_path}/lib_loader:power_lib_loader" ]
+
+  deps += [ "${powermgr_inner_api}:powermgr_client" ]
 
   external_deps = [
     "c_utils:utils",

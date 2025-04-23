@@ -21,10 +21,7 @@ config("private_config") {
 }
 
 config("public_config") {
-  include_dirs = [
-    "include",
-    "../native/include",
-  ]
+  include_dirs = [ "include" ]
 }
 
 ohos_shared_library("power_ffrt") {

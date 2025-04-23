@@ -53,12 +53,12 @@ void InterfaceLoaderTest::TearDownTestCase()
  */
 HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest001 function start!");
+    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest001 start!");
     void* connectAbilityFunc = g_loader.QueryInterface("PowerConnectAbility");
     EXPECT_NE(connectAbilityFunc, nullptr);
     void* isForegroundAppFunc = g_loader.QueryInterface("PowerIsForegroundApplication");
     EXPECT_NE(isForegroundAppFunc, nullptr);
-    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest001 function end!");
+    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest001 end!");
 }
 
 /**
@@ -68,12 +68,12 @@ HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest001, TestSize.Level0)
  */
 HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest002 function start!");
+    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest002 start!");
     void* powerAbcFunc = g_loader.QueryInterface("UnExistedSymbolPowerAbc");
     EXPECT_EQ(powerAbcFunc, nullptr);
     void* powerXyzFunc = g_loader.QueryInterface("UnExistedSymbolPowerXyz");
     EXPECT_EQ(powerXyzFunc, nullptr);
-    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest002 function end!");
+    POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest002 end!");
 }
 } // PowerMgr
 } // OHOS

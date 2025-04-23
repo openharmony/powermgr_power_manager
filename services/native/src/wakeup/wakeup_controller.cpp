@@ -39,6 +39,7 @@
 #include "customized_screen_event_rules.h"
 #include "singleton.h"
 
+
 namespace OHOS {
 namespace PowerMgr {
 using namespace OHOS::MMI;
@@ -764,9 +765,6 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
 #endif
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->NotifyScreenOnEventAgain(reason);
-#endif
         return true;
     }
 
@@ -783,6 +781,9 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
         (reason != WakeupDeviceType::WAKEUP_DEVICE_LID);
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Screen is on, skip current wakeup reason: %{public}u", reason);
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->NotifyScreenOnEventAgain(reason);
+#endif
         return true;
     }
 
@@ -887,7 +888,7 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
         return;
     }
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-    if (wakeupController->IsLowCapacityWakeup(reason)) {
+    if (wakeupController->IsLowCapacityWakeup(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON)) {
         wakeupController->ProcessLowCapacityWakeup();
         return;
     }

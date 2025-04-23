@@ -35,14 +35,14 @@
             "power_manager_feature_pickup",
             "power_manager_feature_force_sleep_broadcast",
             "power_manager_feature_movement",
-            "power_manager_feature_screen_on_timeout_check",
             "power_manager_feature_dialog_path",
             "power_manager_feature_charging_type_setting",
             "power_manager_feature_external_screen_management",
             "power_manager_feature_block_long_press",
             "power_manager_feature_judging_takeover_shutdown",
             "power_manager_feature_watch_limit_screen_common_event_publish",
-            "power_manager_feature_watch_update_adapt"
+            "power_manager_feature_watch_update_adapt",
+            "power_manager_feature_watch_boot_completed"
         ],
         "adapted_system_type": [
             "standard"
@@ -65,10 +65,7 @@
                 "data_share",
                 "display_manager",
                 "drivers_interface_power",
-                "ets_runtime",
-                "eventhandler",
                 "ffrt",
-                "graphic_2d",
                 "hdf_core",
                 "hicollie",
                 "hisysevent",

@@ -35,7 +35,7 @@ std::vector<std::string> CustomizedScreenEventRules::GetForegroundBundleNames()
     std::vector<OHOS::AppExecFwk::AppStateData> appList;
     AppManagerUtils::GetForegroundApplications(appList);
     for (const auto &curApp : appList) {
-        if (std::find(bundleNames.begin(), bundleNames.end(), cuiApp.bundleName) == bundleNames.end()) {
+        if (std::find(bundleNames.begin(), bundleNames.end(), curApp.bundleName) == bundleNames.end()) {
             bundleNames.push_back(curApp.bundleName);
         }
     }
@@ -46,6 +46,11 @@ void CustomizedScreenEventRules::SetScreenOnEventRules(StateChangeReason reason)
 {
     defaultReason = reason;
     PowerExtIntfWrapper::Instance().SetScreenOnEventRules(reason);
+}
+
+void CustomizedScreenEventRules::NotifyOperateEventAfterScreenOn()
+{
+    PowerExtIntfWrapper::Instance().NotifyOperateEventAfterScreenOn(bundleNames);
 }
 
 void CustomizedScreenEventRules::PublishCustomizedScreenEvent(PowerState state)
@@ -60,11 +65,6 @@ void CustomizedScreenEventRules::PublishCustomizedScreenEvent(PowerState state)
 bool CustomizedScreenEventRules::NotifyScreenOnEventAgain(WakeupDeviceType reason)
 {
     return PowerExtIntfWrapper::Instance().NotifyScreenOnEventAgain(reason, bundleNames);
-}
-
-void CustomizedScreenEventRules::NotifyOperateEventAfterScreenOn()
-{
-    PowerExtIntfWrapper::Instance().NotifyOperateEventAfterScreenOn(bundleNames);
 }
 #endif
 
@@ -86,5 +86,5 @@ void CustomizedScreenEventRules::SendCustomizedScreenEvent(
 #endif
 }
 
-}  //namespace PowerMgr
-}  //namespace OHOS
+}  // namespace PowerMgr
+}  // namespace OHOS

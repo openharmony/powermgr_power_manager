@@ -227,11 +227,11 @@ Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeR
         case StateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT;
             break;
-        case StateChangeReason::STATE_CHANGE_REASON_HIBERNATE:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_HIBERNATE;
-            break;
         case StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_HIBERNATE:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_HIBERNATE;
             break;
         case StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT;

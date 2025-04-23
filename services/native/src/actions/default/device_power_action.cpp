@@ -24,7 +24,6 @@ namespace {
 const std::string UPDATER_CMD = "updater";
 const std::string REBOOT_CMD = "";
 const std::string SHUTDOWN_CMD = "shutdown";
-const std::string FLASH_CMD = "flash";
 }
 
 namespace OHOS {

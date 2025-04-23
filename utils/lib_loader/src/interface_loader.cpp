@@ -28,7 +28,7 @@ InterfaceLoader::InterfaceLoader(const std::string& libPath, const std::vector<s
         return;
     }
     for (const std::string& s : symbolArr) {
-        POWER_HILOGE(COMP_SVC, "InterfaceLoader add symbo: %{public}s", s.c_str());
+        POWER_HILOGE(COMP_SVC, "InterfaceLoader add symbol: %{public}s", s.c_str());
         interfaces_.insert(std::make_pair(s, nullptr));
     }
 }

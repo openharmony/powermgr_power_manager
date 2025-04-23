@@ -31,7 +31,6 @@ ohos_shared_library("runninglock") {
 
   deps_ex = [
     "c_utils:utils",
-    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]

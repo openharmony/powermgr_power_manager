@@ -42,5 +42,6 @@ private:
 };
 
 } // namespace PowerMgr
-} // namespace OHOS
-#endif // POWERMGR_UTILS_LIB_LOADER_INTERFACE_LOADER_H
+}
+
+#endif

@@ -21,6 +21,7 @@
 #include <memory>
 #include <vector>
 
+#include "event_handler.h"
 #include "ffrt_utils.h"
 #include "power_state_machine.h"
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -124,7 +125,6 @@ private:
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     std::atomic<bool> forceSleeping_ {false};
 #endif
-    sptr<IPowerStateCallback> suspendPowerStateCallback_ {nullptr};
 };
 
 class SuspendMonitor {
