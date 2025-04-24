@@ -39,6 +39,7 @@ namespace PowerMgr {
 namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
+constexpr uint32_t COORDINATION_LOCK_AUTO_SUSPEND_DELAY_TIME = 0;
 sptr<IPowerRunninglockCallback> g_runningLockCallback = nullptr;
 const string INCALL_APP_BUNDLE_NAME = "com.ohos.callui";
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -515,6 +516,7 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
     if (lockInner->IsProxied()) {
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Runninglock is proxied, unProxy");
         runninglockProxy_->UpdateProxyState(lockInner->GetPid(), lockInner->GetUid(), remoteObj, false);
+        lockInner->SetState(RunningLockState::RUNNINGLOCK_STATE_DISABLE);
     }
     auto lockInnerParam = lockInner->GetParam();
     // try unlock
@@ -718,6 +720,10 @@ void RunningLockMgr::UnlockInnerByProxy(const sptr<IRemoteObject>& remoteObj,
     if (lastState == RunningLockState::RUNNINGLOCK_STATE_DISABLE) {
         // UnlockInnerByProxy failed, runninglock Disable
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "Unlock Disable");
+        return;
+    }
+    if (lastState == RunningLockState::RUNNINGLOCK_STATE_PROXIED) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "UnlockInnerByProxy failed, runninglock Proxied");
         return;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();

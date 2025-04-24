@@ -46,7 +46,7 @@ namespace {
  */
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
@@ -63,7 +63,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(4);
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001: end");
 }
 /**
  * @tc.name: PowerSuspendTest002
@@ -72,7 +72,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level0)
  */
 HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: start");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
@@ -94,6 +94,6 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
     // the second powerkey event would interrupt the transition to INACTIVE
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: end");
 }
 } // namespace

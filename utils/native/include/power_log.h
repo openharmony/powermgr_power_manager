@@ -126,7 +126,7 @@ enum PowerManagerLogDomain {
 };
 
 struct PowerManagerLogLabelDomain {
-    unsigned int domainId;
+    uint32_t domainId;
     const char* tag;
 };
 

@@ -64,7 +64,7 @@ TransitResult TransitResultToStateChangeReason(StateChangeReason trigger)
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine001: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
@@ -90,7 +90,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level
     stateMachine->SetDisplaySuspend(true);
     stateMachine->SetDisplaySuspend(false);
 
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine001::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine001: Suspend Device end.";
 }
 
@@ -102,7 +102,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine001, TestSize.Level
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
     EXPECT_TRUE(stateMachine->Init());
@@ -135,7 +135,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
     EXPECT_TRUE(stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK, true));
     stateMachine->UnRegisterPowerStateCallback(callBackFifth);
     stateMachine->UnRegisterPowerStateCallback(callBackSixth);
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine002::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine002: Suspend Device end.";
 }
 
@@ -147,7 +147,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine002, TestSize.Level
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine003: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
@@ -180,7 +180,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level
     std::string result;
     stateMachine->DumpInfo(result);
 
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine003::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine003: Suspend Device end.";
 }
 
@@ -192,7 +192,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_OTHER;
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
@@ -237,7 +237,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, static_cast<WakeupDeviceType>(MAXTYPE), "7", "7");
 
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device end.";
 }
 
@@ -249,7 +249,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine005: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine005 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine005::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
 
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
@@ -280,7 +280,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
     EXPECT_TRUE(stateMachineController2->TransitTo(trigger, false) == TransitResult::OTHER_ERR);
     EXPECT_FALSE(stateMachineController2->CheckState());
 
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine005 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine005::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine005: Suspend Device end.";
 }
 
@@ -292,7 +292,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine005, TestSize.Level
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine006: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006::fun is start!");
     auto stateMachine = std::make_shared<PowerStateMachine>(nullptr);
     EXPECT_TRUE(stateMachine->Init());
     EXPECT_FALSE(stateMachine->CheckRunningLock(PowerState::INACTIVE));
@@ -307,7 +307,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level
     SuspendDeviceType suspendDeviceType = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION;
     stateMachine->SuspendDeviceInner(PID, CALLTIMEMS, suspendDeviceType, true, false);
 
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine006::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine006: Suspend Device end.";
 }
 
@@ -319,7 +319,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine006, TestSize.Level
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device start.";
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007::fun is start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
     auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
@@ -345,7 +345,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level
 
     pmsTest->UnLock(token);
     EXPECT_EQ(pmsTest->IsUsed(token), false);
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007::fun is end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device end.";
 }
 /**
@@ -355,7 +355,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level
  */
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008: func started!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
     auto stateMachine = pmsTest->GetPowerStateMachine();
@@ -368,7 +368,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
     displayOffTime = stateMachine->GetDisplayOffTime();
     EXPECT_EQ(displayOffTime, 60 * 1000);
     EXPECT_EQ(stateMachine->GetDimTime(displayOffTime), PowerStateMachine::MAX_DIM_TIME_MS);
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine008: func ended!");
 }
 
 /**
@@ -378,7 +378,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine008, TestSize.Level
  */
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func started!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
@@ -395,7 +395,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
     EXPECT_EQ(stateMachine->GetExternalScreenNumber(), 1);
     pmsTest->UnRegisterExternalScreenListener();
 #endif
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009: func ended!");
 }
 
 /**
@@ -405,7 +405,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
  */
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function start!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010::fun is start!");
 #ifdef HAS_SENSORS_SENSOR_PART
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
@@ -432,7 +432,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level
     delete event;
     event = nullptr;
 #endif
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function end!");
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010::fun is end!");
 }
 
 } // namespace

@@ -31,10 +31,10 @@ using namespace testing::ext;
  */
 HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 function start!");
+    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 start!");
     std::vector<AppStateData> testAppsData;
     AppManagerUtils::GetForegroundApplications(testAppsData);
-    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 function end!");
+    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 end!");
 }
 
 /**
@@ -44,11 +44,11 @@ HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level0)
  */
 HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 function start!");
+    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 start!");
     std::string unExistApp = "com.example.UNEXISTED_APP";
     bool res = AppManagerUtils::IsForegroundApplication(unExistApp);
     EXPECT_FALSE(res);
-    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 function end!");
+    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 end!");
 }
 } // PowerMgr
 } // OHOS

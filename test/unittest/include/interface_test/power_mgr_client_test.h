@@ -43,6 +43,7 @@ constexpr uint32_t TRANSFER_NS_TO_MS = 1000000;
 constexpr uint32_t TRANSFER_MS_TO_S = 1000;
 constexpr float DIM_RATE = 0.8;
 constexpr uint32_t DOUBLE_TIMES = 2;
+constexpr uint32_t SCREEN_OFF_SLEEP_TIME_S = 5;
 
 class PowerMgrClientTest : public testing::Test {
 };

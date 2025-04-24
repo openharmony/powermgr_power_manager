@@ -28,7 +28,6 @@ using namespace testing::ext;
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest001, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest001 function start!");
     int32_t x = 0;
     FFRTTask task = [&]() {
         x = 2;
@@ -36,7 +35,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest001, TestSize.Level1)
     FFRTUtils::SubmitTask(task); // submit an async task
     ffrt::wait(); // wait async task finish
     EXPECT_EQ(x, 2);
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest001 function end!");
 }
 
 /**
@@ -46,14 +44,12 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest001, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest002, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest002 function start!");
     int32_t x = 0;
     FFRTTask task = [&]() {
         x = 2;
     };
     FFRTUtils::SubmitTaskSync(task); // submit a sync task
     EXPECT_EQ(x, 2);
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest002 function end!");
 }
 
 /**
@@ -63,7 +59,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest002, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest003, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest003 function start!");
     int x = 0;
     FFRTTask task1 = [&]() {
         ffrt::this_task::sleep_for(std::chrono::milliseconds(1));
@@ -89,7 +84,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest003, TestSize.Level1)
 
     ffrt::this_task::sleep_for(std::chrono::milliseconds(80));
     EXPECT_EQ(x, 6); // task3 finished
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest003 function end!");
 }
 
 /**
@@ -99,7 +93,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest003, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest004, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest004 function start!");
     int x = 0;
     FFRTTask task = [&]() {
         x = 2;
@@ -113,7 +106,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest004, TestSize.Level1)
 
     ffrt::this_task::sleep_for(std::chrono::milliseconds(7));
     EXPECT_EQ(x, 2); // task finished
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest004 function end!");
 }
 
 /**
@@ -123,7 +115,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest004, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest005, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest005 function start!");
     int x = 0;
     FFRTTask task = [&]() {
         x = 2;
@@ -140,7 +131,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest005, TestSize.Level1)
 
     ffrt::this_task::sleep_for(std::chrono::milliseconds(10));
     EXPECT_EQ(x, 0); // task not executed, because it is already canceled
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest005 function end!");
 }
 
 /**
@@ -150,7 +140,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest005, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest006, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest006 function start!");
     int x = 0;
     FFRTTask task = [&]() {
         ffrt::this_task::sleep_for(std::chrono::milliseconds(5)); // task sleep 5ms
@@ -159,7 +148,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest006, TestSize.Level1)
     bool ret = FFRTUtils::SubmitTimeoutTask(task, 10); // task time out is 10ms
     EXPECT_TRUE(ret); // task will not timeout
     EXPECT_EQ(x, 2); // task finished
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest006 function end!");
 }
 
 /**
@@ -169,7 +157,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest006, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest007, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest007 function start!");
     int x = 0;
     FFRTTask task = [&]() {
         ffrt::this_task::sleep_for(std::chrono::milliseconds(10)); // task sleep 10ms
@@ -178,7 +165,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest007, TestSize.Level1)
     bool ret = FFRTUtils::SubmitTimeoutTask(task, 5); // task time out is 5ms
     EXPECT_FALSE(ret); // task will timeout
     EXPECT_EQ(x, 0); // task not finished
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest007 function end!");
 }
 
 /**
@@ -188,7 +174,7 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest007, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTUtilsTest008, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 function start!");
+    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 start");
     FFRTQueue queue("test_power_ffrt_queue_test008");
     void* taskptr = nullptr;
     FFRTHandle handle;
@@ -202,7 +188,7 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest008, TestSize.Level1)
     handle = ffrt::submit_h(task);
     ffrt::wait({handle});
     EXPECT_EQ(taskptr, (void*)handle);
-    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 function end!");
+    POWER_HILOGI(LABEL_TEST, "FFRTUtilsTest008 end");
 }
 
 /**
@@ -212,7 +198,6 @@ HWTEST_F(FFRTUtilsTest, FFRTUtilsTest008, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTMutexTest001, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTMutexTest001 function start!");
     auto mutex = FFRTMutex();
     std::unique_lock lock(mutex);
     FFRTTask task1 = [&mutex]() {
@@ -227,7 +212,6 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest001, TestSize.Level1)
     lock.unlock();
     FFRTUtils::SubmitTaskSync(task2);
     EXPECT_TRUE(lock.try_lock());
-    POWER_HILOGI(LABEL_TEST, "FFRTMutexTest001 function end!");
 }
 
 /**
@@ -237,7 +221,6 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest001, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTMutexTest002, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTMutexTest002 function start!");
     constexpr uint32_t MUTEX_ID_A = 1;
     FFRTMutexMap mutexMap;
     int data = 0;
@@ -256,7 +239,6 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest002, TestSize.Level1)
     ffrt::this_task::sleep_for(std::chrono::milliseconds(50));
     // tanskA changed data to 1
     EXPECT_EQ(data, 1);
-    POWER_HILOGI(LABEL_TEST, "FFRTMutexTest002 function end!");
 }
 
 /**
@@ -266,7 +248,6 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest002, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTMutexTest003, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTMutexTest003 function start!");
     constexpr uint32_t MUTEX_ID_A = 1;
     constexpr uint32_t MUTEX_ID_B = 2;
     FFRTMutexMap mutexMap;
@@ -284,7 +265,6 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest003, TestSize.Level1)
     // tanskA changed data to 1
     EXPECT_EQ(data, 1);
     mutexMap.Unlock(MUTEX_ID_B);
-    POWER_HILOGI(LABEL_TEST, "FFRTMutexTest003 function end!");
 }
 
 /**
@@ -294,7 +274,6 @@ HWTEST_F(FFRTUtilsTest, FFRTMutexTest003, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTTimerTest001, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest001 function start!");
     constexpr uint32_t TIMER_ID_A = 1;
     constexpr uint32_t TIMER_ID_B = 2;
     constexpr uint32_t TIMER_ID_C = 3;
@@ -337,7 +316,6 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest001, TestSize.Level1)
     ffrt::this_task::sleep_for(std::chrono::milliseconds(100));
     // taskA changed data to 1, taskB and taskC are canceled
     EXPECT_EQ(data, 1);
-    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest001 function end!");
 }
 
 /**
@@ -347,7 +325,6 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest001, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTTimerTest002, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest002 function start!");
     FFRTMutexMap mutexMap;
     FFRTTimer timer;
 
@@ -372,7 +349,6 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest002, TestSize.Level1)
     timer.Clear();
     // task id is set to 0 in Clear()
     EXPECT_EQ(timer.GetTaskId(TIMER_ID_A), 0);
-    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest002 function end!");
 }
 
 /**
@@ -382,7 +358,7 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest002, TestSize.Level1)
  */
 HWTEST_F(FFRTUtilsTest, FFRTTimerTest003, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 function start!");
+    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 start");
     FFRTTimer timer{"FFRTTimerTest003"};
     bool executed = false;
     bool canceled = false;
@@ -402,7 +378,7 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest003, TestSize.Level1)
     }
     EXPECT_TRUE(executed);
     EXPECT_TRUE(canceled);
-    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 function end!");
+    POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 end");
 }
 
 } // namespace Test

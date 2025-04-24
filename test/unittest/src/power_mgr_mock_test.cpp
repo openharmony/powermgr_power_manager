@@ -70,7 +70,7 @@ namespace {
 HWTEST_F(PowerMgrMockTest, PowerMgrMock001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock001: start.";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:Start.");
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         GTEST_LOG_(INFO) << "PowerMgrMock001: Failed to get PowerMgrService";
@@ -79,7 +79,7 @@ HWTEST_F(PowerMgrMockTest, PowerMgrMock001, TestSize.Level2)
     EXPECT_CALL(*g_powerAction, Reboot(std::string("test_case"))).Times(1);
     pms->RebootDeviceForDeprecated(std::string("test_case"));
     usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End.");
     GTEST_LOG_(INFO) << "PowerMgrMock001: end.";
 }
 }

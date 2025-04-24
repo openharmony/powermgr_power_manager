@@ -139,15 +139,14 @@ bool ShutdownDialog::ConnectSystemUi()
         return true;
     }
 
-    Want want;
-    want.SetElementName(dialogBundleName_, dialogAbilityName_);
-
-    void *handler = dlopen("libpower_ability.z.so", RTLD_NOW | RTLD_NODELETE);
+    void *handler = dlopen("libpower_ability.z.so", RTLD_LAZY | RTLD_NODELETE);
     if (handler == nullptr) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "dlopen libpower_ability.z.so failed, reason : %{public}s", dlerror());
         return false;
     }
 
+    Want want;
+    want.SetElementName(dialogBundleName_, dialogAbilityName_);
     auto powerConnectAbility = reinterpret_cast<void (*)(const Want&, const sptr<IAbilityConnection>&,
         int32_t)>(dlsym(handler, "PowerConnectAbility"));
     if (powerConnectAbility == nullptr) {

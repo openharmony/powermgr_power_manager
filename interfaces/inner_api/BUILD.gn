@@ -71,7 +71,6 @@ ohos_shared_library("powermgr_client") {
   ]
 
   external_deps = [
-    "ability_base:want",
     "c_utils:utils",
     "hicollie:libhicollie",
     "hilog:libhilog",

@@ -84,7 +84,7 @@ namespace {
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 begin.");
     g_pmsTest->HallSensorSubscriberInit();
     g_pmsTest->HallSensorSubscriberCancel();
 
@@ -98,7 +98,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
 
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 end.");
 }
 
 /**
@@ -108,7 +108,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 begin.");
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
     g_pmsTest->HandleKeyEvent(keyCode);
     keyCode = OHOS::MMI::KeyEvent::KEYCODE_F2;
@@ -125,7 +125,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
     EXPECT_TRUE(g_pmsTest->ShutDownDevice(SHUTDOWN_FAST_REASON) == PowerErrors::ERR_OK);
     SuspendDeviceType reasonSDT = SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN;
     EXPECT_TRUE(g_pmsTest->SuspendDevice(SUSCALLTIMEMS, reasonSDT, false) == PowerErrors::ERR_OK);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 end.");
 }
 
 /**
@@ -135,7 +135,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 begin.");
 #ifdef POWER_PICKUP_ENABLE
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
@@ -144,7 +144,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
     SettingHelper::UnregisterSettingWakeupPickupObserver();
     EXPECT_TRUE(SettingHelper::pickUpObserver_ == nullptr);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 end.");
 }
 
 /**
@@ -154,14 +154,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
     auto flag = SettingHelper::IsAutoAdjustBrightnessSettingValid();
     powerModeModuleTest->RegisterAutoAdjustBrightnessObserver();
     SettingHelper::SetSettingAutoAdjustBrightness(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingAutoAdjustBrightness(INVALID_CODE);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 end.");
 }
 
 /**
@@ -171,14 +171,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterAutoAdjustBrightnessObserver();
     auto flag = SettingHelper::IsBrightnessSettingValid();
     SettingHelper::SetSettingBrightness(INVALID_CODE);
     auto ret = SettingHelper::GetSettingAutoAdjustBrightness(INVALID_CODE);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 end.");
 }
 
 /**
@@ -188,14 +188,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterVibrateStateObserver();
     auto flag = SettingHelper::IsVibrationSettingValid();
     SettingHelper::SetSettingVibration(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingVibration(INVALID_CODE);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 end.");
 }
 
 
@@ -206,14 +206,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterAutoWindowRotationObserver();
     auto flag = SettingHelper::IsWindowRotationSettingValid();
     SettingHelper::SetSettingWindowRotation(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingWindowRotation(INVALID_CODE);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 end.");
 }
 
 /**
@@ -223,7 +223,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 begin.");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
     powerModeModuleTest->RegisterIntellVoiceObserver();
@@ -231,7 +231,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level0)
     SettingHelper::SetSettingIntellVoice(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingIntellVoice(INVALID_CODE);
     powerModeModuleTest->UnregisterSaveModeObserver();
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 end.");
 }
 
 /**
@@ -241,14 +241,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 begin.");
     g_pmsTest->RegisterSettingPowerModeObservers();
     g_pmsTest->RegisterSettingPowerModeObservers();
     EXPECT_TRUE(SettingHelper::powerModeObserver_ != nullptr);
     SettingHelper::SaveCurrentMode(INVALID_CODE);
     SettingHelper::UnRegisterSettingPowerModeObserver();
     EXPECT_TRUE(SettingHelper::powerModeObserver_ == nullptr);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 end.");
 }
 
 /**
@@ -258,13 +258,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 begin.");
     g_pmsTest->RegisterSettingWakeUpLidObserver();
     SettingHelper::SetSettingWakeupLid(true);
     bool ret = SettingHelper::GetSettingWakeupLid();
     SettingHelper::UnRegisterSettingWakeupLidObserver();
     EXPECT_TRUE(SettingHelper::lidObserver_ == nullptr);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 end.");
 }
 
 /**
@@ -274,7 +274,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 begin.");
 #ifdef POWER_DOUBLECLICK_ENABLE
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
@@ -283,7 +283,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
     SettingHelper::UnregisterSettingWakeupDoubleObserver();
     EXPECT_TRUE(SettingHelper::doubleClickObserver_ == nullptr);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 end.");
 }
 
 /**
@@ -293,7 +293,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 begin.");
 #ifdef MSDP_MOVEMENT_ENABLE
     auto stateMachine = std::make_shared<PowerStateMachine>(g_pmsTest);
     g_pmsTest->RegisterMovementCallback();
@@ -302,7 +302,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level0)
     bool ret =  stateMachine->IsMovementStateOn();
     EXPECT_TRUE(ret == false);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 end.");
 }
 
 /**
@@ -312,14 +312,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 begin.");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_pmsTest->RegisterExternalScreenListener();
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ != nullptr);
     g_pmsTest->UnRegisterExternalScreenListener();
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 end.");
 }
 
 /**
@@ -329,7 +329,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 begin.");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_pmsTest->SuspendControllerInit();
     g_pmsTest->WakeupControllerInit();
@@ -368,7 +368,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
     g_pmsTest->UnRegisterExternalScreenListener();
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 end.");
 }
 
 /**
@@ -378,7 +378,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level0)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 begin.");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_pmsTest->SuspendControllerInit();
     g_pmsTest->WakeupControllerInit();
@@ -424,7 +424,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level0)
     g_pmsTest->UnRegisterExternalScreenListener();
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 end.");
 }
 
 } // namespace

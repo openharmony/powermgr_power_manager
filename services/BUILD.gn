@@ -92,6 +92,7 @@ ohos_shared_library("powermgrservice") {
     ":powermgr_stub",
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/appmgr:power_appmgr",
     "${powermgr_utils_path}/ffrt:power_ffrt",
     "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper",
     "${powermgr_utils_path}/lib_loader:power_lib_loader",
@@ -111,9 +112,7 @@ ohos_shared_library("powermgrservice") {
     "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
     "drivers_interface_power:libpower_proxy_1.2",
-    "eventhandler:libeventhandler",
     "ffrt:libffrt",
-    "graphic_2d:librender_service_base",
     "hdf_core:libhdi",
     "hdf_core:libpub_utils",
     "hicollie:libhicollie",
@@ -124,7 +123,6 @@ ohos_shared_library("powermgrservice") {
     "jsoncpp:jsoncpp",
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   if (has_hiviewdfx_hisysevent_part) {
