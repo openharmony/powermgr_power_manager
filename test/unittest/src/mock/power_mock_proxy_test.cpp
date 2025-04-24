@@ -57,7 +57,7 @@ namespace {
  */
 HWTEST_F(PowerMockProxyTest, PowerMockProxyTest001, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest001 start.");
     pid_t uid = 0;
     pid_t pid = 0;
     sptr<IPCObjectStub> remote = new IPCObjectStub();
@@ -73,7 +73,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest001, TestSize.Level2)
     EXPECT_FALSE(sptrProxy->ProxyRunningLock(true, pid, uid));
     EXPECT_FALSE(sptrProxy->ProxyRunningLocks(true, {std::make_pair(pid, uid)}));
     EXPECT_FALSE(sptrProxy->ResetRunningLocks());
-    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest001 end.");
 }
 
 /**
@@ -83,7 +83,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest001, TestSize.Level2)
  */
 HWTEST_F(PowerMockProxyTest, PowerMockProxyTest002, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest002 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest002 start.");
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
@@ -103,7 +103,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest002, TestSize.Level2)
     EXPECT_EQ(sptrProxy->SetDeviceMode(mode1), PowerErrors::ERR_CONNECTION_FAIL);
     auto mode2 = sptrProxy->GetDeviceMode();
     EXPECT_TRUE(mode2 == mode1);
-    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest002 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest002 end.");
 }
 
 /**
@@ -113,7 +113,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest002, TestSize.Level2)
  */
 HWTEST_F(PowerMockProxyTest, PowerMockProxyTest003, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest003 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest003 start.");
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
@@ -139,6 +139,6 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest003, TestSize.Level2)
     std::string errorCode = "remote error";
     std::string actualDebugInfo = sptrProxy->ShellDump(dumpArgs, dumpArgs.size());
     EXPECT_EQ(errorCode, actualDebugInfo);
-    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest003 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMockProxyTest003 end.");
 }
 } // namespace

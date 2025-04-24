@@ -39,7 +39,7 @@ void DeviceStateActionCallback(uint32_t trigger) {}
  */
 HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001 function start!");
+    POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is start!");
     auto deviceStateAction = std::make_shared<DeviceStateAction>();
     SuspendCallback1 sd = DeviceStateActionCallback;
     deviceStateAction->RegisterCallback(sd);
@@ -73,6 +73,6 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_SUSPEND);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_OFF, reason);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_ON, reason);
-    POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001 function end!");
+    POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001::fun is end!");
 }
 } // namespace

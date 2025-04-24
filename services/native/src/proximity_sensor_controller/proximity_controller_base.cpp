@@ -165,7 +165,7 @@ void ProximityNormalController::ActivateValidProximitySensor(PowerState state)
             FFRTUtils::SubmitTask(task);
             proximitySensorEnabled_ = true;
         } else {
-            POWER_HILOGI(FEATURE_POWER_STATE, "Pickup wakeup device is disable, skip PROXIMITY sensor Enable");
+            POWER_HILOGI(FEATURE_POWER_STATE, "Piukup Wakeup device is disable, skip PROXIMITY sensor Enable");
         }
     } else if (state == PowerState::AWAKE) {
         if (!proximitySensorEnabled_) {

@@ -294,8 +294,13 @@ void PowerStateMachine::EmplaceAwake()
                 "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_ON",
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
-#endif
             mDeviceState_.screenState.lastOnTime = GetTickCount();
+#endif
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen()) {
+                this->stateAction_->SetInternalScreenDisplayPower(DisplayState::DISPLAY_ON, reason);
+            }
+#endif
             auto targetState = DisplayState::DISPLAY_ON;
             if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
                 if (isDozeEnabled_) {
@@ -304,11 +309,6 @@ void PowerStateMachine::EmplaceAwake()
                     targetState = DisplayState::DISPLAY_OFF;
                 }
             }
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen()) {
-                this->stateAction_->SetInternalScreenDisplayPower(DisplayState::DISPLAY_ON, reason);
-            }
-#endif
             uint32_t ret = this->stateAction_->SetDisplayState(targetState, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
@@ -424,6 +424,7 @@ void PowerStateMachine::EmplaceDim()
             if (reason == StateChangeReason::STATE_CHANGE_REASON_COORDINATION) {
                 dimTime = COORDINATED_STATE_SCREEN_OFF_TIME_MS;
             }
+            DisplayState dispState = stateAction_->GetDisplayState();
             uint32_t ret = stateAction_->SetDisplayState(DisplayState::DISPLAY_DIM, reason);
             if (ret != ActionResult::SUCCESS) {
                 // failed but not return, still need to set screen off
@@ -753,7 +754,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HIBERNATE, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
-    
+
     g_preHibernateStart = GetTickCount();
     if (clearMemory) {
         PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
@@ -878,7 +879,9 @@ void PowerStateMachine::RollbackHibernate(PowerState originalState, bool clearMe
         }
     }
 }
+#endif
 
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
 bool PowerStateMachine::HibernateInner(bool clearMemory)
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "HibernateInner begin.");
@@ -894,7 +897,6 @@ bool PowerStateMachine::HibernateInner(bool clearMemory)
         POWER_HILOGE(FEATURE_SUSPEND, "shutdown controller or hibernate controller or notify is nullptr.");
         return false;
     }
-
     if (clearMemory) {
         // do takeover only when user presses "shutdown" menu
         bool takenOver = shutdownController->TriggerTakeOverHibernateCallback(TakeOverInfo("hibernate", clearMemory));
@@ -1105,7 +1107,6 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         case PowerState::AWAKE: {
             DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
                 notify, PowerState::AWAKE, callTime);
-            notify->PublishScreenOnEvents(callTime);
             isAwakeNotified_.store(true, std::memory_order_relaxed);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
             auto suspendController = pms->GetSuspendController();
@@ -1120,7 +1121,6 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         case PowerState::INACTIVE: {
             DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
                 notify, PowerState::INACTIVE, callTime);
-            notify->PublishScreenOffEvents(callTime);
             isAwakeNotified_.store(false, std::memory_order_relaxed);
             break;
         }
@@ -1706,11 +1706,10 @@ void PowerStateMachine::ScreenChangeCheck::ReportSysEvent(const std::string& msg
         return;
     }
     lastReportTime = now;
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, eventName, HiviewDFX::HiSysEvent::EventType::FAULT, "PID",
         pid_, "UID", uid_, "PACKAGE_NAME", "", "PROCESS_NAME", "", "MSG", msg.c_str(), "REASON",
         PowerUtils::GetReasonTypeString(reason_).c_str());
-#endif
 }
 
 std::shared_ptr<PowerStateMachine::StateController> PowerStateMachine::GetStateController(PowerState state)

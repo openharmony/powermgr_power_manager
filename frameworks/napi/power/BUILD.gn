@@ -14,13 +14,6 @@
 import("../../../powermgr.gni")
 
 ohos_shared_library("power") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
   include_dirs = [ "../utils" ]
   sources = [
     "../utils/async_callback_info.cpp",
@@ -34,10 +27,7 @@ ohos_shared_library("power") {
     "${powermgr_utils_path}:utils_config",
     "${powermgr_utils_path}:coverage_flags",
   ]
-  deps = [
-    "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_utils_path}/appmgr:power_appmgr",
-  ]
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
   deps_ex = [
     "c_utils:utils",
@@ -50,10 +40,6 @@ ohos_shared_library("power") {
   } else {
     external_deps = deps_ex
     external_deps += [ "napi:ace_napi" ]
-  }
-
-  if (has_ability_runtime_part) {
-    external_deps += [ "ability_runtime:app_manager" ]
   }
 
   relative_install_dir = "module"

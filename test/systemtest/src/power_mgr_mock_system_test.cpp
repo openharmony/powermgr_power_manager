@@ -70,7 +70,7 @@ namespace {
 HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "PowerMgrMock001: start";
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:Start");
 
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -87,7 +87,7 @@ HWTEST_F(PowerMgrMockSystemTest, PowerMgrMock001, TestSize.Level2)
     pms->UnLock(token);
 #endif
 
-    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrMock001:End");
     GTEST_LOG_(INFO) << "PowerMgrMock001: end";
 }
 }
