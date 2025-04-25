@@ -26,7 +26,7 @@
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
-#include "v1_2/ipower_interface.h"
+#include "v1_3/ipower_interface.h"
 #include "ffrt_utils.h"
 
 namespace OHOS {
@@ -53,19 +53,23 @@ private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);
 
     inline static constexpr const char* WAKEUP_HOLDER = "OHOSPowerMgr.WakeupHolder";
-    class PowerHdfCallback : public OHOS::HDI::Power::V1_2::IPowerHdiCallback {
+    class PowerHdfCallback : public OHOS::HDI::Power::V1_3::IPowerHdiCallback {
     public:
         PowerHdfCallback() = default;
         ~PowerHdfCallback() = default;
         int32_t OnSuspend() override;
         int32_t OnWakeup() override;
-        void SetListener(std::function<void()>& suspend, std::function<void()>& wakeup);
+        int32_t OnWakeupWithTag(int32_t suspendTag) override;
+        void SetListener(std::function<void()>& suspend, std::function<void()>& wakeup,
+            std::function<void(int32_t)>& onWakeupWithTag);
+
     private:
-        std::function<void()> onSuspend_;
-        std::function<void()> onWakeup_;
+        std::function<void()> onSuspend_ {nullptr};
+        std::function<void()> onWakeup_ {nullptr};
+        std::function<void(int32_t)> onWakeupWithTag_ {nullptr};
     };
-    OHOS::HDI::Power::V1_2::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
-    using IPowerInterface = OHOS::HDI::Power::V1_2::IPowerInterface;
+    OHOS::HDI::Power::V1_3::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
+    using IPowerInterface = OHOS::HDI::Power::V1_3::IPowerInterface;
     sptr<IPowerInterface> GetPowerInterface();
     std::mutex mutex_;
     std::mutex interfaceMutex_;
