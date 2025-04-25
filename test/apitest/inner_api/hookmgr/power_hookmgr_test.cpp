@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,28 @@
  * limitations under the License.
  */
 
-#include "power_hdi_callback.h"
-#include "hdf_base.h"
+#include <gtest/gtest.h>
 #include "power_hookmgr.h"
-
-using namespace OHOS::HDI::Power::V1_2;
+#include "power_log.h"
 
 namespace OHOS {
 namespace PowerMgr {
-int32_t PowerHdiCallback::OnSuspend()
-{
-    return HDF_SUCCESS;
-}
+namespace Test {
+using namespace testing::ext;
+class PowerHookMgrTest : public testing::Test {};
 
-int32_t PowerHdiCallback::OnWakeup()
+/**
+ * @tc.name: PowerHookMgrTest001
+ * @tc.desc: test GetPowerHookMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerHookMgrTest, PowerHookMgrTest001, TestSize.Level1)
 {
-    return HDF_SUCCESS;
+    POWER_HILOGI(LABEL_TEST, "PowerHookMgrTest001 function start!");
+    HOOK_MGR* testHookMgr = GetPowerHookMgr();
+    EXPECT_NE(testHookMgr, nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerHookMgrTest001 function end!");
 }
-} // OHOS
-} // PowerMgr
+} // namespace Test
+} // namespace PowerMgr
+} // namespace OHOS
