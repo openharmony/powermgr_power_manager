@@ -29,6 +29,8 @@ public:
     int32_t OnSuspend() override;
 
     int32_t OnWakeup() override;
+
+    int32_t OnWakeupWithTag(const std::string& tag) override;
 };
 } // OHOS
 } // PowerMgr

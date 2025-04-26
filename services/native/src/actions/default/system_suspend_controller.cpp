@@ -288,11 +288,20 @@ int32_t SystemSuspendController::PowerHdfCallback::OnWakeup()
     return 0;
 }
 
-void SystemSuspendController::PowerHdfCallback::SetListener(
-    std::function<void()>& suspend, std::function<void()>& wakeup)
+int32_t SystemSuspendController::PowerHdfCallback::OnWakeupWithTag(const std::string& tag)
+{
+    if (onWakeupWithTag_ != nullptr) {
+        onWakeupWithTag_(tag);
+    }
+    return 0;
+}
+
+void SystemSuspendController::PowerHdfCallback::SetListener(std::function<void()>& suspend,
+    std::function<void()>& wakeup, std::function<void(const std::string&)>& wakeupWithTag)
 {
     onSuspend_ = suspend;
     onWakeup_ = wakeup;
+    onWakeupWithTag_ = wakeupWithTag;
 }
 } // namespace PowerMgr
 } // namespace OHOS
