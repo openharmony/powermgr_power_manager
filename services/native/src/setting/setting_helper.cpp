@@ -265,6 +265,13 @@ bool SettingHelper::IsDisplayOffTimeSettingValid()
 int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
 {
     int64_t value = GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, defaultVal);
+#ifdef POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF
+    constexpr int64_t PARAMETER_ZERO = 0;
+    if (value < PARAMETER_ZERO) {
+        POWER_HILOGI(COMP_UTILS, "disable auto displayoff, value=(%{public}" PRId64 ")", value);
+        return value;
+    }
+#endif
     if (value <= MIN_DISPLAY_OFF_TIME_MS) {
         POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}" PRId64 ")ms, use defaultVal", __func__, value);
         value = defaultVal;
