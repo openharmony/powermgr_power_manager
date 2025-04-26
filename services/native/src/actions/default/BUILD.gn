@@ -62,7 +62,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   external_deps = [
     "c_utils:utils",
-    "drivers_interface_power:libpower_proxy_1.3",
+    "drivers_interface_power:libpower_proxy_1.2",
     "ffrt:libffrt",
     "hdf_core:libhdf_utils",
     "hdf_core:libhdi",
