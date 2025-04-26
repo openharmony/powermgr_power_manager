@@ -74,6 +74,10 @@ public:
     {
         return;
     }
+    virtual void SetInternalScreenBrightness()
+    {
+        return;
+    }
     virtual bool TryToCancelScreenOff()
     {
         return false;

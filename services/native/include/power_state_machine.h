@@ -227,6 +227,8 @@ public:
     bool IsSettingState(PowerState state);
     void SetEnableDoze(bool enable);
     bool SetDozeMode(DisplayState state);
+    void SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason);
+    void SetInternalScreenBrightness();
 
 private:
     enum PreBrightState : uint32_t {

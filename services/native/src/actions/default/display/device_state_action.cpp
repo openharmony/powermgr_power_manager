@@ -275,6 +275,12 @@ void DeviceStateAction::SetInternalScreenDisplayPower(DisplayState state, StateC
         "SetInternalScreenDisplayPower, state=%{public}u, reason=%{public}u, ret = %{public}d", state, reason, ret);
 }
 
+void DeviceStateAction::SetInternalScreenBrightness()
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "SetInternalScreenBrightness");
+    DisplayPowerMgrClient::GetInstance().SetScreenOnBrightness();
+}
+
 void DeviceStateAction::SetCoordinated(bool coordinated)
 {
     coordinated_ = coordinated;

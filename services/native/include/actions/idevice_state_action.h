@@ -46,6 +46,7 @@ public:
     virtual uint32_t SetDisplayState(
         DisplayState state, StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) = 0;
     virtual void SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason) = 0;
+    virtual void SetInternalScreenBrightness() = 0;
     virtual bool TryToCancelScreenOff() = 0;
     virtual void BeginPowerkeyScreenOff() = 0;
     virtual void EndPowerkeyScreenOff() = 0;
