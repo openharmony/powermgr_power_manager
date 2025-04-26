@@ -59,10 +59,14 @@ private:
         ~PowerHdfCallback() = default;
         int32_t OnSuspend() override;
         int32_t OnWakeup() override;
-        void SetListener(std::function<void()>& suspend, std::function<void()>& wakeup);
+        int32_t OnWakeupWithTag(const std::string& tag) override;
+        void SetListener(std::function<void()>& suspend, std::function<void()>& wakeup,
+            std::function<void(const std::string&)>& wakeupWithTag);
+
     private:
         std::function<void()> onSuspend_;
         std::function<void()> onWakeup_;
+        std::function<void(const std::string&)> onWakeupWithTag_;
     };
     OHOS::HDI::Power::V1_2::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
     using IPowerInterface = OHOS::HDI::Power::V1_2::IPowerInterface;

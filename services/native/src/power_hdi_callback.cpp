@@ -30,5 +30,11 @@ int32_t PowerHdiCallback::OnWakeup()
 {
     return HDF_SUCCESS;
 }
+
+int32_t PowerHdiCallback::OnWakeupWithTag(const std::string& tag)
+{
+    (void)tag;
+    return HDF_SUCCESS;
+}
 } // OHOS
 } // PowerMgr
