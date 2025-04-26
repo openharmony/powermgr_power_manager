@@ -24,6 +24,7 @@
 #include <string_ex.h>
 
 #include "power_common.h"
+#include "power_log.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"

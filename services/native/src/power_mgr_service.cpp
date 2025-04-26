@@ -1014,7 +1014,7 @@ PowerErrors PowerMgrService::SuspendDevice(
 
 #ifdef POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED
     if (isBootCompleted_ == false) {
-        POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
+        POWER_HILOGE(FEATURE_SUSPEND, "SuspendDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
             pid, uid);
         return PowerErrors::ERR_FAILURE;
     }
