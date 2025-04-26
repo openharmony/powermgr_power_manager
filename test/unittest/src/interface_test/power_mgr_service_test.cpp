@@ -158,12 +158,12 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 start.");
-    uint32_t PARM_THREE = 3;
+    uint32_t PARM_FIVE = 5;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.OverrideScreenOffTime(1000), PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
-    sleep(PARM_THREE);
+    sleep(PARM_FIVE);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService006: Prepare Fail, Screen is ON.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 end.");
 }
