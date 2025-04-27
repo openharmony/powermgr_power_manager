@@ -111,7 +111,7 @@ ohos_shared_library("powermgrservice") {
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
-    "drivers_interface_power:libpower_proxy_1.3",
+    "drivers_interface_power:libpower_proxy_1.2",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",

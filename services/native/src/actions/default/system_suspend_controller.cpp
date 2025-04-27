@@ -28,7 +28,7 @@ const std::string HDI_SERVICE_NAME = "power_interface_service";
 constexpr uint32_t RETRY_TIME = 1000;
 constexpr int32_t ERR_FAILED = -1;
 } // namespace
-using namespace OHOS::HDI::Power::V1_3;
+using namespace OHOS::HDI::Power::V1_2;
 
 SystemSuspendController::SystemSuspendController() {}
 
@@ -193,11 +193,11 @@ bool SystemSuspendController::Hibernate()
     return true;
 }
 
-OHOS::HDI::Power::V1_3::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
+OHOS::HDI::Power::V1_2::RunningLockInfo SystemSuspendController::FillRunningLockInfo(const RunningLockParam& param)
 {
-    OHOS::HDI::Power::V1_3::RunningLockInfo filledInfo {};
+    OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo {};
     filledInfo.name = param.name;
-    filledInfo.type = static_cast<OHOS::HDI::Power::V1_3::RunningLockType>(param.type);
+    filledInfo.type = static_cast<OHOS::HDI::Power::V1_2::RunningLockType>(param.type);
     filledInfo.timeoutMs = param.timeoutMs;
     filledInfo.uid = param.uid;
     filledInfo.pid = param.pid;
@@ -212,7 +212,7 @@ int32_t SystemSuspendController::AcquireRunningLock(const RunningLockParam& para
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return status;
     }
-    OHOS::HDI::Power::V1_3::RunningLockInfo filledInfo = FillRunningLockInfo(param);
+    OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo = FillRunningLockInfo(param);
     status = powerInterface->HoldRunningLockExt(filledInfo,
         param.lockid, param.bundleName);
     return status;
@@ -226,7 +226,7 @@ int32_t SystemSuspendController::ReleaseRunningLock(const RunningLockParam& para
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
         return status;
     }
-    OHOS::HDI::Power::V1_3::RunningLockInfo filledInfo = FillRunningLockInfo(param);
+    OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo = FillRunningLockInfo(param);
     status = powerInterface->UnholdRunningLockExt(filledInfo,
         param.lockid, param.bundleName);
     return status;
@@ -288,20 +288,20 @@ int32_t SystemSuspendController::PowerHdfCallback::OnWakeup()
     return 0;
 }
 
-int32_t SystemSuspendController::PowerHdfCallback::OnWakeupWithTag(int32_t suspendTag)
+int32_t SystemSuspendController::PowerHdfCallback::OnWakeupWithTag(const std::string& tag)
 {
-    if (onWakeup_ != nullptr) {
-        onWakeupWithTag_(suspendTag);
+    if (onWakeupWithTag_ != nullptr) {
+        onWakeupWithTag_(tag);
     }
     return 0;
 }
 
-void SystemSuspendController::PowerHdfCallback::SetListener(
-    std::function<void()>& suspend, std::function<void()>& wakeup, std::function<void(int32_t)>& onWakeupWithTag)
+void SystemSuspendController::PowerHdfCallback::SetListener(std::function<void()>& suspend,
+    std::function<void()>& wakeup, std::function<void(const std::string&)>& wakeupWithTag)
 {
     onSuspend_ = suspend;
     onWakeup_ = wakeup;
-    onWakeupWithTag_ = onWakeupWithTag;
+    onWakeupWithTag_ = wakeupWithTag;
 }
 } // namespace PowerMgr
 } // namespace OHOS
