@@ -61,6 +61,11 @@ void DefaultDeviceStateAction::SetInternalScreenDisplayPower(DisplayState state,
     (void)reason;
 }
 
+void DefaultDeviceStateAction::SetInternalScreenBrightness()
+{
+    return;
+}
+
 void DefaultDeviceStateAction::SetCoordinated(bool coordinated)
 {
     (void)coordinated;

@@ -307,8 +307,9 @@ void PowerStateMachine::EmplaceAwake()
                 }
             }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen()) {
-                this->stateAction_->SetInternalScreenDisplayPower(DisplayState::DISPLAY_ON, reason);
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen() && IsScreenOn()) {
+                SetInternalScreenDisplayPower(DisplayState::DISPLAY_ON, reason);
+                SetInternalScreenBrightness();
             }
 #endif
             uint32_t ret = this->stateAction_->SetDisplayState(targetState, reason);
@@ -1514,6 +1515,16 @@ bool PowerStateMachine::SetDozeMode(DisplayState state)
     uint32_t ret =
         this->stateAction_->SetDisplayState(state, StateChangeReason::STATE_CHANGE_REASON_SWITCHING_DOZE_MODE);
     return ret == ActionResult::SUCCESS;
+}
+
+void PowerStateMachine::SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason)
+{
+    this->stateAction_->SetInternalScreenDisplayPower(state, reason);
+}
+
+void PowerStateMachine::SetInternalScreenBrightness()
+{
+    this->stateAction_->SetInternalScreenBrightness();
 }
 
 bool PowerStateMachine::CheckRunningLock(PowerState state)

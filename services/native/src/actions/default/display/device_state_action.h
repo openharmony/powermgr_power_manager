@@ -38,6 +38,7 @@ public:
     uint32_t SetDisplayState(DisplayState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_UNKNOWN) override;
     void SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason) override;
+    void SetInternalScreenBrightness() override;
     bool TryToCancelScreenOff() override;
     void BeginPowerkeyScreenOff() override;
     void EndPowerkeyScreenOff() override;
