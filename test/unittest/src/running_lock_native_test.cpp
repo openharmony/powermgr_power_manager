@@ -710,7 +710,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level0)
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    IRunningLockAction *runLockAction = new RunningLockAction();
 
     RunningLockParam runningLockParam0 {0,
         "runninglockNativeTest023_1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
