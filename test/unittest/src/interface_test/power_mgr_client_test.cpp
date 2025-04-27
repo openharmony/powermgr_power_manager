@@ -229,6 +229,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient007, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient007: Prepare Fail, Screen is OFF.";
     powerMgrClient.RefreshActivity(abnormaltype);
     usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / PARM_TWO + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
+    sleep(SCREEN_OFF_SLEEP_TIME_S);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient007: RefreshActivity Device Fail, Screen is OFF";
     powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient007::fun is end!");
