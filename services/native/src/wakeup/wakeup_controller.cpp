@@ -717,6 +717,7 @@ void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
     uint64_t screenId = Rosen::DisplayManagerLite::GetInstance().GetInternalScreenId();
     bool ret = Rosen::DisplayManagerLite::GetInstance().SetScreenPowerById(
         screenId, Rosen::ScreenPowerState::POWER_ON, dmsReason);
+    stateMachine_->SetInternalScreenBrightness();
     POWER_HILOGI(FEATURE_WAKEUP,
         "[UL_POWER] Power on internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
         static_cast<uint32_t>(screenId), ret);
