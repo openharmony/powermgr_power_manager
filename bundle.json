@@ -32,6 +32,7 @@
             "power_manager_feature_power_dialog",
             "power_manager_feature_enable_s4",
             "power_manager_feature_audio_lock_unproxy",
+            "power_manager_feature_disable_auto_displayoff",
             "power_manager_feature_doubleclick",
             "power_manager_feature_pickup",
             "power_manager_feature_force_sleep_broadcast",
