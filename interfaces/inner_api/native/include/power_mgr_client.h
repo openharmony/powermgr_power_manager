@@ -97,12 +97,12 @@ public:
      * Windows overwrite timeout
      * @param timeout Specifies the timeout duration.
      */
-    PowerErrors OverrideScreenOffTime(int64_t timeout);
+    PowerErrors OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion = "-1");
 
     /**
      * Windows restores timeout
      */
-    PowerErrors RestoreScreenOffTime();
+    PowerErrors RestoreScreenOffTime(const std::string& apiVersion = "-1");
 
     /**
      * Check whether the device screen is on. The result may be true or false, depending on the system state.
@@ -144,7 +144,7 @@ public:
      * Hibernate the device.
      * @param clearMemory Indicates whether to clear the memory before the device hibernates.
      */
-    PowerErrors Hibernate(bool clearMemory);
+    PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion = "-1");
 
     /* Set the device mode.
      *

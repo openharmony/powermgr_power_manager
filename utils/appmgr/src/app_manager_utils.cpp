@@ -14,6 +14,10 @@
  */
 
 #include "app_manager_utils.h"
+#ifdef HAS_ABILITY_RUNTIME_PART
+#include "bundle_mgr_interface.h"
+#include "system_ability_definition.h"
+#endif
 
 #include "power_log.h"
 #include <app_mgr_interface.h>
@@ -25,6 +29,9 @@ namespace OHOS {
 namespace PowerMgr {
 static constexpr uint32_t APP_MGR_SERVICE_ID = 501;
 sptr<OHOS::AppExecFwk::IAppMgr> AppManagerUtils::appManagerInstance_ = nullptr;
+namespace {
+const int32_t API_VERSION_MOD = 1000;
+}
 
 sptr<OHOS::AppExecFwk::IAppMgr> AppManagerUtils::GetAppManagerInstance()
 {
@@ -81,6 +88,42 @@ bool AppManagerUtils::IsForegroundApplication(const std::string& appName)
     }
     POWER_HILOGI(FEATURE_UTIL, "IsForegroundApplication, ret: %{public}u", static_cast<uint32_t>(IsForeground));
     return IsForeground;
+}
+
+int32_t AppManagerUtils::GetApiTargetVersion()
+{
+#ifdef HAS_ABILITY_RUNTIME_PART
+    static int32_t apiTargetVersion = -1;
+    if (apiTargetVersion != -1) {
+        return apiTargetVersion;
+    }
+    sptr<OHOS::ISystemAbilityManager> saManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        POWER_HILOGE(FEATURE_UTIL, "Failed to get ISystemAbilityManager");
+        return 0;
+    }
+    sptr<OHOS::IRemoteObject> remoteObject = saManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<OHOS::AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgrProxy == nullptr) {
+        POWER_HILOGE(FEATURE_UTIL, "GetApiTargetVersion: bundleMgrProxy is nullptr");
+        return 0;
+    }
+    OHOS::AppExecFwk::BundleInfo bundleInfo;
+    auto ret =
+        bundleMgrProxy->GetBundleInfoForSelf(OHOS::AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo);
+    if (ret != 0) {
+        POWER_HILOGI(FEATURE_UTIL, "GetApiTargetVersion: GetBundleInfoForSelf failed");
+        return 0;
+    }
+    int32_t hapApiVersion = bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_MOD;
+    apiTargetVersion = hapApiVersion;
+    POWER_HILOGI(FEATURE_UTIL, "GetApiTargetVersion: hapApiVersion is %{public}d", hapApiVersion);
+    return hapApiVersion;
+#else
+    POWER_HILOGI(FEATURE_UTIL, "GetApiTargetVersion not support");
+    return -1;
+#endif
 }
 
 } // namespace PowerMgr
