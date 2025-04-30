@@ -84,6 +84,7 @@
                 "libxml2",
                 "napi",
                 "os_account",
+                "runtime_core",
                 "safwk",
                 "samgr",
                 "sensor",
@@ -108,6 +109,7 @@
                 ],
                 "fwk_group": [
                     "//base/powermgr/power_manager/frameworks:power_napi",
+                    "//base/powermgr/power_manager/frameworks/ets/taihe:power_manager_taihe",
                     "//base/powermgr/power_manager/interfaces/inner_api:powermgr_client"
                 ],
                 "service_group": [
@@ -208,6 +210,9 @@
                       ],
                       "header_base": "//base/powermgr/power_manager/frameworks/cj/power/include"
                     }
+                },
+                {
+                    "name": "//base/powermgr/power_manager/frameworks/ets/taihe/runninglock:copy_power_manager_runninglock"
                 }
             ],
             "test": [
