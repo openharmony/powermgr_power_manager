@@ -84,6 +84,7 @@
                 "libxml2",
                 "napi",
                 "os_account",
+                "runtime_core",
                 "safwk",
                 "samgr",
                 "sensor",
