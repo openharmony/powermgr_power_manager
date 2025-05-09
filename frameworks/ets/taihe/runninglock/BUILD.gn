@@ -68,6 +68,13 @@ generate_static_abc("runningLock_abc") {
   dependencies = [ ":run_taihe" ]
 }
 
+generate_static_abc("runningLock_test_abc") {
+  base_url = "$powermgr_framework/ets/taihe/runninglock/test"
+  files = [ "$powermgr_framework/ets/taihe/runninglock/test/test_main.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/runningLock_test_abc.abc"
+}
+
 ohos_prebuilt_etc("runningLock_etc") {
   source = "$target_out_dir/runningLock_abc.abc"
   module_install_dir = "framework"
