@@ -213,6 +213,9 @@
                 },
                 {
                     "name": "//base/powermgr/power_manager/frameworks/ets/taihe/runninglock:copy_power_manager_runninglock"
+                },
+                {
+                    "name": "//base/powermgr/power_manager/frameworks/ets/taihe/power:copy_power_manager"
                 }
             ],
             "test": [
