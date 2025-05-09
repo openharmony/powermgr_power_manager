@@ -13,6 +13,8 @@
 
 group("power_manager_taihe") {
   deps = [
+    "power:power_abc_etc",
+    "power:power_manager_taihe_native",
     "runninglock:runningLock_etc",
     "runninglock:power_manager_runninglock_taihe_native",
   ]
