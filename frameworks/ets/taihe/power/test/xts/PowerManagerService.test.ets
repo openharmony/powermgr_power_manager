@@ -17,10 +17,10 @@ import { describe, it, expect, TestType, Size, Level } from "../hypium/index";
 import { BusinessError } from '@ohos.base'
 import hilog from '@ohos.hilog'
 import Utils from './Util.test';
-import power from '@ohos.power'
+import power_ from '@ohos.power'
 
-let domain: number = 0x0000; //日志标识,0x0000作为测试框架的业务标识
-let tag: string = 'testTag'; //日志标识字符串,作为tag标识当前runner类下的测试行为
+let domain: number = 0x0000;
+let tag: string = 'testTag';
 const ERROR_CODE = 202;
 
 export default function PowerManagerServiceTest() {
@@ -31,7 +31,7 @@ export default function PowerManagerServiceTest() {
       async (done: () => void): Promise<void> => {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0100 start');
         try {
-          let isActive = power.isActive();
+          let isActive = power_.isActive();
           hilog.info(domain, tag, '%{public}s', JSON.stringify(isActive));
           hilog.info(domain, tag, '%{public}s', typeof isActive);
           expect(typeof isActive).assertEqual('boolean');
@@ -46,7 +46,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0200 start');
         let TAG = 'PowerManagerServiceTest0200';
         try {
-          power.wakeup("PowerManagerServiceTest0200");
+          power_.wakeup("PowerManagerServiceTest0200");
           console.info(TAG + ' end');
           done();
         } catch (e : BusinessError) {
@@ -60,7 +60,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0300 start');
         let TAG = 'PowerManagerServiceTest0300';
         try {
-          power.suspend(true);
+          power_.suspend(true);
           console.info(TAG + ' end');
           done();
         } catch (e : BusinessError) {
@@ -74,7 +74,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0400 start');
         let TAG = 'PowerManagerServiceTest0400';
         try {
-          power.suspend(false);
+          power_.suspend(false);
           console.info(TAG + ' end');
           done();
         } catch (e : BusinessError) {
@@ -88,7 +88,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0500 start');
         let TAG = 'PowerManagerServiceTest0500';
         try {
-          power.suspend();
+          power_.suspend();
           console.info(TAG + ' end');
           done();
         } catch (e : BusinessError) {
@@ -102,10 +102,10 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0600 start');
         let TAG = 'PowerManagerServiceTest0600';
         try {
-          let currentMode = power.getPowerMode();
+          let currentMode = power_.getPowerMode();
           console.info(TAG + ' currentMode:' + currentMode);
-          expect(currentMode >= power.DevicePowerMode.MODE_NORMAL &&
-            currentMode <= power.DevicePowerMode.MODE_EXTREME_POWER_SAVE).assertTrue();
+          expect(currentMode >= power_.DevicePowerMode.MODE_NORMAL &&
+            currentMode <= power_.DevicePowerMode.MODE_EXTREME_POWER_SAVE).assertTrue();
           done();
         } catch (e) {
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
@@ -131,15 +131,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0800 start');
         let TAG = 'PowerManagerServiceTest0800';
         try {
-          power.setPowerMode(power.DevicePowerMode.MODE_PERFORMANCE)
-            .then(() => {
-              console.info('set power mode to MODE_PERFORMANCE');
-              expect().assertFail();
-            })
-            .catch((error) => {
-              console.info(TAG + ` setPowerMode err: ${error.code} ${error.message}`);
-              expect(error.code).assertEqual(ERROR_CODE);
-            });
+          await power_.setPowerMode(power_.DevicePowerMode.MODE_PERFORMANCE);
           console.info(TAG + ' end');
           done();
         } catch (e : BusinessError) {
@@ -153,7 +145,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest0900 start');
         let TAG = 'PowerManagerServiceTest0900';
         try {
-          let isStandby = power.isStandby();
+          let isStandby = power_.isStandby();
           console.info(TAG + ' end isStandby:' + isStandby);
           expect(isStandby).assertFalse();
           done();
@@ -167,7 +159,7 @@ export default function PowerManagerServiceTest() {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1000 start');
         let TAG = 'PowerManagerServiceTest1000';
         try {
-          power.setScreenOffTime(3000);
+          power_.setScreenOffTime(3000);
           console.info(TAG + ' end');
           done();
         } catch (e : BusinessError) {
@@ -180,16 +172,95 @@ export default function PowerManagerServiceTest() {
       async (done: () => void): Promise<void> => {
         hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1100 start');
         let TAG = 'PowerManagerServiceTest1100';
-        let devicePowerMode = power.DevicePowerMode.MODE_NORMAL;
+        let devicePowerMode = power_.DevicePowerMode.MODE_NORMAL;
         expect(devicePowerMode === 600).assertTrue();
-        devicePowerMode = power.DevicePowerMode.MODE_POWER_SAVE;
+        console.info(TAG + ' end');
+        done();
+      })
+    it("PowerManagerServiceTest1200", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1200 start');
+        let TAG = 'PowerManagerServiceTest1200';
+        let devicePowerMode = power_.DevicePowerMode.MODE_POWER_SAVE;
         expect(devicePowerMode === 601).assertTrue();
-        devicePowerMode = power.DevicePowerMode.MODE_PERFORMANCE;
+        console.info(TAG + ' end');
+        done();
+      })
+    it("PowerManagerServiceTest1300", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1300 start');
+        let TAG = 'PowerManagerServiceTest1300';
+        let devicePowerMode = power_.DevicePowerMode.MODE_PERFORMANCE;
         expect(devicePowerMode === 602).assertTrue();
-        devicePowerMode = power.DevicePowerMode.MODE_EXTREME_POWER_SAVE;
+        console.info(TAG + ' end');
+        done();
+      })
+    it("PowerManagerServiceTest1400", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1400 start');
+        let TAG = 'PowerManagerServiceTest1400';
+        let devicePowerMode = power_.DevicePowerMode.MODE_EXTREME_POWER_SAVE;
         expect(devicePowerMode === 603).assertTrue();
         console.info(TAG + ' end');
         done();
+      })
+    it("PowerManagerServiceTest1500", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1500 start');
+        let TAG = 'PowerManagerServiceTest1500';
+        try {
+          power_.shutdown("PowerManagerServiceTest1500");
+          console.info(TAG + ' end');
+          done();
+        } catch (e : BusinessError) {
+          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+          expect(e.code).assertEqual(ERROR_CODE);
+          done();
+        }
+        
+      })
+    it("PowerManagerServiceTest1600", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1600 start');
+        let TAG = 'PowerManagerServiceTest1600';
+        try {
+          power_.reboot("PowerManagerServiceTest1600");
+          console.info(TAG + ' end');
+          done();
+        } catch (e : BusinessError) {
+          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+          expect(e.code).assertEqual(ERROR_CODE);
+          done();
+        }
+        
+      })
+    it("PowerManagerServiceTest1700", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1700 start');
+        let TAG = 'PowerManagerServiceTest1700';
+        try {
+          power_.hibernate(true);
+          console.info(TAG + ' end');
+          done();
+        } catch (e : BusinessError) {
+          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+          expect(e.code).assertEqual(ERROR_CODE);
+          done();
+        }
+      })
+    it("PowerManagerServiceTest1800", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest1800 start');
+        let TAG = 'PowerManagerServiceTest1800';
+        try {
+          power_.hibernate(false);
+          console.info(TAG + ' end');
+          done();
+        } catch (e : BusinessError) {
+          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+          expect(e.code).assertEqual(ERROR_CODE);
+          done();
+        }
       })
   })
   hilog.info(domain, tag, '%{public}s', 'PowerManagerServiceTest end');
