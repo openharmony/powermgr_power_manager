@@ -13,20 +13,7 @@
  * limitations under the License.
  */
 
-@!namespace("@ohos.runningLock", "runningLock")
-
-@!sts_inject("""
-static { loadLibrary("power_manager_runninglock_taihe_native.z") }""")
-
-enum RunningLockType: i32 { PROXIMITY_SCREEN_CONTROL = 2 }
-
-@class
-interface RunningLock {
-    Hold(timeout: i32): void;
-    IsHolding(): bool;
-    Unhold(): void;
+import RunningLockTest from './RunningLock.test'
+export default function testsuite() {
+    RunningLockTest();
 }
-
-@gen_async("create")
-@gen_promise("create")
-function CreateSync(name: String, type: RunningLockType): RunningLock;
