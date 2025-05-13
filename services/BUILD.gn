@@ -112,6 +112,7 @@ ohos_shared_library("powermgrservice") {
     "config_policy:configpolicy_util",
     "data_share:datashare_consumer",
     "drivers_interface_power:libpower_proxy_1.2",
+    "drivers_interface_power:libpower_proxy_1.3",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",
