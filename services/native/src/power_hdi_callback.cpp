@@ -16,6 +16,7 @@
 #include "power_hdi_callback.h"
 #include "hdf_base.h"
 #include "power_hookmgr.h"
+#include "power_log.h"
 
 using namespace OHOS::HDI::Power::V1_2;
 
@@ -23,11 +24,25 @@ namespace OHOS {
 namespace PowerMgr {
 int32_t PowerHdiCallback::OnSuspend()
 {
+    POWER_HILOGD(FEATURE_SUSPEND, "OnSuspend");
     return HDF_SUCCESS;
 }
 
 int32_t PowerHdiCallback::OnWakeup()
 {
+    POWER_HILOGD(FEATURE_WAKEUP, "OnSuspend");
+    return HDF_SUCCESS;
+}
+
+int32_t PowerHdiCallbackExt::OnSuspendWithTag(const std::string& tag)
+{
+    POWER_HILOGD(FEATURE_SUSPEND, "OnSuspendWithTag, tag:%{public}s", tag.c_str());
+    return HDF_SUCCESS;
+}
+
+int32_t PowerHdiCallbackExt::OnWakeupWithTag(const std::string& tag)
+{
+    POWER_HILOGD(FEATURE_WAKEUP, "OnWakeupWithTag, tag:%{public}s", tag.c_str());
     return HDF_SUCCESS;
 }
 } // OHOS
