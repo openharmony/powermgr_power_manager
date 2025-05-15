@@ -26,11 +26,12 @@
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
-#include "v1_2/ipower_interface.h"
+#include "v1_3/ipower_interface.h"
 #include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
+using namespace OHOS::HDI::Power;
 class SystemSuspendController : public DelayedRefSingleton<SystemSuspendController> {
 public:
     void Suspend(const std::function<void()>& onSuspend, const std::function<void()>& onWakeup, bool force);
@@ -65,12 +66,12 @@ private:
         std::function<void()> onWakeup_;
     };
     OHOS::HDI::Power::V1_2::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
-    using IPowerInterface = OHOS::HDI::Power::V1_2::IPowerInterface;
-    sptr<IPowerInterface> GetPowerInterface();
+    sptr<V1_3::IPowerInterface> GetPowerInterface();
     std::mutex mutex_;
     std::mutex interfaceMutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
-    sptr<IPowerInterface> powerInterface_ { nullptr };
+    sptr<V1_3::IPowerInterface> powerInterface_ { nullptr };
+    sptr<V1_3::IPowerHdiCallbackExt> powerCallbackExt_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
     std::atomic<bool> allowSleepTask_ {false};
