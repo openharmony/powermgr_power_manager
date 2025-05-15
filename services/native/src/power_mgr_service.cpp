@@ -69,7 +69,7 @@ MODULE_MGR *g_moduleMgr = nullptr;
 #if (defined(__aarch64__) || defined(__x86_64__))
 const char* POWER_PLUGIN_AUTORUN_PATH = "/system/lib64/powerplugin/autorun";
 #else
-const char* POWER_PLUGIN_AUTORUN_PATH = "/system/lib32/powerplugin/autorun";
+const char* POWER_PLUGIN_AUTORUN_PATH = "/system/lib/powerplugin/autorun";
 #endif
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string REASON_POWER_KEY = "power_key";
@@ -681,6 +681,7 @@ void PowerMgrService::OnStop()
 #ifndef FUZZ_TEST
     PowerExtIntfWrapper::Instance().DeInit();
     ModuleMgrDestroy(g_moduleMgr);
+    g_moduleMgr = nullptr;
 #endif
 }
 
