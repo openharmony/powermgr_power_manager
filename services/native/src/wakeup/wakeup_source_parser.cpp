@@ -16,12 +16,11 @@
 #include <fstream>
 #include <unistd.h>
 
+#include <cJSON.h>
 #include "config_policy_utils.h"
 #include "power_log.h"
 #include "setting_helper.h"
 #include "wakeup_source_parser.h"
-#include "json/reader.h"
-#include "json/value.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -109,51 +108,54 @@ bool WakeupSourceParser::GetTargetPath(std::string& targetPath)
 std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::string& jsonStr)
 {
     std::shared_ptr<WakeupSources> parseSources = std::make_shared<WakeupSources>();
-    Json::Reader reader;
-    Json::Value root;
-    std::string errors;
-    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
+    cJSON* root = cJSON_Parse(jsonStr.c_str());
+    if (!root) {
         POWER_HILOGE(FEATURE_WAKEUP, "json parse error");
         parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
 
-    if (root.isNull() || !root.isObject()) {
+    if (!cJSON_IsObject(root)) {
         POWER_HILOGE(FEATURE_WAKEUP, "json root invalid[%{public}s]", jsonStr.c_str());
         parseSources->SetParseErrorFlag(true);
+        cJSON_Delete(root);
         return parseSources;
     }
 
-    Json::Value::Members members = root.getMemberNames();
-    for (auto iter = members.begin(); iter != members.end(); iter++) {
-        std::string key = *iter;
-        Json::Value valueObj = root[key];
-
-        bool ret = ParseSourcesProc(parseSources, valueObj, key);
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, root) {
+        const char* key = item->string;
+        if (!key) {
+            POWER_HILOGI(FEATURE_WAKEUP, "invalid key in json object");
+            continue;
+        }
+        std::string keyStr = std::string(key);
+        bool ret = ParseSourcesProc(parseSources, item, keyStr);
         if (ret == false) {
             POWER_HILOGI(FEATURE_WAKEUP, "lost map config key");
             continue;
         }
     }
 
+    cJSON_Delete(root);
     return parseSources;
 }
 
 bool WakeupSourceParser::ParseSourcesProc(
-    std::shared_ptr<WakeupSources>& parseSources, Json::Value& valueObj, std::string& key)
+    std::shared_ptr<WakeupSources>& parseSources, cJSON* valueObj, std::string& key)
 {
     bool enable = true;
     uint32_t click = DOUBLE_CLICK;
     WakeupDeviceType wakeupDeviceType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
-    if (!valueObj.isNull() && valueObj.isObject()) {
-        Json::Value enableValue = valueObj[WakeupSource::ENABLE_KEY];
-        Json::Value clickValue = valueObj[WakeupSource::KEYS_KEY];
-        if (!clickValue.isNull() && clickValue.isUInt()) {
-            click = (clickValue.asUInt() == SINGLE_CLICK || clickValue.asUInt() == DOUBLE_CLICK) ? clickValue.asUInt() :
-                                                                                                   DOUBLE_CLICK;
+    if (valueObj && cJSON_IsObject(valueObj)) {
+        cJSON* enableValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupSource::ENABLE_KEY);
+        if (enableValue && cJSON_IsBool(enableValue)) {
+            enable = cJSON_IsTrue(enableValue);
         }
-        if (enableValue.isBool()) {
-            enable = enableValue.asBool();
+        cJSON* clickValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupSource::KEYS_KEY);
+        if (clickValue && cJSON_IsNumber(clickValue)) {
+            uint32_t clickInt = static_cast<uint32_t>(clickValue->valueint);
+            click = (clickInt == SINGLE_CLICK || clickInt == DOUBLE_CLICK) ? clickInt : DOUBLE_CLICK;
         }
     }
 

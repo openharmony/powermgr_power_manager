@@ -27,11 +27,10 @@
 #include <key_event.h>
 #include <key_option.h>
 #endif
+#include <cJSON.h>
 #include <message_parcel.h>
 
 #include "config_policy_utils.h"
-#include "json/reader.h"
-#include "json/value.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_vibrator.h"
@@ -187,30 +186,41 @@ void ShutdownDialog::LoadDialogConfig()
 
     std::ifstream inputStream(configPath, std::ios::in | std::ios::binary);
     std::string contentStr(std::istreambuf_iterator<char> {inputStream}, std::istreambuf_iterator<char> {});
-    Json::Reader reader;
-    Json::Value root;
-    if (!reader.parse(contentStr.data(), contentStr.data() + contentStr.size(), root)) {
-        POWER_HILOGE(COMP_UTILS, "json parse error");
+    if (contentStr.empty()) {
+        POWER_HILOGE(COMP_UTILS, "json file is empty");
         return;
     }
 
-    if (root.isNull() || !root.isObject()) {
-        POWER_HILOGE(COMP_UTILS, "json root invalid[%{public}s]", contentStr.c_str());
-        return;
-    }
-    
-    if (!root["bundleName"].isString() ||
-        !root["abilityName"].isString() || !root["uiExtensionType"].isString()) {
-        POWER_HILOGE(COMP_UTILS, "json varibale not support");
+    cJSON* root = cJSON_Parse(contentStr.c_str());
+    if (!root) {
+        POWER_HILOGE(COMP_UTILS, "json parse error[%{public}s]", contentStr.c_str());
         return;
     }
 
-    bundleName_ = root["bundleName"].asString();
-    abilityName_ = root["abilityName"].asString();
-    uiExtensionType_ = root["uiExtensionType"].asString();
-    dialogBundleName_ = root["bundleName"].asString();
+    if (!cJSON_IsObject(root)) {
+        POWER_HILOGE(COMP_UTILS, "json root invalid");
+        cJSON_Delete(root);
+        return;
+    }
+
+    cJSON* bundleNameItem = cJSON_GetObjectItemCaseSensitive(root, "bundleName");
+    cJSON* abilityNameItem = cJSON_GetObjectItemCaseSensitive(root, "abilityName");
+    cJSON* uiExtensionTypeItem = cJSON_GetObjectItemCaseSensitive(root, "uiExtensionType");
+    if (!bundleNameItem || !cJSON_IsString(bundleNameItem) ||
+        !abilityNameItem || !cJSON_IsString(abilityNameItem) ||
+        !uiExtensionTypeItem || !cJSON_IsString(uiExtensionTypeItem)) {
+        POWER_HILOGE(COMP_UTILS, "json variable not supported");
+        cJSON_Delete(root);
+        return;
+    }
+
+    bundleName_ = bundleNameItem->valuestring;
+    abilityName_ = abilityNameItem->valuestring;
+    uiExtensionType_ = uiExtensionTypeItem->valuestring;
+    dialogBundleName_ = bundleNameItem->valuestring;
     dialogAbilityName_ = "com.ohos.sceneboard.systemdialog";
     POWER_HILOGI(COMP_UTILS, "PowerOff variables have changed");
+    cJSON_Delete(root);
 }
 
 void ShutdownDialog::DialogAbilityConnection::OnAbilityConnectDone(

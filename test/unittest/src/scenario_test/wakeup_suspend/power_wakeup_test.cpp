@@ -16,7 +16,7 @@
 #include <fstream>
 #include <thread>
 #include <unistd.h>
-
+#include <cJSON.h>
 #include "axis_event.h"
 #include "input_device.h"
 #include "pointer_event.h"
@@ -27,7 +27,6 @@
 #include "power_mgr_client.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
-#include "json/reader.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;

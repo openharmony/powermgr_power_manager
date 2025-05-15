@@ -59,12 +59,12 @@ ohos_fuzztest("ShutDownDeviceFuzzTest") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "cJSON:cjson",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
     "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",

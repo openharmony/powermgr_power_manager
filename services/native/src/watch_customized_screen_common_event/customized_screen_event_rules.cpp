@@ -15,7 +15,7 @@
 
 #include "customized_screen_event_rules.h"
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-#include "json/json.h"
+#include <cJSON.h>
 #include "power_ext_intf_wrapper.h"
 #endif
 
