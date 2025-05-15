@@ -52,6 +52,7 @@ deps_ex = [
   "ability_base:base",
   "ability_base:want",
   "ability_runtime:ability_manager",
+  "cJSON:cjson",
   "c_utils:utils",
   "common_event_service:cesfwk_innerkits",
   "ffrt:libffrt",

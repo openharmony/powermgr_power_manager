@@ -16,7 +16,7 @@
 #include <fstream>
 #include <thread>
 #include <unistd.h>
-
+#include <cJSON.h>
 #include "axis_event.h"
 #include "input_device.h"
 #include "pointer_event.h"
@@ -28,7 +28,6 @@
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
-#include "json/reader.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -380,19 +379,30 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest011, TestSize.Level
         "false},\"lid\": {\"enable\": false},\"switch\": {\"enable\": true},\"xxx\": {\"enable\": false}}";
 
     std::shared_ptr<WakeupSources> parseSources = std::make_shared<WakeupSources>();
-    Json::Reader reader;
-    Json::Value root;
 
-    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
+    cJSON* root = cJSON_Parse(jsonStr.c_str());
+    if (!root) {
         GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: json parse error";
+        return;
+    }
+    if (!cJSON_IsObject(root)) {
+        GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: root is not object";
+        cJSON_Delete(root);
+        return;
     }
 
-    Json::Value::Members members = root.getMemberNames();
-    for (auto iter = members.begin(); iter != members.end(); iter++) {
-        std::string key = *iter;
-        Json::Value valueObj = root[key];
-        WakeupSourceParser::ParseSourcesProc(parseSources, valueObj, key);
+    cJSON* item = NULL;
+    cJSON_ArrayForEach(item, root) {
+        const char* key = item->string;
+        if (!key) {
+            continue;
+        }
+        std::string keyStr = std::string(key);
+        WakeupSourceParser::ParseSourcesProc(parseSources, item, keyStr);
     }
+
+    cJSON_Delete(root);
+
     EXPECT_TRUE(parseSources->GetSourceList().size() != 0);
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest011 function end!");

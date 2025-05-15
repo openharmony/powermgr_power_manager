@@ -60,11 +60,11 @@ ohos_fuzztest("IsScreenOnFuzzTest") {
   external_deps = [
     "ability_runtime:ability_manager",
     "c_utils:utils",
+    "cJSON:cjson",
     "ffrt:libffrt",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",

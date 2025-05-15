@@ -19,8 +19,8 @@
 #include <memory>
 #include <string>
 
+#include <cJSON.h>
 #include "wakeup_action_sources.h"
-#include "json/value.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -30,7 +30,7 @@ public:
     static std::shared_ptr<WakeupActionSources> ParseSources(const std::string& jsonStr);
     static bool GetTargetPath(std::string& targetPath);
     static bool ParseSourcesProc(
-        std::shared_ptr<WakeupActionSources> &parseSources,  Json::Value& valueObj, std::string& key);
+        std::shared_ptr<WakeupActionSources> &parseSources,  cJSON* valueObj, std::string& key);
 };
 } // namespace PowerMgr
 } // namespace OHOS

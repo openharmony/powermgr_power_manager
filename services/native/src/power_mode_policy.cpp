@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
+#include <cJSON.h>
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
 #include "power_log.h"
 #include "power_save_mode.h"
 #include "singleton.h"
 #include "setting_helper.h"
-#include "json/json.h"
 using namespace std;
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr int32_t KEY_BASE = 10;
+
 int32_t PowerModePolicy::GetPowerModeValuePolicy(uint32_t type)
 {
     int32_t ret = INIT_VALUE_FALSE;
@@ -68,20 +70,33 @@ void PowerModePolicy::ComparePowerModePolicy()
 bool PowerModePolicy::InitRecoverMap()
 {
     std::string jsonStr = SettingHelper::ReadPowerModeRecoverMap();
-    Json::Value recoverJson;
-    Json::Reader reader;
-    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), recoverJson)) {
+
+    cJSON* recoverJson = cJSON_Parse(jsonStr.c_str());
+    if (!recoverJson) {
         POWER_HILOGW(FEATURE_POWER_MODE, "parse recover json str error");
         return false;
     }
-    for (const auto &member : recoverJson.getMemberNames()) {
-        int32_t key = std::stoi(member);
-        if (!recoverJson[member].isInt()) {
+    if (!cJSON_IsObject(recoverJson)) {
+        POWER_HILOGW(FEATURE_POWER_MODE, "recover json root is not an object");
+        cJSON_Delete(recoverJson);
+        return false;
+    }
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, recoverJson) {
+        const char* keyStr = item->string;
+        if (!keyStr || !cJSON_IsNumber(item)) {
             continue;
         }
-        int32_t value = recoverJson[member].asInt();
+        errno = 0;
+        int32_t key = static_cast<int32_t>(strtol(keyStr, nullptr, KEY_BASE));
+        if (errno == ERANGE && (key == INT_MAX || key == INT_MIN)) {
+            continue;
+        }
+        int32_t value = static_cast<int32_t>(item->valueint);
         recoverMap_[key] = value;
     }
+
+    cJSON_Delete(recoverJson);
     POWER_HILOGI(FEATURE_POWER_MODE, "init recover map succeed");
     return true;
 }
@@ -193,11 +208,27 @@ void PowerModePolicy::RemoveBackupMapSettingSwitch(uint32_t switchId)
 
 void PowerModePolicy::SavePowerModeRecoverMap()
 {
-    Json::Value recoverJson;
-    for (const auto& pair : recoverMap_) {
-        recoverJson[to_string(pair.first)] = pair.second;
+    cJSON* recoverJson = cJSON_CreateObject();
+    if (!recoverJson) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Failed to create cJSON object");
+        return;
     }
-    SettingHelper::SavePowerModeRecoverMap(recoverJson.toStyledString());
+
+    for (const auto& pair : recoverMap_) {
+        std::string keyStr = std::to_string(pair.first);
+        cJSON_AddNumberToObject(recoverJson, keyStr.c_str(), pair.second);
+    }
+
+    char* jsonStr = cJSON_Print(recoverJson);
+    if (!jsonStr) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Failed to print cJSON to string");
+        cJSON_Delete(recoverJson);
+        return;
+    }
+    std::string jsonConfig = std::string(jsonStr);
+    SettingHelper::SavePowerModeRecoverMap(jsonConfig);
+    cJSON_free(jsonStr);
+    cJSON_Delete(recoverJson);
 }
 } // namespace PowerMgr
 } // namespace OHOS

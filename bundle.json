@@ -82,7 +82,6 @@
                 "input",
                 "ipc",
                 "image_framework",
-                "jsoncpp",
                 "libxml2",
                 "napi",
                 "os_account",
