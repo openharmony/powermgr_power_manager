@@ -115,6 +115,7 @@ void SystemSuspendController::UnRegisterPowerHdiCallback()
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     powerInterface->UnRegisterPowerCallbackExt(powerCallbackExt_);
+    powerCallbackExt_ = nullptr;
 #else
     sptr<IPowerHdiCallback> callback = nullptr;
     powerInterface->RegisterCallback(callback);

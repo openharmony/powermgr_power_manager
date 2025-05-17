@@ -19,16 +19,11 @@
 namespace OHOS {
 namespace PowerMgr {
 static const char* POWER_HOOKMGR_NAME = "power_hookmgr";
-static HOOK_MGR* g_powerHookMgr = nullptr;
 
 HOOK_MGR* GetPowerHookMgr()
 {
-    if (g_powerHookMgr != nullptr) {
-        return g_powerHookMgr;
-    }
-
-    g_powerHookMgr = HookMgrCreate(POWER_HOOKMGR_NAME);
-    return g_powerHookMgr;
+    static HOOK_MGR* powerHookMgr = HookMgrCreate(POWER_HOOKMGR_NAME);
+    return powerHookMgr;
 }
 } // namespace PowerMgr
 } // namespace OHOS
