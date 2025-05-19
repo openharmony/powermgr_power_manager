@@ -89,7 +89,7 @@ static std::mutex powerInitMutex_;
 #ifdef POWER_PICKUP_ENABLE
 bool g_isPickUpOpen = false;
 #endif
-constexpr int32_t API18 = 18;
+constexpr int32_t API19 = 19;
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
@@ -1054,7 +1054,7 @@ PowerErrors PowerMgrService::SuspendDevice(
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API18 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1085,7 +1085,7 @@ PowerErrors PowerMgrService::WakeupDevice(
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API18 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "WakeupDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1152,7 +1152,7 @@ PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout, const std::s
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API18 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "OverrideScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1171,7 +1171,7 @@ PowerErrors PowerMgrService::RestoreScreenOffTime(const std::string& apiVersion)
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API18 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "RestoreScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1224,7 +1224,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API18 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
@@ -1245,7 +1245,7 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reas
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API18 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "Hibernate failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
