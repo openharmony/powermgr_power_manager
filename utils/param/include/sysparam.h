@@ -27,11 +27,13 @@ class SysParam {
 public:
     typedef void (* BootCompletedCallback)();
     static void RegisterBootCompletedCallback(BootCompletedCallback&);
+    static void RegisterBootCompletedCallbackForPowerSa(BootCompletedCallback&);
     static int32_t GetIntValue(const std::string& key, int32_t def);
 
 private:
     static constexpr const char* KEY_BOOT_COMPLETED {"bootevent.boot.completed"};
     static constexpr int32_t VALUE_MAX_LEN = 32;
+    static void LoopReadBootCompletedParameter(BootCompletedCallback& callback);
 };
 } // namespace PowerMgr
 } // namespace OHOS
