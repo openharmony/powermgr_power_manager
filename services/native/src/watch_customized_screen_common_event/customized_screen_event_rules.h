@@ -34,7 +34,9 @@ class CustomizedScreenEventRules : public DelayedSingleton<CustomizedScreenEvent
 public:
     CustomizedScreenEventRules() = default;
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    static void SetScreenOnEventRules(StateChangeReason reason);
+    static void SetScreenOnEventRules(StateChangeReason reason,
+        const std::vector<StateChangeReason>& stateChangeReason,
+        const std::vector<WakeupDeviceType>& wakeupDeviceTypes);
     static void PublishCustomizedScreenEvent(PowerState state);
     static bool NotifyScreenOnEventAgain(WakeupDeviceType reason);
     static void NotifyOperateEventAfterScreenOn();
