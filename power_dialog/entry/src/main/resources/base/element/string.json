@@ -89,11 +89,17 @@
         },
         {
             "name":"notice_title",
-            "value":"Remote assistance"
+            "value":"Remote assistance",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"notice_text",
-            "value":"%s is assisting you remotely"
+            "value":"%s is assisting you remotely",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"bn_notice_cancel",
@@ -101,11 +107,17 @@
         },
         {
             "name":"bn_agree",
-            "value":"Allow"
+            "value":"Allow",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"bn_not_agree",
-            "value":"Deny"
+            "value":"Deny",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"text_inject_tip_title",
