@@ -24,31 +24,43 @@
             "name":"WARNING_TIP",
             "value":"用於分享螢幕時，與會者可遠端協助您的桌面。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
-            "value":"允許"
+            "value":"允許",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"text_inject_tip_title",
             "value":"允許%s使用您的螢幕？",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_title",
-            "value":"遠端協助"
+            "value":"遠端協助",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"notice_text",
-            "value":"%s正在遠端協助您的桌面"
+            "value":"%s正在遠端協助您的桌面",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_not_agree",
-            "value":"不允許"
+            "value":"不允許",
+            "attr":{
+                "priority":"LT"
+            }
         }
     ]
 }
