@@ -113,6 +113,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("PLUG_CHANGE");
         case StateChangeReason::STATE_CHANGE_REASON_UNKNOWN:
             return std::string("UNKNOWN");
+        case StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL:
+            return std::string("BLUETOOTH_INCOMING_CALL");
         default:
             break;
     }
@@ -302,6 +304,8 @@ WakeupDeviceType PowerUtils::ParseWakeupDeviceType(const std::string& details)
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_SHELL;
     } else if (strcmp(details.c_str(), "end_dream") == 0) {
         parsedType = WakeupDeviceType::WAKEUP_DEVICE_END_DREAM;
+    } else if (strcmp(details.c_str(), "wake up screen:receive bluetooth call") == 0) {
+        parsedType = WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL;
     }
 
     if (parsedType != WakeupDeviceType::WAKEUP_DEVICE_APPLICATION) {

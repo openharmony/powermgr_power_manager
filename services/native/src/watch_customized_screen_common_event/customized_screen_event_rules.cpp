@@ -24,7 +24,7 @@ namespace PowerMgr {
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
 static std::vector<std::string> bundleNames{};
 static StateChangeReason defaultReason = StateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
-
+static std::vector<StateChangeReason> g_watchCurrentStateChangeReason;
 
 std::vector<std::string> CustomizedScreenEventRules::GetForegroundBundleNames()
 {
@@ -42,15 +42,19 @@ std::vector<std::string> CustomizedScreenEventRules::GetForegroundBundleNames()
     return bundleNames;
 }
 
-void CustomizedScreenEventRules::SetScreenOnEventRules(StateChangeReason reason)
+void CustomizedScreenEventRules::SetScreenOnEventRules(StateChangeReason reason,
+    const std::vector<StateChangeReason>& stateChangeReason, const std::vector<WakeupDeviceType>& wakeupDeviceTypes)
 {
     defaultReason = reason;
-    PowerExtIntfWrapper::Instance().SetScreenOnEventRules(reason);
+    g_watchCurrentStateChangeReason = stateChangeReason;
+    PowerExtIntfWrapper::Instance().SetScreenOnEventRules(reason, stateChangeReason, wakeupDeviceTypes);
 }
 
 void CustomizedScreenEventRules::PublishCustomizedScreenEvent(PowerState state)
 {
-    if (defaultReason == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
+    if (!g_watchCurrentStateChangeReason.empty() &&
+        std::find(g_watchCurrentStateChangeReason.begin(), g_watchCurrentStateChangeReason.end(), defaultReason) !=
+        g_watchCurrentStateChangeReason.end()) {
         PowerExtIntfWrapper::Instance().PublishCustomizedScreenEvent(state, GetForegroundBundleNames());
     } else {
         PowerExtIntfWrapper::Instance().PublishCustomizedScreenEvent(state, bundleNames);

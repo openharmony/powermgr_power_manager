@@ -71,6 +71,18 @@ pid_t g_callSetForceTimingOutPid = 0;
 pid_t g_callSetForceTimingOutUid = 0;
 const std::string LID_STATUS_SCENE_NAME = "lid_status";
 }
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+const std::vector<StateChangeReason> WATCH_CUSTOMIZED_STATE_CHANGE_REASONS {
+    StateChangeReason::STATE_CHANGE_REASON_PICKUP,
+    StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL,
+    StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL
+};
+static std::vector<WakeupDeviceType> WATCH_CUSTOMIZED_WAKEUP_DEVICE_TYPES {
+    WakeupDeviceType::WAKEUP_DEVICE_PICKUP,
+    WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL,
+    WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL
+};
+#endif
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
     : pms_(pms), ffrtTimer_(ffrtTimer), currentState_(PowerState::UNKNOWN)
 {
@@ -657,8 +669,12 @@ void PowerStateMachine::WakeupDeviceInner(
     // Call legacy wakeup, Check the screen state
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    if (!pms->IsScreenOn() && GetReasonByWakeType(type) == StateChangeReason::STATE_CHANGE_REASON_PICKUP) {
-        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(GetReasonByWakeType(type));
+    if (!pms->IsScreenOn() && !WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.empty() &&
+        std::find(WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.begin(),
+            WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.end(),
+            GetReasonByWakeType(type)) != WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.end()) {
+        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(
+            GetReasonByWakeType(type), WATCH_CUSTOMIZED_STATE_CHANGE_REASONS, WATCH_CUSTOMIZED_WAKEUP_DEVICE_TYPES);
     }
 #endif
 
@@ -2131,6 +2147,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_END_DREAM:
             ret = StateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL:
+            ret = StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:

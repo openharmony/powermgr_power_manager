@@ -631,6 +631,10 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
         StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_SHELL),
         StateChangeReason::STATE_CHANGE_REASON_SHELL);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL),
+        StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_PICKUP),
+        StateChangeReason::STATE_CHANGE_REASON_PICKUP);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 function end!");
 }
@@ -657,7 +661,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON);
     EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("pre_bright_auth_fail_screen_off"),
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
-
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("wake up screen:receive bluetooth call"),
+        WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 function end!");
 }
