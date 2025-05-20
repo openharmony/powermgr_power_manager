@@ -34,8 +34,11 @@ ohos_shared_library("power_sysparam") {
 
   public_configs = [ ":public_config" ]
 
+  deps = [ "../ffrt:power_ffrt" ]
+
   external_deps = [
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",

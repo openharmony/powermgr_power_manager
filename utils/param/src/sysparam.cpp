@@ -15,14 +15,37 @@
 
 #include "sysparam.h"
 
+#include "ffrt_utils.h"
 #include "power_log.h"
 #include "string_ex.h"
 #include "syspara/parameter.h"
+#include "syspara/parameters.h"
 
 namespace OHOS {
 namespace PowerMgr {
+
+void SysParam::LoopReadBootCompletedParameter(BootCompletedCallback& callback)
+{
+    ffrt::submit([callback](void) -> void {
+        constexpr int32_t delayTimeMs = 50;
+        constexpr int32_t logInterval = 100;
+        int32_t count = 0;
+        while (!system::GetBoolParameter(KEY_BOOT_COMPLETED, false)) {
+            count++;
+            if (count >= logInterval) {
+                POWER_HILOGW(COMP_UTILS, "bootevent not fired!");
+                count = 0;
+            }
+            ffrt::this_task::sleep_for(std::chrono::milliseconds(delayTimeMs));
+        }
+        POWER_HILOGI(COMP_UTILS, "Get booteventCompleted true success!");
+        callback();
+    });
+}
+
 void SysParam::RegisterBootCompletedCallback(BootCompletedCallback& callback)
 {
+    POWER_HILOGI(COMP_UTILS, "start to RegisterBootCompletedCallback");
     int32_t ret = WatchParameter(
         KEY_BOOT_COMPLETED,
         [](const char* key, const char* value, void* context) {
@@ -31,9 +54,26 @@ void SysParam::RegisterBootCompletedCallback(BootCompletedCallback& callback)
             }
         },
         reinterpret_cast<void*>(callback));
-    if (ret < 0) {
+    if (ret != 0) {
         POWER_HILOGW(COMP_UTILS, "RegisterBootCompletedCallback failed, ret=%{public}d", ret);
     }
+}
+
+void SysParam::RegisterBootCompletedCallbackForPowerSa(BootCompletedCallback& callback)
+{
+    POWER_HILOGI(COMP_UTILS, "start to RegisterBootCompletedCallback for power SA");
+    int32_t ret = WatchParameter(
+        KEY_BOOT_COMPLETED,
+        [](const char* key, const char* value, void* context) {
+            if (strcmp(value, "true") == 0) {
+                ((BootCompletedCallback)context)();
+            }
+        },
+        reinterpret_cast<void*>(callback));
+    if (ret != 0) {
+        POWER_HILOGW(COMP_UTILS, "RegisterBootCompletedCallback for power SA failed, ret=%{public}d", ret);
+    }
+    LoopReadBootCompletedParameter(callback);
 }
 
 int32_t SysParam::GetIntValue(const std::string& key, int32_t def)

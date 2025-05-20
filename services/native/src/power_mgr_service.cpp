@@ -77,6 +77,7 @@ constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
+static std::mutex powerInitMutex_;
 #ifdef POWER_PICKUP_ENABLE
 bool g_isPickUpOpen = false;
 #endif
@@ -84,6 +85,8 @@ constexpr int32_t API18 = 18;
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
+std::atomic_bool PowerMgrService::isNeedReInit_  = false;
+std::atomic_bool PowerMgrService::displayManagerServiceCrash_ = false;
 #ifdef HAS_SENSORS_SENSOR_PART
     bool PowerMgrService::isInLidMode_ = false;
 #endif
@@ -156,8 +159,15 @@ bool PowerMgrService::Init()
 
 void PowerMgrService::RegisterBootCompletedCallback()
 {
+    POWER_HILOGI(COMP_SVC, "plan to RegisterBootCompletedCallback.");
     g_bootCompletedCallback = []() {
+        std::lock_guard lock(powerInitMutex_);
+        if (!isNeedReInit_) {
+            POWER_HILOGW(COMP_SVC, "Power initialization is not required.");
+            return;
+        }
         POWER_HILOGI(COMP_SVC, "BootCompletedCallback triggered");
+        isNeedReInit_  = false;
         auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (power == nullptr) {
             POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
@@ -192,7 +202,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         power->KeepScreenOnInit();
         isBootCompleted_ = true;
     };
-    SysParam::RegisterBootCompletedCallback(g_bootCompletedCallback);
+    SysParam::RegisterBootCompletedCallbackForPowerSa(g_bootCompletedCallback);
 }
 
 void PowerMgrService::PowerExternalAbilityInit()
@@ -699,6 +709,11 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
         power->ResetMovementState();
     }
 #endif
+    if (systemAbilityId ==  DISPLAY_MANAGER_SERVICE_SA_ID) {
+        std::lock_guard lock(powerInitMutex_);
+        POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID crash in PowerService.");
+        displayManagerServiceCrash_ = true;
+    }
 }
 
 void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -711,7 +726,20 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         }
     }
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
+        std::lock_guard lock(powerInitMutex_);
+        POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_ID in PowerService");
+        isNeedReInit_  = true;
         RegisterBootCompletedCallback();
+    }
+
+    if (systemAbilityId ==  DISPLAY_MANAGER_SERVICE_SA_ID) {
+        std::lock_guard lock(powerInitMutex_);
+        POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID in PowerService");
+        if (displayManagerServiceCrash_) {
+            isNeedReInit_  = true;
+            RegisterBootCompletedCallback();
+            displayManagerServiceCrash_ = false;
+        }
     }
 #ifdef MSDP_MOVEMENT_ENABLE
     if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
