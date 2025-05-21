@@ -66,6 +66,7 @@ ohos_fuzztest("SetForceTimingOutFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
+    "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
   ]
