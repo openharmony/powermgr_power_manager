@@ -68,6 +68,8 @@ public:
     static void PowerModeSettingUpdateFunc(const std::string& key);
     static void RegisterSettingWakeUpLidObserver();
     static void WakeupLidSettingUpdateFunc(const std::string& key);
+    static void RegisterSettingDuringCallObservers();
+    static void DuringCallSettingUpdateFunc(const std::string& key);
 
     virtual void OnStart() override;
     virtual void OnStop() override;

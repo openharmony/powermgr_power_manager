@@ -24,6 +24,21 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
+namespace {
+OHOS::Rosen::FoldDisplayMode g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::MAIN;
+} // namespace
+namespace OHOS::Rosen {
+FoldDisplayMode DisplayManagerLite::GetFoldDisplayMode()
+{
+    return g_foldDisplayMode;
+}
+
+void DisplayManagerLite::SetFoldDisplayMode(FoldDisplayMode mode)
+{
+    g_foldDisplayMode = mode;
+}
+} // namespace OHOS::Rosen
+
 void NativePowerStateMachineTest::SetUpTestCase() {}
 
 void PowerStateTest1Callback::OnPowerStateChanged(PowerState state)
@@ -401,5 +416,47 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine009, TestSize.Level
     pmsTest->UnRegisterExternalScreenListener();
 #endif
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine009 function end!");
+}
+
+/**
+ * @tc.name: NativePowerStateMachine010
+ * @tc.desc: test HandleDuringCallState
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+
+    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    EXPECT_TRUE(ret);
+    stateMachine->SetDuringCallState(true);
+    ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK, true);
+    EXPECT_TRUE(ret);
+
+    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PICKUP);
+    EXPECT_FALSE(ret);
+    g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::SUB;
+    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
+    EXPECT_TRUE(ret && g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN);
+    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
+    EXPECT_FALSE(ret);
+    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+    EXPECT_FALSE(ret);
+    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    EXPECT_FALSE(ret);
+    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
+    EXPECT_FALSE(ret);
+    g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::SUB;
+    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
+    EXPECT_TRUE(ret && g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN);
+    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
+    EXPECT_TRUE(ret && g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB);
+    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function end!");
 }
 } // namespace

@@ -457,4 +457,27 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level1)
     GTEST_LOG_(INFO) << "PowerMgrServiceNative015 end.";
 }
 
+/**
+ * @tc.name: PowerMgrServiceNative016
+ * @tc.desc: test RegisterSettingDuringCallObservers
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative016, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative016 start.";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative016 function start!");
+    g_pmsTest->RegisterSettingDuringCallObservers();
+    EXPECT_TRUE(SettingHelper::duringCallObserver_ != nullptr);
+    g_pmsTest->RegisterSettingDuringCallObservers();
+    EXPECT_TRUE(SettingHelper::duringCallObserver_ != nullptr);
+    SettingHelper::UnRegisterSettingDuringCallObserver();
+    EXPECT_TRUE(SettingHelper::duringCallObserver_ == nullptr);
+    SettingHelper::UnRegisterSettingDuringCallObserver();
+    EXPECT_TRUE(SettingHelper::duringCallObserver_ == nullptr);
+    g_pmsTest->DuringCallSettingUpdateFunc(SettingHelper::SETTING_DURING_CALL_STATE_KEY);
+    auto runningLockMgr = g_pmsTest->GetRunningLockMgr();
+    EXPECT_FALSE(runningLockMgr->isDuringCallState_);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative016 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative016 end.";
+}
 } // namespace

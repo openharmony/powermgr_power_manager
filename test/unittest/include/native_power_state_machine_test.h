@@ -26,6 +26,7 @@
 #include <stdlib.h>
 
 #include <gtest/gtest.h>
+#include <display_manager_lite.h>
 
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"

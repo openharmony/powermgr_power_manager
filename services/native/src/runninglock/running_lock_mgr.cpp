@@ -47,6 +47,7 @@ constexpr uint32_t FOREGROUND_INCALL_DELAY_TIME_MS = 300;
 constexpr uint32_t BACKGROUND_INCALL_DELAY_TIME_MS = 800;
 #endif
 }
+bool RunningLockMgr::isDuringCallState_ = false;
 
 RunningLockMgr::~RunningLockMgr() {}
 
@@ -199,6 +200,7 @@ void RunningLockMgr::InitLocksTypeProximity()
                 }
                 PreprocessBeforeAwake();
                 stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+                stateMachine->SetDuringCallState(false);
             };
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
@@ -947,6 +949,9 @@ void RunningLockMgr::HandleProximityCloseEvent()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
+    if (isDuringCallState_) {
+        stateMachine->SetDuringCallState(true);
+    }
     if (GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
         uint32_t delayTime = FOREGROUND_INCALL_DELAY_TIME_MS;
@@ -977,6 +982,10 @@ void RunningLockMgr::HandleProximityAwayEvent()
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
         runningLock->PreprocessBeforeAwake();
         stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
+        if (isDuringCallState_) {
+            // Proximity away need keep origin action after first away
+            stateMachine->SetDuringCallState(false);
+        }
     } else {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Unholding PROXIMITY LOCK");
     }
