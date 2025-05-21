@@ -244,6 +244,7 @@ void PowerMgrService::PowerExternalAbilityInit()
     POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
 #endif
     power->RegisterSettingPowerModeObservers();
+    power->RegisterSettingDuringCallObservers();
     power->RegisterExternalCallback();
 }
 
@@ -263,6 +264,20 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
     }
     POWER_HILOGI(COMP_SVC, "PowerModeSettingUpdateFunc curr:%{public}d, saveMode:%{public}d", currMode, saveMode);
     power->SetDeviceMode(static_cast<PowerMode>(saveMode));
+}
+
+void PowerMgrService::RegisterSettingDuringCallObservers()
+{
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string &key) { DuringCallSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingDuringCallObserver(updateFunc);
+}
+
+void PowerMgrService::DuringCallSettingUpdateFunc(const std::string &key)
+{
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    bool duringCallState = SettingHelper::GetDuringCallState(key);
+    POWER_HILOGI(COMP_SVC, "DuringCallState is %{public}d", duringCallState);
+    power->runningLockMgr_->SetDuringCallState(duringCallState);
 }
 
 bool PowerMgrService::IsDeveloperMode()

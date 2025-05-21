@@ -1986,6 +1986,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
+    if (HandleDuringCallState(state, reason)) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "Duringcall action trigger, state=%{public}s, reason=%{public}s",
+            PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str());
+        return true;
+    }
     if (!CheckFFRTTaskAvailability(state, reason)) {
         POWER_HILOGI(FEATURE_POWER_STATE, "this timeout task is invalidated, directly return");
         return false;
@@ -2535,6 +2540,35 @@ bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason
         return false;
     }
     return true;
+}
+
+bool PowerStateMachine::HandleDuringCallState(PowerState state, StateChangeReason reason)
+{
+    if (isDuringCallState_) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "enter HandleDuringCallState, state=%{public}s, resaon=%{public}s"
+            " isDuringCallState_=%{public}d", PowerUtils::GetPowerStateString(state).c_str(),
+            PowerUtils::GetReasonTypeString(reason).c_str(), isDuringCallState_);
+        // PROXIMITY away or PROXIMITY lock release and fold display mode is sub 
+        if (state == PowerState::AWAKE &&
+            (reason == StateChangeReason::STATE_CHANGE_REASON_PROXIMITY ||
+            reason == StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK) &&
+            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB) {
+            Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
+            return true;
+        // power_key down for wakeup main and fold display mode is sub
+        } else if (state == PowerState::INACTIVE && reason == StateChangeReason::STATE_CHANGE_REASON_HARD_KEY &&
+            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB) {
+            Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
+            return true;
+        // PROXIMITY close and fold display mode is main
+        } else if (state == PowerState::INACTIVE && reason == StateChangeReason::STATE_CHANGE_REASON_PROXIMITY &&
+            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::MAIN) {
+            Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::SUB);
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 bool PowerStateMachine::IsSwitchOpenByPath()

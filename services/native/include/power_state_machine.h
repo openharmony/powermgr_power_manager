@@ -216,6 +216,10 @@ public:
     {
         return mDeviceState_.screenState.lastOnTime;
     }
+    void SetDuringCallState(bool state)
+    {
+        isDuringCallState_ = state;
+    }
 
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
@@ -356,6 +360,7 @@ private:
     void ShowCurrentScreenLocks();
     void HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason);
     bool HandlePreBrightState(PowerState targetState, StateChangeReason reason);
+    bool HandleDuringCallState(PowerState state, StateChangeReason reason);
     bool IsPreBrightAuthReason(StateChangeReason reason);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     bool NeedShowScreenLocks(PowerState state);
@@ -417,6 +422,7 @@ private:
     std::atomic<int32_t> externalScreenNumber_ {0};
     std::mutex internalScreenStateMutex_;
 #endif
+    bool isDuringCallState_ {false};
     bool SetDreamingState(StateChangeReason reason);
 };
 } // namespace PowerMgr

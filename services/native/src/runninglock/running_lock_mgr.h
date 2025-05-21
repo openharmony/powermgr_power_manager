@@ -79,6 +79,10 @@ public:
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
     bool IsExistAudioStream(pid_t uid);
+    void SetDuringCallState(bool state)
+    {
+        isDuringCallState_ = state;
+    }
 private:
 
     void AsyncWakeup();
@@ -142,6 +146,7 @@ private:
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
 
+    static bool isDuringCallState_;
     const wptr<PowerMgrService> pms_;
     std::mutex mutex_;
     std::mutex screenLockListsMutex_;
