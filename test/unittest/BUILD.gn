@@ -529,7 +529,10 @@ ohos_unittest("test_power_mgr_power_intf_wrapper") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [ "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper" ]
+  deps = [
+    "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper",
+    "${powermgr_utils_path}/lib_loader:power_lib_loader",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -1352,6 +1355,7 @@ group("unittest") {
     ":test_power_mgr_mock",
     ":test_power_mgr_power_appmgr",
     ":test_power_mgr_power_lib_loader",
+    ":test_power_mgr_power_intf_wrapper",
     ":test_power_mgr_powerdialog",
     ":test_power_mgr_service",
     ":test_power_mgr_service_death",
