@@ -71,6 +71,7 @@ deps_ex = [
   "input:libmmi-client",
   "ipc:ipc_core",
   "jsoncpp:jsoncpp",
+  "libxml2:libxml2",
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
@@ -273,8 +274,10 @@ ohos_unittest("test_power_mgr_service") {
                     "access_token:libnativetoken",
                     "access_token:libtoken_setproc",
                     "access_token:libtokenid_sdk",
+                    "cJSON:cjson",
                     "data_share:datashare_common",
                     "data_share:datashare_consumer",
+                    "selinux_adapter:librestorecon",
                   ]
 }
 

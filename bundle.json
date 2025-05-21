@@ -92,7 +92,9 @@
                 "device_standby",
                 "window_manager",
                 "miscdevice",
-                "bundle_framework"
+                "bundle_framework",
+                "selinux_adapter",
+                "cJSON"
             ]
         },
         "build": {
