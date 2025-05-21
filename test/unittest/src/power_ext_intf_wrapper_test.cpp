@@ -32,7 +32,8 @@ HWTEST_F(PowerExtIntfWrapperTest, GetRebootCommandTest, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "GetRebootCommandTest function start!");
     std::string rebootReason = "reboot_by_test";
     std::string rebootCmd;
-    PowerExtIntfWrapper::Instance().GetRebootCommand(rebootReason, rebootCmd);
+    PowerExtIntfWrapper::ErrCode code = PowerExtIntfWrapper::Instance().GetRebootCommand(rebootReason, rebootCmd);
+    EXPECT_TRUE(code == PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND || code == PowerExtIntfWrapper::ErrCode::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "GetRebootCommandTest function end!");
 }
 
@@ -44,8 +45,10 @@ HWTEST_F(PowerExtIntfWrapperTest, GetRebootCommandTest, TestSize.Level1)
 HWTEST_F(PowerExtIntfWrapperTest, SubscribeScreenLockCommonEventTest, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SubscribeScreenLockCommonEventTest function start!");
-    PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
-    PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
+    PowerExtIntfWrapper::ErrCode code = PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
+    EXPECT_TRUE(code == PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND || code == PowerExtIntfWrapper::ErrCode::ERR_OK);
+    code = PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
+    EXPECT_TRUE(code == PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND || code == PowerExtIntfWrapper::ErrCode::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "SubscribeScreenLockCommonEventTest function end!");
 }
 
@@ -57,9 +60,12 @@ HWTEST_F(PowerExtIntfWrapperTest, SubscribeScreenLockCommonEventTest, TestSize.L
 HWTEST_F(PowerExtIntfWrapperTest, BlockHibernateUntilScrLckReadyTest, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "BlockHibernateUntilScrLckReadyTest function start!");
-    PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
-    PowerExtIntfWrapper::Instance().BlockHibernateUntilScrLckReady();
-    PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
+    PowerExtIntfWrapper::ErrCode code = PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
+    EXPECT_TRUE(code == PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND || code == PowerExtIntfWrapper::ErrCode::ERR_OK);
+    code = PowerExtIntfWrapper::Instance().BlockHibernateUntilScrLckReady();
+    EXPECT_TRUE(code == PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND || code == PowerExtIntfWrapper::ErrCode::ERR_OK);
+    code = PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
+    EXPECT_TRUE(code == PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND || code == PowerExtIntfWrapper::ErrCode::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "BlockHibernateUntilScrLckReadyTest function end!");
 }
 } // PowerMgr
