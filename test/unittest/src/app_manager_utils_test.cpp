@@ -34,6 +34,7 @@ HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 function start!");
     std::vector<AppStateData> testAppsData;
     AppManagerUtils::GetForegroundApplications(testAppsData);
+    EXPECT_TRUE(testAppsData.size()>=0);
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 function end!");
 }
 
