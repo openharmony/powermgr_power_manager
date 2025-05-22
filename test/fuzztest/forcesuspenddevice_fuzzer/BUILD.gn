@@ -66,6 +66,7 @@ ohos_fuzztest("ForceSuspendDeviceFuzzTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+    "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
   ]
