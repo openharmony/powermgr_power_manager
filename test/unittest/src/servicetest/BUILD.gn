@@ -33,7 +33,6 @@ config("module_private_config") {
     "${powermgr_root_path}/test/unittest/include",
     "${powermgr_root_path}/test/unittest/include/servicetest",
     "${powermgr_root_path}/test/unittest/include/servicetest/mock",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include/",
   ]
 
   if (power_manager_feature_wakeup_action) {
@@ -45,8 +44,6 @@ config("module_mock_private_config") {
   include_dirs = [
     "${powermgr_root_path}/test/unittest/include/mock",
     "${powermgr_root_path}/test/unittest/mock",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include/",
-    "//commonlibrary/c_utils/base/include/",
     "${powermgr_service_zidl}/include",
   ]
 }
@@ -59,7 +56,9 @@ deps_ex = [
   "common_event_service:cesfwk_innerkits",
   "ffrt:libffrt",
   "hilog:libhilog",
+  "input:libmmi-client",
   "ipc:ipc_core",
+  "libxml2:libxml2",
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
