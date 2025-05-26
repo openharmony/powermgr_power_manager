@@ -119,7 +119,8 @@ HWTEST_F(PowerSuspendParseTest, PowerSuspendParse001, TestSize.Level0)
         GTEST_LOG_(INFO) << "PowerSuspendParse001: Failed to get PowerMgrService";
     }
 
-    pmsTest_->Init();
+    auto ret = pmsTest_->Init();
+    EXPECT_TRUE(ret);
     pmsTest_->SuspendControllerInit();
     pmsTest_->suspendController_->Init();
 
