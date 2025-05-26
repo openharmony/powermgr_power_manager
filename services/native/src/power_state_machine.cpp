@@ -298,6 +298,11 @@ void PowerStateMachine::EmplaceAwake()
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "REASON", PowerUtils::GetReasonTypeString(reason).c_str());
 #endif
             mDeviceState_.screenState.lastOnTime = GetTickCount();
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen() && IsScreenOn()) {
+                SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, reason);
+            }
+#endif
             auto targetState = DisplayState::DISPLAY_ON;
             if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
                 if (isDozeEnabled_) {
@@ -306,12 +311,6 @@ void PowerStateMachine::EmplaceAwake()
                     targetState = DisplayState::DISPLAY_OFF;
                 }
             }
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen() && IsScreenOn()) {
-                SetInternalScreenDisplayPower(DisplayState::DISPLAY_ON, reason);
-                SetInternalScreenBrightness();
-            }
-#endif
             uint32_t ret = this->stateAction_->SetDisplayState(targetState, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
@@ -1268,6 +1267,15 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
     }
 }
 
+void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event, FFRTTask& task)
+{
+    if (!ffrtTimer_) {
+        POWER_HILOGE(FEATURE_ACTIVITY, "Failed to set delay timer, the timer pointer is null");
+        return;
+    }
+    ffrtTimer_->SetTimer(event, task, delayTime);
+}
+
 void PowerStateMachine::CancelDelayTimer(int32_t event)
 {
     if (!ffrtTimer_) {
@@ -1517,15 +1525,31 @@ bool PowerStateMachine::SetDozeMode(DisplayState state)
     return ret == ActionResult::SUCCESS;
 }
 
-void PowerStateMachine::SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason)
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason)
 {
-    this->stateAction_->SetInternalScreenDisplayPower(state, reason);
+    std::lock_guard<std::mutex> lock(internalScreenStateMutex_);
+    if (state == DisplayState::DISPLAY_ON) {
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+        if (IsHibernating()) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Do not power the internal screen while hibernating");
+            return;
+        }
+#endif
+        if (!IsSwitchOpen()) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Do not power the internal screen while switch is close");
+            return;
+        }
+        this->stateAction_->SetInternalScreenDisplayPower(state, reason);
+        this->stateAction_->SetInternalScreenBrightness();
+    } else if (state == DisplayState::DISPLAY_OFF) {
+        this->stateAction_->SetInternalScreenDisplayPower(state, reason);
+    } else {
+        POWER_HILOGW(
+            FEATURE_POWER_STATE, "[UL_POWER] SetInternalScreenDisplayState, invalid display state: %{public}u", state);
+    }
 }
-
-void PowerStateMachine::SetInternalScreenBrightness()
-{
-    this->stateAction_->SetInternalScreenBrightness();
-}
+#endif
 
 bool PowerStateMachine::CheckRunningLock(PowerState state)
 {
