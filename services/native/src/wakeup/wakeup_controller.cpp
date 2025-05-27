@@ -701,26 +701,7 @@ bool WakeupController::CheckEventReciveTime(WakeupDeviceType wakeupType)
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 void WakeupController::PowerOnInternalScreen(WakeupDeviceType type)
 {
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    if (stateMachine_->IsHibernating()) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power the internal screen while hibernating");
-        return;
-    }
-#endif
-    if (!stateMachine_->IsSwitchOpen()) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Do not power the internal screen while switch is close");
-        return;
-    }
-
-    auto changeReason = stateMachine_->GetReasonByWakeType(type);
-    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
-    uint64_t screenId = Rosen::DisplayManagerLite::GetInstance().GetInternalScreenId();
-    bool ret = Rosen::DisplayManagerLite::GetInstance().SetScreenPowerById(
-        screenId, Rosen::ScreenPowerState::POWER_ON, dmsReason);
-    stateMachine_->SetInternalScreenBrightness();
-    POWER_HILOGI(FEATURE_WAKEUP,
-        "[UL_POWER] Power on internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
-        static_cast<uint32_t>(screenId), ret);
+    stateMachine_->SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, stateMachine_->GetReasonByWakeType(type));
 }
 
 void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
@@ -751,9 +732,12 @@ bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) 
 
 void WakeupController::ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrService>& pms, WakeupDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power on internal screen only when external screen is on");
-    PowerOnInternalScreen(reason);
-    pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
+    FFRTTask powerOnInternalScreenTask = [this, pms, reason]() {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power on internal screen only when external screen is on");
+        PowerOnInternalScreen(reason);
+        pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
+    };
+    stateMachine_->SetDelayTimer(0, PowerStateMachine::SET_INTERNAL_SCREEN_STATE_MSG, powerOnInternalScreenTask);
 }
 #endif
 
