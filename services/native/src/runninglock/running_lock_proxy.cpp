@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-static const std::string OFFLOAD_RUNNING_NAME = "AudioOffloadBackgroudPlay";
+static const std::string OFFLOAD_RUNNING_NAME = "AudioOffloadBackgroundPlay";
 static const std::string FAST_RUNNING_NAME = "AudioFastBackgroundPlay";
 }
 void RunningLockProxy::AddRunningLock(pid_t pid, pid_t uid, const sptr<IRemoteObject>& remoteObj)
