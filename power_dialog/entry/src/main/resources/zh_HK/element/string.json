@@ -24,31 +24,43 @@
             "name":"WARNING_TIP",
             "value":"用以在分享屏幕時，參與者可以遠距協助您的主屏幕。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
-            "value":"允許"
+            "value":"允許",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"text_inject_tip_title",
             "value":"允許%s使用您的屏幕？",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_title",
-            "value":"遠距協助"
+            "value":"遠距協助",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"notice_text",
-            "value":"%s正在遠距協助您的主屏幕"
+            "value":"%s正在遠距協助您的主屏幕",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"bn_not_agree",
-            "value":"不允許"
+            "value":"不允許",
+            "attr":{
+                "priority":"LT"
+            }
         }
     ]
 }
