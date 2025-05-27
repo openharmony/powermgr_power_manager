@@ -77,6 +77,7 @@ public:
         CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG,
         CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG,
         CHECK_PROXIMITY_SCREEN_OFF_MSG,
+        SET_INTERNAL_SCREEN_STATE_MSG,
     };
 
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -146,6 +147,7 @@ public:
     void RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     void UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
     void SetDelayTimer(int64_t delayTime, int32_t event);
+    void SetDelayTimer(int64_t delayTime, int32_t event, FFRTTask& task);
     void CancelDelayTimer(int32_t event);
     void ResetInactiveTimer(bool needPrintLog = true);
     void ResetSleepTimer();
@@ -227,8 +229,9 @@ public:
     bool IsSettingState(PowerState state);
     void SetEnableDoze(bool enable);
     bool SetDozeMode(DisplayState state);
-    void SetInternalScreenDisplayPower(DisplayState state, StateChangeReason reason);
-    void SetInternalScreenBrightness();
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    void SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason);
+#endif
 
 private:
     enum PreBrightState : uint32_t {
@@ -408,6 +411,7 @@ private:
     std::atomic<bool> isDozeEnabled_ {false};
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     std::atomic<int32_t> externalScreenNumber_ {0};
+    std::mutex internalScreenStateMutex_;
 #endif
     ProximityNormalController proximityNormalController_;
     bool SetDreamingState(StateChangeReason reason);

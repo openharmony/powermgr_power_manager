@@ -498,14 +498,8 @@ std::shared_ptr<SuspendMonitor> SuspendController::GetSpecifiedSuspendMonitor(Su
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 void SuspendController::PowerOffInternalScreen(SuspendDeviceType type)
 {
-    using namespace OHOS::Rosen;
-    auto changeReason = stateMachine_->GetReasonBySuspendType(type);
-    auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
-    uint64_t screenId = DisplayManagerLite::GetInstance().GetInternalScreenId();
-    bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, ScreenPowerState::POWER_OFF, dmsReason);
-    POWER_HILOGI(FEATURE_SUSPEND,
-        "[UL_POWER] Power off internal screen, reason = %{public}u, screenId = %{public}u, ret = %{public}d", dmsReason,
-        static_cast<uint32_t>(screenId), ret);
+    stateMachine_->SetInternalScreenDisplayState(
+        DisplayState::DISPLAY_OFF, stateMachine_->GetReasonBySuspendType(type));
 }
 
 void SuspendController::PowerOffAllScreens(SuspendDeviceType type)
@@ -530,10 +524,13 @@ bool SuspendController::IsPowerOffInernalScreenOnlyScene(
 
 void SuspendController::ProcessPowerOffInternalScreenOnly(const sptr<PowerMgrService>& pms, SuspendDeviceType reason)
 {
-    POWER_HILOGI(
-        FEATURE_SUSPEND, "[UL_POWER] Power off internal screen when closing switch is configured as no operation");
-    PowerOffInternalScreen(reason);
-    pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
+    FFRTTask powerOffInternalScreenTask = [this, pms, reason]() {
+        POWER_HILOGI(
+            FEATURE_SUSPEND, "[UL_POWER] Power off internal screen when closing switch is configured as no operation");
+        PowerOffInternalScreen(reason);
+        pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
+    };
+    stateMachine_->SetDelayTimer(0, PowerStateMachine::SET_INTERNAL_SCREEN_STATE_MSG, powerOffInternalScreenTask);
 }
 #endif
 
