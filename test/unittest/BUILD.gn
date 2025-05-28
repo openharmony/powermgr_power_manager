@@ -104,8 +104,6 @@ ohos_unittest("test_power_mgr_client") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (has_display_manager_part) {
@@ -131,7 +129,6 @@ ohos_unittest("test_register_callback_mode") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -153,7 +150,6 @@ ohos_unittest("test_power_get_mode") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -175,7 +171,6 @@ ohos_unittest("test_power_set_mode") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -195,7 +190,6 @@ ohos_unittest("test_power_device_mode") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -215,7 +209,6 @@ ohos_unittest("test_running_lock") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -235,7 +228,6 @@ ohos_unittest("test_running_lock_scenario") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -300,7 +292,6 @@ ohos_unittest("test_power_mgr_service_death") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -323,7 +314,6 @@ ohos_unittest("test_power_state_level_framework") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -344,8 +334,6 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -374,8 +362,6 @@ ohos_unittest("test_power_mgr_mock") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -397,8 +383,6 @@ ohos_unittest("test_power_mgr_fail_check") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -420,7 +404,6 @@ if (false) {
       "${powermgr_inner_api}:powermgr_client",
       "${powermgr_service_path}:powermgrservice",
       "${powermgr_service_path}/native/src/actions:powermgr_actions",
-      "//third_party/googletest:gtest_main",
     ]
 
     external_deps = deps_ex
@@ -458,12 +441,12 @@ ohos_unittest("test_power_mgr_util") {
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/setting:power_setting",
     "${powermgr_utils_path}/vibrator:power_vibrator",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:ability_manager",
+    "ability_runtime:dataobs_manager",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "data_share:datashare_common",
@@ -565,7 +548,6 @@ ohos_unittest("test_power_mock_object") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -593,7 +575,6 @@ ohos_unittest("test_mock_parcel") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/permission:power_permission",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -619,7 +600,6 @@ ohos_unittest("test_mock_peer") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -651,7 +631,6 @@ ohos_unittest("test_mock_proxy") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -673,7 +652,6 @@ ohos_unittest("power_state_machine_native_test") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -695,7 +673,6 @@ ohos_unittest("test_running_lock_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -727,8 +704,6 @@ ohos_unittest("test_power_mgr_service_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -754,7 +729,6 @@ ohos_unittest("test_device_state_action_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   deps_ex += [ "display_manager:displaymgr" ]
@@ -776,8 +750,6 @@ ohos_unittest("test_power_mgr_dump") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -799,8 +771,6 @@ ohos_unittest("test_power_mgr_client_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -819,7 +789,6 @@ ohos_unittest("power_mode_module_native_test") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = deps_ex
 }
@@ -845,7 +814,6 @@ ohos_unittest("test_running_lock_hub_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -874,8 +842,6 @@ ohos_unittest("test_running_lock_mock") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -902,7 +868,6 @@ ohos_unittest("test_power_suspend_parse") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -939,7 +904,6 @@ ohos_unittest("test_power_wakeup_parse") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -977,8 +941,6 @@ ohos_unittest("test_power_suspend_controller") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1016,8 +978,6 @@ ohos_unittest("test_power_suspend") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1055,8 +1015,6 @@ ohos_unittest("test_power_wakeup_controller") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1094,8 +1052,6 @@ ohos_unittest("test_power_wakeup") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1125,7 +1081,6 @@ ohos_unittest("test_power_shutdown_clinet") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = deps_ex
 }
@@ -1153,8 +1108,6 @@ ohos_unittest("test_power_getcontroller_mock") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1192,8 +1145,6 @@ ohos_unittest("test_power_screenon_mock") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1229,8 +1180,6 @@ ohos_unittest("test_power_parsesources_mock") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1276,12 +1225,11 @@ ohos_unittest("test_power_mgr_powerdialog") {
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = deps_ex
+
+  external_deps += [ "libxml2:libxml2" ]
 }
 
 ##############################coordination_lock_test#############################
@@ -1309,8 +1257,6 @@ ohos_unittest("test_power_coordination_lock") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex
@@ -1331,11 +1277,7 @@ ohos_unittest("test_running_lock_timer_handler") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [
-    "${powermgr_inner_api}:powermgr_client",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
 
   external_deps = deps_ex
 }
@@ -1357,8 +1299,8 @@ group("unittest") {
     ":test_power_mgr_dump",
     ":test_power_mgr_mock",
     ":test_power_mgr_power_appmgr",
-    ":test_power_mgr_power_lib_loader",
     ":test_power_mgr_power_intf_wrapper",
+    ":test_power_mgr_power_lib_loader",
     ":test_power_mgr_powerdialog",
     ":test_power_mgr_service",
     ":test_power_mgr_service_death",
