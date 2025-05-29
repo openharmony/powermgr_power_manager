@@ -109,12 +109,12 @@ HWTEST_F (PowerDeviceModeTest, SetDeviceModeTest001, TestSize.Level2)
  */
 HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 function start!");
     PowerMode modeFirst = PowerMode::NORMAL_MODE;
     PowerMode modeSecond = PowerMode::NORMAL_MODE;
     PowerMode modeThird = PowerMode::NORMAL_MODE;
     sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     modeFirst = powerMgrClient.GetDeviceMode();
 
@@ -123,5 +123,6 @@ HWTEST_F (PowerDeviceModeTest, GetDeviceModeTest001, TestSize.Level2)
     EXPECT_EQ(modeSecond, modeThird);
     powerMgrClient.SetDeviceMode(modeFirst);
     POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 function end!");
+    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode end.";
 }
 }

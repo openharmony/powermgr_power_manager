@@ -24,6 +24,7 @@
 #include <string_ex.h>
 
 #include "power_common.h"
+#include "power_log.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
@@ -41,11 +42,11 @@ namespace {
  */
 HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 function start!");
     PowerMode modeFirst;
     PowerMode modeSecond = PowerMode::NORMAL_MODE;
     sleep(SLEEP_WAIT_TIME_S);
-    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     modeFirst = powerMgrClient.GetDeviceMode();
@@ -53,5 +54,6 @@ HWTEST_F (PowerGetModeTest, GetDeviceModeTest001, TestSize.Level1)
     EXPECT_EQ(modeSecond, powerMgrClient.GetDeviceMode());
     powerMgrClient.SetDeviceMode(modeFirst);
     POWER_HILOGI(LABEL_TEST, "GetDeviceModeTest001 function end!");
+    GTEST_LOG_(INFO) << "GetDeviceModeTest001: GetDeviceMode end.";
 }
 }
