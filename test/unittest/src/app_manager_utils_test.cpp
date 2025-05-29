@@ -29,7 +29,7 @@ using namespace testing::ext;
  * @tc.desc: test GetForegroundApplications
  * @tc.type: FUNC
  */
-HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level1)
+HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest001 function start!");
     std::vector<AppStateData> testAppsData;
@@ -43,7 +43,7 @@ HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level1)
  * @tc.desc: test IsForegroundApplication
  * @tc.type: FUNC
  */
-HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest002, TestSize.Level1)
+HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 function start!");
     std::string unExistApp = "com.example.UNEXISTED_APP";

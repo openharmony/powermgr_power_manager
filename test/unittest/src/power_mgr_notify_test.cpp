@@ -84,6 +84,7 @@ public:
 shared_ptr<TestCommonEventSubscriber> RegisterEvent()
 {
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest:: Regist Subscriber Start!!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest:: Regist Subscriber start!");
     sptr<AAFwk::Skills> skill = new AAFwk::Skills();
     skill->AddAction(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     skill->AddAction(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
@@ -108,6 +109,7 @@ shared_ptr<TestCommonEventSubscriber> RegisterEvent()
         GTEST_LOG_(INFO) << "PowerMgrNotifyTest:: Fail to register Subscriber!!!";
         return nullptr;
     }
+    POWER_HILOGI(LABEL_TEST, "PowerMgrNotifyTest:: Regist Subscriber Success!");
     GTEST_LOG_(INFO) << "PowerMgrNotifyTest:: register Subscriber Success!!";
     return subscriber;
 }

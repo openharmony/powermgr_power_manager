@@ -51,7 +51,7 @@ void InterfaceLoaderTest::TearDownTestCase()
  * @tc.desc: test QueryInterface, symbol exists
  * @tc.type: FUNC
  */
-HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest001, TestSize.Level1)
+HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest001 function start!");
     void* connectAbilityFunc = g_loader.QueryInterface("PowerConnectAbility");
@@ -66,7 +66,7 @@ HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest001, TestSize.Level1)
  * @tc.desc: test QueryInterface, symbol don't exist
  * @tc.type: FUNC
  */
-HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest002, TestSize.Level1)
+HWTEST_F(InterfaceLoaderTest, InterfaceLoaderTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "InterfaceLoaderTest002 function start!");
     void* powerAbcFunc = g_loader.QueryInterface("UnExistedSymbolPowerAbc");

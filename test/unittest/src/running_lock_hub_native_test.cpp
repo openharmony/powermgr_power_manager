@@ -48,6 +48,7 @@ void RunningSuspendCallback()
  */
 HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "RunningLockNative001 start";
     POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function start!");
     auto sc = std::make_shared<Suspend::SuspendController>();
     auto runningLockHub = std::make_shared<Suspend::RunningLockHub>(sc);
@@ -60,6 +61,7 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level1)
     runningLockHub->Release("333");
     EXPECT_TRUE(runningLockHub->runningLockMap_.empty());
     POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function end!");
+    GTEST_LOG_(INFO) << "RunningLockNative001 end";
 }
 
 /**
@@ -69,6 +71,7 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative001, TestSize.Level1)
  */
 HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "RunningLockNative002 start";
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002 function start!");
     auto SuspendController = std::make_shared<Suspend::SuspendController>();
     SuspendController->Wakeup();
@@ -83,5 +86,6 @@ HWTEST_F(RunningLockHubNativeTest, RunningLockNative002, TestSize.Level1)
     SuspendController->DecSuspendBlockCounter();
     SuspendController->DecSuspendBlockCounter();
     POWER_HILOGI(LABEL_TEST, "RunningLockNative002 function end!");
+    GTEST_LOG_(INFO) << "RunningLockNative002 end";
 }
 } // namespace

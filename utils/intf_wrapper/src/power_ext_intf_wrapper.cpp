@@ -20,6 +20,7 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
+
 const std::vector<std::string> ALL_POWER_EXT_INTF_SYMBOL = {
     "GetRebootCommand",
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
@@ -46,7 +47,7 @@ PowerExtIntfWrapper& PowerExtIntfWrapper::Instance()
 PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::GetRebootCommand(
     const std::string& rebootReason, std::string& rebootCmd) const
 {
-    POWER_HILOGE(COMP_SVC, "Enter GetRebootCommand wrapper");
+    POWER_HILOGI(COMP_SVC, "Enter GetRebootCommand wrapper");
     void* funcPtr = intfLoader_.QueryInterface("GetRebootCommand");
     if (funcPtr == nullptr) {
         return PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND;

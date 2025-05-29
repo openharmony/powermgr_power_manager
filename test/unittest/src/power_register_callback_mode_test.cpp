@@ -46,6 +46,7 @@ namespace {
  */
 HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerRegisterCallbackModeCallback001 start.";
     POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<IPowerModeCallback> cb1 = new PowerModeTest1Callback();
@@ -55,5 +56,6 @@ HWTEST_F (PowerRegisterCallbackModeTest, PowerRegisterCallbackModeCallback001, T
     powerMgrClient.SetDeviceMode(mode);
     EXPECT_EQ(mode, powerMgrClient.GetDeviceMode());
     POWER_HILOGI(LABEL_TEST, "PowerRegisterCallbackModeCallback001 function end!");
+    GTEST_LOG_(INFO) << "PowerRegisterCallbackModeCallback001 end.";
 }
 }

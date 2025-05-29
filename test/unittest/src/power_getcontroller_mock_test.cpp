@@ -19,6 +19,7 @@
 #define protected public
 #endif
 
+#include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "sp_singleton.h"
