@@ -808,8 +808,8 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     
     g_preHibernateStart = GetTickCount();
     if (clearMemory) {
-        PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
-
+        auto hookMgr = GetPowerHookMgr();
+        HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_SWITCH_ACCOUNT), nullptr, nullptr);
         POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate begin.");
         if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
             POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
@@ -830,8 +830,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
             return false;
         }
-        PowerExtIntfWrapper::Instance().BlockHibernateUntilScrLckReady();
-        PowerExtIntfWrapper::Instance().UnSubscribeScreenLockCommonEvent();
+        HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_POST_SWITCH_ACCOUNT), nullptr, nullptr);
     }
     hibernateController->PreHibernate();
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate sync callback end.");

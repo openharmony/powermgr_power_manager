@@ -40,10 +40,6 @@
 #include <sys/ioctl.h>
 #include <vector>
 
-#ifdef POWER_MANAGER_POWEROFF_CHARGE
-#include "battery_srv_client.h"
-#endif
-
 using namespace OHOS::AAFwk;
 using namespace OHOS::EventFwk;
 using namespace std;
@@ -52,7 +48,6 @@ namespace OHOS {
 namespace PowerMgr {
 namespace {
 const time_t MAX_TIMEOUT_SEC = 30;
-const std::string REASON_POWEROFF_CHARGE_DISABLE = "POWEROFF_CHARGE_DISABLE";
 #ifdef POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN
 const vector<string> REASONS_DISABLE_TAKE_OVER = {"LowCapacity", "HibernateFail"};
 #endif
@@ -90,44 +85,6 @@ bool ShutdownController::IsShuttingDown()
 {
     return started_;
 }
-
-#ifdef POWER_MANAGER_POWEROFF_CHARGE
-static bool IsNeedWritePoweroffChargeFlag(const std::string& reason)
-{
-    if (reason == REASON_POWEROFF_CHARGE_DISABLE) {
-        return false;
-    }
-    auto& batterySvcClient = BatterySrvClient::GetInstance();
-    const auto pluggedType = batterySvcClient.GetPluggedType();
-    POWER_HILOGI(FEATURE_SHUTDOWN, "pluggedType : %{public}u", pluggedType);
-    return (pluggedType == BatteryPluggedType::PLUGGED_TYPE_AC) ||
-        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_USB) ||
-        (pluggedType == BatteryPluggedType::PLUGGED_TYPE_WIRELESS);
-}
-
-static const char* POWER_CHARGE_EXTENSION_PATH = "libpower_charge_ext.z.so";
-static const char* WRITE_POWER_OFF_CHARGE_FLAG_FUNC = "WritePoweroffChargeFlag";
-typedef void(*Func)();
-
-static void WritePoweroffChargeFlag()
-{
-    POWER_HILOGI(FEATURE_SHUTDOWN, "enter WritePoweroffChargeFlag");
-    void *handler = dlopen(POWER_CHARGE_EXTENSION_PATH, RTLD_LAZY | RTLD_NODELETE);
-    if (handler == nullptr) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "Dlopen failed, reason : %{public}s", dlerror());
-        return;
-    }
-
-    Func writePoweroffChargeFlag = (Func)dlsym(handler, WRITE_POWER_OFF_CHARGE_FLAG_FUNC);
-    if (writePoweroffChargeFlag == nullptr) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "find function failed, reason : %{public}s", dlerror());
-        dlclose(handler);
-        return;
-    }
-    writePoweroffChargeFlag();
-    dlclose(handler);
-}
-#endif
 
 static void SetFrameworkFinishBootStage(void)
 {
@@ -184,13 +141,6 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     make_unique<thread>([=] {
         Prepare(isReboot);
         POWER_HILOGI(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
-
-#ifdef POWER_MANAGER_POWEROFF_CHARGE
-        if (IsNeedWritePoweroffChargeFlag(reason)) {
-            WritePoweroffChargeFlag();
-        }
-#endif
-
         if (devicePowerAction_ != nullptr) {
             std::string shutdownDeviceTime = std::to_string(GetCurrentRealTimeMs());
             system::SetParameter("persist.dfx.shutdowncompletetime", shutdownDeviceTime);

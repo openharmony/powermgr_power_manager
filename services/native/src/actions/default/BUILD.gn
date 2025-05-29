@@ -56,6 +56,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
   deps = [
     "${powermgr_utils_path}:power_utils",
     "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_utils_path}/hookmgr:power_hookmgr",
     "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper",
     "${powermgr_utils_path}/lib_loader:power_lib_loader",
   ]
@@ -76,6 +77,10 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   if (has_hiviewdfx_hisysevent_part) {
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (power_manager_feature_poweroff_charge) {
+    defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
   }
 
   if (has_display_manager_part) {
