@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <string_ex.h>
 
+#include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "power_state_machine_info.h"

@@ -223,7 +223,7 @@ HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub001, TestSize.Level0)
  */
 HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub002, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub002 function start!");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub002 function start!");
     uint32_t code = 1; // CMD_ON_TAKEOVER_HIBERNATE
     MessageParcel data;
     MessageParcel reply;
@@ -238,7 +238,7 @@ HWTEST_F(ShutdownClientTest, TakeOverShutdownCallbackStub002, TestSize.Level0)
     bool retVal = takeOverShutdownCallback.TakeOverShutdownCallbackStub::OnTakeOverHibernate(
         {"TakeOverShutdownCallbackStub002", false});
     EXPECT_EQ(retVal, false);
-    POWER_HILOGD(LABEL_TEST, "TakeOverShutdownCallbackStub002 function end!");
+    POWER_HILOGI(LABEL_TEST, "TakeOverShutdownCallbackStub002 function end!");
 }
 
 /**

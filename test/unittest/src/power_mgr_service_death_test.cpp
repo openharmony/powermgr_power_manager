@@ -33,6 +33,7 @@ namespace {
  */
 HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceDeathTest_001 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_TRUE(powerMgrClient.GetPowerMgrProxy() != nullptr);
@@ -44,6 +45,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
     deathRecipient->OnRemoteDied(remoteObj);
     EXPECT_NE(powerMgrClient.proxy_, nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_001 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceDeathTest_001 end.";
 }
 
 /**
@@ -54,6 +56,7 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_001, TestSize.Level
  */
 HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceDeathTest_002 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_TRUE(powerMgrClient.GetPowerMgrProxy() != nullptr);
@@ -66,5 +69,6 @@ HWTEST_F (PowerMgrServiceDeathTest, PowerMgrServiceDeathTest_002, TestSize.Level
     deathRecipient->OnRemoteDied(sptrRemoteObj);
     EXPECT_NE(powerMgrClient.proxy_, nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceDeathTest_002 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceDeathTest_002 end.";
 }
 }

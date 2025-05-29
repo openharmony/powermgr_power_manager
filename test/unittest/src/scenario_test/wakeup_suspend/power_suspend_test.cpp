@@ -41,14 +41,14 @@ static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
 namespace {
 /**
  * @tc.name: PowerSuspendTest001
- * @tc.desc: test simulate powerkey event once when screenon
+ * @tc.desc: test simulate powerkey event when screenon
  * @tc.type: FUNC
  */
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
@@ -67,14 +67,14 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level1)
 }
 /**
  * @tc.name: PowerSuspendTest002
- * @tc.desc: test simulate powerkey event when screenon
+ * @tc.desc: test simulate powerkey event once when screenon
  * @tc.type: FUNC
  */
 HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest001");
+    powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendTest002");
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     auto inputManager = MMI::InputManager::GetInstance();

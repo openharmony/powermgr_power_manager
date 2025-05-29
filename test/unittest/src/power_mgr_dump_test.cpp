@@ -62,6 +62,7 @@ namespace {
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative001 function start!";
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative001 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative001 fail to get PowerMgrService";
     int32_t fd = 1;
@@ -70,6 +71,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level1)
     args.push_back(arg);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative001 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative001 function end!";
 }
 
 /**
@@ -79,6 +81,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative001, TestSize.Level1)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative002 function start!";
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative002 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative002 fail to get PowerMgrService";
     int32_t fd = 1;
@@ -87,6 +90,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level1)
     args.push_back(arg);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative002 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative002 function end!";
 }
 
 /**
@@ -96,6 +100,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative002, TestSize.Level1)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative003 function start!";
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative003 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative003 fail to get PowerMgrService";
     int32_t fd = 1;
@@ -108,6 +113,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level1)
     args.push_back(arg2);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative003 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative003 function end!";
 }
 
 /**
@@ -117,6 +123,7 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative003, TestSize.Level1)
  */
 HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative004 function start!";
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative004 function start!");
     EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative004 fail to get PowerMgrService";
     int32_t fd = 1;
@@ -125,5 +132,6 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level1)
     args.push_back(arg);
     EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative004 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative004 function end!";
 }
 } // namespace

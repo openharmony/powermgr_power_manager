@@ -27,7 +27,7 @@ using namespace testing::ext;
  * @tc.desc: test GetRebootCommand
  * @tc.type: FUNC
  */
-HWTEST_F(PowerExtIntfWrapperTest, GetRebootCommandTest, TestSize.Level1)
+HWTEST_F(PowerExtIntfWrapperTest, GetRebootCommandTest, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "GetRebootCommandTest function start!");
     std::string rebootReason = "reboot_by_test";
@@ -42,7 +42,7 @@ HWTEST_F(PowerExtIntfWrapperTest, GetRebootCommandTest, TestSize.Level1)
  * @tc.desc: test SubscribeScreenLockCommonEvent/UnSubscribeScreenLockCommonEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PowerExtIntfWrapperTest, SubscribeScreenLockCommonEventTest, TestSize.Level1)
+HWTEST_F(PowerExtIntfWrapperTest, SubscribeScreenLockCommonEventTest, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "SubscribeScreenLockCommonEventTest function start!");
     PowerExtIntfWrapper::ErrCode code = PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();
@@ -57,7 +57,7 @@ HWTEST_F(PowerExtIntfWrapperTest, SubscribeScreenLockCommonEventTest, TestSize.L
  * @tc.desc: test BlockHibernateUntilScrLckReady
  * @tc.type: FUNC
  */
-HWTEST_F(PowerExtIntfWrapperTest, BlockHibernateUntilScrLckReadyTest, TestSize.Level1)
+HWTEST_F(PowerExtIntfWrapperTest, BlockHibernateUntilScrLckReadyTest, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "BlockHibernateUntilScrLckReadyTest function start!");
     PowerExtIntfWrapper::ErrCode code = PowerExtIntfWrapper::Instance().SubscribeScreenLockCommonEvent();

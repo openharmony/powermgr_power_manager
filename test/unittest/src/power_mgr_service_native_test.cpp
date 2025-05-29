@@ -84,6 +84,7 @@ namespace {
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative001 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function start!");
     g_pmsTest->HallSensorSubscriberInit();
     g_pmsTest->HallSensorSubscriberCancel();
@@ -99,6 +100,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative001 end.";
 }
 
 /**
@@ -108,6 +110,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative002 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 function start!");
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
     g_pmsTest->HandleKeyEvent(keyCode);
@@ -126,6 +129,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level1)
     SuspendDeviceType reasonSDT = SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN;
     EXPECT_TRUE(g_pmsTest->SuspendDevice(SUSCALLTIMEMS, reasonSDT, false) == PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative002 end.";
 }
 
 /**
@@ -135,6 +139,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative003 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 function start!");
 #ifdef POWER_PICKUP_ENABLE
     g_pmsTest->RegisterSettingWakeupPickupGestureObserver();
@@ -145,6 +150,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level1)
     EXPECT_TRUE(SettingHelper::pickUpObserver_ == nullptr);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative003 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative003 end.";
 }
 
 /**
@@ -154,6 +160,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative003, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative004 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
@@ -162,6 +169,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level1)
     SettingHelper::SetSettingAutoAdjustBrightness(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingAutoAdjustBrightness(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative004 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative004 end.";
 }
 
 /**
@@ -171,6 +179,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative004, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative005 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
@@ -179,6 +188,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level1)
     SettingHelper::SetSettingBrightness(INVALID_CODE);
     auto ret = SettingHelper::GetSettingAutoAdjustBrightness(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative005 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative005 end.";
 }
 
 /**
@@ -188,6 +198,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative005, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative006 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
@@ -196,6 +207,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level1)
     SettingHelper::SetSettingVibration(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingVibration(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative006 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative006 end.";
 }
 
 
@@ -206,6 +218,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative006, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative007 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
@@ -214,6 +227,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level1)
     SettingHelper::SetSettingWindowRotation(SettingHelper::SwitchStatus::INVALID);
     auto ret = SettingHelper::GetSettingWindowRotation(INVALID_CODE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative007 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative007 end.";
 }
 
 /**
@@ -223,6 +237,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative007, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative008 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 function start!");
     shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
     EXPECT_TRUE(powerModeModuleTest != nullptr);
@@ -232,6 +247,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level1)
     auto ret = SettingHelper::GetSettingIntellVoice(INVALID_CODE);
     powerModeModuleTest->UnregisterSaveModeObserver();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative008 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative008 end.";
 }
 
 /**
@@ -241,6 +257,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative008, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative009 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 function start!");
     g_pmsTest->RegisterSettingPowerModeObservers();
     g_pmsTest->RegisterSettingPowerModeObservers();
@@ -249,6 +266,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level1)
     SettingHelper::UnRegisterSettingPowerModeObserver();
     EXPECT_TRUE(SettingHelper::powerModeObserver_ == nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative009 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative009 end.";
 }
 
 /**
@@ -258,6 +276,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative009, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative010 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 function start!");
     g_pmsTest->RegisterSettingWakeUpLidObserver();
     SettingHelper::SetSettingWakeupLid(true);
@@ -265,6 +284,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level1)
     SettingHelper::UnRegisterSettingWakeupLidObserver();
     EXPECT_TRUE(SettingHelper::lidObserver_ == nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative010 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative010 end.";
 }
 
 /**
@@ -274,6 +294,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative010, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative011 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 function start!");
 #ifdef POWER_DOUBLECLICK_ENABLE
     g_pmsTest->RegisterSettingWakeupDoubleClickObservers();
@@ -284,6 +305,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level1)
     EXPECT_TRUE(SettingHelper::doubleClickObserver_ == nullptr);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative011 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative011 end.";
 }
 
 /**
@@ -293,6 +315,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative011, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative012 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 function start!");
 #ifdef MSDP_MOVEMENT_ENABLE
     auto stateMachine = std::make_shared<PowerStateMachine>(g_pmsTest);
@@ -303,6 +326,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level1)
     EXPECT_TRUE(ret == false);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative012 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative012 end.";
 }
 
 /**
@@ -312,6 +336,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative012, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative013 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_pmsTest->RegisterExternalScreenListener();
@@ -320,6 +345,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level1)
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative013 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative013 end.";
 }
 
 /**
@@ -329,6 +355,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative013, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative014 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_pmsTest->SuspendControllerInit();
@@ -369,6 +396,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level1)
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative014 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative014 end.";
 }
 
 /**
@@ -378,6 +406,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative014, TestSize.Level1)
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative015 start.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 function start!");
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_pmsTest->SuspendControllerInit();
@@ -425,6 +454,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level1)
     EXPECT_TRUE(g_pmsTest->externalScreenListener_ == nullptr);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative015 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative015 end.";
 }
 
 } // namespace
