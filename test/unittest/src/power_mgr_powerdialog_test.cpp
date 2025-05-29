@@ -63,6 +63,7 @@ constexpr int32_t SLEEP_WAIT_TIME_S = 1;
  */
 HWTEST_F(PowerMgrPowerDialog, LongPressKeyMonitorInitTest, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "LongPressKeyMonitorInitTest start.";
     POWER_HILOGI(LABEL_TEST, "LongPressKeyMonitorInitTest function start!");
     ShutdownDialog shutdownDialog;
     shutdownDialog.KeyMonitorInit();
@@ -70,6 +71,7 @@ HWTEST_F(PowerMgrPowerDialog, LongPressKeyMonitorInitTest, TestSize.Level2)
     shutdownDialog.KeyMonitorCancel();
     EXPECT_TRUE(shutdownDialog.longPressId_ == OHOS::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "LongPressKeyMonitorInitTest function end!");
+    GTEST_LOG_(INFO) << "LongPressKeyMonitorInitTest end.";
 }
 
 /**
@@ -79,6 +81,7 @@ HWTEST_F(PowerMgrPowerDialog, LongPressKeyMonitorInitTest, TestSize.Level2)
  */
 HWTEST_F(PowerMgrPowerDialog, ConnectSystemUiDialogShowTest, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "ConnectSystemUiDialogShowTest start.";
     POWER_HILOGI(LABEL_TEST, "ConnectSystemUiDialogShowTest function start!");
     ShutdownDialog shutdownDialog;
     sptr<IRemoteObject> sptrRemoteObj = new MockPowerRemoteObject();
@@ -88,6 +91,7 @@ HWTEST_F(PowerMgrPowerDialog, ConnectSystemUiDialogShowTest, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_TRUE(shutdownDialog.ConnectSystemUi());
     POWER_HILOGI(LABEL_TEST, "ConnectSystemUiDialogShowTest function end!");
+    GTEST_LOG_(INFO) << "ConnectSystemUiDialogShowTest end.";
 }
 
 /**
@@ -97,6 +101,7 @@ HWTEST_F(PowerMgrPowerDialog, ConnectSystemUiDialogShowTest, TestSize.Level2)
  */
 HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTestFail, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "OnAbilityConnectDoneTestFail start.";
     POWER_HILOGI(LABEL_TEST, "OnAbilityConnectDoneTestFail function start!");
     ShutdownDialog shutdownDialog;
     shutdownDialog.ResetLongPressFlag();
@@ -107,6 +112,7 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTestFail, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_FALSE(shutdownDialog.IsLongPress());
     POWER_HILOGI(LABEL_TEST, "OnAbilityConnectDoneTestFail function end!");
+    GTEST_LOG_(INFO) << "OnAbilityConnectDoneTestFail end.";
 }
 
 /**
@@ -116,6 +122,7 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTestFail, TestSize.Level2)
  */
 HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTestRemoteNull, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "OnAbilityConnectDoneTestRemoteNull start.";
     POWER_HILOGI(LABEL_TEST, "OnAbilityConnectDoneTestRemoteNull function start!");
     ShutdownDialog shutdownDialog;
     shutdownDialog.ResetLongPressFlag();
@@ -125,6 +132,7 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTestRemoteNull, TestSize.Level
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_FALSE(shutdownDialog.IsLongPress());
     POWER_HILOGI(LABEL_TEST, "OnAbilityConnectDoneTestRemoteNull function end!");
+    GTEST_LOG_(INFO) << "OnAbilityConnectDoneTestRemoteNull end.";
 }
 
 /**
@@ -134,6 +142,7 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTestRemoteNull, TestSize.Level
  */
 HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTest, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "OnAbilityConnectDoneTest start.";
     POWER_HILOGI(LABEL_TEST, "OnAbilityConnectDoneTest function start!");
     ShutdownDialog shutdownDialog;
     shutdownDialog.ResetLongPressFlag();
@@ -144,6 +153,7 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTest, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_TRUE(shutdownDialog.IsLongPress());
     POWER_HILOGI(LABEL_TEST, "OnAbilityConnectDoneTest function end!");
+    GTEST_LOG_(INFO) << "OnAbilityConnectDoneTest end.";
 }
 
 /**
@@ -153,6 +163,7 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityConnectDoneTest, TestSize.Level2)
  */
 HWTEST_F(PowerMgrPowerDialog, OnAbilityDisconnectDoneTest, TestSize.Level2)
 {
+    GTEST_LOG_(INFO) << "OnAbilityDisconnectDoneTest start.";
     POWER_HILOGI(LABEL_TEST, "OnAbilityDisconnectDoneTest function start!");
     ShutdownDialog shutdownDialog;
     AppExecFwk::ElementName element;
@@ -160,5 +171,6 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityDisconnectDoneTest, TestSize.Level2)
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_FALSE(shutdownDialog.IsLongPress());
     POWER_HILOGI(LABEL_TEST, "OnAbilityDisconnectDoneTest function end!");
+    GTEST_LOG_(INFO) << "OnAbilityDisconnectDoneTest end.";
 }
 } // namespace
