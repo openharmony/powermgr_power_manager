@@ -13,15 +13,11 @@
 
 import("//base/powermgr/power_manager/powermgr.gni")
 
-config("private_config") {
+config("public_config") {
   include_dirs = [
     "include",
     "../native/include",
   ]
-}
-
-config("public_config") {
-  include_dirs = [ "include" ]
 }
 
 ohos_shared_library("power_hookmgr") {
@@ -35,7 +31,6 @@ ohos_shared_library("power_hookmgr") {
   sources = [ "src/power_hookmgr.cpp" ]
 
   configs = [
-    ":private_config",
     "${powermgr_utils_path}:coverage_flags",
   ]
 
