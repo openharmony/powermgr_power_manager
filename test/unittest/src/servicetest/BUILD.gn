@@ -62,6 +62,7 @@ deps_ex = [
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "googletest:gtest_main",
 ]
 
 if (has_sensors_sensor_part) {
@@ -87,7 +88,6 @@ ohos_unittest("powermgr_native_test") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [ "image_framework:image_native" ]
@@ -118,7 +118,6 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = deps_ex

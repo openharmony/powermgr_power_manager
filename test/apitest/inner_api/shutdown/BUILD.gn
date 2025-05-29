@@ -51,6 +51,8 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "ipc:ipc_core",
+  "googletest:gmock_main",
+  "googletest:gtest_main",
   "libxml2:libxml2",
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
@@ -71,8 +73,6 @@ ohos_unittest("takeover_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = deps_ex
   module_out_path = module_output_path
@@ -88,8 +88,6 @@ ohos_unittest("async_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = deps_ex
   module_out_path = module_output_path
@@ -105,8 +103,6 @@ ohos_unittest("sync_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = deps_ex
   module_out_path = module_output_path

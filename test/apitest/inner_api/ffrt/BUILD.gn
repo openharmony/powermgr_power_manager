@@ -30,13 +30,11 @@ ohos_unittest("test_ffrt_utils") {
     ":module_private_config",
     "${powermgr_utils_path}:coverage_flags",
   ]
-  deps = [
-    "${powermgr_utils_path}/ffrt:power_ffrt",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${powermgr_utils_path}/ffrt:power_ffrt" ]
   external_deps = [
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }

@@ -55,7 +55,6 @@ ohos_fuzztest("IsFoldScreenOnFuzzTest") {
     "${powermgr_service_path}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -65,6 +64,7 @@ ohos_fuzztest("IsFoldScreenOnFuzzTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
