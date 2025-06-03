@@ -19,7 +19,6 @@
 #include "init_reboot.h"
 #include "list.h"
 #include "power_hookmgr.h"
-#include "power_ext_intf_wrapper.h"
 #include "power_log.h"
 
 namespace {
@@ -38,9 +37,8 @@ void DevicePowerAction::Reboot(const std::string& reason)
     RebootCmdInfo rebootInfo = {.rebootReason = reason, .rebootCmd = INVALID_CMD};
     HOOK_EXEC_OPTIONS options {TRAVERSE_STOP_WHEN_ERROR, nullptr, nullptr};
     HOOK_MGR* hookMgr = GetPowerHookMgr();
-    if (hookMgr &&
-        HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_DO_REBOOT), &rebootInfo, &options) ==
-            0) {
+    if (HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_DO_REBOOT), &rebootInfo, &options) ==
+        0) {
         rebootCmd = rebootInfo.rebootCmd;
     } else {
         rebootCmd = Updater(reason);
