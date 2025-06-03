@@ -64,6 +64,8 @@ using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace PowerMgr {
+// Explicit specialization definition(an initializer is required for it to be a definition)
+template<> sptr<PowerMgrService> DelayedSpSingleton<PowerMgrService>::instance_ {};
 namespace {
 MODULE_MGR *g_moduleMgr = nullptr;
 #if (defined(__aarch64__) || defined(__x86_64__))
