@@ -18,7 +18,7 @@
 
 #include <memory>
 #include <string>
-#include "json/value.h"
+#include <cJSON.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -56,7 +56,7 @@ private:
     std::vector<VibratorSource> ParseSources(const std::string& config);
     void GetTargetPath(std::string& targetPath,
         const std::string& etcPath, const std::string& vendorPath, const std::string& systemPath);
-    void ParseSourcesProc(std::vector<VibratorSource>& sources, Json::Value& valueObj, std::string& key);
+    void ParseSourcesProc(std::vector<VibratorSource>& sources, cJSON* valueObj, std::string& key);
 };
 } // namespace PowerMgr
 } // namespace OHOS

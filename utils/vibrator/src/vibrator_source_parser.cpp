@@ -18,10 +18,9 @@
 #include <fstream>
 #include <securec.h>
 #include <unistd.h>
+#include <cJSON.h>
 #include "config_policy_utils.h"
 #include "power_log.h"
-#include "json/reader.h"
-#include "json/value.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -71,37 +70,64 @@ void VibratorSourceParser::GetTargetPath(
 std::vector<VibratorSource> VibratorSourceParser::ParseSources(const std::string& jsonStr)
 {
     std::vector<VibratorSource> sources;
-    Json::Reader reader;
-    Json::Value root;
-    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
-        POWER_HILOGE(COMP_UTILS, "json parse error");
+
+    if (jsonStr.empty()) {
+        POWER_HILOGE(COMP_UTILS, "Input JSON string is empty");
         return sources;
     }
-    Json::Value::Members members = root.getMemberNames();
-    for (auto iter = members.begin(); iter != members.end(); iter++) {
-        std::string key = *iter;
-        Json::Value valueObj = root[key];
-        POWER_HILOGI(COMP_UTILS, "key=%{public}s", key.c_str());
-        ParseSourcesProc(sources, valueObj, key);
+
+    cJSON* root = cJSON_Parse(jsonStr.c_str());
+    if (!root) {
+        POWER_HILOGE(COMP_UTILS, "JSON parse error");
+        return sources;
     }
+    if (!cJSON_IsObject(root)) {
+        POWER_HILOGE(COMP_UTILS, "JSON root is not object");
+        cJSON_Delete(root);
+        return sources;
+    }
+
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, root) {
+        const char* key = item->string;
+        if (!key) {
+            POWER_HILOGE(COMP_UTILS, "invalid key in json object");
+            continue;
+        }
+        std::string keyStr = std::string(key);
+        POWER_HILOGI(COMP_UTILS, "key=%{public}s", keyStr.c_str());
+        ParseSourcesProc(sources, item, keyStr);
+    }
+
+    cJSON_Delete(root);
     return sources;
 }
    
 void VibratorSourceParser::ParseSourcesProc(
-    std::vector<VibratorSource>& sources, Json::Value& valueObj, std::string& key)
+    std::vector<VibratorSource>& sources, cJSON* valueObj, std::string& key)
 {
-    if (!valueObj.isObject()) {
+    if (!cJSON_IsObject(valueObj)) {
+        POWER_HILOGE(COMP_UTILS, "ValueObj is not a json object.");
         return;
     }
-    std::string type;
+
     bool enable = false;
-    Json::Value enableValue = valueObj[VibratorSource::ENABLE_KEY];
-    Json::Value typeValue = valueObj[VibratorSource::TYPE_KEY];
-    if (!typeValue.isString() || !enableValue.isBool()) {
+    std::string type;
+
+    cJSON* enableItem = cJSON_GetObjectItemCaseSensitive(valueObj, VibratorSource::ENABLE_KEY);
+    if (!enableItem || !cJSON_IsBool(enableItem)) {
+        POWER_HILOGE(COMP_UTILS, "Parse enable error.");
         return;
     }
-    enable = enableValue.asBool();
-    type = typeValue.asString();
+    enable =  cJSON_IsTrue(enableItem);
+
+    cJSON* typeItem = cJSON_GetObjectItemCaseSensitive(valueObj, VibratorSource::TYPE_KEY);
+    if (!typeItem || !cJSON_IsString(typeItem)) {
+        POWER_HILOGE(COMP_UTILS, "Parse type error.");
+        return;
+    }
+    type = typeItem->valuestring;
+
     if (!enable || type.empty()) {
         return;
     }
