@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 
-#include "json/value.h"
+#include <cJSON.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -30,7 +30,7 @@ public:
     static std::shared_ptr<WakeupSources> ParseSources();
     static std::shared_ptr<WakeupSources> ParseSources(const std::string& config);
     static bool ParseSourcesProc(
-        std::shared_ptr<WakeupSources>& parseSources, Json::Value& valueObj, std::string& key);
+        std::shared_ptr<WakeupSources>& parseSources, cJSON* valueObj, std::string& key);
     static bool GetTargetPath(std::string& targetPath);
     static void SetSettingsToDatabase(WakeupDeviceType type, bool enable);
     static const std::string GetWakeupSourcesByConfig();

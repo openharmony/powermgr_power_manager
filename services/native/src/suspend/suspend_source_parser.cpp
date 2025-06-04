@@ -18,11 +18,11 @@
 #include <securec.h>
 #include <unistd.h>
 
+#include <cJSON.h>
+
 #include "config_policy_utils.h"
 #include "power_log.h"
 #include "setting_helper.h"
-#include "json/reader.h"
-#include "json/value.h"
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 #include "power_mgr_service.h"
 #endif
@@ -152,36 +152,40 @@ bool SuspendSourceParser::GetTargetPath(std::string& targetPath)
 std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::string& jsonStr)
 {
     std::shared_ptr<SuspendSources> parseSources = std::make_shared<SuspendSources>();
-    Json::Reader reader;
-    Json::Value root;
-    std::string errors;
-    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
+    cJSON* root = cJSON_Parse(jsonStr.c_str());
+    if (!root) {
         POWER_HILOGE(FEATURE_SUSPEND, "json parse error");
         parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
-
-    if (root.isNull() || !root.isObject()) {
+    if (!cJSON_IsObject(root)) {
         POWER_HILOGE(FEATURE_SUSPEND, "json root invalid[%{public}s]", jsonStr.c_str());
         parseSources->SetParseErrorFlag(true);
+        cJSON_Delete(root);
         return parseSources;
     }
 
-    Json::Value::Members members = root.getMemberNames();
-    for (auto iter = members.begin(); iter != members.end(); iter++) {
-        std::string key = *iter;
-        Json::Value valueObj = root[key];
-        bool ret = ParseSourcesProc(parseSources, valueObj, key);
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, root) {
+        const char* key = item->string;
+        if (!key) {
+            POWER_HILOGI(FEATURE_SUSPEND, "invalid key in json object");
+            continue;
+        }
+        std::string keyStr = std::string(key);
+        bool ret = ParseSourcesProc(parseSources, item, keyStr);
         if (ret == false) {
             POWER_HILOGI(FEATURE_SUSPEND, "lost map config key");
             continue;
         }
     }
+
+    cJSON_Delete(root);
     return parseSources;
 }
 
 bool SuspendSourceParser::ParseSourcesProc(
-    std::shared_ptr<SuspendSources>& parseSources, Json::Value& valueObj, std::string& key)
+    std::shared_ptr<SuspendSources>& parseSources, cJSON* valueObj, std::string& key)
 {
     if (parseSources == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "parseSources is nullptr");
@@ -195,12 +199,12 @@ bool SuspendSourceParser::ParseSourcesProc(
 
     uint32_t action = 0;
     uint32_t delayMs = 0;
-    if (!valueObj.isNull() && valueObj.isObject()) {
-        Json::Value actionValue = valueObj[SuspendSource::ACTION_KEY];
-        Json::Value delayValue = valueObj[SuspendSource::DELAY_KEY];
-        if (actionValue.isUInt() && delayValue.isUInt()) {
-            action = actionValue.asUInt();
-            delayMs = delayValue.asUInt();
+    if (valueObj && cJSON_IsObject(valueObj)) {
+        cJSON* actionValue = cJSON_GetObjectItemCaseSensitive(valueObj, SuspendSource::ACTION_KEY);
+        cJSON* delayValue = cJSON_GetObjectItemCaseSensitive(valueObj, SuspendSource::DELAY_KEY);
+        if (actionValue && cJSON_IsNumber(actionValue) && delayValue && cJSON_IsNumber(delayValue)) {
+            action = static_cast<uint32_t>(actionValue->valueint);
+            delayMs = static_cast<uint32_t>(delayValue->valueint);
             if (action >= ILLEGAL_ACTION) {
                 action = 0;
             }

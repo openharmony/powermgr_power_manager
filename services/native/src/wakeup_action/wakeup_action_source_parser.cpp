@@ -18,10 +18,9 @@
 #include <securec.h>
 #include <unistd.h>
 
+#include <cJSON.h>
 #include "config_policy_utils.h"
 #include "power_log.h"
-#include "json/reader.h"
-#include "json/value.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -79,46 +78,52 @@ bool WakeupActionSourceParser::GetTargetPath(std::string& targetPath)
 std::shared_ptr<WakeupActionSources> WakeupActionSourceParser::ParseSources(const std::string& jsonStr)
 {
     std::shared_ptr<WakeupActionSources> parseSources = std::make_shared<WakeupActionSources>();
-    Json::Reader reader;
-    Json::Value root;
-    if (!reader.parse(jsonStr.data(), jsonStr.data() + jsonStr.size(), root)) {
-        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json parse error");
+    cJSON* root = cJSON_Parse(jsonStr.c_str());
+    if (!root) {
+        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json parse error[%{public}s]", jsonStr.c_str());
         return parseSources;
     }
 
-    if (root.isNull() || !root.isObject()) {
-        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json root invalid[%{public}s]", jsonStr.c_str());
+    if (!cJSON_IsObject(root)) {
+        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json root invalid");
+        cJSON_Delete(root);
         return parseSources;
     }
-    
-    Json::Value::Members members = root.getMemberNames();
-    for (auto iter = members.begin(); iter != members.end(); iter++) {
-        std::string key = *iter;
-        Json::Value valueObj = root[key];
-        POWER_HILOGI(FEATURE_WAKEUP_ACTION, "key=%{public}s", key.c_str());
-        bool ret = ParseSourcesProc(parseSources, valueObj, key);
+
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, root) {
+        const char* key = item->string;
+        if (!key) {
+            POWER_HILOGI(FEATURE_WAKEUP_ACTION, "invalid key in json object");
+            continue;
+        }
+        POWER_HILOGI(FEATURE_WAKEUP_ACTION, "key=%{public}s", key);
+        std::string keyStr = std::string(key);
+        bool ret = ParseSourcesProc(parseSources, item, keyStr);
         if (ret == false) {
             POWER_HILOGI(FEATURE_WAKEUP_ACTION, "lost map config key");
             continue;
         }
     }
+
+    cJSON_Delete(root);
     return parseSources;
 }
 
 bool WakeupActionSourceParser::ParseSourcesProc(
-    std::shared_ptr<WakeupActionSources>& parseSources, Json::Value& valueObj, std::string& key)
+    std::shared_ptr<WakeupActionSources>& parseSources, cJSON* valueObj, std::string& key)
 {
     std::string scene{""};
     uint32_t action = 0;
-    if (!valueObj.isNull() && valueObj.isObject()) {
-        Json::Value sceneValue = valueObj[WakeupActionSource::SCENE_KEY];
-        Json::Value actionValue = valueObj[WakeupActionSource::ACTION_KEY];
-        if (sceneValue.isString()) {
-            scene = sceneValue.asString();
+    if (valueObj && cJSON_IsObject(valueObj)) {
+        cJSON* sceneValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupActionSource::SCENE_KEY);
+        if (sceneValue && cJSON_IsString(sceneValue)) {
+            scene = sceneValue->valuestring;
             POWER_HILOGI(FEATURE_WAKEUP_ACTION, "scene=%{public}s", scene.c_str());
         }
-        if (actionValue.isUInt()) {
-            action = actionValue.asUInt();
+        cJSON* actionValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupActionSource::ACTION_KEY);
+        if (actionValue && cJSON_IsNumber(actionValue)) {
+            action = static_cast<uint32_t>(actionValue->valueint);
             POWER_HILOGI(FEATURE_WAKEUP_ACTION, "action=%{public}u", action);
             if (action >= ILLEGAL_ACTION) {
                 action = 0;

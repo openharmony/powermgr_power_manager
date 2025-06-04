@@ -38,13 +38,13 @@ bool SettingHelper::IsSuspendSourcesSettingValid()
 }
 
 bool SuspendSourceParser::ParseSourcesProc(
-    std::shared_ptr<SuspendSources>& parseSources, Json::Value& valueObj, std::string& key)
+    std::shared_ptr<SuspendSources>& parseSources, cJSON* valueObj, std::string& key)
 {
     return false;
 }
 
 bool WakeupSourceParser::ParseSourcesProc(
-    std::shared_ptr<WakeupSources>& parseSources, Json::Value& valueObj, std::string& key)
+    std::shared_ptr<WakeupSources>& parseSources, cJSON* valueObj, std::string& key)
 {
     return false;
 }
