@@ -401,7 +401,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient013, TestSize.Level2)
     runningLock->UnLock();
     EXPECT_EQ(runningLock->IsUsed(), false);
     usleep(time * TRANSFER_MS_TO_S + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
+    EXPECT_EQ(powerMgrClient.IsFoldScreenOn(), false);
     powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient013 function end!");
 }
