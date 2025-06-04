@@ -143,7 +143,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService003, TestSize.Level0)
     usleep(50000);
     EXPECT_EQ(powerMgrClient.OverrideScreenOffTime(1000), PowerErrors::ERR_OK);
     sleep(PARM_THREE);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService003: Prepare Fail, Screen is ON.";
+    EXPECT_EQ(powerMgrClient.IsFoldScreenOn(), false) << "PowerMgrService003: Prepare Fail, Screen is ON.";
     EXPECT_EQ(powerMgrClient.RestoreScreenOffTime(), PowerErrors::ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService003 function end!");
 }
