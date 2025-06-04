@@ -310,10 +310,10 @@ void SuspendController::Cancel()
 
 void SuspendController::StopSleep()
 {
-    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
     if (ffrtTimer_ != nullptr) {
         ffrtTimer_->CancelTimer(TIMER_ID_SLEEP);
     }
+    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
     sleepTime_ = -1;
     sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
     ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
@@ -551,18 +551,18 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
         return;
     }
 
-    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
     if ((timeout > sleepTime_) && (sleepTime_ != -1)) {
         POWER_HILOGI(FEATURE_SUSPEND, "already have a sleep event (%{public}" PRId64 " > %{public}" PRId64 ")", timeout,
             sleepTime_);
-        ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
         return;
     }
+    ffrtMutexMap_.Lock(TIMER_ID_SLEEP);
     sleepTime_ = timeout;
     sleepReason_ = reason;
     sleepAction_ = action;
     sleepDuration_ = delay;
     sleepType_ = action;
+    ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
     FFRTTask task = [this, reason, action] {
         HandleAction(reason, action);
     };
@@ -572,7 +572,6 @@ void SuspendController::StartSleepTimer(SuspendDeviceType reason, uint32_t actio
     } else {
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}u) failed, timer is null", __func__, delay);
     }
-    ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
 }
 
 void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
