@@ -54,7 +54,8 @@ public:
     ErrCode BlockHibernateUntilScrLckReady() const;
     void OnHibernateEnd(bool hibernateResult);
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    void SetScreenOnEventRules(StateChangeReason reason);
+    ErrCode SetScreenOnEventRules(StateChangeReason reason, const std::vector<StateChangeReason>& stateChangeReason,
+        const std::vector<WakeupDeviceType>& wakeupDeviceTypes);
     void PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames);
     bool NotifyScreenOnEventAgain(WakeupDeviceType reason, std::vector<std::string> bundleNames);
     void NotifyOperateEventAfterScreenOn(std::vector<std::string> bundleNames);
