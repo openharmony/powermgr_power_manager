@@ -191,7 +191,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine003, TestSize.Level
  */
 HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device start.";
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_OTHER;
@@ -233,12 +232,13 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     type = WakeupDeviceType::WAKEUP_DEVICE_MOUSE;
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
+    type = WakeupDeviceType::WAKEUP_DEVICE_PICKUP;
+    stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     type = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, static_cast<WakeupDeviceType>(MAXTYPE), "7", "7");
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine004 function end!");
-    GTEST_LOG_(INFO) << "NativePowerStateMachine004: Suspend Device end.";
 }
 
 /**

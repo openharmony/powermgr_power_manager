@@ -102,14 +102,17 @@ void PowerExtIntfWrapper::OnHibernateEnd(bool hibernateResult)
 }
 
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-void PowerExtIntfWrapper::SetScreenOnEventRules(StateChangeReason reason)
+PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::SetScreenOnEventRules(StateChangeReason reason,
+    const std::vector<StateChangeReason>& stateChangeReason, const std::vector<WakeupDeviceType>& wakeupDeviceTypes)
 {
     void *funcPtr = intfLoader_.QueryInterface("SetScreenOnEventRules");
     if (funcPtr == nullptr) {
-        return;
+        return PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND;
     }
-    auto setScreenOnEventRulesFunc = reinterpret_cast<void (*)(const StateChangeReason)>(funcPtr);
-    setScreenOnEventRulesFunc(reason);
+    auto setScreenOnEventRulesFunc = reinterpret_cast<void (*)(
+        StateChangeReason, const std::vector<StateChangeReason>&, const std::vector<WakeupDeviceType>&)>(funcPtr);
+    setScreenOnEventRulesFunc(reason, stateChangeReason, wakeupDeviceTypes);
+    return PowerExtIntfWrapper::ErrCode::ERR_OK;
 }
 
 void PowerExtIntfWrapper::PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames)
