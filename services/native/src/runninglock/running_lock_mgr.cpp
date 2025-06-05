@@ -953,6 +953,11 @@ void RunningLockMgr::SetProximity(uint32_t status)
     }
 }
 
+bool RunningLockMgr::IsExistAudioStream(pid_t uid)
+{
+    return runninglockProxy_->IsExistAudioStream(uid);
+}
+
 bool RunningLockMgr::IsProximityClose()
 {
     return proximityController_.IsClose();

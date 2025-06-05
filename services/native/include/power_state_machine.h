@@ -31,6 +31,7 @@
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
 #include "proximity_controller_base.h"
+#include "window_manager_lite.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -371,6 +372,10 @@ private:
     bool IsProximityClose();
 #endif
     void StartSleepTimer(PowerState from);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    bool ReportScreenOffInvalidEvent(StateChangeReason reason);
+    bool ReportAbnormalScreenOffEvent(StateChangeReason reason);
+#endif
 
     const wptr<PowerMgrService> pms_;
     std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
