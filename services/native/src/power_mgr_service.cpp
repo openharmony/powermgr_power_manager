@@ -1464,6 +1464,12 @@ void PowerMgrService::QueryRunningLockListsInner(std::map<std::string, RunningLo
     runningLockMgr_->QueryRunningLockLists(runningLockLists);
 }
 
+bool PowerMgrService::IsExistAudioStream(pid_t uid)
+{
+    std::lock_guard lock(lockMutex_);
+    return runningLockMgr_->IsExistAudioStream(uid);
+}
+
 bool PowerMgrService::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
 {
     std::lock_guard lock(lockMutex_);

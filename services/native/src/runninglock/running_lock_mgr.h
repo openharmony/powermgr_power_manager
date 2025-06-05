@@ -82,6 +82,7 @@ public:
 #endif
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
+    bool IsExistAudioStream(pid_t uid);
 private:
 
     void AsyncWakeup();

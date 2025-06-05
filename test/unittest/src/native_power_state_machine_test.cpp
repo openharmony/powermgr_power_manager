@@ -345,6 +345,11 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level
 
     pmsTest->UnLock(token);
     EXPECT_EQ(pmsTest->IsUsed(token), false);
+
+    ret = stateMachine->ReportScreenOffInvalidEvent(StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
+    EXPECT_TRUE(ret);
+    ret = stateMachine->ReportAbnormalScreenOffEvent(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+    EXPECT_TRUE(ret);
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007 function end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device end.";
 }

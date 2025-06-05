@@ -127,6 +127,7 @@ ohos_shared_library("powermgrservice") {
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libwm_lite",
   ]
 
   if (power_manager_feature_tv_dreaming) {

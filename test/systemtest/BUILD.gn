@@ -56,6 +56,7 @@ deps_ex = [
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "window_manager:libwm_lite",
 ]
 
 if (has_sensors_sensor_part) {

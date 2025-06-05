@@ -349,6 +349,39 @@ bool RunningLockProxy::UpdateProxyState(pid_t pid, pid_t uid, const sptr<IRemote
     return true;
 }
 
+bool RunningLockProxy::IsExistAudioStream(pid_t uid)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+        return false;
+    }
+    auto rlmgr = pms->GetRunningLockMgr();
+    if (rlmgr == nullptr) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockMgr is nullptr");
+        return false;
+    }
+    for (auto &proxyItem : proxyMap_) {
+        TokenWorkSourceMap& tokenWksMap = proxyItem.second;
+        for (auto &tokenWksItem : tokenWksMap) {
+            auto lockInner = rlmgr->GetRunningLockInner(tokenWksItem.first);
+            if (lockInner == nullptr) {
+                POWER_HILOGW(FEATURE_RUNNING_LOCK, "RunninglockInner is nullptr");
+                continue;
+            }
+            if (lockInner->GetType() != RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO) {
+                continue;
+            }
+            WksMap& wksMap = tokenWksItem.second.first;
+            auto wksMapIter = wksMap.find(uid);
+            if (wksMapIter != wksMap.end() && !wksMapIter->second.second) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void RunningLockProxy::Clear()
 {
     proxyMap_.clear();

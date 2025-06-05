@@ -70,6 +70,10 @@ std::atomic_bool g_prepareResult = true;
 pid_t g_callSetForceTimingOutPid = 0;
 pid_t g_callSetForceTimingOutUid = 0;
 const std::string LID_STATUS_SCENE_NAME = "lid_status";
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+constexpr int32_t SCREEN_OFF_ABNORMAL = 0;
+constexpr int32_t SCREEN_OFF_INVALID = 1;
+#endif
 }
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
 const std::vector<StateChangeReason> WATCH_CUSTOMIZED_STATE_CHANGE_REASONS {
@@ -363,6 +367,9 @@ void PowerStateMachine::EmplaceInactive()
                 && isDozeEnabled_.load(std::memory_order_relaxed)) {
                 state = DisplayState::DISPLAY_DOZE;
             }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+            ReportScreenOffInvalidEvent(reason);
+#endif
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
             if (ret != ActionResult::SUCCESS) {
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to INACTIVE, display error, ret: %{public}u", ret);
@@ -443,6 +450,9 @@ void PowerStateMachine::EmplaceDim()
                 // failed but not return, still need to set screen off
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+            ReportAbnormalScreenOffEvent(reason);
+#endif
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             // Set a timer without checking runninglock, but the actual timeout event can still be blocked.
@@ -2535,6 +2545,71 @@ bool PowerStateMachine::IsSwitchOpenByPath()
     bool status = static_cast<bool>(num);
     POWER_HILOGI(FEATURE_POWER_STATE, "IsSwitchOpenByPath status: %{public}d", status);
     return status;
+}
+
+bool PowerStateMachine::ReportScreenOffInvalidEvent(StateChangeReason reason)
+{
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "ReportScreenOffInvalidEvent fail, reason: %{public}d", reason);
+        return false;
+    }
+    FFRTTask task = [this] {
+        // condition 1: no audiolock
+        // condition 2: has screenlock
+        if (!IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO)) {
+            std::map<std::string, RunningLockInfo> screenOnLockLists;
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms == nullptr) {
+                POWER_HILOGE(FEATURE_POWER_STATE, "ReportScreenOffInvalidEvent fail, Pms is nullptr");
+                return;
+            }
+            pms->QueryRunningLockListsInner(screenOnLockLists);
+            for (const auto &it : screenOnLockLists) {
+                HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_OFF_EXCEPTION",
+                    HiviewDFX::HiSysEvent::EventType::FAULT, "EXCEPTION_TYPE", SCREEN_OFF_INVALID,
+                    "PID", it.second.pid, "UID", it.second.uid, "BUNDLE_NAME", it.second.bundleName.c_str(),
+                    "ABILITY_NAME", "", "WINDOW_ID", 0, "APP_BEHAVIOR", "");
+            }
+        }
+    };
+    FFRTUtils::SubmitTask(task);
+    return true;
+}
+
+bool PowerStateMachine::ReportAbnormalScreenOffEvent(StateChangeReason reason)
+{
+    if (reason != StateChangeReason::STATE_CHANGE_REASON_TIMEOUT &&
+        reason != StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK) {
+        POWER_HILOGD(FEATURE_POWER_STATE, "ReportAbnormalScreenOffEvent fail, reason: %{public}d", reason);
+        return false;
+    }
+    FFRTTask task = [this] {
+        // condition 1: no cast
+        if (forceTimingOut_.load()) {
+            POWER_HILOGD(FEATURE_POWER_STATE, "ReportAbnormalScreenOffEvent fail, Currently casting");
+            return;
+        }
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_POWER_STATE, "ReportAbnormalScreenOffEvent fail, Pms is nullptr");
+            return;
+        }
+        // condition 2: current visible window is not desktop
+        // condition 3: audio stream exist in the window
+        std::vector<sptr<Rosen::WindowVisibilityInfo>> infos;
+        Rosen::WindowManagerLite::GetInstance().GetVisibilityWindowInfo(infos);
+        for (const auto &it: infos) {
+            if (it != nullptr && it->visibilityState_ < Rosen::WindowVisibilityState::WINDOW_LAYER_STATE_MAX
+                && it->bundleName_.compare(it->abilityName_) != 0 && pms->IsExistAudioStream(it->uid_)) {
+                HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SCREEN_OFF_EXCEPTION",
+                    HiviewDFX::HiSysEvent::EventType::FAULT, "EXCEPTION_TYPE", SCREEN_OFF_ABNORMAL,
+                    "PID", it->pid_, "UID", it->uid_, "BUNDLE_NAME", it->bundleName_.c_str(), "ABILITY_NAME",
+                    it->abilityName_.c_str(), "WINDOW_ID", it->windowId_, "APP_BEHAVIOR", "");
+            }
+        }
+    };
+    FFRTUtils::SubmitTask(task);
+    return true;
 }
 } // namespace PowerMgr
 } // namespace OHOS
