@@ -25,6 +25,7 @@
 #endif
 #include <ipc_skeleton.h>
 #include "power_ext_intf_wrapper.h"
+#include <power_hookmgr.h>
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
 #include "hitrace_meter.h"
 #endif
