@@ -1285,6 +1285,14 @@ ohos_unittest("test_running_lock_timer_handler") {
 ##############################test_device_power_action##############################
 ohos_unittest("test_device_power_action") {
   module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
   sources = [ "src/device_power_action_test.cpp" ]
 
   configs = [

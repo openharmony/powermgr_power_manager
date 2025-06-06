@@ -177,12 +177,6 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "sensor:sensor_interface_native" ]
   }
 
-  if (power_manager_feature_poweroff_charge && defined(global_parts_info) &&
-      defined(global_parts_info.powermgr_battery_manager)) {
-    defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
-    external_deps += [ "battery_manager:batterysrv_client" ]
-  }
-
   if (power_manager_feature_doubleclick) {
     defines += [ "POWER_DOUBLECLICK_ENABLE" ]
   }

@@ -37,8 +37,10 @@ int DoRebootExt(const char* mode, const char* option)
     g_cmdResult = mode;
     return 0;
 }
+
 int HookMgrExecute(HOOK_MGR* hookMgr, int stage, void* context, const HOOK_EXEC_OPTIONS* options)
 {
+    g_invoked = true;
     return g_retval;
 }
 
@@ -47,41 +49,46 @@ class DevicePowerActionTest : public DevicePowerAction, public Test {};
 namespace {
 HWTEST_F(DevicePowerActionTest, DevicePowerActionTest001, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest001 start!");
     g_cmdResult.clear();
     g_retval = 0;
     g_invoked = false;
     Reboot("");
     EXPECT_TRUE(g_invoked);
     EXPECT_EQ(g_cmdResult, "invalid_cmd");
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest001 end!");
 }
 
 HWTEST_F(DevicePowerActionTest, DevicePowerActionTest002, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest002 start!");
     g_cmdResult.clear();
     g_retval = -1;
     g_invoked = false;
     Reboot("");
     EXPECT_TRUE(g_invoked);
     EXPECT_EQ(g_cmdResult, "");
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest002 end!");
 }
 
 HWTEST_F(DevicePowerActionTest, DevicePowerActionTest003, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest003 start!");
     g_cmdResult.clear();
     g_retval = -1;
     g_invoked = false;
     Reboot("updater");
     EXPECT_TRUE(g_invoked);
     EXPECT_EQ(g_cmdResult, "updater");
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest003 end!");
 }
 
 HWTEST_F(DevicePowerActionTest, DevicePowerActionTest004, TestSize.Level0)
 {
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest004 start!");
     g_cmdResult.clear();
-    g_retval = -1;
-    g_invoked = false;
     Shutdown("");
-    EXPECT_TRUE(g_invoked);
     EXPECT_EQ(g_cmdResult, "shutdown");
+    POWER_HILOGI(LABEL_TEST, "DevicePowerActionTest004 end!");
 }
 } // namespace
