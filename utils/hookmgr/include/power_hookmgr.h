@@ -17,13 +17,24 @@
 #define POWERMGR_UTILS_HOOKMGR_POWER_HOOKMGR_H
 
 #include <cstdint>
+#include <string>
 #include <hookmgr.h>
+#include "modulemgr.h"
 
 namespace OHOS {
 namespace PowerMgr {
 enum class PowerHookStage : int32_t {
     POWER_HDI_CALLBACK_WAKEUP = 0,
+    POWER_PRE_SWITCH_ACCOUNT,
+    POWER_POST_SWITCH_ACCOUNT,
+    POWER_PRE_DO_REBOOT,
+    POWER_PRE_DO_SHUTDOWN,
     POWER_HOOK_STAGE_MAX = 1000,
+};
+
+struct RebootCmdInfo {
+    std::string rebootReason;
+    std::string rebootCmd;
 };
 
 HOOK_MGR* GetPowerHookMgr();
