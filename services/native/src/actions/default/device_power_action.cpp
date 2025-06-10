@@ -16,11 +16,13 @@
 #include "device_power_action.h"
 
 #include <string>
-#include "init_reboot.h"
-#include "power_ext_intf_wrapper.h"
+#include <init_reboot.h>
+#include <list.h>
+#include "power_hookmgr.h"
 #include "power_log.h"
 
 namespace {
+const std::string INVALID_CMD = "invalid_cmd";
 const std::string UPDATER_CMD = "updater";
 const std::string REBOOT_CMD = "";
 const std::string SHUTDOWN_CMD = "shutdown";
@@ -32,16 +34,26 @@ namespace PowerMgr {
 void DevicePowerAction::Reboot(const std::string& reason)
 {
     std::string rebootCmd;
-    auto ret = PowerExtIntfWrapper::Instance().GetRebootCommand(reason, rebootCmd);
-    if (ret != PowerExtIntfWrapper::ErrCode::ERR_OK) {
+    RebootCmdInfo rebootInfo = {.rebootReason = reason, .rebootCmd = INVALID_CMD};
+    HOOK_EXEC_OPTIONS options {TRAVERSE_STOP_WHEN_ERROR, nullptr, nullptr};
+    HOOK_MGR* hookMgr = GetPowerHookMgr();
+    if (HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_DO_REBOOT),
+        &rebootInfo, &options) == 0) {
+        rebootCmd = rebootInfo.rebootCmd;
+    } else {
         rebootCmd = Updater(reason);
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Reboot command: %{public}s", rebootCmd.c_str());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Reboot reason: %{public}s, command: %{public}s", reason.c_str(), rebootCmd.c_str());
     DoRebootExt(rebootCmd.c_str(), reason.c_str());
 }
 
 void DevicePowerAction::Shutdown(const std::string& reason)
 {
+#ifdef POWER_MANAGER_POWEROFF_CHARGE
+    HOOK_MGR* hookMgr = GetPowerHookMgr();
+    std::string hookContext = reason;
+    HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_DO_SHUTDOWN), &hookContext, nullptr);
+#endif
     POWER_HILOGI(FEATURE_SHUTDOWN, "Shutdown executing");
     DoRebootExt(SHUTDOWN_CMD.c_str(), reason.c_str());
 }
