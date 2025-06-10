@@ -37,6 +37,7 @@ using namespace OHOS;
 using namespace std;
 static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
+static constexpr int NEXT_WAIT_TIME_S = 1;
 
 void PowerSuspendControllerTest::SetUpTestCase(void)
 {
@@ -352,5 +353,49 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest014, TestSize.Lev
     EXPECT_TRUE(tmp.size() != 0);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest014: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest014 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest015
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest015, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest015 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest015: start";
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_service->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_service->IsForceSleeping(), false);
+#endif
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest015: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest015 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest016
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest016, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest016 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest016: start";
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_service->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_service->IsForceSleeping(), false);
+#endif
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest016: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest016 function end!");
 }
 } // namespace

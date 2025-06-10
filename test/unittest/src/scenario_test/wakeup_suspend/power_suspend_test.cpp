@@ -37,6 +37,7 @@ using namespace OHOS;
 using namespace std;
 static constexpr int32_t SLEEP_WAIT_TIME_S = 2;
 static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
+static constexpr int32_t NEXT_WAIT_TIME_S = 1;
 
 namespace {
 /**
@@ -95,5 +96,47 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level1)
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendTest003
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest003, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest003 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.SuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.ForceSuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice(abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest003 function end!");
 }
 } // namespace
