@@ -90,6 +90,7 @@ public:
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual bool IsCollaborationScreenOn() override;
+    virtual bool IsForceSleeping() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") override;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") override;

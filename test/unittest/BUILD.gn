@@ -110,6 +110,10 @@ ohos_unittest("test_power_mgr_client") {
     deps_ex += [ "display_manager:displaymgr" ]
   }
   external_deps = deps_ex
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
 }
 
 ##############################unittest##########################################
@@ -247,6 +251,10 @@ ohos_unittest("test_power_mgr_service") {
 
   if (power_manager_feature_tv_dreaming) {
     defines += [ "POWER_MANAGER_TV_DREAMING" ]
+  }
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
   configs = [
@@ -953,6 +961,10 @@ ohos_unittest("test_power_suspend_controller") {
     "samgr:samgr_proxy",
   ]
   external_deps += deps_ex
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
 }
 
 ohos_unittest("test_power_suspend") {
@@ -990,6 +1002,10 @@ ohos_unittest("test_power_suspend") {
     "samgr:samgr_proxy",
   ]
   external_deps += deps_ex
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
 }
 
 ohos_unittest("test_power_wakeup_controller") {
@@ -1027,6 +1043,10 @@ ohos_unittest("test_power_wakeup_controller") {
     "samgr:samgr_proxy",
   ]
   external_deps += deps_ex
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
 }
 
 ohos_unittest("test_power_wakeup") {

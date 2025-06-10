@@ -511,6 +511,17 @@ int32_t PowerMgrStub::IsScreenOnStub(MessageParcel& data, MessageParcel& reply)
     return ERR_OK;
 }
 
+int32_t PowerMgrStub::IsForceSleepingStub(MessageParcel& reply)
+{
+    bool ret = false;
+    ret = IsForceSleeping();
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
 int32_t PowerMgrStub::RegisterPowerStateCallbackStub(MessageParcel& data)
 {
     sptr<IRemoteObject> obj = data.ReadRemoteObject();

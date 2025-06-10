@@ -920,4 +920,45 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest041 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrServiceNativeTest042
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042 function start!");
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+    g_powerMgrServiceProxy->ForceSuspendDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+#endif
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+#endif
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042 function end!");
+}
 } // namespace
