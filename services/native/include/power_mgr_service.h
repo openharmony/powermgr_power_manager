@@ -166,6 +166,7 @@ public:
 #endif
     bool IsCollaborationState();
     void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
+    bool IsExistAudioStream(pid_t uid);
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();
 #endif

@@ -69,6 +69,7 @@ ohos_fuzztest("PowerModeCallbackFuzzTest") {
     "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
+    "window_manager:libwm_lite",
   ]
   defines = []
 

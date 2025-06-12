@@ -64,6 +64,7 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "googletest:gtest_main",
+  "window_manager:libwm_lite",
 ]
 
 if (has_sensors_sensor_part) {
