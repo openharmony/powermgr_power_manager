@@ -28,6 +28,7 @@
 #include <ipc_skeleton.h>
 #include <securec.h>
 #include "permission.h"
+#include "power_cjson_utils.h"
 #include "power_errors.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
@@ -198,6 +199,11 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         return;
     }
     POWER_HILOGI(COMP_SVC, "the origin ccmJson is: %{public}s", jsonStr.c_str());
+    WakeupParseJsonConfig(updateEnable, jsonStr);
+}
+
+void WakeupController::WakeupParseJsonConfig(bool updateEnable, std::string& jsonStr)
+{
     cJSON* root = cJSON_Parse(jsonStr.c_str());
     if (!root) {
         POWER_HILOGE(COMP_SVC, "json parse error");
@@ -209,13 +215,13 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         return;
     }
     cJSON* touchscreenNode = cJSON_GetObjectItemCaseSensitive(root, "touchscreen");
-    if (!touchscreenNode || !cJSON_IsObject(touchscreenNode)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObject(touchscreenNode)) {
         POWER_HILOGE(COMP_SVC, "this touchscreenNode is empty");
         cJSON_Delete(root);
         return;
     }
     cJSON* enableNode = cJSON_GetObjectItemCaseSensitive(touchscreenNode, "enable");
-    if (!enableNode || !cJSON_IsBool(enableNode)) {
+    if (!PowerMgrJsonUtils::IsValidJsonBool(enableNode)) {
         POWER_HILOGE(COMP_SVC, "the touchscreenNode enable value is invalid");
         cJSON_Delete(root);
         return;
@@ -226,7 +232,7 @@ void WakeupController::ChangeWakeupSourceConfig(bool updateEnable)
         cJSON_Delete(root);
         return;
     }
-    enableNode->valueint = updateEnable ? 1 : 0;
+    cJSON_SetBoolValue(enableNode, updateEnable ? 1 : 0);
     char* jsonUpdatedStr = cJSON_Print(root);
     if (!jsonUpdatedStr) {
         POWER_HILOGI(COMP_SVC, "Failed to print cJSON to string");
@@ -319,6 +325,11 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         POWER_HILOGE(COMP_SVC, "there is no such configuration file available");
         return;
     }
+    PickupWakeupParseJsonConfig(updataEnable, jsonStr);
+}
+
+void WakeupController::PickupWakeupParseJsonConfig(bool updataEnable, std::string& jsonStr)
+{
     POWER_HILOGI(COMP_SVC, "%{public}s(%{public}d)", __func__, updataEnable);
     cJSON* root = cJSON_Parse(jsonStr.c_str());
     if (!root) {
@@ -331,13 +342,13 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         return;
     }
     cJSON* pickupNode = cJSON_GetObjectItemCaseSensitive(root, "pickup");
-    if (!pickupNode || !cJSON_IsObject(pickupNode)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObject(pickupNode)) {
         POWER_HILOGE(COMP_SVC, "this pickNode is empty");
         cJSON_Delete(root);
         return;
     }
     cJSON* enableNode = cJSON_GetObjectItemCaseSensitive(pickupNode, "enable");
-    if (!enableNode || !cJSON_IsBool(enableNode)) {
+    if (!PowerMgrJsonUtils::IsValidJsonBool(enableNode)) {
         POWER_HILOGE(COMP_SVC, "the pickupNode enable value is invalid");
         cJSON_Delete(root);
         return;
@@ -348,7 +359,7 @@ void WakeupController::ChangePickupWakeupSourceConfig(bool updataEnable)
         cJSON_Delete(root);
         return;
     }
-    enableNode->valueint = updataEnable ? 1 : 0;
+    cJSON_SetBoolValue(enableNode, updataEnable ? 1 : 0);
     char* jsonUpdatedStr = cJSON_Print(root);
     if (!jsonUpdatedStr) {
         POWER_HILOGI(COMP_SVC, "Failed to print cJSON to string");
@@ -368,7 +379,11 @@ void WakeupController::ChangeLidWakeupSourceConfig(bool updataEnable)
     std::lock_guard lock(sourceUpdateMutex_);
     std::string jsonStr = SettingHelper::GetSettingWakeupSources();
     POWER_HILOGI(FEATURE_POWER_STATE, "%{public}s", jsonStr.c_str());
+    LidWakeupParseJsonConfig(updataEnable, jsonStr);
+}
 
+void WakeupController::LidWakeupParseJsonConfig(bool updataEnable, std::string& jsonStr)
+{
     cJSON* root = cJSON_Parse(jsonStr.c_str());
     if (!root) {
         POWER_HILOGE(FEATURE_POWER_STATE, "Failed to parse json string");
@@ -380,14 +395,14 @@ void WakeupController::ChangeLidWakeupSourceConfig(bool updataEnable)
         return;
     }
     cJSON* lidNode = cJSON_GetObjectItemCaseSensitive(root, "lid");
-    if (!lidNode || !cJSON_IsObject(lidNode)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObject(lidNode)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "this lidNode is empty or not an object");
         cJSON_Delete(root);
         return;
     }
     bool originEnable = true;
     cJSON* enableNode = cJSON_GetObjectItemCaseSensitive(lidNode, "enable");
-    if (enableNode && cJSON_IsBool(enableNode)) {
+    if (PowerMgrJsonUtils::IsValidJsonBool(enableNode)) {
         originEnable = cJSON_IsTrue(enableNode);
     }
     if (originEnable == updataEnable) {
@@ -396,8 +411,8 @@ void WakeupController::ChangeLidWakeupSourceConfig(bool updataEnable)
         return;
     }
 
-    if (enableNode && cJSON_IsBool(enableNode)) {
-        enableNode->valueint = updataEnable ? 1 : 0;
+    if (PowerMgrJsonUtils::IsValidJsonBool(enableNode)) {
+        cJSON_SetBoolValue(enableNode, updataEnable ? 1 : 0);
     }
     char* jsonUpdatedStr = cJSON_Print(root);
     if (!jsonUpdatedStr) {

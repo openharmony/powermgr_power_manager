@@ -14,6 +14,7 @@
  */
 
 #include <cJSON.h>
+#include "power_cjson_utils.h"
 #include "power_mode_policy.h"
 #include "power_mgr_service.h"
 #include "power_log.h"
@@ -70,26 +71,46 @@ void PowerModePolicy::ComparePowerModePolicy()
 bool PowerModePolicy::InitRecoverMap()
 {
     std::string jsonStr = SettingHelper::ReadPowerModeRecoverMap();
+    if (!ParseRecoverJson(jsonStr)) {
+        POWER_HILOGI(FEATURE_POWER_MODE, "init recover map error");
+        return false;
+    }
+    POWER_HILOGI(FEATURE_POWER_MODE, "init recover map succeed");
+    return true;
+}
 
+bool PowerModePolicy::ParseRecoverJson(std::string& jsonStr)
+{
     cJSON* recoverJson = cJSON_Parse(jsonStr.c_str());
     if (!recoverJson) {
         POWER_HILOGW(FEATURE_POWER_MODE, "parse recover json str error");
         return false;
     }
-    if (!cJSON_IsObject(recoverJson)) {
-        POWER_HILOGW(FEATURE_POWER_MODE, "recover json root is not an object");
+    if (!PowerMgrJsonUtils::IsValidJsonObjectOrJsonArray(recoverJson)) {
+        POWER_HILOGW(FEATURE_POWER_MODE, "recover json root is not object or array , string:%{public}s",
+            jsonStr.c_str());
         cJSON_Delete(recoverJson);
         return false;
     }
     cJSON* item = nullptr;
     cJSON_ArrayForEach(item, recoverJson) {
         const char* keyStr = item->string;
-        if (!keyStr || !cJSON_IsNumber(item)) {
+        if (!keyStr || !PowerMgrJsonUtils::IsValidJsonNumber(item)) {
             continue;
         }
         errno = 0;
-        int32_t key = static_cast<int32_t>(strtol(keyStr, nullptr, KEY_BASE));
+        char* endptr = nullptr;
+        int32_t key = static_cast<int32_t>(strtol(keyStr, &endptr, KEY_BASE));
+        if (endptr == keyStr) {
+            POWER_HILOGW(FEATURE_POWER_MODE, "String have no numbers, string:%{public}s", keyStr);
+            continue;
+        }
         if (errno == ERANGE && (key == INT_MAX || key == INT_MIN)) {
+            POWER_HILOGW(FEATURE_POWER_MODE, "Transit result out of range, string:%{public}s", keyStr);
+            continue;
+        }
+        if (endptr == nullptr || *endptr != '\0') {
+            POWER_HILOGW(FEATURE_POWER_MODE, "String contain non-numeric characters, string:%{public}s", keyStr);
             continue;
         }
         int32_t value = static_cast<int32_t>(item->valueint);
@@ -97,7 +118,6 @@ bool PowerModePolicy::InitRecoverMap()
     }
 
     cJSON_Delete(recoverJson);
-    POWER_HILOGI(FEATURE_POWER_MODE, "init recover map succeed");
     return true;
 }
 
@@ -216,7 +236,9 @@ void PowerModePolicy::SavePowerModeRecoverMap()
 
     for (const auto& pair : recoverMap_) {
         std::string keyStr = std::to_string(pair.first);
-        cJSON_AddNumberToObject(recoverJson, keyStr.c_str(), pair.second);
+        if (cJSON_AddNumberToObject(recoverJson, keyStr.c_str(), pair.second) == nullptr) {
+            POWER_HILOGE(FEATURE_POWER_MODE, "Failed to add %{public}s to recoverJson object", keyStr.c_str());
+        }
     }
 
     char* jsonStr = cJSON_Print(recoverJson);

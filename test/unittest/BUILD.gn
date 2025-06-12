@@ -1309,9 +1309,85 @@ ohos_unittest("test_power_config_parse") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/vibrator:power_vibrator",
   ]
 
-  external_deps = deps_ex
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  external_deps += deps_ex
+
+  if (power_manager_feature_doubleclick) {
+    defines += [ "POWER_DOUBLECLICK_ENABLE" ]
+  }
+
+  if (power_manager_feature_pickup) {
+    defines += [ "POWER_PICKUP_ENABLE" ]
+  }
+}
+
+##############################test_power_config_parse_two.#############################
+ohos_unittest("test_power_config_parse_two") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  sources = [
+    "src/power_config_parse_test_two.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/vibrator:power_vibrator",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  external_deps += deps_ex
+
+  if (power_manager_feature_doubleclick) {
+    defines += [ "POWER_DOUBLECLICK_ENABLE" ]
+  }
+
+  if (power_manager_feature_pickup) {
+    defines += [ "POWER_PICKUP_ENABLE" ]
+  }
 }
 
 group("unittest") {
@@ -1324,6 +1400,7 @@ group("unittest") {
     ":test_mock_peer",
     ":test_mock_proxy",
     ":test_power_config_parse",
+    ":test_power_config_parse_two",
     ":test_power_coordination_lock",
     ":test_power_device_mode",
     ":test_power_getcontroller_mock",

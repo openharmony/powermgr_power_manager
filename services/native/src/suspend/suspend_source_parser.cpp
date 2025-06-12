@@ -21,6 +21,7 @@
 #include <cJSON.h>
 
 #include "config_policy_utils.h"
+#include "power_cjson_utils.h"
 #include "power_log.h"
 #include "setting_helper.h"
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
@@ -158,7 +159,7 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources(const std::str
         parseSources->SetParseErrorFlag(true);
         return parseSources;
     }
-    if (!cJSON_IsObject(root)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObjectOrJsonArray(root)) {
         POWER_HILOGE(FEATURE_SUSPEND, "json root invalid[%{public}s]", jsonStr.c_str());
         parseSources->SetParseErrorFlag(true);
         cJSON_Delete(root);
@@ -199,10 +200,10 @@ bool SuspendSourceParser::ParseSourcesProc(
 
     uint32_t action = 0;
     uint32_t delayMs = 0;
-    if (valueObj && cJSON_IsObject(valueObj)) {
+    if (PowerMgrJsonUtils::IsValidJsonObject(valueObj)) {
         cJSON* actionValue = cJSON_GetObjectItemCaseSensitive(valueObj, SuspendSource::ACTION_KEY);
         cJSON* delayValue = cJSON_GetObjectItemCaseSensitive(valueObj, SuspendSource::DELAY_KEY);
-        if (actionValue && cJSON_IsNumber(actionValue) && delayValue && cJSON_IsNumber(delayValue)) {
+        if (PowerMgrJsonUtils::IsValidJsonNumber(actionValue) && PowerMgrJsonUtils::IsValidJsonNumber(delayValue)) {
             action = static_cast<uint32_t>(actionValue->valueint);
             delayMs = static_cast<uint32_t>(delayValue->valueint);
             if (action >= ILLEGAL_ACTION) {

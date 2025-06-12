@@ -56,9 +56,12 @@ public:
 #endif
     static int32_t SetWakeupDoubleClickSensor(bool enable);
     static void ChangeWakeupSourceConfig(bool updateEnable);
+    static void WakeupParseJsonConfig(bool updateEnable, std::string& jsonStr);
     static void ChangePickupWakeupSourceConfig(bool updataEnable);
+    static void PickupWakeupParseJsonConfig(bool updataEnable, std::string& jsonStr);
     static void PickupConnectMotionConfig(bool databaseSwitchValue);
     static void ChangeLidWakeupSourceConfig(bool updataEnable);
+    static void LidWakeupParseJsonConfig(bool updataEnable, std::string& jsonStr);
     std::shared_ptr<PowerStateMachine> GetStateMachine()
     {
         return stateMachine_;

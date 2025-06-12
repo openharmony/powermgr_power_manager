@@ -49,6 +49,7 @@ public:
     void TriggerAllActions(bool isBoot);
     bool IsValidType(uint32_t type);
     bool InitRecoverMap();
+    bool ParseRecoverJson(std::string& jsonStr);
 
 private:
     std::map<uint32_t, ModeAction> actionMap_;

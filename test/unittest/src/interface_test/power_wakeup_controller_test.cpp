@@ -385,7 +385,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest011, TestSize.Level
         GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: json parse error";
         return;
     }
-    if (!cJSON_IsObject(root)) {
+    if (!cJSON_IsObject(root) || !cJSON_IsArray(root)) {
         GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: root is not object";
         cJSON_Delete(root);
         return;
