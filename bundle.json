@@ -62,6 +62,7 @@
                 "ability_runtime",
                 "access_token",
                 "battery_manager",
+                "cJSON",
                 "common_event_service",
                 "config_policy",
                 "c_utils",
@@ -92,8 +93,7 @@
                 "window_manager",
                 "miscdevice",
                 "bundle_framework",
-                "selinux_adapter",
-                "cJSON"
+                "selinux_adapter"
             ]
         },
         "build": {
