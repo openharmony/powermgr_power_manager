@@ -538,4 +538,28 @@ HWTEST_F (RunningLockTest, RunningLockTest019, TestSize.Level1)
     EXPECT_TRUE(runninglockProxy->DecreaseProxyCnt(pid, uid));
     POWER_HILOGI(LABEL_TEST, "RunningLockTest019 function end!");
 }
+
+/**
+ * @tc.name: RunningLockTest020
+ * @tc.desc: Test UpdateWorkSource function
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F (RunningLockTest, RunningLockTest020, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest020 function start!");
+    auto runninglockProxy = std::make_shared<RunningLockProxy>();
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::shared_ptr<RunningLock> runningLock = powerMgrClient.CreateRunningLock("backgroudAudio.test020",
+        RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    ASSERT_NE(runningLock, nullptr);
+
+    pid_t curUid = 1;
+    runningLock->Lock();
+    EXPECT_TRUE(runningLock->IsUsed());
+    EXPECT_FALSE(runninglockProxy->IsExistAudioStream(curUid));
+    runningLock->UnLock();
+    EXPECT_FALSE(runningLock->IsUsed());
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest020 function end!");
+}
 } // namespace
