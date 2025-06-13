@@ -1214,6 +1214,26 @@ bool PowerMgrService::IsCollaborationScreenOn()
     return isCollaborationScreenOn;
 }
 
+bool PowerMgrService::IsForceSleeping()
+{
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGI(FEATURE_SUSPEND, "IsForceSleeping failed, The application does not have the permission");
+        return false;
+    }
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get suspendController fail");
+        return false;
+    }
+
+    bool isForceSleep = false;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    isForceSleep = suspendController->GetForceSleepingFlag();
+#endif
+    POWER_HILOGD(COMP_SVC, "isForceSleep: %{public}d", isForceSleep);
+    return isForceSleep;
+}
+
 PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion)
 {
     std::lock_guard lock(suspendMutex_);

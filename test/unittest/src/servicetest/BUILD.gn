@@ -94,6 +94,10 @@ ohos_unittest("powermgr_native_test") {
 
   external_deps = [ "image_framework:image_native" ]
   external_deps += deps_ex
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
 }
 
 ##############################native_mock_parcel_test##########################################
