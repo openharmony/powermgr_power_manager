@@ -121,6 +121,11 @@ public:
     bool IsCollaborationScreenOn();
 
     /**
+     * Check whether the device is in force sleep. The result may be true or false, depending on the system state.
+     */
+    bool IsForceSleeping();
+
+    /**
      * Get Power state. The result is PowerState type.
      */
     PowerState GetState();

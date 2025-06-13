@@ -1390,4 +1390,46 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient056, TestSize.Level0)
     runningLock->UnLock();
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient056 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient057
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient057, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.SuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.ForceSuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice(abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057 function end!");
+}
 } // namespace
