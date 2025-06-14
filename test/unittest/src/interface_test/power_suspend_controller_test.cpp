@@ -365,8 +365,25 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest015, TestSize.Lev
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest015 function start!");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest015: start";
+    g_service->WakeupControllerInit();
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_service->IsForceSleeping(), false);
     g_service->SuspendControllerInit();
     g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_service->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_service->IsForceSleeping(), false);
+#endif
+
+    g_service->WakeupControllerInit();
+    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_service->IsForceSleeping(), false);
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     sleep(NEXT_WAIT_TIME_S);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     EXPECT_EQ(g_service->IsForceSleeping(), true);
@@ -387,14 +404,10 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest016, TestSize.Lev
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest016 function start!");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest016: start";
-    g_service->SuspendControllerInit();
-    g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
-    sleep(NEXT_WAIT_TIME_S);
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    EXPECT_EQ(g_service->IsForceSleeping(), true);
-#else
+    std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
+    g_service->suspendController_ = nullptr;
     EXPECT_EQ(g_service->IsForceSleeping(), false);
-#endif
+    g_service->suspendController_ = suspendController;
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest016: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest016 function end!");
 }
