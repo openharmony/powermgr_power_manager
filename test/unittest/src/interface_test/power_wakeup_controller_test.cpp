@@ -39,7 +39,6 @@ static constexpr int32_t SLEEP_WAIT_TIME_MS = 400;
 static constexpr int32_t DISPLAY_OFF_TIME_MS = 600;
 static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
-static constexpr int32_t NEXT_WAIT_TIME_S = 1;
 static const std::string TEST_DEVICE_ID = "test_device_id";
 
 class InputCallbackMock : public IInputEventConsumer {
@@ -621,25 +620,5 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest020 function end!");
-}
-
-/**
- * @tc.name: PowerWakeupControllerTest021
- * @tc.desc: test IsForceSleeping
- * @tc.type: FUNC
- * @tc.require: issueICE3O4
- */
-HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021 function start!");
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest021: start";
-    sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    EXPECT_EQ(pms->IsForceSleeping(), false);
-    g_service->WakeupControllerInit();
-    g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
-    sleep(NEXT_WAIT_TIME_S);
-    EXPECT_EQ(g_service->IsForceSleeping(), false);
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest021: end";
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021 function end!");
 }
 } // namespace

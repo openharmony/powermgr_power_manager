@@ -107,6 +107,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_COLLABORATION_SCREEN_ON):
             ret = IsCollaborationScreenOnStub(reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_FORCE_SLEEPING):
+            ret = IsForceSleepingStub(reply);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND):
             ret = ForceSuspendDeviceStub(data, reply);
             break;
