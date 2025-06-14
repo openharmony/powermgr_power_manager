@@ -1045,10 +1045,6 @@ ohos_unittest("test_power_wakeup_controller") {
     "samgr:samgr_proxy",
   ]
   external_deps += deps_ex
-
-  if (power_manager_feature_force_sleep_broadcast) {
-    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
-  }
 }
 
 ohos_unittest("test_power_wakeup") {
