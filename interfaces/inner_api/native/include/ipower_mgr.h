@@ -67,6 +67,7 @@ public:
     virtual bool IsScreenOn(bool needPrintLog = true) = 0;
     virtual bool IsFoldScreenOn() = 0;
     virtual bool IsCollaborationScreenOn() = 0;
+    virtual bool IsForceSleeping() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true) = 0;
     virtual bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback) = 0;

@@ -976,6 +976,22 @@ bool PowerMgrService::IsCollaborationScreenOn()
     return isCollaborationScreenOn;
 }
 
+bool PowerMgrService::IsForceSleeping()
+{
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get suspendController fail");
+        return false;
+    }
+
+    bool isForceSleeping = false;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    isForceSleeping = suspendController->GetForceSleepingFlag();
+#endif
+    POWER_HILOGD(COMP_SVC, "isForceSleeping: %{public}d", isForceSleeping);
+    return isForceSleeping;
+}
+
 PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);

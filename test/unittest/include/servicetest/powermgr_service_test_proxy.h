@@ -62,6 +62,7 @@ public:
     PowerState GetState();
     bool IsScreenOn(bool needPrintLog = true);
     PowerErrors ForceSuspendDevice(int64_t callTimeMs);
+    bool IsForceSleeping();
     PowerErrors RebootDevice(const std::string& reason);
     PowerErrors RebootDeviceForDeprecated(const std::string& reason);
     PowerErrors ShutDownDevice(const std::string& reason);

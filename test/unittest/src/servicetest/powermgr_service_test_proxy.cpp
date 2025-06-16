@@ -555,6 +555,33 @@ bool PowerMgrServiceTestProxy::IsScreenOn(bool needPrintLog)
     return result;
 }
 
+bool PowerMgrServiceTestProxy::IsForceSleeping()
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_FORCE_SLEEPING), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
+    }
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(COMP_FWK, "Read IsForceSleeping fail");
+    }
+
+    return result;
+}
+
 bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
     RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);

@@ -306,6 +306,16 @@ bool PowerMgrClient::IsCollaborationScreenOn()
     return ret;
 }
 
+bool PowerMgrClient::IsForceSleeping()
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, false);
+    bool ret = false;
+    ret = proxy->IsForceSleeping();
+    POWER_HILOGD(COMP_FWK, "IsForceSleeping=%{public}d, caller pid=%{public}d", ret, getpid());
+    return ret;
+}
+
 PowerState PowerMgrClient::GetState()
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
