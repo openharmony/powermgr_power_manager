@@ -107,6 +107,9 @@ int PowerMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessagePar
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_COLLABORATION_SCREEN_ON):
             ret = IsCollaborationScreenOnStub(reply);
             break;
+        case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_FORCE_SLEEPING):
+            ret = IsForceSleepingStub(reply);
+            break;
         case static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND):
             ret = ForceSuspendDeviceStub(data, reply);
             break;
@@ -500,6 +503,17 @@ int32_t PowerMgrStub::IsScreenOnStub(MessageParcel& data, MessageParcel& reply)
     bool needPrintLog = true;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Bool, needPrintLog, E_READ_PARCEL_ERROR);
     ret = IsScreenOn(needPrintLog);
+    if (!reply.WriteBool(ret)) {
+        POWER_HILOGE(COMP_FWK, "WriteBool fail");
+        return E_WRITE_PARCEL_ERROR;
+    }
+    return ERR_OK;
+}
+
+int32_t PowerMgrStub::IsForceSleepingStub(MessageParcel& reply)
+{
+    bool ret = false;
+    ret = IsForceSleeping();
     if (!reply.WriteBool(ret)) {
         POWER_HILOGE(COMP_FWK, "WriteBool fail");
         return E_WRITE_PARCEL_ERROR;

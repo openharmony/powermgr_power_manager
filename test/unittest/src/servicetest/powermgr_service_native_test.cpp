@@ -873,37 +873,78 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level
 
 /**
  * @tc.name: PowerMgrServiceNativeTest042
- * @tc.desc: test WakeupDevice
+ * @tc.desc: test IsForceSleeping
  * @tc.type: FUNC
- * @tc.require: #I9G5XH
+ * @tc.require: issueICE3O4
  */
-HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level0)
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level2)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is start");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042 function start!");
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
-    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
 
-    g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING);
-    EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
-    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest042::fun is end");
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+    g_powerMgrServiceProxy->ForceSuspendDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+#endif
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), true);
+#else
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+#endif
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount());
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest042 function end!");
 }
 
 /**
  * @tc.name: PowerMgrServiceNativeTest043
  * @tc.desc: test WakeupDevice
  * @tc.type: FUNC
- * @tc.require: #I9O7I2
+ * @tc.require: #I9G5XH
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest043, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest043::fun is start");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest043::fun is start");
+    g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
+
+    g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING);
+    EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
+    EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
+    POWER_HILOGD(LABEL_TEST, "PowerMgrServiceNativeTest043::fun is end");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNativeTest044
+ * @tc.desc: test WakeupDevice
+ * @tc.type: FUNC
+ * @tc.require: #I9O7I2
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest044, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest044::fun is start");
     g_powerMgrServiceProxy->SuspendDevice(GetTickCount());
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), false);
 
     g_powerMgrServiceProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_PEN);
     EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::AWAKE);
     EXPECT_EQ(g_powerMgrServiceProxy->IsScreenOn(), true);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest043::fun is end");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest044::fun is end");
 }
 } // namespace

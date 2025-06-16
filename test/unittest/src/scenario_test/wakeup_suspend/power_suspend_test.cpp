@@ -27,6 +27,7 @@
 #include <securec.h>
 
 #include "power_mgr_service.h"
+#include "power_mgr_client.h"
 #include "power_state_callback_stub.h"
 #include "power_state_machine.h"
 #include "setting_helper.h"
@@ -39,6 +40,7 @@ static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
 static constexpr size_t WAKEUP_WAIT_TIME = 500;
 static constexpr size_t USECPERMSEC = 1000;
+static constexpr int32_t NEXT_WAIT_TIME_S = 1;
 
 void PowerSuspendTest::SetUpTestCase(void)
 {
@@ -110,5 +112,47 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level0)
     sleep(2);
     EXPECT_FALSE(g_service->IsScreenOn());
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002: end");
+}
+
+/**
+ * @tc.name: PowerSuspendTest003
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerSuspendTest, PowerSuspendTest003, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest003 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.SuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.ForceSuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice(abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendTest003 function end!");
 }
 } // namespace
