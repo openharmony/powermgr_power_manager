@@ -69,6 +69,7 @@ public:
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual bool IsCollaborationScreenOn() override;
+    virtual bool IsForceSleeping() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;

@@ -1306,48 +1306,90 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient056, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrClient057
- * @tc.desc: test IsCollaborationScreenOn
+ * @tc.desc: test IsForceSleeping
  * @tc.type: FUNC
- * @tc.require: #IAN4ZA
+ * @tc.require: issueICE3O4
  */
-HWTEST_F(PowerMgrClientTest, PowerMgrClient057, TestSize.Level0)
+HWTEST_F(PowerMgrClientTest, PowerMgrClient057, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057::fun is start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
     powerMgrClient.WakeupDevice();
-
-    // Suspend Device before test
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
     powerMgrClient.SuspendDevice();
-    EXPECT_EQ(powerMgrClient.IsCollaborationScreenOn(), false) << "PowerMgrClient057: Screen is Off";
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
 
     powerMgrClient.WakeupDevice();
-    EXPECT_EQ(powerMgrClient.IsCollaborationScreenOn(), true) << "PowerMgrClient057: Screen is On";
-
-    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057::fun is end!");
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.ForceSuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice(abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient057 function end!");
 }
 
 /**
  * @tc.name: PowerMgrClient058
+ * @tc.desc: test IsCollaborationScreenOn
+ * @tc.type: FUNC
+ * @tc.require: #IAN4ZA
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient058, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient058::fun is start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.WakeupDevice();
+
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+    EXPECT_EQ(powerMgrClient.IsCollaborationScreenOn(), false) << "PowerMgrClient058: Screen is Off";
+
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsCollaborationScreenOn(), true) << "PowerMgrClient058: Screen is On";
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient058::fun is end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient059
  * @tc.desc: test WakeupDevice
  * @tc.type: FUNC
  * @tc.require: #IAXR0O
  */
-HWTEST_F(PowerMgrClientTest, PowerMgrClient058, TestSize.Level0)
+HWTEST_F(PowerMgrClientTest, PowerMgrClient059, TestSize.Level0)
 {
-    POWER_HILOGD(LABEL_TEST, "PowerMgrClient058::fun is start!");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient059::fun is start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 
     powerMgrClient.WakeupDevice();
     // Suspend Device before test
     powerMgrClient.SuspendDevice();
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient058: Prepare Fail, Screen is On.";
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient059: Prepare Fail, Screen is On.";
 
     powerMgrClient.WakeupDeviceAsync(WakeupDeviceType::WAKEUP_DEVICE_PEN);
     sleep(1);
     EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
-    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient058: Wakeup Device Async Fail, Screen is Off";
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient059: Wakeup Device Async Fail, Screen is Off";
 
-    POWER_HILOGD(LABEL_TEST, "PowerMgrClient058::fun is end!");
+    POWER_HILOGD(LABEL_TEST, "PowerMgrClient059::fun is end!");
 }
 } // namespace

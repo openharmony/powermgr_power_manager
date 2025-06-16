@@ -42,6 +42,7 @@ private:
     int32_t IsScreenOnStub(MessageParcel& data, MessageParcel& reply);
     int32_t IsFoldScreenOnStub(MessageParcel& reply);
     int32_t IsCollaborationScreenOnStub(MessageParcel& reply);
+    int32_t IsForceSleepingStub(MessageParcel& reply);
     int32_t ForceSuspendDeviceStub(MessageParcel& data, MessageParcel& reply);
     int32_t ProxyRunningLockStub(MessageParcel& data, MessageParcel& reply);
     int32_t ProxyRunningLocksStub(MessageParcel& data, MessageParcel& reply);
