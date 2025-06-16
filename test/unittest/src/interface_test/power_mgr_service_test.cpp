@@ -53,6 +53,8 @@ void PowerMgrServiceTest::TearDown(void)
 namespace {
 constexpr const int64_t STATE_WAIT_TIME_MS = 300;
 constexpr const int64_t STATE_OFF_WAIT_TIME_MS = 2000;
+constexpr const int64_t NEXT_WAIT_TIME_S = 1;
+
 /**
  * @tc.name: PowerMgrService01
  * @tc.desc: Test PowerMgrService service ready.
@@ -583,5 +585,47 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
 
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 end.");
+}
+
+/**
+ * @tc.name: PowerMgrServiceTest031
+ * @tc.desc: test IsForceSleeping
+ * @tc.type: FUNC
+ * @tc.require: issueICE3O4
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest031, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest031 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
+    WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.SuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    powerMgrClient.ForceSuspendDevice();
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice(abnormaltype);
+    sleep(NEXT_WAIT_TIME_S);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), true);
+#else
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+#endif
+    powerMgrClient.WakeupDevice();
+    sleep(NEXT_WAIT_TIME_S);
+    EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest031 function end!");
 }
 }
