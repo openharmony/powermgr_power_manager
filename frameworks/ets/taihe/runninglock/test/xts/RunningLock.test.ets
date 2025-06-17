@@ -90,6 +90,21 @@ export default function RunningLockTest() {
           done();
         }
       })
+    it("RunningLockTest0400", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
+      async (done: () => void): Promise<void> => {
+        hilog.info(domain, tag, '%{public}s', 'RunningLockTest0400 start');
+        let TAG = 'RunningLockTest0400';
+        try {
+          let runningLockType = runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL;
+          let isSupported = runningLock.isSupported(runningLockType);
+          expect(isSupported).assertTrue();
+          console.info(TAG + ' end');
+          done();
+        } catch (e) {
+          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+          done();
+        }
+      })
   })
   hilog.info(domain, tag, '%{public}s', 'RunningLockTest end');
 }

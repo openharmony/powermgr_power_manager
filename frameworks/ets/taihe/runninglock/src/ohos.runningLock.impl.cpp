@@ -93,11 +93,21 @@ ohos::runningLock::RunningLock CreateSync(string_view name, ohos::runningLock::R
     OHOS::PowerMgr::RunningLockType tp = static_cast<OHOS::PowerMgr::RunningLockType>(type.get_value());
     runLock = PowerMgrClient::GetInstance().CreateRunningLock(std::string(name), tp);
     PowerErrors code = PowerMgrClient::GetInstance().GetError();
-    if (code != PowerErrors::ERR_OK) {
+    if (code != PowerErrors::ERR_OK && errorTable.find(code) != errorTable.end()) {
         taihe::set_business_error(static_cast<int32_t>(code), errorTable[code]);
     }
     return make_holder<RunningLockImpl, ohos::runningLock::RunningLock>(runLock);
 }
+
+bool IsSupported(ohos::runningLock::RunningLockType type)
+{
+    OHOS::PowerMgr::RunningLockType tp = static_cast<OHOS::PowerMgr::RunningLockType>(type.get_value());
+    return tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+}
 }  // namespace
 
+// Since these macros are auto-generate, lint will cause false positive
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_CreateSync(CreateSync);
+TH_EXPORT_CPP_API_IsSupported(IsSupported);
+// NOLINTEND
