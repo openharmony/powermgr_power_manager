@@ -30,3 +30,5 @@ interface RunningLock {
 @gen_async("create")
 @gen_promise("create")
 function CreateSync(name: String, type: RunningLockType): RunningLock;
+
+function IsSupported(type: RunningLockType): bool;
