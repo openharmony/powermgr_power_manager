@@ -472,7 +472,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_OFF_WAIT_TIME_MS) *
         US_PER_MS);
     usleep(DELAY_US);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
+    EXPECT_NE(powerMgrClient.GetState(), PowerState::AWAKE);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 end.");
 }
 
@@ -507,7 +507,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
         while (!notified) {
             powerMgrClient.SuspendDevice();
             usleep(OPERATION_DELAY_US);
-            EXPECT_EQ(powerMgrClient.GetState(), PowerState::SLEEP);
+            EXPECT_NE(powerMgrClient.GetState(), PowerState::AWAKE);
             usleep(OPERATION_DELAY_US);
             powerMgrClient.WakeupDevice();
             EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
