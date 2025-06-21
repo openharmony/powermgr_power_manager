@@ -22,10 +22,11 @@ copy_taihe_idl("copy_power_manager_runninglock") {
 
 subsystem_name = "powermgr"
 part_name = "power_manager"
-taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
+taihe_generated_file_path_runningLock =
+    "$taihe_file_path/out/$subsystem_name/$part_name/runningLock"
 
 ohos_taihe("run_taihe") {
-  taihe_generated_file_path = "$taihe_generated_file_path"
+  taihe_generated_file_path = "${taihe_generated_file_path_runningLock}"
   deps = [ ":copy_power_manager_runninglock" ]
   outputs = [
     "$taihe_generated_file_path/src/ohos.runningLock.ani.cpp",
@@ -40,7 +41,7 @@ taihe_shared_library("power_manager_runninglock_taihe_native") {
     cfi_cross_dso = true
     debug = false
   }
-  taihe_generated_file_path = "$taihe_generated_file_path"
+  taihe_generated_file_path = "${taihe_generated_file_path_runningLock}"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
@@ -61,8 +62,8 @@ taihe_shared_library("power_manager_runninglock_taihe_native") {
 }
 
 generate_static_abc("runningLock_abc") {
-  base_url = "$taihe_generated_file_path"
-  files = [ "$taihe_generated_file_path/@ohos.runningLock.ets" ]
+  base_url = "${taihe_generated_file_path_runningLock}"
+  files = [ "${taihe_generated_file_path_runningLock}/@ohos.runningLock.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/runningLock_abc.abc"
   dependencies = [ ":run_taihe" ]
