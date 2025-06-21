@@ -111,6 +111,9 @@ void PowerMgrService::OnStart()
         POWER_HILOGW(COMP_SVC, "OnStart is ready, nothing to do");
         return;
     }
+#ifndef FUZZ_TEST
+    g_moduleMgr = ModuleMgrScan(POWER_PLUGIN_AUTORUN_PATH);
+#endif
     if (!Init()) {
         POWER_HILOGE(COMP_SVC, "powermgr service init fail");
         return;
@@ -129,7 +132,6 @@ void PowerMgrService::OnStart()
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     PowerExtIntfWrapper::Instance().Init();
-    g_moduleMgr = ModuleMgrScan(POWER_PLUGIN_AUTORUN_PATH);
 #endif
     
     if (!Publish(DelayedSpSingleton<PowerMgrService>::GetInstance())) {

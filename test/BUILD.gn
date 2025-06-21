@@ -39,6 +39,7 @@ group("unittest") {
     "apitest/inner_api/hookmgr:apitest",
     "apitest/inner_api/shutdown:unittest",
     "unittest:unittest",
+    "unittest:unittest_ex",
     "unittest/src/servicetest:unittest",
   ]
 }
