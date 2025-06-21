@@ -365,7 +365,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock010, TestSize.Level2)
 
     pms->Lock(token);
     EXPECT_EQ(pms->IsUsed(token), true);
-    pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
+    pms->MockProximity(IProximityController::PROXIMITY_CLOSE);
     pms->UnLock(token);
 
 #endif
@@ -397,7 +397,7 @@ HWTEST_F(PowerMgrSTMockTest, PowerMgrMock011, TestSize.Level2)
     pms->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("test"));
     EXPECT_EQ(pms->IsUsed(token), true);
     EXPECT_EQ(PowerState::AWAKE, pms->GetState());
-    pms->MockProximity(RunningLockMgr::PROXIMITY_CLOSE);
+    pms->MockProximity(IProximityController::PROXIMITY_CLOSE);
     pms->UnLock(token);
 
 #endif

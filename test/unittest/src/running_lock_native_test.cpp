@@ -180,8 +180,8 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level1)
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_AWAY);
-    runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_CLOSE);
+    runningLockMgr->SetProximity(IProximityController::PROXIMITY_AWAY);
+    runningLockMgr->SetProximity(IProximityController::PROXIMITY_CLOSE);
     runningLockMgr->SetProximity(MAXTYPE);
 
     RunningLockParam runningLockParam {0,
@@ -189,10 +189,10 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative004, TestSize.Level1)
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
     runningLockMgr->Lock(token);
-    runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_AWAY);
-    runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_CLOSE);
-    runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_CLOSE);
-    runningLockMgr->SetProximity(RunningLockMgr::PROXIMITY_AWAY);
+    runningLockMgr->SetProximity(IProximityController::PROXIMITY_AWAY);
+    runningLockMgr->SetProximity(IProximityController::PROXIMITY_CLOSE);
+    runningLockMgr->SetProximity(IProximityController::PROXIMITY_CLOSE);
+    runningLockMgr->SetProximity(IProximityController::PROXIMITY_AWAY);
     runningLockMgr->UnLock(token);
 
     RunningLockParam runningLockParam2 {0,

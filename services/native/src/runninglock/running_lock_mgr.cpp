@@ -31,6 +31,7 @@
 #include "power_mgr_service.h"
 #include "power_utils.h"
 #include "system_suspend_controller.h"
+#include "power_hookmgr.h"
 
 using namespace std;
 
@@ -139,38 +140,50 @@ void RunningLockMgr::InitLocksTypeBackground()
 }
 
 #ifdef HAS_SENSORS_SENSOR_PART
-void RunningLockMgr::ProximityLockOn()
+bool RunningLockMgr::InitProximityController()
 {
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
+    if (proximityController_ != nullptr) {
+        return true;
     }
-    auto stateMachine = pms->GetPowerStateMachine();
-    auto suspendController = pms->GetSuspendController();
-    if (stateMachine == nullptr || suspendController == nullptr) {
-        return;
-    }
-
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
-    proximityController_.Enable();
-    if (proximityController_.IsClose()) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] INACTIVE when proximity is closed");
-        bool ret = stateMachine->SetState(PowerState::INACTIVE,
-            StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
-        if (ret) {
-            suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-                static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+#ifdef POWER_MANAGER_INIT_PROXIMITY_CONTROLLER
+    auto action = [](uint32_t status) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+            return;
         }
+        auto runningLock = pms->GetRunningLockMgr();
+        if (runningLock == nullptr) {
+            POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr");
+            return;
+        }
+        if (status == IProximityController::PROXIMITY_CLOSE) {
+            runningLock->HandleProximityCloseEvent();
+        } else if (status == IProximityController::PROXIMITY_AWAY) {
+            runningLock->HandleProximityAwayEvent();
+        }
+    };
+    HOOK_MGR* hookMgr = GetPowerHookMgr();
+    ProximityControllerContext context = {.action = action};
+    HookMgrExecute(
+        hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PROXIMITY_CONTROLLER_INIT), &context, nullptr);
+    if (context.controllerPtr != nullptr) {
+        proximityController_ = context.controllerPtr;
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "InitProximityController with hook");
     } else {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] AWAKE when proximity is away");
-        PreprocessBeforeAwake();
-        stateMachine->SetState(PowerState::AWAKE,
-            StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
+        proximityController_ = std::make_shared<ProximityController>();
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "InitProximityController without hook");
     }
+#else
+    proximityController_ = std::make_shared<ProximityController>();
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "InitProximityController Done");
+#endif
+    return true;
 }
 
 void RunningLockMgr::InitLocksTypeProximity()
 {
+    InitProximityController();
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL,
             [this](bool active, [[maybe_unused]] RunningLockParam runningLockParam) -> int32_t {
@@ -189,12 +202,12 @@ void RunningLockMgr::InitLocksTypeProximity()
             };
             if (active) {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL active");
-                proximityController_.Enable();
+                proximityController_->Enable();
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
                 FFRTUtils::SubmitTask(task);
-                proximityController_.Disable();
-                proximityController_.Clear();
+                proximityController_->Disable();
+                proximityController_->Clear();
             }
             return RUNNINGLOCK_SUCCESS;
         })
@@ -736,7 +749,7 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
     }
     runninglockProxy_->Clear();
 #ifdef HAS_SENSORS_SENSOR_PART
-    proximityController_.Clear();
+    proximityController_->Clear();
 #endif
     std::shared_ptr<IRunningLockAction> mock(mockAction);
     runningLockAction_ = mock;
@@ -790,9 +803,9 @@ void RunningLockMgr::DumpInfo(std::string& result)
     result.append("Peripherals Info: \n")
             .append("  Proximity: ")
             .append("Enabled=")
-            .append(ToString(proximityController_.IsEnabled()))
+            .append(ToString(proximityController_->IsEnabled()))
             .append(" Status=")
-            .append(ToString(proximityController_.GetStatus()))
+            .append(ToString(proximityController_->GetStatus()))
             .append("\n");
 #endif
 }
@@ -866,38 +879,76 @@ void RunningLockMgr::ProximityController::RecordSensorCallback(SensorEvent *even
         return;
     }
     auto runningLock = pms->GetRunningLockMgr();
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr");
+        return;
+    }
     ProximityData* data = reinterpret_cast<ProximityData*>(event->data);
     int32_t distance = static_cast<int32_t>(data->distance);
 
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "SensorD=%{public}d", distance);
     if (distance == PROXIMITY_CLOSE_SCALAR) {
-        runningLock->SetProximity(PROXIMITY_CLOSE);
+        runningLock->SetProximity(IProximityController::PROXIMITY_CLOSE);
     } else if (distance == PROXIMITY_AWAY_SCALAR) {
-        runningLock->SetProximity(PROXIMITY_AWAY);
+        runningLock->SetProximity(IProximityController::PROXIMITY_AWAY);
     }
 }
 
 void RunningLockMgr::ProximityController::OnClose()
 {
-    if (!enabled_ || IsClose()) {
+    if (!IsEnabled() || IsClose()) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or closed already");
         return;
     }
+    SetClose(true);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is closed");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+        return;
+    }
+    auto runningLock = pms->GetRunningLockMgr();
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr");
+        return;
+    }
+    runningLock->HandleProximityCloseEvent();
+}
+
+void RunningLockMgr::ProximityController::OnAway()
+{
+    if (!IsEnabled() || !IsClose()) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or away already");
+        return;
+    }
+    SetClose(false);
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is away");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+        return;
+    }
+    auto runningLock = pms->GetRunningLockMgr();
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr");
+        return;
+    }
+    runningLock->HandleProximityAwayEvent();
+}
+
+void RunningLockMgr::HandleProximityCloseEvent()
+{
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
         return;
     }
     auto stateMachine = pms->GetPowerStateMachine();
-    auto suspendController = pms->GetSuspendController();
-    if (stateMachine == nullptr || suspendController == nullptr) {
+    if (stateMachine == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
-    isClose_ = true;
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is closed");
-    auto runningLock = pms->GetRunningLockMgr();
-    if (runningLock->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
+    if (GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
         uint32_t delayTime = FOREGROUND_INCALL_DELAY_TIME_MS;
         if (!PowerUtils::IsForegroundApplication(INCALL_APP_BUNDLE_NAME)) {
@@ -910,12 +961,8 @@ void RunningLockMgr::ProximityController::OnClose()
     }
 }
 
-void RunningLockMgr::ProximityController::OnAway()
+void RunningLockMgr::HandleProximityAwayEvent()
 {
-    if (!enabled_ || !IsClose()) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "PROXIMITY is disabled or away already");
-        return;
-    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
@@ -926,11 +973,8 @@ void RunningLockMgr::ProximityController::OnAway()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "state machine is nullptr");
         return;
     }
-    isClose_ = false;
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "PROXIMITY is away");
     auto runningLock = pms->GetRunningLockMgr();
-    if (runningLock->GetValidRunningLockNum(
-        RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
+    if (GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to AWAKE when holding PROXIMITY LOCK");
         runningLock->PreprocessBeforeAwake();
         stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
@@ -942,11 +986,11 @@ void RunningLockMgr::ProximityController::OnAway()
 void RunningLockMgr::SetProximity(uint32_t status)
 {
     switch (status) {
-        case PROXIMITY_CLOSE:
-            proximityController_.OnClose();
+        case IProximityController::PROXIMITY_CLOSE:
+            proximityController_->OnClose();
             break;
-        case PROXIMITY_AWAY:
-            proximityController_.OnAway();
+        case IProximityController::PROXIMITY_AWAY:
+            proximityController_->OnAway();
             break;
         default:
             break;
@@ -960,7 +1004,7 @@ bool RunningLockMgr::IsExistAudioStream(pid_t uid)
 
 bool RunningLockMgr::IsProximityClose()
 {
-    return proximityController_.IsClose();
+    return proximityController_->IsClose();
 }
 #endif
 

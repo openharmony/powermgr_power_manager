@@ -20,6 +20,7 @@
 #include <string>
 #include <hookmgr.h>
 #include "modulemgr.h"
+#include "iproximity_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -29,12 +30,18 @@ enum class PowerHookStage : int32_t {
     POWER_POST_SWITCH_ACCOUNT,
     POWER_PRE_DO_REBOOT,
     POWER_PRE_DO_SHUTDOWN,
+    POWER_PROXIMITY_CONTROLLER_INIT,
     POWER_HOOK_STAGE_MAX = 1000,
 };
 
 struct RebootCmdInfo {
     std::string rebootReason;
     std::string rebootCmd;
+};
+
+struct ProximityControllerContext {
+    std::shared_ptr<IProximityController> controllerPtr {nullptr};
+    std::function<void(uint32_t)> action {nullptr};
 };
 
 HOOK_MGR* GetPowerHookMgr();

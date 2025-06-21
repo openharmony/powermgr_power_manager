@@ -1,0 +1,128 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../powermgr_test.gni")
+
+###############################################################################
+
+config("module_mock_private_config") {
+  include_dirs = [
+    "${powermgr_test_path}/unittest/include/mock",
+    "${powermgr_service_path}/native/include",
+    "${powermgr_service_path}/native/src/",
+    "${powermgr_service_path}/native/src/actions/",
+    "${powermgr_service_path}/native/src/actions/default",
+    "${powermgr_service_path}/native/src/hibernate",
+    "${powermgr_service_path}/native/src/proximity_sensor_controller",
+    "${powermgr_service_path}/native/src/runninglock",
+    "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_service_path}/native/src/suspend",
+    "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/screenoffpre",
+  ]
+}
+
+deps_ex = [
+  "ability_base:base",
+  "ability_base:want",
+  "ability_runtime:ability_manager",
+  "cJSON:cjson",
+  "c_utils:utils",
+  "common_event_service:cesfwk_innerkits",
+  "config_policy:configpolicy_util",
+  "drivers_interface_power:libpower_proxy_1.2",
+  "drivers_interface_power:libpower_proxy_1.3",
+  "ffrt:libffrt",
+  "googletest:gmock_main",
+  "googletest:gtest_main",
+  "hdf_core:libhdi",
+  "hdf_core:libpub_utils",
+  "hilog:libhilog",
+  "input:libmmi-client",
+  "ipc:ipc_core",
+  "libxml2:libxml2",
+  "power_manager:power_ffrt",
+  "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
+  "window_manager:libdm_lite",
+  "window_manager:libwm_lite",
+]
+
+if (has_sensors_sensor_part) {
+  deps_ex += [ "sensor:sensor_interface_native" ]
+}
+
+if (has_hiviewdfx_hisysevent_part) {
+  deps_ex += [ "hisysevent:libhisysevent" ]
+}
+
+if (has_hiviewdfx_hitrace_part) {
+  deps_ex += [ "hitrace:hitrace_meter" ]
+}
+
+##############################proximity_running_lock_test##########################################
+
+ohos_unittest("test_proximity_running_lock_abnormal") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${powermgr_service_path}/native/src/runninglock/running_lock_mgr.cpp",
+    "running_lock_mgr_abnormal_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/hookmgr:power_hookmgr",
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_inner_api}:powermgr_client",
+  ]
+
+  if (has_display_manager_part) {
+    deps_ex += [ "display_manager:displaymgr" ]
+  }
+  external_deps = deps_ex
+}
+
+ohos_unittest("test_proximity_running_lock") {
+  module_out_path = module_output_path
+
+  sources = [
+    "proximity_controller_base_test.cpp",
+    "proximity_running_lock_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/hookmgr:power_hookmgr",
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_inner_api}:powermgr_client",
+  ]
+
+  if (has_display_manager_part) {
+    deps_ex += [ "display_manager:displaymgr" ]
+  }
+  external_deps = deps_ex
+}

@@ -17,6 +17,7 @@ config("public_config") {
   include_dirs = [
     "include",
     "../native/include",
+    "${powermgr_inner_api}/native/include",
   ]
 }
 
