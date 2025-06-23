@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef POWERMGR_SERVICES_ASYNC_REPLY_H
-#define POWERMGR_SERVICES_ASYNC_REPLY_H
+#ifndef POWERMGR_SERVICES_ASYNC_REPLY_PROXY_H
+#define POWERMGR_SERVICES_ASYNC_REPLY_PROXY_H
 
-#include <mutex>
-#include <condition_variable>
-#include <nocopyable.h>
-#include "iremote_broker.h"
+#include <iremote_proxy.h>
+#include "power_mgr_async_reply.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class IPowerMgrAsync : public IRemoteBroker {
+
+class PowerMgrProxyAsync : public IRemoteProxy<IPowerMgrAsync> {
 public:
-    enum PowerInterfaceId {
-        SEND_ASYNC_REPLY = 0,
-    };
-    virtual void SendAsyncReply(int reply) = 0;
+    explicit PowerMgrProxyAsync(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IPowerMgrAsync>(impl) {}
+    ~PowerMgrProxyAsync() = default;
+    DISALLOW_COPY_AND_MOVE(PowerMgrProxyAsync);
 
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgrAsync");
+    void SendAsyncReply(int reply) override;
+private:
+    static inline BrokerDelegator<PowerMgrProxyAsync> delegator_;
 };
-
 } // namespace PowerMgr
 } // namespace OHOS
-#endif // POWERMGR_SERVICES_ASYNC_REPLY_H
+#endif // POWERMGR_SERVICES_ASYNC_REPLY_PROXY_H

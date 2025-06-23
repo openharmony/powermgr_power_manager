@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
 {
     uint32_t readType;
@@ -63,6 +64,39 @@ bool RunningLockInfo::Marshalling(Parcel& parcel) const
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(pid), false);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(uid), false);
     return true;
+}
+
+bool VectorPair::Marshalling(Parcel& parcel) const
+{
+    size_t size = processInfos_.size();
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, size, false);
+    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "size exceed limit, size=%{public}zu", size);
+        return false;
+    }
+    for (size_t i = 0; i < size; ++i) {
+        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, processInfos_[i].first, false);
+        RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, processInfos_[i].second, false);
+    }
+    return true;
+}
+
+VectorPair* VectorPair::Unmarshalling(Parcel& parcel)
+{
+    auto vectorPairPtr = std::make_unique<VectorPair>();
+
+    int32_t size {0};
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Int32, size, nullptr);
+    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGW(COMP_FWK, "size exceed limit, size=%{public}d", size);
+        return nullptr;
+    }
+    vectorPairPtr->processInfos_.resize(size);
+    for (int i = 0; i < size; ++i) {
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Int32, vectorPairPtr->processInfos_[i].first, nullptr);
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Int32, vectorPairPtr->processInfos_[i].second, nullptr);
+    }
+    return vectorPairPtr.release();
 }
 } // namespace PowerMgr
 } // namespace OHOS

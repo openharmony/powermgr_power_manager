@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "getsetdevicemode_fuzzer"
 
 #include "power_fuzzer.h"
-#include "power_mgr_ipc_interface_code.h"
+#include "ipower_mgr.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -30,7 +30,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
-    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(PowerMgrInterfaceCode::SETMODE_DEVICE), data, size);
-    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(PowerMgrInterfaceCode::GETMODE_DEVICE), data, size);
+    g_serviceTest.TestPowerServiceStub(
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SET_DEVICE_MODE_IPC), data, size);
+    g_serviceTest.TestPowerServiceStub(
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_GET_DEVICE_MODE_IPC), data, size);
     return 0;
 }
