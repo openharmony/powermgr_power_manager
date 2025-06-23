@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "syncsleepcallback_fuzzer"
 
 #include "power_fuzzer.h"
-#include "power_mgr_ipc_interface_code.h"
+#include "ipower_mgr.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -31,8 +31,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(PowerMgrInterfaceCode::REG_SYNC_SLEEP_CALLBACK), data, size);
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_SYNC_SLEEP_CALLBACK_IPC), data, size);
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(PowerMgrInterfaceCode::UNREG_SYNC_SLEEP_CALLBACK), data, size);
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_SYNC_SLEEP_CALLBACK_IPC), data, size);
     return 0;
 }

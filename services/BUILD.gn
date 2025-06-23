@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("../powermgr.gni")
 
 config("powermgr_public_config") {
@@ -18,6 +19,10 @@ config("powermgr_public_config") {
     "native/include",
     "zidl/include",
     "${powermgr_inner_api}/native/include",
+    "${powermgr_inner_api}/native/include/hibernate",
+    "${powermgr_inner_api}/native/include/shutdown",
+    "${powermgr_inner_api}/native/include/suspend",
+    "${target_gen_dir}",
   ]
 }
 
@@ -40,6 +45,86 @@ config("powermgr_private_config") {
   }
 }
 
+idl_gen_interface("powermgr_interface") {
+  sources = [ "IPowerMgr.idl" ]
+
+  log_domainid = "0xD002902"
+  log_tag = "PowerSvc"
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
+}
+
+ohos_source_set("powermgr_proxy") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_values = get_target_outputs(":powermgr_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    "${powermgr_utils_path}:coverage_flags",
+    ":zidl_private_config",
+  ]
+
+  public_configs = [ ":powermgr_public_config" ]
+
+  deps = [ ":powermgr_interface" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_single",
+  ]
+
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
+}
+
+ohos_source_set("powermgr_stub") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_values = get_target_outputs(":powermgr_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  sources += [
+    "zidl/src/power_mgr_async_reply.cpp",
+    "zidl/src/power_mode_callback_stub.cpp",
+    "zidl/src/power_runninglock_callback_stub.cpp",
+    "zidl/src/power_state_callback_stub.cpp",
+    "zidl/src/screen_off_pre_callback_stub.cpp",
+    "zidl/src/sync_sleep_callback_stub.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    "${powermgr_utils_path}:coverage_flags",
+    ":zidl_private_config",
+  ]
+
+  public_configs = [ ":powermgr_public_config" ]
+
+  deps = [
+    ":powermgr_interface",
+    "${powermgr_inner_api}:powermgr_client",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_single",
+  ]
+
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
+}
+
 ohos_shared_library("powermgrservice") {
   sanitize = {
     cfi = true
@@ -54,6 +139,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mgr_factory.cpp",
     "native/src/power_mgr_notify.cpp",
     "native/src/power_mgr_service.cpp",
+    "native/src/power_mgr_service_ipc_adapter.cpp",
     "native/src/power_mode_module.cpp",
     "native/src/power_mode_policy.cpp",
     "native/src/power_save_mode.cpp",
@@ -266,39 +352,6 @@ ohos_shared_library("powermgrservice") {
 
 config("zidl_private_config") {
   include_dirs = [ "zidl/src/shutdown" ]
-}
-
-ohos_shared_library("powermgr_stub") {
-  sources = [
-    "zidl/src/power_mgr_async_reply.cpp",
-    "zidl/src/power_mgr_stub.cpp",
-    "zidl/src/power_mode_callback_stub.cpp",
-    "zidl/src/power_runninglock_callback_stub.cpp",
-    "zidl/src/power_state_callback_stub.cpp",
-    "zidl/src/screen_off_pre_callback_stub.cpp",
-    "zidl/src/shutdown/shutdown_stub_delegator.cpp",
-    "zidl/src/sync_sleep_callback_stub.cpp",
-  ]
-
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    "${powermgr_utils_path}:coverage_flags",
-    ":zidl_private_config",
-  ]
-
-  public_configs = [ ":powermgr_public_config" ]
-
-  deps = [ "${powermgr_inner_api}:powermgr_client" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hicollie:libhicollie",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-  ]
-
-  subsystem_name = "powermgr"
-  part_name = "${powermgr_part_name}"
 }
 
 group("service") {

@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "lockscreenaftertimingout_fuzzer"
 
 #include "power_fuzzer.h"
-#include "power_mgr_ipc_interface_code.h"
+#include "ipower_mgr.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -31,6 +31,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(PowerMgrInterfaceCode::LOCK_SCREEN_AFTER_TIMING_OUT), data, size);
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_LOCK_SCREEN_AFTER_TIMING_OUT_IPC), data, size);
     return 0;
 }

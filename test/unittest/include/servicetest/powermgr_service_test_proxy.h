@@ -22,6 +22,7 @@
 #include <iosfwd>
 #include <vector>
 
+#include "hilog/log.h"
 #include "iremote_object.h"
 #include "ipower_mode_callback.h"
 #include "ipower_state_callback.h"
@@ -40,47 +41,49 @@ public:
     PowerMgrServiceTestProxy(const sptr<PowerMgrService>& service);
     ~PowerMgrServiceTestProxy() = default;
 
-    PowerErrors CreateRunningLock(const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo);
-    bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
-    bool IsRunningLockTypeSupported(RunningLockType type);
-    bool Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1);
-    bool UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
-    bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
-    bool ProxyRunningLocks(bool isProxied,
-        const std::vector<std::pair<pid_t, pid_t>>& processInfos);
-    bool ResetRunningLocks();
-    bool IsUsed(const sptr<IRemoteObject>& remoteObj);
-    PowerErrors SuspendDevice(int64_t callTimeMs,
-        SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-        bool suspendImmed = false);
-    PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
-        const std::string& detail = std::string("app call"));
-    bool RefreshActivity(int64_t callTimeMs, UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER,
+    int32_t CreateRunningLockIpc(
+        const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo, int32_t& powerError);
+    int32_t ReleaseRunningLockIpc(const sptr<IRemoteObject>& remoteObj, const std::string& name = "");
+    int32_t IsRunningLockTypeSupportedIpc(int32_t lockType, bool& lockSupported);
+    int32_t LockIpc(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs, int32_t& powerError);
+    int32_t UnLockIpc(const sptr<IRemoteObject>& remoteObj, const std::string& name, int32_t& powerError);
+    int32_t ProxyRunningLockIpc(bool isProxied, pid_t pid, pid_t uid);
+    int32_t ProxyRunningLocksIpc(bool isProxied, const VectorPair& vectorPairInfos);
+    int32_t ResetRunningLocksIpc();
+    int32_t IsUsedIpc(const sptr<IRemoteObject>& remoteObj, bool& isUsed);
+    int32_t SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue, bool suspendImmed,
+        const std::string& apiVersion, int32_t& powerError);
+    int32_t WakeupDeviceIpc(int64_t callTimeMs, int32_t reasonValue, const std::string& details,
+        const std::string& apiVersion, int32_t& powerError);
+    int32_t RefreshActivityIpc(int64_t callTimeMs,
+        int32_t activityType = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_OTHER),
         bool needChangeBacklight = true);
-    PowerErrors OverrideScreenOffTime(int64_t timeout);
-    PowerErrors RestoreScreenOffTime();
-    PowerState GetState();
-    bool IsScreenOn(bool needPrintLog = true);
-    PowerErrors ForceSuspendDevice(int64_t callTimeMs);
-    bool IsForceSleeping();
-    PowerErrors RebootDevice(const std::string& reason);
-    PowerErrors RebootDeviceForDeprecated(const std::string& reason);
-    PowerErrors ShutDownDevice(const std::string& reason);
-    bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
-    bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
-    bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
-    bool RegisterScreenStateCallback(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
-    bool UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback);
-    bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
-    bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
-    bool SetDisplaySuspend(bool enable);
-    PowerErrors SetDeviceMode(const PowerMode& mode);
-    PowerMode GetDeviceMode();
-    std::string ShellDump(const std::vector<std::string>& args, uint32_t argc);
-    PowerErrors IsStandby(bool& isStandby);
+    int32_t OverrideScreenOffTimeIpc(int64_t timeout, int32_t& powerError);
+    int32_t RestoreScreenOffTimeIpc(const std::string& apiVersion, int32_t& powerError);
+    int32_t GetStateIpc(int32_t& powerState);
+    int32_t IsScreenOnIpc(bool needPrintLog, bool& isScreenOn);
+    int32_t ForceSuspendDeviceIpc(int64_t callTimeMs);
+    int32_t IsForceSleepingIpc(bool& isForceSleeping);
+    int32_t RebootDeviceIpc(const std::string& reason, int32_t& powerError);
+    int32_t RebootDeviceForDeprecatedIpc(const std::string& reason, int32_t& powerError);
+    int32_t ShutDownDeviceIpc(const std::string& reason, int32_t& powerError);
+    int32_t RegisterPowerStateCallbackIpc(const sptr<IPowerStateCallback>& callback, bool isSync = true);
+    int32_t UnRegisterPowerStateCallbackIpc(const sptr<IPowerStateCallback>& callback);
+    int32_t RegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback);
+    int32_t UnRegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback);
+    int32_t RegisterScreenStateCallbackIpc(int32_t remainTime, const sptr<IScreenOffPreCallback>& callback);
+    int32_t UnRegisterScreenStateCallbackIpc(const sptr<IScreenOffPreCallback>& callback);
+    int32_t RegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback);
+    int32_t UnRegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback);
+    int32_t SetDisplaySuspendIpc(bool enable);
+    int32_t SetDeviceModeIpc(int32_t modeValue, int32_t& powerError);
+    int32_t GetDeviceModeIpc(int32_t& powerMode);
+    int32_t ShellDumpIpc(const std::vector<std::string>& args, uint32_t argc, std::string& returnDump);
+    int32_t IsStandbyIpc(bool& isStandby, int32_t& powerError);
 private:
+    static constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0xD000F00, "PowerTest"};
     sptr<PowerMgrStub> stub_ {nullptr};
+    const int VECTOR_MAX_SIZE = 102400;
 };
 } // namespace PowerMgr
 } // namespace OHOS
