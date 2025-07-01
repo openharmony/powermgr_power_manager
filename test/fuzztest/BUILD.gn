@@ -28,6 +28,7 @@ group("fuzztest") {
     "hibernate_fuzzer:HibernateFuzzTest",
     "iscollaborationscreenon_fuzzer:IsCollaborationScreenOnFuzzTest",
     "isfoldscreenon_fuzzer:IsFoldScreenOnFuzzTest",
+    "isforcesleeping_fuzzer:IsForceSleepingFuzzTest",
     "isrunninglocktypesupported_fuzzer:IsRunningLockTypeSupportedFuzzTest",
     "isscreenon_fuzzer:IsScreenOnFuzzTest",
     "isstandby_fuzzer:IsStandbyFuzzTest",

@@ -71,6 +71,8 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice("-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.Hibernate(true, "", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerClientMockPeerTest001 function end!");
 }
 
@@ -94,6 +96,8 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest002, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice("-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.Hibernate(true, "", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerClientMockPeerTest002 function end!");
 }
 

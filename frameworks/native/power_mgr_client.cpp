@@ -307,7 +307,10 @@ PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
     RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    proxy->ForceSuspendDeviceIpc(GetTickCount(), apiVersion, powerProxy);
+    int32_t result = proxy->ForceSuspendDeviceIpc(GetTickCount(), apiVersion, powerProxy);
+    if (result != ERR_OK) {
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
     // Wait for the asynchronous callback to return, with a timeout of 100 milliseconds
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(100));
     POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDevice Success");
@@ -539,7 +542,10 @@ PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reaso
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
     RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    proxy->HibernateIpc(clearMemory, reason, apiVersion, powerProxy);
+    int32_t result = proxy->HibernateIpc(clearMemory, reason, apiVersion, powerProxy);
+    if (result != ERR_OK) {
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
     // Wait for the asynchronous callback to return, with a timeout of 100 milliseconds
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(100));
     return ret;
