@@ -33,42 +33,39 @@ void ShutdownClient::RegisterShutdownCallback(
     const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
 {
     RETURN_IF(Connect() != ERR_OK);
-    int32_t priorityValue = static_cast<int32_t>(priority);
-    proxy_->RegisterShutdownCallbackIpc(callback, priorityValue);
+    proxy_->RegisterShutdownCallback(callback, priority);
 }
 
 void ShutdownClient::UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback)
 {
     RETURN_IF(Connect() != ERR_OK);
-    proxy_->UnRegisterShutdownCallbackIpc(callback);
+    proxy_->UnRegisterShutdownCallback(callback);
 }
 
 void ShutdownClient::RegisterShutdownCallback(
     const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
 {
     RETURN_IF(Connect() != ERR_OK);
-    int32_t priorityValue = static_cast<int32_t>(priority);
-    proxy_->RegisterShutdownCallbackIpc(callback, priorityValue);
+    proxy_->RegisterShutdownCallback(callback, priority);
 }
 
 void ShutdownClient::UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
 {
     RETURN_IF(Connect() != ERR_OK);
-    proxy_->UnRegisterShutdownCallbackIpc(callback);
+    proxy_->UnRegisterShutdownCallback(callback);
 }
 
 void ShutdownClient::RegisterShutdownCallback(
     const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority)
 {
     RETURN_IF(Connect() != ERR_OK);
-    int32_t priorityValue = static_cast<int32_t>(priority);
-    proxy_->RegisterShutdownCallbackIpc(callback, priorityValue);
+    proxy_->RegisterShutdownCallback(callback, priority);
 }
 
 void ShutdownClient::UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback)
 {
     RETURN_IF(Connect() != ERR_OK);
-    proxy_->UnRegisterShutdownCallbackIpc(callback);
+    proxy_->UnRegisterShutdownCallback(callback);
 }
 } // namespace PowerMgr
 } // namespace OHOS

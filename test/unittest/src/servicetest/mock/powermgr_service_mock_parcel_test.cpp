@@ -84,29 +84,15 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest001, TestSi
     pid_t uid = 0;
     pid_t pid = 0;
     int32_t timeOutMs = 0;
-    int32_t powerError = 1;
-    std::string name;
-    bool lockTypeSupported = false;
-    bool isUsed = false;
-    g_powerMgrServiceProxy->CreateRunningLockIpc(token, runningLockInfo, powerError);
-    EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    EXPECT_NE(g_powerMgrServiceProxy->ReleaseRunningLockIpc(token), ERR_OK);
-    g_powerMgrServiceProxy->IsRunningLockTypeSupportedIpc(
-        static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BUTT), lockTypeSupported);
-    EXPECT_FALSE(lockTypeSupported);
-    g_powerMgrServiceProxy->LockIpc(token, timeOutMs, powerError);
-    EXPECT_NE(powerError, ERR_OK);
-    g_powerMgrServiceProxy->UnLockIpc(token, name, powerError);
-    EXPECT_NE(powerError, ERR_OK);
-    g_powerMgrServiceProxy->IsUsedIpc(token, isUsed);
-    EXPECT_FALSE(isUsed);
-    EXPECT_NE(g_powerMgrServiceProxy->ProxyRunningLockIpc(true, pid, uid), ERR_OK);
-    std::unique_ptr<VectorPair> vectorPairInfos = std::make_unique<VectorPair>();
-    std::vector<std::pair<pid_t, pid_t>> processInfos;
-    processInfos.emplace_back(pid, uid);
-    vectorPairInfos->SetProcessInfos(processInfos);
-    EXPECT_NE(g_powerMgrServiceProxy->ProxyRunningLocksIpc(true, *vectorPairInfos), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->ResetRunningLocksIpc(), ERR_OK);
+    EXPECT_FALSE(g_powerMgrServiceProxy->CreateRunningLock(token, runningLockInfo) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(g_powerMgrServiceProxy->ReleaseRunningLock(token));
+    EXPECT_FALSE(g_powerMgrServiceProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
+    EXPECT_FALSE(g_powerMgrServiceProxy->Lock(token));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnLock(token));
+    EXPECT_FALSE(g_powerMgrServiceProxy->IsUsed(token));
+    EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLock(true, pid, uid));
+    EXPECT_FALSE(g_powerMgrServiceProxy->ProxyRunningLocks(true, {std::make_pair(pid, uid)}));
+    EXPECT_FALSE(g_powerMgrServiceProxy->ResetRunningLocks());
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest001 end.");
 }
 
@@ -120,36 +106,24 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSi
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest002 start.");
     int32_t PARM_ONE = 1;
-    int32_t powerError = 1;
-    int32_t powerState = -1;
-    std::string apiVersion = "-1";
-    int32_t ret = 0;
-    bool isScreenOn = false;
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + PARM_ONE;
-    ret = g_powerMgrServiceProxy->SuspendDeviceIpc(0, suspendReason, false, apiVersion, powerError);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
-    ret = g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION),
-        std::string("app call"), apiVersion, powerError);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
-    int32_t attention = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
-    EXPECT_NE(g_powerMgrServiceProxy->RefreshActivityIpc(GetTickCount(), attention, true), ERR_OK);
-    g_powerMgrServiceProxy->OverrideScreenOffTimeIpc(200, powerError);
-    EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    g_powerMgrServiceProxy->RestoreScreenOffTimeIpc(apiVersion, powerError);
-    EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    ret = g_powerMgrServiceProxy->GetStateIpc(powerState);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
-    EXPECT_FALSE(isScreenOn);
-    g_powerMgrServiceProxy->SetDisplaySuspendIpc(true);
+    SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
+    EXPECT_EQ(g_powerMgrServiceProxy->SuspendDevice(0, abnormaltype, false), PowerErrors::ERR_CONNECTION_FAIL);
+    auto error = g_powerMgrServiceProxy->WakeupDevice(GetTickCount(),
+        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("app call"));
+    EXPECT_EQ(error, PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_FALSE(g_powerMgrServiceProxy->RefreshActivity(GetTickCount(),
+        UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, true));
+    EXPECT_FALSE(g_powerMgrServiceProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(g_powerMgrServiceProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
+    EXPECT_EQ(g_powerMgrServiceProxy->GetState(), PowerState::UNKNOWN);
+    EXPECT_FALSE(g_powerMgrServiceProxy->IsScreenOn());
+    g_powerMgrServiceProxy->SetDisplaySuspend(true);
     PowerMode setMode = PowerMode::NORMAL_MODE;
-    ret = g_powerMgrServiceProxy->SetDeviceModeIpc(static_cast<int32_t>(setMode), powerError);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
-    int32_t getMode = 0;
-    ret = g_powerMgrServiceProxy->GetDeviceModeIpc(getMode);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(g_powerMgrServiceProxy->SetDeviceMode(setMode), PowerErrors::ERR_CONNECTION_FAIL);
+    PowerMode getMode = g_powerMgrServiceProxy->GetDeviceMode();
+    EXPECT_TRUE(getMode == setMode);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest002 end.");
 }
 
@@ -162,30 +136,27 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSi
 HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSize.Level2)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest003 start.");
-    int32_t powerError = 1;
-    std::string apiVersion = "-1";
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     sptr<IPowerStateCallback> stateCb = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCb = new PowerModeTestCallback();
     sptr<IPowerRunninglockCallback> RunninglockCb =new PowerRunningLockTestCallback();
-    EXPECT_NE(g_powerMgrServiceProxy->RegisterPowerStateCallbackIpc(stateCb), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->UnRegisterPowerStateCallbackIpc(stateCb), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->RegisterPowerStateCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->UnRegisterPowerStateCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->RegisterPowerModeCallbackIpc(modeCb), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->UnRegisterPowerModeCallbackIpc(modeCb), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->RegisterPowerModeCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->UnRegisterPowerModeCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->RegisterRunningLockCallbackIpc(RunninglockCb), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->UnRegisterRunningLockCallbackIpc(RunninglockCb), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->RegisterRunningLockCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(g_powerMgrServiceProxy->UnRegisterRunningLockCallbackIpc(nullptr), ERR_OK);
-    EXPECT_FALSE(g_powerMgrServiceProxy->ForceSuspendDeviceIpc(0) == ERR_OK);
+    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerStateCallback(stateCb));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(stateCb));
+    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerStateCallback(nullptr));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerStateCallback(nullptr));
+    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerModeCallback(modeCb));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(modeCb));
+    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterRunningLockCallback(RunninglockCb));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(RunninglockCb));
+    EXPECT_FALSE(g_powerMgrServiceProxy->RegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(g_powerMgrServiceProxy->UnRegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(g_powerMgrServiceProxy->ForceSuspendDevice(0) == PowerErrors::ERR_OK);
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
-    std::string errorCode;
-    std::string actualDebugInfo;
-    g_powerMgrServiceProxy->ShellDumpIpc(dumpArgs, dumpArgs.size(), actualDebugInfo);
+    std::string errorCode = "remote error";
+    std::string actualDebugInfo = g_powerMgrServiceProxy->ShellDump(dumpArgs, dumpArgs.size());
     EXPECT_EQ(errorCode, actualDebugInfo);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest003 end.");
 }

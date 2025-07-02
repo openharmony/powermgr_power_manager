@@ -124,6 +124,7 @@
                     "name": "//base/powermgr/power_manager/interfaces/inner_api:powermgr_client",
                     "header": {
                       "header_files": [
+                        "ipower_mgr.h",
                         "ipower_state_callback.h",
                         "iscreen_off_pre_callback.h",
                         "power_errors.h",

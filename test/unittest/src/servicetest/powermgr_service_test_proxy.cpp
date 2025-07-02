@@ -20,13 +20,11 @@
 
 #include "errors.h"
 #include "message_option.h"
-#include "hilog/log.h"
 #include "power_common.h"
 #include "power_log.h"
-#include "ipower_mgr.h"
+#include "power_mgr_ipc_interface_code.h"
 #include "power_mgr_proxy.h"
 
-using OHOS::HiviewDFX::HiLog;
 namespace OHOS {
 namespace PowerMgr {
 constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
@@ -37,1264 +35,898 @@ PowerMgrServiceTestProxy::PowerMgrServiceTestProxy(const sptr<PowerMgrService>& 
     }
 }
 
-int32_t PowerMgrServiceTestProxy::CreateRunningLockIpc(const sptr<IRemoteObject>& remoteObj,
-    const RunningLockInfo& runningLockInfo, int32_t& powerError)
+PowerErrors PowerMgrServiceTestProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
+    const RunningLockInfo& runningLockInfo)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteRemoteObject(remoteObj)) {
-        HiLog::Error(LABEL, "Write [remoteObj] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteParcelable(&runningLockInfo)) {
-        HiLog::Error(LABEL, "Write [runningLockInfo] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_CREATE_RUNNING_LOCK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_CREATE_RUNNING_LOCK_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::ReleaseRunningLockIpc(const sptr<IRemoteObject>& remoteObj, const std::string& name)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteRemoteObject(remoteObj)) {
-        HiLog::Error(LABEL, "Write [remoteObj] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString16(Str8ToStr16(name))) {
-        HiLog::Error(LABEL, "Write [name] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_RELEASE_RUNNING_LOCK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_RELEASE_RUNNING_LOCK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::IsRunningLockTypeSupportedIpc(int32_t lockType, bool& lockTypesSupported)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt32(lockType)) {
-        HiLog::Error(LABEL, "Write [lockType] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_RUNNING_LOCK_TYPE_SUPPORTED_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_RUNNING_LOCK_TYPE_SUPPORTED_IPC));
-        return errCode;
-    }
-
-    lockTypesSupported = reply.ReadInt32() == 1 ? true : false;
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::LockIpc(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteRemoteObject(remoteObj)) {
-        HiLog::Error(LABEL, "Write [remoteObj] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(timeOutMs)) {
-        HiLog::Error(LABEL, "Write [timeOutMs] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_LOCK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_LOCK_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::UnLockIpc(const sptr<IRemoteObject>& remoteObj,
-    const std::string& name, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteRemoteObject(remoteObj)) {
-        HiLog::Error(LABEL, "Write [remoteObj] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString16(Str8ToStr16(name))) {
-        HiLog::Error(LABEL, "Write [name] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_LOCK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_LOCK_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::IsUsedIpc(const sptr<IRemoteObject>& remoteObj, bool& isUsed)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteRemoteObject(remoteObj)) {
-        HiLog::Error(LABEL, "Write [remoteObj] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_USED_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_USED_IPC));
-        return errCode;
-    }
-
-    isUsed = reply.ReadInt32() == 1 ? true : false;
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::ProxyRunningLockIpc(bool isProxied, int32_t pid, int32_t uid)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt32(isProxied ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [isProxied] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(pid)) {
-        HiLog::Error(LABEL, "Write [pid] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(uid)) {
-        HiLog::Error(LABEL, "Write [uid] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_PROXY_RUNNING_LOCK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_PROXY_RUNNING_LOCK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::ProxyRunningLocksIpc(bool isProxied, const VectorPair& vectorPairInfos)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt32(isProxied ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [isProxied] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteParcelable(&vectorPairInfos)) {
-        HiLog::Error(LABEL, "Write [vectorPairInfos] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_PROXY_RUNNING_LOCKS_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_PROXY_RUNNING_LOCKS_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::ResetRunningLocksIpc()
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_RESET_RUNNING_LOCKS_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_RESET_RUNNING_LOCKS_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::RebootDeviceIpc(const std::string& reason, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteString16(Str8ToStr16(reason))) {
-        HiLog::Error(LABEL, "Write [reason] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REBOOT_DEVICE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REBOOT_DEVICE_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::ShutDownDeviceIpc(const std::string& reason, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteString16(Str8ToStr16(reason))) {
-        HiLog::Error(LABEL, "Write [reason] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SHUT_DOWN_DEVICE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SHUT_DOWN_DEVICE_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue,
-    bool suspendImmed, const std::string& apiVersion, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt64(callTimeMs)) {
-        HiLog::Error(LABEL, "Write [callTimeMs] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(reasonValue)) {
-        HiLog::Error(LABEL, "Write [reasonValue] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(suspendImmed ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [suspendImmed] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString16(Str8ToStr16(apiVersion))) {
-        HiLog::Error(LABEL, "Write [apiVersion] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SUSPEND_DEVICE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SUSPEND_DEVICE_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::WakeupDeviceIpc(int64_t callTimeMs, int32_t reasonValue,
-    const std::string& details, const std::string& apiVersion, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt64(callTimeMs)) {
-        HiLog::Error(LABEL, "Write [callTimeMs] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(reasonValue)) {
-        HiLog::Error(LABEL, "Write [reasonValue] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString16(Str8ToStr16(details))) {
-        HiLog::Error(LABEL, "Write [details] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString16(Str8ToStr16(apiVersion))) {
-        HiLog::Error(LABEL, "Write [apiVersion] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_WAKEUP_DEVICE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_WAKEUP_DEVICE_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::RefreshActivityIpc(int64_t callTimeMs, int32_t activityType, bool needChangeBacklight)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt64(callTimeMs)) {
-        HiLog::Error(LABEL, "Write [callTimeMs] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(activityType)) {
-        HiLog::Error(LABEL, "Write [activityType] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(needChangeBacklight ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [needChangeBacklight] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    uint32_t code = static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REFRESH_ACTIVITY_IPC);
-    int32_t result = stub_->OnRemoteRequest(code, data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.", code);
-        return errCode;
-    }
-
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::OverrideScreenOffTimeIpc(int64_t timeout, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt64(timeout)) {
-        HiLog::Error(LABEL, "Write [timeout] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_OVERRIDE_SCREEN_OFF_TIME_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_OVERRIDE_SCREEN_OFF_TIME_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::RestoreScreenOffTimeIpc(const std::string& apiVersion, int32_t& powerError)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteString16(Str8ToStr16(apiVersion))) {
-        HiLog::Error(LABEL, "Write [apiVersion] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_RESTORE_SCREEN_OFF_TIME_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_RESTORE_SCREEN_OFF_TIME_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
-}
-
-int32_t PowerMgrServiceTestProxy::ForceSuspendDeviceIpc(int64_t callTimeMs)
-{
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (!data.WriteInt64(callTimeMs)) {
-        HiLog::Error(LABEL, "Write [callTimeMs] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteRemoteObject(remoteObj.GetRefPtr());
+    data.WriteParcelable(&runningLockInfo);
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_FORCE_SUSPEND_DEVICE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::CREATE_RUNNINGLOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    int32_t error = ERR_OK;
-    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, ERR_OK);
-    return error;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::GetStateIpc(int32_t& powerState)
+bool PowerMgrServiceTestProxy::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_GET_STATE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
+    data.WriteRemoteObject(remoteObj.GetRefPtr());
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, name, false);
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RELEASE_RUNNINGLOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::IsRunningLockTypeSupported(RunningLockType type)
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_GET_STATE_IPC));
-        return errCode;
+    data.WriteUint32(static_cast<uint32_t>(type));
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_RUNNINGLOCK_TYPE_SUPPORTED),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
     }
 
-    powerState = reply.ReadInt32();
-    return ERR_OK;
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "ReadBool fail");
+    }
+
+    return result;
 }
 
-int32_t PowerMgrServiceTestProxy::IsScreenOnIpc(bool needPrintLog, bool& isScreenOn)
+bool PowerMgrServiceTestProxy::Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    if (!data.WriteInt32(needPrintLog ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [needPrintLog] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteRemoteObject(remoteObj.GetRefPtr());
+    data.WriteInt32(timeOutMs);
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_SCREEN_ON_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_LOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_SCREEN_ON_IPC));
-        return errCode;
-    }
-
-    isScreenOn = reply.ReadInt32() == 1 ? true : false;
-    return ERR_OK;
+    return true;
 }
 
-int32_t PowerMgrServiceTestProxy::IsForceSleepingIpc(bool& isForceSleeping)
+bool PowerMgrServiceTestProxy::UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write descriptor failed");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<int>(IPowerMgrIpcCode::COMMAND_IS_FORCE_SLEEPING_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
+    data.WriteRemoteObject(remoteObj.GetRefPtr());
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String, name, false);
 
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_FORCE_SLEEPING_IPC));
-        return errCode;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_UNLOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-
-    isForceSleeping = reply.ReadInt32() == 1 ? true : false;
-    return ERR_OK;
+    return true;
 }
 
-int32_t PowerMgrServiceTestProxy::RegisterPowerStateCallbackIpc(
-    const sptr<IPowerStateCallback>& powerCallback, bool isSync)
+bool PowerMgrServiceTestProxy::IsUsed(const sptr<IRemoteObject>& remoteObj)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
+    data.WriteRemoteObject(remoteObj.GetRefPtr());
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RUNNINGLOCK_ISUSED),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteInt32(isSync ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [isSync] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_POWER_STATE_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_POWER_STATE_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    bool used = false;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, used, false);
+    return used;
 }
 
-int32_t PowerMgrServiceTestProxy::UnRegisterPowerStateCallbackIpc(const sptr<IPowerStateCallback>& powerCallback)
+bool PowerMgrServiceTestProxy::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteBool(isProxied);
+    data.WriteInt32(pid);
+    data.WriteInt32(uid);
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_POWER_STATE_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_POWER_STATE_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    bool succ = false;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
+    return succ;
 }
 
-int32_t PowerMgrServiceTestProxy::RegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& powerCallback)
+bool PowerMgrServiceTestProxy::ProxyRunningLocks(bool isProxied,
+    const std::vector<std::pair<pid_t, pid_t>>& processInfos)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
+    int32_t size = processInfos.size();
+    data.WriteBool(isProxied);
+    data.WriteUint32(size);
+    if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
+        POWER_HILOGE(COMP_FWK, "size exceed limit, size=%{public}d", size);
+        return false;
     }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_POWER_MODE_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    for (int i = 0; i < size; ++i) {
+        data.WriteInt32(processInfos[i].first);
+        data.WriteInt32(processInfos[i].second);
     }
 
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_POWER_MODE_CALLBACK_IPC));
-        return errCode;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::PROXY_RUNNINGLOCKS),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-
-    return ERR_OK;
+    bool succ = false;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
+    return succ;
 }
 
-int32_t PowerMgrServiceTestProxy::UnRegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& powerCallback)
+bool PowerMgrServiceTestProxy::ResetRunningLocks()
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
+    int ret = stub_->SendRequest(static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESET_RUNNINGLOCKS),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_POWER_MODE_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_POWER_MODE_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    bool succ = false;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, succ, false);
+    return succ;
 }
 
-int32_t PowerMgrServiceTestProxy::RegisterScreenStateCallbackIpc(
-    int32_t remainTime, const sptr<IScreenOffPreCallback>& powerCallback)
+PowerErrors PowerMgrServiceTestProxy::RebootDevice(const std::string& reason)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (!data.WriteInt32(remainTime)) {
-        HiLog::Error(LABEL, "Write [remainTime] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteString16(Str8ToStr16(reason));
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_SCREEN_STATE_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REBOOT_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_SCREEN_STATE_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::UnRegisterScreenStateCallbackIpc(const sptr<IScreenOffPreCallback>& powerCallback)
+PowerErrors PowerMgrServiceTestProxy::ShutDownDevice(const std::string& reason)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteString16(Str8ToStr16(reason));
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_SCREEN_STATE_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHUTDOWN_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_SCREEN_STATE_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::RegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& powerCallback)
+PowerErrors PowerMgrServiceTestProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteInt64(callTimeMs);
+    data.WriteUint32(static_cast<uint32_t>(reason));
+    data.WriteBool(suspendImmed);
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_RUNNING_LOCK_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SUSPEND_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_RUNNING_LOCK_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::UnRegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& powerCallback)
+PowerErrors PowerMgrServiceTestProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
+    const std::string& details)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_WAKEUP, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (powerCallback == nullptr) {
-        HiLog::Error(LABEL, "powerCallback is nullptr!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteRemoteObject(powerCallback->AsObject())) {
-        HiLog::Error(LABEL, "Write [powerCallback] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteInt64(callTimeMs);
+    data.WriteUint32(static_cast<uint32_t>(reason));
+    data.WriteString16(Str8ToStr16(details));
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_RUNNING_LOCK_CALLBACK_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::WAKEUP_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_WAKEUP, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_RUNNING_LOCK_CALLBACK_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::SetDisplaySuspendIpc(bool enable)
+bool PowerMgrServiceTestProxy::RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_ACTIVITY, "Write descriptor failed");
+        return false;
     }
 
-    if (!data.WriteInt32(enable ? 1 : 0)) {
-        HiLog::Error(LABEL, "Write [enable] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteInt64(callTimeMs);
+    data.WriteUint32(static_cast<uint32_t>(type));
+    data.WriteBool(needChangeBacklight);
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SET_DISPLAY_SUSPEND_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REFRESH_ACTIVITY), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_ACTIVITY, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SET_DISPLAY_SUSPEND_IPC));
-        return errCode;
-    }
-
-    return ERR_OK;
+    return true;
 }
 
-int32_t PowerMgrServiceTestProxy::SetDeviceModeIpc(int32_t modeValue, int32_t& powerError)
+PowerErrors PowerMgrServiceTestProxy::OverrideScreenOffTime(int64_t timeout)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(COMP_SVC, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (!data.WriteInt32(modeValue)) {
-        HiLog::Error(LABEL, "Write [modeValue] failed!");
-        return ERR_INVALID_DATA;
-    }
+    data.WriteInt64(timeout);
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SET_DEVICE_MODE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_SVC, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SET_DEVICE_MODE_IPC));
-        return errCode;
-    }
-
-    powerError = reply.ReadInt32();
-    return ERR_OK;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::GetDeviceModeIpc(int32_t& powerMode)
+PowerErrors PowerMgrServiceTestProxy::RestoreScreenOffTime()
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_GET_DEVICE_MODE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_GET_DEVICE_MODE_IPC));
-        return errCode;
-    }
-
-    powerMode = reply.ReadInt32();
-    return ERR_OK;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
 }
 
-int32_t PowerMgrServiceTestProxy::ShellDumpIpc(const std::vector<std::string>& args,
-    uint32_t argc, std::string& returnDump)
+PowerErrors PowerMgrServiceTestProxy::ForceSuspendDevice(int64_t callTimeMs)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    if (args.size() > static_cast<size_t>(VECTOR_MAX_SIZE)) {
-        HiLog::Error(LABEL, "The vector/array size exceeds the security limit!");
-        return ERR_INVALID_DATA;
+    data.WriteInt64(callTimeMs);
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::FORCE_DEVICE_SUSPEND),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "SendRequest is failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    data.WriteInt32(args.size());
-    for (auto it3 = args.begin(); it3 != args.end(); ++it3) {
-        if (!data.WriteString16(Str8ToStr16((*it3)))) {
-            HiLog::Error(LABEL, "Write [(*it3)] failed!");
-            return ERR_INVALID_DATA;
-        }
-    }
-    if (!data.WriteUint32(argc)) {
-        HiLog::Error(LABEL, "Write [argc] failed!");
-        return ERR_INVALID_DATA;
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
+}
+
+PowerState PowerMgrServiceTestProxy::GetState()
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerState::UNKNOWN);
+
+    uint32_t result = 0;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return PowerState::UNKNOWN;
     }
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SHELL_DUMP_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GET_STATE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerState::UNKNOWN;
+    }
+    if (!reply.ReadUint32(result)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "ReadUint32 failed");
+        return PowerState::UNKNOWN;
+    }
+
+    return static_cast<PowerState>(result);
+}
+
+bool PowerMgrServiceTestProxy::IsScreenOn(bool needPrintLog)
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, needPrintLog, false);
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_SCREEN_ON), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
+    }
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(COMP_FWK, "ReadBool fail");
+    }
+
+    return result;
+}
+
+bool PowerMgrServiceTestProxy::IsForceSleeping()
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    bool result = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SHELL_DUMP_IPC));
-        return errCode;
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_FORCE_SLEEPING), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
+    }
+    if (!reply.ReadBool(result)) {
+        POWER_HILOGE(COMP_FWK, "Read IsForceSleeping fail");
     }
 
-    returnDump = Str16ToStr8(reply.ReadString16());
-    return ERR_OK;
+    return result;
 }
 
-int32_t PowerMgrServiceTestProxy::IsStandbyIpc(bool& isStandby, int32_t& powerError)
+bool PowerMgrServiceTestProxy::RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return false;
     }
 
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_STANDBY_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
+    data.WriteRemoteObject(callback->AsObject());
+    data.WriteBool(isSync);
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_STATE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_POWER_MODE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_POWER_MODE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::RegisterScreenStateCallback(int32_t remainTime,
+    const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (remainTime <= 0) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+    data.WriteInt32(remainTime);
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterScreenStateCallback(const sptr<IScreenOffPreCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_SCREEN_OFF_PRE_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SCREEN_OFF_PRE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::REG_RUNNINGLOCK_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr) || (callback == nullptr), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::UNREG_RUNNINGLOCK_CALLBACK),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::SetDisplaySuspend(bool enable)
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteBool(enable);
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SET_DISPLAY_SUSPEND), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+PowerErrors PowerMgrServiceTestProxy::SetDeviceMode(const PowerMode& mode)
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    data.WriteUint32(static_cast<uint32_t>(mode));
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SETMODE_DEVICE), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+    int32_t error;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_OK);
+    return static_cast<PowerErrors>(error);
+}
+
+PowerMode PowerMgrServiceTestProxy::GetDeviceMode()
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, static_cast<PowerMode>(false));
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Write descriptor failed");
+        return PowerMode::NORMAL_MODE;
+    }
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::GETMODE_DEVICE),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerMode::NORMAL_MODE;
+    }
+
+    uint32_t used = static_cast<uint32_t>(PowerMode::NORMAL_MODE);
+    if (!reply.ReadUint32(used)) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "ReadUint32 fail");
+    }
+    return static_cast<PowerMode>(used);
+}
+
+std::string PowerMgrServiceTestProxy::ShellDump(const std::vector<std::string>& args, uint32_t argc)
+{
+    std::string result = "remote error";
+    RETURN_IF_WITH_RET(stub_ == nullptr, result);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return result;
+    }
+    if (argc > args.size()) {
+        POWER_HILOGE(COMP_FWK, "argc is greater than args size!");
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
-    if (FAILED(errCode)) {
-        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
-            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_STANDBY_IPC));
-        return errCode;
+    data.WriteUint32(argc);
+    for (uint32_t i = 0; i < argc; i++) {
+        data.WriteString(args[i]);
+    }
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SHELL_DUMP),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return result;
+    }
+    result = reply.ReadString();
+
+    return result;
+}
+
+PowerErrors PowerMgrServiceTestProxy::IsStandby(bool& isStandby)
+{
+    RETURN_IF_WITH_RET(stub_ == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(COMP_FWK, "Write descriptor failed");
+        return PowerErrors::ERR_CONNECTION_FAIL;
     }
 
-    isStandby = reply.ReadInt32() == 1 ? true : false;
-    powerError = reply.ReadInt32();
-    return ERR_OK;
+    int32_t ret = stub_->SendRequest(
+        static_cast<int>(PowerMgr::PowerMgrInterfaceCode::IS_STANDBY), data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return PowerErrors::ERR_CONNECTION_FAIL;
+    }
+
+    int32_t error;
+
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Bool, isStandby, PowerErrors::ERR_CONNECTION_FAIL);
+
+    return static_cast<PowerErrors>(error);
 }
 } // namespace PowerMgr
 } // namespace OHOS

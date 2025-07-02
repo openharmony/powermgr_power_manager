@@ -30,7 +30,6 @@
 #include "running_lock.h"
 #include "running_lock_info.h"
 #include "running_lock_token_stub.h"
-#include "power_mgr_async_reply_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -142,25 +141,17 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest004 function start!");
     pid_t uid = 0;
     pid_t pid = 0;
-    int32_t powerError = 1;
-    int32_t timeOutMs = -1;
-    std::string name;
-    bool lockTypeSupported = false;
-    bool isUsed = false;
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
-    sptrProxy->CreateRunningLockIpc(token, info, powerError);
-    sptrProxy->ReleaseRunningLockIpc(token, name);
-    sptrProxy->ProxyRunningLockIpc(true, pid, uid);
-    sptrProxy->IsRunningLockTypeSupportedIpc(
-        static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BUTT), lockTypeSupported);
-    EXPECT_FALSE(lockTypeSupported);
-    sptrProxy->LockIpc(token, timeOutMs, powerError);
-    sptrProxy->UnLockIpc(token, name, powerError);
-    sptrProxy->IsUsedIpc(token, isUsed);
-    EXPECT_FALSE(isUsed);
+    sptrProxy->CreateRunningLock(token, info);
+    sptrProxy->ReleaseRunningLock(token);
+    sptrProxy->ProxyRunningLock(true, pid, uid);
+    EXPECT_FALSE(sptrProxy->IsRunningLockTypeSupported(RunningLockType::RUNNINGLOCK_BUTT));
+    sptrProxy->Lock(token);
+    sptrProxy->UnLock(token);
+    EXPECT_FALSE(sptrProxy->IsUsed(token));
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest004 function end!");
 }
 
@@ -173,25 +164,25 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest004, TestSize.Level2)
 HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest005 function start!");
-    int32_t ret = 0;
+    bool ret = 0;
     sptr<IPCObjectStub> remote = new IPCObjectStub();
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     sptr<IPowerStateCallback> cb1 = new PowerStateTestCallback();
     sptr<IPowerModeCallback> cb3 = new PowerModeTestCallback();
     sptr<IPowerRunninglockCallback> cb5 =new PowerRunningLockTestCallback();
-    ret = sptrProxy->RegisterPowerStateCallbackIpc(cb1, true);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    sptrProxy->UnRegisterPowerStateCallbackIpc(cb1);
-    sptrProxy->RegisterPowerStateCallbackIpc(nullptr, true);
-    sptrProxy->UnRegisterPowerStateCallbackIpc(nullptr);
-    EXPECT_NE(sptrProxy->RegisterPowerModeCallbackIpc(cb3), ERR_OK);
-    EXPECT_NE(sptrProxy->UnRegisterPowerModeCallbackIpc(cb3), ERR_OK);
-    EXPECT_NE(sptrProxy->RegisterPowerModeCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(sptrProxy->UnRegisterPowerModeCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(sptrProxy->RegisterRunningLockCallbackIpc(cb5), ERR_OK);
-    EXPECT_NE(sptrProxy->UnRegisterRunningLockCallbackIpc(cb5), ERR_OK);
-    EXPECT_NE(sptrProxy->RegisterRunningLockCallbackIpc(nullptr), ERR_OK);
-    EXPECT_NE(sptrProxy->UnRegisterRunningLockCallbackIpc(nullptr), ERR_OK);
+    ret = sptrProxy->RegisterPowerStateCallback(cb1);
+    EXPECT_EQ(ret, false);
+    sptrProxy->UnRegisterPowerStateCallback(cb1);
+    sptrProxy->RegisterPowerStateCallback(nullptr);
+    sptrProxy->UnRegisterPowerStateCallback(nullptr);
+    EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(cb3));
+    EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(cb3));
+    EXPECT_FALSE(sptrProxy->RegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->UnRegisterPowerModeCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(cb5));
+    EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(cb5));
+    EXPECT_FALSE(sptrProxy->RegisterRunningLockCallback(nullptr));
+    EXPECT_FALSE(sptrProxy->UnRegisterRunningLockCallback(nullptr));
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest005 function end!");
 }
 
@@ -203,45 +194,30 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest005, TestSize.Level2)
  */
 HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
 {
-    int32_t powerError = 1;
-    int32_t powerMode = 0;
-    int32_t powerState = -1;
-    std::string apiVersion = "-1";
-    bool isScreenOn = false;
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 function start!");
     sptr<IPCObjectStub> remote = new IPCObjectStub();
-    sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
-    sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
-    sptrProxy->SuspendDeviceIpc(0, static_cast<int32_t>(abnormaltype), false, apiVersion, powerError);
-    sptrProxy->WakeupDeviceIpc(GetTickCount(), static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION),
-        std::string("app call"), apiVersion, powerError);
-    int32_t userAttention = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
-    sptrProxy->RefreshActivityIpc(GetTickCount(), userAttention, true);
-    sptrProxy->OverrideScreenOffTimeIpc(200, apiVersion, powerError);
-    EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    sptrProxy->RestoreScreenOffTimeIpc(apiVersion, powerError);
-    EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    int32_t result = sptrProxy->GetStateIpc(powerState);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-    sptrProxy->IsScreenOnIpc(true, isScreenOn);
-    EXPECT_FALSE(isScreenOn);
-    sptrProxy->SetDisplaySuspendIpc(true);
+    sptrProxy->SuspendDevice(0, abnormaltype, false);
+    sptrProxy->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string("app call"));
+    sptrProxy->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_ATTENTION, true);
+    EXPECT_FALSE(sptrProxy->OverrideScreenOffTime(200) == PowerErrors::ERR_OK);
+    EXPECT_FALSE(sptrProxy->RestoreScreenOffTime() == PowerErrors::ERR_OK);
+    auto state = sptrProxy->GetState();
+    EXPECT_EQ(state, PowerState::UNKNOWN);
+    EXPECT_FALSE(sptrProxy->IsScreenOn());
+    sptrProxy->SetDisplaySuspend(true);
     PowerMode mode1 = PowerMode::NORMAL_MODE;
-    sptrProxy->SetDeviceModeIpc(static_cast<int32_t>(mode1), powerError);
-    sptrProxy->GetDeviceModeIpc(powerMode);
-    sptrProxy->RebootDeviceIpc(" ", powerError);
-    sptrProxy->ShutDownDeviceIpc(" ", powerError);
-    sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
-    int waitTime = 100;
-    PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(waitTime));
+    sptrProxy->SetDeviceMode(mode1);
+    sptrProxy->GetDeviceMode();
+    sptrProxy->RebootDevice(" ");
+    sptrProxy->ShutDownDevice(" ");
+    sptrProxy->ForceSuspendDevice(0);
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
-    std::string errCode;
-    std::string actualDebugInfo;
-    sptrProxy->ShellDumpIpc(dumpArgs, dumpArgs.size(), actualDebugInfo);
+    std::string errCode = "remote error";
+    std::string actualDebugInfo = sptrProxy->ShellDump(dumpArgs, dumpArgs.size());
     EXPECT_EQ(actualDebugInfo, errCode);
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 function end!");
 }

@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "queryrunninglocklists_fuzzer"
 
 #include "power_fuzzer.h"
-#include "ipower_mgr.h"
+#include "power_mgr_ipc_interface_code.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -30,7 +30,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
-    g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_QUERY_RUNNING_LOCK_LISTS_IPC), data, size);
+    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(PowerMgrInterfaceCode::RUNNINGLOCK_QUERY), data, size);
     return 0;
 }

@@ -14,8 +14,6 @@
  */
 
 #include "power_mgr_async_reply.h"
-#include "power_mgr_async_reply_proxy.h"
-#include "power_mgr_async_reply_stub.h"
 #include "power_common.h"
 
 namespace OHOS {
