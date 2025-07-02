@@ -28,6 +28,12 @@ config("powermgr_private_config") {
 }
 
 ohos_shared_library("powermgr_client") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   branch_protector_ret = "pac_ret"
 
   sources = [
@@ -38,7 +44,6 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_framework_native}/shutdown/shutdown_client.cpp",
     "${powermgr_framework_native}/shutdown/takeover_info.cpp",
     "${powermgr_service_zidl}/src/power_mgr_async_reply.cpp",
-    "${powermgr_service_zidl}/src/power_mgr_proxy.cpp",
     "${powermgr_service_zidl}/src/power_mode_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/power_mode_callback_stub.cpp",
     "${powermgr_service_zidl}/src/power_runninglock_callback_proxy.cpp",
@@ -49,7 +54,6 @@ ohos_shared_library("powermgr_client") {
     "${powermgr_service_zidl}/src/screen_off_pre_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_stub.cpp",
-    "${powermgr_service_zidl}/src/shutdown/shutdown_proxy_delegator.cpp",
     "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_proxy.cpp",
     "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_stub.cpp",
     "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
@@ -61,14 +65,18 @@ ohos_shared_library("powermgr_client") {
   ]
 
   configs = [
+    "${powermgr_service_path}:powermgr_public_config",
     "${powermgr_utils_path}:coverage_flags",
     ":powermgr_private_config",
   ]
 
   public_configs = [
     ":powermgr_public_config",
+    "${powermgr_service_path}:powermgr_public_config",
     "${powermgr_utils_path}:utils_config",
   ]
+
+  deps = [ "${powermgr_service_path}:powermgr_proxy" ]
 
   external_deps = [
     "ability_base:want",
