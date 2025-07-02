@@ -39,10 +39,6 @@ using RunningLockMap = std::map<const sptr<IRemoteObject>, std::shared_ptr<Runni
 
 class RunningLockMgr {
 public:
-    enum {
-        PROXIMITY_AWAY = 0,
-        PROXIMITY_CLOSE
-    };
     explicit RunningLockMgr(const wptr<PowerMgrService>& pms) : pms_(pms) {}
     ~RunningLockMgr();
 
@@ -88,10 +84,13 @@ private:
     void AsyncWakeup();
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
+    void InitLocksTypeCoordination();
 #ifdef HAS_SENSORS_SENSOR_PART
     void InitLocksTypeProximity();
+    bool InitProximityController();
+    void HandleProximityCloseEvent();
+    void HandleProximityAwayEvent();
 #endif
-    void InitLocksTypeCoordination();
 
     class LockCounter {
     public:
@@ -122,11 +121,10 @@ private:
         explicit ProximityController(const std::string& name = "RunningLock", SensorCallbackFunc
             callback = &ProximityController::RecordSensorCallback) : ProximityControllerBase(name, callback) {}
         ~ProximityController() override {}
-        void OnClose();
-        void OnAway();
+        virtual void OnClose() override;
+        virtual void OnAway() override;
         static void RecordSensorCallback(SensorEvent *event);
     };
-    ProximityController proximityController_;
 #endif
 
     class RunningLockDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -141,9 +139,6 @@ private:
     static uint64_t TransformLockid(const sptr<IRemoteObject>& remoteObj);
     bool IsValidType(RunningLockType type);
     void PreprocessBeforeAwake();
-#ifdef HAS_SENSORS_SENSOR_PART
-    void ProximityLockOn();
-#endif
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
 
@@ -152,6 +147,7 @@ private:
     std::mutex screenLockListsMutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
+    std::shared_ptr<IProximityController> proximityController_ {nullptr};
     std::shared_ptr<RunningLockProxy> runninglockProxy_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;

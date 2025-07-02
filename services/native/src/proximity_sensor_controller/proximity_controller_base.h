@@ -21,59 +21,25 @@
 #endif
 #include "sensor_agent.h"
 #include "power_state_machine_info.h"
+#include "iproximity_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
-typedef void (*SensorCallbackFunc)(SensorEvent *event);
-
-class ProximityControllerBase {
+class ProximityControllerBase : public IProximityController {
 public:
+    typedef void (*SensorCallbackFunc)(SensorEvent *event);
+    ProximityControllerBase() = default;
     ProximityControllerBase(const std::string& name, SensorCallbackFunc callback);
     virtual ~ProximityControllerBase();
-    void Enable();
-    void Disable();
-    bool IsEnabled()
-    {
-        return enabled_;
-    }
-    bool IsSupported()
-    {
-        return support_;
-    }
-    bool IsClose();
-    uint32_t GetStatus()
-    {
-        return status_;
-    }
-    void Clear();
-
-protected:
+    void Enable() override;
+    void Disable() override;
+    void OnClose() override {}
+    void OnAway() override {}
     static const int32_t PROXIMITY_CLOSE_SCALAR = 0;
     static const int32_t PROXIMITY_AWAY_SCALAR = 5;
     static const uint32_t SAMPLING_RATE =  100000000;
-    bool support_ {false};
-    bool enabled_ {false};
-    bool isClose_ {false};
-    uint32_t status_ {0};
-    SensorUser user_ {};
-};
-
-class ProximityNormalController : public ProximityControllerBase {
-public:
-    explicit ProximityNormalController(const std::string& name = "ProximityNormalController", SensorCallbackFunc
-        callback = &ProximityNormalController::RecordSensorCallback) : ProximityControllerBase(name, callback) {}
-    ~ProximityNormalController() override {}
-    void ActivateValidProximitySensor(PowerState state);
-    static void RecordSensorCallback(SensorEvent *event);
-    static bool IsInactiveClose()
-    {
-        return isInactiveClose_;
-    }
-
 private:
-    bool proximitySensorEnabled_ {false};
-    static std::mutex userMutex_;
-    static bool isInactiveClose_;
+    SensorUser user_ {};
 };
 } // namespace PowerMgr
 } // namespace OHOS

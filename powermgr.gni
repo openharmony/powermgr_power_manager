@@ -40,6 +40,7 @@ declare_args() {
   power_manager_feature_watch_limit_screen_common_event_publish = false
   power_manager_feature_watch_update_adapt = false
   power_manager_feature_watch_boot_completed = false
+  power_manager_feature_init_proximity_controller = false
 }
 
 defines = []
@@ -54,6 +55,10 @@ if (power_manager_feature_enable_suspend_with_tag) {
 
 if (power_manager_feature_audio_lock_unproxy) {
   defines += [ "POWER_MANAGER_AUDIO_LOCK_UNPROXY" ]
+}
+
+if (power_manager_feature_init_proximity_controller) {
+  defines += [ "POWER_MANAGER_INIT_PROXIMITY_CONTROLLER" ]
 }
 
 if (!defined(global_parts_info) ||
