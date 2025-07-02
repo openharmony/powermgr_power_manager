@@ -816,7 +816,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HIBERNATE, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }
-
+    
     g_preHibernateStart = GetTickCount();
     if (clearMemory) {
         auto hookMgr = GetPowerHookMgr();

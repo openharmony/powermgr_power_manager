@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "refreshactivity_fuzzer"
 
 #include "power_fuzzer.h"
-#include "ipower_mgr.h"
+#include "power_mgr_ipc_interface_code.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -30,7 +30,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
-    uint32_t code = static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REFRESH_ACTIVITY_IPC);
-    g_serviceTest.TestPowerServiceStub(code, data, size);
+    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(PowerMgrInterfaceCode::REFRESH_ACTIVITY), data, size);
     return 0;
 }
