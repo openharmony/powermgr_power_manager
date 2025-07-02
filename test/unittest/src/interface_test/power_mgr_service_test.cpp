@@ -39,6 +39,7 @@
 #include "power_utils.h"
 #include "setting_helper.h"
 #include "token_setproc.h"
+#include "mock_power_mgr_client.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -207,7 +208,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService007 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
@@ -224,7 +225,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
@@ -242,7 +243,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 function start!");
     uint32_t PARM_TWO = 2;
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000) == PowerErrors::ERR_OK);
     EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
@@ -260,7 +261,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
@@ -277,7 +278,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);;
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
@@ -295,7 +296,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 function start!");
     uint32_t PARM_TWO = 2;
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000) == PowerErrors::ERR_OK);
     EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
@@ -314,7 +315,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
@@ -332,7 +333,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
@@ -417,7 +418,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
@@ -437,7 +438,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
@@ -458,7 +459,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
 HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
