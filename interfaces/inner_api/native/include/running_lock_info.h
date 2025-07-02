@@ -21,8 +21,6 @@
 
 #include <parcel.h>
 
-#include "power_errors.h"
-
 namespace OHOS {
 namespace PowerMgr {
 /**
@@ -99,25 +97,6 @@ struct RunningLockInfo : public Parcelable {
     bool ReadFromParcel(Parcel& parcel);
     bool Marshalling(Parcel& parcel) const override;
     static RunningLockInfo* Unmarshalling(Parcel& parcel);
-};
-
-class VectorPair : public Parcelable {
-public:
-    inline void SetProcessInfos(const std::vector<std::pair<pid_t, pid_t>> &processInfos)
-    {
-        processInfos_ = processInfos;
-    }
-
-    inline std::vector<std::pair<pid_t, pid_t>> GetProcessInfos() const
-    {
-        return processInfos_;
-    }
-
-    virtual bool Marshalling(Parcel &parcel) const override;
-    static VectorPair* Unmarshalling(Parcel &parcel);
-
-private:
-    std::vector<std::pair<pid_t, pid_t>> processInfos_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

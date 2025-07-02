@@ -27,7 +27,6 @@
 #include "ffrt_utils.h"
 #include "ipower_mgr.h"
 #include "power_mgr_notify.h"
-#include "power_mgr_service_ipc_adapter.h"
 #include "power_mgr_stub.h"
 #include "power_mode_module.h"
 #include "power_save_mode.h"
@@ -54,7 +53,7 @@ enum class PowerConnectStatus : int32_t {
 #endif
 
 class RunningLockMgr;
-class PowerMgrService final : public SystemAbility, public PowerMgrServiceAdapter {
+class PowerMgrService final : public SystemAbility, public PowerMgrStub {
     DECLARE_SYSTEM_ABILITY(PowerMgrService)
     DECLARE_DELAYED_SP_SINGLETON(PowerMgrService);
 

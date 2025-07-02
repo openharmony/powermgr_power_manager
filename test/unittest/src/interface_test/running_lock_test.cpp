@@ -18,7 +18,6 @@
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
-#include "power_mgr_proxy.h"
 #include "power_mgr_service.h"
 #include "running_lock_mgr.h"
 #include "power_log.h"
@@ -29,8 +28,6 @@ using namespace OHOS;
 using namespace std;
 
 namespace {
-constexpr int32_t VECTOR_MAX_SIZE = 102400;
-constexpr int32_t TEST_PROCESS_COUNT = 2000;
 constexpr int32_t US_PER_MS = 1000;
 constexpr int32_t app0Uid = 8;
 constexpr int32_t app1Uid = 9;
@@ -42,7 +39,7 @@ namespace {
  * @tc.desc: Test RunningLockInnerKit function, connect PowerMgrService and call member function.
  * @tc.type: FUNC
  */
-HWTEST_F(RunningLockTest, RunningLockTest001, TestSize.Level0)
+HWTEST_F (RunningLockTest, RunningLockTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -63,7 +60,7 @@ HWTEST_F(RunningLockTest, RunningLockTest001, TestSize.Level0)
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
  */
-HWTEST_F(RunningLockTest, RunningLockTest002, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -93,7 +90,7 @@ HWTEST_F(RunningLockTest, RunningLockTest002, TestSize.Level1)
  * @tc.desc: Test RunningLockInnerKit function, timeout lock.
  * @tc.type: FUNC
  */
-HWTEST_F(RunningLockTest, RunningLockTest003, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest003 function start!");
     if (false) {
@@ -137,7 +134,7 @@ HWTEST_F(RunningLockTest, RunningLockTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6NWQD
  */
-HWTEST_F(RunningLockTest, RunningLockTest004, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest004 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -176,7 +173,7 @@ HWTEST_F(RunningLockTest, RunningLockTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F(RunningLockTest, RunningLockTest005, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest005 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -200,7 +197,7 @@ HWTEST_F(RunningLockTest, RunningLockTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F(RunningLockTest, RunningLockTest006, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest006, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest006 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -229,7 +226,7 @@ HWTEST_F(RunningLockTest, RunningLockTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F(RunningLockTest, RunningLockTest007, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest007, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest007 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -259,7 +256,7 @@ HWTEST_F(RunningLockTest, RunningLockTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F(RunningLockTest, RunningLockTest008, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest008 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -283,7 +280,7 @@ HWTEST_F(RunningLockTest, RunningLockTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F(RunningLockTest, RunningLockTest009, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest009, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest009 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -320,7 +317,7 @@ HWTEST_F(RunningLockTest, RunningLockTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F(RunningLockTest, RunningLockTest010, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest010 function start!");
     pid_t curUid = 1;
@@ -337,7 +334,7 @@ HWTEST_F(RunningLockTest, RunningLockTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI7405P
  */
-HWTEST_F(RunningLockTest, RunningLockTest011, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest011, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest011 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
@@ -356,7 +353,7 @@ HWTEST_F(RunningLockTest, RunningLockTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI7405P
  */
-HWTEST_F(RunningLockTest, RunningLockTest012, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest012, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest012 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
@@ -377,7 +374,7 @@ HWTEST_F(RunningLockTest, RunningLockTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI7405P
  */
-HWTEST_F(RunningLockTest, RunningLockTest013, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest013, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest013 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
@@ -404,11 +401,6 @@ HWTEST_F(RunningLockTest, RunningLockTest014, TestSize.Level1)
     processInfos.push_back(std::pair<pid_t, pid_t>(curPid, curUid));
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     EXPECT_TRUE(powerMgrClient.ProxyRunningLocks(true, processInfos));
-
-    for (int i = 0; i < TEST_PROCESS_COUNT; ++i) {
-        processInfos.emplace_back(static_cast<pid_t>(US_PER_MS + i), static_cast<pid_t>(TEST_PROCESS_COUNT + i));
-    }
-    EXPECT_FALSE(powerMgrClient.ProxyRunningLocks(true, processInfos));
     POWER_HILOGI(LABEL_TEST, "RunningLockTest014 function end!");
 }
 
@@ -449,7 +441,7 @@ HWTEST_F(RunningLockTest, RunningLockTest015, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F(RunningLockTest, RunningLockTest016, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest016, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest016 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -475,7 +467,7 @@ HWTEST_F(RunningLockTest, RunningLockTest016, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F(RunningLockTest, RunningLockTest017, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest017, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest017 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
@@ -493,8 +485,6 @@ HWTEST_F(RunningLockTest, RunningLockTest017, TestSize.Level1)
     EXPECT_FALSE(runningLock->IsUsed());
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(false, curPid, 0));
     EXPECT_TRUE(runningLock->IsUsed());
-    std::vector<int32_t> hugeWorkSource(VECTOR_MAX_SIZE + 1, 1);
-    EXPECT_EQ(runningLock->UpdateWorkSource(hugeWorkSource), E_INNER_ERR);
     runningLock->UnLock();
     POWER_HILOGI(LABEL_TEST, "RunningLockTest017 function end!");
 }
@@ -505,7 +495,7 @@ HWTEST_F(RunningLockTest, RunningLockTest017, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F(RunningLockTest, RunningLockTest018, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest018, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest018 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
@@ -515,7 +505,7 @@ HWTEST_F(RunningLockTest, RunningLockTest018, TestSize.Level1)
     sptr<IRemoteObject> remoteObj2 = nullptr;
     runninglockProxy->AddRunningLock(pid, uid, remoteObj);
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
-
+    
     EXPECT_TRUE(runninglockProxy->UpdateWorkSource(pid, uid, remoteObj, {{0, {"test", false}}}));
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj);
     EXPECT_TRUE(runninglockProxy->IncreaseProxyCnt(pid, uid));
@@ -529,7 +519,7 @@ HWTEST_F(RunningLockTest, RunningLockTest018, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require
  */
-HWTEST_F(RunningLockTest, RunningLockTest019, TestSize.Level1)
+HWTEST_F (RunningLockTest, RunningLockTest019, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockTest019 function start!");
     auto runninglockProxy = std::make_shared<RunningLockProxy>();
@@ -539,7 +529,7 @@ HWTEST_F(RunningLockTest, RunningLockTest019, TestSize.Level1)
     sptr<IRemoteObject> remoteObj2 = nullptr;
     runninglockProxy->AddRunningLock(pid, uid, remoteObj);
     runninglockProxy->RemoveRunningLock(pid, uid, remoteObj2);
-
+    
     EXPECT_TRUE(runninglockProxy->UpdateWorkSource(pid, uid, remoteObj, {{0, {"test019", false}}}));
     EXPECT_TRUE(runninglockProxy->UpdateProxyState(pid, uid, remoteObj, true));
     EXPECT_TRUE(runninglockProxy->UpdateProxyState(pid, uid, remoteObj, false));
@@ -571,29 +561,5 @@ HWTEST_F (RunningLockTest, RunningLockTest020, TestSize.Level1)
     runningLock->UnLock();
     EXPECT_FALSE(runningLock->IsUsed());
     POWER_HILOGI(LABEL_TEST, "RunningLockTest020 function end!");
-}
-
-HWTEST_F(RunningLockTest, RunningLockTest021, TestSize.Level1)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest021 function start!");
-    EXPECT_NE(stub_, nullptr);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor());
-    data.WriteInt32(1);
-    VectorPair vectorPairInfos;
-    std::vector<std::pair<pid_t, pid_t>> processInfos;
-    processInfos.reserve(VECTOR_MAX_SIZE + 1);
-    for (int i = 0; i <= VECTOR_MAX_SIZE; ++i) {
-        processInfos.emplace_back(i, i + 100);
-    }
-    vectorPairInfos.SetProcessInfos(processInfos);
-    EXPECT_FALSE(data.WriteParcelable(&vectorPairInfos));
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_PROXY_RUNNING_LOCKS_IPC), data, reply, option);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
-    POWER_HILOGI(LABEL_TEST, "RunningLockTest021 function end!");
 }
 } // namespace

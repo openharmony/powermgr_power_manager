@@ -18,7 +18,6 @@
 
 #include <gtest/gtest.h>
 
-#include "power_mgr_client.h"
 #include "power_mode_callback_stub.h"
 #include "power_state_callback_stub.h"
 #include "screen_off_pre_callback_stub.h"

@@ -31,15 +31,6 @@ namespace OHOS {
 namespace PowerMgr {
 class RunningLockTest : public testing::Test {
 public:
-    RunningLockTest()
-    {
-        sptr<PowerMgrService> service = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        service->OnStart();
-        stub_ = static_cast<PowerMgrStub*>(service);
-    }
-
-    ~RunningLockTest() = default;
-
     void TestRunningLockInnerExisit(sptr<IRemoteObject>& token, RunningLockInfo& runningLockInfo)
     {
         auto lockMap = runningLockMgr_->GetRunningLockMap();
@@ -64,8 +55,7 @@ public:
     }
 
     static std::shared_ptr<RunningLockMgr> runningLockMgr_;
-protected:
-    sptr<PowerMgrStub> stub_ {nullptr};
+    static sptr<PowerMgrService> pmsTest_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

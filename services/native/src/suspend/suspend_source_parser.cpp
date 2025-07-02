@@ -62,7 +62,7 @@ std::shared_ptr<SuspendSources> SuspendSourceParser::ParseSources()
         }
         configJsonStr = fileStringStr;
     }
-
+    
     if (isPowerConnected && isSettingAcValid) {
         configJsonStr = SettingHelper::GetSettingAcSuspendSources();
     } else if (!isPowerConnected && isSettingDcValid) {

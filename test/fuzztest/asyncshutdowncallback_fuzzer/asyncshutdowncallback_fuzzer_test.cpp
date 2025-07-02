@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "asyncshutdowncallback_fuzzer"
 
 #include "power_fuzzer.h"
-#include "ipower_mgr.h"
+#include "shutdown/shutdown_client_ipc_interface_code.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -30,9 +30,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
-    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(
-        IPowerMgrIpcCode::COMMAND_REGISTER_SHUTDOWN_CALLBACK_IPC_IN_IASYNCSHUTDOWNCALLBACK_IN_INT), data, size);
-    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(
-        IPowerMgrIpcCode::COMMAND_UN_REGISTER_SHUTDOWN_CALLBACK_IPC_IN_IASYNCSHUTDOWNCALLBACK), data, size);
+    g_serviceTest.TestPowerServiceStub(
+        static_cast<uint32_t>(ShutdownClientInterfaceCode::CMD_REG_ASYNC_SHUTDOWN_CALLBACK), data, size);
+    g_serviceTest.TestPowerServiceStub(
+        static_cast<uint32_t>(ShutdownClientInterfaceCode::CMD_UNREG_ASYNC_SHUTDOWN_CALLBACK), data, size);
     return 0;
 }

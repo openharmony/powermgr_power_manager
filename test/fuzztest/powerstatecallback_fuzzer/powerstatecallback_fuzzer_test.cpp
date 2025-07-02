@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "powerstatecallback_fuzzer"
 
 #include "power_fuzzer.h"
-#include "ipower_mgr.h"
+#include "power_mgr_ipc_interface_code.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -31,8 +31,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_POWER_STATE_CALLBACK_IPC), data, size);
+        static_cast<uint32_t>(PowerMgrInterfaceCode::REG_POWER_STATE_CALLBACK), data, size);
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_POWER_STATE_CALLBACK_IPC), data, size);
+        static_cast<uint32_t>(PowerMgrInterfaceCode::UNREG_POWER_STATE_CALLBACK), data, size);
     return 0;
 }
