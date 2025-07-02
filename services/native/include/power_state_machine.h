@@ -30,7 +30,6 @@
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
-#include "proximity_controller_base.h"
 #include "window_manager_lite.h"
 
 namespace OHOS {
@@ -418,7 +417,6 @@ private:
     std::atomic<int32_t> externalScreenNumber_ {0};
     std::mutex internalScreenStateMutex_;
 #endif
-    ProximityNormalController proximityNormalController_;
     bool SetDreamingState(StateChangeReason reason);
 };
 } // namespace PowerMgr

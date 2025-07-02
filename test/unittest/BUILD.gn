@@ -1403,3 +1403,8 @@ group("unittest") {
     ":test_running_lock_timer_handler",
   ]
 }
+
+group("unittest_ex") {
+  testonly = true
+  deps = [ "src/scenario_test:scenario_test" ]
+}
