@@ -18,7 +18,7 @@
 #define FUZZ_PROJECT_NAME "isrunninglocktypesupported_fuzzer"
 
 #include "power_fuzzer.h"
-#include "ipower_mgr.h"
+#include "power_mgr_ipc_interface_code.h"
 
 using namespace OHOS::PowerMgr;
 
@@ -31,6 +31,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_IS_RUNNING_LOCK_TYPE_SUPPORTED_IPC), data, size);
+        static_cast<uint32_t>(PowerMgrInterfaceCode::IS_RUNNINGLOCK_TYPE_SUPPORTED), data, size);
     return 0;
 }

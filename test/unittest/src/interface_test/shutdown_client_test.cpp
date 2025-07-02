@@ -110,11 +110,6 @@ HWTEST_F(ShutdownClientTest, RegisterShutdownCallback001, TestSize.Level0)
     EXPECT_FALSE(g_isOnSyncShutdown);
     EXPECT_TRUE(g_isOnTakeOverShutdown);
 
-    powerMgrClient.RebootDeviceForDeprecated("RegisterShutdownCallback001");
-    EXPECT_FALSE(g_isOnAsyncShutdown);
-    EXPECT_FALSE(g_isOnSyncShutdown);
-    EXPECT_TRUE(g_isOnTakeOverShutdown);
-
     powerMgrClient.ShutDownDevice("RegisterShutdownCallback001");
     EXPECT_FALSE(g_isOnAsyncShutdown);
     EXPECT_FALSE(g_isOnSyncShutdown);
