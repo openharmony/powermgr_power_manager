@@ -30,6 +30,7 @@
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "running_lock_token_stub.h"
+#include "mock_power_mgr_client.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -276,7 +277,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient009, TestSize.Level0)
     int32_t PARM_ONE = 1;
     int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + PARM_ONE;
     WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient = MockPowerMgrClient::GetInstance();
 
     powerMgrClient.WakeupDevice();
     // Suspend Device before test
