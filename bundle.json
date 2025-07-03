@@ -222,7 +222,8 @@
                 "//base/powermgr/power_manager/test:apitest",
                 "//base/powermgr/power_manager/test:unittest",
                 "//base/powermgr/power_manager/test:fuzztest",
-                "//base/powermgr/power_manager/test:systemtest"
+                "//base/powermgr/power_manager/test:systemtest",
+                "//base/powermgr/power_manager/frameworks/ets/taihe:power_manager_taihe_test"
             ]
         }
     }

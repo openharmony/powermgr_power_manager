@@ -93,7 +93,7 @@ ohos::runningLock::RunningLock CreateSync(string_view name, ohos::runningLock::R
     OHOS::PowerMgr::RunningLockType tp = static_cast<OHOS::PowerMgr::RunningLockType>(type.get_value());
     runLock = PowerMgrClient::GetInstance().CreateRunningLock(std::string(name), tp);
     PowerErrors code = PowerMgrClient::GetInstance().GetError();
-    if (code != PowerErrors::ERR_OK && errorTable.find(code) != errorTable.end()) {
+    if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         taihe::set_business_error(static_cast<int32_t>(code), errorTable[code]);
     }
     return make_holder<RunningLockImpl, ohos::runningLock::RunningLock>(runLock);
