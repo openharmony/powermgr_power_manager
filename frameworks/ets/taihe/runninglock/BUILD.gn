@@ -20,11 +20,6 @@ copy_taihe_idl("copy_power_manager_runninglock") {
   sources = [ "idl/ohos.runningLock.taihe" ]
 }
 
-subsystem_name = "powermgr"
-part_name = "power_manager"
-taihe_generated_file_path_runningLock =
-    "$taihe_file_path/out/$subsystem_name/$part_name/runningLock"
-
 ohos_taihe("run_taihe") {
   taihe_generated_file_path = "${taihe_generated_file_path_runningLock}"
   deps = [ ":copy_power_manager_runninglock" ]
@@ -42,8 +37,6 @@ taihe_shared_library("power_manager_runninglock_taihe_native") {
     debug = false
   }
   taihe_generated_file_path = "${taihe_generated_file_path_runningLock}"
-  part_name = "$part_name"
-  subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
   include_dirs = [ "./include" ]
   configs = [
@@ -59,6 +52,9 @@ taihe_shared_library("power_manager_runninglock_taihe_native") {
     "${powermgr_inner_api}:powermgr_client",
   ]
   external_deps = [ "hilog:libhilog" ]
+
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
 }
 
 generate_static_abc("runningLock_abc") {
@@ -79,7 +75,7 @@ generate_static_abc("runningLock_test_abc") {
 ohos_prebuilt_etc("runningLock_etc") {
   source = "$target_out_dir/runningLock_abc.abc"
   module_install_dir = "framework"
-  part_name = "$part_name"
-  subsystem_name = "$subsystem_name"
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
   deps = [ ":runningLock_abc" ]
 }

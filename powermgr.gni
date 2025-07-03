@@ -135,3 +135,5 @@ powermgr_inner_api = "${powermgr_root_path}/interfaces/inner_api"
 powermgr_utils_path = "${powermgr_root_path}/utils"
 
 system_type = "default"
+taihe_generated_file_path_power = "${root_out_dir}/taihe/out/powermgr/power_manager/power"
+taihe_generated_file_path_runningLock = "${root_out_dir}/taihe/out/powermgr/power_manager/runningLock"
