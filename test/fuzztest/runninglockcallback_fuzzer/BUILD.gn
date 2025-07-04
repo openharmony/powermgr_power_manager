@@ -53,7 +53,7 @@ ohos_fuzztest("RunningLockCallbackFuzzTest") {
     "./runninglockcallback_fuzzer_test.cpp",
   ]
   deps = [
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
