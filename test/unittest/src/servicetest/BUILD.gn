@@ -73,6 +73,12 @@ if (has_sensors_sensor_part) {
 
 ##############################native_test##########################################
 ohos_unittest("powermgr_native_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   module_out_path = module_output_path
 
   sources = [
@@ -88,7 +94,7 @@ ohos_unittest("powermgr_native_test") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -102,6 +108,12 @@ ohos_unittest("powermgr_native_test") {
 
 ##############################native_mock_parcel_test##########################################
 ohos_unittest("powermgr_native_mock_parcel_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   module_out_path = module_output_path
 
   sources = [
@@ -122,7 +134,7 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 

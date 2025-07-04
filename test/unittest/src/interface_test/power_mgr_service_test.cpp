@@ -178,7 +178,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService005: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 function end!");
 }
 
@@ -230,7 +230,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService008: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 function end!");
 }
 
@@ -249,7 +249,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
     EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     sleep(PARM_TWO);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService009: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 function end!");
 }
 
@@ -266,7 +266,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService010: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 function end!");
 }
 
@@ -283,7 +283,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);;
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService011: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 function end!");
 }
 
@@ -303,7 +303,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     sleep(PARM_TWO);
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService012: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 function end!");
 }
 
@@ -321,7 +321,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService013: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 function end!");
 }
 
@@ -339,7 +339,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService014: Prepare Fail, Screen is OFF.";
-    
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 function end!");
 }
 
@@ -407,6 +407,7 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService018, TestSize.Level0)
     runningLock->Lock();
     ASSERT_TRUE(runningLock->IsUsed()) << "runningLock->IsUsed() != true";
     runningLock->UnLock();
+    EXPECT_EQ(powerMgrClient.ResetRunningLocks(), true);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService018 function end!");
 }
 
@@ -868,5 +869,63 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest031, TestSize.Level2)
     sleep(NEXT_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest031 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService032
+ * @tc.desc: Test ForceSuspendDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService032, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService032 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(""), PowerErrors::ERR_OK);
+    powerMgrClient.WakeupDevice();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService032 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService033
+ * @tc.desc: Test Dump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService033, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService033 function start!");
+    size_t size = 1000;
+    std::vector<std::string> cmdsList;
+    for (size_t i = 0; i < size; i++) {
+        std::string cmd = "test_cmd" + std::to_string(i);
+        cmdsList.push_back(cmd);
+    }
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string result = powerMgrClient.Dump(cmdsList);
+
+    POWER_HILOGI(LABEL_TEST, "result : %{public}s", result.c_str());
+    EXPECT_EQ(true, result == "remote error");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService032 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService034
+ * @tc.desc: Test Dump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService034, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService034 function start!");
+    size_t size = 5;
+    std::vector<std::string> cmdsList;
+    for (size_t i = 0; i < size; i++) {
+        std::string cmd = "test_cmd" + std::to_string(i);
+        cmdsList.push_back(cmd);
+    }
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string result = powerMgrClient.Dump(cmdsList);
+
+    POWER_HILOGI(LABEL_TEST, "result : %{public}s", result.c_str());
+    EXPECT_EQ(true, result.empty());
+    POWER_HILOGI(LABEL_TEST, "PowerMgrService034 function end!");
 }
 }
