@@ -1924,9 +1924,10 @@ bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChange
         if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_FINISHED, std::memory_order_relaxed);
             ret = true;
+        } else {
+            POWER_HILOGW(
+                FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
         }
-        POWER_HILOGW(
-            FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
     } else {
         if (targetState != PowerState::SLEEP && curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
             POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
