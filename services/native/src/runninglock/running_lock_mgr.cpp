@@ -263,7 +263,6 @@ void RunningLockMgr::InitLocksTypeCoordination()
             } else {
                 stateAction->SetCoordinated(false);
                 result = counter->Decrease(backgroundLockParam);
-                AsyncWakeup();
             }
             return result;
         })
