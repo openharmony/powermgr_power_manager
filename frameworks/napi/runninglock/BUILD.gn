@@ -31,15 +31,10 @@ ohos_shared_library("runninglock") {
 
   deps_ex = [
     "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
-
-  if (defined(ark_hybrid) && ark_hybrid) {
-    deps_ex += [ "runtime_core:libarkruntime" ]
-  } else {
-    deps_ex += [ "ets_runtime:libark_jsruntime" ]
-  }
 
   if (!build_public_version) {
     external_deps = deps_ex
