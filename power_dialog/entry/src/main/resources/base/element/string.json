@@ -54,19 +54,31 @@
         },
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"Cancel"
+            "value":"Cancel",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"Power off"
+            "value":"Power off",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"Restart"
+            "value":"Restart",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"Power Options"
+            "value":"Power Options",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_KNOW",
@@ -103,7 +115,10 @@
         },
         {
             "name":"bn_notice_cancel",
-            "value":"End remote assistance"
+            "value":"End remote assistance",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_agree",
