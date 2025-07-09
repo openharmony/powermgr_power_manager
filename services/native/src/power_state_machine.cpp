@@ -2009,7 +2009,15 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
             g_callSetForceTimingOutPid, g_callSetForceTimingOutUid);
     }
     UpdateSettingStateFlag(state, reason);
+    auto pms = pms_.promote();
+    std::shared_ptr<WakeupController> wakeupController = pms ? pms->GetWakeupController() : nullptr;
+    if (wakeupController && state == PowerState::INACTIVE) {
+        wakeupController->RegisterMonitor(state);
+    }
     TransitResult ret = pController->TransitTo(reason, force);
+    if (wakeupController) {
+        wakeupController->RegisterMonitor(GetState());
+    }
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), ret);
     RestoreSettingStateFlag();
