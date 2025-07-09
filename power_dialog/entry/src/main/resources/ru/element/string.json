@@ -41,6 +41,41 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"Отмена",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"Перезагрузка",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_notice_cancel",
+            "value":"Завершить сеанс удаленной поддержки",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"Опции",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"Выключение",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

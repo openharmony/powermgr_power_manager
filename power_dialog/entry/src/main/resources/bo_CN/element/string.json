@@ -2,53 +2,80 @@
     "string":[
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"འདོར་བ།"
+            "value":"འདོར་བ།",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"བསྐྱར་སློང་།"
+            "value":"བསྐྱར་སློང་།",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"གློག་ཁུངས་གདམ་ག"
+            "value":"གློག་ཁུངས་གདམ་ག",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"སྒོ་རྒྱག་པ།"
+            "value":"སྒོ་རྒྱག་པ།",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"རྒྱང་རིང་རམ་འདེགས་གཅོད་པ།"
+            "value":"རྒྱང་རིང་རམ་འདེགས་གཅོད་པ།",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"WARNING_TIP",
             "value":"བརྙན་ཡོལ་མཉམ་སྤྱོད་བྱེད་སྐབས། ཚོགས་ཞུགས་མི་སྣས་ཁྱེད་ཀྱི་ཅོག་ངོས་ལ་རྒྱང་རིང་རམ་འདེགས་བྱེད་ཐུབ།",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
-            "value":"ཆོག་པ།"
+            "value":"ཆོག་པ།",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"text_inject_tip_title",
             "value":"%sཡིས་ཁྱེད་ཀྱི་བརྙན་ཡོལ་བཀོལ་ཆོག་པར་བྱེད་དམ།",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_title",
-            "value":"རྒྱང་རིང་རམ་འདེགས།"
+            "value":"རྒྱང་རིང་རམ་འདེགས།",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"notice_text",
-            "value":"%sཡིས་ཁྱེད་ལ་རྒྱང་རིང་རམ་འདེགས་བྱེད་བཞིན་པ།"
+            "value":"%sཡིས་ཁྱེད་ལ་རྒྱང་རིང་རམ་འདེགས་བྱེད་བཞིན་པ།",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"bn_not_agree",
-            "value":"མི་ཆོག"
+            "value":"མི་ཆོག",
+            "attr":{
+                "priority":"LT"
+            }
         }
     ]
 }

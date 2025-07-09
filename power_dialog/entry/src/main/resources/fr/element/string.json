@@ -1,78 +1,78 @@
 {
     "string":[
         {
-            "name":"WARNING_TIP",
-            "value":"يتيح هذا التحكم في شاشتك عن بُعد أثناء مشاركة الشاشة.",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"bn_agree",
-            "value":"سماح",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"text_inject_tip_title",
-            "value":"هل تسمح لـ %s باستخدام شاشتك؟",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"notice_title",
-            "value":"المساعدة عن بُعد",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"notice_text",
-            "value":"يُساعدك %s على العمل عن بُعد",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"bn_not_agree",
-            "value":"رفض",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"إلغاء",
+            "value":"Annuler",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"إعادة التشغيل",
+            "value":"Redémarrer",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"إنهاء المساعدة عن بُعد",
+            "value":"Mettre fin à l'Assistance à distance",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"Cette option permet de contrôler votre écran à distance pendant le partage d'écran.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_agree",
+            "value":"Autoriser",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"Autoriser %s à utiliser votre écran ?",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"خيارات الطاقة",
+            "value":"Options d'alimentation",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_title",
+            "value":"Assistance à distance",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_text",
+            "value":"%s vous assiste à distance",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"Refuser",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"إيقاف التشغيل",
+            "value":"Mise hors tension",
             "attr":{
                 "priority":"translate"
             }
