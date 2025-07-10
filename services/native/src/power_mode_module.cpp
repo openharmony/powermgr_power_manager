@@ -385,6 +385,11 @@ void PowerModeModule::PublishPowerModeEvent()
             code = static_cast<uint32_t>(PowerMode::EXTREME_POWER_SAVE_MODE);
             data = ToString(static_cast<uint32_t>(PowerMode::EXTREME_POWER_SAVE_MODE));
             break;
+        case PowerMode::CUSTOM_POWER_SAVE_MODE:
+            action = CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
+            code = static_cast<uint32_t>(PowerMode::CUSTOM_POWER_SAVE_MODE);
+            data = ToString(static_cast<uint32_t>(PowerMode::CUSTOM_POWER_SAVE_MODE));
+            break;
         default:
             POWER_HILOGW(FEATURE_POWER_MODE, "Unknown mode");
             return;

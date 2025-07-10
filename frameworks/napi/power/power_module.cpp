@@ -43,17 +43,20 @@ static napi_value CreateDevicePowerMode(napi_env env, napi_value exports)
     napi_value powerSave = nullptr;
     napi_value performance = nullptr;
     napi_value extremePowerSave = nullptr;
+    napi_value customPowerSave = nullptr;
 
     napi_create_int32(env, (int32_t)PowerMode::NORMAL_MODE, &normal);
     napi_create_int32(env, (int32_t)PowerMode::POWER_SAVE_MODE, &powerSave);
     napi_create_int32(env, (int32_t)PowerMode::PERFORMANCE_MODE, &performance);
     napi_create_int32(env, (int32_t)PowerMode::EXTREME_POWER_SAVE_MODE, &extremePowerSave);
+    napi_create_int32(env, (int32_t)PowerMode::CUSTOM_POWER_SAVE_MODE, &customPowerSave);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("MODE_NORMAL", normal),
         DECLARE_NAPI_STATIC_PROPERTY("MODE_POWER_SAVE", powerSave),
         DECLARE_NAPI_STATIC_PROPERTY("MODE_PERFORMANCE", performance),
         DECLARE_NAPI_STATIC_PROPERTY("MODE_EXTREME_POWER_SAVE", extremePowerSave),
+        DECLARE_NAPI_STATIC_PROPERTY("MODE_CUSTOM_POWER_SAVE", customPowerSave),
     };
     napi_value result = nullptr;
     napi_define_class(env, "DevicePowerMode", NAPI_AUTO_LENGTH, EnumPowerModeClassConstructor, nullptr,
