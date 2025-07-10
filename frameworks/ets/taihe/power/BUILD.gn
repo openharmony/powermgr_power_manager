@@ -20,11 +20,6 @@ copy_taihe_idl("copy_power_manager") {
   sources = [ "idl/ohos.power.taihe" ]
 }
 
-subsystem_name = "powermgr"
-part_name = "power_manager"
-taihe_generated_file_path_power =
-    "$taihe_file_path/out/$subsystem_name/$part_name/power"
-
 ohos_taihe("run_taihe") {
   taihe_generated_file_path = "${taihe_generated_file_path_power}"
   deps = [ ":copy_power_manager" ]
@@ -42,8 +37,6 @@ taihe_shared_library("power_manager_taihe_native") {
     debug = false
   }
   taihe_generated_file_path = "${taihe_generated_file_path_power}"
-  part_name = "$part_name"
-  subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
   include_dirs = [ "./include" ]
   configs = [
@@ -67,6 +60,9 @@ taihe_shared_library("power_manager_taihe_native") {
   if (has_ability_runtime_part) {
     external_deps += [ "ability_runtime:app_manager" ]
   }
+
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
 }
 
 generate_static_abc("power_abc") {
@@ -90,7 +86,7 @@ generate_static_abc("power_test") {
 ohos_prebuilt_etc("power_abc_etc") {
   source = "$target_out_dir/power_abc.abc"
   module_install_dir = "framework"
-  part_name = "$part_name"
-  subsystem_name = "$subsystem_name"
+  subsystem_name = "powermgr"
+  part_name = "${powermgr_part_name}"
   deps = [ ":power_abc" ]
 }
