@@ -1345,7 +1345,10 @@ ohos_unittest("test_device_power_action") {
     blocklist = "../cfi_blocklist.txt"
   }
 
-  sources = [ "src/device_power_action_test.cpp" ]
+  sources = [
+    "${powermgr_service_path}/native/src/power_hdi_callback.cpp",
+    "src/device_power_action_test.cpp",
+  ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",
@@ -1357,7 +1360,11 @@ ohos_unittest("test_device_power_action") {
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
   ]
   external_deps = deps_ex
-  external_deps += [ "init:libbegetutil" ]
+  external_deps += [
+    "drivers_interface_power:libpower_proxy_1.2",
+    "drivers_interface_power:libpower_proxy_1.3",
+    "init:libbegetutil",
+  ]
 }
 
 ##############################test_power_config_parse.#############################
