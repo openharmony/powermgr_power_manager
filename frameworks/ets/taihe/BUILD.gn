@@ -19,3 +19,11 @@ group("power_manager_taihe") {
     "runninglock:power_manager_runninglock_taihe_native",
   ]
 }
+
+group("power_manager_taihe_test") {
+  testonly = true
+  deps = [
+    "power/test/unittest:power_taihe_native_test",
+    "runninglock/test/unittest:runninglock_taihe_native_test",
+  ]
+}
