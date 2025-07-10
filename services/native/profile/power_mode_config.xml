@@ -20,6 +20,7 @@
     MODE_POWER_SAVE = 601,
     MODE_PERFORMANCE = 602,
     MODE_EXTREME_POWER_SAVE = 603,
+    MODE_CUSTOM_POWER_SAVE = 650,
 -->
 <!--
     Action Definitions:
@@ -56,6 +57,14 @@
         <switch id="120" value="1" recover_flag="0"/>
     </proxy>
     <proxy id="603">
+        <switch id="101" value="5000" recover_flag="0"/>
+        <switch id="102" value="1000" recover_flag="0"/>
+        <switch id="103" value="-1" recover_flag="0"/>
+        <switch id="107" value="-1" recover_flag="0"/>
+        <switch id="115" value="25" recover_flag="0"/>
+        <switch id="120" value="-1" recover_flag="0"/>
+    </proxy>
+    <proxy id="650">
         <switch id="101" value="5000" recover_flag="0"/>
         <switch id="102" value="1000" recover_flag="0"/>
         <switch id="103" value="-1" recover_flag="0"/>
