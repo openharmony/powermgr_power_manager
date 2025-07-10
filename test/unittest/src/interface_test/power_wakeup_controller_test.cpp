@@ -679,4 +679,28 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level
     delete callbackThird;
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: end");
 }
+
+/**
+ * @tc.name: PowerWakeupControllerTest022
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest022, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022: start");
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022: end");
+}
 } // namespace
