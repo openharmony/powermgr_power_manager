@@ -931,7 +931,12 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
     std::weak_ptr<PowerkeyWakeupMonitor> weak = weak_from_this();
-    powerkeyShortPressId_ = InputManager::GetInstance()->SubscribeKeyEvent(
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_WAKEUP, "PowerkeyWakeupMonitorInit inputManager is null");
+        return false;
+    }
+    powerkeyShortPressId_ = inputManager->SubscribeKeyEvent(
         keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             std::shared_ptr<PowerkeyWakeupMonitor> strong = weak.lock();
             if (!strong) {
@@ -998,9 +1003,14 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
 
 void PowerkeyWakeupMonitor::Cancel()
 {
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_WAKEUP, "PowerkeyWakeupMonitorCancel inputManager is null");
+        return;
+    }
     if (powerkeyShortPressId_ >= 0) {
         POWER_HILOGI(FEATURE_WAKEUP, "UnsubscribeKeyEvent: PowerkeyWakeupMonitor");
-        InputManager::GetInstance()->UnsubscribeKeyEvent(powerkeyShortPressId_);
+        inputManager->UnsubscribeKeyEvent(powerkeyShortPressId_);
     }
 }
 
