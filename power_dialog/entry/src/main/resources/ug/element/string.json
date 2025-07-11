@@ -2,53 +2,80 @@
     "string":[
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"بىكار قىلىش"
+            "value":"بىكار قىلىش",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"قايتا قوزغىتىش"
+            "value":"قايتا قوزغىتىش",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"توك مەنبە تاللانمىلىرى"
+            "value":"توك مەنبە تاللانمىلىرى",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"ئېتىش"
+            "value":"ئېتىش",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"يىراقتىن ياردەمنى ئۈزۈش"
+            "value":"يىراقتىن ياردەمنى ئۈزۈش",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"WARNING_TIP",
             "value":"ئېكران ئورتاقلاشقاندا يىغىندىكىلەر ئېكرانىڭىزدا مەشغۇلات قىلىپ، سىزگە يىراقتىن ياردەم بېرەلەيدۇ.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
-            "value":"رۇخسەت"
+            "value":"رۇخسەت",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"text_inject_tip_title",
             "value":"\u200f«%s» ئېكرانىڭىزنى ئىشلەتمەكچى",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_title",
-            "value":"يىراقتىن ياردەم"
+            "value":"يىراقتىن ياردەم",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"notice_text",
-            "value":"نۆۋەتتە %s سىزگە يىراقتىن ياردەم بېرىۋاتىدۇ."
+            "value":"نۆۋەتتە %s سىزگە يىراقتىن ياردەم بېرىۋاتىدۇ.",
+            "attr":{
+                "priority":"LT"
+            }
         },
         {
             "name":"bn_not_agree",
-            "value":"چەكلەش"
+            "value":"چەكلەش",
+            "attr":{
+                "priority":"LT"
+            }
         }
     ]
 }

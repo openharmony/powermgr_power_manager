@@ -1,78 +1,78 @@
 {
     "string":[
         {
-            "name":"WARNING_TIP",
-            "value":"يتيح هذا التحكم في شاشتك عن بُعد أثناء مشاركة الشاشة.",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"bn_agree",
-            "value":"سماح",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"text_inject_tip_title",
-            "value":"هل تسمح لـ %s باستخدام شاشتك؟",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"notice_title",
-            "value":"المساعدة عن بُعد",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"notice_text",
-            "value":"يُساعدك %s على العمل عن بُعد",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"bn_not_agree",
-            "value":"رفض",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"إلغاء",
+            "value":"Hủy",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"إعادة التشغيل",
+            "value":"Khởi động lại",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"إنهاء المساعدة عن بُعد",
+            "value":"Kết thúc hỗ trợ từ xa",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"Tính năng này cho phép điều khiển màn hình của bạn từ xa trong khi chia sẻ màn hình.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_agree",
+            "value":"Cho phép",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"Cho phép %s sử dụng màn hình của bạn?",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"خيارات الطاقة",
+            "value":"Tùy chọn nguồn",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_title",
+            "value":"Hỗ trợ từ xa",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_text",
+            "value":"%s đang hỗ trợ bạn từ xa",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"Từ chối",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"إيقاف التشغيل",
+            "value":"Tắt nguồn",
             "attr":{
                 "priority":"translate"
             }

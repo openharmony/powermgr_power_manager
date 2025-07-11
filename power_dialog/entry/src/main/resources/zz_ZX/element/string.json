@@ -34,7 +34,7 @@
         },
         {
             "name":"bn_notice_cancel",
-            "value":"[TS_941065]_Cancel the authorization"
+            "value":"[TS_941065]_End remote assistance"
         },
         {
             "name":"WARNING_TIP",
@@ -46,7 +46,7 @@
         },
         {
             "name":"notice_title",
-            "value":"[TS_941060]_Safety Tips"
+            "value":"[TS_941060]_Remote assistance"
         },
         {
             "name":"entry_desc",
@@ -54,7 +54,7 @@
         },
         {
             "name":"notice_text",
-            "value":"[TS_941046]_Injection permission has been granted."
+            "value":"[TS_941046]_%s is assisting you remotely"
         },
         {
             "name":"MainAbility_desc",
@@ -94,7 +94,19 @@
         },
         {
             "name":"bn_not_agree",
-            "value":"[TS_959924]_Don't allow"
+            "value":"[TS_959924]_Deny"
+        },
+        {
+            "name":"inject_notice_ability_label",
+            "value":"[TS_974171]_InjectNoticeAbility"
+        },
+        {
+            "name":"capsule_window_ability_label",
+            "value":"[TS_974172]_CapsuleWindowAbility"
+        },
+        {
+            "name":"inject_input_reason",
+            "value":"[TS_974173]_inject event"
         }
     ]
 }

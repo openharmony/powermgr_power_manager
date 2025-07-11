@@ -2,23 +2,38 @@
     "string":[
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"取消"
+            "value":"取消",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"重新啟動"
+            "value":"重新啟動",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"電源選項"
+            "value":"電源選項",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"關機"
+            "value":"關機",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"中斷遠端協助"
+            "value":"中斷遠端協助",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"WARNING_TIP",

@@ -1,78 +1,78 @@
 {
     "string":[
         {
-            "name":"WARNING_TIP",
-            "value":"يتيح هذا التحكم في شاشتك عن بُعد أثناء مشاركة الشاشة.",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"bn_agree",
-            "value":"سماح",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"text_inject_tip_title",
-            "value":"هل تسمح لـ %s باستخدام شاشتك؟",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"notice_title",
-            "value":"المساعدة عن بُعد",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"notice_text",
-            "value":"يُساعدك %s على العمل عن بُعد",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
-            "name":"bn_not_agree",
-            "value":"رفض",
-            "attr":{
-                "priority":"translate"
-            }
-        },
-        {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"إلغاء",
+            "value":"취소",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"إعادة التشغيل",
+            "value":"다시 시작",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"إنهاء المساعدة عن بُعد",
+            "value":"원격 지원 종료",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"화면 공유 중에도 원격으로 화면을 제어할 수 있습니다.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_agree",
+            "value":"허용",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"%s에서 화면을 사용하도록 허용하시겠습니까?",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"خيارات الطاقة",
+            "value":"전원 옵션",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_title",
+            "value":"원격 지원",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_text",
+            "value":"%s님이 원격으로 지원 중",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"거부",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"إيقاف التشغيل",
+            "value":"전원 끄기",
             "attr":{
                 "priority":"translate"
             }

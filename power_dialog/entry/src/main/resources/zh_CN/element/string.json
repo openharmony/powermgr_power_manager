@@ -42,19 +42,31 @@
         },
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"取消"
+            "value":"取消",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"关机"
+            "value":"关机",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"重启"
+            "value":"重启",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"电源选项"
+            "value":"电源选项",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"BUTTON_KNOW",
@@ -91,7 +103,10 @@
         },
         {
             "name":"bn_notice_cancel",
-            "value":"断开远程协助"
+            "value":"断开远程协助",
+            "attr":{
+                "priority":"translate"
+            }
         },
         {
             "name":"bn_agree",
