@@ -27,7 +27,8 @@ enum class PowerMode : uint32_t {
     POWER_SAVE_MODE,
     PERFORMANCE_MODE,
     EXTREME_POWER_SAVE_MODE,
-    POWER_MODE_MAX = EXTREME_POWER_SAVE_MODE
+    CUSTOM_POWER_SAVE_MODE = 650,
+    POWER_MODE_MAX = CUSTOM_POWER_SAVE_MODE
 };
 } // namespace PowerMgr
 } // namespace OHOS
