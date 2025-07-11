@@ -70,6 +70,7 @@ void PowerMgrSetDeviceModeTest::CommonEventServiCesSystemTest::OnReceiveEvent(co
     }
     uint32_t j = 2;
     EXPECT_EQ(g_i, j) << "PowerSavemode_022 fail to PowerModeCallback";
+    g_i = 0;
     POWER_HILOGI(LABEL_TEST, "CommonEventServiCesSystemTest::OnReceiveEvent other.");
 }
 
@@ -160,5 +161,28 @@ HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_002, TestSize.Level1)
     CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
     POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_002 function end!");
     GTEST_LOG_(INFO) << "PowerSetdevicemode_002: UnRegisterPowerModeCallback start.";
+}
+
+/**
+ * @tc.name: PowerSetdevicemode_003
+ * @tc.desc: ReceiveEvent
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrSetDeviceModeTest, PowerSetdevicemode_003, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_003 function start!");
+    bool result = false;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto subscriberPtr = std::make_shared<CommonEventServiCesSystemTest>(subscribeInfo);
+    result = CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+    EXPECT_TRUE(result);
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    PowerMode mode = PowerMode::CUSTOM_POWER_SAVE_MODE;
+    powerMgrClient.SetDeviceMode(mode);
+    CommonEventManager::UnSubscribeCommonEvent(subscriberPtr);
+    POWER_HILOGI(LABEL_TEST, "PowerSetdevicemode_003 function end!");
 }
 } // namespace

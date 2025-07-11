@@ -47,7 +47,7 @@ sptr<SettingObserver> g_wakeupSourcesKeyObserver = nullptr;
 #ifdef POWER_DOUBLECLICK_ENABLE
 const int32_t ERR_FAILED = -1;
 #endif
-
+constexpr int32_t EVENT_INTERVAL_MS = 1000;
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t OTHER_SYSTEM_DEVICE_ID = 0xAAAAAAFE;
@@ -59,10 +59,7 @@ WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMach
 {
     stateMachine_ = stateMachine;
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
-    std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
-    if (monitorId_ < 0) {
-        monitorId_ = InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(callback));
-    }
+    RegisterMonitor(PowerState::AWAKE);
 #endif
     eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD, 0);
     eventHandleMap_.emplace(WakeupDeviceType::WAKEUP_DEVICE_MOUSE, 0);
@@ -77,10 +74,44 @@ WakeupController::~WakeupController()
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputManager* inputManager = InputManager::GetInstance();
     if (monitorId_ >= 0) {
-        inputManager->RemoveMonitor(monitorId_);
+        inputManager->UnsubscribeInputActive(monitorId_);
     }
 #endif
     UnregisterSettingsObserver();
+}
+
+void WakeupController::RegisterMonitor(PowerState state)
+{
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    constexpr int32_t PARAM_ZERO = 0;
+    static PowerState curState = PowerState::UNKNOWN;
+    POWER_HILOGD(FEATURE_WAKEUP, "RegisterMonitor state: %{public}d -> %{public}d", static_cast<int32_t>(curState),
+        static_cast<int32_t>(state));
+    if (state != PowerState::AWAKE && state != PowerState::INACTIVE) {
+        POWER_HILOGE(FEATURE_WAKEUP, "not setting awake or inactive, return");
+        return;
+    }
+    std::lock_guard lock(mmiMonitorMutex_);
+    if (curState == state) {
+        POWER_HILOGE(FEATURE_WAKEUP, "State not changed, return");
+        return;
+    }
+    InputManager* inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_WAKEUP, "inputManager is null");
+        return;
+    }
+    if (monitorId_ >= PARAM_ZERO) {
+        POWER_HILOGE(FEATURE_WAKEUP, "removing monitor id = %{public}d", monitorId_);
+        inputManager->UnsubscribeInputActive(monitorId_);
+    }
+    std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
+    monitorId_ = inputManager->SubscribeInputActive(std::static_pointer_cast<IInputEventConsumer>(callback),
+        state == PowerState::AWAKE ? EVENT_INTERVAL_MS : static_cast<int64_t>(PARAM_ZERO));
+    curState = state;
+    POWER_HILOGD(FEATURE_WAKEUP, "new monitorid = %{public}d, new state = %{public}d", monitorId_,
+        static_cast<int32_t>(curState));
+#endif
 }
 
 void WakeupController::Init()
@@ -591,6 +622,11 @@ bool InputCallback::isKeyboardKeycode(int32_t keyCode) const
 
 void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
 {
+    if (!keyEvent) {
+        POWER_HILOGE(FEATURE_WAKEUP, "keyEvent is null");
+        return;
+    }
+    POWER_HILOGD(FEATURE_WAKEUP, "input keyEvent event received, action = %{public}d", keyEvent->GetAction());
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "get powerMgrService instance error");
@@ -598,11 +634,11 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     }
     // ignores remote event
     if (isRemoteEvent(keyEvent)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "is remote event, ignore");
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
-
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
         return;
@@ -612,7 +648,6 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         POWER_HILOGE(FEATURE_WAKEUP, "wakeupController is not init");
         return;
     }
-
     int32_t keyCode = keyEvent->GetKeyCode();
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     if (keyCode == KeyEvent::KEYCODE_F1) {
@@ -622,7 +657,6 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     } else if (keyCode == KeyEvent::KEYCODE_WAKEUP) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_TP_TOUCH;
     }
-
     if (isKeyboardKeycode(keyCode)) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD;
         if (wakeupController->CheckEventReciveTime(wakeupType) ||
@@ -630,7 +664,6 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
             return;
         }
     }
-
     POWER_HILOGD(FEATURE_WAKEUP, "[UL_POWER] KeyEvent wakeupType=%{public}u, keyCode=%{public}d", wakeupType, keyCode);
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
@@ -651,33 +684,9 @@ bool InputCallback::TouchEventAfterScreenOn(std::shared_ptr<PointerEvent> pointe
     return false;
 }
 
-void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
+WakeupDeviceType InputCallback::DetermineWakeupDeviceType(int32_t deviceType, int32_t sourceType) const
 {
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
-    if (!NonWindowEvent(pointerEvent)) {
-        return;
-    }
-    if (isRemoteEvent(pointerEvent)) {
-        return;
-    }
-    int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
-
-    PowerState state = pms->GetState();
-    if (TouchEventAfterScreenOn(pointerEvent, state)) {
-        return;
-    }
-    std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
     WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
-    PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        POWER_HILOGI(FEATURE_WAKEUP, "GetPointerItem false");
-    }
-    int32_t deviceType = pointerItem.GetToolType();
-    int32_t sourceType = pointerEvent->GetSourceType();
     if (deviceType == PointerEvent::TOOL_TYPE_PEN) {
         wakeupType = WakeupDeviceType::WAKEUP_DEVICE_PEN;
     } else {
@@ -695,10 +704,46 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
                 break;
         }
     }
+    return wakeupType;
+}
+
+void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const
+{
+    if (!pointerEvent) {
+        POWER_HILOGE(FEATURE_WAKEUP, "pointerEvent is null");
+        return;
+    }
+    POWER_HILOGD(FEATURE_WAKEUP, "input pointer event received, action = %{public}d", pointerEvent->GetPointerAction());
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    if (!NonWindowEvent(pointerEvent)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "generated by window event, ignore");
+        return;
+    }
+    if (isRemoteEvent(pointerEvent)) {
+        POWER_HILOGE(FEATURE_WAKEUP, "is remote event, ignore");
+        return;
+    }
+    int64_t now = static_cast<int64_t>(time(nullptr));
+    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    PowerState state = pms->GetState();
+    if (TouchEventAfterScreenOn(pointerEvent, state)) {
+        return;
+    }
+    std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
+    PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        POWER_HILOGI(FEATURE_WAKEUP, "GetPointerItem false");
+    }
+    int32_t deviceType = pointerItem.GetToolType();
+    int32_t sourceType = pointerEvent->GetSourceType();
+    wakeupType = DetermineWakeupDeviceType(deviceType, sourceType);
     if (wakeupController->CheckEventReciveTime(wakeupType)) {
         return;
     }
-
     if (wakeupType != WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PointerEvent wakeupType=%{public}u", wakeupType);
         wakeupController->ExecWakeupMonitorByReason(wakeupType);
@@ -719,7 +764,11 @@ bool InputCallback::NonWindowEvent(const std::shared_ptr<PointerEvent>& pointerE
 
 void InputCallback::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const
 {
-    POWER_HILOGD(FEATURE_WAKEUP, "AxisEvent");
+    if (!axisEvent) {
+        POWER_HILOGE(FEATURE_WAKEUP, "axisEvent is null");
+        return;
+    }
+    POWER_HILOGD(FEATURE_WAKEUP, "input axisEvent event received, action = %{public}d", axisEvent->GetAction());
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         return;

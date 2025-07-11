@@ -42,6 +42,7 @@ class WakeupController : public std::enable_shared_from_this<WakeupController> {
 public:
     explicit WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine);
     ~WakeupController();
+    void RegisterMonitor(PowerState state);
     void Init();
     void Cancel();
     void RegisterSettingsObserver();
@@ -104,6 +105,7 @@ private:
     std::mutex mutex_;
     std::mutex monitorMutex_;
     std::mutex eventHandleMutex_;
+    std::mutex mmiMonitorMutex_;
     static std::mutex sourceUpdateMutex_;
     int32_t monitorId_ {-1};
 };
@@ -120,6 +122,7 @@ public:
 private:
     bool isRemoteEvent(std::shared_ptr<InputEvent> event) const;
     bool isKeyboardKeycode(int32_t keyCode) const;
+    WakeupDeviceType DetermineWakeupDeviceType(int32_t deviceType, int32_t sourceType) const;
 };
 #endif
 
