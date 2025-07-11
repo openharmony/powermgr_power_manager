@@ -169,4 +169,21 @@ HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest005, TestSize.L
     EXPECT_TRUE(proximityControllerBase->IsEnabled());
     POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest005 function end!");
 }
+
+/**
+ * @tc.name: ProximityControllerBaseTest006
+ * @tc.desc: Test IProximityController SetStatus
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest006, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest006 function start!");
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest", nullptr);
+    EXPECT_EQ(proximityControllerBase->GetStatus(), 0);
+    proximityControllerBase->SetStatus(1);
+    EXPECT_EQ(proximityControllerBase->GetStatus(), 1);
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest006 function end!");
+}
 } // namespace
