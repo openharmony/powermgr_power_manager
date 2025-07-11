@@ -1924,9 +1924,10 @@ bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChange
         if (curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
             preBrightState_.store(PowerStateMachine::PRE_BRIGHT_FINISHED, std::memory_order_relaxed);
             ret = true;
+        } else {
+            POWER_HILOGW(
+                FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
         }
-        POWER_HILOGW(
-            FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
     } else {
         if (targetState != PowerState::SLEEP && curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
             POWER_HILOGI(FEATURE_WAKEUP, "Cancel pre-bright-auth timer, rason=%{public}s",
@@ -2008,7 +2009,15 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
             g_callSetForceTimingOutPid, g_callSetForceTimingOutUid);
     }
     UpdateSettingStateFlag(state, reason);
+    auto pms = pms_.promote();
+    std::shared_ptr<WakeupController> wakeupController = pms ? pms->GetWakeupController() : nullptr;
+    if (wakeupController && state == PowerState::INACTIVE) {
+        wakeupController->RegisterMonitor(state);
+    }
     TransitResult ret = pController->TransitTo(reason, force);
+    if (wakeupController) {
+        wakeupController->RegisterMonitor(GetState());
+    }
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), ret);
     RestoreSettingStateFlag();

@@ -621,4 +621,62 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest020 function end!");
 }
+
+/**
+ * @tc.name: PowerWakeupControllerTest021
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: start");
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    EXPECT_TRUE(wakeupController_ != nullptr);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+    wakeupController_->RegisterMonitor(PowerState::INACTIVE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+    wakeupController_->RegisterMonitor(PowerState::UNKNOWN);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+    powerStateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+    InputCallback* callbackFirst = new InputCallback();
+    std::shared_ptr<MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
+    keyEvent = nullptr;
+    callbackFirst->OnInputEvent(keyEvent);
+    delete callbackFirst;
+    InputCallback* callbackSecond = new InputCallback();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WakeupDeviceType wakeupType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
+    wakeupType = callbackSecond->DetermineWakeupDeviceType(PointerEvent::TOOL_TYPE_PEN,
+        PointerEvent::SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(wakeupType, WakeupDeviceType::WAKEUP_DEVICE_PEN);
+    wakeupType = callbackSecond->DetermineWakeupDeviceType(PointerEvent::TOOL_TYPE_MOUSE,
+        PointerEvent::SOURCE_TYPE_MOUSE);
+    EXPECT_EQ(wakeupType, WakeupDeviceType::WAKEUP_DEVICE_MOUSE);
+    wakeupType = callbackSecond->DetermineWakeupDeviceType(PointerEvent::TOOL_TYPE_TOUCHPAD,
+        PointerEvent::SOURCE_TYPE_TOUCHPAD);
+    EXPECT_EQ(wakeupType, WakeupDeviceType::WAKEUP_DEVICE_TOUCHPAD);
+    wakeupType = callbackSecond->DetermineWakeupDeviceType(PointerEvent::TOOL_TYPE_TOUCHPAD,
+        PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    EXPECT_EQ(wakeupType, WakeupDeviceType::WAKEUP_DEVICE_SINGLE_CLICK);
+    wakeupType = callbackSecond->DetermineWakeupDeviceType(PointerEvent::POINTER_ACTION_UNKNOWN,
+        PointerEvent::SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(wakeupType, WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN);
+    pointerEvent = nullptr;
+    callbackSecond->OnInputEvent(pointerEvent);
+    delete callbackSecond;
+    InputCallback* callbackThird = new InputCallback();
+    std::shared_ptr<MMI::AxisEvent> axisEvent = MMI::AxisEvent::Create();
+    axisEvent = nullptr;
+    callbackThird->OnInputEvent(axisEvent);
+    delete callbackThird;
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: end");
+}
 } // namespace
