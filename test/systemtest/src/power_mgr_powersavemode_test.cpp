@@ -367,4 +367,27 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_014, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_014 function end!");
     GTEST_LOG_(INFO) << "PowerSavemode_014: SetDeviceMode end.";
 }
+
+/**
+ * @tc.name: PowerSavemode_015
+ * @tc.desc: test SetDeviceMode in proxy
+ * @tc.type: FUNC
+ * @tc.require: issueI5MJZJ
+ */
+HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_015, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerSavemode_015: SetDeviceMode start.";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_015 function start!");
+    int PARM_ONE = 606;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    const sptr<IPowerModeCallback> callBack = new PowerModeTest1Callback();
+    powerMgrClient.UnRegisterPowerModeCallback(callBack);
+    PowerMode modeFirst = static_cast<PowerMode>(PARM_ONE);
+    PowerMode modeSecond = static_cast<PowerMode>(PARM_ONE);
+    powerMgrClient.SetDeviceMode(modeFirst);
+    modeFirst = powerMgrClient.GetDeviceMode();
+    EXPECT_NE(modeFirst, modeSecond) << "PowerSavemode_015 fail to PowerModeCallback";
+    POWER_HILOGI(LABEL_TEST, "PowerSavemode_015 function end!");
+    GTEST_LOG_(INFO) << "PowerSavemode_015: SetDeviceMode end.";
+}
 } // namespace

@@ -80,6 +80,10 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
     EXPECT_EQ(mode, powerModeModuleTest->GetModeItem());
     mode = static_cast<PowerMode>(POWERMODE);
     powerModeModuleTest->SetModeItem(mode);
+    mode = static_cast<PowerMode>(POWERMODE2);
+    powerModeModuleTest->SetModeItem(mode);
+    mode = static_cast<PowerMode>(POWERMODE3);
+    powerModeModuleTest->SetModeItem(mode);
 
     shared_ptr<PowerModeModule::CallbackManager> powerModeModuleManager =
                                             make_shared<PowerModeModule::CallbackManager>();
