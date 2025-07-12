@@ -29,6 +29,8 @@
 namespace OHOS {
 namespace PowerMgr {
 constexpr uint32_t POWERMODE = 607;
+constexpr uint32_t POWERMODE2 = 655;
+constexpr uint32_t POWERMODE3 = 1;
 constexpr int32_t GETI = 0;
 constexpr uint32_t READODE = 600;
 constexpr uint32_t MODEITEM = 7;
