@@ -83,6 +83,12 @@ void PowerModeModule::SetModeItem(PowerMode mode)
     }
 
     /* If it's a valid mode */
+    if (mode > PowerMode::EXTREME_POWER_SAVE_MODE && mode < PowerMode::POWER_MODE_MAX) {
+        POWER_HILOGW(FEATURE_POWER_MODE, "Invalid mode %{public}d", mode);
+        return;
+    }
+
+    /* If it's a valid mode */
     if (mode < PowerMode::POWER_MODE_MIN || mode > PowerMode::POWER_MODE_MAX) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid mode %{public}d", mode);
         return;
