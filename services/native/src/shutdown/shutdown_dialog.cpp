@@ -84,8 +84,13 @@ void ShutdownDialog::KeyMonitorInit()
     keyOption->SetFinalKey(KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(LONG_PRESS_DELAY_MS);
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "KeyMonitorInit inputManager is null");
+        return;
+    }
     longPressId_ =
-        InputManager::GetInstance()->SubscribeKeyEvent(keyOption, [this](std::shared_ptr<KeyEvent> keyEvent) {
+        inputManager->SubscribeKeyEvent(keyOption, [this](std::shared_ptr<KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_SHUTDOWN, "Receive long press powerkey");
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
             //If the power button is shielded, the shutdown screen is not displayed.

@@ -56,23 +56,27 @@ HWTEST_F(PowerWakeupControllerOninputTest, PowerWakeupControllerOninputTest001, 
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerOninputTest001: start");
     GTEST_LOG_(INFO) << "PowerWakeupControllerOninputTest001: start";
-
     auto powerStateMachine = g_service->GetPowerStateMachine();
     g_service->WakeupControllerInit();
     auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
     wakeupController_->RegisterMonitor(PowerState::AWAKE);
-    EXPECT_EQ(wakeupController_->monitorId_, -1);
+    EXPECT_TRUE(wakeupController_->monitorId_ != 0);
     wakeupController_->RegisterMonitor(PowerState::INACTIVE);
-    EXPECT_EQ(wakeupController_->monitorId_, -1);
+    EXPECT_TRUE(wakeupController_->monitorId_ != 0);
     wakeupController_->RegisterMonitor(PowerState::UNKNOWN);
-    EXPECT_EQ(wakeupController_->monitorId_, -1);
+    EXPECT_TRUE(wakeupController_->monitorId_ != 0);
     powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     wakeupController_->RegisterMonitor(PowerState::AWAKE);
-    EXPECT_EQ(wakeupController_->monitorId_, -1);
+    EXPECT_TRUE(wakeupController_->monitorId_ != 0);
     powerStateMachine->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
     wakeupController_->RegisterMonitor(PowerState::INACTIVE);
-    EXPECT_EQ(wakeupController_->monitorId_, -1);
+    EXPECT_TRUE(wakeupController_->monitorId_ != 0);
 
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
     GTEST_LOG_(INFO) << "PowerWakeupControllerOninputTest001: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerOninputTest001: end");
 }

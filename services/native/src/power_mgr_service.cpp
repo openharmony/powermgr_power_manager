@@ -530,8 +530,13 @@ void PowerMgrService::SwitchSubscriberInit()
 {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGW(FEATURE_INPUT, "Initialize the subscription switch");
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_INPUT, "SwitchSubscriberInit inputManager is null");
+        return;
+    }
     switchId_ =
-        InputManager::GetInstance()->SubscribeSwitchEvent([this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
+        inputManager->SubscribeSwitchEvent([this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
             POWER_HILOGI(FEATURE_WAKEUP, "switch event received");
             if (switchEvent->GetSwitchValue() == SwitchEvent::SWITCH_OFF) {
                 POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Switch close event received, begin to suspend");
@@ -562,8 +567,13 @@ void PowerMgrService::SwitchSubscriberCancel()
 {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGI(FEATURE_INPUT, "Unsubscribe switch information");
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_INPUT, "SwitchSubscriberCancel inputManager is null");
+        return;
+    }
     if (switchId_ >= 0) {
-        InputManager::GetInstance()->UnsubscribeSwitchEvent(switchId_);
+        inputManager->UnsubscribeSwitchEvent(switchId_);
         switchId_ = -1;
     }
 #endif
@@ -574,9 +584,14 @@ void PowerMgrService::InputMonitorInit()
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGI(FEATURE_INPUT, "PowerMgr service input monitor init");
     std::shared_ptr<PowerMgrInputMonitor> inputMonitor = std::make_shared<PowerMgrInputMonitor>();
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_INPUT, "InputMonitorInit inputManager is null");
+        return;
+    }
     if (inputMonitorId_ < 0) {
         inputMonitorId_ =
-            InputManager::GetInstance()->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(inputMonitor));
+            inputManager->AddMonitor(std::static_pointer_cast<IInputEventConsumer>(inputMonitor));
     }
 #endif
 }
@@ -586,6 +601,10 @@ void PowerMgrService::InputMonitorCancel()
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     POWER_HILOGI(FEATURE_INPUT, "PowerMgr service input monitor cancel");
     InputManager* inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_INPUT, "InputMonitorCancel inputManager is null");
+        return;
+    }
     if (inputMonitorId_ >= 0) {
         inputManager->RemoveMonitor(inputMonitorId_);
         inputMonitorId_ = -1;
