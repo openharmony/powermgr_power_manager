@@ -54,6 +54,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mgr_factory.cpp",
     "native/src/power_mgr_notify.cpp",
     "native/src/power_mgr_service.cpp",
+    "native/src/power_mgr_service_ipc_adapter.cpp",
     "native/src/power_mode_module.cpp",
     "native/src/power_mode_policy.cpp",
     "native/src/power_save_mode.cpp",
@@ -84,13 +85,16 @@ ohos_shared_library("powermgrservice") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  public_configs = [ ":powermgr_public_config" ]
+  public_configs = [
+    ":powermgr_public_config",
+    "zidl:powermgr_ipc_config"
+  ]
 
   public_deps = [ "${powermgr_utils_path}/setting:power_setting" ]
 
   deps = [
-    ":powermgr_stub",
     "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_utils_path}:power_utils",
     "${powermgr_utils_path}/ffrt:power_ffrt",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
@@ -264,47 +268,10 @@ ohos_shared_library("powermgrservice") {
   part_name = "${powermgr_part_name}"
 }
 
-config("zidl_private_config") {
-  include_dirs = [ "zidl/src/shutdown" ]
-}
-
-ohos_shared_library("powermgr_stub") {
-  sources = [
-    "zidl/src/power_mgr_async_reply.cpp",
-    "zidl/src/power_mgr_stub.cpp",
-    "zidl/src/power_mode_callback_stub.cpp",
-    "zidl/src/power_runninglock_callback_stub.cpp",
-    "zidl/src/power_state_callback_stub.cpp",
-    "zidl/src/screen_off_pre_callback_stub.cpp",
-    "zidl/src/shutdown/shutdown_stub_delegator.cpp",
-    "zidl/src/sync_sleep_callback_stub.cpp",
-  ]
-
-  configs = [
-    "${powermgr_utils_path}:utils_config",
-    "${powermgr_utils_path}:coverage_flags",
-    ":zidl_private_config",
-  ]
-
-  public_configs = [ ":powermgr_public_config" ]
-
-  deps = [ "${powermgr_inner_api}:powermgr_client" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hicollie:libhicollie",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-  ]
-
-  subsystem_name = "powermgr"
-  part_name = "${powermgr_part_name}"
-}
-
 group("service") {
   deps = [
-    ":powermgr_stub",
     ":powermgrservice",
     "native/profile:power_service_config",
+    "${powermgr_service_zidl}:powermgr_stub",
   ]
 }

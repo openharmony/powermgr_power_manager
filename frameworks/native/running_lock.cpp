@@ -23,6 +23,7 @@
 #include "errors.h"
 #include "new"
 #include "refbase.h"
+#include "power_common.h"
 #include "power_log.h"
 #include "power_mgr_errors.h"
 #include "running_lock_token_stub.h"
@@ -30,6 +31,7 @@
 namespace OHOS {
 namespace PowerMgr {
 constexpr int32_t DEFAULT_TIMEOUT = 3000;
+constexpr int32_t PARAM_MAX_SIZE = 2000;
 constexpr int32_t NOT_USE_TIMEOUT = -1;
 RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type)
     : proxy_(proxy)
@@ -62,7 +64,9 @@ PowerErrors RunningLock::Create()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "CProxy=null");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-    return proxy->CreateRunningLock(token_, runningLockInfo_);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_FAILURE);
+    proxy->CreateRunningLockIpc(token_, runningLockInfo_, powerError);
+    return static_cast<PowerErrors>(powerError);
 }
 
 PowerErrors RunningLock::Recover(const wptr<IPowerMgr>& proxy)
@@ -80,7 +84,10 @@ ErrCode RunningLock::UpdateWorkSource(const std::vector<int32_t>& workSources)
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "UpProxy=null");
         return E_GET_POWER_SERVICE_FAILED;
     }
-    if (!proxy->UpdateWorkSource(token_, workSources)) {
+    RETURN_IF_WITH_RET(workSources.size() > PARAM_MAX_SIZE, E_INNER_ERR);
+    int32_t ret = proxy->UpdateWorkSourceIpc(token_, workSources);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to UpdateWorkSource");
         return E_INNER_ERR;
     }
     return ERR_OK;
@@ -102,7 +109,9 @@ ErrCode RunningLock::Lock(int32_t timeOutMs)
         timeOutMs = DEFAULT_TIMEOUT;
         POWER_HILOGW(FEATURE_RUNNING_LOCK, "use default timeout");
     }
-    PowerErrors error = proxy->Lock(token_, timeOutMs);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_FAILURE);
+    proxy->LockIpc(token_, timeOutMs, powerError);
+    PowerErrors error = static_cast<PowerErrors>(powerError);
     if (error != PowerErrors::ERR_OK) {
         return error == PowerErrors::ERR_PERMISSION_DENIED ? E_PERMISSION_DENIED : E_INNER_ERR;
     }
@@ -117,7 +126,9 @@ ErrCode RunningLock::UnLock()
         return E_GET_POWER_SERVICE_FAILED;
     }
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Service side UnLock call");
-    PowerErrors error = proxy->UnLock(token_, runningLockInfo_.name);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_FAILURE);
+    proxy->UnLockIpc(token_, runningLockInfo_.name, powerError);
+    PowerErrors error = static_cast<PowerErrors>(powerError);
     if (error != PowerErrors::ERR_OK) {
         return error == PowerErrors::ERR_PERMISSION_DENIED ? E_PERMISSION_DENIED : E_INNER_ERR;
     }
@@ -131,7 +142,8 @@ bool RunningLock::IsUsed()
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "IProxy=null");
         return false;
     }
-    bool ret = proxy->IsUsed(token_);
+    bool ret = false;
+    proxy->IsUsedIpc(token_, ret);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Is Used: %{public}d", ret);
     return ret;
 }
@@ -145,7 +157,7 @@ void RunningLock::Release()
     }
     // ReleaseRunningLock
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "RlsN=%{public}s", runningLockInfo_.name.c_str());
-    proxy->ReleaseRunningLock(token_, runningLockInfo_.name);
+    proxy->ReleaseRunningLockIpc(token_, runningLockInfo_.name);
 }
 } // namespace PowerMgr
 } // namespace OHOS
