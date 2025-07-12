@@ -742,7 +742,12 @@ bool PowerKeySuspendMonitor::Init()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(false);
     keyOption->SetFinalKeyDownDuration(0);
-    powerkeyReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorInit inputManager is null");
+        return false;
+    }
+    powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
         keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             ReceivePowerkeyCallback(keyEvent);
         });
@@ -838,10 +843,15 @@ void PowerKeySuspendMonitor::EndPowerkeyScreenOff() const
 
 void PowerKeySuspendMonitor::Cancel()
 {
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorCancel inputManager is null");
+        return;
+    }
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
     if (powerkeyReleaseId_ >= 0) {
         POWER_HILOGI(FEATURE_SUSPEND, "UnsubscribeKeyEvent: PowerKeySuspendMonitor");
-        InputManager::GetInstance()->UnsubscribeKeyEvent(powerkeyReleaseId_);
+        inputManager->UnsubscribeKeyEvent(powerkeyReleaseId_);
         powerkeyReleaseId_ = -1;
     }
 #endif
@@ -893,7 +903,12 @@ bool TPCoverSuspendMonitor::Init()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_SLEEP);
     keyOption->SetFinalKeyDownDuration(0);
     std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
-    TPCoverReleaseId_ = InputManager::GetInstance()->SubscribeKeyEvent(
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
+        return false;
+    }
+    TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
         keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             std::shared_ptr<TPCoverSuspendMonitor> strong = weak.lock();
             if (!strong) {
@@ -913,9 +928,14 @@ bool TPCoverSuspendMonitor::Init()
 void TPCoverSuspendMonitor::Cancel()
 {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    auto inputManager = InputManager::GetInstance();
+    if (!inputManager) {
+        POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorCancel inputManager is null");
+        return;
+    }
     if (TPCoverReleaseId_ >= 0) {
         POWER_HILOGI(FEATURE_SUSPEND, "UnsubscribeKeyEvent: TPCoverSuspendMonitor");
-        InputManager::GetInstance()->UnsubscribeKeyEvent(TPCoverReleaseId_);
+        inputManager->UnsubscribeKeyEvent(TPCoverReleaseId_);
         TPCoverReleaseId_ = -1;
     }
 #endif
