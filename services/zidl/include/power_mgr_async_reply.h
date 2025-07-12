@@ -20,8 +20,6 @@
 #include <condition_variable>
 #include <nocopyable.h>
 #include "iremote_broker.h"
-#include "iremote_stub.h"
-#include "iremote_proxy.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -35,32 +33,6 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IPowerMgrAsync");
 };
 
-class PowerMgrStubAsync : public IRemoteStub<IPowerMgrAsync> {
-public:
-    DISALLOW_COPY_AND_MOVE(PowerMgrStubAsync);
-    PowerMgrStubAsync() = default;
-    ~PowerMgrStubAsync() override = default;
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void SendAsyncReply(int reply) override;
-    int WaitForAsyncReply(int timeout);
-private:
-    std::mutex mutex_;
-    std::condition_variable cv_;
-    int asyncReply_ = { 0 };
-    bool notified {false};
-};
-
-class PowerMgrProxyAsync : public IRemoteProxy<IPowerMgrAsync> {
-public:
-    explicit PowerMgrProxyAsync(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IPowerMgrAsync>(impl) {}
-    ~PowerMgrProxyAsync() = default;
-    DISALLOW_COPY_AND_MOVE(PowerMgrProxyAsync);
-
-    void SendAsyncReply(int reply) override;
-private:
-    static inline BrokerDelegator<PowerMgrProxyAsync> delegator_;
-};
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_SERVICES_ASYNC_REPLY_H

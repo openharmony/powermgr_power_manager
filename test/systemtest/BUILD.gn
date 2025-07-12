@@ -69,6 +69,13 @@ if (has_hiviewdfx_hisysevent_part) {
 ##############################systemtest##########################################
 
 ohos_systemtest("ces_system") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
   module_out_path = module_output_path
 
   sources = [ "src/ces_system_test.cpp" ]
@@ -81,7 +88,7 @@ ohos_systemtest("ces_system") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -111,7 +118,7 @@ ohos_systemtest("test_power_mgr_mock_system") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -141,7 +148,7 @@ ohos_systemtest("test_power_mgr_powersavemode") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -171,7 +178,7 @@ ohos_systemtest("test_power_mgr_powersetdevicemode") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -182,6 +189,13 @@ ohos_systemtest("test_power_mgr_powersetdevicemode") {
 ################################powermgrsystem################################
 
 ohos_systemtest("test_power_mgr_system") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
   module_out_path = module_output_path
 
   resource_config_file =
@@ -197,7 +211,7 @@ ohos_systemtest("test_power_mgr_system") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -227,7 +241,7 @@ ohos_systemtest("test_power_mgr_shutdown_fast") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -257,7 +271,7 @@ ohos_systemtest("test_power_level_event_system_test_off") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -287,7 +301,7 @@ ohos_systemtest("test_power_level_event_system_test_on") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -316,7 +330,7 @@ ohos_systemtest("test_power_st_mgr_mock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -345,7 +359,7 @@ ohos_systemtest("test_power_st_mgr_mock_suspend") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_path}:powermgr_stub",
+    "${powermgr_service_zidl}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
