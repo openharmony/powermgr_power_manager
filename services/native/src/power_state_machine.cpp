@@ -807,7 +807,7 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 void PowerStateMachine::DelayForHibernateInactive(bool clearMemory)
 {
     if (clearMemory) {
-        usleep(PREPARE_HIBERNATE_INACTIVE_DELAY_US); // 在灭屏之前增加延时以解决关机动效异常
+        usleep(PREPARE_HIBERNATE_INACTIVE_DELAY_US);
     }
 }
 
