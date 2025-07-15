@@ -22,10 +22,11 @@ copy_taihe_idl("copy_power_manager") {
 
 subsystem_name = "powermgr"
 part_name = "power_manager"
-taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
+taihe_generated_file_path_power =
+    "$taihe_file_path/out/$subsystem_name/$part_name/power"
 
 ohos_taihe("run_taihe") {
-  taihe_generated_file_path = "$taihe_generated_file_path"
+  taihe_generated_file_path = "${taihe_generated_file_path_power}"
   deps = [ ":copy_power_manager" ]
   outputs = [
     "$taihe_generated_file_path/src/ohos.power.ani.cpp",
@@ -40,7 +41,7 @@ taihe_shared_library("power_manager_taihe_native") {
     cfi_cross_dso = true
     debug = false
   }
-  taihe_generated_file_path = "$taihe_generated_file_path"
+  taihe_generated_file_path = "${taihe_generated_file_path_power}"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
@@ -69,8 +70,8 @@ taihe_shared_library("power_manager_taihe_native") {
 }
 
 generate_static_abc("power_abc") {
-  base_url = "$taihe_generated_file_path"
-  files = [ "$taihe_generated_file_path/@ohos.power.ets" ]
+  base_url = "${taihe_generated_file_path_power}"
+  files = [ "${taihe_generated_file_path_power}/@ohos.power.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/power_abc.abc"
   dependencies = [ ":run_taihe" ]
@@ -80,7 +81,7 @@ generate_static_abc("power_test") {
   base_url = "$powermgr_framework/ets/taihe/power/test"
   files = [
     "$powermgr_framework/ets/taihe/power/test/test_main.ets",
-    "$powermgr_framework/ets/taihe/power/test/test_power.ets"
+    "$powermgr_framework/ets/taihe/power/test/test_power.ets",
   ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/power_test.abc"
@@ -91,7 +92,5 @@ ohos_prebuilt_etc("power_abc_etc") {
   module_install_dir = "framework"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
-  deps = [
-    ":power_abc",
-  ]
+  deps = [ ":power_abc" ]
 }
