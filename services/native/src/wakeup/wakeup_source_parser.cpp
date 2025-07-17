@@ -18,6 +18,7 @@
 
 #include <cJSON.h>
 #include "config_policy_utils.h"
+#include "power_cjson_utils.h"
 #include "power_log.h"
 #include "setting_helper.h"
 #include "wakeup_source_parser.h"
@@ -115,7 +116,7 @@ std::shared_ptr<WakeupSources> WakeupSourceParser::ParseSources(const std::strin
         return parseSources;
     }
 
-    if (!cJSON_IsObject(root)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObjectOrJsonArray(root)) {
         POWER_HILOGE(FEATURE_WAKEUP, "json root invalid[%{public}s]", jsonStr.c_str());
         parseSources->SetParseErrorFlag(true);
         cJSON_Delete(root);
@@ -147,13 +148,13 @@ bool WakeupSourceParser::ParseSourcesProc(
     bool enable = true;
     uint32_t click = DOUBLE_CLICK;
     WakeupDeviceType wakeupDeviceType = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
-    if (valueObj && cJSON_IsObject(valueObj)) {
+    if (PowerMgrJsonUtils::IsValidJsonObject(valueObj)) {
         cJSON* enableValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupSource::ENABLE_KEY);
-        if (enableValue && cJSON_IsBool(enableValue)) {
+        if (PowerMgrJsonUtils::IsValidJsonBool(enableValue)) {
             enable = cJSON_IsTrue(enableValue);
         }
         cJSON* clickValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupSource::KEYS_KEY);
-        if (clickValue && cJSON_IsNumber(clickValue)) {
+        if (PowerMgrJsonUtils::IsValidJsonNumber(clickValue)) {
             uint32_t clickInt = static_cast<uint32_t>(clickValue->valueint);
             click = (clickInt == SINGLE_CLICK || clickInt == DOUBLE_CLICK) ? clickInt : DOUBLE_CLICK;
         }

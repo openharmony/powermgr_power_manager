@@ -20,6 +20,7 @@
 
 #include <cJSON.h>
 #include "config_policy_utils.h"
+#include "power_cjson_utils.h"
 #include "power_log.h"
 
 namespace OHOS {
@@ -84,8 +85,8 @@ std::shared_ptr<WakeupActionSources> WakeupActionSourceParser::ParseSources(cons
         return parseSources;
     }
 
-    if (!cJSON_IsObject(root)) {
-        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json root invalid");
+    if (!PowerMgrJsonUtils::IsValidJsonObjectOrJsonArray(root)) {
+        POWER_HILOGE(FEATURE_WAKEUP_ACTION, "json root invalid[%{public}s]", jsonStr.c_str());
         cJSON_Delete(root);
         return parseSources;
     }
@@ -115,14 +116,14 @@ bool WakeupActionSourceParser::ParseSourcesProc(
 {
     std::string scene{""};
     uint32_t action = 0;
-    if (valueObj && cJSON_IsObject(valueObj)) {
+    if (PowerMgrJsonUtils::IsValidJsonObject(valueObj)) {
         cJSON* sceneValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupActionSource::SCENE_KEY);
-        if (sceneValue && cJSON_IsString(sceneValue)) {
+        if (PowerMgrJsonUtils::IsValidJsonString(sceneValue)) {
             scene = sceneValue->valuestring;
             POWER_HILOGI(FEATURE_WAKEUP_ACTION, "scene=%{public}s", scene.c_str());
         }
         cJSON* actionValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupActionSource::ACTION_KEY);
-        if (actionValue && cJSON_IsNumber(actionValue)) {
+        if (PowerMgrJsonUtils::IsValidJsonNumber(actionValue)) {
             action = static_cast<uint32_t>(actionValue->valueint);
             POWER_HILOGI(FEATURE_WAKEUP_ACTION, "action=%{public}u", action);
             if (action >= ILLEGAL_ACTION) {
