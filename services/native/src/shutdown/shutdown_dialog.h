@@ -35,6 +35,7 @@ public:
     void ResetLongPressFlag();
     void StartVibrator();
     void LoadDialogConfig();
+    void ParseJsonConfig(std::string& contentStr);
     static std::string GetBundleName()
     {
         return bundleName_;
