@@ -94,7 +94,7 @@ ohos_unittest("powermgr_native_test") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -134,7 +134,7 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
