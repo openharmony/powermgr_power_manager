@@ -27,11 +27,8 @@
 
 namespace OHOS {
 namespace PowerMgr {
-namespace {
 constexpr int32_t MAX_PARAM_NUM = 2000;
 constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
-constexpr int32_t MAX_VERSION_STRING_SIZE = 4;
-}
 PowerErrors PowerMgrProxy::CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
     const RunningLockInfo& runningLockInfo)
 {
@@ -475,10 +472,8 @@ PowerErrors PowerMgrProxy::SetSuspendTag(const std::string& tag)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::SuspendDevice(
-    int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed, const std::string& apiVersion)
+PowerErrors PowerMgrProxy::SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
@@ -495,8 +490,6 @@ PowerErrors PowerMgrProxy::SuspendDevice(
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Uint32,
         static_cast<uint32_t>(reason), PowerErrors::ERR_CONNECTION_FAIL);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, suspendImmed, PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::SUSPEND_DEVICE), data, reply, option);
@@ -509,10 +502,8 @@ PowerErrors PowerMgrProxy::SuspendDevice(
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::WakeupDevice(
-    int64_t callTimeMs, WakeupDeviceType reason, const std::string& details, const std::string& apiVersion)
+PowerErrors PowerMgrProxy::WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
 {
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
@@ -529,8 +520,6 @@ PowerErrors PowerMgrProxy::WakeupDevice(
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Uint32,
         static_cast<uint32_t>(reason), PowerErrors::ERR_CONNECTION_FAIL);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, String16, Str8ToStr16(details), PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::WAKEUP_DEVICE), data, reply, option);
@@ -596,9 +585,8 @@ bool PowerMgrProxy::RefreshActivity(int64_t callTimeMs, UserActivityType type, b
     return true;
 }
 
-PowerErrors PowerMgrProxy::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrProxy::OverrideScreenOffTime(int64_t timeout)
 {
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
@@ -612,8 +600,6 @@ PowerErrors PowerMgrProxy::OverrideScreenOffTime(int64_t timeout, const std::str
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int64, timeout, PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::OVERRIDE_DISPLAY_OFF_TIME),
@@ -628,9 +614,8 @@ PowerErrors PowerMgrProxy::OverrideScreenOffTime(int64_t timeout, const std::str
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrProxy::RestoreScreenOffTime()
 {
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
@@ -642,9 +627,6 @@ PowerErrors PowerMgrProxy::RestoreScreenOffTime(const std::string& apiVersion)
         POWER_HILOGE(COMP_FWK, "Write descriptor failed");
         return PowerErrors::ERR_CONNECTION_FAIL;
     }
-
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
 
     int ret = remote->SendRequest(
         static_cast<int>(PowerMgr::PowerMgrInterfaceCode::RESTORE_DISPLAY_OFF_TIME),
@@ -659,9 +641,8 @@ PowerErrors PowerMgrProxy::RestoreScreenOffTime(const std::string& apiVersion)
     return static_cast<PowerErrors>(error);
 }
 
-PowerErrors PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion)
+PowerErrors PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs)
 {
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
@@ -675,8 +656,6 @@ PowerErrors PowerMgrProxy::ForceSuspendDevice(int64_t callTimeMs, const std::str
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Int64, callTimeMs, PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     data.WriteRemoteObject(asyncCallback->AsObject());
 
@@ -1149,9 +1128,8 @@ bool PowerMgrProxy::SetDisplaySuspend(bool enable)
     return true;
 }
 
-PowerErrors PowerMgrProxy::Hibernate(bool clearMemory, const std::string& apiVersion)
+PowerErrors PowerMgrProxy::Hibernate(bool clearMemory)
 {
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     sptr<IRemoteObject> remote = Remote();
     RETURN_IF_WITH_RET(remote == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
 
@@ -1165,8 +1143,6 @@ PowerErrors PowerMgrProxy::Hibernate(bool clearMemory, const std::string& apiVer
     }
 
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(data, Bool, clearMemory, PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(
-        data, String16, Str8ToStr16(apiVersion), PowerErrors::ERR_CONNECTION_FAIL);
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     data.WriteRemoteObject(asyncCallback->AsObject());
 
