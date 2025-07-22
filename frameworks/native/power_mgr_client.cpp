@@ -200,22 +200,20 @@ PowerErrors PowerMgrClient::SetSuspendTag(const std::string &tag)
     return proxy->SetSuspendTag(tag);
 }
 
-PowerErrors PowerMgrClient::SuspendDevice(
-    SuspendDeviceType reason, bool suspendImmed, const std::string& apiVersion)
+PowerErrors PowerMgrClient::SuspendDevice(SuspendDeviceType reason, bool suspendImmed)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGD(FEATURE_SUSPEND, " Calling SuspendDevice success");
-    return proxy->SuspendDevice(GetTickCount(), reason, suspendImmed, apiVersion);
+    return proxy->SuspendDevice(GetTickCount(), reason, suspendImmed);
 }
 
-PowerErrors PowerMgrClient::WakeupDevice(
-    WakeupDeviceType reason, const std::string& detail, const std::string& apiVersion)
+PowerErrors PowerMgrClient::WakeupDevice(WakeupDeviceType reason, const std::string& detail)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
-    return proxy->WakeupDevice(GetTickCount(), reason, detail, apiVersion);
+    return proxy->WakeupDevice(GetTickCount(), reason, detail);
 }
 
 void PowerMgrClient::WakeupDeviceAsync(WakeupDeviceType reason, const std::string& detail)
@@ -235,7 +233,7 @@ bool PowerMgrClient::RefreshActivity(UserActivityType type)
     return ret;
 }
 
-PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
 {
     if (timeout <= 0) {
         POWER_HILOGW(COMP_FWK, "Invalid timeout, timeout=%{public}" PRId64 "", timeout);
@@ -243,16 +241,16 @@ PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::st
     }
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy->OverrideScreenOffTime(timeout, apiVersion);
+    PowerErrors ret = proxy->OverrideScreenOffTime(timeout);
     POWER_HILOGD(COMP_FWK, "Calling OverrideScreenOffTime Success");
     return ret;
 }
 
-PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrClient::RestoreScreenOffTime()
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy->RestoreScreenOffTime(apiVersion);
+    PowerErrors ret = proxy->RestoreScreenOffTime();
     POWER_HILOGD(COMP_FWK, "Calling RestoreScreenOffTime Success");
     return ret;
 }
@@ -265,11 +263,11 @@ bool PowerMgrClient::IsRunningLockTypeSupported(RunningLockType type)
     return proxy->IsRunningLockTypeSupported(type);
 }
 
-PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
+PowerErrors PowerMgrClient::ForceSuspendDevice()
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    PowerErrors ret = proxy->ForceSuspendDevice(GetTickCount(), apiVersion);
+    PowerErrors ret = proxy->ForceSuspendDevice(GetTickCount());
     POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDevice Success");
     return ret;
 }
@@ -470,11 +468,11 @@ bool PowerMgrClient::SetDisplaySuspend(bool enable)
     return ret;
 }
 
-PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& apiVersion)
+PowerErrors PowerMgrClient::Hibernate(bool clearMemory)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    return proxy->Hibernate(clearMemory, apiVersion);
+    return proxy->Hibernate(clearMemory);
 }
 
 PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)

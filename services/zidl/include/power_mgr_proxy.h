@@ -59,19 +59,17 @@ public:
     virtual bool ResetRunningLocks() override;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     // Use for PowerStateMachine
-    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,
-        bool suspendImmed, const std::string& apiVersion = "-1") override;
-    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
-        const std::string& details, const std::string& apiVersion = "-1") override;
+    virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed) override;
+    virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual void WakeupDeviceAsync(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) override;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) override;
-    virtual PowerErrors OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion = "-1") override;
-    virtual PowerErrors RestoreScreenOffTime(const std::string& apiVersion = "-1") override;
+    virtual PowerErrors OverrideScreenOffTime(int64_t timeout) override;
+    virtual PowerErrors RestoreScreenOffTime() override;
     virtual PowerState GetState() override;
     virtual bool IsScreenOn(bool needPrintLog = true) override;
     virtual bool IsFoldScreenOn() override;
     virtual bool IsCollaborationScreenOn() override;
-    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") override;
+    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
@@ -85,7 +83,7 @@ public:
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
-    virtual PowerErrors Hibernate(bool clearMemory, const std::string& apiVersion = "-1") override;
+    virtual PowerErrors Hibernate(bool clearMemory) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
