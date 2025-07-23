@@ -358,6 +358,12 @@ void PowerStateMachine::EmplaceInactive()
     controllerMap_.emplace(PowerState::INACTIVE,
         std::make_shared<StateController>(PowerState::INACTIVE, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_INACTIVE lambda start");
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+            TransitResult result = TakeOverSuspendAction(reason);
+            if (result != TransitResult::SUCCESS) {
+                return result;
+            }
+#endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER_UE, "SCREEN_OFF",
                 HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PNAMEID", "PowerManager", "PVERSIONID", "1.0",
@@ -788,8 +794,14 @@ bool PowerStateMachine::RestoreScreenOffTimeInner()
 
 bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 {
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    auto setStateRet = SetState(
+        PowerState::INACTIVE, GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
+    RETURN_IF_WITH_RET(!setStateRet, true);
+#else
     SetState(
         PowerState::INACTIVE, GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), true);
+#endif
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto suspendController = pms->GetSuspendController();
     if (suspendController != nullptr) {
@@ -2211,6 +2223,30 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
     return ret;
 }
 
+SuspendDeviceType PowerStateMachine::GetSuspendTypeByReason(StateChangeReason reason)
+{
+    POWER_HILOGD(FEATURE_SUSPEND, "GetSuspendTypeByReason reason: %{public}u", reason);
+    SuspendDeviceType ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION;
+    switch (reason) {
+        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT:
+            ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK:
+            ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_HARD_KEY:
+            ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_SYSTEM:
+            ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND;
+            break;
+        default:
+            break;
+    }
+    POWER_HILOGD(FEATURE_SUSPEND, "SuspendDeviceType: %{public}u", ret);
+    return ret;
+}
+
 StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType type)
 {
     POWER_HILOGD(FEATURE_SUSPEND, "SuspendDeviceType: %{public}u", type);
@@ -2403,7 +2439,7 @@ TransitResult PowerStateMachine::StateController::TransitTo(StateChangeReason re
         if (needNotify) {
             owner->NotifyPowerStateChanged(owner->currentState_, reason);
         }
-    } else if (IsReallyFailed(reason)) {
+    } else if (IsReallyFailed(reason) && (ret != TransitResult::TAKEN_OVER)) {
         RecordFailure(owner->currentState_, reason, ret);
     }
 
@@ -2629,5 +2665,29 @@ bool PowerStateMachine::ReportAbnormalScreenOffEvent(StateChangeReason reason)
     FFRTUtils::SubmitTask(task);
     return true;
 }
+
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+TransitResult PowerStateMachine::TakeOverSuspendAction(StateChangeReason reason)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "pms is nullptr");
+        return TransitResult::OTHER_ERR;
+    }
+
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "suspendController is nullptr");
+        return TransitResult::OTHER_ERR;
+    }
+
+    bool isTakenOver = suspendController->TriggerTakeOverSuspendCallback(GetSuspendTypeByReason(reason));
+    if (isTakenOver) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Suspend is taken over by OnTakeOverSuspend callback");
+        return TransitResult::TAKEN_OVER;
+    }
+    return TransitResult::SUCCESS;
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS

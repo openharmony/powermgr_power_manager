@@ -23,6 +23,7 @@
 #include "power_state_callback_stub.h"
 #include "screen_off_pre_callback_stub.h"
 #include "power_runninglock_callback_stub.h"
+#include "suspend/itake_over_suspend_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {

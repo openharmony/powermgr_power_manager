@@ -1625,6 +1625,47 @@ bool PowerMgrService::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>
     return true;
 }
 
+bool PowerMgrService::RegisterSuspendTakeoverCallback(
+    const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority)
+{
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Permission deny");
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "Func %{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+    if (suspendController_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "suspendController_ is nullptr");
+        return false;
+    }
+    suspendController_->AddCallback(callback, priority);
+    return true;
+#else
+    return true;
+#endif
+}
+
+bool PowerMgrService::UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback)
+{
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Permission deny");
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "Func %{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+    suspendController_->RemoveCallback(callback);
+    return true;
+#else
+    return true;
+#endif
+}
+
 bool PowerMgrService::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
 {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4

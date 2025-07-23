@@ -33,6 +33,9 @@
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include "i_input_event_consumer.h"
 #endif
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+#include "suspend_takeover_callback_holder.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -59,8 +62,11 @@ public:
     bool GetPowerkeyDownWhenScreenOff();
 
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
+    void AddCallback(const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority);
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
+    void RemoveCallback(const sptr<ITakeOverSuspendCallback>& callback);
     void TriggerSyncSleepCallback(bool isWakeup);
+    bool TriggerTakeOverSuspendCallback(SuspendDeviceType type);
     void UpdateSuspendSources();
 
     std::shared_ptr<PowerStateMachine> GetStateMachine() const
@@ -111,6 +117,11 @@ private:
 
     void TriggerSyncSleepCallbackInner(
         SleepCallbackHolder::SleepCallbackContainerType& callbacks, const std::string& priority, bool isWakeup);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    bool TriggerTakeOverSuspendCallbackInner(
+        TakeOverSuspendCallbackHolder::TakeoverSuspendCallbackContainerType& callbacks,
+        const std::string& priority, SuspendDeviceType type);
+#endif
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     std::vector<SuspendSource> sourceList_;
@@ -125,6 +136,7 @@ private:
     bool powerkeyDownWhenScreenOff_ = false;
     std::mutex mutex_;
     std::mutex sleepCbMutex_;
+    std::mutex suspendMutex_;
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST

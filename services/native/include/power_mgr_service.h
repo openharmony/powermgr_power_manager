@@ -115,6 +115,9 @@ public:
 
     virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) override;
     virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) override;
+    virtual bool RegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback,
+        TakeOverSuspendPriority priority) override;
+    virtual bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback) override;
     virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
     virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
 

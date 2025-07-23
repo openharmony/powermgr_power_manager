@@ -45,7 +45,8 @@
             "power_manager_feature_block_long_press",
             "power_manager_feature_judging_takeover_shutdown",
             "power_manager_feature_watch_limit_screen_common_event_publish",
-            "power_manager_feature_watch_update_adapt"
+            "power_manager_feature_watch_update_adapt",
+            "power_manager_feature_surport_takeover_suspend"
         ],
         "adapted_system_type": [
             "standard"
@@ -141,7 +142,8 @@
                         "shutdown/shutdown_priority.h",
                         "shutdown/sync_shutdown_callback_stub.h",
                         "shutdown/takeover_info.h",
-                        "shutdown/takeover_shutdown_callback_stub.h"
+                        "shutdown/takeover_shutdown_callback_stub.h",
+                        "suspend/itake_over_suspend_callback.h"
                       ],
                       "header_base": "//base/powermgr/power_manager/interfaces/inner_api/native/include"
                     }
