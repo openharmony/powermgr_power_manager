@@ -29,6 +29,7 @@
 #include "running_lock_info.h"
 #include "running_lock_token_stub.h"
 #include "power_mgr_async_reply_stub.h"
+#include "takeover_suspend_callback_proxy.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -74,6 +75,12 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     std::shared_ptr<PowerStateCallbackProxy> stateCallbackProxy = std::make_shared<PowerStateCallbackProxy>(remote);
     PowerState state = PowerState::AWAKE;
     stateCallbackProxy->OnPowerStateChanged(state);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    std::shared_ptr<TakeOverSuspendCallbackProxy> suspendCallbackProxy =
+        std::make_shared<TakeOverSuspendCallbackProxy>(remote);
+    SuspendDeviceType type = SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY;
+    suspendCallbackProxy->OnTakeOverSuspend(type);
+#endif
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     sptrProxy->CreateRunningLockIpc(token, info, powerError);

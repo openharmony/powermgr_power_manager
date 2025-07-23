@@ -458,6 +458,31 @@ bool PowerMgrClient::UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>&
     return ret == ERR_OK;
 }
 
+bool PowerMgrClient::RegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback,
+                                                     TakeOverSuspendPriority priority)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s start", __func__);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    if ((callback == nullptr) || (proxy == nullptr)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s callback or proxy is nullptr", __func__);
+        return false;
+    }
+    int32_t ret = proxy->RegisterSuspendTakeoverCallbackIpc(callback, static_cast<int>(priority));
+    return ret == ERR_OK;
+}
+
+bool PowerMgrClient::UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s start", __func__);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    if ((callback == nullptr) || (proxy == nullptr)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s callback or proxy is nullptr", __func__);
+        return false;
+    }
+    int32_t ret = proxy->UnRegisterSuspendTakeoverCallbackIpc(callback);
+    return ret == ERR_OK;
+}
+
 bool PowerMgrClient::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();

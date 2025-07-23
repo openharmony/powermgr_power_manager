@@ -307,6 +307,42 @@ int32_t PowerMgrServiceAdapter::RegisterPowerModeCallbackIpc(const sptr<IPowerMo
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::RegisterSuspendTakeoverCallbackIpc(
+    const sptr<ITakeOverSuspendCallback>& callback, int32_t priority)
+{
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    if (callback == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
+        return INIT_VALUE;
+    }
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterSuspendTakeoverCallback", false);
+    if (priority < static_cast<int32_t>(TakeOverSuspendPriority::LOW) ||
+        priority > static_cast<int32_t>(TakeOverSuspendPriority::HIGH)) {
+        return INIT_VALUE;
+    }
+    TakeOverSuspendPriority takeOverSuspendPriority = static_cast<TakeOverSuspendPriority>(priority);
+    RegisterSuspendTakeoverCallback(callback, takeOverSuspendPriority);
+    return ERR_OK;
+#else
+    return ERR_OK;
+#endif
+}
+
+int32_t PowerMgrServiceAdapter::UnRegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback)
+{
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    if (callback == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
+        return INIT_VALUE;
+    }
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterSuspendTakeoverCallback", false);
+    UnRegisterSuspendTakeoverCallback(callback);
+    return ERR_OK;
+#else
+    return ERR_OK;
+#endif
+}
+
 int32_t PowerMgrServiceAdapter::UnRegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterPowerModeCallback", false);

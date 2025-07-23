@@ -928,4 +928,88 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService034, TestSize.Level0)
     EXPECT_EQ(true, result.empty());
     POWER_HILOGI(LABEL_TEST, "PowerMgrService034 function end!");
 }
+
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
+    public:
+        TestTakeOverSuspendCallback() = default;
+        virtual ~TestTakeOverSuspendCallback() = default;
+
+        bool OnTakeOverSuspend(SuspendDeviceType type) override
+        {
+            return false;
+        }
+        sptr<IRemoteObject> AsObject() override
+        {
+            return nullptr;
+        }
+};
+
+/**
+ * @tc.name: PowerMgrService035
+ * @tc.desc: Test PowerStateMachine::EmplaceInactive()
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService035, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService035 function start!");
+    auto powerMgrService = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    std::shared_ptr<PowerStateMachine> stateMachine = powerMgrService->GetPowerStateMachine();
+    stateMachine->EmplaceInactive();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService035 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService036
+ * @tc.desc: Test StateChangeReason Get
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService036, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService036 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    ASSERT_TRUE(pmsTest_ != nullptr) << "PowerMgrService036 failed to get PowerMgrService";
+    auto stateMachine_ = pmsTest_->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine_ != nullptr) << "PowerMgrService036 failed to get PowerStateMachine";
+
+    stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
+    stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_SYSTEM);
+    EXPECT_EQ(stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT),
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_EQ(stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK),
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_EQ(stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_HARD_KEY),
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
+    EXPECT_EQ(stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_SYSTEM),
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND);
+    EXPECT_EQ(stateMachine_->GetSuspendTypeByReason(StateChangeReason::STATE_CHANGE_REASON_UNKNOWN),
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService036 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService037
+ * @tc.desc: Test RegisterSuspendTakeoverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService037, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService037 function start!");
+    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    TakeOverSuspendPriority priority = TakeOverSuspendPriority::HIGH;
+    pmsTest_->RegisterSuspendTakeoverCallback(callback, priority);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService037 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService038
+ * @tc.desc: Test UnRegisterSuspendTakeoverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService038, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService038 function start!");
+    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest_->UnRegisterSuspendTakeoverCallback(callback);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService038 function end!");
+}
+#endif
 }

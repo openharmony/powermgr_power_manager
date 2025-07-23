@@ -75,6 +75,8 @@ public:
     int32_t UnRegisterScreenStateCallbackIpc(const sptr<IScreenOffPreCallback>& callback);
     int32_t RegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback);
     int32_t UnRegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback);
+    bool RegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback);
+    bool UnRegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback);
     int32_t SetDisplaySuspendIpc(bool enable);
     int32_t SetDeviceModeIpc(int32_t modeValue, int32_t& powerError);
     int32_t GetDeviceModeIpc(int32_t& powerMode);
