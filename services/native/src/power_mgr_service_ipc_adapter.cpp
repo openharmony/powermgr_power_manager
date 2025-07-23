@@ -199,7 +199,7 @@ int32_t PowerMgrServiceAdapter::QueryRunningLockListsIpc(std::map<std::string, R
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::QueryRunningLockLists", true);
     QueryRunningLockLists(runningLockLists);
-    int32_t num = runningLockLists.size();
+    int32_t num = static_cast<int32_t>(runningLockLists.size());
     RETURN_IF_WITH_RET(num > MAX_PARAM_NUM, INIT_VALUE);
     return ERR_OK;
 }
