@@ -18,7 +18,6 @@
 
 #include "datashare_helper.h"
 #include "errors.h"
-#include "mutex"
 #include "setting_observer.h"
 
 namespace OHOS {
@@ -69,7 +68,6 @@ private:
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static std::atomic<SettingProvider*> instance_;
-    static std::mutex settingMutex_;
     static sptr<IRemoteObject> remoteObj_;
     static int32_t currentUserId_;
 
