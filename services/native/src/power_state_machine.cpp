@@ -2548,7 +2548,7 @@ bool PowerStateMachine::HandleDuringCallState(PowerState state, StateChangeReaso
         POWER_HILOGI(FEATURE_POWER_STATE, "enter HandleDuringCallState, state=%{public}s, resaon=%{public}s"
             " isDuringCallState_=%{public}d", PowerUtils::GetPowerStateString(state).c_str(),
             PowerUtils::GetReasonTypeString(reason).c_str(), isDuringCallState_);
-        // PROXIMITY away or PROXIMITY lock release and fold display mode is sub 
+        // PROXIMITY away or PROXIMITY lock release and fold display mode is sub
         if (state == PowerState::AWAKE &&
             (reason == StateChangeReason::STATE_CHANGE_REASON_PROXIMITY ||
             reason == StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK) &&
