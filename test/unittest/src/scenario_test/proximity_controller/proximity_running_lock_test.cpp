@@ -95,8 +95,21 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest001, TestSize.Level1)
         EXPECT_FALSE(g_pmsTest->GetRunningLockMgr()->proximityController_->IsClose());
         POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest away IsScreenOn:%{public}d", g_pmsTest->IsScreenOn());
         EXPECT_TRUE(g_pmsTest->IsScreenOn());
+
+        if (i) {
+            g_pmsTest->isDuringCallStateEnable_ = true;
+            EXPECT_TRUE(g_pmsTest->IsDuringCallStateEnable());
+        }
+        g_pmsTest->GetPowerStateMachine()->SetDuringCallState(true);
+        g_pmsTest->GetRunningLockMgr()->HandleProximityAwayEvent();
+        g_pmsTest->GetPowerStateMachine()->SetDuringCallState(false);
+        EXPECT_TRUE(g_pmsTest->IsScreenOn());
         g_pmsTest->UnLock(runningLockToken);
         usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS / 10); // 100ms for unlock async screen on
+        if (i) {
+            g_pmsTest->isDuringCallStateEnable_ = false;
+            EXPECT_FALSE(g_pmsTest->IsDuringCallStateEnable());
+        }
     }
     POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest001 function end!");
 }

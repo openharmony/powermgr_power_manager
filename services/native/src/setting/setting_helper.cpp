@@ -565,7 +565,7 @@ void SettingHelper::UnRegisterSettingDuringCallObserver()
     duringCallObserver_ = nullptr;
 }
 
-bool SettingHelper::GetDuringCallState(const std::string& key)
+bool SettingHelper::GetSettingDuringCallState(const std::string& key)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     bool value = false;

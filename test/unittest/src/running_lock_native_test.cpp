@@ -732,40 +732,4 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level1)
     
     POWER_HILOGI(LABEL_TEST, "RunningLockNative023 function end!");
 }
-
-/**
- * @tc.name: RunningLockNative024
- * @tc.desc: test SetDuringCallState
- * @tc.type: FUNC
- */
-HWTEST_F(RunningLockNativeTest, RunningLockNative024, TestSize.Level1)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function start!");
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    pmsTest->OnStart();
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
-    EXPECT_TRUE(runningLockMgr->Init());
-    EXPECT_FALSE(runningLockMgr->isDuringCallState_);
-#ifdef HAS_SENSORS_SENSOR_PART
-    RunningLockParam runningLockParam {0,
-        "RunningLockNative024", "", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, TIMEOUTMS, PID, UID};
-    sptr<IRemoteObject> token = new RunningLockTokenStub();
-    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
-    runningLockMgr->Lock(token);
-    auto stateMachine = pmsTest->GetPowerStateMachine();
-    runningLockMgr->HandleProximityCloseEvent();
-    EXPECT_FALSE(stateMachine->isDuringCallState_);
-    runningLockMgr->HandleProximityAwayEvent();
-    EXPECT_FALSE(stateMachine->isDuringCallState_);
-
-    runningLockMgr->SetDuringCallState(true);
-    EXPECT_TRUE(runningLockMgr->isDuringCallState_);
-    runningLockMgr->HandleProximityCloseEvent();
-    EXPECT_TRUE(stateMachine->isDuringCallState_);
-    runningLockMgr->HandleProximityAwayEvent();
-    EXPECT_FALSE(stateMachine->isDuringCallState_);
-    runningLockMgr->UnLock(token);
-#endif
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function end!");
-}
 } // namespace

@@ -1343,6 +1343,10 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
             proximityScreenOffTimerStarted_.store(false, std::memory_order_relaxed);
             break;
         }
+        case CHECK_PROXIMITY_SCREEN_SWITCH_TO_SUB_MSG: {
+            ffrtTimer_->CancelTimer(TIMER_ID_PROXIMITY_SCREEN_SWITCH_TO_SUB);
+            break;
+        }
         default: {
             break;
         }
@@ -1995,11 +1999,6 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
         PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
     std::lock_guard<std::mutex> lock(stateMutex_);
-    if (HandleDuringCallState(state, reason)) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "Duringcall action trigger, state=%{public}s, reason=%{public}s",
-            PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str());
-        return true;
-    }
     if (!CheckFFRTTaskAvailability(state, reason)) {
         POWER_HILOGI(FEATURE_POWER_STATE, "this timeout task is invalidated, directly return");
         return false;
@@ -2551,33 +2550,22 @@ bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason
     return true;
 }
 
-bool PowerStateMachine::HandleDuringCallState(PowerState state, StateChangeReason reason)
+bool PowerStateMachine::HandleDuringCall(bool isProximityClose)
 {
-    if (isDuringCallState_) {
-        POWER_HILOGI(FEATURE_POWER_STATE, "enter HandleDuringCallState, state=%{public}s, resaon=%{public}s"
-            " isDuringCallState_=%{public}d", PowerUtils::GetPowerStateString(state).c_str(),
-            PowerUtils::GetReasonTypeString(reason).c_str(), isDuringCallState_);
-        // PROXIMITY away or PROXIMITY lock release and fold display mode is sub
-        if (state == PowerState::AWAKE &&
-            (reason == StateChangeReason::STATE_CHANGE_REASON_PROXIMITY ||
-            reason == StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK) &&
-            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB) {
-            Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
-            return true;
-        // power_key down for wakeup main and fold display mode is sub
-        } else if (state == PowerState::INACTIVE && reason == StateChangeReason::STATE_CHANGE_REASON_HARD_KEY &&
-            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB) {
-            Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
-            return true;
-        // PROXIMITY close and fold display mode is main
-        } else if (state == PowerState::INACTIVE && reason == StateChangeReason::STATE_CHANGE_REASON_PROXIMITY &&
-            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::MAIN) {
-            Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::SUB);
-            return true;
-        }
+    // when screen is off or duringcall is false, wakeup or suspend is normal
+    if (!isDuringCall_ || !IsScreenOn()) {
         return false;
     }
-    return false;
+    Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
+    POWER_HILOGI(FEATURE_POWER_STATE, "HandleDuringCall mode:%{public}d, isProximityClose:%{public}d",
+        static_cast<int32_t>(mode), isProximityClose);
+    if (mode == Rosen::FoldDisplayMode::MAIN && isProximityClose &&
+        IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL)) {
+        Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::SUB);
+    } else if (mode == Rosen::FoldDisplayMode::SUB && !isProximityClose) {
+        Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
+    }
+    return true;
 }
 
 bool PowerStateMachine::IsSwitchOpenByPath()

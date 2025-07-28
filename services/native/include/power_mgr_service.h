@@ -285,6 +285,10 @@ public:
     {
         return shutdownController_;
     }
+    bool IsDuringCallStateEnable()
+    {
+        return isDuringCallStateEnable_;
+    }
 #ifdef HAS_SENSORS_SENSOR_PART
     static bool isInLidMode_;
 #endif
@@ -363,6 +367,7 @@ private:
     void UnregisterExternalCallback();
 
     bool ready_ {false};
+    bool isDuringCallStateEnable_ {false};
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
