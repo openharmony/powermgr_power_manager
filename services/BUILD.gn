@@ -87,14 +87,14 @@ ohos_shared_library("powermgrservice") {
 
   public_configs = [
     ":powermgr_public_config",
-    "zidl:powermgr_ipc_config"
+    "${powermgr_inner_api}:powermgr_ipc_config"
   ]
 
   public_deps = [ "${powermgr_utils_path}/setting:power_setting" ]
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_utils_path}:power_utils",
     "${powermgr_utils_path}/ffrt:power_ffrt",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
@@ -272,6 +272,6 @@ group("service") {
   deps = [
     ":powermgrservice",
     "native/profile:power_service_config",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
   ]
 }

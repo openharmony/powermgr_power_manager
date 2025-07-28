@@ -31,6 +31,7 @@
 #include <message_parcel.h>
 
 #include "config_policy_utils.h"
+#include "power_cjson_utils.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_vibrator.h"
@@ -195,7 +196,11 @@ void ShutdownDialog::LoadDialogConfig()
         POWER_HILOGE(COMP_UTILS, "json file is empty");
         return;
     }
+    ParseJsonConfig(contentStr);
+}
 
+void ShutdownDialog::ParseJsonConfig(std::string& contentStr)
+{
     cJSON* root = cJSON_Parse(contentStr.c_str());
     if (!root) {
         POWER_HILOGE(COMP_UTILS, "json parse error[%{public}s]", contentStr.c_str());
@@ -211,9 +216,9 @@ void ShutdownDialog::LoadDialogConfig()
     cJSON* bundleNameItem = cJSON_GetObjectItemCaseSensitive(root, "bundleName");
     cJSON* abilityNameItem = cJSON_GetObjectItemCaseSensitive(root, "abilityName");
     cJSON* uiExtensionTypeItem = cJSON_GetObjectItemCaseSensitive(root, "uiExtensionType");
-    if (!bundleNameItem || !cJSON_IsString(bundleNameItem) ||
-        !abilityNameItem || !cJSON_IsString(abilityNameItem) ||
-        !uiExtensionTypeItem || !cJSON_IsString(uiExtensionTypeItem)) {
+    if (!PowerMgrJsonUtils::IsValidJsonString(bundleNameItem) ||
+        !PowerMgrJsonUtils::IsValidJsonString(abilityNameItem) ||
+        !PowerMgrJsonUtils::IsValidJsonString(uiExtensionTypeItem)) {
         POWER_HILOGE(COMP_UTILS, "json variable not supported");
         cJSON_Delete(root);
         return;

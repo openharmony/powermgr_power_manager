@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <cJSON.h>
 #include "config_policy_utils.h"
+#include "power_cjson_utils.h"
 #include "power_log.h"
 
 namespace OHOS {
@@ -81,7 +82,7 @@ std::vector<VibratorSource> VibratorSourceParser::ParseSources(const std::string
         POWER_HILOGE(COMP_UTILS, "JSON parse error");
         return sources;
     }
-    if (!cJSON_IsObject(root)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObjectOrJsonArray(root)) {
         POWER_HILOGE(COMP_UTILS, "JSON root is not object");
         cJSON_Delete(root);
         return sources;
@@ -106,7 +107,7 @@ std::vector<VibratorSource> VibratorSourceParser::ParseSources(const std::string
 void VibratorSourceParser::ParseSourcesProc(
     std::vector<VibratorSource>& sources, cJSON* valueObj, std::string& key)
 {
-    if (!cJSON_IsObject(valueObj)) {
+    if (!PowerMgrJsonUtils::IsValidJsonObject(valueObj)) {
         POWER_HILOGE(COMP_UTILS, "ValueObj is not a json object.");
         return;
     }
@@ -115,14 +116,14 @@ void VibratorSourceParser::ParseSourcesProc(
     std::string type;
 
     cJSON* enableItem = cJSON_GetObjectItemCaseSensitive(valueObj, VibratorSource::ENABLE_KEY);
-    if (!enableItem || !cJSON_IsBool(enableItem)) {
+    if (!PowerMgrJsonUtils::IsValidJsonBool(enableItem)) {
         POWER_HILOGE(COMP_UTILS, "Parse enable error.");
         return;
     }
     enable =  cJSON_IsTrue(enableItem);
 
     cJSON* typeItem = cJSON_GetObjectItemCaseSensitive(valueObj, VibratorSource::TYPE_KEY);
-    if (!typeItem || !cJSON_IsString(typeItem)) {
+    if (!PowerMgrJsonUtils::IsValidJsonString(typeItem)) {
         POWER_HILOGE(COMP_UTILS, "Parse type error.");
         return;
     }

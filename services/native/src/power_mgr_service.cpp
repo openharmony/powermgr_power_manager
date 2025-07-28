@@ -491,12 +491,17 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     auto status = static_cast<uint32_t>(data->status);
 
     if (status & LID_CLOSED_HALL_FLAG) {
+        if (isInLidMode_) {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received again");
+            return;
+        }
         POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received, begin to suspend");
         isInLidMode_ = true;
         SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
         suspendController->ExecSuspendMonitorByReason(reason);
     } else {
         if (!isInLidMode_) {
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Lid open event received again");
             return;
         }
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Lid open event received, begin to wakeup");
