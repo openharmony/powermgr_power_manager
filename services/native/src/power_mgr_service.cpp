@@ -166,7 +166,8 @@ bool PowerMgrService::Init()
         screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
         screenOffPreController_->Init();
     }
-    POWER_HILOGI(COMP_SVC, "powermgr service init success");
+    isDuringCallStateEnable_ = system::GetBoolParameter("const.power.during_call_state_enable", false);
+    POWER_HILOGI(COMP_SVC, "powermgr service init success %{pubilc}d", isDuringCallStateEnable_);
     return true;
 }
 
@@ -268,6 +269,11 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
 
 void PowerMgrService::RegisterSettingDuringCallObservers()
 {
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (!pms->IsDuringCallStateEnable()) {
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "will RegisterSettingDuringCallObservers");
     SettingObserver::UpdateFunc updateFunc = [&](const std::string &key) { DuringCallSettingUpdateFunc(key); };
     SettingHelper::RegisterSettingDuringCallObserver(updateFunc);
 }
@@ -275,9 +281,14 @@ void PowerMgrService::RegisterSettingDuringCallObservers()
 void PowerMgrService::DuringCallSettingUpdateFunc(const std::string &key)
 {
     auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    bool duringCallState = SettingHelper::GetDuringCallState(key);
+    bool duringCallState = SettingHelper::GetSettingDuringCallState(key);
     POWER_HILOGI(COMP_SVC, "DuringCallState is %{public}d", duringCallState);
-    power->runningLockMgr_->SetDuringCallState(duringCallState);
+    auto stateMachine = power->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "PowerStateMachine is nullptr");
+        return;
+    }
+    stateMachine->SetDuringCallState(duringCallState);
 }
 
 bool PowerMgrService::IsDeveloperMode()

@@ -109,7 +109,7 @@ public:
     static bool IsWakeupLidSettingValid();
     static void RegisterSettingDuringCallObserver(SettingObserver::UpdateFunc& func);
     static void UnRegisterSettingDuringCallObserver();
-    static bool GetDuringCallState(const std::string& key = SETTING_DURING_CALL_STATE_KEY);
+    static bool GetSettingDuringCallState(const std::string& key = SETTING_DURING_CALL_STATE_KEY);
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
     static const std::string GetBlockLongPress();
 #endif

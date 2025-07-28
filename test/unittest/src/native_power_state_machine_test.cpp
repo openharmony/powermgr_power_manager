@@ -430,35 +430,47 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     pmsTest->OnStart();
-    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
-    EXPECT_TRUE(stateMachine->Init());
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
 
-    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(pmsTest->SuspendDevice(SUSCALLTIMEMS, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false)
+        == PowerErrors::ERR_OK);
+    constexpr int ONE_SECOND = 1;
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false) << "NativePowerStateMachine010: Prepare Fail, Screen is On";
+    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "NativePowerStateMachine010");
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true) << "NativePowerStateMachine010: Prepare Fail, Screen is Off";
     stateMachine->SetDuringCallState(true);
-    ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_DOUBLE_CLICK, true);
-    EXPECT_TRUE(ret);
 
-    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PICKUP);
-    EXPECT_FALSE(ret);
+    g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::MAIN;
+    bool ret = stateMachine->HandleDuringCall(true);
+    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB && ret);
+    ret = stateMachine->HandleDuringCall(true);
+    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB && ret);
+    ret = stateMachine->HandleDuringCall(false);
+    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN && ret);
+    ret = stateMachine->HandleDuringCall(false);
+    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN && ret);
+    g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::FULL;
+    ret = stateMachine->HandleDuringCall(true);
+    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::FULL && ret);
+
+    constexpr int WAIT_TIME_MS = 100;
+    usleep(WAIT_TIME_MS);
+    pmsTest->isDuringCallStateEnable_ = true;
     g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::SUB;
-    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
-    EXPECT_TRUE(ret && g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN);
-    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
-    EXPECT_FALSE(ret);
-    ret = stateMachine->HandleDuringCallState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
-    EXPECT_FALSE(ret);
-    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    EXPECT_FALSE(ret);
-    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    EXPECT_FALSE(ret);
-    g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::SUB;
-    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    EXPECT_TRUE(ret && g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN);
-    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
-    EXPECT_TRUE(ret && g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB);
-    ret = stateMachine->HandleDuringCallState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
-    EXPECT_FALSE(ret);
+    ret = pmsTest->GetSuspendController()->NeedToSkipCurrentSuspend(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, 0, 0);
+    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN && ret);
+    pmsTest->isDuringCallStateEnable_ = false;
+    pmsTest->GetSuspendController()->NeedToSkipCurrentSuspend(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, 0, 0);
+    stateMachine->SetDuringCallState(false);
+    pmsTest->suspendController_ = nullptr;
+    EXPECT_TRUE(pmsTest->GetSuspendController() == nullptr);
+    usleep(WAIT_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function end!");
 }
 

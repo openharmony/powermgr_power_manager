@@ -78,6 +78,7 @@ public:
         CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG,
         CHECK_PROXIMITY_SCREEN_OFF_MSG,
         SET_INTERNAL_SCREEN_STATE_MSG,
+        CHECK_PROXIMITY_SCREEN_SWITCH_TO_SUB_MSG,
     };
 
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -218,7 +219,11 @@ public:
     }
     void SetDuringCallState(bool state)
     {
-        isDuringCallState_ = state;
+        isDuringCall_ = state;
+    }
+    bool IsDuringCall()
+    {
+        return isDuringCall_;
     }
 
     void DumpInfo(std::string& result);
@@ -236,6 +241,7 @@ public:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     void SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason);
 #endif
+    bool HandleDuringCall(bool isProximityClose);
 
 private:
     enum PreBrightState : uint32_t {
@@ -360,7 +366,6 @@ private:
     void ShowCurrentScreenLocks();
     void HandleProximityScreenOffTimer(PowerState state, StateChangeReason reason);
     bool HandlePreBrightState(PowerState targetState, StateChangeReason reason);
-    bool HandleDuringCallState(PowerState state, StateChangeReason reason);
     bool IsPreBrightAuthReason(StateChangeReason reason);
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     bool NeedShowScreenLocks(PowerState state);
@@ -423,7 +428,7 @@ private:
     std::atomic<int32_t> externalScreenNumber_ {0};
     std::mutex internalScreenStateMutex_;
 #endif
-    bool isDuringCallState_ {false};
+    std::atomic<bool> isDuringCall_ {false};
     bool SetDreamingState(StateChangeReason reason);
 };
 } // namespace PowerMgr
