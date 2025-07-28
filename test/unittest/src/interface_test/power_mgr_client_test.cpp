@@ -1433,4 +1433,30 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient057, TestSize.Level2)
     EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient057 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient058
+ * @tc.desc: test RefreshActivity
+ * @tc.type: FUNC
+ * @tc.require: issueICPVG3
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient058, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient058 function start!");
+    uint32_t PARM_TWO = 2;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.SuspendDevice();
+    // Wakeup Device before test
+    powerMgrClient.WakeupDevice();
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient058: Prepare Fail, Screen is OFF.";
+    powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
+    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / PARM_TWO);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrClient058: Prepare Fail, Screen is OFF.";
+    powerMgrClient.RefreshActivity(UserActivityType::USER_ACTIVITY_TYPE_APPLICATION, "PowerMgrClient058");
+    usleep(SCREEN_OFF_WAIT_TIME_S * TRANSFER_NS_TO_MS / PARM_TWO + WAIT_SUSPEND_TIME_MS * TRANSFER_MS_TO_S);
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrClient058: RefreshActivity Device Fail, Screen is OFF";
+    powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient058 function end!");
+}
 } // namespace
