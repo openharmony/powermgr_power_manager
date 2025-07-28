@@ -2431,5 +2431,25 @@ PowerErrors PowerMgrService::IsRunningLockEnabled(const RunningLockType type, bo
     result = num > 0 ? true : false;
     return PowerErrors::ERR_OK;
 }
+
+PowerErrors PowerMgrService::RefreshActivity(
+    int64_t callTimeMs, UserActivityType type, const std::string& refreshReason)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "RefreshActivity failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "RefreshActivity failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_ACTIVITY,
+        "Try to refresh activity, pid: %{public}d, uid: %{public}d, activity type: %{public}u, reason: %{public}s",
+        pid, uid, type, refreshReason.c_str());
+    return RefreshActivityInner(callTimeMs, type, true) ? PowerErrors::ERR_OK :
+        PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
+}
 } // namespace PowerMgr
 } // namespace OHOS

@@ -22,7 +22,8 @@ std::map<PowerErrors, std::string> NapiErrors::errorTable_ = {
     {PowerErrors::ERR_CONNECTION_FAIL,   "Failed to connect to the service."},
     {PowerErrors::ERR_PERMISSION_DENIED, "Permission is denied"             },
     {PowerErrors::ERR_SYSTEM_API_DENIED, "System permission is denied"      },
-    {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         }
+    {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         },
+    {PowerErrors::ERR_FREQUENT_FUNCTION_CALL, "Frequent function calls."    }
 };
 
 napi_value NapiErrors::GetNapiError(napi_env& env) const

@@ -102,4 +102,7 @@ interface OHOS.PowerMgr.IPowerMgr {
     void UnRegisterRunningLockCallbackIpc([in] IPowerRunninglockCallback powerCallback);
     void IsRunningLockEnabledIpc([in] int lockType, [out] boolean lockEnabledResult, [out] int powerError);
     void IsForceSleepingIpc([out] boolean isForceSleeping);
+
+    void RefreshActivityIpc([in] long callTimeMs, [in] int activityType, [in] String refreshReason,
+        [out] int powerError);
 }

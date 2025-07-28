@@ -98,6 +98,8 @@ public:
     int32_t UnRegisterShutdownCallbackIpc(const sptr<IAsyncShutdownCallback>& callback) override;
     int32_t RegisterShutdownCallbackIpc(const sptr<ISyncShutdownCallback>& callback, int32_t priorityValue) override;
     int32_t UnRegisterShutdownCallbackIpc(const sptr<ISyncShutdownCallback>& callback) override;
+    virtual int32_t RefreshActivityIpc(
+        int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError) override;
 
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) = 0;
@@ -158,6 +160,8 @@ public:
     virtual PowerErrors LockScreenAfterTimingOut(
         bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) = 0;
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) = 0;
+    virtual PowerErrors RefreshActivity(
+        int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) = 0;
 
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;
