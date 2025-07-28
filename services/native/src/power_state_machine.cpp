@@ -62,6 +62,7 @@ constexpr int32_t DISPLAY_ON = 2;
 const std::string POWERMGR_STOPSERVICE = "persist.powermgr.stopservice";
 constexpr uint32_t PRE_BRIGHT_AUTH_TIMER_DELAY_MS = 3000;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+constexpr uint32_t PREPARE_HIBERNATE_INACTIVE_DELAY_US = 1500000;
 constexpr uint32_t POST_HIBERNATE_CLEARMEM_DELAY_US = 2000000;
 constexpr uint32_t HIBERNATE_DELAY_MS = 3500;
 constexpr int32_t PREPARE_HIBERNATE_TIMEOUT_MS = 30000;
@@ -803,6 +804,13 @@ bool PowerStateMachine::ForceSuspendDeviceInner(pid_t pid, int64_t callTimeMs)
 }
 
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+void PowerStateMachine::DelayForHibernateInactive(bool clearMemory)
+{
+    if (clearMemory) {
+        usleep(PREPARE_HIBERNATE_INACTIVE_DELAY_US);
+    }
+}
+
 bool PowerStateMachine::PrepareHibernate(bool clearMemory)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -813,6 +821,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     }
     SystemSuspendController::GetInstance().Wakeup();
     bool ret = true;
+    DelayForHibernateInactive(clearMemory);
     if (!SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_HIBERNATE, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to inactive.");
     }

@@ -66,6 +66,8 @@ void PowerStateTest2Callback::OnAsyncPowerStateChanged(PowerState state)
 }
 
 namespace {
+constexpr int ONE_SECOND = 1;
+
 TransitResult TransitResultToStateChangeReason(StateChangeReason trigger)
 {
     return TransitResult::ALREADY_IN_STATE;
@@ -459,4 +461,115 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine010 function end!");
 }
+
+/**
+ * @tc.name: NativePowerStateMachine011
+ * @tc.desc: test Lid Sensor
+ * @tc.type: FUNC
+ */
+#ifdef HAS_SENSORS_SENSOR_PART
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine011, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "NativePowerStateMachine011: Suspend Device start.";
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine011 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    SensorEvent *event = new SensorEvent();
+    event->data = new uint8_t(0);
+    HallData* data = reinterpret_cast<HallData*>(event->data);
+    event->sensorTypeId = SENSOR_TYPE_ID_HALL;
+
+    EXPECT_TRUE(pmsTest->SuspendDevice(SUSCALLTIMEMS, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false)
+        == PowerErrors::ERR_OK);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false) << "NativePowerStateMachine011: Prepare Fail, Screen is On";
+
+    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "NativePowerStateMachine011");
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true) << "NativePowerStateMachine011: Prepare Fail, Screen is Off";
+
+    data->status = 0;
+    pmsTest->HallSensorCallback(event);
+    sleep(ONE_SECOND);
+
+    data->status = 1;
+    pmsTest->HallSensorCallback(event);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false);
+
+    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "NativePowerStateMachine011");
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true);
+
+    pmsTest->HallSensorCallback(event);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true);
+    delete event->data;
+    event->data = nullptr;
+    data = nullptr;
+    delete event;
+    event = nullptr;
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine011 function end!");
+    GTEST_LOG_(INFO) << "NativePowerStateMachine011: Suspend Device end.";
+}
+#endif
+
+/**
+ * @tc.name: NativePowerStateMachine012
+ * @tc.desc: test Lid Sensor
+ * @tc.type: FUNC
+ */
+#ifdef HAS_SENSORS_SENSOR_PART
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine012, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "NativePowerStateMachine012: Suspend Device start.";
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine012 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    SensorEvent *event = new SensorEvent();
+    event->data = new uint8_t(0);
+    HallData* data = reinterpret_cast<HallData*>(event->data);
+    event->sensorTypeId = SENSOR_TYPE_ID_HALL;
+
+    pmsTest->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "NativePowerStateMachine012");
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true) << "NativePowerStateMachine012: Prepare Fail, Screen is Off";
+
+    EXPECT_TRUE(pmsTest->SuspendDevice(SUSCALLTIMEMS, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false)
+        == PowerErrors::ERR_OK);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false) << "NativePowerStateMachine012: Prepare Fail, Screen is On";
+
+    data->status = 1;
+    pmsTest->HallSensorCallback(event);
+    sleep(ONE_SECOND);
+
+    data->status = 0;
+    pmsTest->HallSensorCallback(event);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), true);
+
+    EXPECT_TRUE(pmsTest->SuspendDevice(SUSCALLTIMEMS, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false)
+        == PowerErrors::ERR_OK);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false);
+
+    pmsTest->HallSensorCallback(event);
+    sleep(ONE_SECOND);
+    EXPECT_EQ(stateMachine->IsScreenOn(), false);
+    delete event->data;
+    event->data = nullptr;
+    data = nullptr;
+    delete event;
+    event = nullptr;
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine012 function end!");
+    GTEST_LOG_(INFO) << "NativePowerStateMachine012: Suspend Device end.";
+}
+#endif
 } // namespace

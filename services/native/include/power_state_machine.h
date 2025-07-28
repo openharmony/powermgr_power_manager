@@ -365,6 +365,7 @@ private:
     bool IsPreBrightWakeUp(WakeupDeviceType type);
     bool NeedShowScreenLocks(PowerState state);
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+    void DelayForHibernateInactive(bool clearMemory);
     bool PrepareHibernate(bool clearMemory);
     bool PrepareHibernateWithTimeout(bool clearMemory);
     void RestoreHibernate(bool clearMemory, HibernateStatus status,

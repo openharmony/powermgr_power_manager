@@ -110,7 +110,7 @@ ohos_unittest("test_power_mgr_client") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -146,7 +146,7 @@ ohos_unittest("test_register_callback_mode") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -174,7 +174,7 @@ ohos_unittest("test_power_get_mode") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -202,7 +202,7 @@ ohos_unittest("test_power_set_mode") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -268,7 +268,7 @@ ohos_unittest("test_running_lock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_proxy",
+    "${powermgr_inner_api}:powermgr_proxy",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -404,7 +404,7 @@ ohos_unittest("test_power_state_machine") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -431,7 +431,7 @@ ohos_unittest("test_power_mgr_mock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -459,7 +459,7 @@ ohos_unittest("test_power_mgr_fail_check") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -630,8 +630,8 @@ ohos_unittest("test_power_mock_object") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_proxy",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_proxy",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -663,8 +663,8 @@ ohos_unittest("test_mock_parcel") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_proxy",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_proxy",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/permission:power_permission",
   ]
@@ -696,8 +696,8 @@ ohos_unittest("test_mock_peer") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_proxy",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_proxy",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -734,8 +734,8 @@ ohos_unittest("test_mock_proxy") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_proxy",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_proxy",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -763,7 +763,7 @@ ohos_unittest("power_state_machine_native_test") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -791,7 +791,7 @@ ohos_unittest("test_running_lock_native") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -822,7 +822,7 @@ ohos_unittest("test_power_mgr_service_native") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -854,7 +854,7 @@ ohos_unittest("test_device_state_action_native") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -903,7 +903,7 @@ ohos_unittest("test_power_mgr_client_native") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -929,7 +929,7 @@ ohos_unittest("power_mode_module_native_test") {
   ]
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
   external_deps = deps_ex
@@ -961,7 +961,7 @@ ohos_unittest("test_running_lock_hub_native") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
   ]
 
@@ -988,7 +988,7 @@ ohos_unittest("test_running_lock_mock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -1020,7 +1020,7 @@ ohos_unittest("test_power_suspend_parse") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
@@ -1063,7 +1063,7 @@ ohos_unittest("test_power_wakeup_parse") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
@@ -1107,7 +1107,7 @@ ohos_unittest("test_power_suspend_controller") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
@@ -1155,7 +1155,7 @@ ohos_unittest("test_power_suspend") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
@@ -1203,7 +1203,7 @@ ohos_unittest("test_power_wakeup_controller") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
@@ -1249,7 +1249,7 @@ ohos_unittest("test_power_wakeup_controller_oninputevent") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_utils_path}/setting:power_setting",
   ]
 
@@ -1289,7 +1289,7 @@ ohos_unittest("test_power_wakeup") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
@@ -1351,7 +1351,7 @@ ohos_unittest("test_power_getcontroller_mock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
@@ -1395,7 +1395,7 @@ ohos_unittest("test_power_screenon_mock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
@@ -1437,7 +1437,7 @@ ohos_unittest("test_power_parsesources_mock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
@@ -1481,7 +1481,7 @@ ohos_unittest("test_power_mgr_powerdialog") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/param:power_sysparam",
@@ -1516,7 +1516,7 @@ ohos_unittest("test_power_coordination_lock") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
@@ -1606,13 +1606,89 @@ ohos_unittest("test_power_config_parse") {
 
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/vibrator:power_vibrator",
   ]
 
-  external_deps = deps_ex
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  external_deps += deps_ex
+
+  if (power_manager_feature_doubleclick) {
+    defines += [ "POWER_DOUBLECLICK_ENABLE" ]
+  }
+
+  if (power_manager_feature_pickup) {
+    defines += [ "POWER_PICKUP_ENABLE" ]
+  }
+}
+
+##############################test_power_config_parse_two.#############################
+ohos_unittest("test_power_config_parse_two") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  sources = [
+    "src/power_config_parse_test_two.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/vibrator:power_vibrator",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  external_deps += deps_ex
+
+  if (power_manager_feature_doubleclick) {
+    defines += [ "POWER_DOUBLECLICK_ENABLE" ]
+  }
+
+  if (power_manager_feature_pickup) {
+    defines += [ "POWER_PICKUP_ENABLE" ]
+  }
 }
 
 group("unittest") {
@@ -1627,6 +1703,7 @@ group("unittest") {
     ":test_mock_peer",
     ":test_mock_proxy",
     ":test_power_config_parse",
+    ":test_power_config_parse_two",
     ":test_power_coordination_lock",
     ":test_power_device_mode",
     ":test_power_getcontroller_mock",

@@ -52,7 +52,7 @@ ohos_fuzztest("SuspendDeviceFuzzTest") {
     "./suspenddevice_fuzzer_test.cpp",
   ]
   deps = [
-    "${powermgr_service_zidl}:powermgr_stub",
+    "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]
