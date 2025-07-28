@@ -905,7 +905,7 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
         switchOpen_ = true;
     }
     hibernating_ = false;
-    notify->PublishExitHibernateEvent(GetTickCount());
+    notify->PublishExitHibernateEvent(GetTickCount(), clearMemory);
 
     if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
@@ -919,12 +919,14 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
     hibernateController->PostHibernate(hibernateRes);
 }
 
-void PowerStateMachine::RollbackHibernate(PowerState originalState, bool needShutdown, const sptr<PowerMgrService>& pms)
+void PowerStateMachine::RollbackHibernate(
+    PowerState originalState, bool clearMemory, bool needShutdown, const sptr<PowerMgrService>& pms)
 {
     bool isSwitchOpen = IsSwitchOpen();
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Try to rollback hibernate, originalPowerState=%{public}d, needShutdown=%{public}d, isSwitchOpen=%{public}d",
-        originalState, needShutdown, isSwitchOpen);
+        "Try to rollback hibernate, originalPowerState=%{public}d, clearMemory=%{public}d, needShutdown=%{public}d, "
+        "isSwitchOpen=%{public}d",
+        originalState, clearMemory, needShutdown, isSwitchOpen);
     hibernating_ = false;
     if (needShutdown) {
         // Ready to shutdown, so no need to publish common event and run PostHibernate
@@ -932,7 +934,7 @@ void PowerStateMachine::RollbackHibernate(PowerState originalState, bool needShu
         return;
     }
     if (pms->GetPowerMgrNotify() != nullptr) {
-        pms->GetPowerMgrNotify()->PublishExitHibernateEvent(GetTickCount());
+        pms->GetPowerMgrNotify()->PublishExitHibernateEvent(GetTickCount(), clearMemory);
     }
     if (pms->GetHibernateController() != nullptr) {
         pms->GetHibernateController()->PostHibernate(false);
@@ -982,18 +984,18 @@ bool PowerStateMachine::HibernateInner(bool clearMemory, const std::string& reas
     hibernating_ = true;
     PowerState originalState = GetState();
     bool needShutdown = clearMemory || reason == "LowCapacity";
-    notify->PublishEnterHibernateEvent(GetTickCount());
+    notify->PublishEnterHibernateEvent(GetTickCount(), clearMemory);
 
     bool ret = PrepareHibernateWithTimeout(clearMemory);
     if (!ret) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, start to rollback");
-        RollbackHibernate(originalState, needShutdown, pms);
+        RollbackHibernate(originalState, clearMemory, needShutdown, pms);
         return true;
     }
     HibernateStatus status = hibernateController->Hibernate(clearMemory);
     if (status != HibernateStatus::HIBERNATE_SUCCESS) {
         POWER_HILOGE(FEATURE_SUSPEND, "do hibernate failed, start to rollback");
-        RollbackHibernate(originalState, needShutdown, pms);
+        RollbackHibernate(originalState, clearMemory, needShutdown, pms);
         return true;
     }
     SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop

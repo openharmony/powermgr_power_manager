@@ -365,7 +365,8 @@ private:
     bool PrepareHibernateWithTimeout(bool clearMemory);
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
         const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
-    void RollbackHibernate(PowerState originalState, bool needShutdown, const sptr<PowerMgrService>& pms);
+    void RollbackHibernate(
+        PowerState originalState, bool clearMemory, bool needShutdown, const sptr<PowerMgrService>& pms);
     uint32_t GetPreHibernateDelay();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
