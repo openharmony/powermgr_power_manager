@@ -131,6 +131,7 @@ ohos_shared_library("powermgrservice") {
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
     "window_manager:libwm_lite",
   ]
 
@@ -166,7 +167,6 @@ ohos_shared_library("powermgrservice") {
     defines += [ "HAS_DISPLAY_MANAGER" ]
     external_deps += [
       "display_manager:displaymgr",
-      "window_manager:libdm_lite",
     ]
   }
 
