@@ -273,7 +273,10 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider002, TestSize.Level0)
     settingProvider.GetIntValue("settings.power.suspend_sources", getValue);
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = settingProvider.CreateObserver("settings.power.suspend_sources", updateFunc);
-    EXPECT_EQ(OHOS::ERR_OK, settingProvider.RegisterObserver(observer));
+    OHOS::ErrCode ret = settingProvider.RegisterObserver(observer);
+    EXPECT_EQ(OHOS::ERR_OK, ret);
+    ret = settingProvider.RegisterObserver(nullptr);
+    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, ret);
     POWER_HILOGI(LABEL_TEST, "SettingProvider002 function end!");
 }
 
@@ -294,6 +297,8 @@ HWTEST_F (PowerMgrUtilTest, SettingProvider003, TestSize.Level0)
     OHOS::ErrCode ret = settingProvider.RegisterObserver(observer);
     ret = settingProvider.UnregisterObserver(observer);
     EXPECT_EQ(OHOS::ERR_OK, ret);
+    ret = settingProvider.UnregisterObserver(nullptr);
+    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, ret);
     POWER_HILOGI(LABEL_TEST, "SettingProvider003 function end!");
 }
 
