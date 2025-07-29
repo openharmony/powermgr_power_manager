@@ -140,7 +140,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     system::SetParameter("persist.dfx.shutdownactiontime", actionTimeStr);
     make_unique<thread>([=] {
         Prepare(isReboot);
-        POWER_HILOGI(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
+        POWER_KHILOGI(FEATURE_SHUTDOWN, "reason = %{public}s, reboot = %{public}d", reason.c_str(), isReboot);
         if (devicePowerAction_ != nullptr) {
             std::string shutdownDeviceTime = std::to_string(GetCurrentRealTimeMs());
             system::SetParameter("persist.dfx.shutdowncompletetime", shutdownDeviceTime);
@@ -160,12 +160,12 @@ void ShutdownController::Prepare(bool isReboot)
     future<void> fut = callbackTask.get_future();
     make_unique<thread>(std::move(callbackTask))->detach();
 
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Waiting for the callback execution complete...");
+    POWER_KHILOGI(FEATURE_SHUTDOWN, "Waiting for the callback execution complete...");
     future_status status = fut.wait_for(std::chrono::seconds(MAX_TIMEOUT_SEC));
     if (status == future_status::timeout) {
         POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown callback execution timeout");
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "The callback execution is complete");
+    POWER_KHILOGI(FEATURE_SHUTDOWN, "The callback execution is complete");
 }
 
 void ShutdownController::PublishShutdownEvent() const
@@ -188,7 +188,7 @@ void ShutdownController::TurnOffScreen()
     POWER_HILOGD(FEATURE_SHUTDOWN, "Turn off screen before shutdown");
     bool ret = Rosen::ScreenManagerLite::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
         Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN);
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Turn off screen before shutting down, ret = %{public}d", ret);
+    POWER_KHILOGE(FEATURE_SHUTDOWN, "Turn off screen before shutting down, ret = %{public}d", ret);
 }
 
 void ShutdownController::AddCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority)
@@ -311,13 +311,16 @@ void ShutdownController::TriggerAsyncShutdownCallback(bool isReboot)
 void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
 {
     for (auto &obj : callbacks) {
+        auto pidUid = asyncShutdownCallbackHolder_->FindCallbackPidUid(obj);
         sptr<IAsyncShutdownCallback> callback = iface_cast<IAsyncShutdownCallback>(obj);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
+            POWER_KHILOGI(FEATURE_SHUTDOWN, "Async Shutdown Callback pid=%{public}d", pidUid.first);
             callback->OnAsyncShutdown();
             callback->OnAsyncShutdownOrReboot(isReboot);
             int64_t cost = GetTickCount() - start;
-            POWER_HILOGD(FEATURE_SHUTDOWN, "Callback finished, cost=%{public}" PRId64 "", cost);
+            POWER_KHILOGI(FEATURE_SHUTDOWN,
+                "ASUTcb P=%{public}dU=%{public}dT=%{public}" PRId64 "", pidUid.first, pidUid.second, cost);
         }
     }
 }
@@ -339,6 +342,7 @@ void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteO
         sptr<ISyncShutdownCallback> callback = iface_cast<ISyncShutdownCallback>(obj);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
+            POWER_KHILOGI(FEATURE_SHUTDOWN, "Sync Shutdown Callback pid=%{public}d", pidUid.first);
             callback->OnSyncShutdown();
             callback->OnSyncShutdownOrReboot(isReboot);
             int64_t cost = GetTickCount() - start;
