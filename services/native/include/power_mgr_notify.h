@@ -35,8 +35,8 @@ public:
     void PublishExitForceSleepEvents(int64_t eventTime);
 #endif
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-    void PublishEnterHibernateEvent(int64_t eventTime);
-    void PublishExitHibernateEvent(int64_t eventTime);
+    void PublishEnterHibernateEvent(int64_t eventTime, bool clearMemory);
+    void PublishExitHibernateEvent(int64_t eventTime, bool clearMemory);
 #endif
 
 private:
