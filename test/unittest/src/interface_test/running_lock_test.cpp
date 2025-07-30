@@ -596,4 +596,28 @@ HWTEST_F(RunningLockTest, RunningLockTest021, TestSize.Level1)
     EXPECT_EQ(result, ERR_INVALID_DATA);
     POWER_HILOGI(LABEL_TEST, "RunningLockTest021 function end!");
 }
+
+HWTEST_F(RunningLockTest, RunningLockTest022, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest022 function start!");
+    EXPECT_NE(stub_, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor());
+    data.WriteInt32(1);
+
+    VectorPair vectorPairInfos;
+    std::vector<std::pair<pid_t, pid_t>> processInfos;
+    vectorPairInfos.SetProcessInfos(processInfos);
+
+    EXPECT_TRUE(data.WriteParcelable(&vectorPairInfos));
+
+    int32_t result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_PROXY_RUNNING_LOCKS_IPC), data, reply, option);
+
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    POWER_HILOGI(LABEL_TEST, "RunningLockTest022 function end!");
+}
 } // namespace
