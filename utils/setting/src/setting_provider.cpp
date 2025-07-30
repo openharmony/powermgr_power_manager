@@ -169,6 +169,10 @@ void SettingProvider::ExecRegisterCb(const sptr<SettingObserver>& observer)
 
 ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        POWER_HILOGE(COMP_UTILS, "observer is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper(observer->GetKey());
@@ -188,6 +192,10 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 
 ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        POWER_HILOGE(COMP_UTILS, "observer is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper(observer->GetKey());
