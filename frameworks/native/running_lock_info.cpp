@@ -88,6 +88,10 @@ VectorPair* VectorPair::Unmarshalling(Parcel& parcel)
 
     int32_t size {0};
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Int32, size, nullptr);
+    if (size <= 0) {
+        POWER_HILOGW(COMP_FWK, "size is negative, size=%{public}d", size);
+        return nullptr;
+    }
     if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
         POWER_HILOGW(COMP_FWK, "size exceed limit, size=%{public}d", size);
         return nullptr;
