@@ -26,11 +26,12 @@
 #include "rdb_errno.h"
 #include "result_set.h"
 #include "uri.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace PowerMgr {
 std::atomic<SettingProvider*> SettingProvider::instance_ {nullptr};
-std::mutex SettingProvider::settingMutex_;
+static ffrt::mutex g_settingMutex;
 sptr<IRemoteObject> SettingProvider::remoteObj_;
 const int32_t INITIAL_USER_ID = 100;
 int32_t SettingProvider::currentUserId_ = INITIAL_USER_ID;
@@ -54,7 +55,7 @@ SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
 {
     SettingProvider* tmp = instance_.load(std::memory_order_acquire);
     if (tmp == nullptr) {
-        std::lock_guard<std::mutex> lock(settingMutex_);
+        std::lock_guard<ffrt::mutex> lock(g_settingMutex);
         tmp = instance_.load(std::memory_order_relaxed);
         if (tmp == nullptr) {
             Initialize(systemAbilityId);
@@ -296,7 +297,7 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
 
 std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelper(const std::string& key)
 {
-    std::lock_guard<std::mutex> lock(settingMutex_);
+    std::lock_guard<ffrt::mutex> lock(g_settingMutex);
     std::string uriProxyStr;
     if (IsNeedMultiUser(key)) {
         uriProxyStr = SETTING_URI_PROXY_USER + "USER_SETTINGSDATA_SECURE_" +
@@ -324,7 +325,7 @@ bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShar
 
 Uri SettingProvider::AssembleUri(const std::string& key)
 {
-    std::lock_guard<std::mutex> lock(settingMutex_);
+    std::lock_guard<ffrt::mutex> lock(g_settingMutex);
     if (IsNeedMultiUser(key)) {
         std::string userSetting = ReplaceUserIdForUri(currentUserId_);
         std::string specialUri = SETTING_URI_PROXY_USER + userSetting + "&key=" + key;
@@ -439,7 +440,7 @@ std::string SettingProvider::ReplaceUserIdForUri(int32_t userId)
 
 void SettingProvider::UpdateCurrentUserId()
 {
-    std::lock_guard<std::mutex> lock(settingMutex_);
+    std::lock_guard<ffrt::mutex> lock(g_settingMutex);
     std::vector<int> activedIds;
     int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activedIds);
     if (ret != 0) {
