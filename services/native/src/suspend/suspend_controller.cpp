@@ -747,9 +747,16 @@ bool PowerKeySuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorInit inputManager is null");
         return false;
     }
+    std::weak_ptr<PowerKeySuspendMonitor> weak = weak_from_this();
     powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            ReceivePowerkeyCallback(keyEvent);
+        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            std::shared_ptr<PowerKeySuspendMonitor> strong = weak.lock();
+            if (!strong) {
+                POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] PowerKeySuspendMonitor is invaild, return");
+                return;
+            }
+
+            strong->ReceivePowerkeyCallback(keyEvent);
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
@@ -902,17 +909,17 @@ bool TPCoverSuspendMonitor::Init()
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_SLEEP);
     keyOption->SetFinalKeyDownDuration(0);
-    std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
         POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
         return false;
     }
+    std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
     TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
         keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             std::shared_ptr<TPCoverSuspendMonitor> strong = weak.lock();
             if (!strong) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] TPCoverSuspendMonitor is invaild, return");
+                POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] TPCoverSuspendMonitor is invaild, return");
                 return;
             }
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
