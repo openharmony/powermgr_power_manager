@@ -185,7 +185,7 @@ protected:
     SuspendListener listener_;
 };
 
-class PowerKeySuspendMonitor : public SuspendMonitor {
+class PowerKeySuspendMonitor : public SuspendMonitor, public std::enable_shared_from_this<PowerKeySuspendMonitor> {
 public:
     explicit PowerKeySuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
     ~PowerKeySuspendMonitor() override = default;
