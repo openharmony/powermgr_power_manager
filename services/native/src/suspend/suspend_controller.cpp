@@ -393,7 +393,11 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 
 void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_LID) {
+#else
     if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+#endif
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendWhenScreenOff: Do nothing for reason %{public}u", reason);
         return;
     }
@@ -418,7 +422,11 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
                 SystemSuspendController::GetInstance().Wakeup();
                 StartSleepTimer(reason, action, 0);
             } else if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+                if (PowerMgrService::isInLidMode_ == false) {
+#else
                 if (stateMachine_->IsSwitchOpen()) {
+#endif
                     POWER_HILOGI(FEATURE_SUSPEND, "switch off event is ignored.");
                     return;
                 }

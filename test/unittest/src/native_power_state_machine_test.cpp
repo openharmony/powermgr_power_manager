@@ -234,6 +234,8 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine004, TestSize.Level
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     type = WakeupDeviceType::WAKEUP_DEVICE_PICKUP;
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
+    
+    stateMachine->SetSwitchState(false);
     type = WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN;
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, type, "7", "7");
     stateMachine->WakeupDeviceInner(PID, CALLTIMEMS, static_cast<WakeupDeviceType>(MAXTYPE), "7", "7");

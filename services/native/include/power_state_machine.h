@@ -131,6 +131,7 @@ public:
 #ifdef MSDP_MOVEMENT_ENABLE
     bool IsMovementStateOn();
 #endif
+    bool IsWakeupDeviceSkip();
 
     PowerState GetState()
     {
