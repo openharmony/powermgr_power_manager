@@ -411,4 +411,39 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest016, TestSize.Lev
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest016: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest016 function end!");
 }
+
+/**
+ * @tc.name: PowerSuspendControllerTest017
+ * @tc.desc: test simulate powerkey event when screenon
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest017, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest017 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest017: start";
+
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
+    EXPECT_TRUE(g_service->IsScreenOn());
+    std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
+    suspendController->monitorMap_.clear();
+
+    auto inputManager = MMI::InputManager::GetInstance();
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
+    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+
+    inputManager->SimulateInputEvent(keyEventPowerkeyDown);
+    inputManager->SimulateInputEvent(keyEventPowerkeyUp);
+    sleep(2);
+    EXPECT_FALSE(g_service->IsScreenOn());
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest017: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest017 function end!");
+}
 } // namespace

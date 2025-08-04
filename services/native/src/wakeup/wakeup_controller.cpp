@@ -945,17 +945,17 @@ bool PowerkeyWakeupMonitor::Init()
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
     keyOption->SetFinalKeyDownDuration(0);
-    std::weak_ptr<PowerkeyWakeupMonitor> weak = weak_from_this();
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
         POWER_HILOGE(FEATURE_WAKEUP, "PowerkeyWakeupMonitorInit inputManager is null");
         return false;
     }
+    std::weak_ptr<PowerkeyWakeupMonitor> weak = weak_from_this();
     powerkeyShortPressId_ = inputManager->SubscribeKeyEvent(
         keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             std::shared_ptr<PowerkeyWakeupMonitor> strong = weak.lock();
             if (!strong) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
+                POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
                 return;
             }
 

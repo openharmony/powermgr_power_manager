@@ -416,6 +416,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest011, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest012, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest012 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest012: start";
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
@@ -428,6 +429,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest012, TestSize.Level
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest012: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest012 function end!");
 }
 
@@ -439,6 +441,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest012, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest013, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest013 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest013: start";
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
@@ -451,6 +454,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest013, TestSize.Level
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest013: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest013 function end!");
 }
 
@@ -462,6 +466,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest013, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest014, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest014 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest014: start";
     g_service->WakeupControllerInit();
     g_service->SetDisplayOffTime(DISPLAY_OFF_TIME_MS);
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
@@ -474,6 +479,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest014, TestSize.Level
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest014: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest014 function end!");
 }
 
@@ -486,12 +492,14 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest014, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest015, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest015 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest015: start";
     g_service->WakeupControllerInit();
     auto wakeupController_ = g_service->GetWakeupController();
     EXPECT_TRUE(wakeupController_ != nullptr);
     wakeupController_->ChangeWakeupSourceConfig(true);
     auto resCode = wakeupController_->SetWakeupDoubleClickSensor(true);
     EXPECT_TRUE(resCode != -1);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest015: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest015 function end!");
 }
 #endif
@@ -504,11 +512,13 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest015, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest016, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest016 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest016: start";
     g_service->WakeupControllerInit();
     auto wakeupController_ = g_service->GetWakeupController();
     EXPECT_TRUE(wakeupController_ != nullptr);
     wakeupController_->ChangePickupWakeupSourceConfig(true);
     wakeupController_->PickupConnectMotionConfig(true);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest016: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest016 function end!");
 }
 #endif
@@ -559,12 +569,15 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest018, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest019, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest019 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest019: start";
 
     g_service->WakeupControllerInit();
     g_service->SuspendControllerInit();
     g_service->SuspendDevice(
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(g_service->IsScreenOn());
+    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+    wakeupController->monitorMap_.clear();
 
     auto inputManager = MMI::InputManager::GetInstance();
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
@@ -585,6 +598,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest019, TestSize.Level
             UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
     EXPECT_TRUE(g_service->IsScreenOn());
 
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest019: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest019 function end!");
 }
 
@@ -597,6 +611,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest019, TestSize.Level
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest020 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest020: start";
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     g_service->SuspendControllerInit();
     g_service->WakeupControllerInit();
@@ -619,6 +634,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
     wakeupController->ControlListener(WakeupDeviceType::WAKEUP_DEVICE_SWITCH);
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
 #endif
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest020: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest020 function end!");
 }
 
@@ -630,7 +646,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
  */
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: start");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021 function start!");
     auto powerStateMachine = g_service->GetPowerStateMachine();
     g_service->WakeupControllerInit();
     auto wakeupController_ = g_service->GetWakeupController();
@@ -677,7 +693,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level
     axisEvent = nullptr;
     callbackThird->OnInputEvent(axisEvent);
     delete callbackThird;
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021: end");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021 function end!");
 }
 
 /**
@@ -688,7 +704,8 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level
  */
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest022, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022: start");
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest022: start";
     auto powerStateMachine = g_service->GetPowerStateMachine();
     g_service->WakeupControllerInit();
     auto wakeupController_ = g_service->GetWakeupController();
@@ -701,6 +718,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest022, TestSize.Level
 
     g_service->InputMonitorCancel();
     g_service->SwitchSubscriberCancel();
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022: end");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest022: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022 function end!");
 }
 } // namespace
