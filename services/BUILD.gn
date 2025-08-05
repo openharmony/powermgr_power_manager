@@ -219,6 +219,10 @@ ohos_shared_library("powermgrservice") {
     ]
   }
 
+  if (power_manager_feature_enable_ulsr_plugin) {
+    defines += [ "POWER_MANAGER_ENABLE_ULSR_PLUGIN" ]
+  }
+
   if (power_manager_feature_force_sleep_broadcast) {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }

@@ -115,6 +115,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("UNKNOWN");
         case StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL:
             return std::string("BLUETOOTH_INCOMING_CALL");
+        case StateChangeReason::STATE_CHANGE_REASON_WAKEUP_FROM_ULSR:
+            return std::string("WAKEUP_ULSR");
         default:
             break;
     }

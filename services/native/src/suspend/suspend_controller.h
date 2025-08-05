@@ -100,8 +100,8 @@ public:
     }
 #endif
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-    bool GetLowCapacityPowerKeyFlag();
-    void SetLowCapacityPowerKeyFlag(bool flag);
+    bool GetWakeupReasonConfigMatchedFlag();
+    void SetWakeupReasonConfigMatchedFlag(bool flag);
 #endif
 
 private:
@@ -145,7 +145,7 @@ private:
 #endif
     sptr<IPowerStateCallback> suspendPowerStateCallback_ {nullptr};
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-    std::atomic<bool> isLowCapacityPowerKey_ {false};
+    std::atomic<bool> isWakeupReasonConfigMatched_ {false};
 #endif
 };
 

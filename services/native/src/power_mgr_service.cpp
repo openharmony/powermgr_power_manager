@@ -918,7 +918,9 @@ static const char* UNREGISTER_EXTERNAL_CONFIG = "UnregisterExternalCallback";
 using WakeupFunc = std::function<void(WakeupDeviceType)>;
 using SuspendFunc = std::function<void(SuspendDeviceType)>;
 using PowerConfigFunc = std::function<int32_t(std::string&, std::string&)>;
-typedef void (*FuncRegisterExternalCallback)(WakeupFunc, SuspendFunc, PowerConfigFunc, PowerConfigFunc);
+using TriggerSyncSleepCallbackFunc = std::function<void(bool)>;
+typedef void (*FuncRegisterExternalCallback)(WakeupFunc, SuspendFunc, PowerConfigFunc, PowerConfigFunc,
+    TriggerSyncSleepCallbackFunc);
 typedef void (*FuncUnregisterExternalCallback)();
 
 void PowerMgrService::RegisterExternalCallback()
@@ -952,6 +954,10 @@ void PowerMgrService::RegisterExternalCallback()
         },
         [](std::string& sceneName, std::string value) {
             return SystemSuspendController::GetInstance().SetPowerConfig(sceneName, value);
+        },
+        [this](bool isWakeup) {
+            POWER_HILOGI(COMP_SVC, "[UL_POWER] sync sleep callback triggered, isWakeup: %{public}d", isWakeup);
+            suspendController_->TriggerSyncSleepCallback(isWakeup);
         });
     POWER_HILOGI(COMP_SVC, "RegisterExternalCallback Success");
     dlclose(subscriberHandler);

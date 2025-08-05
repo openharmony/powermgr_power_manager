@@ -565,4 +565,34 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest022 function end!");
 }
 #endif
+
+/**
+ * @tc.name: PowerSuspendControllerTest023
+ * @tc.desc: test simulate powerkey event
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: start";
+
+    g_service->SuspendControllerInit();
+    g_service->wakeupController_ = nullptr;
+    auto monitor = g_service->suspendController_->monitorMap_[SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY];
+    ASSERT_TRUE(monitor != nullptr);
+    std::shared_ptr<PowerKeySuspendMonitor> powerkeySuspendMonitor =
+        std::static_pointer_cast<PowerKeySuspendMonitor>(monitor);
+
+    powerkeySuspendMonitor->ReceivePowerkeyCallback(nullptr);
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
+    EXPECT_TRUE(g_service->wakeupController_ == nullptr);
+
+    g_service->WakeupControllerInit();
+    powerkeySuspendMonitor->ReceivePowerkeyCallback(nullptr);
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
+    EXPECT_TRUE(g_service->wakeupController_ != nullptr);
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function end!");
+}
 } // namespace

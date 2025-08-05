@@ -36,7 +36,7 @@ public:
     ~WakeupActionController();
     void Init();
     bool ExecuteByGetReason();
-    bool IsLowCapacityWakeup();
+    bool IsWakeupReasonConfigMatched();
 
 private:
     void HandleAction(const std::string& reason);
