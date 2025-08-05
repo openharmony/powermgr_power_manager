@@ -284,7 +284,7 @@ public:
         return shutdownController_;
     }
 #ifdef HAS_SENSORS_SENSOR_PART
-    static bool isInLidMode_;
+    static std::atomic_bool isInLidMode_;
 #endif
 
 private:
