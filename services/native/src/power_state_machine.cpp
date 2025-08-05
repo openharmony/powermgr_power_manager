@@ -648,6 +648,19 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
     return;
 }
 
+bool PowerStateMachine::IsWakeupDeviceSkip()
+{
+    bool ret = false;
+    ret |= !IsSwitchOpen();
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    ret |= IsHibernating();
+#endif
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+    ret |= PowerMgrService::isInLidMode_;
+#endif
+    return ret;
+}
+
 void PowerStateMachine::WakeupDeviceInner(
     pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
@@ -659,12 +672,8 @@ void PowerStateMachine::WakeupDeviceInner(
         return;
     }
 
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    if (!IsSwitchOpen() || IsHibernating()) {
-#else
-    if (!IsSwitchOpen()) {
-#endif
-        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup device do nothing.");
+    if (IsWakeupDeviceSkip()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup device skip.");
         return;
     }
 
@@ -905,7 +914,10 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
         switchOpen_ = true;
     }
     hibernating_ = false;
-    notify->PublishExitHibernateEvent(GetTickCount(), clearMemory);
+
+    if (notify) {
+        notify->PublishExitHibernateEvent(GetTickCount(), clearMemory);
+    }
 
     if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");

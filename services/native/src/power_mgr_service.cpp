@@ -96,7 +96,7 @@ std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 std::atomic_bool PowerMgrService::isNeedReInit_  = false;
 std::atomic_bool PowerMgrService::displayManagerServiceCrash_ = false;
 #ifdef HAS_SENSORS_SENSOR_PART
-    bool PowerMgrService::isInLidMode_ = false;
+    std::atomic_bool PowerMgrService::isInLidMode_ = false;
 #endif
 using namespace MMI;
 
