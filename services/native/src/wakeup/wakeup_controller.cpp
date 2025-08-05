@@ -507,7 +507,7 @@ WakeupController::SleepGuard::~SleepGuard()
 }
 
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-bool WakeupController::IsLowCapacityWakeup(WakeupDeviceType reason)
+bool WakeupController::IsWakeupReasonConfigMatched(WakeupDeviceType reason)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -520,12 +520,12 @@ bool WakeupController::IsLowCapacityWakeup(WakeupDeviceType reason)
         return false;
     }
     return (reason == WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON) &&
-        (wakeupActionController->IsLowCapacityWakeup());
+        (wakeupActionController->IsWakeupReasonConfigMatched());
 }
 
-void WakeupController::ProcessLowCapacityWakeup()
+void WakeupController::ProcessWakeupReason()
 {
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] processing low capacity wake up begins.");
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] processing wake up reason begins.");
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] the current power state is not sleep.");
         return;
@@ -1005,12 +1005,13 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
     }
 
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-    if (wakeupController->IsLowCapacityWakeup(reason)) {
-        wakeupController->ProcessLowCapacityWakeup();
-        suspendController->SetLowCapacityPowerKeyFlag(true);
+    // When received powerkey down event, must read wakeup reason!
+    if (wakeupController->IsWakeupReasonConfigMatched(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON)) {
+        wakeupController->ProcessWakeupReason();
+        suspendController->SetWakeupReasonConfigMatchedFlag(true);
         return;
     }
-    suspendController->SetLowCapacityPowerKeyFlag(false);
+    suspendController->SetWakeupReasonConfigMatchedFlag(false);
 #endif
 
     bool poweroffInterrupted = false;

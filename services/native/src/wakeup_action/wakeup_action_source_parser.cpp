@@ -115,7 +115,7 @@ bool WakeupActionSourceParser::ParseSourcesProc(
     std::shared_ptr<WakeupActionSources>& parseSources, cJSON* valueObj, std::string& key)
 {
     std::string scene{""};
-    uint32_t action = 0;
+    uint32_t action = ILLEGAL_ACTION;
     if (PowerMgrJsonUtils::IsValidJsonObject(valueObj)) {
         cJSON* sceneValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupActionSource::SCENE_KEY);
         if (PowerMgrJsonUtils::IsValidJsonString(sceneValue)) {
@@ -125,14 +125,16 @@ bool WakeupActionSourceParser::ParseSourcesProc(
         cJSON* actionValue = cJSON_GetObjectItemCaseSensitive(valueObj, WakeupActionSource::ACTION_KEY);
         if (PowerMgrJsonUtils::IsValidJsonNumber(actionValue)) {
             action = static_cast<uint32_t>(actionValue->valueint);
-            POWER_HILOGI(FEATURE_WAKEUP_ACTION, "action=%{public}u", action);
             if (action >= ILLEGAL_ACTION) {
-                action = 0;
+                action = ILLEGAL_ACTION;
+                POWER_HILOGW(FEATURE_WAKEUP_ACTION, "action=%{public}u, ILLEGAL!", action);
+            } else {
+                POWER_HILOGI(FEATURE_WAKEUP_ACTION, "action=%{public}u", action);
             }
         }
     }
 
-    if (action != 0) {
+    if (action != ILLEGAL_ACTION) {
         std::shared_ptr<WakeupActionSource> wakeupActionSource = std::make_shared<WakeupActionSource>(scene, action);
         parseSources->PutSource(key, wakeupActionSource);
     }

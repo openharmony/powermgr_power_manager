@@ -2239,6 +2239,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
         case WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL:
             ret = StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL;
             break;
+        case WakeupDeviceType::WAKEUP_DEVICE_FROM_ULSR:
+            ret = StateChangeReason::STATE_CHANGE_REASON_WAKEUP_FROM_ULSR;
+            break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
             break;
