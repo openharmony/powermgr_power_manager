@@ -35,6 +35,7 @@ group("fuzztest") {
     "lockscreenaftertimingout_fuzzer:LockScreenAfterTimingOutFuzzTest",
     "lockunlockisused_fuzzer:LockUnLockIsUsedFuzzTest",
     "overridescreenofftime_fuzzer:OverrideScreenOffTimeFuzzTest",
+    "powermgrservice_fuzzer:PowermgrServiceFuzzTest",
     "powermodecallback_fuzzer:PowerModeCallbackFuzzTest",
     "powerstatecallback_fuzzer:PowerStateCallbackFuzzTest",
     "proxyrunninglock_fuzzer:ProxyRunningLockFuzzTest",
