@@ -445,5 +445,14 @@ int32_t PowerMgrServiceAdapter::IsForceSleepingIpc(bool& isForceSleeping)
     isForceSleeping = IsForceSleeping();
     return ERR_OK;
 }
+
+int32_t PowerMgrServiceAdapter::RefreshActivityIpc(
+    int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RefreshActivity LongIntStringInt", false);
+    UserActivityType type = static_cast<UserActivityType>(activityType);
+    powerError = static_cast<int32_t>(RefreshActivity(callTimeMs, type, refreshReason));
+    return ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS
