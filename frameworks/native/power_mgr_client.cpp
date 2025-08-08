@@ -637,5 +637,14 @@ PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, boo
     return static_cast<PowerErrors>(powerError);
 }
 
+PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::string& refreshReason)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t activityType = static_cast<int32_t>(type);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->RefreshActivityIpc(GetTickCount(), activityType, refreshReason, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
 } // namespace PowerMgr
 } // namespace OHOS

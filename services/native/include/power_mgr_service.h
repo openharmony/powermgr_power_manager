@@ -135,6 +135,8 @@ public:
     virtual PowerErrors LockScreenAfterTimingOut(
         bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
+    virtual PowerErrors RefreshActivity(
+        int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;
 
     void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
