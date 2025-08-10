@@ -206,6 +206,9 @@ void RunningLockMgr::InitLocksTypeProximity()
             } else {
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "[UL_POWER] RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL inactive");
                 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+                if (pms == nullptr) {
+                    return RUNNINGLOCK_FAILURE;
+                }
                 auto stateMachine = pms->GetPowerStateMachine();
                 if (stateMachine == nullptr) {
                     return RUNNINGLOCK_FAILURE;
