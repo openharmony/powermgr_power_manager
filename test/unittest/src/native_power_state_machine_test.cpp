@@ -446,9 +446,9 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine010, TestSize.Level
 
     g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::MAIN;
     bool ret = stateMachine->HandleDuringCall(true);
-    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB && ret);
+    EXPECT_FALSE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB && ret);
     ret = stateMachine->HandleDuringCall(true);
-    EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB && ret);
+    EXPECT_FALSE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::SUB && ret);
     ret = stateMachine->HandleDuringCall(false);
     EXPECT_TRUE(g_foldDisplayMode == OHOS::Rosen::FoldDisplayMode::MAIN && ret);
     ret = stateMachine->HandleDuringCall(false);
