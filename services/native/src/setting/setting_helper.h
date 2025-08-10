@@ -107,6 +107,9 @@ public:
     static bool GetSettingWakeupLid(const std::string& key = SETTING_POWER_WAKEUP_LID_KEY);
     static void SetSettingWakeupLid(bool enable);
     static bool IsWakeupLidSettingValid();
+    static void RegisterSettingDuringCallObserver(SettingObserver::UpdateFunc& func);
+    static void UnRegisterSettingDuringCallObserver();
+    static bool GetSettingDuringCallState(const std::string& key = SETTING_DURING_CALL_STATE_KEY);
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
     static const std::string GetBlockLongPress();
 #endif
@@ -147,10 +150,12 @@ private:
     static constexpr const char* SETTING_POWER_MODE_KEY  {"settings.power.smart_mode_status"};
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
+    static constexpr const char* SETTING_DURING_CALL_STATE_KEY {"during_call_state"};
     static sptr<SettingObserver> doubleClickObserver_;
     static sptr<SettingObserver> pickUpObserver_;
     static sptr<SettingObserver> powerModeObserver_;
     static sptr<SettingObserver> lidObserver_;
+    static sptr<SettingObserver> duringCallObserver_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

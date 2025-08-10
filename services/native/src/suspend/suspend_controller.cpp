@@ -15,9 +15,7 @@
 
 #include "suspend_controller.h"
 #include <datetime_ex.h>
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 #include <display_manager_lite.h>
-#endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -443,35 +441,14 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
 
 void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "get PowerStateMachine instance error");
         return;
     }
 
-    if (pms->CheckDialogAndShuttingDown()) {
+    if (NeedToSkipCurrentSuspend(reason, action, delay)) {
         return;
     }
-
-    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-        stateMachine_->SetSwitchAction(action);
-    }
-    bool isScreenOn = stateMachine_->IsScreenOn();
-    if (!isScreenOn) {
-        SuspendWhenScreenOff(reason, action, delay);
-        return;
-    }
-
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
-        ProcessPowerOffInternalScreenOnly(pms, reason);
-        return;
-    }
-#endif
-
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SUSPEND,
@@ -492,6 +469,43 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (ret) {
         StartSleepTimer(reason, action, delay);
     }
+}
+
+bool SuspendController::NeedToSkipCurrentSuspend(SuspendDeviceType reason, uint32_t action, uint32_t delay)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "get PowerMgrService instance error");
+        return true;
+    }
+    if (pms->CheckDialogAndShuttingDown()) {
+        return true;
+    }
+
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+        stateMachine_->SetSwitchAction(action);
+    }
+    bool isScreenOn = stateMachine_->IsScreenOn();
+    if (!isScreenOn) {
+        SuspendWhenScreenOff(reason, action, delay);
+        return true;
+    }
+    if (pms->IsDuringCallStateEnable()) {
+        if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY &&
+            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB &&
+            stateMachine_->HandleDuringCall(false)) {
+            POWER_HILOGI(FEATURE_SUSPEND, "switch to main display when duringcall mode");
+            return true;
+        }
+    }
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
+        ProcessPowerOffInternalScreenOnly(pms, reason);
+        return true;
+    }
+#endif
+    return false;
 }
 
 std::shared_ptr<SuspendMonitor> SuspendController::GetSpecifiedSuspendMonitor(SuspendDeviceType type) const

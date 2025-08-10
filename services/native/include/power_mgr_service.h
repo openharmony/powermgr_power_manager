@@ -68,6 +68,8 @@ public:
     static void PowerModeSettingUpdateFunc(const std::string& key);
     static void RegisterSettingWakeUpLidObserver();
     static void WakeupLidSettingUpdateFunc(const std::string& key);
+    static void RegisterSettingDuringCallObservers();
+    static void DuringCallSettingUpdateFunc(const std::string& key);
 
     virtual void OnStart() override;
     virtual void OnStop() override;
@@ -285,6 +287,10 @@ public:
     {
         return shutdownController_;
     }
+    bool IsDuringCallStateEnable()
+    {
+        return isDuringCallStateEnable_;
+    }
 #ifdef HAS_SENSORS_SENSOR_PART
     static std::atomic_bool isInLidMode_;
 #endif
@@ -363,6 +369,7 @@ private:
     void UnregisterExternalCallback();
 
     bool ready_ {false};
+    bool isDuringCallStateEnable_ {false};
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4

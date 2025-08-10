@@ -1357,6 +1357,10 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
             proximityScreenOffTimerStarted_.store(false, std::memory_order_relaxed);
             break;
         }
+        case CHECK_PROXIMITY_SCREEN_SWITCH_TO_SUB_MSG: {
+            ffrtTimer_->CancelTimer(TIMER_ID_PROXIMITY_SCREEN_SWITCH_TO_SUB);
+            break;
+        }
         default: {
             break;
         }
@@ -2556,6 +2560,24 @@ bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
         reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         return false;
+    }
+    return true;
+}
+
+bool PowerStateMachine::HandleDuringCall(bool isProximityClose)
+{
+    // when screen is off or duringcall is false, wakeup or suspend is normal
+    if (!isDuringCall_ || !IsScreenOn()) {
+        return false;
+    }
+    Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
+    POWER_HILOGI(FEATURE_POWER_STATE, "HandleDuringCall mode:%{public}d, isProximityClose:%{public}d",
+        static_cast<int32_t>(mode), isProximityClose);
+    if (mode == Rosen::FoldDisplayMode::MAIN && isProximityClose &&
+        IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL)) {
+        Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::SUB);
+    } else if (mode == Rosen::FoldDisplayMode::SUB && !isProximityClose) {
+        Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
     }
     return true;
 }
