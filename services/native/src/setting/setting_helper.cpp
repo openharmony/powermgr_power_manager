@@ -32,6 +32,7 @@ sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::powerModeObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::lidObserver_ = nullptr;
+sptr<SettingObserver> SettingHelper::duringCallObserver_ = nullptr;
 
 void SettingHelper::RegisterAodSwitchObserver()
 {
@@ -540,6 +541,39 @@ void SettingHelper::UnRegisterSettingPowerModeObserver()
         POWER_HILOGE(COMP_UTILS, "unregister setting power mode observer failed, ret=%{public}d", ret);
     }
     powerModeObserver_ = nullptr;
+}
+
+void SettingHelper::RegisterSettingDuringCallObserver(SettingObserver::UpdateFunc& func)
+{
+    if (duringCallObserver_) {
+        POWER_HILOGI(COMP_UTILS, "setting during call observer is already registered");
+        return;
+    }
+    duringCallObserver_ = RegisterSettingKeyObserver(SETTING_DURING_CALL_STATE_KEY, func);
+}
+
+void SettingHelper::UnRegisterSettingDuringCallObserver()
+{
+    if (!duringCallObserver_) {
+        POWER_HILOGI(COMP_UTILS, "duringCallObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    auto ret = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(duringCallObserver_);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "unregister setting during call observer failed, ret=%{public}d", ret);
+    }
+    duringCallObserver_ = nullptr;
+}
+
+bool SettingHelper::GetSettingDuringCallState(const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    bool value = false;
+    ErrCode ret = settingProvider.GetBoolValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_UTILS, "get setting during call state key failed, ret=%{public}d", ret);
+    }
+    return value;
 }
 
 const std::string SettingHelper::ReadPowerModeRecoverMap()

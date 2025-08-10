@@ -41,6 +41,7 @@ constexpr pid_t PID = 1;
 constexpr pid_t UID = 1;
 constexpr int32_t UNCANCELID = -1;
 constexpr int32_t INVALID_CODE = -1;
+constexpr int32_t TRY_TIMES = 2;
 sptr<PowerMgrService> g_pmsTest;
 } // namespace
 
@@ -457,4 +458,40 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative015, TestSize.Level1)
     GTEST_LOG_(INFO) << "PowerMgrServiceNative015 end.";
 }
 
+/**
+ * @tc.name: PowerMgrServiceNative016
+ * @tc.desc: test RegisterSettingDuringCallObservers
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative016, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative016 start.";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative016 function start!");
+    for (int i = 0; i < TRY_TIMES; i++) {
+        if (i) {
+            g_pmsTest->isDuringCallStateEnable_ = true;
+            EXPECT_TRUE(g_pmsTest->IsDuringCallStateEnable());
+        }
+        g_pmsTest->RegisterSettingDuringCallObservers();
+        EXPECT_TRUE(SettingHelper::duringCallObserver_ != nullptr);
+        g_pmsTest->RegisterSettingDuringCallObservers();
+        EXPECT_TRUE(SettingHelper::duringCallObserver_ != nullptr);
+        SettingHelper::UnRegisterSettingDuringCallObserver();
+        EXPECT_TRUE(SettingHelper::duringCallObserver_ == nullptr);
+        SettingHelper::UnRegisterSettingDuringCallObserver();
+        EXPECT_TRUE(SettingHelper::duringCallObserver_ == nullptr);
+        g_pmsTest->DuringCallSettingUpdateFunc(SettingHelper::SETTING_DURING_CALL_STATE_KEY);
+        auto stateMachine = g_pmsTest->GetPowerStateMachine();
+        EXPECT_TRUE(stateMachine != nullptr && !stateMachine->isDuringCall_);
+        g_pmsTest->powerStateMachine_ = nullptr;
+        EXPECT_TRUE(g_pmsTest->GetPowerStateMachine() == nullptr);
+        g_pmsTest->DuringCallSettingUpdateFunc(SettingHelper::SETTING_DURING_CALL_STATE_KEY);
+        if (i) {
+            g_pmsTest->isDuringCallStateEnable_ = false;
+            EXPECT_FALSE(g_pmsTest->IsDuringCallStateEnable());
+        }
+    }
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative016 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrServiceNative016 end.";
+}
 } // namespace

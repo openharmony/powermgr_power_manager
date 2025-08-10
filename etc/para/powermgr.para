@@ -17,3 +17,4 @@ persist.dfx.userclicktime = 0
 persist.dfx.shutdownactiontime = 0
 persist.dfx.shutdowncompletetime = 0
 persist.dfx.eventtype = 0
+const.power.during_call_state_enable = false
