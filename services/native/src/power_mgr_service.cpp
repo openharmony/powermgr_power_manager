@@ -167,7 +167,7 @@ bool PowerMgrService::Init()
         screenOffPreController_->Init();
     }
     isDuringCallStateEnable_ = system::GetBoolParameter("const.power.during_call_state_enable", false);
-    POWER_HILOGI(COMP_SVC, "powermgr service init success %{pubilc}d", isDuringCallStateEnable_);
+    POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }
 
