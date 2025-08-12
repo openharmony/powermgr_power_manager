@@ -37,6 +37,7 @@ constexpr uint32_t SET_MODE_PROMISE_MAX_ARGC = 1;
 constexpr uint32_t SUSPEND_MAX_ARGC = 1;
 constexpr uint32_t SET_SCREEN_OFFTIME_ARGC = 1;
 constexpr uint32_t HIBERNATE_ARGC = 1;
+constexpr uint32_t REFRESH_ACTIVITY_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
@@ -362,6 +363,26 @@ napi_value PowerNapi::IsStandby(napi_env env, napi_callback_info info)
     }
     NapiErrors error;
     return error.ThrowError(env, code);
+}
+
+napi_value PowerNapi::RefreshActivity(napi_env env, napi_callback_info info)
+{
+    size_t argc = REFRESH_ACTIVITY_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors error;
+    if (argc != REFRESH_ACTIVITY_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_string)) {
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    std::string reason = NapiUtils::GetStringFromNapi(env, argv[INDEX_0]);
+    PowerErrors code = g_powerMgrClient.RefreshActivity(UserActivityType::USER_ACTIVITY_TYPE_APPLICATION, reason);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_ACTIVITY, "RefreshActivity failed. code:%{public}d", static_cast<int32_t>(code));
+        return error.ThrowError(env, code);
+    }
+    return nullptr;
 }
 } // namespace PowerMgr
 } // namespace OHOS

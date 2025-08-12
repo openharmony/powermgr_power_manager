@@ -32,5 +32,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     PowerFuzzerTest g_serviceTest;
     uint32_t code = static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REFRESH_ACTIVITY_IPC);
     g_serviceTest.TestPowerServiceStub(code, data, size);
+    code = static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REFRESH_ACTIVITY_IPC_IN_LONG_IN_INT_IN_STRING_OUT_INT);
+    g_serviceTest.TestPowerServiceStub(code, data, size);
     return 0;
 }

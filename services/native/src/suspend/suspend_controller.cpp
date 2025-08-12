@@ -15,9 +15,7 @@
 
 #include "suspend_controller.h"
 #include <datetime_ex.h>
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 #include <display_manager_lite.h>
-#endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -466,7 +464,11 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 
 void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_LID) {
+#else
     if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+#endif
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendWhenScreenOff: Do nothing for reason %{public}u", reason);
         return;
     }
@@ -491,7 +493,11 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
                 SystemSuspendController::GetInstance().Wakeup();
                 StartSleepTimer(reason, action, 0);
             } else if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+                if (PowerMgrService::isInLidMode_ == false) {
+#else
                 if (stateMachine_->IsSwitchOpen()) {
+#endif
                     POWER_HILOGI(FEATURE_SUSPEND, "switch off event is ignored.");
                     return;
                 }
@@ -508,35 +514,14 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
 
 void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return;
-    }
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "get PowerStateMachine instance error");
         return;
     }
 
-    if (pms->CheckDialogAndShuttingDown()) {
+    if (NeedToSkipCurrentSuspend(reason, action, delay)) {
         return;
     }
-
-    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-        stateMachine_->SetSwitchAction(action);
-    }
-    bool isScreenOn = stateMachine_->IsScreenOn();
-    if (!isScreenOn) {
-        SuspendWhenScreenOff(reason, action, delay);
-        return;
-    }
-
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
-        ProcessPowerOffInternalScreenOnly(pms, reason);
-        return;
-    }
-#endif
-
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_SUSPEND,
@@ -557,6 +542,43 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (ret) {
         StartSleepTimer(reason, action, delay);
     }
+}
+
+bool SuspendController::NeedToSkipCurrentSuspend(SuspendDeviceType reason, uint32_t action, uint32_t delay)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "get PowerMgrService instance error");
+        return true;
+    }
+    if (pms->CheckDialogAndShuttingDown()) {
+        return true;
+    }
+
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+        stateMachine_->SetSwitchAction(action);
+    }
+    bool isScreenOn = stateMachine_->IsScreenOn();
+    if (!isScreenOn) {
+        SuspendWhenScreenOff(reason, action, delay);
+        return true;
+    }
+    if (pms->IsDuringCallStateEnable()) {
+        if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY &&
+            Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB &&
+            stateMachine_->HandleDuringCall(false)) {
+            POWER_HILOGI(FEATURE_SUSPEND, "switch to main display when duringcall mode");
+            return true;
+        }
+    }
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
+        ProcessPowerOffInternalScreenOnly(pms, reason);
+        return true;
+    }
+#endif
+    return false;
 }
 
 std::shared_ptr<SuspendMonitor> SuspendController::GetSpecifiedSuspendMonitor(SuspendDeviceType type) const
@@ -820,9 +842,16 @@ bool PowerKeySuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorInit inputManager is null");
         return false;
     }
+    std::weak_ptr<PowerKeySuspendMonitor> weak = weak_from_this();
     powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            ReceivePowerkeyCallback(keyEvent);
+        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            std::shared_ptr<PowerKeySuspendMonitor> strong = weak.lock();
+            if (!strong) {
+                POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] PowerKeySuspendMonitor is invaild, return");
+                return;
+            }
+
+            strong->ReceivePowerkeyCallback(keyEvent);
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
@@ -975,17 +1004,17 @@ bool TPCoverSuspendMonitor::Init()
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_SLEEP);
     keyOption->SetFinalKeyDownDuration(0);
-    std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
         POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
         return false;
     }
+    std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
     TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
         keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             std::shared_ptr<TPCoverSuspendMonitor> strong = weak.lock();
             if (!strong) {
-                POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] TPCoverSuspendMonitor is invaild, return");
+                POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] TPCoverSuspendMonitor is invaild, return");
                 return;
             }
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");

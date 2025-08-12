@@ -199,7 +199,7 @@ int32_t PowerMgrServiceAdapter::QueryRunningLockListsIpc(std::map<std::string, R
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::QueryRunningLockLists", true);
     QueryRunningLockLists(runningLockLists);
-    int32_t num = runningLockLists.size();
+    int32_t num = static_cast<int32_t>(runningLockLists.size());
     RETURN_IF_WITH_RET(num > MAX_PARAM_NUM, INIT_VALUE);
     return ERR_OK;
 }
@@ -479,6 +479,15 @@ int32_t PowerMgrServiceAdapter::IsForceSleepingIpc(bool& isForceSleeping)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::IsForceSleeping", false);
     isForceSleeping = IsForceSleeping();
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::RefreshActivityIpc(
+    int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RefreshActivity LongIntStringInt", false);
+    UserActivityType type = static_cast<UserActivityType>(activityType);
+    powerError = static_cast<int32_t>(RefreshActivity(callTimeMs, type, refreshReason));
     return ERR_OK;
 }
 } // namespace PowerMgr

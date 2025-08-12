@@ -903,7 +903,9 @@ ohos_unittest("test_device_state_action_native") {
     "${powermgr_service_path}:powermgrservice",
   ]
 
-  deps_ex += [ "display_manager:displaymgr" ]
+  if (has_display_manager_part) {
+    deps_ex += [ "display_manager:displaymgr" ]
+  }
   deps_ex += [ "window_manager:libdm_lite" ]
   external_deps = deps_ex
 }
@@ -1765,7 +1767,6 @@ group("unittest") {
     ":power_mode_module_native_test",
     ":power_state_machine_native_test",
     ":test_device_power_action",
-    ":test_device_state_action_native",
     ":test_mock_parcel",
     ":test_mock_peer",
     ":test_mock_proxy",
@@ -1812,6 +1813,9 @@ group("unittest") {
       ":test_power_mgr_service_ipc_adapter",
       ":test_power_suspend_takeover",
     ]
+  }
+  if (has_display_manager_part) {
+    deps += [ ":test_device_state_action_native" ]
   }
 }
 

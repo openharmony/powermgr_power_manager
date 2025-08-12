@@ -124,6 +124,7 @@ private:
 #endif
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
+    bool NeedToSkipCurrentSuspend(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     std::vector<SuspendSource> sourceList_;
     std::map<SuspendDeviceType, std::shared_ptr<SuspendMonitor>> monitorMap_;
     std::shared_ptr<ShutdownController> shutdownController_;
@@ -197,7 +198,7 @@ protected:
     SuspendListener listener_;
 };
 
-class PowerKeySuspendMonitor : public SuspendMonitor {
+class PowerKeySuspendMonitor : public SuspendMonitor, public std::enable_shared_from_this<PowerKeySuspendMonitor> {
 public:
     explicit PowerKeySuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
     ~PowerKeySuspendMonitor() override = default;

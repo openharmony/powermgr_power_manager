@@ -24,7 +24,8 @@ enum class PowerErrors : int32_t {
     ERR_PERMISSION_DENIED = 201,
     ERR_SYSTEM_API_DENIED = 202,
     ERR_PARAM_INVALID = 401,
-    ERR_CONNECTION_FAIL = 4900101
+    ERR_CONNECTION_FAIL = 4900101,
+    ERR_FREQUENT_FUNCTION_CALL = 4900201
 };
 } // namespace PowerMgr
 } // namespace OHOS

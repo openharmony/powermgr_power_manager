@@ -654,6 +654,19 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
     return;
 }
 
+bool PowerStateMachine::IsWakeupDeviceSkip()
+{
+    bool ret = false;
+    ret |= !IsSwitchOpen();
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    ret |= IsHibernating();
+#endif
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+    ret |= PowerMgrService::isInLidMode_;
+#endif
+    return ret;
+}
+
 void PowerStateMachine::WakeupDeviceInner(
     pid_t pid, int64_t callTimeMs, WakeupDeviceType type, const std::string& details, const std::string& pkgName)
 {
@@ -665,12 +678,8 @@ void PowerStateMachine::WakeupDeviceInner(
         return;
     }
 
-#ifdef POWER_MANAGER_POWER_ENABLE_S4
-    if (!IsSwitchOpen() || IsHibernating()) {
-#else
-    if (!IsSwitchOpen()) {
-#endif
-        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup device do nothing.");
+    if (IsWakeupDeviceSkip()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch is closed or hibernating, wakeup device skip.");
         return;
     }
 
@@ -917,7 +926,10 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
         switchOpen_ = true;
     }
     hibernating_ = false;
-    notify->PublishExitHibernateEvent(GetTickCount());
+
+    if (notify) {
+        notify->PublishExitHibernateEvent(GetTickCount(), clearMemory);
+    }
 
     if (!SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to awake when hibernate.");
@@ -931,12 +943,14 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
     hibernateController->PostHibernate(hibernateRes);
 }
 
-void PowerStateMachine::RollbackHibernate(PowerState originalState, bool needShutdown, const sptr<PowerMgrService>& pms)
+void PowerStateMachine::RollbackHibernate(
+    PowerState originalState, bool clearMemory, bool needShutdown, const sptr<PowerMgrService>& pms)
 {
     bool isSwitchOpen = IsSwitchOpen();
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Try to rollback hibernate, originalPowerState=%{public}d, needShutdown=%{public}d, isSwitchOpen=%{public}d",
-        originalState, needShutdown, isSwitchOpen);
+        "Try to rollback hibernate, originalPowerState=%{public}d, clearMemory=%{public}d, needShutdown=%{public}d, "
+        "isSwitchOpen=%{public}d",
+        originalState, clearMemory, needShutdown, isSwitchOpen);
     hibernating_ = false;
     if (needShutdown) {
         // Ready to shutdown, so no need to publish common event and run PostHibernate
@@ -944,7 +958,7 @@ void PowerStateMachine::RollbackHibernate(PowerState originalState, bool needShu
         return;
     }
     if (pms->GetPowerMgrNotify() != nullptr) {
-        pms->GetPowerMgrNotify()->PublishExitHibernateEvent(GetTickCount());
+        pms->GetPowerMgrNotify()->PublishExitHibernateEvent(GetTickCount(), clearMemory);
     }
     if (pms->GetHibernateController() != nullptr) {
         pms->GetHibernateController()->PostHibernate(false);
@@ -994,18 +1008,18 @@ bool PowerStateMachine::HibernateInner(bool clearMemory, const std::string& reas
     hibernating_ = true;
     PowerState originalState = GetState();
     bool needShutdown = clearMemory || reason == "LowCapacity";
-    notify->PublishEnterHibernateEvent(GetTickCount());
+    notify->PublishEnterHibernateEvent(GetTickCount(), clearMemory);
 
     bool ret = PrepareHibernateWithTimeout(clearMemory);
     if (!ret) {
         POWER_HILOGE(FEATURE_SUSPEND, "prepare hibernate failed, start to rollback");
-        RollbackHibernate(originalState, needShutdown, pms);
+        RollbackHibernate(originalState, clearMemory, needShutdown, pms);
         return true;
     }
     HibernateStatus status = hibernateController->Hibernate(clearMemory);
     if (status != HibernateStatus::HIBERNATE_SUCCESS) {
         POWER_HILOGE(FEATURE_SUSPEND, "do hibernate failed, start to rollback");
-        RollbackHibernate(originalState, needShutdown, pms);
+        RollbackHibernate(originalState, clearMemory, needShutdown, pms);
         return true;
     }
     SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
@@ -1353,6 +1367,10 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
         case CHECK_PROXIMITY_SCREEN_OFF_MSG: {
             ffrtTimer_->CancelTimer(TIMER_ID_PROXIMITY_SCREEN_OFF);
             proximityScreenOffTimerStarted_.store(false, std::memory_order_relaxed);
+            break;
+        }
+        case CHECK_PROXIMITY_SCREEN_SWITCH_TO_SUB_MSG: {
+            ffrtTimer_->CancelTimer(TIMER_ID_PROXIMITY_SCREEN_SWITCH_TO_SUB);
             break;
         }
         default: {
@@ -2578,6 +2596,24 @@ bool PowerStateMachine::StateController::IsReallyFailed(StateChangeReason reason
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
         reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         return false;
+    }
+    return true;
+}
+
+bool PowerStateMachine::HandleDuringCall(bool isProximityClose)
+{
+    // when screen is off or duringcall is false, wakeup or suspend is normal
+    if (!isDuringCall_ || !IsScreenOn()) {
+        return false;
+    }
+    Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
+    POWER_HILOGI(FEATURE_POWER_STATE, "HandleDuringCall mode:%{public}d, isProximityClose:%{public}d",
+        static_cast<int32_t>(mode), isProximityClose);
+    if (mode == Rosen::FoldDisplayMode::MAIN && isProximityClose &&
+        IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL)) {
+        Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::SUB);
+    } else if (mode == Rosen::FoldDisplayMode::SUB && !isProximityClose) {
+        Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(Rosen::FoldDisplayMode::MAIN);
     }
     return true;
 }

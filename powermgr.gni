@@ -42,6 +42,7 @@ declare_args() {
   power_manager_feature_watch_boot_completed = false
   power_manager_feature_surport_takeover_suspend = false
   power_manager_feature_init_proximity_controller = false
+  power_manager_feature_enable_lid_check = false
 }
 
 defines = []
@@ -60,6 +61,10 @@ if (power_manager_feature_audio_lock_unproxy) {
 
 if (power_manager_feature_init_proximity_controller) {
   defines += [ "POWER_MANAGER_INIT_PROXIMITY_CONTROLLER" ]
+}
+
+if (power_manager_feature_enable_lid_check) {
+  defines += [ "POWER_MANAGER_ENABLE_LID_CHECK" ]
 }
 
 if (!defined(global_parts_info) ||
@@ -147,3 +152,5 @@ powermgr_inner_api = "${powermgr_root_path}/interfaces/inner_api"
 powermgr_utils_path = "${powermgr_root_path}/utils"
 
 system_type = "default"
+taihe_generated_file_path_power = "${root_out_dir}/taihe/out/powermgr/power_manager/power"
+taihe_generated_file_path_runningLock = "${root_out_dir}/taihe/out/powermgr/power_manager/runningLock"

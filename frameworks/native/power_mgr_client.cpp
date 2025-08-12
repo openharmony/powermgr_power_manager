@@ -46,7 +46,7 @@ std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
 std::mutex g_instanceMutex;
 constexpr int32_t MAX_VERSION_STRING_SIZE = 4;
-constexpr int32_t PARAM_MAX_NUM = 10;
+constexpr uint32_t PARAM_MAX_NUM = 10;
 
 PowerMgrClient::PowerMgrClient()
 {
@@ -598,9 +598,9 @@ std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, error);
     std::string returnDump = "remote error";
-    int32_t argc = args.size();
+    uint32_t argc = args.size();
     if (argc >= PARAM_MAX_NUM) {
-        POWER_HILOGW(COMP_FWK, "params exceed limit, argc=%{public}d", argc);
+        POWER_HILOGW(COMP_FWK, "params exceed limit, argc=%{public}u", argc);
         return returnDump;
     }
     proxy->ShellDumpIpc(args, argc, returnDump);
@@ -662,5 +662,14 @@ PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, boo
     return static_cast<PowerErrors>(powerError);
 }
 
+PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::string& refreshReason)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t activityType = static_cast<int32_t>(type);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->RefreshActivityIpc(GetTickCount(), activityType, refreshReason, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
 } // namespace PowerMgr
 } // namespace OHOS
