@@ -80,6 +80,7 @@ public:
         CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG,
         CHECK_PROXIMITY_SCREEN_OFF_MSG,
         SET_INTERNAL_SCREEN_STATE_MSG,
+        CHECK_PROXIMITY_SCREEN_SWITCH_TO_SUB_MSG,
     };
 
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -133,6 +134,7 @@ public:
 #ifdef MSDP_MOVEMENT_ENABLE
     bool IsMovementStateOn();
 #endif
+    bool IsWakeupDeviceSkip();
 
     PowerState GetState()
     {
@@ -219,6 +221,14 @@ public:
     {
         return mDeviceState_.screenState.lastOnTime;
     }
+    void SetDuringCallState(bool state)
+    {
+        isDuringCall_ = state;
+    }
+    bool IsDuringCall()
+    {
+        return isDuringCall_;
+    }
 
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
@@ -235,6 +245,7 @@ public:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     void SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason);
 #endif
+    bool HandleDuringCall(bool isProximityClose);
 
 private:
     enum PreBrightState : uint32_t {
@@ -368,7 +379,8 @@ private:
     bool PrepareHibernateWithTimeout(bool clearMemory);
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
         const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
-    void RollbackHibernate(PowerState originalState, bool needShutdown, const sptr<PowerMgrService>& pms);
+    void RollbackHibernate(
+        PowerState originalState, bool clearMemory, bool needShutdown, const sptr<PowerMgrService>& pms);
     uint32_t GetPreHibernateDelay();
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -424,6 +436,7 @@ private:
     std::atomic<int32_t> externalScreenNumber_ {0};
     std::mutex internalScreenStateMutex_;
 #endif
+    std::atomic<bool> isDuringCall_ {false};
     bool SetDreamingState(StateChangeReason reason);
 };
 } // namespace PowerMgr

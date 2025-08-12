@@ -22,7 +22,6 @@
 
 namespace OHOS {
 namespace PowerMgr {
-constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
 bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
 {
     uint32_t readType;
@@ -68,6 +67,7 @@ bool RunningLockInfo::Marshalling(Parcel& parcel) const
 
 bool VectorPair::Marshalling(Parcel& parcel) const
 {
+    constexpr uint32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
     size_t size = processInfos_.size();
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, size, false);
     if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
@@ -83,10 +83,15 @@ bool VectorPair::Marshalling(Parcel& parcel) const
 
 VectorPair* VectorPair::Unmarshalling(Parcel& parcel)
 {
+    constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
     auto vectorPairPtr = std::make_unique<VectorPair>();
 
     int32_t size {0};
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Int32, size, nullptr);
+    if (size <= 0) {
+        POWER_HILOGW(COMP_FWK, "size is negative, size=%{public}d", size);
+        return nullptr;
+    }
     if (size > MAX_PROXY_RUNNINGLOCK_NUM) {
         POWER_HILOGW(COMP_FWK, "size exceed limit, size=%{public}d", size);
         return nullptr;

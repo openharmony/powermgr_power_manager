@@ -96,7 +96,7 @@ std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 std::atomic_bool PowerMgrService::isNeedReInit_  = false;
 std::atomic_bool PowerMgrService::displayManagerServiceCrash_ = false;
 #ifdef HAS_SENSORS_SENSOR_PART
-    bool PowerMgrService::isInLidMode_ = false;
+    std::atomic_bool PowerMgrService::isInLidMode_ = false;
 #endif
 using namespace MMI;
 
@@ -166,7 +166,8 @@ bool PowerMgrService::Init()
         screenOffPreController_ = std::make_shared<ScreenOffPreController>(powerStateMachine_);
         screenOffPreController_->Init();
     }
-    POWER_HILOGI(COMP_SVC, "powermgr service init success");
+    isDuringCallStateEnable_ = system::GetBoolParameter("const.power.during_call_state_enable", false);
+    POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }
 
@@ -244,6 +245,7 @@ void PowerMgrService::PowerExternalAbilityInit()
     POWER_HILOGI(COMP_SVC, "Not allow subscribe Hall sensor");
 #endif
     power->RegisterSettingPowerModeObservers();
+    power->RegisterSettingDuringCallObservers();
     power->RegisterExternalCallback();
 }
 
@@ -263,6 +265,30 @@ void PowerMgrService::PowerModeSettingUpdateFunc(const std::string &key)
     }
     POWER_HILOGI(COMP_SVC, "PowerModeSettingUpdateFunc curr:%{public}d, saveMode:%{public}d", currMode, saveMode);
     power->SetDeviceMode(static_cast<PowerMode>(saveMode));
+}
+
+void PowerMgrService::RegisterSettingDuringCallObservers()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (!pms->IsDuringCallStateEnable()) {
+        return;
+    }
+    POWER_HILOGI(COMP_SVC, "will RegisterSettingDuringCallObservers");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string &key) { DuringCallSettingUpdateFunc(key); };
+    SettingHelper::RegisterSettingDuringCallObserver(updateFunc);
+}
+
+void PowerMgrService::DuringCallSettingUpdateFunc(const std::string &key)
+{
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    bool duringCallState = SettingHelper::GetSettingDuringCallState(key);
+    POWER_HILOGI(COMP_SVC, "DuringCallState is %{public}d", duringCallState);
+    auto stateMachine = power->GetPowerStateMachine();
+    if (stateMachine == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "PowerStateMachine is nullptr");
+        return;
+    }
+    stateMachine->SetDuringCallState(duringCallState);
 }
 
 bool PowerMgrService::IsDeveloperMode()
@@ -476,12 +502,17 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     auto status = static_cast<uint32_t>(data->status);
 
     if (status & LID_CLOSED_HALL_FLAG) {
+        if (isInLidMode_) {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received again");
+            return;
+        }
         POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received, begin to suspend");
         isInLidMode_ = true;
         SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_LID;
         suspendController->ExecSuspendMonitorByReason(reason);
     } else {
         if (!isInLidMode_) {
+            POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Lid open event received again");
             return;
         }
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Lid open event received, begin to wakeup");
@@ -2466,6 +2497,26 @@ PowerErrors PowerMgrService::IsRunningLockEnabled(const RunningLockType type, bo
     POWER_HILOGI(COMP_SVC, "Hold running lock type:%{public}u, num:%{public}u", static_cast<uint32_t>(type), num);
     result = num > 0 ? true : false;
     return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::RefreshActivity(
+    int64_t callTimeMs, UserActivityType type, const std::string& refreshReason)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "RefreshActivity failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION")) {
+        POWER_HILOGI(FEATURE_ACTIVITY, "RefreshActivity failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_ACTIVITY,
+        "Try to refresh activity, pid: %{public}d, uid: %{public}d, activity type: %{public}u, reason: %{public}s",
+        pid, uid, type, refreshReason.c_str());
+    return RefreshActivityInner(callTimeMs, type, true) ? PowerErrors::ERR_OK :
+        PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
 }
 } // namespace PowerMgr
 } // namespace OHOS

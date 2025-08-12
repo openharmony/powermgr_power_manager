@@ -68,6 +68,8 @@ public:
     static void PowerModeSettingUpdateFunc(const std::string& key);
     static void RegisterSettingWakeUpLidObserver();
     static void WakeupLidSettingUpdateFunc(const std::string& key);
+    static void RegisterSettingDuringCallObservers();
+    static void DuringCallSettingUpdateFunc(const std::string& key);
 
     virtual void OnStart() override;
     virtual void OnStop() override;
@@ -138,6 +140,8 @@ public:
     virtual PowerErrors LockScreenAfterTimingOut(
         bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
+    virtual PowerErrors RefreshActivity(
+        int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;
 
     void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
@@ -286,8 +290,12 @@ public:
     {
         return shutdownController_;
     }
+    bool IsDuringCallStateEnable()
+    {
+        return isDuringCallStateEnable_;
+    }
 #ifdef HAS_SENSORS_SENSOR_PART
-    static bool isInLidMode_;
+    static std::atomic_bool isInLidMode_;
 #endif
 
 private:
@@ -364,6 +372,7 @@ private:
     void UnregisterExternalCallback();
 
     bool ready_ {false};
+    bool isDuringCallStateEnable_ {false};
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4

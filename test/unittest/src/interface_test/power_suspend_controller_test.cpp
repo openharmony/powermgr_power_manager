@@ -413,6 +413,41 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest016, TestSize.Lev
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest016 function end!");
 }
 
+/**
+ * @tc.name: PowerSuspendControllerTest017
+ * @tc.desc: test simulate powerkey event when screenon
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest017, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest017 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest017: start";
+
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
+    EXPECT_TRUE(g_service->IsScreenOn());
+    std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
+    suspendController->monitorMap_.clear();
+
+    auto inputManager = MMI::InputManager::GetInstance();
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
+    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+
+    inputManager->SimulateInputEvent(keyEventPowerkeyDown);
+    inputManager->SimulateInputEvent(keyEventPowerkeyUp);
+    sleep(2);
+    EXPECT_FALSE(g_service->IsScreenOn());
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest017: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest017 function end!");
+}
+
 #ifdef POWER_MANAGER_TAKEOVER_SUSPEND
 class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
     public:
@@ -428,23 +463,6 @@ class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
             return nullptr;
         }
 };
-
-/**
- * @tc.name: PowerSuspendControllerTest017
- * @tc.desc: test add takeover callback
- * @tc.type: FUNC
- */
-HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest017, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest017 function start!");
-    GTEST_LOG_(INFO) << "PowerSuspendControllerTest017: start";
-    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
-    g_service->SuspendControllerInit();
-    g_service->suspendController_->AddCallback(callback, TakeOverSuspendPriority::DEFAULT);
-    EXPECT_TRUE(g_service->suspendController_ != nullptr);
-    GTEST_LOG_(INFO) << "PowerSuspendControllerTest017: end";
-    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest017 function end!");
-}
 
 /**
  * @tc.name: PowerSuspendControllerTest018
@@ -524,6 +542,23 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest021, TestSize.Lev
     g_service->suspendController_->RemoveCallback(static_cast<const sptr<ITakeOverSuspendCallback>&>(callback));
     g_service->suspendController_->TriggerTakeOverSuspendCallback(type);
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest021 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest022
+ * @tc.desc: test add takeover callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest022 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest022: start";
+    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    g_service->SuspendControllerInit();
+    g_service->suspendController_->AddCallback(callback, TakeOverSuspendPriority::DEFAULT);
+    EXPECT_TRUE(g_service->suspendController_ != nullptr);
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest022: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest022 function end!");
 }
 #endif
 } // namespace

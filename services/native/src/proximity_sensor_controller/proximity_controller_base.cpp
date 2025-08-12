@@ -26,30 +26,9 @@ ProximityControllerBase::ProximityControllerBase(const std::string& name, Sensor
 {
 #ifdef HAS_SENSORS_SENSOR_PART
     POWER_HILOGD(FEATURE_INPUT, "Instance enter");
-    SensorInfo* sensorInfo = nullptr;
-    int32_t count = 0;
-    int ret = GetAllSensors(&sensorInfo, &count);
-    if (ret != 0 || sensorInfo == nullptr) {
-        POWER_HILOGE(FEATURE_INPUT, "Get sensors fail, ret=%{public}d", ret);
-        return;
-    }
-    for (int32_t i = 0; i < count; i++) {
-        if (sensorInfo[i].sensorTypeId == SENSOR_TYPE_ID_PROXIMITY) {
-            POWER_HILOGI(FEATURE_INPUT, "Support PROXIMITY sensor");
-            SetSupported(true);
-            break;
-        }
-    }
-    if (!IsSupported()) {
-        POWER_HILOGE(FEATURE_INPUT, "PROXIMITY sensor not support");
-        return;
-    }
-    if (strcpy_s(user_.name, sizeof(user_.name), name.c_str()) != EOK) {
-        POWER_HILOGE(FEATURE_INPUT, "strcpy_s user_.name=%{public}s error", name.c_str());
-        return;
-    }
-    user_.userData = nullptr;
-    user_.callback = callback;
+    callback_ = callback;
+    name_ = name;
+    InitProximitySensorUser();
 #endif
 }
 
@@ -63,15 +42,44 @@ ProximityControllerBase::~ProximityControllerBase()
 }
 
 #ifdef HAS_SENSORS_SENSOR_PART
+bool ProximityControllerBase::InitProximitySensorUser()
+{
+    SensorInfo* sensorInfo = nullptr;
+    int32_t count = 0;
+    const constexpr int32_t PARAM_ZERO = 0;
+    int ret = GetAllSensors(&sensorInfo, &count);
+    if (ret != PARAM_ZERO || sensorInfo == nullptr) {
+        POWER_HILOGE(FEATURE_INPUT, "Get sensors fail, ret=%{public}d", ret);
+        return false;
+    }
+    for (int32_t i = PARAM_ZERO; i < count; i++) {
+        if (sensorInfo[i].sensorTypeId == SENSOR_TYPE_ID_PROXIMITY) {
+            POWER_HILOGI(FEATURE_INPUT, "Support PROXIMITY sensor");
+            SetSupported(true);
+            break;
+        }
+    }
+    if (!IsSupported()) {
+        POWER_HILOGE(FEATURE_INPUT, "PROXIMITY sensor not support");
+        return false;
+    }
+    if (strcpy_s(user_.name, sizeof(user_.name), name_.c_str()) != EOK) {
+        POWER_HILOGE(FEATURE_INPUT, "strcpy_s user_.name=%{public}s error", name_.c_str());
+        return true;
+    }
+    user_.userData = nullptr;
+    user_.callback = callback_;
+    return true;
+}
+
 void ProximityControllerBase::Enable()
 {
     POWER_HILOGD(FEATURE_INPUT, "Enter");
     SetEnabled(true);
-    if (!IsSupported()) {
-        POWER_HILOGE(FEATURE_INPUT, "PROXIMITY sensor not support");
+    if (!IsSupported() && !InitProximitySensorUser()) {
+        POWER_HILOGE(FEATURE_INPUT, "Enable PROXIMITY sensor not support");
         return;
     }
-
     int32_t errorCode = SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
     if (errorCode != ERR_OK) {
         POWER_HILOGW(FEATURE_INPUT, "SubscribeSensor PROXIMITY failed, errorCode=%{public}d", errorCode);
@@ -92,7 +100,7 @@ void ProximityControllerBase::Disable()
     POWER_HILOGD(FEATURE_INPUT, "Enter");
     SetEnabled(false);
     if (!IsSupported()) {
-        POWER_HILOGE(FEATURE_INPUT, "PROXIMITY sensor not support");
+        POWER_HILOGE(FEATURE_INPUT, "Disable PROXIMITY sensor not support");
         return;
     }
 

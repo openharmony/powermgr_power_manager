@@ -31,6 +31,7 @@ public:
     ProximityControllerBase() = default;
     ProximityControllerBase(const std::string& name, SensorCallbackFunc callback);
     virtual ~ProximityControllerBase();
+    bool InitProximitySensorUser();
     void Enable() override;
     void Disable() override;
     void OnClose() override {}
@@ -39,6 +40,8 @@ public:
     static const int32_t PROXIMITY_AWAY_SCALAR = 5;
     static const uint32_t SAMPLING_RATE =  100000000;
 private:
+    SensorCallbackFunc callback_ = nullptr;
+    std::string name_ {};
     SensorUser user_ {};
 };
 } // namespace PowerMgr

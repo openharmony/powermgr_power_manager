@@ -92,6 +92,15 @@ public:
     bool RefreshActivity(UserActivityType type = UserActivityType::USER_ACTIVITY_TYPE_OTHER);
 
     /**
+     * Refresh the screentimeout time, and keep the screen on. RefreshActivity works only when the screen is on.
+     *
+     * @param type The RefreshActivity type, such as touch/button/accessibility and so on.
+     * @param refreshReason The reason to refresh the screentimeout time.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code.
+     */
+    PowerErrors RefreshActivity(UserActivityType type, const std::string& refreshReason);
+
+    /**
      * Windows overwrite timeout
      * @param timeout Specifies the timeout duration.
      */

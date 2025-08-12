@@ -30,6 +30,7 @@ config("module_mock_private_config") {
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
     "${powermgr_service_path}/native/src/screenoffpre",
+    "${powermgr_service_path}/native/src/setting",
   ]
 }
 
@@ -41,6 +42,7 @@ deps_ex = [
   "c_utils:utils",
   "common_event_service:cesfwk_innerkits",
   "config_policy:configpolicy_util",
+  "data_share:datashare_consumer",
   "drivers_interface_power:libpower_proxy_1.2",
   "drivers_interface_power:libpower_proxy_1.3",
   "ffrt:libffrt",
@@ -78,6 +80,7 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
 
   sources = [
     "${powermgr_service_path}/native/src/runninglock/running_lock_mgr.cpp",
+    "${powermgr_service_path}/native/src/suspend/suspend_controller.cpp",
     "running_lock_mgr_abnormal_test.cpp",
   ]
 
