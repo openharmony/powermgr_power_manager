@@ -55,7 +55,7 @@ bool TakeOverShutdownCallback::OnTakeOverShutdown(const TakeOverInfo& info)
 }
 
 
-void PowerServiceFuzzTest(const uint8_t* data, size_t size)
+void PowerServiceFuzzTest()
 {
     auto g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
@@ -101,7 +101,7 @@ void PowerServiceFuzzTest(const uint8_t* data, size_t size)
     g_service->IsRunningLockEnabledIpc(lockType, result, powerError);
 }
 
-void PowerServiceCallbackFuzzTest(const uint8_t* data, size_t size)
+void PowerServiceCallbackFuzzTest()
 {
     auto g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
@@ -148,8 +148,10 @@ void PowerServiceCallbackFuzzTest(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::PowerServiceFuzzTest(data, size);
-    OHOS::PowerServiceCallbackFuzzTest(data, size);
+    OHOS::PowerServiceFuzzTest();
+    OHOS::PowerServiceCallbackFuzzTest();
+    PowerFuzzerTest g_serviceTest;
+    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SHELL_DUMP_IPC), data, size);
     return 0;
 }
 
