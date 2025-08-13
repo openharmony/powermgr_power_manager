@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include "power_wakeup_controller_oninput_test.h"
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 #include "wakeup_controller.h"
@@ -40,10 +42,12 @@ void PowerWakeupControllerOninputTest::TearDownTestCase(void)
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
 }
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 MMI::InputManager *InputManager::GetInstance()
 {
     return nullptr;
 }
+#endif
 
 namespace {
 /**
@@ -52,6 +56,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupControllerOninputTest, PowerWakeupControllerOninputTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerOninputTest001: start");
@@ -80,4 +85,5 @@ HWTEST_F(PowerWakeupControllerOninputTest, PowerWakeupControllerOninputTest001, 
     GTEST_LOG_(INFO) << "PowerWakeupControllerOninputTest001: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerOninputTest001: end");
 }
+#endif
 } // namespace
