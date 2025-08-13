@@ -23,8 +23,10 @@
 #include <csignal>
 #include <iostream>
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include "key_event.h"
 #include "pointer_event.h"
+#endif
 #include "power_common.h"
 #include "power_mgr_service.h"
 #include "setting_helper.h"
@@ -89,7 +91,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function start!");
     g_pmsTest->HallSensorSubscriberInit();
     g_pmsTest->HallSensorSubscriberCancel();
-
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     int32_t keyCode = OHOS::MMI::KeyEvent::KEYCODE_F1;
     g_pmsTest->HandleKeyEvent(keyCode);
     int32_t type = OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
@@ -100,6 +102,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
 
     g_pmsTest->doubleClickId_ = UNCANCELID;
     g_pmsTest->monitorId_ = UNCANCELID;
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative001 function end!");
     GTEST_LOG_(INFO) << "PowerMgrServiceNative001 end.";
 }
@@ -109,6 +112,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative001, TestSize.Level1)
  * @tc.desc: test handleKeyEvent in powerMgrService
  * @tc.type: FUNC
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PowerMgrServiceNative002 start.";
@@ -132,6 +136,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative002, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative002 function end!");
     GTEST_LOG_(INFO) << "PowerMgrServiceNative002 end.";
 }
+#endif
 
 /**
  * @tc.name: PowerMgrServiceNative003
