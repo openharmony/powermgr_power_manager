@@ -23,7 +23,9 @@
 #endif
 
 #include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <securec.h>
 
 #include "power_mgr_client.h"
@@ -45,6 +47,7 @@ namespace {
  * @tc.desc: test simulate powerkey event when screenon
  * @tc.type: FUNC
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001 function start!");
@@ -66,11 +69,14 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest001, TestSize.Level1)
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest001 function end!");
 }
+#endif
+
 /**
  * @tc.name: PowerSuspendTest002
  * @tc.desc: test simulate powerkey event once when screenon
  * @tc.type: FUNC
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function start!");
@@ -97,6 +103,7 @@ HWTEST_F(PowerSuspendTest, PowerSuspendTest002, TestSize.Level1)
 
     POWER_HILOGI(LABEL_TEST, "PowerSuspendTest002 function end!");
 }
+#endif
 
 /**
  * @tc.name: PowerSuspendTest003

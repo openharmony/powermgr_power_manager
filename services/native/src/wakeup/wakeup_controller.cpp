@@ -24,7 +24,9 @@
 #include <hisysevent.h>
 #endif
 #include <cJSON.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <ipc_skeleton.h>
 #include <securec.h>
 #include "permission.h"
@@ -939,6 +941,7 @@ std::shared_ptr<WakeupMonitor> WakeupMonitor::CreateMonitor(WakeupSource& source
 /** PowerkeyWakeupMonitor Implement */
 bool PowerkeyWakeupMonitor::Init()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     if (powerkeyShortPressId_ >= 0) {
         return true;
     }
@@ -969,6 +972,9 @@ bool PowerkeyWakeupMonitor::Init()
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
     return powerkeyShortPressId_ >= 0 ? true : false;
+#else
+    return false;
+#endif
 }
 
 void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
@@ -1023,6 +1029,7 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
 
 void PowerkeyWakeupMonitor::Cancel()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
         POWER_HILOGE(FEATURE_WAKEUP, "PowerkeyWakeupMonitorCancel inputManager is null");
@@ -1032,6 +1039,7 @@ void PowerkeyWakeupMonitor::Cancel()
         POWER_HILOGI(FEATURE_WAKEUP, "UnsubscribeKeyEvent: PowerkeyWakeupMonitor");
         inputManager->UnsubscribeKeyEvent(powerkeyShortPressId_);
     }
+#endif
 }
 
 /** Keyboard Implement */

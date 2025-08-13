@@ -24,8 +24,10 @@
 #undef private
 #undef protected
 #include "power_mgr_dumper.h"
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include "key_event.h"
 #include "pointer_event.h"
+#endif
 #include "power_log.h"
 
 using namespace testing::ext;

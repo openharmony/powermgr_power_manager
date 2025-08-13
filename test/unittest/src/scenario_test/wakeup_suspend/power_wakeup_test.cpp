@@ -17,11 +17,13 @@
 #include <thread>
 #include <unistd.h>
 #include <cJSON.h>
+#include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+#include <input_manager.h>
 #include "axis_event.h"
 #include "input_device.h"
 #include "pointer_event.h"
-#include <datetime_ex.h>
-#include <input_manager.h>
+#endif
 #include <securec.h>
 
 #include "power_mgr_client.h"
@@ -42,6 +44,7 @@ static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
 static const std::string TEST_DEVICE_ID = "test_device_id";
 
 namespace {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 MMI::PointerEvent::PointerItem CreatePointerItem(
     int32_t pointerId, int32_t deviceId, const std::pair<int32_t, int32_t>& displayLocation, bool isPressed)
 {
@@ -53,12 +56,14 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
     item.SetPressed(isPressed);
     return item;
 }
+#endif
 
 /**
  * @tc.name: PowerWakeupTest001
  * @tc.desc: test keyboard wakeup and powerkey pressed at the same time
  * @tc.type: FUNC
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest001 function start!");
@@ -90,12 +95,14 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level1)
     powerMgrClient.RestoreScreenOffTime();
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest001 function end!");
 }
+#endif
 
 /**
  * @tc.name: PowerWakeupTest002
  * @tc.desc: test simulate normal key event when screenoff
  * @tc.type: FUNC
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest002 function start!");
@@ -118,4 +125,5 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level1)
 
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest002 function end!");
 }
+#endif
 } // namespace

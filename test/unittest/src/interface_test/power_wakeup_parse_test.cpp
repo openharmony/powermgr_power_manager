@@ -23,7 +23,9 @@
 #endif
 
 #include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <securec.h>
 
 #include "power_mgr_service.h"

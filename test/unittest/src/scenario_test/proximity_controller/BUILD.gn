@@ -51,7 +51,6 @@ deps_ex = [
   "hdf_core:libhdi",
   "hdf_core:libpub_utils",
   "hilog:libhilog",
-  "input:libmmi-client",
   "ipc:ipc_core",
   "libxml2:libxml2",
   "power_manager:power_ffrt",
@@ -60,6 +59,10 @@ deps_ex = [
   "window_manager:libdm_lite",
   "window_manager:libwm_lite",
 ]
+
+if (has_multimodalinput_input_part) {
+  deps_ex += [ "input:libmmi-client" ]
+}
 
 if (has_sensors_sensor_part) {
   deps_ex += [ "sensor:sensor_interface_native" ]
