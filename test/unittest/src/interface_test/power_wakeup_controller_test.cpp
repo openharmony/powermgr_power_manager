@@ -17,11 +17,13 @@
 #include <thread>
 #include <unistd.h>
 #include <cJSON.h>
+#include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+#include <input_manager.h>
 #include "axis_event.h"
 #include "input_device.h"
 #include "pointer_event.h"
-#include <datetime_ex.h>
-#include <input_manager.h>
+#endif
 #include <securec.h>
 
 #include "power_mgr_client.h"
@@ -41,12 +43,14 @@ static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
 static const std::string TEST_DEVICE_ID = "test_device_id";
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 class InputCallbackMock : public IInputEventConsumer {
 public:
     virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
     virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
     virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
 };
+#endif
 
 void PowerWakeupControllerTest::SetUpTestCase(void)
 {
@@ -64,6 +68,7 @@ void PowerWakeupControllerTest::TearDownTestCase(void)
 }
 
 namespace {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 MMI::PointerEvent::PointerItem CreatePointerItem(
     int32_t pointerId, int32_t deviceId, const std::pair<int32_t, int32_t>& displayLocation, bool isPressed)
 {
@@ -75,6 +80,7 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
     item.SetPressed(isPressed);
     return item;
 }
+#endif
 
 /**
  * @tc.name: PowerWakeupControllerTest001
@@ -82,6 +88,7 @@ MMI::PointerEvent::PointerItem CreatePointerItem(
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest001 function start!");
@@ -94,6 +101,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest001, TestSize.Level
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest001: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest001 function end!");
 }
+#endif
 
 /**
  * @tc.name: PowerWakeupControllerTest002
@@ -229,6 +237,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest007, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest007 function start!");
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest007: start";
     g_service->WakeupControllerInit();
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputCallback* callback = new InputCallback();
     InputCallbackMock* callback_mock = reinterpret_cast<InputCallbackMock*>(callback);
     std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
@@ -242,6 +251,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest007, TestSize.Level
     callback_mock->OnInputEvent(keyEvent);
     delete callback;
     EXPECT_TRUE(g_service->wakeupController_ != nullptr);
+#endif
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest007: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest007 function end!");
 }
@@ -263,6 +273,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest008, TestSize.Level
     constexpr int32_t DRAG_DST_Y {500};
     int32_t deviceMouseId {0};
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputCallback* callback = new InputCallback();
     InputCallbackMock* callback_mock = reinterpret_cast<InputCallbackMock*>(callback);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -286,6 +297,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest008, TestSize.Level
     callback_mock->OnInputEvent(pointerEvent);
     EXPECT_TRUE(g_service->wakeupController_ != nullptr);
     delete callback;
+#endif
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest008: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest008 function end!");
 }
@@ -307,6 +319,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest009, TestSize.Level
     constexpr int32_t DRAG_DST_Y {500};
     int32_t deviceMouseId {0};
 
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputCallback* callback = new InputCallback();
     InputCallbackMock* callback_mock = reinterpret_cast<InputCallbackMock*>(callback);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -338,6 +351,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest009, TestSize.Level
     callback_mock->OnInputEvent(pointerEvent2);
 
     delete callback;
+#endif
     EXPECT_TRUE(g_service->wakeupController_ != nullptr);
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest009: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest009 function end!");
@@ -422,12 +436,14 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest012, TestSize.Level
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
         WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerWakeupControllerTest012");
     EXPECT_TRUE(g_service->IsScreenOn());
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
     InputCallback callback;
     callback.OnInputEvent(keyEvent);
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
+#endif
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest012: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest012 function end!");
@@ -447,12 +463,14 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest013, TestSize.Level
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
         WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupControllerTest013");
     EXPECT_TRUE(g_service->IsScreenOn());
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     InputCallback callback;
     callback.OnInputEvent(pointerEvent);
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
+#endif
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest013: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest013 function end!");
@@ -472,12 +490,14 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest014, TestSize.Level
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
         WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "PowerWakeupControllerTest014");
     EXPECT_TRUE(g_service->IsScreenOn());
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     std::shared_ptr<MMI::AxisEvent> axisEvent = MMI::AxisEvent::Create();
     InputCallback callback;
     callback.OnInputEvent(axisEvent);
     usleep(SLEEP_WAIT_TIME_MS * 1000);
     EXPECT_TRUE(g_service->IsScreenOn());
+#endif
     g_service->SetDisplayOffTime(RECOVER_DISPLAY_OFF_TIME_S);
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest014: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest014 function end!");
@@ -576,9 +596,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest019, TestSize.Level
     g_service->SuspendDevice(
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(g_service->IsScreenOn());
-    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
-    wakeupController->monitorMap_.clear();
-
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     auto inputManager = MMI::InputManager::GetInstance();
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
     keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
@@ -591,13 +609,13 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest019, TestSize.Level
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
-    sleep(2);
+    sleep(SLEEP_WAIT_TIME_S);
     //wake it up when the screen goes off after timeout
     g_service->RefreshActivity(
         static_cast<int64_t>(std::chrono::system_clock::now().time_since_epoch().count()),
             UserActivityType::USER_ACTIVITY_TYPE_TOUCH, true);
     EXPECT_TRUE(g_service->IsScreenOn());
-
+#endif
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest019: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest019 function end!");
 }
@@ -644,6 +662,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021 function start!");
@@ -695,6 +714,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level
     delete callbackThird;
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest021 function end!");
 }
+#endif
 
 /**
  * @tc.name: PowerWakeupControllerTest022
@@ -702,6 +722,7 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest021, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest022, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022 function start!");
@@ -721,4 +742,5 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest022, TestSize.Level
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest022: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022 function end!");
 }
+#endif
 } // namespace
