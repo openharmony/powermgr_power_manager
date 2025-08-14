@@ -137,6 +137,7 @@ void SuspendController::TriggerSyncSleepCallbackInner(
         auto pidUid = SleepCallbackHolder::GetInstance().FindCallbackPidUid(callback);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
+            POWER_HILOGI(FEATURE_SUSPEND, "Sync Sleep Callback, pid=%{public}d", pidUid.first);
             isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,
@@ -945,12 +946,12 @@ void PowerKeySuspendMonitor::EndPowerkeyScreenOff() const
 
 void PowerKeySuspendMonitor::Cancel()
 {
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
         POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorCancel inputManager is null");
         return;
     }
-#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     if (powerkeyReleaseId_ >= 0) {
         POWER_HILOGI(FEATURE_SUSPEND, "UnsubscribeKeyEvent: PowerKeySuspendMonitor");
         inputManager->UnsubscribeKeyEvent(powerkeyReleaseId_);

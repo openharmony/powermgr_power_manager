@@ -51,7 +51,6 @@ deps_ex = [
   "hdf_core:libhdi",
   "hdf_core:libpub_utils",
   "hilog:libhilog",
-  "input:libmmi-client",
   "ipc:ipc_core",
   "libxml2:libxml2",
   "power_manager:power_ffrt",
@@ -60,6 +59,10 @@ deps_ex = [
   "window_manager:libdm_lite",
   "window_manager:libwm_lite",
 ]
+
+if (has_multimodalinput_input_part) {
+  deps_ex += [ "input:libmmi-client" ]
+}
 
 if (has_sensors_sensor_part) {
   deps_ex += [ "sensor:sensor_interface_native" ]
@@ -99,6 +102,13 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
 
   if (has_display_manager_part) {
     deps_ex += [ "display_manager:displaymgr" ]
+  }
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    deps_ex += [ "battery_manager:batterysrv_client" ]
   }
   external_deps = deps_ex
 }

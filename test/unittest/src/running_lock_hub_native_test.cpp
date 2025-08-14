@@ -19,7 +19,9 @@
 #include <ipc_skeleton.h>
 
 #include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <securec.h>
 
 #include "actions/irunning_lock_action.h"
