@@ -51,7 +51,7 @@ public:
 
     inline void DumpRunningLockInfo()
     {
-        system("hidumper -s 3301 -a -runninglock");
+        std::system("hidumper -s 3301 -a -runninglock");
     }
 
     static std::shared_ptr<RunningLockMgr> runningLockMgr_;

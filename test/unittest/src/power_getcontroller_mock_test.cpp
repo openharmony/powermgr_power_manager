@@ -58,7 +58,7 @@ HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Lev
     std::shared_ptr<WakeupController> wakeupController_ = std::make_shared<WakeupController>(stateMachine);
     EXPECT_TRUE(wakeupController_ != nullptr);
     wakeupController_->Wakeup();
-
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
     InputCallback* callback = new InputCallback();
     std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
     keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
@@ -66,6 +66,7 @@ HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Lev
     callback->OnInputEvent(keyEvent);
     EXPECT_TRUE(callback != nullptr);
     delete callback;
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerGetControllerMockTest001 function end!");
     GTEST_LOG_(INFO) << "PowerGetControllerMockTest001: end";
 }

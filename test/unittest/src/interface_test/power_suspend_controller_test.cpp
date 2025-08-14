@@ -23,7 +23,9 @@
 #endif
 
 #include <datetime_ex.h>
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
+#endif
 #include <securec.h>
 
 #include "power_mgr_service.h"
@@ -101,6 +103,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest002 function start!");
@@ -113,6 +116,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest002, TestSize.Lev
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest002: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest002 function end!");
 }
+#endif
 
 /**
  * @tc.name: PowerSuspendControllerTest003
