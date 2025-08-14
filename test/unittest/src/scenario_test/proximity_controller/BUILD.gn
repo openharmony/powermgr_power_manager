@@ -103,6 +103,13 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
   if (has_display_manager_part) {
     deps_ex += [ "display_manager:displaymgr" ]
   }
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    deps_ex += [ "battery_manager:batterysrv_client" ]
+  }
   external_deps = deps_ex
 }
 
