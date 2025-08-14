@@ -43,7 +43,8 @@ void DevicePowerAction::Reboot(const std::string& reason)
     } else {
         rebootCmd = Updater(reason);
     }
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Reboot reason: %{public}s, command: %{public}s", reason.c_str(), rebootCmd.c_str());
+    POWER_KHILOGI(FEATURE_SHUTDOWN,
+        "Reboot reason: %{public}s, command: %{public}s", reason.c_str(), rebootCmd.c_str());
     DoRebootExt(rebootCmd.c_str(), reason.c_str());
 }
 
@@ -54,7 +55,7 @@ void DevicePowerAction::Shutdown(const std::string& reason)
     std::string hookContext = reason;
     HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_DO_SHUTDOWN), &hookContext, nullptr);
 #endif
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Shutdown executing");
+    POWER_KHILOGI(FEATURE_SHUTDOWN, "Shutdown executing");
     DoRebootExt(SHUTDOWN_CMD.c_str(), reason.c_str());
 }
 
