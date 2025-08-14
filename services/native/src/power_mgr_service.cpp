@@ -1660,6 +1660,7 @@ bool PowerMgrService::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCal
 {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     POWER_HILOGI(FEATURE_SUSPEND, "RegisterSyncHibernateCallback begin.");
+    std::lock_guard lock(hibernateMutex_);
     HibernateControllerInit();
     hibernateController_->RegisterSyncHibernateCallback(callback);
     return true;
@@ -1673,6 +1674,7 @@ bool PowerMgrService::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateC
 {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     POWER_HILOGI(FEATURE_SUSPEND, "UnRegisterSyncHibernateCallback begin.");
+    std::lock_guard lock(hibernateMutex_);
     HibernateControllerInit();
     hibernateController_->UnregisterSyncHibernateCallback(callback);
     return true;
