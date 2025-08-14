@@ -1181,7 +1181,12 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
 
     // Call back all native function
     for (auto& listener : asyncPowerStateListeners_) {
+        auto iter = cachedRegister_.find(listener);
+        auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
+        // IPowerStateCallback calling pid uid
+        POWER_HILOGI(FEATURE_POWER_STATE, "APSCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         listener->OnAsyncPowerStateChanged(state);
+        POWER_HILOGI(FEATURE_POWER_STATE, "APSCb End");
     }
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
     HitraceScopedEx powerHitrace(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_POWER, "StateListener");
@@ -1192,6 +1197,7 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
         // IPowerStateCallback calling pid uid
         POWER_HILOGI(FEATURE_POWER_STATE, "IPSCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         listener->OnPowerStateChanged(state);
+        POWER_HILOGI(FEATURE_POWER_STATE, "IPSCb End");
     }
 }
 

@@ -109,6 +109,7 @@ void SuspendController::TriggerSyncSleepCallbackInner(
         auto pidUid = SleepCallbackHolder::GetInstance().FindCallbackPidUid(callback);
         if (callback != nullptr) {
             int64_t start = GetTickCount();
+            POWER_HILOGI(FEATURE_SUSPEND, "Sync Sleep Callback, pid=%{public}d", pidUid.first);
             isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,
