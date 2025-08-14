@@ -862,7 +862,8 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
     skipWakeup = !stateMachine_->IsSwitchOpen();
 #endif
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    skipWakeup = skipWakeup && (stateMachine_->GetExternalScreenNumber() <= 0);
+    skipWakeup = skipWakeup &&
+        (stateMachine_->GetExternalScreenNumber() <= 0 || !stateMachine_->IsOnlySecondDisplayModeSupported());
 #endif
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);

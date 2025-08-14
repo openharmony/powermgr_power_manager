@@ -31,6 +31,7 @@
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
 #include "window_manager_lite.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -171,6 +172,11 @@ public:
     void SetExternalScreenNumber(int32_t exScreenNumber)
     {
         externalScreenNumber_ = exScreenNumber;
+    }
+    bool IsOnlySecondDisplayModeSupported() const
+    {
+        int32_t displayMode = system::GetIntParameter("const.product.support_display_mode", 0);
+        return (displayMode & DISPLAY_MODE_ONLY_SECOND_SCREEN) > 0;
     }
 #endif
 
@@ -429,6 +435,7 @@ private:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     std::atomic<int32_t> externalScreenNumber_ {0};
     std::mutex internalScreenStateMutex_;
+    static constexpr int32_t DISPLAY_MODE_ONLY_SECOND_SCREEN = 8;
 #endif
     std::atomic<bool> isDuringCall_ {false};
     bool SetDreamingState(StateChangeReason reason);
