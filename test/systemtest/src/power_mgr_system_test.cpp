@@ -48,7 +48,7 @@ const int32_t SLEEPTIME_ID = PowerModePolicy::ServiceType::SLEEPTIME;
 
 void PowerMgrSystemTest::SetUpTestCase(void)
 {
-    system("mount -o rw,remount /vendor");
+    std::system("mount -o rw,remount /vendor");
 }
 
 static void UpdateGlobalSleepTime(std::list<ModePolicy>& info)
