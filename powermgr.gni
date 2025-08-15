@@ -40,6 +40,7 @@ declare_args() {
   power_manager_feature_watch_limit_screen_common_event_publish = false
   power_manager_feature_watch_update_adapt = false
   power_manager_feature_watch_boot_completed = false
+  power_manager_feature_surport_takeover_suspend = false
   power_manager_feature_init_proximity_controller = false
   power_manager_feature_enable_lid_check = false
 }

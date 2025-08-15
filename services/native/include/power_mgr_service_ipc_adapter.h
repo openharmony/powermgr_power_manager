@@ -71,6 +71,10 @@ public:
     virtual int32_t RegisterSyncHibernateCallbackIpc(const sptr<ISyncHibernateCallback>& callback) override;
     virtual int32_t UnRegisterSyncHibernateCallbackIpc(const sptr<ISyncHibernateCallback>& callback) override;
 
+    virtual int32_t RegisterSuspendTakeoverCallbackIpc(
+        const sptr<ITakeOverSuspendCallback>& callback, int32_t priority) override;
+    virtual int32_t UnRegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback) override;
+
     virtual int32_t RegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback) override;
     virtual int32_t UnRegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback) override;
 
@@ -171,6 +175,10 @@ public:
     virtual void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) = 0;
     virtual void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) = 0;
     virtual void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) = 0;
+
+    virtual bool RegisterSuspendTakeoverCallback(
+        const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority) = 0;
+    virtual bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

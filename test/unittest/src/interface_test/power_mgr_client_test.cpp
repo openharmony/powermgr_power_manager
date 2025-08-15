@@ -31,6 +31,8 @@
 #include "power_state_machine.h"
 #include "running_lock_token_stub.h"
 #include "mock_power_mgr_client.h"
+#include "mock_power_remote_object.h"
+#include "takeover_suspend_callback_proxy.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -1459,4 +1461,52 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient058, TestSize.Level2)
     powerMgrClient.OverrideScreenOffTime(PowerStateMachine::DEFAULT_SLEEP_TIME_MS);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient058 function end!");
 }
+
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
+    public:
+        TestTakeOverSuspendCallback() = default;
+        virtual ~TestTakeOverSuspendCallback() = default;
+
+        bool OnTakeOverSuspend(SuspendDeviceType type) override
+        {
+            return false;
+        }
+        sptr<IRemoteObject> AsObject() override
+        {
+            return nullptr;
+        }
+};
+
+/**
+ * @tc.name: PowerMgrClient059
+ * @tc.desc: test RegisterSuspendTakeoverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient059, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    TakeOverSuspendPriority priority = TakeOverSuspendPriority::LOW;
+    powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient060
+ * @tc.desc: test UnRegisterSuspendTakeoverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient060, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    TakeOverSuspendPriority priority = TakeOverSuspendPriority::HIGH;
+    // first register callback
+    powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    // then test unregister callback
+    powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function end!");
+}
+#endif
 } // namespace

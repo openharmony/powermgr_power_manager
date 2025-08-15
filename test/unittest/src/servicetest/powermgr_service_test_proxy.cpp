@@ -1115,6 +1115,58 @@ int32_t PowerMgrServiceTestProxy::UnRegisterRunningLockCallbackIpc(const sptr<IP
     return ERR_OK;
 }
 
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+bool PowerMgrServiceTestProxy::RegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr || (callback == nullptr)), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(IPowerMgrIpcCode::COMMAND_REGISTER_SUSPEND_TAKEOVER_CALLBACK_IPC),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+
+bool PowerMgrServiceTestProxy::UnRegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr || (callback == nullptr)), false);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Write descriptor failed");
+        return false;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int ret = stub_->OnRemoteRequest(
+        static_cast<int>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_SUSPEND_TAKEOVER_CALLBACK_IPC),
+        data, reply, option);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SendRequest failed with ret=%{public}d", __func__, ret);
+        return false;
+    }
+    return true;
+}
+#endif
+
 int32_t PowerMgrServiceTestProxy::SetDisplaySuspendIpc(bool enable)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);

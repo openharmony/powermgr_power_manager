@@ -121,7 +121,10 @@ ohos_unittest("test_power_key_option") {
 ohos_unittest("test_power_mgr_client") {
   module_out_path = module_output_path
 
-  sources = [ "src/interface_test/power_mgr_client_test.cpp" ]
+  sources = [
+    "src/interface_test/power_mgr_client_test.cpp",
+    "mock/mock_power_remote_object.cpp",
+  ]
 
   sanitize = {
     cfi = true
@@ -364,6 +367,48 @@ ohos_unittest("test_power_mgr_service") {
                     "data_share:datashare_consumer",
                     "selinux_adapter:librestorecon",
                   ]
+}
+
+ohos_unittest("test_power_mgr_service_ipc_adapter") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [
+    "src/interface_test/power_mgr_service_ipc_adapter_test.cpp",
+  ]
+
+  if (power_manager_feature_tv_dreaming) {
+    defines += [ "POWER_MANAGER_TV_DREAMING" ]
+  }
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+  include_dirs = [ "${powermgr_service_path}/native/include" ]
+  deps = [ "${powermgr_service_path}:powermgrservice" ]
+
+  external_deps = deps_ex + [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "access_token:libtokenid_sdk",
+    "cJSON:cjson",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "selinux_adapter:librestorecon",
+  ]
 }
 
 ohos_unittest("test_power_mgr_service_death") {
@@ -1356,6 +1401,24 @@ ohos_unittest("test_power_shutdown_clinet") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_power_suspend_takeover") {
+  module_out_path = module_output_path
+
+  sources = [ "src/interface_test/suspend_takeover_client_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+  ]
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_power_getcontroller_mock") {
   module_out_path = module_output_path
 
@@ -1721,6 +1784,10 @@ ohos_unittest("test_power_config_parse_two") {
   }
 }
 
+if (power_manager_feature_surport_takeover_suspend) {
+  defines += [ "POWER_MANAGER_TAKEOVER_SUSPEND" ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -1770,6 +1837,12 @@ group("unittest") {
     ":test_running_lock_scenario",
     ":test_running_lock_timer_handler",
   ]
+  if (power_manager_feature_surport_takeover_suspend) {
+    deps += [
+      ":test_power_mgr_service_ipc_adapter",
+      ":test_power_suspend_takeover",
+    ]
+  }
   if (has_display_manager_part) {
     deps += [ ":test_device_state_action_native" ]
   }

@@ -21,14 +21,12 @@
 
 #include "power_state_machine_info.h"
 #include "running_lock.h"
+#include "suspend/itake_over_suspend_callback.h"
+#include "isync_sleep_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
 class PowerMgrClient final {
-private:
-    PowerMgrClient();
-    DISALLOW_COPY_AND_MOVE(PowerMgrClient);
-
 public:
     static PowerMgrClient& GetInstance();
     virtual ~PowerMgrClient();
@@ -197,6 +195,9 @@ public:
     bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
     bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);
+    bool RegisterSuspendTakeoverCallback(
+        const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority);
+    bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback);
     bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void RecoverRunningLocks();
@@ -239,6 +240,10 @@ private:
     static std::mutex runningLocksMutex_;
     sptr<IRemoteObject> token_ {nullptr};
     PowerErrors error_ = PowerErrors::ERR_OK;
+
+private:
+    PowerMgrClient();
+    DISALLOW_COPY_AND_MOVE(PowerMgrClient);
 };
 } // namespace PowerMgr
 } // namespace OHOS
