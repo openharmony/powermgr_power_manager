@@ -31,6 +31,7 @@
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
 #include "window_manager_lite.h"
+#include "suspend/itake_over_suspend_callback.h"
 #include "parameters.h"
 
 namespace OHOS {
@@ -65,6 +66,7 @@ enum class TransitResult {
     DISPLAY_OFF_ERR = 5,
     FORBID_TRANSIT = 6,
     PRE_BRIGHT_ERR = 7,
+    TAKEN_OVER = 8,
     OTHER_ERR = 99
 };
 
@@ -162,6 +164,7 @@ public:
     void SetDisplaySuspend(bool enable);
     void WriteHiSysEvent(TransitResult ret, StateChangeReason reason, int32_t beginTimeMs, PowerState state);
     bool IsTransitFailed(TransitResult ret);
+    SuspendDeviceType GetSuspendTypeByReason(StateChangeReason reason);
     StateChangeReason GetReasonByWakeType(WakeupDeviceType type);
     StateChangeReason GetReasonBySuspendType(SuspendDeviceType type);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -393,6 +396,9 @@ private:
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     bool ReportScreenOffInvalidEvent(StateChangeReason reason);
     bool ReportAbnormalScreenOffEvent(StateChangeReason reason);
+#endif
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    TransitResult TakeOverSuspendAction(StateChangeReason reason);
 #endif
 
     const wptr<PowerMgrService> pms_;

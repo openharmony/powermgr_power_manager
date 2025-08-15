@@ -44,6 +44,18 @@ public:
         return PowerMgrClient::GetInstance().WakeupDevice(reason, detail);
     }
 
+    bool IsForceSleeping()
+    {
+        return PowerMgrClient::GetInstance().IsForceSleeping();
+    }
+
+    PowerErrors ForceSuspendDevice()
+    {
+        state_ = false;
+        PowerErrors ret = PowerMgrClient::GetInstance().ForceSuspendDevice();
+        return ret;
+    }
+
     PowerErrors SuspendDevice()
     {
         state_ = false;

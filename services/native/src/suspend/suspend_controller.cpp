@@ -84,6 +84,34 @@ void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
+void SuspendController::AddCallback(const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority)
+{
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    if (callback == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
+        return;
+    }
+    TakeOverSuspendCallbackHolder::GetInstance().AddCallback(callback, priority);
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "TakeOver Suspend callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+#endif
+}
+
+void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& callback)
+{
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    if (callback == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
+        return;
+    }
+    TakeOverSuspendCallbackHolder::GetInstance().RemoveCallback(callback);
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "TakeOver Suspend callback removed, pid=%{public}d, uid=%{public}d",
+        IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+#endif
+}
+
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
     std::lock_guard lock(sleepCbMutex_);
@@ -118,6 +146,51 @@ void SuspendController::TriggerSyncSleepCallbackInner(
         }
     }
 }
+
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+bool SuspendController::TriggerTakeOverSuspendCallback(SuspendDeviceType type)
+{
+    bool isTakeover = false;
+    POWER_HILOGI(FEATURE_SUSPEND, "TriggerTakeOverSuspendCallback, type=%{public}d", type);
+    auto highPriorityCallbacks = TakeOverSuspendCallbackHolder::GetInstance().GetHighPriorityCallbacks();
+    isTakeover = TriggerTakeOverSuspendCallbackInner(highPriorityCallbacks, "High", type);
+    RETURN_IF_WITH_RET(isTakeover, true);
+    auto defaultPriorityCallbacks = TakeOverSuspendCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
+    isTakeover = TriggerTakeOverSuspendCallbackInner(defaultPriorityCallbacks, "Default", type);
+    RETURN_IF_WITH_RET(isTakeover, true);
+    auto lowPriorityCallbacks = TakeOverSuspendCallbackHolder::GetInstance().GetLowPriorityCallbacks();
+    isTakeover = TriggerTakeOverSuspendCallbackInner(lowPriorityCallbacks, "Low", type);
+    return isTakeover;
+}
+#endif
+
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+bool SuspendController::TriggerTakeOverSuspendCallbackInner(
+    TakeOverSuspendCallbackHolder::TakeoverSuspendCallbackContainerType& callbacks,
+    const std::string& priority, SuspendDeviceType type)
+{
+    uint32_t id = 0;
+    bool isTakeover = false;
+    if (callbacks.size() == 0) {
+        POWER_HILOGI(FEATURE_SUSPEND, "callbacks size is zero");
+        return isTakeover;
+    }
+    for (const auto& callback : callbacks) {
+        auto pidUid = TakeOverSuspendCallbackHolder::GetInstance().FindCallbackPidUid(callback);
+        if (callback == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
+            continue;
+        }
+        int64_t start = GetTickCount();
+        isTakeover = isTakeover || callback->OnTakeOverSuspend(type);
+        int64_t count = GetTickCount() - start;
+        POWER_HILOGI(FEATURE_SUSPEND,
+            "Trigger %{public}s takeovercb [%{public}u] success, P=%{public}d U=%{public}d T=%{public}" PRId64,
+            priority.c_str(), ++id, pidUid.first, pidUid.second, count);
+    }
+    return isTakeover;
+}
+#endif
 
 class SuspendPowerStateCallback : public PowerStateCallbackStub {
 public:

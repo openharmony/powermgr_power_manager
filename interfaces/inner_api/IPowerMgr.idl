@@ -26,6 +26,7 @@ interface OHOS.PowerMgr.IAsyncShutdownCallback;
 interface OHOS.PowerMgr.ISyncShutdownCallback;
 interface OHOS.PowerMgr.IPowerRunninglockCallback;
 interface OHOS.PowerMgr.IPowerMgrAsync;
+interface OHOS.PowerMgr.ITakeOverSuspendCallback;
 
 interface OHOS.PowerMgr.IPowerMgr {
     [ipccode 0] void CreateRunningLockIpc(
@@ -67,6 +68,9 @@ interface OHOS.PowerMgr.IPowerMgr {
 
     void RegisterSyncSleepCallbackIpc([in] ISyncSleepCallback powerCallback, [in] int priorityValue);
     void UnRegisterSyncSleepCallbackIpc([in] ISyncSleepCallback powerCallback);
+
+    void RegisterSuspendTakeoverCallbackIpc([in] ITakeOverSuspendCallback takeOverSuspendCallback, [in] int priority);
+    void UnRegisterSuspendTakeoverCallbackIpc([in] ITakeOverSuspendCallback takeOverSuspendCallback);
 
     void RegisterSyncHibernateCallbackIpc([in] ISyncHibernateCallback powerCallback);
     void UnRegisterSyncHibernateCallbackIpc([in] ISyncHibernateCallback powerCallback);

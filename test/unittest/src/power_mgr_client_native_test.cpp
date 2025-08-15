@@ -69,7 +69,10 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerStateCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterPowerModeCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(nullptr));
-
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    EXPECT_FALSE(powerMgrClient.RegisterSuspendTakeoverCallback(nullptr, TakeOverSuspendPriority::DEFAULT));
+    EXPECT_FALSE(powerMgrClient.UnRegisterSuspendTakeoverCallback(nullptr));
+#endif
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterScreenStateCallback(0, nullptr));
