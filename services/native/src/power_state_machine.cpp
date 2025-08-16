@@ -657,12 +657,12 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
 bool PowerStateMachine::IsWakeupDeviceSkip()
 {
     bool ret = false;
-    ret |= !IsSwitchOpen();
+    ret = ret || !IsSwitchOpen();
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-    ret |= IsHibernating();
+    ret = ret || IsHibernating();
 #endif
 #ifdef POWER_MANAGER_ENABLE_LID_CHECK
-    ret |= PowerMgrService::isInLidMode_;
+    ret = ret || PowerMgrService::isInLidMode_;
 #endif
     return ret;
 }
