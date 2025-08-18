@@ -40,9 +40,12 @@ function Hibernate(clearMemory: bool): void;
 
 function SetScreenOffTime(timeout: i64): void;
 
+function RefreshActivity(reason: String): void;
+
 enum DevicePowerMode : i32 {
   MODE_NORMAL = 600,
   MODE_POWER_SAVE,
   MODE_PERFORMANCE,
-  MODE_EXTREME_POWER_SAVE
+  MODE_EXTREME_POWER_SAVE,
+  MODE_CUSTOM_POWER_SAVE = 650
 }
