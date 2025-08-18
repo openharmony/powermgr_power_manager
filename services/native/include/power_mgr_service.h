@@ -45,6 +45,9 @@
 
 namespace OHOS {
 namespace PowerMgr {
+// Explicit specialization declaration. The class has been forward-declared in some of the headers.
+// Visible for TUs that include this header.
+template<> sptr<PowerMgrService> DelayedSpSingleton<PowerMgrService>::instance_;
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 enum class PowerConnectStatus : int32_t {
     POWER_CONNECT_INVALID = -1,
