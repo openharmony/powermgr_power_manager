@@ -271,6 +271,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "POWER_MANAGER_TAKEOVER_SUSPEND" ]
   }
 
+  if (power_manager_feature_glasses_boot_completed) {
+    defines += [ "POWER_MANAGER_ENABLE_GLASSES_BOOT_COMPLETED" ]
+}
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }
