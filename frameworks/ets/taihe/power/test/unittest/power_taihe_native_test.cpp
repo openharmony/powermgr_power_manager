@@ -107,6 +107,12 @@ PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::st
     g_pass = true;
     return g_error;
 }
+
+PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::string& refreshReason)
+{
+    g_pass = true;
+    return g_error;
+}
 } // namespace OHOS::PowerMgr
 
 namespace {
@@ -205,6 +211,8 @@ HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_004, TestSize.Level1)
     g_mode = PowerMode::PERFORMANCE_MODE;
     GetPowerMode();
     g_mode = PowerMode::EXTREME_POWER_SAVE_MODE;
+    GetPowerMode();
+    g_mode = PowerMode::CUSTOM_POWER_SAVE_MODE;
     GetPowerMode();
     g_mode = static_cast<PowerMode>(0);
     GetPowerMode();
@@ -314,6 +322,23 @@ HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_008, TestSize.Level1)
     EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_SYSTEM_API_DENIED));
     EXPECT_TRUE(g_pass);
     POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_008 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_009
+ * @tc.desc: test power taihe native
+ * @tc.type: FUNC
+ * @tc.require: issue#ICTIYR
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_009, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_009 start");
+    RefreshActivity("PowerTaiheNativeTest_009");
+    g_error = PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
+    RefreshActivity("PowerTaiheNativeTest_009");
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_FREQUENT_FUNCTION_CALL));
+    EXPECT_TRUE(g_pass);
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_009 end");
 }
 } // namespace
 
