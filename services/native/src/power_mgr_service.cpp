@@ -171,7 +171,7 @@ bool PowerMgrService::Init()
 #ifdef POWER_MANAGER_ENABLE_GLASSES_BOOT_COMPLETED
     if (!suspendController_) {
         suspendController_ = std::make_shared<SuspendController>(shutdownController_, powerStateMachine_, ffrtTimer_);
-        }
+    }
 #endif
     isDuringCallStateEnable_ = system::GetBoolParameter("const.power.during_call_state_enable", false);
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
