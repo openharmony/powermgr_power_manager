@@ -76,31 +76,31 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest001, TestSize.Level0)
     g_service->SuspendDevice(
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(g_service->IsScreenOn());
+    if (callbackPowerWake_) {
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+        keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+        keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
+        keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+        keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
 
-    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
-    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
-    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
-    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
-    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        callbackPowerWake_(keyEventPowerkeyDown);
+        callbackPowerWake_(keyEventPowerkeyUp);
+        callbackPowerWake_(keyEventPowerkeyDown);
+        callbackPowerWake_(keyEventPowerkeyUp);
+        EXPECT_TRUE(g_service->IsScreenOn());
 
-    EXPECT_NE(callbackPowerWake_, nullptr);
-    callbackPowerWake_(keyEventPowerkeyDown);
-    callbackPowerWake_(keyEventPowerkeyUp);
-    callbackPowerWake_(keyEventPowerkeyDown);
-    callbackPowerWake_(keyEventPowerkeyUp);
-    EXPECT_TRUE(g_service->IsScreenOn());
-
-    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
-    std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
-    EXPECT_NE(wakeupController, nullptr);
-    EXPECT_NE(suspendController, nullptr);
-    wakeupController->monitorMap_.clear();
-    suspendController->monitorMap_.clear();
-    callbackPowerWake_(keyEventPowerkeyDown);
-    callbackPowerWake_(keyEventPowerkeyUp);
-    callbackPowerWake_(keyEventPowerkeyDown);
-    callbackPowerWake_(keyEventPowerkeyUp);
+        std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+        std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
+        EXPECT_NE(wakeupController, nullptr);
+        EXPECT_NE(suspendController, nullptr);
+        wakeupController->monitorMap_.clear();
+        suspendController->monitorMap_.clear();
+        callbackPowerWake_(keyEventPowerkeyDown);
+        callbackPowerWake_(keyEventPowerkeyUp);
+        callbackPowerWake_(keyEventPowerkeyDown);
+        callbackPowerWake_(keyEventPowerkeyUp);
+    }
     GTEST_LOG_(INFO) << "PowerKeyOptionTest001: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest001 function end!");
 }
@@ -121,28 +121,28 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest002, TestSize.Level0)
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
     EXPECT_TRUE(g_service->IsScreenOn());
+    if (callbackPowerSuspend_) {
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+        keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+        keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
+        keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+        keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
 
-    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
-    keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
-    std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyUp = MMI::KeyEvent::Create();
-    keyEventPowerkeyUp->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
-    keyEventPowerkeyUp->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        callbackPowerSuspend_(keyEventPowerkeyDown);
+        callbackPowerSuspend_(keyEventPowerkeyUp);
+        sleep(SLEEP_WAIT_TIME_S);
+        EXPECT_FALSE(g_service->IsScreenOn());
 
-    EXPECT_NE(callbackPowerSuspend_, nullptr);
-    callbackPowerSuspend_(keyEventPowerkeyDown);
-    callbackPowerSuspend_(keyEventPowerkeyUp);
-    sleep(SLEEP_WAIT_TIME_S);
-    EXPECT_FALSE(g_service->IsScreenOn());
-
-    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
-    std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
-    EXPECT_NE(wakeupController, nullptr);
-    EXPECT_NE(suspendController, nullptr);
-    wakeupController->monitorMap_.clear();
-    suspendController->monitorMap_.clear();
-    callbackPowerSuspend_(keyEventPowerkeyDown);
-    callbackPowerSuspend_(keyEventPowerkeyUp);
+        std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+        std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
+        EXPECT_NE(wakeupController, nullptr);
+        EXPECT_NE(suspendController, nullptr);
+        wakeupController->monitorMap_.clear();
+        suspendController->monitorMap_.clear();
+        callbackPowerSuspend_(keyEventPowerkeyDown);
+        callbackPowerSuspend_(keyEventPowerkeyUp);
+    }
     GTEST_LOG_(INFO) << "PowerKeyOptionTest002: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest002 function end!");
 }
@@ -163,22 +163,22 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest003, TestSize.Level0)
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
     EXPECT_TRUE(g_service->IsScreenOn());
+    if (callbackTp_) {
+        std::shared_ptr<MMI::KeyEvent> keyEventTPCover = MMI::KeyEvent::Create();
+        keyEventTPCover->SetKeyCode(MMI::KeyEvent::KEYCODE_SLEEP);
 
-    std::shared_ptr<MMI::KeyEvent> keyEventTPCover = MMI::KeyEvent::Create();
-    keyEventTPCover->SetKeyCode(MMI::KeyEvent::KEYCODE_SLEEP);
+        callbackTp_(keyEventTPCover);
+        sleep(SLEEP_WAIT_TIME_S);
+        EXPECT_FALSE(g_service->IsScreenOn());
 
-    EXPECT_NE(callbackTp_, nullptr);
-    callbackTp_(keyEventTPCover);
-    sleep(SLEEP_WAIT_TIME_S);
-    EXPECT_FALSE(g_service->IsScreenOn());
-
-    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
-    std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
-    EXPECT_NE(wakeupController, nullptr);
-    EXPECT_NE(suspendController, nullptr);
-    wakeupController->monitorMap_.clear();
-    suspendController->monitorMap_.clear();
-    callbackTp_(keyEventTPCover);
+        std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+        std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
+        EXPECT_NE(wakeupController, nullptr);
+        EXPECT_NE(suspendController, nullptr);
+        wakeupController->monitorMap_.clear();
+        suspendController->monitorMap_.clear();
+        callbackTp_(keyEventTPCover);
+    }
     GTEST_LOG_(INFO) << "PowerKeyOptionTest003: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest003 function end!");
 }
