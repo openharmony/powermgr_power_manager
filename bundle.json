@@ -48,7 +48,7 @@
             "power_manager_feature_watch_update_adapt",
             "power_manager_feature_surport_takeover_suspend",
             "power_manager_feature_enable_lid_check",
-            "power_manager_feature_glasses_boot_completed",
+            "power_manager_feature_glasses_boot_completed"
         ],
         "adapted_system_type": [
             "standard"
