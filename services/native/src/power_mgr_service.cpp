@@ -791,7 +791,7 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             this->GetPowerModeModule().InitPowerMode();
         }
     }
-#ifndef HAS_DISPLAY_MANAGER_PART
+#ifdef HAS_DISPLAY_MANAGER_PART
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
 #else
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_SA_ID) {
