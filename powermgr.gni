@@ -43,7 +43,6 @@ declare_args() {
   power_manager_feature_surport_takeover_suspend = false
   power_manager_feature_init_proximity_controller = false
   power_manager_feature_enable_lid_check = false
-  power_manager_feature_glasses_boot_completed = false
 }
 
 defines = []
