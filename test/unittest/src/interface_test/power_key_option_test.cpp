@@ -39,9 +39,9 @@ void PowerKeyOptionTest::TearDownTestCase(void)
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
-std::function<void(std::shared_ptr<KeyEvent>)> callbackPowerWake_;
-std::function<void(std::shared_ptr<KeyEvent>)> callbackPowerSuspend_;
-std::function<void(std::shared_ptr<KeyEvent>)> callbackTp_;
+std::function<void(std::shared_ptr<KeyEvent>)> callbackPowerWake_ = nullptr;
+std::function<void(std::shared_ptr<KeyEvent>)> callbackPowerSuspend_ = nullptr;
+std::function<void(std::shared_ptr<KeyEvent>)> callbackTp_ = nullptr;
 
 int32_t MMI::InputManager::SubscribeKeyEvent(std::shared_ptr<KeyOption> keyOption,
     std::function<void(std::shared_ptr<KeyEvent>)> callback)
@@ -76,7 +76,7 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest001, TestSize.Level0)
     g_service->SuspendDevice(
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(g_service->IsScreenOn());
-    if (callbackPowerWake_) {
+    if (callbackPowerWake_ != nullptr) {
         std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
         keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
         keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
@@ -121,7 +121,7 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest002, TestSize.Level0)
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
     EXPECT_TRUE(g_service->IsScreenOn());
-    if (callbackPowerSuspend_) {
+    if (callbackPowerSuspend_ != nullptr) {
         std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
         keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
         keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
@@ -163,7 +163,7 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest003, TestSize.Level0)
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
     EXPECT_TRUE(g_service->IsScreenOn());
-    if (callbackTp_) {
+    if (callbackTp_ != nullptr) {
         std::shared_ptr<MMI::KeyEvent> keyEventTPCover = MMI::KeyEvent::Create();
         keyEventTPCover->SetKeyCode(MMI::KeyEvent::KEYCODE_SLEEP);
 
