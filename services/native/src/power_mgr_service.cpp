@@ -791,13 +791,18 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             this->GetPowerModeModule().InitPowerMode();
         }
     }
+#ifdef HAS_DISPLAY_MANAGER_PART
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
+#else
+    if (systemAbilityId == DISPLAY_MANAGER_SERVICE_SA_ID) {
+#endif
         std::lock_guard lock(powerInitMutex_);
         POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_ID in PowerService");
         isNeedReInit_  = true;
         RegisterBootCompletedCallback();
     }
 
+#ifdef HAS_DISPLAY_MANAGER_PART
     if (systemAbilityId ==  DISPLAY_MANAGER_SERVICE_SA_ID) {
         std::lock_guard lock(powerInitMutex_);
         POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID in PowerService");
@@ -807,6 +812,7 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             displayManagerServiceCrash_ = false;
         }
     }
+#endif
 #ifdef MSDP_MOVEMENT_ENABLE
     if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
         auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
