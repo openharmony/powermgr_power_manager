@@ -35,6 +35,7 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "power_vibrator.h"
+#include "sysparam.h"
 
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
 #include "setting_helper.h"
@@ -56,6 +57,7 @@ std::atomic_bool g_longPressShow = false;
 int32_t g_retryCount = 1;
 sptr<IRemoteObject> g_remoteObject = nullptr;
 const std::string DIALOG_CONFIG_PATH = "etc/systemui/poweroff_config.json";
+const std::string KEY_DOWN_DURATION = "const.powerkey.down_duration";
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
 const std::string BLOCK_LONG_PRESS = "1";
 #endif
@@ -84,7 +86,9 @@ void ShutdownDialog::KeyMonitorInit()
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
-    keyOption->SetFinalKeyDownDuration(LONG_PRESS_DELAY_MS);
+    int32_t downDuration = SysParam::GetIntValue(KEY_DOWN_DURATION, LONG_PRESS_DELAY_MS);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Initialize powerkey down duration %{public}d.", downDuration);
+    keyOption->SetFinalKeyDownDuration(downDuration);
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "KeyMonitorInit inputManager is null");
