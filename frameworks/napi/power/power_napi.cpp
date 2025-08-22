@@ -38,6 +38,7 @@ constexpr uint32_t SUSPEND_MAX_ARGC = 1;
 constexpr uint32_t SET_SCREEN_OFFTIME_ARGC = 1;
 constexpr uint32_t HIBERNATE_ARGC = 1;
 constexpr uint32_t REFRESH_ACTIVITY_ARGC = 1;
+constexpr uint32_t POWERRKEY_FILTERING_STRATEGY_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
@@ -380,6 +381,36 @@ napi_value PowerNapi::RefreshActivity(napi_env env, napi_callback_info info)
     PowerErrors code = g_powerMgrClient.RefreshActivity(UserActivityType::USER_ACTIVITY_TYPE_APPLICATION, reason);
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_ACTIVITY, "RefreshActivity failed. code:%{public}d", static_cast<int32_t>(code));
+        return error.ThrowError(env, code);
+    }
+    return nullptr;
+}
+
+napi_value PowerNapi::SetPowerKeyFilteringStrategy(napi_env env, napi_callback_info info)
+{
+    size_t argc = POWERRKEY_FILTERING_STRATEGY_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors error;
+    if (argc != POWERRKEY_FILTERING_STRATEGY_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_number)) {
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    int32_t strategy = 0;
+    if (napi_ok != napi_get_value_int32(env, argv[INDEX_0], &strategy)) {
+        POWER_HILOGE(FEATURE_INPUT, "napi get int32 value failed.");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    if (strategy < 0 || strategy >= static_cast<int32_t>(PowerKeyFilteringStrategy::STRATEGY_MAX)) {
+        POWER_HILOGE(FEATURE_INPUT, "strategy is not right.");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    PowerErrors code = g_powerMgrClient.SetPowerKeyFilteringStrategy(static_cast<PowerKeyFilteringStrategy>(strategy));
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_INPUT, "SetPowerKeyFilteringStrategy failed. code:%{public}d", static_cast<int32_t>(code));
         return error.ThrowError(env, code);
     }
     return nullptr;
