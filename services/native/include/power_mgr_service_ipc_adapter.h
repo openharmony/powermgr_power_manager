@@ -104,6 +104,7 @@ public:
     int32_t UnRegisterShutdownCallbackIpc(const sptr<ISyncShutdownCallback>& callback) override;
     virtual int32_t RefreshActivityIpc(
         int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError) override;
+    virtual int32_t SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError) override;
 
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) = 0;
@@ -166,6 +167,7 @@ public:
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) = 0;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) = 0;
+    virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) = 0;
 
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;

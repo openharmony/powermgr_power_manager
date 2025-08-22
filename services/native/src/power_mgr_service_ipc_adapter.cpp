@@ -490,5 +490,13 @@ int32_t PowerMgrServiceAdapter::RefreshActivityIpc(
     powerError = static_cast<int32_t>(RefreshActivity(callTimeMs, type, refreshReason));
     return ERR_OK;
 }
+
+int32_t PowerMgrServiceAdapter::SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetPowerKeyFilteringStrategy", false);
+    PowerKeyFilteringStrategy filteringStrategy = static_cast<PowerKeyFilteringStrategy>(strategy);
+    powerError = static_cast<int32_t>(SetPowerKeyFilteringStrategy(filteringStrategy));
+    return ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

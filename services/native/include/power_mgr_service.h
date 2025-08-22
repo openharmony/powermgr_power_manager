@@ -145,6 +145,7 @@ public:
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;
+    virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) override;
 
     void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;

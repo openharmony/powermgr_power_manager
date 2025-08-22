@@ -216,6 +216,13 @@ public:
      */
     PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result);
 
+    /**
+     * Set the power key filtering strategy.
+     * @param strategy The power key filtering strategy.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy);
+
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:
 #endif

@@ -2528,5 +2528,33 @@ PowerErrors PowerMgrService::RefreshActivity(
     return RefreshActivityInner(callTimeMs, type, true) ? PowerErrors::ERR_OK :
         PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
 }
+
+PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGI(FEATURE_INPUT, "SetPowerKeyFilteringStrategy failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGI(FEATURE_INPUT, "SetPowerKeyFilteringStrategy failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_INPUT,
+        "SetPowerKeyFilteringStrategy pid: %{public}d, uid: %{public}d, strategy: %{public}d", pid, uid, strategy);
+    switch (strategy) {
+        case PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING:
+            shutdownDialog_.SetShutdownDialogForbid(false);
+            break;
+        case PowerKeyFilteringStrategy::LONG_PRESS_FILTERING_ONCE:
+            shutdownDialog_.SetShutdownDialogForbid(true);
+            break;
+        default:
+            POWER_HILOGW(FEATURE_INPUT, "SetPowerKeyFilteringStrategy out of range");
+            break;
+    }
+    return PowerErrors::ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

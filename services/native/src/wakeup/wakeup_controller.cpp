@@ -990,6 +990,10 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] PowerMgrService is nullptr");
         return;
     }
+
+    // Received powerkey down, reset shutdown dialog forbid
+    pms->SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+
     int64_t now = static_cast<int64_t>(time(nullptr));
     pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
 
