@@ -24,7 +24,7 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 static sptr<PowerMgrService> g_service;
-static constexpr int SLEEP_WAIT_TIME_S = 2;
+static constexpr int SLEEP_WAIT_TIME_US = 500000;
 
 void PowerKeyOptionTest::SetUpTestCase(void)
 {
@@ -131,8 +131,8 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest002, TestSize.Level0)
 
         callbackPowerSuspend_(keyEventPowerkeyDown);
         callbackPowerSuspend_(keyEventPowerkeyUp);
-        sleep(SLEEP_WAIT_TIME_S);
-        EXPECT_FALSE(g_service->IsScreenOn());
+        usleep(SLEEP_WAIT_TIME_US);
+        EXPECT_FALSE(g_service->IsFoldScreenOn());
 
         std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
         std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
@@ -168,8 +168,8 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest003, TestSize.Level0)
         keyEventTPCover->SetKeyCode(MMI::KeyEvent::KEYCODE_SLEEP);
 
         callbackTp_(keyEventTPCover);
-        sleep(SLEEP_WAIT_TIME_S);
-        EXPECT_FALSE(g_service->IsScreenOn());
+        usleep(SLEEP_WAIT_TIME_US);
+        EXPECT_FALSE(g_service->IsFoldScreenOn());
 
         std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
         std::shared_ptr<SuspendController> suspendController = g_service->GetSuspendController();
