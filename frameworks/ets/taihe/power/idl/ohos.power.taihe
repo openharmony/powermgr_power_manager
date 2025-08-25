@@ -16,7 +16,7 @@
 @!namespace("@ohos.power", "power")
 
 @!sts_inject("""
-static { loadLibrary("power_manager_taihe_native.z") }""")
+static { loadLibraryWithPermissionCheck("power_manager_taihe_native.z", "@ohos.power") }""")
 
 function Shutdown(reason: String): void;
 
