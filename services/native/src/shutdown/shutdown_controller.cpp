@@ -47,6 +47,8 @@ using namespace std;
 namespace OHOS {
 namespace PowerMgr {
 namespace {
+constexpr std::chrono::seconds CALLBACK_TIMEOUT = 10s;
+constexpr std::chrono::seconds OFF_TIMEOUT = 5s;
 const time_t MAX_TIMEOUT_SEC = 30;
 #ifdef POWER_MANAGER_ENABLE_JUDGING_TAKEOVER_SHUTDOWN
 const vector<string> REASONS_DISABLE_TAKE_OVER = {"LowCapacity", "HibernateFail"};
@@ -71,9 +73,9 @@ ShutdownController::ShutdownController() : started_(false)
     syncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
 }
 
-void ShutdownController::Reboot(const std::string& reason)
+void ShutdownController::Reboot(const std::string& reason, bool force)
 {
-    RebootOrShutdown(reason, true);
+    RebootOrShutdown(reason, true, force);
 }
 
 void ShutdownController::Shutdown(const std::string& reason)
@@ -109,22 +111,32 @@ static void SetFrameworkFinishBootStage(void)
     return;
 }
 
-void ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot)
+namespace {
+std::future<void> g_futForSyncCb;
+std::future<void> g_futForOff;
+}
+
+void ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot, bool force)
 {
-    if (started_) {
-        POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown is already running");
-        return;
+    // skip takeover callback
+    // SetFrameworkFinishBootStage done in client
+    if (!force) {
+        if (started_) {
+            POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown is already running");
+            return;
+        }
+        started_ = true;
+        bool isTakeOver = TakeOverShutdownAction(reason, isReboot);
+        if (isTakeOver) {
+            started_ = false;
+            return;
+        }
+        if (reason != "test_case") {
+            SetFrameworkFinishBootStage();
+        }
     }
     started_ = true;
-    bool isTakeOver = TakeOverShutdownAction(reason, isReboot);
-    if (isTakeOver) {
-        started_ = false;
-        return;
-    }
     POWER_KHILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
-    if (reason != "test_case") {
-        SetFrameworkFinishBootStage();
-    }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
@@ -133,9 +145,19 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     std::string actionTimeStr = std::to_string(GetCurrentRealTimeMs());
     PowerEventType eventType = isReboot ? PowerEventType::REBOOT : PowerEventType::SHUTDOWN;
     system::SetParameter("persist.dfx.eventtype", to_string(eventType));
-    TriggerSyncShutdownCallback(isReboot);
-    actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
-    TurnOffScreen();
+    if (force) {
+        // only two threads are allowed, next time it blocks
+        // either block or thread leak. since the previous action is shutdown, block is safer than thread leak
+        g_futForSyncCb = async(launch::async, &ShutdownController::TriggerSyncShutdownCallback, this, isReboot);
+        g_futForOff = async(launch::async, &ShutdownController::TurnOffScreen, this);
+        g_futForSyncCb.wait_for(CALLBACK_TIMEOUT);
+        actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
+        g_futForOff.wait_for(OFF_TIMEOUT);
+    } else {
+        TriggerSyncShutdownCallback(isReboot);
+        actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
+        TurnOffScreen();
+    }
     actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
     system::SetParameter("persist.dfx.shutdownactiontime", actionTimeStr);
     make_unique<thread>([=] {
@@ -310,7 +332,7 @@ void ShutdownController::TriggerAsyncShutdownCallback(bool isReboot)
 
 void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
 {
-    for (auto &obj : callbacks) {
+    for (const auto &obj : callbacks) {
         auto pidUid = asyncShutdownCallbackHolder_->FindCallbackPidUid(obj);
         sptr<IAsyncShutdownCallback> callback = iface_cast<IAsyncShutdownCallback>(obj);
         if (callback != nullptr) {

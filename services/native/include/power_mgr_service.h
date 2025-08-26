@@ -80,7 +80,8 @@ public:
     virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     virtual PowerErrors RebootDevice(const std::string& reason) override;
-    virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) override;
+    virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason, bool force = false) override;
+    virtual PowerErrors ForceRebootDevice(const std::string& reason) override;
     virtual PowerErrors ShutDownDevice(const std::string& reason) override;
     virtual PowerErrors SetSuspendTag(const std::string& tag) override;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,

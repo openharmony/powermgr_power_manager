@@ -1046,7 +1046,7 @@ PowerErrors PowerMgrService::RebootDevice(const std::string& reason)
     return RebootDeviceForDeprecated(reason);
 }
 
-PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason)
+PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason, bool force)
 {
     std::lock_guard lock(shutdownMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -1061,8 +1061,16 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
         suspendController_->StopSleep();
     }
     POWER_KHILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
-    shutdownController_->Reboot(reason);
+    shutdownController_->Reboot(reason, force);
     return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::ForceRebootDevice(const std::string& reason)
+{
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    return RebootDeviceForDeprecated(reason, true);
 }
 
 PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
