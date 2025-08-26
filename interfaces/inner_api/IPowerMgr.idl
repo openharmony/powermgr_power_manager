@@ -47,6 +47,7 @@ interface OHOS.PowerMgr.IPowerMgr {
     // Used for power state machine.
     void RebootDeviceIpc([in] String reason, [out] int powerError);
     void RebootDeviceForDeprecatedIpc([in] String reason, [out] int powerError);
+    void ForceRebootDeviceIpc([in] String reason, [out] int powerError);
     void ShutDownDeviceIpc([in] String reason, [out] int powerError);
     void SetSuspendTagIpc([in] String tag, [out] int powerError);
     void SuspendDeviceIpc([in] long callTimeMs, [in] int reasonValue, [in] boolean suspendImmed, [in] String apiVersion,

@@ -33,5 +33,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REBOOT_DEVICE_IPC), data, size);
     g_serviceTest.TestPowerServiceStub(
         static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REBOOT_DEVICE_FOR_DEPRECATED_IPC), data, size);
+    g_serviceTest.TestPowerServiceStub(
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_FORCE_REBOOT_DEVICE_IPC), data, size);
     return 0;
 }

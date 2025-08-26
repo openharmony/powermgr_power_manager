@@ -41,6 +41,16 @@ public:
     PowerErrors RebootDeviceForDeprecated(const std::string& reason);
 
     /**
+     * @brief Forces the device to reboot.
+     * Ignores registered takeOverShutdownCallback, set time limits for executing other callbacks.
+     * Guarantees the invocation of function "DoRebootExt" provided by startup_init within 60 seconds.
+     * A Timeout will trigger reboot in kernel if the caller has the permission to set reboot stage.
+     *
+     * @param reason The reason for rebooting the device. e.g.updater
+     */
+    PowerErrors ForceRebootDevice(const std::string& reason);
+
+    /**
      * Shut down the device.
      *
      * @param reason The reason for shutting down the device.
