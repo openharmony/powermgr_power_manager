@@ -671,5 +671,15 @@ PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::st
     proxy->RefreshActivityIpc(GetTickCount(), activityType, refreshReason, powerError);
     return static_cast<PowerErrors>(powerError);
 }
+
+PowerErrors PowerMgrClient::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t strategyValue = static_cast<int32_t>(strategy);
+    proxy->SetPowerKeyFilteringStrategyIpc(strategyValue, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
 } // namespace PowerMgr
 } // namespace OHOS

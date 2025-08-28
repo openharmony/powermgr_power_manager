@@ -109,4 +109,6 @@ interface OHOS.PowerMgr.IPowerMgr {
 
     void RefreshActivityIpc([in] long callTimeMs, [in] int activityType, [in] String refreshReason,
         [out] int powerError);
+
+    void SetPowerKeyFilteringStrategyIpc([in] int strategy, [out] int powerError);
 }

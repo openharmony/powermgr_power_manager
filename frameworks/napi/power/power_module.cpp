@@ -15,6 +15,7 @@
 
 #include "napi/native_api.h"
 #include "napi/native_common.h"
+#include "power_state_machine_info.h"
 #include "napi/native_node_api.h"
 
 #include "power.h"
@@ -67,6 +68,41 @@ static napi_value CreateDevicePowerMode(napi_env env, napi_value exports)
     return exports;
 }
 
+static napi_value EnumPowerKeyFilteringStrategyClassConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void* data = nullptr;
+
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+
+    return thisArg;
+}
+
+static napi_value CreatePowerKeyFilteringStrategy(napi_env env, napi_value exports)
+{
+    napi_value disableLongPressFiltering = nullptr;
+    napi_value longPressFilteringOnce = nullptr;
+
+    napi_create_int32(env, (int32_t)PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING,
+        &disableLongPressFiltering);
+    napi_create_int32(env, (int32_t)PowerKeyFilteringStrategy::LONG_PRESS_FILTERING_ONCE, &longPressFilteringOnce);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("DISABLE_LONG_PRESS_FILTERING", disableLongPressFiltering),
+        DECLARE_NAPI_STATIC_PROPERTY("LONG_PRESS_FILTERING_ONCE", longPressFilteringOnce),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "PowerKeyFilteringStrategy", NAPI_AUTO_LENGTH, EnumPowerKeyFilteringStrategyClassConstructor,
+        nullptr, sizeof(desc) / sizeof(*desc), desc, &result);
+
+    napi_set_named_property(env, exports, "PowerKeyFilteringStrategy", result);
+
+    return exports;
+}
+
 EXTERN_C_START
 /*
  * function for module exports
@@ -93,9 +129,11 @@ static napi_value PowerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getPowerMode", PowerNapi::GetPowerMode),
         DECLARE_NAPI_FUNCTION("isStandby", PowerNapi::IsStandby),
         DECLARE_NAPI_FUNCTION("setScreenOffTime", PowerNapi::SetScreenOffTime),
-        DECLARE_NAPI_FUNCTION("refreshActivity", PowerNapi::RefreshActivity)};
+        DECLARE_NAPI_FUNCTION("refreshActivity", PowerNapi::RefreshActivity),
+        DECLARE_NAPI_FUNCTION("setPowerKeyFilteringStrategy", PowerNapi::SetPowerKeyFilteringStrategy)};
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateDevicePowerMode(env, exports);
+    CreatePowerKeyFilteringStrategy(env, exports);
     POWER_HILOGD(COMP_FWK, "The initialization of the Power module is complete");
 
     return exports;

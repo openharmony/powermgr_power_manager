@@ -25,6 +25,7 @@
 #include <string_ex.h>
 #include <system_ability_definition.h>
 
+#include "permission.h"
 #include "accesstoken_kit.h"
 #include "display_manager_lite.h"
 #include "mock_state_action.h"
@@ -46,6 +47,25 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
+namespace {
+bool g_isSystem = true;
+bool g_isPermissionGranted = true;
+} // namespace
+
+namespace OHOS::PowerMgr {
+bool Permission::IsSystem()
+{
+    GTEST_LOG_(INFO) << "PowerMgrServiceTest g_isSystem: " << g_isSystem;
+    return g_isSystem;
+}
+
+bool Permission::IsPermissionGranted(const std::string& perm)
+{
+    GTEST_LOG_(INFO) << "PowerMgrServiceTest IsPermissionGranted: " << g_isPermissionGranted;
+    return g_isPermissionGranted;
+}
+} // namespace OHOS::PowerMgr
+
 void PowerMgrServiceTest::SetUpTestCase(void)
 {
     DelayedSpSingleton<PowerMgrService>::GetInstance()->OnStart();
@@ -61,6 +81,8 @@ void PowerMgrServiceTest::SetUp(void)
 
 void PowerMgrServiceTest::TearDown(void)
 {
+    g_isSystem = true;
+    g_isPermissionGranted = true;
 }
 
 #ifdef POWER_MANAGER_TV_DREAMING
@@ -1012,4 +1034,46 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService038, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService038 function end!");
 }
 #endif
+
+/**
+ * @tc.name: PowerMgrService039
+ * @tc.desc: Test SetPowerKeyFilteringStrategy with all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService039, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService039 start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerKeyFilteringStrategy strategy;
+    PowerErrors ret;
+
+    // Test case 1: No system permission
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
+
+    // Test case 2: No POWER_MANAGER permission
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED) << "Test case 2 failed";
+
+    // Test case 3: Valid strategy DISABLE_LONG_PRESS_FILTERING
+    g_isPermissionGranted = true;
+    strategy = PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING;
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 3 failed";
+
+    // Test case 4: Valid strategy LONG_PRESS_FILTERING_ONCE
+    strategy = PowerKeyFilteringStrategy::LONG_PRESS_FILTERING_ONCE;
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 4 failed";
+
+    // Test case 5: Invalid strategy
+    strategy = static_cast<PowerKeyFilteringStrategy>(PowerKeyFilteringStrategy::STRATEGY_MAX);
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 5 failed";
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService039 end!");
+}
 }

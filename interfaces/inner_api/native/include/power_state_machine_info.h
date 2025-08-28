@@ -258,6 +258,13 @@ enum class StateChangeReason : uint32_t {
     STATE_CHANGE_REASON_PLUG_CHANGE = 106,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
+
+// PowerKey Filtering Strategy
+enum class PowerKeyFilteringStrategy : uint32_t {
+    DISABLE_LONG_PRESS_FILTERING = 0, // not filtering
+    LONG_PRESS_FILTERING_ONCE = 1,    // only filtering the current long press, the next not filtering
+    STRATEGY_MAX
+};
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_POWER_STATE_MACHINE_INFO_H

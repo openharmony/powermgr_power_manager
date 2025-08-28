@@ -173,4 +173,24 @@ HWTEST_F(PowerMgrPowerDialog, OnAbilityDisconnectDoneTest, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "OnAbilityDisconnectDoneTest function end!");
     GTEST_LOG_(INFO) << "OnAbilityDisconnectDoneTest end.";
 }
+
+/**
+ * @tc.name: StartDialogTest
+ * @tc.desc: test StartDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrPowerDialog, StartDialogTest, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "StartDialogTest start.";
+    POWER_HILOGI(LABEL_TEST, "StartDialog function start!");
+    ShutdownDialog shutdownDialog;
+    shutdownDialog.SetShutdownDialogForbid(true);
+    EXPECT_TRUE(shutdownDialog.isShutdownDialogForbid_.load(std::memory_order_relaxed));
+    shutdownDialog.StartDialog();
+    shutdownDialog.SetShutdownDialogForbid(false);
+    EXPECT_FALSE(shutdownDialog.isShutdownDialogForbid_.load(std::memory_order_relaxed));
+    shutdownDialog.StartDialog();
+    POWER_HILOGI(LABEL_TEST, "StartDialog function end!");
+    GTEST_LOG_(INFO) << "StartDialogTest end.";
+}
 } // namespace

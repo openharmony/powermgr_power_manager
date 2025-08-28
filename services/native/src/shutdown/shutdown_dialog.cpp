@@ -31,6 +31,7 @@
 #include <message_parcel.h>
 
 #include "config_policy_utils.h"
+#include "parameters.h"
 #include "power_cjson_utils.h"
 #include "power_log.h"
 #include "power_mgr_service.h"
@@ -105,8 +106,7 @@ void ShutdownDialog::KeyMonitorInit()
                 return;
             }
 #endif
-            ConnectSystemUi();
-            StartVibrator();
+            StartDialog();
         });
     if (longPressId_ < ERR_OK) {
         if (g_retryCount <= INIT_LONG_PRESS_RETRY) {
@@ -137,6 +137,25 @@ void ShutdownDialog::KeyMonitorCancel()
     }
     longPressId_ = 0;
 #endif
+}
+
+void ShutdownDialog::SetShutdownDialogForbid(bool forbid)
+{
+    isShutdownDialogForbid_.store(forbid, std::memory_order_relaxed);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "SetShutDownDialogForbid state to %{public}d", static_cast<int>(forbid));
+}
+
+void ShutdownDialog::StartDialog()
+{
+    // If the forbid state is enable, reset and not start shutdown dialog
+    if (isShutdownDialogForbid_.load(std::memory_order_relaxed)) {
+        isShutdownDialogForbid_.store(false, std::memory_order_relaxed);
+        POWER_HILOGI(FEATURE_SHUTDOWN, "skip shutdown dialog");
+        return;
+    }
+
+    ConnectSystemUi();
+    StartVibrator();
 }
 
 bool ShutdownDialog::ConnectSystemUi()
