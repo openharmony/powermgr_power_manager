@@ -1509,4 +1509,32 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient060, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function end!");
 }
 #endif
+
+
+/**
+ * @tc.name: PowerMgrClient061
+ * @tc.desc: Test all PowerKeyFilteringStrategy enum values
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient061, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient061 start!");
+    auto& client = PowerMgrClient::GetInstance();
+    PowerErrors ret;
+
+    // Test DISABLE_LONG_PRESS_FILTERING
+    ret = client.SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "DISABLE_LONG_PRESS_FILTERING failed";
+
+    // Test LONG_PRESS_FILTERING_ONCE
+    ret = client.SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::LONG_PRESS_FILTERING_ONCE);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "LONG_PRESS_FILTERING_ONCE failed";
+
+    // Test invalid STRATEGY_MAX
+    ret = client.SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::STRATEGY_MAX);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "STRATEGY_MAX should return error";
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient061 end!");
+}
+
 } // namespace

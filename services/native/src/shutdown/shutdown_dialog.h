@@ -36,6 +36,7 @@ public:
     void StartVibrator();
     void LoadDialogConfig();
     void ParseJsonConfig(std::string& contentStr);
+    void SetShutdownDialogForbid(bool state);
     static std::string GetBundleName()
     {
         return bundleName_;
@@ -61,9 +62,11 @@ private:
         std::mutex mutex_;
     };
 
+    void StartDialog();
     int32_t longPressId_ {0};
     sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_ {nullptr};
     FFRTQueue queue_ {"shutdown_dialog"};
+    std::atomic<bool> isShutdownDialogForbid_ {false};
     static std::string bundleName_;
     static std::string abilityName_;
     static std::string uiExtensionType_;
