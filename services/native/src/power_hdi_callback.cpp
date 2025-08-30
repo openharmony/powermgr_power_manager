@@ -43,6 +43,14 @@ int32_t PowerHdiCallbackExt::OnSuspendWithTag(const std::string& tag)
 int32_t PowerHdiCallbackExt::OnWakeupWithTag(const std::string& tag)
 {
     POWER_HILOGD(FEATURE_WAKEUP, "OnWakeupWithTag, tag:%{public}s", tag.c_str());
+#ifdef POWER_MANAGER_ENABLE_ULSR_PLUGIN
+    if (tag == "ulsr") {
+        int ret = HookMgrExecute(GetPowerHookMgr(), static_cast<int32_t>(PowerHookStage::POWER_HDI_CALLBACK_WAKEUP),
+            nullptr, nullptr);
+        POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, HookMgrExecute, stage: %{public}d, ret: %{public}d",
+            PowerHookStage::POWER_HDI_CALLBACK_WAKEUP, ret);
+    }
+#endif
     return HDF_SUCCESS;
 }
 } // OHOS
