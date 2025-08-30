@@ -45,7 +45,7 @@ void WakeupActionController::Init()
     }
 }
 
-bool WakeupActionController::IsLowCapacityWakeup()
+bool WakeupActionController::IsWakeupReasonConfigMatched()
 {
     std::string reason;
     SystemSuspendController::GetInstance().GetWakeupReason(reason);

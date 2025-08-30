@@ -660,6 +660,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
         StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_PICKUP),
         StateChangeReason::STATE_CHANGE_REASON_PICKUP);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_FROM_ULSR),
+        StateChangeReason::STATE_CHANGE_REASON_WAKEUP_FROM_ULSR);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 function end!");
 }

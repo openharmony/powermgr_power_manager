@@ -26,6 +26,7 @@ declare_args() {
   power_manager_feature_power_dialog = true
   power_manager_feature_enable_s4 = false
   power_manager_feature_enable_suspend_with_tag = false
+  power_manager_feature_enable_ulsr_plugin = false
   power_manager_feature_audio_lock_unproxy = false
   power_manager_feature_screen_on_timeout_check = false
   power_manager_feature_disable_auto_displayoff = false

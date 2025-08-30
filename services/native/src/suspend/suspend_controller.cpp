@@ -784,14 +784,14 @@ void SuspendController::Reset()
 }
 
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-bool SuspendController::GetLowCapacityPowerKeyFlag()
+bool SuspendController::GetWakeupReasonConfigMatchedFlag()
 {
-    return isLowCapacityPowerKey_;
+    return isWakeupReasonConfigMatched_;
 }
 
-void SuspendController::SetLowCapacityPowerKeyFlag(bool flag)
+void SuspendController::SetWakeupReasonConfigMatchedFlag(bool flag)
 {
-    isLowCapacityPowerKey_ = flag;
+    isWakeupReasonConfigMatched_ = flag;
 }
 #endif
 
@@ -875,12 +875,18 @@ void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::
         POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] suspendController is nullptr");
         return;
     }
+    std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
+    if (wakeupController == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupController is nullptr");
+        return;
+    }
 
 #if POWER_MANAGER_WAKEUP_ACTION
-    bool isLowCapacityPowerKey = suspendController->GetLowCapacityPowerKeyFlag();
-    if (isLowCapacityPowerKey) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] skip low capacity powerkey up");
-        suspendController->SetLowCapacityPowerKeyFlag(false);
+    bool isWakeupReasonConfigMatched = suspendController->GetWakeupReasonConfigMatchedFlag();
+    if (isWakeupReasonConfigMatched
+        || wakeupController->IsWakeupReasonConfigMatched(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] wakeup reason matcged config, skip powerkey up");
+        suspendController->SetWakeupReasonConfigMatchedFlag(false);
         return;
     }
 #endif
