@@ -129,6 +129,20 @@ public:
         proxyMockEnabled = enable;
     }
 
+    void WaitForDetachedThread(int maxTick = 100)
+    {
+        constexpr int tickTimeUs = 1000 * 50;
+        if (!stub_) {
+            return;
+        }
+        for (int tick = 0; tick < maxTick; tick++) {
+            if (!stub_->GetShutdownController()->IsShuttingDown()) {
+                break;
+            }
+            usleep(tickTimeUs);
+        }
+    }
+
     void SetUp(void)
     {
         // will be passed to smart pointers in EnableMock
@@ -144,16 +158,7 @@ public:
 
     void TearDown(void)
     {
-        constexpr int maxTick = 100;
-        constexpr int tickTimeUs = 1000 * 50;
-        // try to wait for the detached thread to complete
-        for (int tick = 0; tick < maxTick; tick++) {
-            if (!stub_->GetShutdownController()->IsShuttingDown()) {
-                break;
-            }
-            usleep(tickTimeUs);
-        }
-
+        WaitForDetachedThread();
         // try to release the mock objects just before end of the current testcase
         if (!stub_->GetShutdownController()->IsShuttingDown()) {
             stub_->EnableMock(nullptr, nullptr, nullptr, nullptr);
@@ -238,6 +243,7 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest001, TestSize.Level0)
         EXPECT_CALL(*mockProxy_, ForceRebootDeviceIpc("Some Reason", _));
         g_isTesting = true;
         powerMgrClient.ForceRebootDevice("Some Reason");
+        WaitForDetachedThread();
         g_isTesting = false;
     }
 
@@ -265,28 +271,31 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest002, TestSize.Level0)
     ASSERT_TRUE(powerActionMock != nullptr);
     EXPECT_CALL(*powerActionMock, Reboot(_)).Times(0);
     powerMgrClient.ForceRebootDevice("Some Reason");
+    WaitForDetachedThread();
     g_boolRet = true;
 
     // Non-force and reason != "test_case"
-    EXPECT_CALL(*powerActionMock, Reboot("Some Reason"));
-    powerMgrClient.RebootDevice("Some Reason");
+    EXPECT_CALL(*powerActionMock, Reboot("Some Reason a"));
+    powerMgrClient.RebootDevice("Some Reason a");
+    WaitForDetachedThread();
 
-    // Non-force and reason != "test_case"
+    // Non-force and reason == "test_case"
     EXPECT_CALL(*powerActionMock, Reboot("test_case"));
     powerMgrClient.RebootDevice("test_case");
+    WaitForDetachedThread();
 
     // Reboot blocks so that the next call will be skipped(since started_ == true), for next non-force reboot
-    EXPECT_CALL(*powerActionMock, Reboot("Some Reason")).WillOnce(Invoke([]() {
+    EXPECT_CALL(*powerActionMock, Reboot("Some Reason b")).WillOnce(Invoke([]() {
         POWER_HILOGI(LABEL_TEST, "blocking reboot action called");
         std::unique_lock lock(g_cvMutex);
         g_cv.wait(lock, []() { return g_notified; });
         g_notified = false;
         POWER_HILOGI(LABEL_TEST, " reboot action unblocked");
     }));
-    // first call, reboot blocks
-    powerMgrClient.RebootDevice("Some Reason");
+    // first call, reboot blocks. Do not add EXPECT_CALL before this call to mock object ends
+    powerMgrClient.RebootDevice("Some Reason b");
     // second call, return early
-    powerMgrClient.RebootDevice("Some Reason");
+    powerMgrClient.RebootDevice("Some Reason c");
     g_isTesting = false;
     // unblocks the blocking reboot
     {
@@ -294,6 +303,7 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest002, TestSize.Level0)
         g_notified = true;
         g_cv.notify_all();
     }
+    WaitForDetachedThread();
     POWER_HILOGI(LABEL_TEST, "ForceRebootDeviceTest002 function end!");
 }
 
