@@ -67,566 +67,179 @@ void RunningLockMockTest::SetUp(void)
 
 namespace {
 /**
- * @tc.name: RunningLockMockTest001
- * @tc.desc: test proximity screen control runninglock by mock
+ * @tc.name: RunningLockMockTest013
+ * @tc.desc: Test ProxyRunningLock function, runninglock release first, then cancel the proxy
  * @tc.type: FUNC
- * @tc.require: issueI6LPK9
+ * @tc.require: issueI6TW2R
  */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
+HWTEST_F (RunningLockMockTest, RunningLockMockTest013, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 function start!");
-#ifdef HAS_SENSORS_SENSOR_PART
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockInfo(
-        "RunningLockMockProximity1.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    RunningLockInfo runninglockInfo2(
-        "RunningLockMockProximity1.2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    int32_t timeoutMs = 100;
+    RunningLockInfo runninglockTask("RunningLockMockTask13.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
     auto runningLockMgr = g_powerService->GetRunningLockMgr();
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
-    uint32_t PARAM_ZERO = 0;
-    uint32_t PARAM_ONE = 1;
-    uint32_t PARAM_TWO = 2;
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
-            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
-            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
-            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> runninglockToken2 = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken2, runninglockInfo2));
-
-    g_powerService->Lock(runninglockToken);
-    EXPECT_EQ(PARAM_ONE, runningLockMgr->GetValidRunningLockNum(runninglockInfo.type));
-    g_powerService->Lock(runninglockToken2);
-    EXPECT_EQ(PARAM_TWO, runningLockMgr->GetValidRunningLockNum(runninglockInfo2.type));
-
-    g_powerService->UnLock(runninglockToken);
-    EXPECT_EQ(PARAM_ONE, runningLockMgr->GetValidRunningLockNum(runninglockInfo.type));
-    g_powerService->UnLock(runninglockToken2);
-    EXPECT_EQ(PARAM_ZERO, runningLockMgr->GetValidRunningLockNum(runninglockInfo2.type));
-
-    g_powerService->ReleaseRunningLock(runninglockToken);
-    g_powerService->ReleaseRunningLock(runninglockToken2);
-
-    EXPECT_EQ(lockActionCount, PARAM_ZERO);
-    EXPECT_EQ(unlockActionCount, PARAM_ZERO);
-#endif
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest002
- * @tc.desc: test proximity screen control runninglock release function by mock
- * @tc.type: FUNC
- * @tc.require: issueI6LPK9
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 function start!");
-#ifdef HAS_SENSORS_SENSOR_PART
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockInfo(
-        "RunningLockMockProximity2.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    int32_t timeoutMs = 100;
-    auto runningLockMgr = g_powerService->GetRunningLockMgr();
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    uint32_t PARAM_ZERO = 0;
-    uint32_t PARAM_ONE = 1;
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
-            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
-            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
-            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
-
-    g_powerService->Lock(runninglockToken);
-    EXPECT_EQ(PARAM_ONE, runningLockMgr->GetValidRunningLockNum(runninglockInfo.type));
-    g_powerService->UnLock(runninglockToken);
-    g_powerService->ReleaseRunningLock(runninglockToken);
-
-    EXPECT_EQ(lockActionCount, PARAM_ZERO);
-    EXPECT_EQ(unlockActionCount, PARAM_ZERO);
-#endif
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest003
- * @tc.desc: test scene runninglock by mock
- * @tc.type: FUNC
- * @tc.require: issueI6LPK9
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest003, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockPhone("RunningLockMockPhone3.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
-    RunningLockInfo runninglockNotify("RunningLockMockNotify3.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
     int32_t timeoutMs = -1;
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    uint32_t PARAM_TWO = 2;
-
-    auto GetRunningLockInfo = [&](RunningLockType type) {
-        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE) {
-            return runninglockPhone;
-        }
-        return runninglockNotify;
-    };
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            EXPECT_EQ(param.timeoutMs, timeoutMs);
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> phoneToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> notifyToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
-
-    g_powerService->Lock(phoneToken);
-    g_powerService->Lock(notifyToken);
-    g_powerService->UnLock(phoneToken);
-    g_powerService->UnLock(notifyToken);
-
-    g_powerService->ReleaseRunningLock(phoneToken);
-    g_powerService->ReleaseRunningLock(notifyToken);
-
-    EXPECT_EQ(lockActionCount, PARAM_TWO);
-    EXPECT_EQ(unlockActionCount, PARAM_TWO);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest004
- * @tc.desc: test scene runninglock by mock
- * @tc.type: FUNC
- * @tc.require: issueI6LPK9
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest004, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockAudio("RunningLockMockAudio4.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
-    RunningLockInfo runninglockSport("RunningLockMockSport4.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
-    int32_t timeoutMs = -1;
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    uint32_t PARAM_TWO = 2;
-
-    auto GetRunningLockInfo = [&](RunningLockType type) {
-        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO) {
-            return runninglockAudio;
-        }
-        return runninglockSport;
-    };
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            EXPECT_EQ(param.timeoutMs, timeoutMs);
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> audioToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> sportToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(audioToken, runninglockAudio));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(sportToken, runninglockSport));
-
-    g_powerService->Lock(audioToken);
-    g_powerService->Lock(sportToken);
-    g_powerService->UnLock(audioToken);
-    g_powerService->UnLock(sportToken);
-
-    g_powerService->ReleaseRunningLock(audioToken);
-    g_powerService->ReleaseRunningLock(sportToken);
-
-    EXPECT_EQ(lockActionCount, PARAM_TWO);
-    EXPECT_EQ(unlockActionCount, PARAM_TWO);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest005
- * @tc.desc: test scene runninglock by mock
- * @tc.type: FUNC
- * @tc.require: issueI6LPK9
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest005, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockNavi("RunningLockMockNavi5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
-    RunningLockInfo runninglockTask("RunningLockMockTask5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
-    int32_t timeoutMs = -1;
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    uint32_t PARAM_TWO = 2;
-
-    auto GetRunningLockInfo = [&](RunningLockType type) {
-        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION) {
-            return runninglockNavi;
-        }
-        return runninglockTask;
-    };
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            auto runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            EXPECT_EQ(param.timeoutMs, timeoutMs);
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            auto runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> naviToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
-
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(naviToken, runninglockNavi));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
-
-    g_powerService->Lock(naviToken);
-    g_powerService->Lock(taskToken);
-    g_powerService->UnLock(naviToken);
-    g_powerService->UnLock(taskToken);
-
-    g_powerService->ReleaseRunningLock(naviToken);
-    g_powerService->ReleaseRunningLock(taskToken);
-
-    EXPECT_EQ(lockActionCount, PARAM_TWO);
-    EXPECT_EQ(unlockActionCount, PARAM_TWO);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest006
- * @tc.desc: test scene runninglock release function by mock
- * @tc.type: FUNC
- * @tc.require: issueI6LPK9
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest006, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockPhone("RunningLockMockPhone6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
-    RunningLockInfo runninglockNotify("RunningLockMockNotify6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
-    RunningLockInfo runninglockAudio("RunningLockMockAudio6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
-    int32_t timeoutMs = 100;
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    uint32_t PARAM_THREE = 3;
-
-    auto GetRunningLockInfo = [&](RunningLockType type) {
-        RunningLockInfo lockInfo {};
-        switch (type) {
-            case RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE:
-                return runninglockPhone;
-            case RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION:
-                return runninglockNotify;
-            case RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO:
-                return runninglockAudio;
-            default:
-                return lockInfo;
-        }
-    };
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> phoneToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> notifyToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> audioToken = new RunningLockTokenStub();
-
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(audioToken, runninglockAudio));
-
-    g_powerService->Lock(phoneToken);
-    g_powerService->Lock(notifyToken);
-    g_powerService->Lock(audioToken);
-
-    g_powerService->UnLock(phoneToken);
-    g_powerService->UnLock(notifyToken);
-    g_powerService->UnLock(audioToken);
-
-    g_powerService->ReleaseRunningLock(phoneToken);
-    g_powerService->ReleaseRunningLock(notifyToken);
-    g_powerService->ReleaseRunningLock(audioToken);
-
-    EXPECT_EQ(lockActionCount, PARAM_THREE);
-    EXPECT_EQ(unlockActionCount, PARAM_THREE);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest007
- * @tc.desc: test scene runninglock release function by mock
- * @tc.type: FUNC
- * @tc.require: issueI6LPK9
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockSport("RunningLockMockSport7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
-    RunningLockInfo runninglockNavi("RunningLockMockNavi7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
-    RunningLockInfo runninglockTask("RunningLockMockTask7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
-    int32_t timeoutMs = 100;
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    uint32_t PARAM_THREE = 3;
-
-    auto GetRunningLockInfo = [&](RunningLockType type) {
-        RunningLockInfo lockInfo {};
-        switch (type) {
-            case RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT:
-                return runninglockSport;
-            case RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION:
-                return runninglockNavi;
-            case RunningLockType::RUNNINGLOCK_BACKGROUND_TASK:
-                return runninglockTask;
-            default:
-                return lockInfo;
-        }
-    };
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> sportToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> naviToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
-
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(sportToken, runninglockSport));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(naviToken, runninglockNavi));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
-
-    g_powerService->Lock(sportToken);
-    g_powerService->Lock(naviToken);
-    g_powerService->Lock(taskToken);
-
-    g_powerService->UnLock(sportToken);
-    g_powerService->UnLock(naviToken);
-    g_powerService->UnLock(taskToken);
-
-    g_powerService->ReleaseRunningLock(sportToken);
-    g_powerService->ReleaseRunningLock(naviToken);
-    g_powerService->ReleaseRunningLock(taskToken);
-
-    EXPECT_EQ(lockActionCount, PARAM_THREE);
-    EXPECT_EQ(unlockActionCount, PARAM_THREE);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest008
- * @tc.desc: Test ProxyRunningLock function, test Background runninglock
- * @tc.type: FUNC
- * @tc.require: issueI6S0YY
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockInfo("RunningLockMockBackground8.1", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    auto runningLockMgr = g_powerService->GetRunningLockMgr();
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
     uint32_t PARAM_ONE = 1;
-    uint32_t PARAM_TWO = 2;
     pid_t curUid = getuid();
     pid_t curPid = getpid();
 
     EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
-            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
+            EXPECT_EQ(param.name, runninglockTask.name);
+            EXPECT_EQ(param.type, runninglockTask.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
             lockActionCount++;
             return RUNNINGLOCK_SUCCESS;
         });
     EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+            EXPECT_EQ(param.name, runninglockTask.name);
+            EXPECT_EQ(param.type, runninglockTask.type);
             unlockActionCount++;
             return RUNNINGLOCK_SUCCESS;
         });
 
-    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
-    auto backgroundLock = runningLockMgr->GetRunningLockInner(runninglockToken);
-    ASSERT_NE(backgroundLock, nullptr);
-    g_powerService->Lock(runninglockToken);
-    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
+    auto taskLock = runningLockMgr->GetRunningLockInner(taskToken);
+
+    g_powerService->Lock(taskToken);
     EXPECT_EQ(lockActionCount, PARAM_ONE);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
 
-    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
     EXPECT_EQ(unlockActionCount, PARAM_ONE);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
+
+    g_powerService->UnLock(taskToken);
+    g_powerService->ReleaseRunningLock(taskToken);
+    EXPECT_EQ(runningLockMgr->GetRunningLockInner(taskToken), nullptr);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
 
-    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
-    EXPECT_EQ(lockActionCount, PARAM_TWO);
-
-    g_powerService->UnLock(runninglockToken);
-    g_powerService->ReleaseRunningLock(runninglockToken);
-    EXPECT_EQ(unlockActionCount, PARAM_TWO);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 function end!");
+    EXPECT_EQ(lockActionCount, PARAM_ONE);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 function end!");
 }
 
 /**
- * @tc.name: RunningLockMockTest009
- * @tc.desc: Test ProxyRunningLock function, test Scene runninglock
+ * @tc.name: RunningLockMockTest012
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_SUCCESS
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
+HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 function start!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockPhone("RunningLockMockPhone9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
-    RunningLockInfo runninglockNotify("RunningLockMockNotify9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    RunningLockInfo runninglockTask("RunningLockMockTask12.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    auto runningLockMgr = g_powerService->GetRunningLockMgr();
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
+    int32_t timeoutMs = -1;
+    uint32_t PARAM_ONE = 1;
+    uint32_t PARAM_TWO = 2;
     pid_t curUid = getuid();
     pid_t curPid = getpid();
 
-    auto GetRunningLockInfo = [&](RunningLockType type) {
-        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE) {
-            return runninglockPhone;
-        }
-        return runninglockNotify;
-    };
-
     EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
-            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
+            EXPECT_EQ(param.name, runninglockTask.name);
+            EXPECT_EQ(param.type, runninglockTask.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
             lockActionCount++;
             return RUNNINGLOCK_SUCCESS;
         });
     EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
-            EXPECT_EQ(param.name, runninglockInfo.name);
-            EXPECT_EQ(param.type, runninglockInfo.type);
+            EXPECT_EQ(param.name, runninglockTask.name);
+            EXPECT_EQ(param.type, runninglockTask.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
+    auto taskLock = runningLockMgr->GetRunningLockInner(taskToken);
+
+    g_powerService->Lock(taskToken);
+    EXPECT_EQ(lockActionCount, PARAM_ONE);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+
+
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
+    EXPECT_EQ(unlockActionCount, PARAM_ONE);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
+
+
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
+    EXPECT_EQ(lockActionCount, PARAM_TWO);
+    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+
+    g_powerService->UnLock(taskToken);
+    g_powerService->ReleaseRunningLock(taskToken);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest011
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_NOT_SUPPORT
+ * @tc.type: FUNC
+ * @tc.require: issueI6S0YY
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 function start!");
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockNavi("RunningLockMockNavi11.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    auto runningLockMgr = g_powerService->GetRunningLockMgr();
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_ONE = 1;
+
+    int32_t timeoutMs = -1;
+    pid_t curUid = getuid();
+    pid_t curPid = getpid();
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, runninglockNavi.name);
+            EXPECT_EQ(param.type, runninglockNavi.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, runninglockNavi.name);
+            EXPECT_EQ(param.type, runninglockNavi.type);
             unlockActionCount++;
             return RUNNINGLOCK_NOT_SUPPORT;
         });
 
-    sptr<IRemoteObject> phoneToken = new RunningLockTokenStub();
-    sptr<IRemoteObject> notifyToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
+    sptr<IRemoteObject> naviToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(naviToken, runninglockNavi));
+    auto naviLock = runningLockMgr->GetRunningLockInner(naviToken);
 
+    g_powerService->Lock(naviToken);
+    EXPECT_EQ(lockActionCount, PARAM_ONE);
+    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
-    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
-    EXPECT_EQ(unlockActionCount, 0);
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
 
-    g_powerService->Lock(phoneToken);
-    g_powerService->Lock(notifyToken);
-    g_powerService->UnLock(phoneToken);
-    g_powerService->UnLock(notifyToken);
+    EXPECT_EQ(unlockActionCount, PARAM_ONE);
+    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
 
-    EXPECT_EQ(lockActionCount, 2);
-    EXPECT_EQ(unlockActionCount, 2);
+    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
 
+    EXPECT_EQ(lockActionCount, PARAM_ONE);
+    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
-    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
-    EXPECT_EQ(lockActionCount, 2);
-
-    g_powerService->ReleaseRunningLock(phoneToken);
-    g_powerService->ReleaseRunningLock(notifyToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 function end!");
+    g_powerService->UnLock(naviToken);
+    g_powerService->ReleaseRunningLock(naviToken);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 function end!");
 }
 
 /**
@@ -702,178 +315,565 @@ HWTEST_F (RunningLockMockTest, RunningLockMockTest010, TestSize.Level2)
 }
 
 /**
- * @tc.name: RunningLockMockTest011
- * @tc.desc: Test ProxyRunningLock function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_NOT_SUPPORT
+ * @tc.name: RunningLockMockTest009
+ * @tc.desc: Test ProxyRunningLock function, test Scene runninglock
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest011, TestSize.Level2)
+HWTEST_F (RunningLockMockTest, RunningLockMockTest009, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 function start!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockNavi("RunningLockMockNavi11.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
-    auto runningLockMgr = g_powerService->GetRunningLockMgr();
+    RunningLockInfo runninglockPhone("RunningLockMockPhone9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    RunningLockInfo runninglockNotify("RunningLockMockNotify9.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
-    uint32_t PARAM_ONE = 1;
-
-    int32_t timeoutMs = -1;
     pid_t curUid = getuid();
     pid_t curPid = getpid();
 
+    auto GetRunningLockInfo = [&](RunningLockType type) {
+        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE) {
+            return runninglockPhone;
+        }
+        return runninglockNotify;
+    };
+
     EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockNavi.name);
-            EXPECT_EQ(param.type, runninglockNavi.type);
-            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
             lockActionCount++;
             return RUNNINGLOCK_SUCCESS;
         });
     EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockNavi.name);
-            EXPECT_EQ(param.type, runninglockNavi.type);
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
             unlockActionCount++;
             return RUNNINGLOCK_NOT_SUPPORT;
         });
 
-    sptr<IRemoteObject> naviToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(naviToken, runninglockNavi));
-    auto naviLock = runningLockMgr->GetRunningLockInner(naviToken);
+    sptr<IRemoteObject> phoneToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> notifyToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
 
-    g_powerService->Lock(naviToken);
-    EXPECT_EQ(lockActionCount, PARAM_ONE);
-    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
-    EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
+    EXPECT_EQ(unlockActionCount, 0);
 
-    EXPECT_EQ(unlockActionCount, PARAM_ONE);
-    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
+    g_powerService->Lock(phoneToken);
+    g_powerService->Lock(notifyToken);
+    g_powerService->UnLock(phoneToken);
+    g_powerService->UnLock(notifyToken);
 
-    EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
+    EXPECT_EQ(lockActionCount, 2);
+    EXPECT_EQ(unlockActionCount, 2);
 
-    EXPECT_EQ(lockActionCount, PARAM_ONE);
-    EXPECT_TRUE(naviLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
-    g_powerService->UnLock(naviToken);
-    g_powerService->ReleaseRunningLock(naviToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest011 function end!");
+    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
+    EXPECT_EQ(lockActionCount, 2);
+
+    g_powerService->ReleaseRunningLock(phoneToken);
+    g_powerService->ReleaseRunningLock(notifyToken);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest009 function end!");
 }
 
 /**
- * @tc.name: RunningLockMockTest012
- * @tc.desc: Test ProxyRunningLock function, test Scene runninglock, HDI unlock() return RUNNINGLOCK_SUCCESS
+ * @tc.name: RunningLockMockTest008
+ * @tc.desc: Test ProxyRunningLock function, test Background runninglock
  * @tc.type: FUNC
  * @tc.require: issueI6S0YY
  */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest012, TestSize.Level2)
+HWTEST_F (RunningLockMockTest, RunningLockMockTest008, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 function start!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 function start!");
     ASSERT_NE(g_powerService, nullptr);
     ASSERT_NE(g_lockAction, nullptr);
 
-    RunningLockInfo runninglockTask("RunningLockMockTask12.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    RunningLockInfo runninglockInfo("RunningLockMockBackground8.1", RunningLockType::RUNNINGLOCK_BACKGROUND);
     auto runningLockMgr = g_powerService->GetRunningLockMgr();
     uint32_t lockActionCount = 0;
     uint32_t unlockActionCount = 0;
-    int32_t timeoutMs = -1;
     uint32_t PARAM_ONE = 1;
     uint32_t PARAM_TWO = 2;
     pid_t curUid = getuid();
     pid_t curPid = getpid();
 
     EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockTask.name);
-            EXPECT_EQ(param.type, runninglockTask.type);
-            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
             lockActionCount++;
             return RUNNINGLOCK_SUCCESS;
         });
     EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockTask.name);
-            EXPECT_EQ(param.type, runninglockTask.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
             unlockActionCount++;
             return RUNNINGLOCK_SUCCESS;
         });
 
-    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
-    auto taskLock = runningLockMgr->GetRunningLockInner(taskToken);
-
-    g_powerService->Lock(taskToken);
+    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
+    auto backgroundLock = runningLockMgr->GetRunningLockInner(runninglockToken);
+    ASSERT_NE(backgroundLock, nullptr);
+    g_powerService->Lock(runninglockToken);
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
     EXPECT_EQ(lockActionCount, PARAM_ONE);
-    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
-
-
-    EXPECT_TRUE(g_powerService->ProxyRunningLocks(true, {std::make_pair(curPid, curUid)}));
-    EXPECT_EQ(unlockActionCount, PARAM_ONE);
-    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
-
-
-    EXPECT_TRUE(g_powerService->ProxyRunningLocks(false, {std::make_pair(curPid, curUid)}));
-    EXPECT_EQ(lockActionCount, PARAM_TWO);
-    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
-
-    g_powerService->UnLock(taskToken);
-    g_powerService->ReleaseRunningLock(taskToken);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest012 function end!");
-}
-
-/**
- * @tc.name: RunningLockMockTest013
- * @tc.desc: Test ProxyRunningLock function, runninglock release first, then cancel the proxy
- * @tc.type: FUNC
- * @tc.require: issueI6TW2R
- */
-HWTEST_F (RunningLockMockTest, RunningLockMockTest013, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 function start!");
-    ASSERT_NE(g_powerService, nullptr);
-    ASSERT_NE(g_lockAction, nullptr);
-
-    RunningLockInfo runninglockTask("RunningLockMockTask13.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
-    auto runningLockMgr = g_powerService->GetRunningLockMgr();
-    uint32_t lockActionCount = 0;
-    uint32_t unlockActionCount = 0;
-    int32_t timeoutMs = -1;
-    uint32_t PARAM_ONE = 1;
-    pid_t curUid = getuid();
-    pid_t curPid = getpid();
-
-    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockTask.name);
-            EXPECT_EQ(param.type, runninglockTask.type);
-            EXPECT_EQ(param.timeoutMs, timeoutMs);
-            lockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
-            EXPECT_EQ(param.name, runninglockTask.name);
-            EXPECT_EQ(param.type, runninglockTask.type);
-            unlockActionCount++;
-            return RUNNINGLOCK_SUCCESS;
-        });
-
-    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
-    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
-    auto taskLock = runningLockMgr->GetRunningLockInner(taskToken);
-
-    g_powerService->Lock(taskToken);
-    EXPECT_EQ(lockActionCount, PARAM_ONE);
-    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(true, curPid, curUid));
 
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
     EXPECT_EQ(unlockActionCount, PARAM_ONE);
-    EXPECT_TRUE(taskLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_PROXIED);
-
-    g_powerService->UnLock(taskToken);
-    g_powerService->ReleaseRunningLock(taskToken);
-    EXPECT_EQ(runningLockMgr->GetRunningLockInner(taskToken), nullptr);
 
     EXPECT_TRUE(g_powerService->ProxyRunningLock(false, curPid, curUid));
 
-    EXPECT_EQ(lockActionCount, PARAM_ONE);
-    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest013 function end!");
+    EXPECT_TRUE(backgroundLock->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE);
+    EXPECT_EQ(lockActionCount, PARAM_TWO);
+
+    g_powerService->UnLock(runninglockToken);
+    g_powerService->ReleaseRunningLock(runninglockToken);
+    EXPECT_EQ(unlockActionCount, PARAM_TWO);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest008 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest007
+ * @tc.desc: test scene runninglock release function by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest007, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 function start!");
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockSport("RunningLockMockSport7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    RunningLockInfo runninglockNavi("RunningLockMockNavi7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    RunningLockInfo runninglockTask("RunningLockMockTask7.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    int32_t timeoutMs = 100;
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_THREE = 3;
+
+    auto GetRunningLockInfo = [&](RunningLockType type) {
+        RunningLockInfo lockInfo {};
+        switch (type) {
+            case RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT:
+                return runninglockSport;
+            case RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION:
+                return runninglockNavi;
+            case RunningLockType::RUNNINGLOCK_BACKGROUND_TASK:
+                return runninglockTask;
+            default:
+                return lockInfo;
+        }
+    };
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> sportToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> naviToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
+
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(sportToken, runninglockSport));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(naviToken, runninglockNavi));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
+
+    g_powerService->Lock(sportToken);
+    g_powerService->Lock(naviToken);
+    g_powerService->Lock(taskToken);
+
+    g_powerService->UnLock(sportToken);
+    g_powerService->UnLock(naviToken);
+    g_powerService->UnLock(taskToken);
+
+    g_powerService->ReleaseRunningLock(sportToken);
+    g_powerService->ReleaseRunningLock(naviToken);
+    g_powerService->ReleaseRunningLock(taskToken);
+
+    EXPECT_EQ(lockActionCount, PARAM_THREE);
+    EXPECT_EQ(unlockActionCount, PARAM_THREE);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest007 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest006
+ * @tc.desc: test scene runninglock release function by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest006, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 function start!");
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockPhone("RunningLockMockPhone6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    RunningLockInfo runninglockNotify("RunningLockMockNotify6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    RunningLockInfo runninglockAudio("RunningLockMockAudio6.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    int32_t timeoutMs = 100;
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_THREE = 3;
+
+    auto GetRunningLockInfo = [&](RunningLockType type) {
+        RunningLockInfo lockInfo {};
+        switch (type) {
+            case RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE:
+                return runninglockPhone;
+            case RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION:
+                return runninglockNotify;
+            case RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO:
+                return runninglockAudio;
+            default:
+                return lockInfo;
+        }
+    };
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> phoneToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> notifyToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> audioToken = new RunningLockTokenStub();
+
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(audioToken, runninglockAudio));
+
+    g_powerService->Lock(phoneToken);
+    g_powerService->Lock(notifyToken);
+    g_powerService->Lock(audioToken);
+
+    g_powerService->UnLock(phoneToken);
+    g_powerService->UnLock(notifyToken);
+    g_powerService->UnLock(audioToken);
+
+    g_powerService->ReleaseRunningLock(phoneToken);
+    g_powerService->ReleaseRunningLock(notifyToken);
+    g_powerService->ReleaseRunningLock(audioToken);
+
+    EXPECT_EQ(lockActionCount, PARAM_THREE);
+    EXPECT_EQ(unlockActionCount, PARAM_THREE);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest006 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest005
+ * @tc.desc: test scene runninglock by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest005, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 function start!");
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockNavi("RunningLockMockNavi5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
+    RunningLockInfo runninglockTask("RunningLockMockTask5.1", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    int32_t timeoutMs = -1;
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_TWO = 2;
+
+    auto GetRunningLockInfo = [&](RunningLockType type) {
+        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION) {
+            return runninglockNavi;
+        }
+        return runninglockTask;
+    };
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            auto runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            auto runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> naviToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> taskToken = new RunningLockTokenStub();
+
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(naviToken, runninglockNavi));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(taskToken, runninglockTask));
+
+    g_powerService->Lock(naviToken);
+    g_powerService->Lock(taskToken);
+    g_powerService->UnLock(naviToken);
+    g_powerService->UnLock(taskToken);
+
+    g_powerService->ReleaseRunningLock(naviToken);
+    g_powerService->ReleaseRunningLock(taskToken);
+
+    EXPECT_EQ(lockActionCount, PARAM_TWO);
+    EXPECT_EQ(unlockActionCount, PARAM_TWO);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest005 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest004
+ * @tc.desc: test scene runninglock by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest004, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 function start!");
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockAudio("RunningLockMockAudio4.1", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
+    RunningLockInfo runninglockSport("RunningLockMockSport4.1", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
+    int32_t timeoutMs = -1;
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_TWO = 2;
+
+    auto GetRunningLockInfo = [&](RunningLockType type) {
+        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO) {
+            return runninglockAudio;
+        }
+        return runninglockSport;
+    };
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> audioToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> sportToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(audioToken, runninglockAudio));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(sportToken, runninglockSport));
+
+    g_powerService->Lock(audioToken);
+    g_powerService->Lock(sportToken);
+    g_powerService->UnLock(audioToken);
+    g_powerService->UnLock(sportToken);
+
+    g_powerService->ReleaseRunningLock(audioToken);
+    g_powerService->ReleaseRunningLock(sportToken);
+
+    EXPECT_EQ(lockActionCount, PARAM_TWO);
+    EXPECT_EQ(unlockActionCount, PARAM_TWO);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest004 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest003
+ * @tc.desc: test scene runninglock by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest003, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 function start!");
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockPhone("RunningLockMockPhone3.1", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    RunningLockInfo runninglockNotify("RunningLockMockNotify3.1", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
+    int32_t timeoutMs = -1;
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_TWO = 2;
+
+    auto GetRunningLockInfo = [&](RunningLockType type) {
+        if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE) {
+            return runninglockPhone;
+        }
+        return runninglockNotify;
+    };
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            EXPECT_EQ(param.timeoutMs, timeoutMs);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            RunningLockInfo runninglockInfo = GetRunningLockInfo(param.type);
+            EXPECT_EQ(param.name, runninglockInfo.name);
+            EXPECT_EQ(param.type, runninglockInfo.type);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> phoneToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> notifyToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(phoneToken, runninglockPhone));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(notifyToken, runninglockNotify));
+
+    g_powerService->Lock(phoneToken);
+    g_powerService->Lock(notifyToken);
+    g_powerService->UnLock(phoneToken);
+    g_powerService->UnLock(notifyToken);
+
+    g_powerService->ReleaseRunningLock(phoneToken);
+    g_powerService->ReleaseRunningLock(notifyToken);
+
+    EXPECT_EQ(lockActionCount, PARAM_TWO);
+    EXPECT_EQ(unlockActionCount, PARAM_TWO);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest003 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest002
+ * @tc.desc: test proximity screen control runninglock release function by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest002, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 function start!");
+#ifdef HAS_SENSORS_SENSOR_PART
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockInfo(
+        "RunningLockMockProximity2.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+    int32_t timeoutMs = 100;
+    auto runningLockMgr = g_powerService->GetRunningLockMgr();
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_ZERO = 0;
+    uint32_t PARAM_ONE = 1;
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
+            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
+
+    g_powerService->Lock(runninglockToken);
+    EXPECT_EQ(PARAM_ONE, runningLockMgr->GetValidRunningLockNum(runninglockInfo.type));
+    g_powerService->UnLock(runninglockToken);
+    g_powerService->ReleaseRunningLock(runninglockToken);
+
+    EXPECT_EQ(lockActionCount, PARAM_ZERO);
+    EXPECT_EQ(unlockActionCount, PARAM_ZERO);
+#endif
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest002 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMockTest001
+ * @tc.desc: test proximity screen control runninglock by mock
+ * @tc.type: FUNC
+ * @tc.require: issueI6LPK9
+ */
+HWTEST_F (RunningLockMockTest, RunningLockMockTest001, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 function start!");
+#ifdef HAS_SENSORS_SENSOR_PART
+    ASSERT_NE(g_powerService, nullptr);
+    ASSERT_NE(g_lockAction, nullptr);
+
+    RunningLockInfo runninglockInfo(
+        "RunningLockMockProximity1.1", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+    RunningLockInfo runninglockInfo2(
+        "RunningLockMockProximity1.2", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+    int32_t timeoutMs = 100;
+    auto runningLockMgr = g_powerService->GetRunningLockMgr();
+    uint32_t lockActionCount = 0;
+    uint32_t unlockActionCount = 0;
+    uint32_t PARAM_ZERO = 0;
+    uint32_t PARAM_ONE = 1;
+    uint32_t PARAM_TWO = 2;
+
+    EXPECT_CALL(*g_lockAction, Lock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
+            EXPECT_EQ(param.timeoutMs, RUNNINGLOCKPARAM_TIMEOUTMS_DEF);
+            lockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+    EXPECT_CALL(*g_lockAction, Unlock(_)).WillRepeatedly([&](const RunningLockParam& param) {
+            EXPECT_EQ(param.name, RUNNINGLOCK_BACKGROUND_NAME);
+            EXPECT_EQ(param.type, RunningLockType::RUNNINGLOCK_BACKGROUND);
+            unlockActionCount++;
+            return RUNNINGLOCK_SUCCESS;
+        });
+
+    sptr<IRemoteObject> runninglockToken = new RunningLockTokenStub();
+    sptr<IRemoteObject> runninglockToken2 = new RunningLockTokenStub();
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken, runninglockInfo));
+    EXPECT_EQ(PowerErrors::ERR_OK, g_powerService->CreateRunningLock(runninglockToken2, runninglockInfo2));
+
+    g_powerService->Lock(runninglockToken);
+    EXPECT_EQ(PARAM_ONE, runningLockMgr->GetValidRunningLockNum(runninglockInfo.type));
+    g_powerService->Lock(runninglockToken2);
+    EXPECT_EQ(PARAM_TWO, runningLockMgr->GetValidRunningLockNum(runninglockInfo2.type));
+
+    g_powerService->UnLock(runninglockToken);
+    EXPECT_EQ(PARAM_ONE, runningLockMgr->GetValidRunningLockNum(runninglockInfo.type));
+    g_powerService->UnLock(runninglockToken2);
+    EXPECT_EQ(PARAM_ZERO, runningLockMgr->GetValidRunningLockNum(runninglockInfo2.type));
+
+    g_powerService->ReleaseRunningLock(runninglockToken);
+    g_powerService->ReleaseRunningLock(runninglockToken2);
+
+    EXPECT_EQ(lockActionCount, PARAM_ZERO);
+    EXPECT_EQ(unlockActionCount, PARAM_ZERO);
+#endif
+    POWER_HILOGI(LABEL_TEST, "RunningLockMockTest001 function end!");
 }
 }
