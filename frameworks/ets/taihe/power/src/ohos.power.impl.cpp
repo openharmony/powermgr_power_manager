@@ -36,7 +36,8 @@ std::map<PowerErrors, std::string> g_errorTable = {
     {PowerErrors::ERR_CONNECTION_FAIL,   "Failed to connect to the service."},
     {PowerErrors::ERR_PERMISSION_DENIED, "Permission is denied"             },
     {PowerErrors::ERR_SYSTEM_API_DENIED, "System permission is denied"      },
-    {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         }
+    {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         },
+    {PowerErrors::ERR_FREQUENT_FUNCTION_CALL, "Frequent function calls."    }
 };
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
@@ -143,9 +144,13 @@ DevicePowerMode GetPowerMode()
         case PowerMode::EXTREME_POWER_SAVE_MODE:
             deviceMode = DevicePowerMode::key_t::MODE_EXTREME_POWER_SAVE;
             break;
+        case PowerMode::CUSTOM_POWER_SAVE_MODE:
+            deviceMode = DevicePowerMode::key_t::MODE_CUSTOM_POWER_SAVE;
+            break;
         default:
             POWER_HILOGE(FEATURE_POWER_MODE, "Unknown mode");
     }
+    POWER_HILOGD(FEATURE_POWER_MODE, "%{public}s mode: %{public}d", __func__, static_cast<int32_t>(mode));
     return deviceMode;
 }
 
@@ -197,6 +202,16 @@ void SetScreenOffTime(int64_t timeout)
         taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
     }
 }
+
+void RefreshActivity(string_view reason)
+{
+    PowerErrors code = g_powerMgrClient.RefreshActivity(
+        UserActivityType::USER_ACTIVITY_TYPE_APPLICATION, std::string(reason));
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_ACTIVITY, "RefreshActivity failed. code:%{public}d", static_cast<int32_t>(code));
+        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+    }
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive
@@ -211,4 +226,5 @@ TH_EXPORT_CPP_API_SetPowerModeSync(SetPowerModeSync);
 TH_EXPORT_CPP_API_IsStandby(IsStandby);
 TH_EXPORT_CPP_API_Hibernate(Hibernate);
 TH_EXPORT_CPP_API_SetScreenOffTime(SetScreenOffTime);
+TH_EXPORT_CPP_API_RefreshActivity(RefreshActivity);
 // NOLINTEND
