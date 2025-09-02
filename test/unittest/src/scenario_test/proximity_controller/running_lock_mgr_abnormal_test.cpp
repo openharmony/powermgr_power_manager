@@ -365,4 +365,19 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest009, TestSize.Lev
         SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, 0, 0));
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest009 function end!");
 }
+
+/**
+ * @tc.name: RunningLockMgrAbnormalTest010
+ * @tc.desc: Test IsVoiceAppForeground
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest010, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest010 function start!");
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    bool ret = lockMgr->IsVoiceAppForeground();
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest010 function end!");
+}
 } // namespace
