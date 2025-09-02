@@ -70,9 +70,9 @@ void AppManagerUtils::GetForegroundApplications(std::vector<OHOS::AppExecFwk::Ap
         FEATURE_UTIL, "GetForegroundApplications, ret: %{public}u, num of apps: %{public}zu", ret, appsData.size());
 }
 
-bool AppManagerUtils::IsForegroundApplication(const std::string& appName)
+bool AppManagerUtils::IsForegroundApplication(const std::set<std::string>& appNames)
 {
-    if (appName.empty()) {
+    if (appNames.empty()) {
         POWER_HILOGW(FEATURE_UTIL, "IsForegroundApplication: app name is empty");
         return false;
     }
@@ -81,8 +81,9 @@ bool AppManagerUtils::IsForegroundApplication(const std::string& appName)
     std::vector<OHOS::AppExecFwk::AppStateData> appsData;
     GetForegroundApplications(appsData);
     for (const auto& curApp : appsData) {
-        if (curApp.bundleName == appName) {
+        if (appNames.find(curApp.bundleName) != appNames.end()) {
             IsForeground = true;
+            POWER_HILOGI(FEATURE_UTIL, "Current ForegroundApp is %{public}s", curApp.bundleName.c_str());
             break;
         }
     }

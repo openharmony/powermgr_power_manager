@@ -62,9 +62,9 @@ void PowerGetForegroundApplications(std::vector<OHOS::AppExecFwk::AppStateData>&
     AppManagerUtils::GetForegroundApplications(appsData);
 }
 
-bool PowerIsForegroundApplication(const std::string& appName)
+bool PowerIsForegroundApplication(const std::set<std::string>& appNames)
 {
-    return AppManagerUtils::IsForegroundApplication(appName);
+    return AppManagerUtils::IsForegroundApplication(appNames);
 }
 
 #ifdef __cplusplus
