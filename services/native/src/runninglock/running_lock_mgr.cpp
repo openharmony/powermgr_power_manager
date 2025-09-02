@@ -32,6 +32,7 @@
 #include "power_utils.h"
 #include "system_suspend_controller.h"
 #include "power_hookmgr.h"
+#include "parameters.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ namespace {
 const string TASK_RUNNINGLOCK_FORCEUNLOCK = "RunningLock_ForceUnLock";
 constexpr int32_t VALID_PID_LIMIT = 1;
 sptr<IPowerRunninglockCallback> g_runningLockCallback = nullptr;
-const string INCALL_APP_BUNDLE_NAME = "com.ohos.callui";
+const string FOREGROUND_APP_LIST = "const.power.prox_dly_off_fg_apps";
 #ifdef HAS_SENSORS_SENSOR_PART
 constexpr uint32_t FOREGROUND_INCALL_DELAY_TIME_MS = 300;
 constexpr uint32_t BACKGROUND_INCALL_DELAY_TIME_MS = 800;
@@ -944,6 +945,18 @@ void RunningLockMgr::ProximityController::OnAway()
     runningLock->HandleProximityAwayEvent();
 }
 
+bool RunningLockMgr::IsVoiceAppForeground()
+{
+    std::string foregroundApp = OHOS::system::GetParameter(FOREGROUND_APP_LIST, "");
+    if (PowerUtils::IsForegroundApplication(PowerUtils::Split(foregroundApp, ';'))) {
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "call in foreground");
+        return true;
+    }
+
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "No voice app is in foreground");
+    return false;
+}
+
 void RunningLockMgr::HandleProximityCloseEvent()
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -959,7 +972,7 @@ void RunningLockMgr::HandleProximityCloseEvent()
     if (GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) > 0) {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Change state to INACITVE when holding PROXIMITY LOCK");
         uint32_t delayTime = FOREGROUND_INCALL_DELAY_TIME_MS;
-        if (!PowerUtils::IsForegroundApplication(INCALL_APP_BUNDLE_NAME)) {
+        if (!IsVoiceAppForeground()) {
             delayTime = BACKGROUND_INCALL_DELAY_TIME_MS;
         }
         if (pms->IsDuringCallStateEnable() && stateMachine->IsDuringCall() && stateMachine->IsScreenOn()) {
