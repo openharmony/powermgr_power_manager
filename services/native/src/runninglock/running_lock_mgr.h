@@ -90,6 +90,7 @@ private:
     bool InitProximityController();
     void HandleProximityCloseEvent();
     void HandleProximityAwayEvent();
+    bool IsVoiceAppForeground();
 #endif
 
     class LockCounter {

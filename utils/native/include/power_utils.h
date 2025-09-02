@@ -16,6 +16,7 @@
 #ifndef POWER_UTILS_H
 #define POWER_UTILS_H
 
+#include <set>
 #include "dm_common.h"
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
@@ -32,7 +33,8 @@ public:
     static StateChangeReason GetReasonByUserActivity(UserActivityType type);
     static WakeupDeviceType ParseWakeupDeviceType(const std::string& details);
     static const std::string JsonToSimpleStr(const std::string& json);
-    static bool IsForegroundApplication(const std::string& appName);
+    static bool IsForegroundApplication(const std::set<std::string>& appNames);
+    static std::set<std::string> Split(const std::string& str, char delimiter);
 };
 } // namespace PowerMgr
 } // namespace OHOS
