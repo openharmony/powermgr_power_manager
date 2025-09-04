@@ -15,6 +15,7 @@
 
 #include <dlfcn.h>
 #include <string>
+#include <sstream>
 #include "power_log.h"
 #include "power_utils.h"
 
@@ -327,7 +328,7 @@ const std::string PowerUtils::JsonToSimpleStr(const std::string& json)
     return str;
 }
 
-bool PowerUtils::IsForegroundApplication(const std::string& appName)
+bool PowerUtils::IsForegroundApplication(const std::set<std::string>& appNames)
 {
     void* handler = dlopen("libpower_ability.z.so", RTLD_NOW | RTLD_NODELETE);
     if (handler == nullptr) {
@@ -336,7 +337,7 @@ bool PowerUtils::IsForegroundApplication(const std::string& appName)
     }
 
     auto powerIsForegroundApplicationFunc =
-        reinterpret_cast<bool (*)(const std::string&)>(dlsym(handler, "PowerIsForegroundApplication"));
+        reinterpret_cast<bool (*)(const std::set<std::string>&)>(dlsym(handler, "PowerIsForegroundApplication"));
     if (powerIsForegroundApplicationFunc == nullptr) {
         POWER_HILOGE(FEATURE_UTIL, "find PowerIsForegroundApplication function failed, reason : %{public}s", dlerror());
 #ifndef FUZZ_TEST
@@ -345,12 +346,24 @@ bool PowerUtils::IsForegroundApplication(const std::string& appName)
         handler = nullptr;
         return false;
     }
-    bool isForeground = powerIsForegroundApplicationFunc(appName);
+    bool isForeground = powerIsForegroundApplicationFunc(appNames);
 #ifndef FUZZ_TEST
     dlclose(handler);
 #endif
     handler = nullptr;
     return isForeground;
+}
+
+std::set<std::string> PowerUtils::Split(const std::string& str, char delimiter)
+{
+    POWER_HILOGI(FEATURE_UTIL, "split str is: %{public}s", str.c_str());
+    std::set<std::string> tokens;
+    std::istringstream tokenStream(str);
+    std::string token;
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.insert(token);
+    }
+    return tokens;
 }
 } // namespace PowerMgr
 } // namespace OHOS
