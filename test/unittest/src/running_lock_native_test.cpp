@@ -16,6 +16,7 @@
 #include "running_lock_native_test.h"
 
 #include <ipc_skeleton.h>
+#include "power_utils.h"
 
 #include "actions/irunning_lock_action.h"
 
@@ -43,6 +44,11 @@ void PowerRunningLockTestCallback::HandleRunningLockMessage(std::string message)
 {
     POWER_HILOGI(LABEL_TEST,
         "PowerRunningLockTestCallback::HandleRunningLockMessage, %{public}s", message.c_str());
+}
+
+bool PowerUtils::IsForegroundApplication(const std::set<std::string>& appNames)
+{
+    return true;
 }
 namespace {
 /**
@@ -731,5 +737,26 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level1)
     EXPECT_FALSE(runningLockMgr->ReleaseLock(token1));
     
     POWER_HILOGI(LABEL_TEST, "RunningLockNative023 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative024
+ * @tc.desc: test IsVoiceAppForeground
+ * @tc.type: FUNC
+ * @tc.require: issueI7MNRN
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative024, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    std::string str = "app.bundlename1;app.bundlename2";
+    auto appList = PowerUtils::Split(str, ';');
+
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
+    bool ret = runningLockMgr->IsVoiceAppForeground();
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function end!");
 }
 } // namespace
