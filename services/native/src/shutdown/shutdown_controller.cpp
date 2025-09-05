@@ -122,7 +122,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     // SetFrameworkFinishBootStage done in client
     if (!force) {
         if (started_) {
-            POWER_HILOGW(FEATURE_SHUTDOWN, "Shutdown is already running");
+            POWER_KHILOGI(FEATURE_SHUTDOWN, "Shutdown is already running");
             return;
         }
         started_ = true;
@@ -149,9 +149,9 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         // only two threads are allowed, next time it blocks
         // either block or thread leak. since the previous action is shutdown, block is safer than thread leak
         g_futForSyncCb = async(launch::async, &ShutdownController::TriggerSyncShutdownCallback, this, isReboot);
-        g_futForOff = async(launch::async, &ShutdownController::TurnOffScreen, this);
         g_futForSyncCb.wait_for(CALLBACK_TIMEOUT);
         actionTimeStr = actionTimeStr + "," + std::to_string(GetCurrentRealTimeMs());
+        g_futForOff = async(launch::async, &ShutdownController::TurnOffScreen, this);
         g_futForOff.wait_for(OFF_TIMEOUT);
     } else {
         TriggerSyncShutdownCallback(isReboot);

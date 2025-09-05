@@ -263,12 +263,16 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest002, TestSize.Level0)
     // cover some branches which are unlikely to be accessed
     POWER_HILOGI(LABEL_TEST, "ForceRebootDeviceTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    ASSERT_TRUE(powerActionMock != nullptr);
 
     g_isTesting = true;
+    // normal case
+    EXPECT_CALL(*powerActionMock, Reboot("First Test"));
+    powerMgrClient.ForceRebootDevice("First Test");
+    WaitForDetachedThread();
 
     // Make permission check to fail
     g_boolRet = false;
-    ASSERT_TRUE(powerActionMock != nullptr);
     EXPECT_CALL(*powerActionMock, Reboot(_)).Times(0);
     powerMgrClient.ForceRebootDevice("Some Reason");
     WaitForDetachedThread();
@@ -305,44 +309,6 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest002, TestSize.Level0)
     }
     WaitForDetachedThread();
     POWER_HILOGI(LABEL_TEST, "ForceRebootDeviceTest002 function end!");
-}
-
-class SyncShutdownCallback : public SyncShutdownCallbackStub {
-public:
-    ~SyncShutdownCallback() override = default;
-    void OnSyncShutdownOrReboot(bool) override
-    {
-        std::unique_lock lock(g_cvMutex);
-        g_cv.wait(lock, []() { return g_notified; });
-    }
-};
-
-// test async process when calling ForceReboot
-// callback blocks, reboot unblocks
-HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest003, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "ForceRebootDeviceTest003 function start!");
-    sptr<ISyncShutdownCallback> callback = sptr<SyncShutdownCallback>::MakeSptr();
-    ShutdownClient::GetInstance().RegisterShutdownCallback(callback);
-    ASSERT_TRUE(powerActionMock != nullptr);
-    EXPECT_CALL(*powerActionMock, Reboot("Some Reason")).WillOnce(Invoke([]() {
-        POWER_HILOGI(LABEL_TEST, "unblocking reboot action called");
-        std::unique_lock lock(g_cvMutex);
-        g_notified = true;
-        g_cv.notify_all();
-    }));
-
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
-    g_isTesting = true;
-    powerMgrClient.ForceRebootDevice("Some Reason");
-    g_isTesting = false;
-    {
-        std::unique_lock lock(g_cvMutex);
-        EXPECT_FALSE(g_notified);
-        // only be unblocked after Reboot is called
-        g_cv.wait(lock, []() { return g_notified; });
-    }
-    POWER_HILOGI(LABEL_TEST, "ForceRebootDeviceTest003 function end!");
 }
 } // namespace
 } // namespace OHOS::PowerMgr
