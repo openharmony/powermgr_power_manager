@@ -949,7 +949,7 @@ bool RunningLockMgr::IsVoiceAppForeground()
 {
     std::string foregroundApp = OHOS::system::GetParameter(FOREGROUND_APP_LIST, "");
     if (PowerUtils::IsForegroundApplication(PowerUtils::Split(foregroundApp, ';'))) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "call in foreground");
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "The voice app is in foreground");
         return true;
     }
 
