@@ -237,6 +237,7 @@ void StartBootTimer(bool isReboot)
 
 PowerErrors PowerMgrClient::ForceRebootDevice(const std::string& reason)
 {
+    POWER_HILOGI(FEATURE_SHUTDOWN, "ForceRebootDevice client side");
     StartBootTimer(true);
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <condition_variable>
+#include <mutex>
+
 #include <gtest/gtest.h>
 #include <mock_power_action.h>
 #include <mock_state_action.h>
@@ -50,10 +53,19 @@ HWTEST_F(ShutDownControllerTest, ShutDownControllerTest001, TestSize.Level0)
     controller.AddCallback(callback, ShutdownPriority::DEFAULT);
     EXPECT_CALL(*powerActionMock, Reboot("::testing::_")).Times(0);
     controller.Reboot("test_case");
-    EXPECT_CALL(*powerActionMock, Reboot("test_case"));
+
+    std::mutex localMutex;
+    std::condition_variable cv;
+    bool notified = false;
+    EXPECT_CALL(*powerActionMock, Reboot("test_case")).WillOnce(Invoke([&localMutex, &cv, &notified]() {
+        std::unique_lock lock(localMutex);
+        notified = true;
+        cv.notify_all();
+    }));
     controller.Reboot("test_case", true);
-    sleep(1);
+    std::unique_lock lock(localMutex);
+    cv.wait(lock, [&notified]() { return notified; });
     POWER_HILOGI(LABEL_TEST, "ShutdownControllerTest001 function end!");
 }
-}
-}
+} // namespace
+} // namespace OHOS::PowerMgr
