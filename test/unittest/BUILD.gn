@@ -28,6 +28,7 @@ config("module_private_config") {
     "include/scenario_test/wakeup_suspend",
     "mock",
     "include/utils",
+    "${powermgr_framework_native}",
     "${powermgr_service_zidl}/include",
     "${powermgr_service_zidl}/src/shutdown",
     "${powermgr_service_path}/native/include",
@@ -1420,6 +1421,26 @@ ohos_unittest("test_power_suspend_takeover") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_general_interfaces") {
+  module_out_path = module_output_path
+
+  sources = [ "src/interface_test/general_interfaces_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/permission:power_permission",
+  ]
+  
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_power_getcontroller_mock") {
   module_out_path = module_output_path
 
@@ -1794,6 +1815,7 @@ group("unittest") {
     ":power_mode_module_native_test",
     ":power_state_machine_native_test",
     ":test_device_power_action",
+    ":test_general_interfaces",
     ":test_mock_parcel",
     ":test_mock_peer",
     ":test_mock_proxy",

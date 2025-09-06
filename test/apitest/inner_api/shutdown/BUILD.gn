@@ -110,10 +110,26 @@ ohos_unittest("sync_shutdown_callback_test") {
   module_out_path = module_output_path
 }
 
+ohos_unittest("shutdown_controller_test") {
+  sources = [ "shutdown_controller_test.cpp" ]
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+  ]
+  external_deps = deps_ex
+  module_out_path = module_output_path
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":async_shutdown_callback_test",
+    ":shutdown_controller_test",
     ":sync_shutdown_callback_test",
     ":takeover_shutdown_callback_test",
   ]

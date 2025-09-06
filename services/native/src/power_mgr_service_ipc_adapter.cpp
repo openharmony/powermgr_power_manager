@@ -40,6 +40,13 @@ int32_t PowerMgrServiceAdapter::RebootDeviceForDeprecatedIpc(const std::string& 
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::ForceRebootDeviceIpc(const std::string& reason, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RebootDevice", false);
+    powerError = static_cast<int32_t>(ForceRebootDevice(reason));
+    return ERR_OK;
+}
+
 int32_t PowerMgrServiceAdapter::ShutDownDeviceIpc(const std::string& reason, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::ShutDownDevice", false);
