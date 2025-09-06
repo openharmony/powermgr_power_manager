@@ -15,6 +15,8 @@
 
 #include "power_mgr_client.h"
 
+#include <sys/ioctl.h>
+#include <fcntl.h>
 #include <cinttypes>
 #include <mutex>
 #include <memory>
@@ -39,6 +41,8 @@
 #include "power_common.h"
 #include "running_lock_info.h"
 #include "power_mgr_async_reply_stub.h"
+
+#define SET_REBOOT _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
 
 namespace OHOS {
 namespace PowerMgr {
@@ -189,6 +193,56 @@ PowerErrors PowerMgrClient::RebootDeviceForDeprecated(const std::string& reason)
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
     proxy->RebootDeviceForDeprecatedIpc(reason, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
+namespace {
+// mostly copied from power_napi.cpp
+// no early return if open fd succeeded
+void StartBootTimer(bool isReboot)
+{
+    int fd = open("/dev/bbox", O_WRONLY);
+    if (fd < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "open /dev/bbox failed!");
+        return;
+    }
+
+    fdsan_exchange_owner_tag(fd, 0, DOMAIN_FEATURE_SHUTDOWN);
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown fw start timeout.");
+
+    int rebootFlag = isReboot ? 1 : 0;
+    int ret = ioctl(fd, SET_REBOOT, &rebootFlag);
+    if (ret < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "set reboot flag failed!");
+    }
+
+    int stage = SHUT_STAGE_FRAMEWORK_START;
+    ret = ioctl(fd, SET_SHUT_STAGE, &stage);
+    if (ret < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "set SHUT_STAGE_FRAMEWORK_START failed!");
+    }
+
+    stage = SHUT_STAGE_FRAMEWORK_FINISH;
+    ret = ioctl(fd, SET_SHUT_STAGE, &stage);
+    if (ret < 0) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "set SHUT_STAGE_FRAMEWORK_FINISH failed!");
+    }
+
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Set shutdown timeout mechanism started.");
+    fdsan_close_with_tag(fd, DOMAIN_FEATURE_SHUTDOWN);
+
+    return;
+}
+}
+
+PowerErrors PowerMgrClient::ForceRebootDevice(const std::string& reason)
+{
+    POWER_HILOGI(FEATURE_SHUTDOWN, "ForceRebootDevice client side");
+    StartBootTimer(true);
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->ForceRebootDeviceIpc(reason, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 

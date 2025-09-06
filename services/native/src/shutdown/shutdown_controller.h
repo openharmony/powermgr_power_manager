@@ -35,7 +35,7 @@ public:
     ShutdownController();
     virtual ~ShutdownController() = default;
 
-    virtual void Reboot(const std::string& reason);
+    virtual void Reboot(const std::string& reason, bool force = false);
     virtual void Shutdown(const std::string& reason);
     bool IsShuttingDown();
     void EnableMock(IDevicePowerAction* mockPowerAction, IDeviceStateAction* mockStateAction)
@@ -61,7 +61,7 @@ public:
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
-    void RebootOrShutdown(const std::string& reason, bool isReboot);
+    void RebootOrShutdown(const std::string& reason, bool isReboot, bool force = false);
     void Prepare(bool isReboot);
     void TurnOffScreen();
     void PublishShutdownEvent() const;

@@ -27,6 +27,7 @@ class PowerMgrServiceAdapter : public PowerMgrStub {
 public:
     virtual int32_t RebootDeviceIpc(const std::string& reason, int32_t& powerError) override;
     virtual int32_t RebootDeviceForDeprecatedIpc(const std::string& reason, int32_t& powerError) override;
+    virtual int32_t ForceRebootDeviceIpc(const std::string& reason, int32_t& powerError) override;
     virtual int32_t ShutDownDeviceIpc(const std::string& reason, int32_t& powerError) override;
     virtual int32_t SetSuspendTagIpc(const std::string& tag, int32_t& powerError) override;
     virtual int32_t SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue, bool suspendImmed,
@@ -107,7 +108,8 @@ public:
     virtual int32_t SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError) override;
 
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
-    virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason) = 0;
+    virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason, bool force = false) = 0;
+    virtual PowerErrors ForceRebootDevice(const std::string& reason) = 0;
     virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
     virtual PowerErrors SetSuspendTag(const std::string& tag) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,

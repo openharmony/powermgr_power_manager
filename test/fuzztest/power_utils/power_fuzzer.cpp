@@ -45,7 +45,7 @@ class FuzzShutdownAction : public ShutdownController {
 public:
     FuzzShutdownAction() = default;
     virtual ~FuzzShutdownAction() = default;
-    virtual void Reboot([[maybe_unused]] const std::string& reason) {};
+    virtual void Reboot([[maybe_unused]] const std::string& reason, bool force = false) {};
     virtual void Shutdown([[maybe_unused]] const std::string& reason) {};
 };
 
