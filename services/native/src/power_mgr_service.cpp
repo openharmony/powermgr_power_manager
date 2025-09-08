@@ -1176,7 +1176,7 @@ PowerErrors PowerMgrService::WakeupDevice(
 
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
 
-    BackgroundRunningLock wakeupRunningLock("WakeupLock", WAKEUP_LOCK_TIMEOUT_MS);
+    BackgroundRunningLock wakeupRunningLock("W", WAKEUP_LOCK_TIMEOUT_MS);
     if (details == "display_doze") {
         bool ret = powerStateMachine_->SetDozeMode(DisplayState::DISPLAY_DOZE);
         return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
