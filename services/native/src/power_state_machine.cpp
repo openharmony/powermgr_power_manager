@@ -1832,8 +1832,8 @@ PowerStateMachine::ScreenChangeCheck::ScreenChangeCheck(
         return;
     }
 
-    pid_ = IPCSkeleton::GetCallingPid();
-    uid_ = IPCSkeleton::GetCallingUid();
+    pid_ = getpid();
+    uid_ = getuid();
 
     FFRTTask task = [checker = (*this)]() {
         checker.ReportSysEvent("TIMEOUT");
