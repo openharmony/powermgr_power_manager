@@ -237,6 +237,7 @@ uint32_t DeviceStateAction::SetDisplayState(DisplayState state, StateChangeReaso
                 std::string identity = IPCSkeleton::ResetCallingIdentity();
                 // SuspendBegin is processed inside IsInterruptingScreenOff
                 if (IsInterruptingScreenOff(dispReason)) {
+                    IPCSkeleton::SetCallingIdentity(identity);
                     return ActionResult::FAILED;
                 }
                 IPCSkeleton::SetCallingIdentity(identity);
