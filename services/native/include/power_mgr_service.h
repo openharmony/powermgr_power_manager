@@ -378,6 +378,7 @@ private:
 
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};
+    static std::atomic_bool foldScreenFlag_;
     std::mutex wakeupMutex_;
     std::mutex suspendMutex_;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4

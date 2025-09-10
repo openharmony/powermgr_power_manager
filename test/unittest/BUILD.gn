@@ -843,6 +843,10 @@ ohos_unittest("power_state_machine_native_test") {
   ]
 
   external_deps = deps_ex
+
+  if (power_manager_feature_lid_fold) {
+    defines += [ "POWER_LID_FOLD_ENABLE" ]
+  }
 }
 
 ohos_unittest("test_running_lock_native") {

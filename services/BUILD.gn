@@ -151,6 +151,10 @@ ohos_shared_library("powermgrservice") {
     defines += [ "MSDP_MOVEMENT_ENABLE" ]
   }
 
+  if (power_manager_feature_lid_fold) {
+    defines += [ "POWER_LID_FOLD_ENABLE" ]
+  }
+
   if (use_libfuzzer) {
     defines += [ "FUZZ_TEST" ]
   }
