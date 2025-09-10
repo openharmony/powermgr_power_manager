@@ -50,6 +50,9 @@
 #include "xcollie/watchdog.h"
 #include "errors.h"
 #include "parameters.h"
+#ifdef POWER_LID_FOLD_ENABLE
+#include "display_manager_lite.h"
+#endif
 #ifdef HAS_DEVICE_STANDBY_PART
 #include "standby_service_client.h"
 #endif
@@ -98,7 +101,10 @@ std::atomic_bool PowerMgrService::isBootCompleted_ = false;
 std::atomic_bool PowerMgrService::isNeedReInit_  = false;
 std::atomic_bool PowerMgrService::displayManagerServiceCrash_ = false;
 #ifdef HAS_SENSORS_SENSOR_PART
-    std::atomic_bool PowerMgrService::isInLidMode_ = false;
+std::atomic_bool PowerMgrService::isInLidMode_ = false;
+#endif
+#ifdef POWER_LID_FOLD_ENABLE
+std::atomic_bool PowerMgrService::foldScreenFlag_ = false;
 #endif
 using namespace MMI;
 
@@ -169,6 +175,9 @@ bool PowerMgrService::Init()
         screenOffPreController_->Init();
     }
     isDuringCallStateEnable_ = system::GetBoolParameter("const.power.during_call_state_enable", false);
+#ifdef POWER_LID_FOLD_ENABLE
+    foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
+#endif
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }
@@ -503,6 +512,14 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     auto data = reinterpret_cast<HallData*>(event->data);
     auto status = static_cast<uint32_t>(data->status);
 
+#ifdef POWER_LID_FOLD_ENABLE
+    Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
+    if (foldScreenFlag_ && (mode != Rosen::FoldDisplayMode::MAIN)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] disable Lid mode in the expanded state");
+        isInLidMode_ = false;
+        return;
+    }
+#endif
     if (status & LID_CLOSED_HALL_FLAG) {
         if (isInLidMode_) {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received again");

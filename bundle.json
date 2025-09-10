@@ -48,7 +48,8 @@
             "power_manager_feature_watch_limit_screen_common_event_publish",
             "power_manager_feature_watch_update_adapt",
             "power_manager_feature_surport_takeover_suspend",
-            "power_manager_feature_enable_lid_check"
+            "power_manager_feature_enable_lid_check",
+            "power_manager_feature_lid_fold"
         ],
         "adapted_system_type": [
             "standard"
