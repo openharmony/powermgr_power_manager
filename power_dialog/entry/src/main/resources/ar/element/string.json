@@ -16,7 +16,7 @@
         },
         {
             "name":"text_inject_tip_title",
-            "value":"هل تسمح لـ %s باستخدام شاشتك؟",
+            "value":"هل تسمح لتطبيق %s باستخدام شاشتك؟",
             "attr":{
                 "priority":"translate"
             }
