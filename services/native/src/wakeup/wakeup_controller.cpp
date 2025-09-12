@@ -959,16 +959,9 @@ bool PowerkeyWakeupMonitor::Init()
         POWER_HILOGE(FEATURE_WAKEUP, "PowerkeyWakeupMonitorInit inputManager is null");
         return false;
     }
-    std::weak_ptr<PowerkeyWakeupMonitor> weak = weak_from_this();
     powerkeyShortPressId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            std::shared_ptr<PowerkeyWakeupMonitor> strong = weak.lock();
-            if (!strong) {
-                POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] PowerkeyWakeupMonitor is invaild, return");
-                return;
-            }
-
-            strong->ReceivePowerkeyCallback(keyEvent);
+        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            this->ReceivePowerkeyCallback(keyEvent);
         });
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
