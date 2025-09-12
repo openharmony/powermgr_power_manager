@@ -843,16 +843,9 @@ bool PowerKeySuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorInit inputManager is null");
         return false;
     }
-    std::weak_ptr<PowerKeySuspendMonitor> weak = weak_from_this();
     powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            std::shared_ptr<PowerKeySuspendMonitor> strong = weak.lock();
-            if (!strong) {
-                POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] PowerKeySuspendMonitor is invaild, return");
-                return;
-            }
-
-            strong->ReceivePowerkeyCallback(keyEvent);
+        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            this->ReceivePowerkeyCallback(keyEvent);
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
@@ -1016,16 +1009,10 @@ bool TPCoverSuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
         return false;
     }
-    std::weak_ptr<TPCoverSuspendMonitor> weak = weak_from_this();
     TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [weak](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            std::shared_ptr<TPCoverSuspendMonitor> strong = weak.lock();
-            if (!strong) {
-                POWER_HILOGE(FEATURE_SUSPEND, "[UL_POWER] TPCoverSuspendMonitor is invaild, return");
-                return;
-            }
+        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
-            strong->Notify();
+            this->Notify();
         });
     POWER_HILOGI(FEATURE_SUSPEND, "TPCoverReleaseId_=%{public}d", TPCoverReleaseId_);
     return TPCoverReleaseId_ >= 0 ? true : false;

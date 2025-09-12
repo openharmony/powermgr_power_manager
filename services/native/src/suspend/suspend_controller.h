@@ -198,7 +198,7 @@ protected:
     SuspendListener listener_;
 };
 
-class PowerKeySuspendMonitor : public SuspendMonitor, public std::enable_shared_from_this<PowerKeySuspendMonitor> {
+class PowerKeySuspendMonitor : public SuspendMonitor {
 public:
     explicit PowerKeySuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
     ~PowerKeySuspendMonitor() override = default;
@@ -239,7 +239,7 @@ public:
     void Cancel() override;
 };
 
-class TPCoverSuspendMonitor : public SuspendMonitor, public std::enable_shared_from_this<TPCoverSuspendMonitor> {
+class TPCoverSuspendMonitor : public SuspendMonitor {
 public:
     explicit TPCoverSuspendMonitor(SuspendSource& source) : SuspendMonitor(source) {}
     ~TPCoverSuspendMonitor() override = default;
