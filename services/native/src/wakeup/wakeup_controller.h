@@ -167,7 +167,7 @@ protected:
     WakeupListener listener_;
 };
 
-class PowerkeyWakeupMonitor : public WakeupMonitor, public std::enable_shared_from_this<PowerkeyWakeupMonitor> {
+class PowerkeyWakeupMonitor : public WakeupMonitor {
 public:
     explicit PowerkeyWakeupMonitor(WakeupSource& source) : WakeupMonitor(source) {}
     ~PowerkeyWakeupMonitor() override = default;
