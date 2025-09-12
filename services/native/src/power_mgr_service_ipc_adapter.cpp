@@ -474,6 +474,14 @@ int32_t PowerMgrServiceAdapter::LockScreenAfterTimingOutIpc(bool enabledLockScre
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::LockScreenAfterTimingOutWithAppidIpc(pid_t appid, bool lockScreen,
+    const sptr<IRemoteObject>& token, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::LockScreenAfterTimingOut", false);
+    powerError = static_cast<int32_t>(LockScreenAfterTimingOutWithAppid(appid, lockScreen, token));
+    return ERR_OK;
+}
+
 int32_t PowerMgrServiceAdapter::IsRunningLockEnabledIpc(int32_t lockType, bool& result, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::IsRunningLockEnabled", false);

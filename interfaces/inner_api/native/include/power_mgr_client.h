@@ -192,8 +192,49 @@ public:
      */
     bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
 
+    /**
+     * Force auto screen-off after the set timeout. I.e the RUNNINGLOCK_SCREEN (or KeepScreenOn window attribute) is
+     * ignored.
+     *
+     * @param enabled Whether or not the feature is enabled: True to ignore RUNNINGLOCK_SCREEN. False to retrieve the
+     * default behaviour.
+     */
     PowerErrors SetForceTimingOut(bool enabled);
+
+    /**
+     * Controls the screen-lock behavior as well as enable or disable callbacks and common-events after an
+     * auto-screen-off after the set timeout.
+     * In case of multiple clients using this interface, the default value of a parameter will take effect if and only
+     * if all of the clients have set that parameter to default. I.e if any of them set a non-default value, the
+     * behaviour will be non-default
+     *
+     * @param enabledLockScreen determines whether or not to lock the screen after auto-screen-off.
+     * True(Default): the screen CAN be locked after auto-screen-off;
+     * False: the screen will not be locked after auto-screen-off.
+     *
+     * @param checkLock is only taken into account if enabledLockScreen is set to true(default).
+     * False(Default): Always lock the screen after an auto-screen-off.
+     * True: lock the screen after an auto-screen-off only if there are active RUNNINGLOCK_SCREEN(which would normally
+     * prevent the auto-screen-off without pairing with SetForceTimingOut).
+     *
+     * @param sendScreenOffEvent determines whether or not to send callbacks and common events after an auto-screen-off
+     * THAT DOES NOT LOCK THE SCREEN.
+     * True(Default): statechange callbacks and common events are sent normally after a non-screen-locking
+     * auto-screen-off.
+     * False: if an auto-screen-off does not lock the screen, callbacks and common events are not sent either.
+     */
     PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent = true);
+
+    /**
+     * Similar to LockScreenAfterTimingOut. This interface should only be used by a bridge service providing TS
+     * interfaces for apps which dont have direct access to native interfaces,
+     *
+     * @param appid indicates the user of this interface, normally a hap.
+     * @param lockScreen determins whether or not to lock the screen after an auto-screen-off.
+     * True: same as calling LockScreenAfterTimingOut(true, false, true).
+     * False: same as calling LockScreenAfterTimingOut(false, false, false).
+     */
+    PowerErrors LockScreenAfterTimingOutWithAppid(pid_t appid, bool lockScreen);
 
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);

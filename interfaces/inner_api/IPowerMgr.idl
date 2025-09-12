@@ -94,6 +94,8 @@ interface OHOS.PowerMgr.IPowerMgr {
     void SetForceTimingOutIpc([in] boolean enabled, [in] IRemoteObject token, [out] int powerError);
     void LockScreenAfterTimingOutIpc([in] boolean enabledLockScreen, [in] boolean checkLock,
         [in] boolean sendScreenOffEvent, [in] IRemoteObject token, [out] int powerError);
+    void LockScreenAfterTimingOutWithAppidIpc([in] int appid, [in] boolean lockScreen, [in] IRemoteObject token,
+        [out] int powerError);
 
     void RegisterShutdownCallbackIpc([in] ITakeOverShutdownCallback powerCallback, [in] int priorityValue);
     void UnRegisterShutdownCallbackIpc([in] ITakeOverShutdownCallback powerCallback);
