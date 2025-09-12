@@ -93,6 +93,8 @@ public:
     virtual int32_t SetForceTimingOutIpc(bool enabled, const sptr<IRemoteObject>& token, int32_t& powerError) override;
     virtual int32_t LockScreenAfterTimingOutIpc(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent,
         const sptr<IRemoteObject>& token, int32_t& powerError) override;
+    virtual int32_t LockScreenAfterTimingOutWithAppidIpc(
+        pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token, int32_t& powerError) override;
     virtual int32_t IsRunningLockEnabledIpc(int32_t lockType, bool& result, int32_t& powerError) override;
 
     int32_t RegisterShutdownCallbackIpc(
@@ -164,8 +166,10 @@ public:
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) = 0;
     virtual PowerErrors IsStandby(bool& isStandby) = 0;
     virtual PowerErrors SetForceTimingOut(bool enabled, const sptr<IRemoteObject>& token) = 0;
-    virtual PowerErrors LockScreenAfterTimingOut(
-        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) = 0;
+    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent,
+        const sptr<IRemoteObject>& token, pid_t appid = -1) = 0;
+    virtual PowerErrors LockScreenAfterTimingOutWithAppid(
+        pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token) = 0;
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) = 0;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) = 0;

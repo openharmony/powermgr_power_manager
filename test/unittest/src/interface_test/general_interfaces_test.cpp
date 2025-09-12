@@ -21,12 +21,17 @@
 #include <permission.h>
 #include <power_mgr_client.h>
 #include <power_mgr_proxy.h>
+#define private public
+// power_state_machine.h is also included here
 #include <power_mgr_service.h>
+#undef private
 #include <shutdown/shutdown_client.h>
 #include <shutdown/sync_shutdown_callback_stub.h>
 
 #include <condition_variable>
 #include <mutex>
+#include <queue>
+#include <stack>
 
 #define SET_REBOOT     _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
 #define SET_SHUT_STAGE _IOW(BOOT_DETECTOR_IOCTL_BASE, 106, int)
@@ -39,7 +44,7 @@ using namespace PowerMgr;
 namespace {
 unsigned int g_retCount = 0;
 std::vector<int> g_retVec {};
-bool g_boolRet = true;
+std::queue<bool> g_boolRet {};
 constexpr const char* PATH = "/dev/bbox";
 pid_t g_testingThreadId = 0;
 bool g_isTesting = false;
@@ -153,7 +158,8 @@ public:
             lockActionMock = new NiceMock<MockLockAction>;
             stub_->EnableMock(stateActionMock, shutdownStateActionMock, powerActionMock, lockActionMock);
         }
-        g_boolRet = true; // controls Permission, refactor it later if I had time
+        std::queue<bool> emptyQueue{};
+        g_boolRet.swap(emptyQueue);
     }
 
     void TearDown(void)
@@ -196,12 +202,23 @@ public:
 
 bool PowerMgr::Permission::IsSystem()
 {
-    return g_boolRet;
+    // if pre-defined values are exhausted, return true thereafter;
+    if (g_boolRet.empty()) {
+        return true;
+    }
+    bool ret = g_boolRet.front();
+    g_boolRet.pop();
+    return ret;
 }
 
 bool PowerMgr::Permission::IsPermissionGranted(const std::string&)
 {
-    return true;
+    if (g_boolRet.empty()) {
+        return true;
+    }
+    bool ret = g_boolRet.front();
+    g_boolRet.pop();
+    return ret;
 }
 
 sptr<IPowerMgr> PowerMgrClient::GetPowerMgrProxy()
@@ -272,11 +289,10 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest002, TestSize.Level0)
     WaitForDetachedThread();
 
     // Make permission check to fail
-    g_boolRet = false;
+    g_boolRet.push(false);
     EXPECT_CALL(*powerActionMock, Reboot(_)).Times(0);
     powerMgrClient.ForceRebootDevice("Some Reason");
     WaitForDetachedThread();
-    g_boolRet = true;
 
     // Non-force and reason != "test_case"
     EXPECT_CALL(*powerActionMock, Reboot("Some Reason a"));
@@ -309,6 +325,51 @@ HWTEST_F(GeneralInterfacesTest, ForceRebootDeviceTest002, TestSize.Level0)
     }
     WaitForDetachedThread();
     POWER_HILOGI(LABEL_TEST, "ForceRebootDeviceTest002 function end!");
+}
+
+// cover branches where permission check fails
+HWTEST_F(GeneralInterfacesTest, LockScreenAfterTimingOutTestWithAppid001, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "LockScreenAfterTimingOutTest001 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    g_boolRet.push(false);
+    powerMgrClient.LockScreenAfterTimingOutWithAppid(0, true); // the params do not matter anyway
+
+    g_boolRet.push(true);
+    g_boolRet.push(false);
+    powerMgrClient.LockScreenAfterTimingOutWithAppid(0, true);
+    auto stateMachine = stub_->GetPowerStateMachine();
+    // default values remain unchanged
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreen_, true);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreenCheckLock_, false);
+    EXPECT_EQ(stateMachine->enabledScreenOffEvent_, true);
+    POWER_HILOGI(LABEL_TEST, "LockScreenAfterTimingOutTest001 function end!");
+}
+
+// Test the basic function of this interface
+HWTEST_F(GeneralInterfacesTest, LockScreenAfterTimingOutTestWithAppid002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "LockScreenAfterTimingOutTest002 function start!");
+    auto stateMachine = stub_->GetPowerStateMachine();
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+
+    powerMgrClient.LockScreenAfterTimingOutWithAppid(0, false);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreen_, false);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreenCheckLock_, false);
+    EXPECT_EQ(stateMachine->enabledScreenOffEvent_, false);
+
+    powerMgrClient.LockScreenAfterTimingOutWithAppid(1, false);
+    powerMgrClient.LockScreenAfterTimingOutWithAppid(0, true);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreen_, false);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreenCheckLock_, false);
+    EXPECT_EQ(stateMachine->enabledScreenOffEvent_, false);
+
+    powerMgrClient.LockScreenAfterTimingOutWithAppid(1, true);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreen_, true);
+    EXPECT_EQ(stateMachine->enabledTimingOutLockScreenCheckLock_, false);
+    EXPECT_EQ(stateMachine->enabledScreenOffEvent_, true);
+    POWER_HILOGI(LABEL_TEST, "LockScreenAfterTimingOutTest002 function end!");
 }
 } // namespace
 } // namespace OHOS::PowerMgr

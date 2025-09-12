@@ -141,8 +141,10 @@ public:
     virtual std::string ShellDump(const std::vector<std::string>& args, uint32_t argc) override;
     virtual PowerErrors IsStandby(bool& isStandby) override;
     virtual PowerErrors SetForceTimingOut(bool enabled, const sptr<IRemoteObject>& token) override;
-    virtual PowerErrors LockScreenAfterTimingOut(
-        bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token) override;
+    virtual PowerErrors LockScreenAfterTimingOut(bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent,
+        const sptr<IRemoteObject>& token, pid_t appid = -1) override;
+    virtual PowerErrors LockScreenAfterTimingOutWithAppid(
+        pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;

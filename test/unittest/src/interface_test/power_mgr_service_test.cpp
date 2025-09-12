@@ -50,7 +50,20 @@ using namespace std;
 namespace {
 bool g_isSystem = true;
 bool g_isPermissionGranted = true;
+struct FakePid {
+    pid_t pid = 0;
+    bool enabled = false;
+} g_fakePid;
 } // namespace
+
+
+pid_t OHOS::IPCSkeleton::GetCallingPid()
+{
+    if (g_fakePid.enabled) {
+        return g_fakePid.pid;
+    }
+    return OHOS::IPCSkeleton::GetCallingRealPid();
+}
 
 namespace OHOS::PowerMgr {
 bool Permission::IsSystem()
@@ -514,22 +527,27 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService022, TestSize.Level0)
     EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObject, runningLockParam) != nullptr);
     runningLockMgr->Lock(remoteObject);
 
+    sptr<IPCObjectProxy> testProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string{u"testProxy"});
     EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->LockScreenAfterTimingOut(true, false, true, nullptr);
+    pmsTest_->LockScreenAfterTimingOut(true, false, true, testProxy);
     EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
-    pmsTest_->LockScreenAfterTimingOut(false, false, true, nullptr);
+    pmsTest_->LockScreenAfterTimingOut(false, false, true, testProxy);
     EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY),
         StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    pmsTest_->LockScreenAfterTimingOut(true, true, true, nullptr);
+    pmsTest_->LockScreenAfterTimingOut(true, true, true, testProxy);
     EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK);
     runningLockMgr->UnLock(remoteObject);
     EXPECT_EQ(stateMaschine_->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT),
         StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
+
+    // reset the value to default, otherwise it would interfere with LockScreenAfterTimingOutWithAppidTest
+    // consider destroy and recreate pms instance instead of using singleton?
+    pmsTest_->LockScreenAfterTimingOut(true, false, true, testProxy);
     // wait runninglock async task to end, otherwise it will interfere with the next test case
     pmsTest_->OnStop();
     ffrt::wait();
@@ -1077,5 +1095,266 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService039, TestSize.Level2) {
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 5 failed";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService039 end!");
+}
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTest001
+ * @tc.desc: test LockScreenAfterTimingOutWithAppid scenario:
+ * step1: Wireless proj calling LockScreenAfterTimingOut(true, true false); Result: true, true, false.
+ * step2: WelinkPC calling LockScreenAfterTimingOutWithAppid(appid, false); Result: false, true, false.
+ * step3: WelinkPC ends its task(or has died) and restore changes made with it. Result: true, true, false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest001, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest001 start!");
+    sptr<IPCObjectProxy> wirelessProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"wireless"});
+    sptr<IPCObjectProxy> AppProxy = sptr<IPCObjectProxy>::MakeSptr(1, std::u16string {u"App"});
+    constexpr pid_t testPid = 999999;
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(stateMachine->enabledTimingOutLockScreen_,
+        stateMachine->enabledTimingOutLockScreenCheckLock_, stateMachine->enabledScreenOffEvent_);
+    // step1
+    pmsTest_->LockScreenAfterTimingOut(true, true, false, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {true, true, false}));
+
+    // step2
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, true, false}));
+
+    // step3
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, true, AppProxy);
+    EXPECT_EQ(result, (std::tuple {true, true, false}));
+    g_fakePid.enabled = false; // disable fake pid
+
+    // make all clients die and reset to default
+    g_fakePid = {testPid, true};
+    AppProxy->SendObituary();
+    g_fakePid.enabled = false;
+    wirelessProxy->SendObituary();
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest001 end!");
+}
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTest002
+ * @tc.desc: test LockScreenAfterTimingOutWithAppid scenario:
+ * step1: Wireless proj calling LockScreenAfterTimingOut(true, true false); Result: true, true, false.
+ * step2: WelinkPC calling LockScreenAfterTimingOutWithAppid(appid, false); Result: false, true, false.
+ * step3: Wireless proj ends its task(or has died) and restore changes made with it. Result: false, false, false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest002 start!");
+    sptr<IPCObjectProxy> wirelessProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"wireless"});
+    sptr<IPCObjectProxy> AppProxy = sptr<IPCObjectProxy>::MakeSptr(1, std::u16string {u"App"});
+    constexpr pid_t testPid = 999999;
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(stateMachine->enabledTimingOutLockScreen_,
+        stateMachine->enabledTimingOutLockScreenCheckLock_, stateMachine->enabledScreenOffEvent_);
+    // step1
+    pmsTest_->LockScreenAfterTimingOut(true, true, false, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {true, true, false}));
+
+    // step2
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, true, false}));
+    g_fakePid.enabled = false; // disable fake pid
+
+    // step3
+    pmsTest_->LockScreenAfterTimingOut(true, false, true, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+    
+    // make all clients die and reset to default
+    g_fakePid = {testPid, true};
+    AppProxy->SendObituary();
+    g_fakePid.enabled = false;
+    wirelessProxy->SendObituary();
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest002 end!");
+}
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTest003
+ * @tc.desc: test LockScreenAfterTimingOutWithAppid scenario:
+ * step1: WelinkPC calling LockScreenAfterTimingOutWithAppid(appid, false); Result: false, false, false.
+ * step2: Wireless proj calling LockScreenAfterTimingOut(true, true false); Result: false, true, false.
+ * step3: WelinkPC ends its task(or has died) and restore changes made with it. Result: true, true, false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest003, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest003 start!");
+    sptr<IPCObjectProxy> wirelessProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"wireless"});
+    sptr<IPCObjectProxy> AppProxy = sptr<IPCObjectProxy>::MakeSptr(1, std::u16string {u"App"});
+    constexpr pid_t testPid = 999999;
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(stateMachine->enabledTimingOutLockScreen_,
+        stateMachine->enabledTimingOutLockScreenCheckLock_, stateMachine->enabledScreenOffEvent_);
+
+    // step1
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+    g_fakePid.enabled = false; // disable fake pid
+
+    // step2
+    pmsTest_->LockScreenAfterTimingOut(true, true, false, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {false, true, false}));
+
+    // step3
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, true, AppProxy);
+    EXPECT_EQ(result, (std::tuple {true, true, false}));
+    g_fakePid.enabled = false; // disable fake pid
+
+    // make all clients die and reset to default
+    g_fakePid = {testPid, true};
+    AppProxy->SendObituary();
+    g_fakePid.enabled = false;
+    wirelessProxy->SendObituary();
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest003 end!");
+}
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTest004
+ * @tc.desc: test LockScreenAfterTimingOutWithAppid scenario:
+ * step1: WelinkPC calling LockScreenAfterTimingOutWithAppid(appid, false); Result: false, false, false.
+ * step2: Wireless proj calling LockScreenAfterTimingOut(true, true false); Result: false, true, false.
+ * step3: Wireless proj ends its task(or has died) and restore changes made with it. Result: false, false, false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest004, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest004 start!");
+    sptr<IPCObjectProxy> wirelessProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"wireless"});
+    sptr<IPCObjectProxy> AppProxy = sptr<IPCObjectProxy>::MakeSptr(1, std::u16string {u"App"});
+    constexpr pid_t testPid = 999999;
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(stateMachine->enabledTimingOutLockScreen_,
+        stateMachine->enabledTimingOutLockScreenCheckLock_, stateMachine->enabledScreenOffEvent_);
+
+    // step1
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+    g_fakePid.enabled = false;
+
+    // step2
+    pmsTest_->LockScreenAfterTimingOut(true, true, false, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {false, true, false}));
+
+    // step3
+    pmsTest_->LockScreenAfterTimingOut(true, false, true, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+
+    // make all clients die and reset to default
+    g_fakePid = {testPid, true};
+    AppProxy->SendObituary();
+    g_fakePid.enabled = false;
+    wirelessProxy->SendObituary();
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest004 end!");
+}
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTest005(case 006 is actually the same)
+ * @tc.desc: test LockScreenAfterTimingOutWithAppid scenario:
+ * step1: WelinkPC calling LockScreenAfterTimingOutWithAppid(appid, false); Result: false, false, false.
+ * step2: App A calling LockScreenAfterTimingOutWithAppid(appid_A, false); Result: false, false, false.
+ * step3: WelinkPC ends its task(or has died) and restore changes made with it. Result: false, false, false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest005, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest005 start!");
+    sptr<IPCObjectProxy> AppProxy = sptr<IPCObjectProxy>::MakeSptr(1, std::u16string {u"App"});
+    constexpr pid_t testPid = 999999;
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(stateMachine->enabledTimingOutLockScreen_,
+        stateMachine->enabledTimingOutLockScreenCheckLock_, stateMachine->enabledScreenOffEvent_);
+    
+    // only one process(client), no need to set fake pid.
+    // step1
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+
+    // step2
+    pmsTest_->LockScreenAfterTimingOutWithAppid(1, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+
+    // step3
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, true, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+
+    // make all clients die and reset to default
+    AppProxy->SendObituary();
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest005 end!");
+}
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTest007
+ * @tc.desc: test LockScreenAfterTimingOutWithAppid scenario:
+ * step1: WelinkPC calling LockScreenAfterTimingOutWithAppid(appid, false); Result: false, false, false.
+ * step2: Wireless proj calling LockScreenAfterTimingOut(true, true false); Result: false, true, false
+ * step3: App A calling LockScreenAfterTimingOutWithAppid(appid_A, false); Result: false, true, false.
+ * step4: Wireless proj ends its task(or has died) and restore changes made with it. Result: false, false, false
+ * step5: WelinkPC ends its task(or has died) and restore changes made with it. Result: false, false, false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest007, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest007 start!");
+    sptr<IPCObjectProxy> wirelessProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"wireless"});
+    sptr<IPCObjectProxy> AppProxy = sptr<IPCObjectProxy>::MakeSptr(1, std::u16string {u"App"});
+    constexpr pid_t testPid = 999999;
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(stateMachine->enabledTimingOutLockScreen_,
+        stateMachine->enabledTimingOutLockScreenCheckLock_, stateMachine->enabledScreenOffEvent_);
+    
+    // step1
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+    g_fakePid.enabled = false;
+
+    // step2
+    pmsTest_->LockScreenAfterTimingOut(true, true, false, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {false, true, false}));
+
+    // step3
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(1, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, true, false}));
+    g_fakePid.enabled = false;
+
+    // step4
+    pmsTest_->LockScreenAfterTimingOut(true, false, true, wirelessProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+
+    // step5
+    g_fakePid = {testPid, true}; // set fake pid
+    pmsTest_->LockScreenAfterTimingOutWithAppid(0, false, AppProxy);
+    EXPECT_EQ(result, (std::tuple {false, false, false}));
+    g_fakePid.enabled = false; // disable fake pid
+
+    // make all clients die and reset to default
+    g_fakePid = {testPid, true};
+    AppProxy->SendObituary();
+    g_fakePid.enabled = false;
+    wirelessProxy->SendObituary();
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest007 end!");
 }
 }
