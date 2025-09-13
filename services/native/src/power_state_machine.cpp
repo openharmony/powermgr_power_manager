@@ -1833,7 +1833,7 @@ PowerStateMachine::ScreenChangeCheck::ScreenChangeCheck(
     }
 
     pid_ = getpid();
-    uid_ = getuid();
+    uid_ = static_cast<pid_t>(getuid());
 
     FFRTTask task = [checker = (*this)]() {
         checker.ReportSysEvent("TIMEOUT");
