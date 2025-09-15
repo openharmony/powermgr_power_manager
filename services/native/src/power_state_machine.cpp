@@ -2003,6 +2003,9 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         return false;
     }
     const void* pendingTask = nullptr;
+    if (curTask == ffrtTimer_->GetTaskHandlePtr(TIMER_ID_AUTO_SLEEP)) {
+        return true;
+    }
     switch (state) {
         case PowerState::DIM:
             pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_TIMEOUT);
@@ -2041,7 +2044,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     if (NeedShowScreenLocks(state)) {
         ShowCurrentScreenLocks();
     }
-
+    CancelAutoSleep();
     HandleProximityScreenOffTimer(state, reason);
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
@@ -2068,6 +2071,20 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     RestoreSettingStateFlag();
     WriteHiSysEvent(ret, reason, beginTimeMs, state);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
+}
+
+void PowerStateMachine::CancelAutoSleep()
+{
+    auto powerMS = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (powerMS != nullptr) {
+        auto suspendController = powerMS->GetSuspendController();
+        if (suspendController != nullptr) {
+            POWER_HILOGI(FEATURE_POWER_STATE, "stop auto sleep");
+            suspendController->StopAutoSleep();
+        } else {
+            POWER_HILOGI(FEATURE_POWER_STATE, "suspendController is nullptr, can't stop sleep ffrt task");
+        }
+    }
 }
 
 void PowerStateMachine::WriteHiSysEvent(TransitResult ret, StateChangeReason reason,

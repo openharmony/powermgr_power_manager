@@ -2469,6 +2469,24 @@ int64_t PowerMgrService::GetSettingDisplayOffTime(int64_t defaultTime)
     return settingTime;
 }
 
+int64_t PowerMgrService::GetSettingPowerSleepTime(int64_t defaultTime)
+{
+    int64_t settingTime = defaultTime;
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "get PowerMgrService fail");
+        return settingTime;
+    }
+    if (pms->IsPowerConnected()) {
+        settingTime = SettingHelper::GetSettingPowerAcSleepTime(defaultTime);
+    } else {
+        settingTime = SettingHelper::GetSettingPowerDcSleepTime(defaultTime);
+    }
+#endif
+    return settingTime;
+}
+
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 void PowerMgrService::UpdateSettingInvalidDisplayOffTime()
 {

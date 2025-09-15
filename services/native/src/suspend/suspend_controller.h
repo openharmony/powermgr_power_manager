@@ -55,6 +55,7 @@ public:
     void Execute();
     void Cancel();
     void StopSleep();
+    void StopAutoSleep();
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
@@ -107,6 +108,7 @@ public:
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void HandleAutoSleep(SuspendDeviceType reason);
+    void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
