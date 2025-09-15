@@ -412,12 +412,14 @@ ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::strin
 }
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)
-{
+{   
     std::vector<std::string> needMultiUserStrVec {
         SETTING_POWER_WAKEUP_DOUBLE_KEY,
         SETTING_POWER_WAKEUP_PICKUP_KEY,
         SETTING_POWER_WAKEUP_SOURCES_KEY,
         SETTING_DURING_CALL_STATE_KEY,
+        SETTING_POWER_AC_SLEEP_TIME_KEY,
+        SETTING_POWER_DC_SLEEP_TIME_KEY,
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
         SETTING_DISPLAY_AC_OFF_TIME_KEY,
         SETTING_DISPLAY_DC_OFF_TIME_KEY,

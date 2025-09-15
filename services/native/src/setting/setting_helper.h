@@ -110,6 +110,8 @@ public:
     static void RegisterSettingDuringCallObserver(SettingObserver::UpdateFunc& func);
     static void UnRegisterSettingDuringCallObserver();
     static bool GetSettingDuringCallState(const std::string& key = SETTING_DURING_CALL_STATE_KEY);
+    static int64_t GetSettingPowerAcSleepTime(int64_t defaultVal);
+    static int64_t GetSettingPowerDcSleepTime(int64_t defaultVal);
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
     static const std::string GetBlockLongPress();
 #endif
@@ -151,6 +153,8 @@ private:
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static constexpr const char* SETTING_DURING_CALL_STATE_KEY {"during_call_state"};
+    static constexpr const char* SETTING_POWER_AC_SLEEP_TIME_KEY {"settings.power.ac.sleep_timeout"};
+    static constexpr const char* SETTING_POWER_DC_SLEEP_TIME_KEY {"settings.power.dc.sleep_timeout"};
     static sptr<SettingObserver> doubleClickObserver_;
     static sptr<SettingObserver> pickUpObserver_;
     static sptr<SettingObserver> powerModeObserver_;
