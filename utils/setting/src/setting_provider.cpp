@@ -412,7 +412,7 @@ ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::strin
 }
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)
-{   
+{
     std::vector<std::string> needMultiUserStrVec {
         SETTING_POWER_WAKEUP_DOUBLE_KEY,
         SETTING_POWER_WAKEUP_PICKUP_KEY,
