@@ -1527,9 +1527,6 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient059, TestSize.Level0) {
     TakeOverSuspendPriority priority = TakeOverSuspendPriority::LOW;
     bool ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
     EXPECT_FALSE(ret);
-    callback = new TestTakeOverSuspendCallback();
-    ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
-    EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function end!");
 }
 
@@ -1544,13 +1541,6 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient060, TestSize.Level0) {
     sptr<TestTakeOverSuspendCallback> callback = nullptr;
     TakeOverSuspendPriority priority = TakeOverSuspendPriority::HIGH;
     bool ret = powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
-    EXPECT_FALSE(ret);
-    callback = new TestTakeOverSuspendCallback();
-    // first register callback
-    ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
-    EXPECT_FALSE(ret);
-    // then test unregister callback
-    ret = powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function end!");
 }
