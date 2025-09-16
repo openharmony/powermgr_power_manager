@@ -639,6 +639,7 @@ void SettingHelper::SetSettingWakeupLid(bool enable)
     SetSettingIntValue(SETTING_POWER_WAKEUP_LID_KEY, value);
 }
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 int64_t SettingHelper::GetSettingPowerAcSleepTime(int64_t defaultVal)
 {
     int64_t value = GetSettingLongValue(SETTING_POWER_AC_SLEEP_TIME_KEY, defaultVal);
@@ -658,6 +659,7 @@ int64_t SettingHelper::GetSettingPowerDcSleepTime(int64_t defaultVal)
     }
     return value;
 }
+#endif
 
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
 const std::string SettingHelper::GetBlockLongPress()
