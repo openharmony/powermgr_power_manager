@@ -719,7 +719,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
             POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
             return;
         }
-        POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}ld), powerSleepTime(%{public}ld)",
+        POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}lld), powerSleepTime(%{public}lld)",
             __func__, displayOffTime, powerSleepTime);
         if (powerSleepTime <= displayOffTime) {
             POWER_HILOGI(FEATURE_SUSPEND, "start auto sleep");
