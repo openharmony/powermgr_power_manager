@@ -2002,10 +2002,10 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         POWER_HILOGE(FEATURE_POWER_STATE, "ffrtTimer_ is nullptr");
         return false;
     }
-    const void* pendingTask = nullptr;
     if (curTask == ffrtTimer_->GetTaskHandlePtr(TIMER_ID_AUTO_SLEEP)) {
         return true;
     }
+    const void* pendingTask = nullptr;
     switch (state) {
         case PowerState::DIM:
             pendingTask = ffrtTimer_->GetTaskHandlePtr(TIMER_ID_USER_ACTIVITY_TIMEOUT);
