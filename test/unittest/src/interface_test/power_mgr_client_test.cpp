@@ -33,6 +33,7 @@
 #include "mock_power_mgr_client.h"
 #include "mock_power_remote_object.h"
 #include "takeover_suspend_callback_proxy.h"
+#include "takeover_suspend_callback_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -1462,8 +1463,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient058, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient058 function end!");
 }
 
-#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
-class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
+class TestTakeOverSuspendCallback : public TakeOverSuspendCallbackStub {
     public:
         TestTakeOverSuspendCallback() = default;
         virtual ~TestTakeOverSuspendCallback() = default;
@@ -1472,12 +1472,9 @@ class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
         {
             return false;
         }
-        sptr<IRemoteObject> AsObject() override
-        {
-            return nullptr;
-        }
 };
 
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
 /**
  * @tc.name: PowerMgrClient059
  * @tc.desc: test RegisterSuspendTakeoverCallback
@@ -1486,9 +1483,13 @@ class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient059, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function start!");
     auto& powerMgrClinet = PowerMgrClient::GetInstance();
-    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    sptr<TestTakeOverSuspendCallback> callback = nullptr;
     TakeOverSuspendPriority priority = TakeOverSuspendPriority::LOW;
-    powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    bool ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    EXPECT_FALSE(ret);
+    callback = new TestTakeOverSuspendCallback();
+    ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    EXPECT_TRUE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function end!");
 }
 
@@ -1500,16 +1501,50 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient059, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient060, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function start!");
     auto& powerMgrClinet = PowerMgrClient::GetInstance();
-    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
+    sptr<TestTakeOverSuspendCallback> callback = nullptr;
     TakeOverSuspendPriority priority = TakeOverSuspendPriority::HIGH;
+    bool ret = powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
+    EXPECT_FALSE(ret);
+    callback = new TestTakeOverSuspendCallback();
     // first register callback
-    powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    EXPECT_TRUE(ret);
     // then test unregister callback
-    powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
+    ret = powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function end!");
+}
+#else
+/**
+ * @tc.name: PowerMgrClient059
+ * @tc.desc: test RegisterSuspendTakeoverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient059, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    sptr<TestTakeOverSuspendCallback> callback = nullptr;
+    TakeOverSuspendPriority priority = TakeOverSuspendPriority::LOW;
+    bool ret = powerMgrClinet.RegisterSuspendTakeoverCallback(callback, priority);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient059 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient060
+ * @tc.desc: test UnRegisterSuspendTakeoverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient060, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    sptr<TestTakeOverSuspendCallback> callback = nullptr;
+    TakeOverSuspendPriority priority = TakeOverSuspendPriority::HIGH;
+    bool ret = powerMgrClinet.UnRegisterSuspendTakeoverCallback(callback);
+    EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient060 function end!");
 }
 #endif
-
 
 /**
  * @tc.name: PowerMgrClient061
