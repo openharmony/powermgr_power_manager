@@ -50,6 +50,8 @@ private:
     // DC for Direct Current, means battery supply
     static constexpr const char* SETTING_DISPLAY_AC_OFF_TIME_KEY {"settings.display.ac.screen_off_timeout"};
     static constexpr const char* SETTING_DISPLAY_DC_OFF_TIME_KEY {"settings.display.dc.screen_off_timeout"};
+    static constexpr const char* SETTING_POWER_AC_SLEEP_TIME_KEY {"settings.power.ac.sleep_timeout"};
+    static constexpr const char* SETTING_POWER_DC_SLEEP_TIME_KEY {"settings.power.dc.sleep_timeout"};
     static constexpr const char* SETTING_POWER_AC_SUSPEND_SOURCES_KEY {"settings.power.ac.suspend_sources"};
     static constexpr const char* SETTING_POWER_DC_SUSPEND_SOURCES_KEY {"settings.power.dc.suspend_sources"};
 #else
@@ -68,8 +70,7 @@ private:
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static constexpr const char* SETTING_DURING_CALL_STATE_KEY {"during_call_state"};
-    static constexpr const char* SETTING_POWER_AC_SLEEP_TIME_KEY {"settings.power.ac.sleep_timeout"};
-    static constexpr const char* SETTING_POWER_DC_SLEEP_TIME_KEY {"settings.power.dc.sleep_timeout"};
+
     static std::atomic<SettingProvider*> instance_;
     static sptr<IRemoteObject> remoteObj_;
     static int32_t currentUserId_;
