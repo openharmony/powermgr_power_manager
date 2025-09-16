@@ -707,6 +707,7 @@ void SuspendController::HandleAction(SuspendDeviceType reason, uint32_t action)
 void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         int64_t displayOffTime = 0;
         int64_t powerSleepTime = 0;
@@ -738,6 +739,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
         }
         return;
     }
+#endif
     SetAutoSleep(reason);
 }
 
