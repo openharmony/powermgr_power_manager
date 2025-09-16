@@ -92,6 +92,12 @@
             "value": "plugin_capsule_my_inject"
           }
         ]
+      },
+      {
+        "name": "ChargeSoundPlayerExtension",
+        "srcEntry": "./ets/ServiceExtAbility/ChargeSoundAbility.ts",
+        "type": "service",
+        "exported": false
       }
     ],
     "requestPermissions": [
