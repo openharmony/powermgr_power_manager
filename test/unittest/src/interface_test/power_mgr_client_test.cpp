@@ -33,6 +33,7 @@
 #include "mock_power_mgr_client.h"
 #include "mock_power_remote_object.h"
 #include "takeover_suspend_callback_proxy.h"
+#include "takeover_suspend_callback_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -1462,7 +1463,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient058, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient058 function end!");
 }
 
-class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
+class TestTakeOverSuspendCallback : public TakeOverSuspendCallbackStub {
     public:
         TestTakeOverSuspendCallback() = default;
         virtual ~TestTakeOverSuspendCallback() = default;
@@ -1470,10 +1471,6 @@ class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
         bool OnTakeOverSuspend(SuspendDeviceType type) override
         {
             return false;
-        }
-        sptr<IRemoteObject> AsObject() override
-        {
-            return nullptr;
         }
 };
 
