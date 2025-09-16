@@ -741,7 +741,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
     SetAutoSleep(reason);
 }
 
-void SuspendController::SetAutonSleep(SuspendDeviceType reason)
+void SuspendController::SetAutoSleep(SuspendDeviceType reason)
 {
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
