@@ -215,7 +215,7 @@
                     "name": "//base/powermgr/power_manager/frameworks/cj/power:cj_power_ffi",
                     "header": {
                       "header_files": [
-                        "power_ffi.h"
+
                       ],
                       "header_base": "//base/powermgr/power_manager/frameworks/cj/power/include"
                     }
