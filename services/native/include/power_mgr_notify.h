@@ -38,6 +38,7 @@ public:
     void PublishEnterHibernateEvent(int64_t eventTime, bool clearMemory);
     void PublishExitHibernateEvent(int64_t eventTime, bool clearMemory);
 #endif
+    static void PublishCustomizedEvent(const AAFwk::Want& want);
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
