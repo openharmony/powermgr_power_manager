@@ -736,7 +736,6 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
         POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
             __func__, delay);
     }
-    return;
 #else
     SetAutoSleep(reason);
 #endif
