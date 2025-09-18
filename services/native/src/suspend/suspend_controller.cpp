@@ -708,39 +708,38 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
-        int64_t displayOffTime = 0;
-        int64_t powerSleepTime = 0;
-        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms != nullptr) {
-            displayOffTime = pms->GetSettingDisplayOffTime(POWER_SLEEP_DEFAULT_TIME);
-            powerSleepTime = pms->GetSettingPowerSleepTime(POWER_SLEEP_DEFAULT_TIME);
-        }
-        if (powerSleepTime == POWER_SLEEP_NEVER) {
-            POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
-            return;
-        }
-        POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}lld), powerSleepTime(%{public}lld)",
-            __func__, displayOffTime, powerSleepTime);
-        if (powerSleepTime <= displayOffTime) {
-            POWER_HILOGI(FEATURE_SUSPEND, "start auto sleep");
-            SetAutoSleep(reason);
-            return;
-        }
-        FFRTTask task = [this, reason] {
-            SetAutoSleep(reason);
-        };
-        uint32_t delay = static_cast<uint32_t>(powerSleepTime - displayOffTime);
-        if (ffrtTimer_ != nullptr) {
-            ffrtTimer_->SetTimer(TIMER_ID_AUTO_SLEEP, task, delay);
-        } else {
-            POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
-                __func__, delay);
-        }
+    int64_t displayOffTime = 0;
+    int64_t powerSleepTime = 0;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr) {
+        displayOffTime = pms->GetSettingDisplayOffTime(POWER_SLEEP_DEFAULT_TIME);
+        powerSleepTime = pms->GetSettingPowerSleepTime(POWER_SLEEP_DEFAULT_TIME);
+    }
+    if (powerSleepTime == POWER_SLEEP_NEVER) {
+        POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
         return;
     }
-#endif
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}lld), powerSleepTime(%{public}lld)",
+        __func__, displayOffTime, powerSleepTime);
+    if (powerSleepTime <= displayOffTime) {
+        POWER_HILOGI(FEATURE_SUSPEND, "start auto sleep");
+        SetAutoSleep(reason);
+        return;
+    }
+    FFRTTask task = [this, reason] {
+        SetAutoSleep(reason);
+    };
+    uint32_t delay = static_cast<uint32_t>(powerSleepTime - displayOffTime);
+    if (ffrtTimer_ != nullptr) {
+        ffrtTimer_->SetTimer(TIMER_ID_AUTO_SLEEP, task, delay);
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
+            __func__, delay);
+    }
+    return;
+#else
     SetAutoSleep(reason);
+#endif
 }
 
 void SuspendController::SetAutoSleep(SuspendDeviceType reason)
