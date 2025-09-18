@@ -193,7 +193,7 @@ public:
     bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
 
     /**
-     * Force auto screen-off after the set timeout. I.e the RUNNINGLOCK_SCREEN (or KeepScreenOn window attribute) is
+     * Force auto screen-off after the set timeout. That is, the RUNNINGLOCK_SCREEN (or KeepScreenOn window attribute) is
      * ignored.
      *
      * @param enabled Whether or not the feature is enabled: True to ignore RUNNINGLOCK_SCREEN. False to retrieve the
@@ -205,7 +205,7 @@ public:
      * Controls the screen-lock behavior as well as enable or disable callbacks and common-events after an
      * auto-screen-off after the set timeout.
      * In case of multiple clients using this interface, the default value of a parameter will take effect if and only
-     * if all of the clients have set that parameter to default. I.e if any of them set a non-default value, the
+     * if all of the clients have set that parameter to default. That is, if any of them set a non-default value, the
      * behaviour will be non-default
      *
      * @param enabledLockScreen determines whether or not to lock the screen after auto-screen-off.

@@ -2126,9 +2126,9 @@ PowerErrors PowerMgrService::LockScreenAfterTimingOut(
 {
     constexpr std::bitset<MAX_PARAM_NUMBER> defaultParams = 0b101;
     constexpr size_t paramNumber = 3;
-    constexpr size_t firtParamPos = 2;
-    constexpr size_t secondParamPos = 1;
-    constexpr size_t thirdParamPos = 0;
+    constexpr size_t firtParamPos = 2;   // index of enabledLockScreen
+    constexpr size_t secondParamPos = 1; // index of checkLock
+    constexpr size_t thirdParamPos = 0;  // index of sendScreenOffEvent
     static sptr<MultiInvokerHelper> multiInvokerhelper = sptr<MultiInvokerHelper>::MakeSptr(
         paramNumber, defaultParams, [this](const std::bitset<MAX_PARAM_NUMBER>& input) {
             auto stateMachine = powerStateMachine_;

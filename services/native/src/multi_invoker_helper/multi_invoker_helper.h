@@ -63,7 +63,6 @@ private:
         }
         std::bitset<MAX_PARAM_NUMBER> SetValue(pid_t appid, const std::bitset<MAX_PARAM_NUMBER>& input);
         std::bitset<MAX_PARAM_NUMBER> GetResult() const;
-        std::vector<uint64_t> GetSum() const;
         std::string Dump() const;
 
     private:
@@ -83,8 +82,10 @@ private:
     std::vector<uint64_t> sum_;
     const std::bitset<MAX_PARAM_NUMBER> defaultParam_;
     std::function<void(const std::bitset<MAX_PARAM_NUMBER>&)> onChange_;
+    void OnChange();
 
 public:
+    // all public methods hold mutex
     std::string Dump();
     std::bitset<MAX_PARAM_NUMBER> GetResult();
     void OnRemoteDied(const wptr<IRemoteObject>& object) override;

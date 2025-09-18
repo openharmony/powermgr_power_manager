@@ -1357,4 +1357,28 @@ HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutWithAppidTest007, TestSize
     EXPECT_EQ(result, (std::tuple {true, false, true}));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTest007 end!");
 }
+
+/**
+ * @tc.name: LockScreenAfterTimingOutWithAppidTestAbnormal001
+ * @tc.desc: cover abnormal branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutAbnormal001, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutAbnormal001 start!");
+    sptr<IPCObjectProxy> testProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"test"});
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    std::shared_ptr<PowerStateMachine> backup = pmsTest_->GetPowerStateMachine();
+    auto result = std::tie(backup->enabledTimingOutLockScreen_, backup->enabledTimingOutLockScreenCheckLock_,
+        backup->enabledScreenOffEvent_);
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+    pmsTest_->powerStateMachine_ = nullptr;
+    pmsTest_->LockScreenAfterTimingOut(false, true, false, testProxy);
+    pmsTest_->LockScreenAfterTimingOut(false, true, false, nullptr);
+    pmsTest_->powerStateMachine_ = backup;
+    EXPECT_EQ(result, (std::tuple {true, false, true}));
+
+    pmsTest_->LockScreenAfterTimingOut(true, false, true, testProxy); // reset to default
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTestAbnormal001 end!");
+}
 }
