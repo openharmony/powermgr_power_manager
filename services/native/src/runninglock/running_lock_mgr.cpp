@@ -111,6 +111,12 @@ void RunningLockMgr::InitLocksTypeScreen()
                         stateMachine->GetState());
                 }
             }
+#ifdef POWER_MANAGER_TV_DREAMING
+            AAFwk::Want want;
+            want.SetAction("usual.event.power.RUNNINGLOCK_SCREEN");
+            want.SetParam("active", active);
+            PowerMgrNotify::PublishCustomizedEvent(want);
+#endif
             return RUNNINGLOCK_SUCCESS;
         })
     );

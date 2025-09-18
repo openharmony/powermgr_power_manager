@@ -153,5 +153,17 @@ void PowerMgrNotify::PublishExitHibernateEvent(int64_t eventTime, bool clearMemo
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", exitHibernateWant_->GetAction().c_str());
 }
 #endif
+
+void PowerMgrNotify::PublishCustomizedEvent(const AAFwk::Want& want)
+{
+    CommonEventData data;
+    data.SetWant(want);
+    CommonEventPublishInfo publishInfo;
+    publishInfo.SetOrdered(false);
+    const std::vector<std::string> permissionVec { "ohos.permission.POWER_MANAGER" };
+    publishInfo.SetSubscriberPermissions(permissionVec);
+    bool ret = CommonEventManager::PublishCommonEvent(data, publishInfo);
+    POWER_HILOGI(COMP_SVC, "PublishCustomizedEvent %{public}s ret=%{public}d", want.GetAction().c_str(), ret);
+}
 } // namespace PowerMgr
 } // namespace OHOS

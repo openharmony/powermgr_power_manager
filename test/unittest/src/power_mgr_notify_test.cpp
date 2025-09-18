@@ -189,6 +189,10 @@ HWTEST_F (PowerMgrNotifyTest, PowerMgrNotifyTest002, TestSize.Level1)
     EXPECT_FALSE(subscriber == nullptr);
 
     powerMgrClient.WakeupDevice();
+    AAFwk::Want want;
+    want.SetAction("usual.event.power.RUNNINGLOCK_SCREEN");
+    want.SetParam("active", true);
+    PowerMgrNotify::PublishCustomizedEvent(want);
 
     sleep(WAIT_EVENT_TIME_S);
 
