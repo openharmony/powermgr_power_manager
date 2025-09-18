@@ -48,33 +48,29 @@ std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::Invoker::GetResult() const
     return result_;
 }
 
-std::vector<uint64_t> MultiInvokerHelper::Invoker::GetSum() const
-{
-    return sum_;
-}
-
 std::string MultiInvokerHelper::Invoker::Dump() const
 {
     constexpr int lastCharsToRemove = 2;
-    std::string ret {};
-    ret += "sums:[";
+    std::string prefix {};
+    prefix += "sums:[";
     // print sums in reverse order to match the bitset appearance
     for (auto iter = sum_.crbegin(); iter != sum_.crend(); iter++) {
-        ret += to_string(*iter);
+        prefix += to_string(*iter);
         if (std::next(iter) != sum_.crend()) {
-            ret += ", ";
+            prefix += ", ";
         } else {
-            ret += "] ";
+            prefix += "] ";
         }
     }
+    std::string res {};
     for (const auto& item : entries_) {
         // to_string(integral type) and std::bitset::to_string()
-        ret += to_string(item.first) + ": " + item.second.to_string() + ", ";
+        res += to_string(item.first) + ": " + item.second.to_string() + ", ";
     }
-    if (!ret.empty()) {
-        ret.erase(ret.size() - lastCharsToRemove);
+    if (!res.empty()) {
+        res.erase(res.size() - lastCharsToRemove);
     }
-    return ret;
+    return prefix + res;
 }
 
 std::string MultiInvokerHelper::DumpInner() const
@@ -122,6 +118,7 @@ bool MultiInvokerHelper::RemoveInvoker(pid_t pid)
         result_[index] = static_cast<bool>(sum_[index] -= iter->second.GetResult()[index]);
     }
     invokers_.erase(iter);
+    OnChange();
     return true;
 }
 
@@ -159,10 +156,19 @@ void MultiInvokerHelper::Set(
     } else if (previous != 0 && result == 0) {
         remoteObj->RemoveDeathRecipient(this);
     }
+    OnChange();
+}
+
+void MultiInvokerHelper::OnChange()
+{
     std::string dumpStr = DumpInner();
-    POWER_HILOGI(FEATURE_POWER_STATE, "final result may have changed after calling interface.");
+    POWER_HILOGI(FEATURE_POWER_STATE, "final result may have changed.");
     POWER_HILOGI(FEATURE_POWER_STATE, "current invokers: %{public}s", dumpStr.c_str());
-    onChange_(result_ ^ defaultParam_);
+    if (onChange_) {
+        onChange_(result_ ^ defaultParam_);
+    } else {
+        POWER_HILOGE(FEATURE_POWER_STATE, "callback is null, the server internal values are not updated");
+    }
 }
 
 void MultiInvokerHelper::OnRemoteDied(const wptr<IRemoteObject>& object)
@@ -174,12 +180,8 @@ void MultiInvokerHelper::OnRemoteDied(const wptr<IRemoteObject>& object)
         POWER_HILOGW(FEATURE_POWER_STATE, "remote died, but IRemoteObject invalid");
         return;
     }
-    bool removed = RemoveInvoker(pid);
-    if (removed) {
-        std::string dumpStr = DumpInner();
-        POWER_HILOGI(FEATURE_POWER_STATE, "final result may have changed after remote dying");
-        POWER_HILOGI(FEATURE_POWER_STATE, "current invokers: %{public}s", dumpStr.c_str());
-        onChange_(result_ ^ defaultParam_);
+    if (!RemoveInvoker(pid)) {
+        POWER_HILOGW(FEATURE_POWER_STATE, "the invoker to be removed does not exit");
     }
     strongRef->RemoveDeathRecipient(this);
 }

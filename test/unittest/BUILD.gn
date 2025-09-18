@@ -91,6 +91,32 @@ if (has_hiviewdfx_hisysevent_part) {
 }
 defs = [ "POWER_GTEST" ]
 
+##############################multi_invoker_helper_test############################
+ohos_unittest("test_multi_invoker_helper") {
+  module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [
+    "src/multi_invoker_helper_test.cpp",
+    "${powermgr_service_path}/native/src/multi_invoker_helper/multi_invoker_helper.cpp"
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  defines += [ "POWERMGR_GTEST" ]
+
+  external_deps = deps_ex
+}
 ##############################client_test##########################################
 
 ohos_unittest("test_power_key_option") {
@@ -1823,6 +1849,7 @@ group("unittest") {
     ":test_mock_parcel",
     ":test_mock_peer",
     ":test_mock_proxy",
+    ":test_multi_invoker_helper",
     ":test_power_config_parse",
     ":test_power_config_parse_two",
     ":test_power_coordination_lock",
