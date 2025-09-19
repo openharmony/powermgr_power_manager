@@ -204,18 +204,14 @@
                 {
                     "name": "//base/powermgr/power_manager/frameworks/cj/runninglock:cj_running_lock_ffi",
                     "header": {
-                      "header_files": [
-
-                      ],
+                      "header_files": [],
                       "header_base": "//base/powermgr/power_manager/frameworks/cj/runninglock/include"
                     }
                 },
                 {
                     "name": "//base/powermgr/power_manager/frameworks/cj/power:cj_power_ffi",
                     "header": {
-                      "header_files": [
-
-                      ],
+                      "header_files": [],
                       "header_base": "//base/powermgr/power_manager/frameworks/cj/power/include"
                     }
                 },
