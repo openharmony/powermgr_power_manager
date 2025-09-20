@@ -595,7 +595,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine015, TestSize.Level
     event.data = reinterpret_cast<uint8_t*>(&data);
     event.sensorTypeId = SENSOR_TYPE_ID_HALL;
     data.status = 0;
-    PowerMgrService::isInLidMode_ = false;
+    PowerMgrService::isInLidMode_ = true;
     bool foldScreenFlag = PowerMgrService::foldScreenFlag_;
     PowerMgrService::foldScreenFlag_ = false;
     Rosen::FoldDisplayMode mode = Rosen::FoldDisplayMode::MAIN;
@@ -629,7 +629,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine016, TestSize.Level
     event.data = reinterpret_cast<uint8_t*>(&data);
     event.sensorTypeId = SENSOR_TYPE_ID_HALL;
     data.status = 0;
-    PowerMgrService::isInLidMode_ = false;
+    PowerMgrService::isInLidMode_ = true;
     bool foldScreenFlag = PowerMgrService::foldScreenFlag_;
     PowerMgrService::foldScreenFlag_ = false;
     Rosen::FoldDisplayMode mode = Rosen::FoldDisplayMode::FULL;
