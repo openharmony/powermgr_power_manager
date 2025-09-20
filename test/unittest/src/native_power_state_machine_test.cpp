@@ -527,25 +527,119 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine013, TestSize.Level
     event.data = reinterpret_cast<uint8_t*>(&data);
     event.sensorTypeId = SENSOR_TYPE_ID_HALL;
     data.status = 0;
+    PowerMgrService::isInLidMode_ = true;
     bool foldScreenFlag = PowerMgrService::foldScreenFlag_;
     PowerMgrService::foldScreenFlag_ = true;
     Rosen::FoldDisplayMode mode = Rosen::FoldDisplayMode::MAIN;
     Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(mode);
     pmsTest->HallSensorCallback(&event);
-    mode = Rosen::FoldDisplayMode::FULL;
-    Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(mode);
+    EXPECT_FALSE(PowerMgrService::isInLidMode_);
+    data.status = 1;
     pmsTest->HallSensorCallback(&event);
-    PowerMgrService::foldScreenFlag_ = false;
-    mode = Rosen::FoldDisplayMode::MAIN;
-    Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(mode);
-    pmsTest->HallSensorCallback(&event);
-    mode = Rosen::FoldDisplayMode::FULL;
+    EXPECT_TRUE(PowerMgrService::isInLidMode_);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine013 function end!");
+}
+#endif
+#endif
+
+/**
+ * @tc.name: NativePowerStateMachine014
+ * @tc.desc: test Lid Fold
+ * @tc.type: FUNC
+ */
+#ifdef HAS_SENSORS_SENSOR_PART
+#ifdef POWER_LID_FOLD_ENABLE
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine014, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine014 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    SensorEvent event;
+    HallData data;
+    event.data = reinterpret_cast<uint8_t*>(&data);
+    event.sensorTypeId = SENSOR_TYPE_ID_HALL;
+    data.status = 0;
+    PowerMgrService::isInLidMode_ = true;
+    bool foldScreenFlag = PowerMgrService::foldScreenFlag_;
+    PowerMgrService::foldScreenFlag_ = true;
+    Rosen::FoldDisplayMode mode = Rosen::FoldDisplayMode::FULL;
     Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(mode);
     pmsTest->HallSensorCallback(&event);
     EXPECT_FALSE(PowerMgrService::isInLidMode_);
-    PowerMgrService::foldScreenFlag_ = foldScreenFlag;
-    event.data = nullptr;
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine013 function end!");
+    data.status = 1;
+    pmsTest->HallSensorCallback(&event);
+    EXPECT_FALSE(PowerMgrService::isInLidMode_);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine014 function end!");
+}
+#endif
+#endif
+
+/**
+ * @tc.name: NativePowerStateMachine015
+ * @tc.desc: test Lid Fold
+ * @tc.type: FUNC
+ */
+#ifdef HAS_SENSORS_SENSOR_PART
+#ifdef POWER_LID_FOLD_ENABLE
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine015, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine015 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    SensorEvent event;
+    HallData data;
+    event.data = reinterpret_cast<uint8_t*>(&data);
+    event.sensorTypeId = SENSOR_TYPE_ID_HALL;
+    data.status = 0;
+    PowerMgrService::isInLidMode_ = false;
+    bool foldScreenFlag = PowerMgrService::foldScreenFlag_;
+    PowerMgrService::foldScreenFlag_ = false;
+    Rosen::FoldDisplayMode mode = Rosen::FoldDisplayMode::MAIN;
+    Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(mode);
+    pmsTest->HallSensorCallback(&event);
+    EXPECT_FALSE(PowerMgrService::isInLidMode_);
+    data.status = 1;
+    pmsTest->HallSensorCallback(&event);
+    EXPECT_TRUE(PowerMgrService::isInLidMode_);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine015 function end!");
+}
+#endif
+#endif
+
+/**
+ * @tc.name: NativePowerStateMachine016
+ * @tc.desc: test Lid Fold
+ * @tc.type: FUNC
+ */
+#ifdef HAS_SENSORS_SENSOR_PART
+#ifdef POWER_LID_FOLD_ENABLE
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine016, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine016 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    SensorEvent event;
+    HallData data;
+    event.data = reinterpret_cast<uint8_t*>(&data);
+    event.sensorTypeId = SENSOR_TYPE_ID_HALL;
+    data.status = 0;
+    PowerMgrService::isInLidMode_ = false;
+    bool foldScreenFlag = PowerMgrService::foldScreenFlag_;
+    PowerMgrService::foldScreenFlag_ = false;
+    Rosen::FoldDisplayMode mode = Rosen::FoldDisplayMode::FULL;
+    Rosen::DisplayManagerLite::GetInstance().SetFoldDisplayMode(mode);
+    pmsTest->HallSensorCallback(&event);
+    EXPECT_FALSE(PowerMgrService::isInLidMode_);
+    data.status = 1;
+    pmsTest->HallSensorCallback(&event);
+    EXPECT_TRUE(PowerMgrService::isInLidMode_);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine016 function end!");
 }
 #endif
 #endif
