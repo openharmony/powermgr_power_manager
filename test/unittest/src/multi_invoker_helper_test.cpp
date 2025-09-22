@@ -19,21 +19,6 @@
 #include <power_log.h>
 
 namespace OHOS {
-namespace {
-struct FakePid {
-    pid_t pid = 0;
-    bool enabled = false;
-} g_fakePid;
-} // namespace
-
-pid_t IPCSkeleton::GetCallingPid()
-{
-    if (g_fakePid.enabled) {
-        return g_fakePid.pid;
-    }
-    return IPCSkeleton::GetCallingRealPid();
-}
-
 namespace PowerMgr {
 using namespace testing;
 using namespace ext;
@@ -58,11 +43,12 @@ HWTEST_F(MultiInvokerHelperTest, MultiInvokerHelperTest001, TestSize.Level0)
     auto testHelper =
         sptr<MultiInvokerHelper>::MakeSptr(paramCount, 0, std::function<void(std::bitset<paramCount>)> {});
     sptr<IPCObjectProxy> testProxy = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"test"});
+    sptr<IPCObjectProxy> testProxyInvalid = sptr<IPCObjectProxy>::MakeSptr(0, std::u16string {u"nottest"});
     constexpr pid_t testPid = 1;
     std::bitset<paramCount> input = 0b10101010;
     testHelper->Set(nullptr, testPid, -1, input);
     EXPECT_EQ(testHelper->GetResult(), 0);
-    EXPECT_FALSE(testHelper->RemoveInvoker(testPid));
+    EXPECT_FALSE(testHelper->RemoveInvoker(testProxy->GetObjectDescriptor()));
     POWER_HILOGI(LABEL_TEST, "phase 1 dump: %{public}s", testHelper->Dump().c_str());
 
     testHelper->Set(testProxy, testPid, -1, input);
@@ -73,14 +59,13 @@ HWTEST_F(MultiInvokerHelperTest, MultiInvokerHelperTest001, TestSize.Level0)
     EXPECT_EQ(testHelper->GetResult(), input);
     POWER_HILOGI(LABEL_TEST, "phase 3 dump: %{public}s", testHelper->Dump().c_str());
 
-    testHelper->OnRemoteDied(testProxy);
+    testHelper->OnRemoteDied(testProxyInvalid);
     EXPECT_EQ(testHelper->GetResult(), input);
     POWER_HILOGI(LABEL_TEST, "phase 4 dump: %{public}s", testHelper->Dump().c_str());
 
-    g_fakePid = {testPid, true};
     testHelper->OnRemoteDied(testProxy);
     EXPECT_EQ(testHelper->GetResult(), 0);
-    g_fakePid.enabled = false;
+
     POWER_HILOGI(LABEL_TEST, "phase 5 dump: %{public}s", testHelper->Dump().c_str());
     POWER_HILOGI(LABEL_TEST, "MultiInvokerHelperTest001 function end!");
 }

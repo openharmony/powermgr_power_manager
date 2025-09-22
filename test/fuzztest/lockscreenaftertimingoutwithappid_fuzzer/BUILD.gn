@@ -1,0 +1,156 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../powermgr.gni")
+
+module_output_path = "power_manager/power_manager"
+
+##############################fuzztest##########################################
+ohos_fuzztest("LockScreenAfterTimingOutWithAppidFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file =
+      "${powermgr_root_path}/test/fuzztest/lockscreenaftertimingoutwithappid_fuzzer"
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src/hibernate",
+    "${powermgr_service_path}/native/src/proximity_sensor_controller",
+    "${powermgr_service_path}/native/src/runninglock",
+    "${powermgr_service_path}/native/src/shutdown",
+    "${powermgr_service_path}/native/src/suspend",
+    "${powermgr_service_path}/native/src/wakeup",
+    "${powermgr_service_path}/native/src/screenoffpre",
+    "../power_utils",
+  ]
+
+  if (power_manager_feature_wakeup_action) {
+    include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
+  }
+
+  configs = [
+    "${powermgr_utils_path}:coverage_flags",
+    "${powermgr_utils_path}:utils_config",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [
+    "../power_utils/power_fuzzer.cpp",
+    "./lockscreenaftertimingoutwithappid_fuzzer_test.cpp",
+  ]
+  deps = [
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "libxml2:libxml2",
+    "power_manager:power_ffrt",
+    "safwk:system_ability_fwk",
+    "window_manager:libwm_lite",
+  ]
+  defines = []
+
+  if (has_hiviewdfx_hisysevent_part) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (has_hiviewdfx_hitrace_part) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (power_manager_feature_movement) {
+    defines += [ "MSDP_MOVEMENT_ENABLE" ]
+  }
+
+  if (use_libfuzzer) {
+    defines += [ "FUZZ_TEST" ]
+  }
+
+  if (power_manager_feature_screen_on_timeout_check) {
+    defines += [ "SCREEN_ON_TIMEOUT_CHECK" ]
+    external_deps += [
+      "ability_runtime:app_manager",
+      "window_manager:libwm",
+    ]
+  }
+
+  if (has_display_manager_part) {
+    defines += [ "HAS_DISPLAY_MANAGER" ]
+    external_deps += [
+      "display_manager:displaymgr",
+      "window_manager:libdm_lite",
+    ]
+  }
+
+  if (has_device_standby_part) {
+    external_deps += [ "device_standby:standby_innerkits" ]
+  }
+
+  if (has_multimodalinput_input_part) {
+    external_deps += [ "input:libmmi-client" ]
+  }
+
+  if (has_sensors_sensor_part) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+  }
+
+  if (power_manager_feature_poweroff_charge && defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_doubleclick) {
+    defines += [ "POWER_DOUBLECLICK_ENABLE" ]
+  }
+
+  if (power_manager_feature_pickup) {
+    defines += [ "POWER_PICKUP_ENABLE" ]
+  }
+
+  if (power_manager_feature_power_dialog) {
+    defines += [ "POWER_MANAGER_POWER_DIALOG" ]
+  }
+
+  if (power_manager_feature_force_sleep_broadcast) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
+  }
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_external_screen_management) {
+    defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
+  }
+
+  if (factory == true) {
+    defines += [ "CONFIG_FACTORY_MODE" ]
+  }
+}

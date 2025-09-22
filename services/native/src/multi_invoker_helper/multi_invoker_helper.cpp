@@ -16,6 +16,7 @@
 #include "multi_invoker_helper.h"
 #include <ipc_skeleton.h>
 #include <power_log.h>
+#include <string_ex.h>
 namespace OHOS::PowerMgr {
 using namespace std;
 // the user i.e MultiInvokerHelper should provide mutex
@@ -46,6 +47,11 @@ std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::Invoker::SetValue(
 std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::Invoker::GetResult() const
 {
     return result_;
+}
+
+pid_t MultiInvokerHelper::Invoker::GetPid() const
+{
+    return pid_;
 }
 
 std::string MultiInvokerHelper::Invoker::Dump() const
@@ -87,7 +93,7 @@ std::string MultiInvokerHelper::DumpInner() const
         }
     }
     for (auto iter = invokers_.cbegin(); iter != invokers_.cend(); iter++) {
-        ret += to_string(iter->first) + ": {" + iter->second.Dump() + "}";
+        ret += to_string(iter->second.GetPid()) + ": {" + iter->second.Dump() + "}";
         if (std::next(iter) != invokers_.cend()) {
             ret += ", ";
         }
@@ -107,10 +113,10 @@ std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::GetResult()
     return result_;
 }
 
-bool MultiInvokerHelper::RemoveInvoker(pid_t pid)
+bool MultiInvokerHelper::RemoveInvoker(std::u16string remoteObjDesc)
 {
     std::lock_guard lock(mutex_);
-    const auto iter = invokers_.find(pid);
+    const auto iter = invokers_.find(remoteObjDesc);
     if (iter == invokers_.cend()) {
         return false;
     }
@@ -122,9 +128,6 @@ bool MultiInvokerHelper::RemoveInvoker(pid_t pid)
     return true;
 }
 
-// For now our client is a singleton, there is 1-1 correspondence between IPCObjectProxy and pid.
-// If it is not the case, the pid can't be used to uniquely identify IPCObjectProxy.
-// I am not be able to use handle or descriptor as key since other ppl dont like it.
 void MultiInvokerHelper::Set(
     const sptr<IRemoteObject>& remoteObj, pid_t invokerPid, pid_t appid, std::bitset<MAX_PARAM_NUMBER>& input)
 {
@@ -134,7 +137,8 @@ void MultiInvokerHelper::Set(
     }
     std::bitset<MAX_PARAM_NUMBER> deltaInput = input ^ defaultParam_;
     std::lock_guard lock(mutex_);
-    auto [iter, _] = invokers_.try_emplace(invokerPid, Invoker {paramCount_, remoteObj});
+    std::u16string remoteObjDesc = remoteObj->GetObjectDescriptor();
+    auto [iter, _] = invokers_.try_emplace(remoteObjDesc, Invoker {paramCount_, remoteObj, invokerPid});
     std::bitset<MAX_PARAM_NUMBER> previous = iter->second.GetResult();
     pid_t inputKey = appid != -1 ? appid : invokerPid;
     std::bitset<MAX_PARAM_NUMBER> result = iter->second.SetValue(inputKey, deltaInput);
@@ -156,6 +160,9 @@ void MultiInvokerHelper::Set(
     } else if (previous != 0 && result == 0) {
         remoteObj->RemoveDeathRecipient(this);
     }
+    if (result == 0) {
+        invokers_.erase(iter);
+    }
     OnChange();
 }
 
@@ -173,16 +180,17 @@ void MultiInvokerHelper::OnChange()
 
 void MultiInvokerHelper::OnRemoteDied(const wptr<IRemoteObject>& object)
 {
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    POWER_HILOGI(FEATURE_POWER_STATE, "remote died, calling pid: %{public}d", pid);
     auto strongRef = object.promote();
     if (!strongRef) {
         POWER_HILOGW(FEATURE_POWER_STATE, "remote died, but IRemoteObject invalid");
         return;
     }
-    if (!RemoveInvoker(pid)) {
-        POWER_HILOGW(FEATURE_POWER_STATE, "the invoker to be removed does not exit");
+    std::u16string desc = strongRef->GetObjectDescriptor();
+    if (!RemoveInvoker(desc)) {
+        POWER_HILOGW(FEATURE_POWER_STATE, "remote died, but the invoker to be removed does not exit");
     }
+    // XXXXXXXXXXXXXXXXXXXXXXXXXX
+    POWER_HILOGW(FEATURE_POWER_STATE, "removed invoker proxy: %{public}s", Str16ToStr8(desc).c_str());
     strongRef->RemoveDeathRecipient(this);
 }
 } // namespace OHOS::PowerMgr
