@@ -14,7 +14,9 @@
  */
 
 #include "power_shell_command.h"
-
+#if defined(_LIBCPP_VERSION) || defined (__GLIBCXX__)
+#include <cxxabi.h>
+#endif
 #include <cerrno>
 #include <string_ex.h>
 #include <sstream>
@@ -192,6 +194,8 @@ ErrCode PowerShellCommand::RunAsForceTimeOutCommand()
     return ERR_OK;
 }
 
+#ifndef POWER_SHELL_USER
+// only for testing and debugging, forget the coding style
 ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
 {
     if (!IsDeveloperMode()) {
@@ -205,6 +209,13 @@ ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
         return ERR_OK;
     }
     PowerMgrClient& client = PowerMgrClient::GetInstance();
+    if (parameterCount == MIN_PARAMETER_COUNT && argList_[0].length() > 1) {
+        int appid = 0;
+        (void)StrToInt(argList_[0], appid);
+        bool lockScreen = argList_[1][0] - '0';
+        client.LockScreenAfterTimingOutWithAppid(appid, lockScreen);
+        return ERR_OK;
+    }
     bool enableLockScreen = argList_[0][0] - '0';
     bool checkScreenOnLock = argList_[1][0] - '0';
     if (parameterCount == MIN_PARAMETER_COUNT) {
@@ -215,6 +226,7 @@ ErrCode PowerShellCommand::RunAsTimeOutScreenLockCommand()
     client.LockScreenAfterTimingOut(enableLockScreen, checkScreenOnLock, sendScreenOffEvent);
     return ERR_OK;
 }
+#endif
 
 ErrCode PowerShellCommand::CreateMessageMap()
 {

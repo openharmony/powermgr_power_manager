@@ -55,28 +55,31 @@ private:
 
     class Invoker {
     public:
-        Invoker(size_t paramCount, const sptr<IRemoteObject>& remoteObj)
+        Invoker(size_t paramCount, const sptr<IRemoteObject>& remoteObj, pid_t pid)
             : paramCount_(paramCount),
               sum_(paramCount_, 0),
-              remoteObj_(remoteObj)
+              remoteObj_(remoteObj),
+              pid_(pid)
         {
         }
         std::bitset<MAX_PARAM_NUMBER> SetValue(pid_t appid, const std::bitset<MAX_PARAM_NUMBER>& input);
         std::bitset<MAX_PARAM_NUMBER> GetResult() const;
         std::string Dump() const;
+        pid_t GetPid() const;
 
     private:
         static_assert(sizeof(uint64_t) >= sizeof(pid_t));
         const size_t paramCount_;
         std::vector<uint64_t> sum_;
         const wptr<IRemoteObject> remoteObj_;
+        pid_t pid_;
         std::unordered_map<pid_t, std::bitset<MAX_PARAM_NUMBER>> entries_ {};
         std::bitset<MAX_PARAM_NUMBER> result_ = 0;
     };
 
     // If it would be used in an ffrt-task, using ffrt::mutex instead
     std::mutex mutex_;
-    std::unordered_map<pid_t, Invoker> invokers_;
+    std::unordered_map<std::u16string, Invoker> invokers_;
     std::bitset<MAX_PARAM_NUMBER> result_ {};
     const size_t paramCount_;
     std::vector<uint64_t> sum_;
@@ -90,7 +93,7 @@ public:
     std::bitset<MAX_PARAM_NUMBER> GetResult();
     void OnRemoteDied(const wptr<IRemoteObject>& object) override;
     // remember making the parameter to be the same type as the key of the underlying map;
-    bool RemoveInvoker(pid_t pid);
+    bool RemoveInvoker(std::u16string remoteObjDesc);
     void Set(const sptr<IRemoteObject>& remoteObj, pid_t invokerPid, pid_t appid, std::bitset<MAX_PARAM_NUMBER>& input);
 };
 } // namespace PowerMgr
