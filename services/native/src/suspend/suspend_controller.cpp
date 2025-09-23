@@ -42,13 +42,13 @@ namespace {
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 sptr<SettingObserver> g_suspendSourcesKeyAcObserver = nullptr;
 sptr<SettingObserver> g_suspendSourcesKeyDcObserver = nullptr;
+constexpr int64_t POWER_SLEEP_DEFAULT_TIME = 60000; // ms
+constexpr int64_t POWER_SLEEP_NEVER = -1;
 #else
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 #endif
 FFRTMutex g_monitorMutex;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
-constexpr int64_t POWER_SLEEP_DEFAULT_TIME = 60000; // ms
-constexpr int64_t POWER_SLEEP_NEVER = -1;
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -393,12 +393,14 @@ void SuspendController::StopSleep()
     ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
 }
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 void SuspendController::StopAutoSleep()
 {
     if (ffrtTimer_ != nullptr) {
         ffrtTimer_->CancelTimer(TIMER_ID_AUTO_SLEEP);
     }
 }
+#endif
 
 void SuspendController::HandleEvent(int64_t delayTime)
 {
