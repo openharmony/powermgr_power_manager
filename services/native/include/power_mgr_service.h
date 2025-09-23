@@ -191,7 +191,6 @@ public:
     void UnregisterAllSettingObserver();
     void RegisterAllSettingObserver();
     int64_t GetSettingDisplayOffTime(int64_t defaultTime);
-    int64_t GetSettingPowerSleepTime(int64_t defaultTime);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     PowerConnectStatus GetPowerConnectStatus() const
     {
@@ -204,6 +203,7 @@ public:
     void PowerConnectStatusInit();
     bool IsPowerConnected();
     void UpdateSettingInvalidDisplayOffTime();
+    int64_t GetSettingPowerSleepTime(int64_t defaultTime);
 #endif
     void OnChargeStateChanged();
 
