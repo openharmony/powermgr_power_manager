@@ -55,7 +55,9 @@ public:
     void Execute();
     void Cancel();
     void StopSleep();
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     void StopAutoSleep();
+#endif
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
@@ -108,7 +110,9 @@ public:
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void HandleAutoSleep(SuspendDeviceType reason);
-    void SetAutoSleep(SuspendDeviceType reason);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    void StopAutoSleep();
+#endif
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
