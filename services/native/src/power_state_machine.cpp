@@ -2046,7 +2046,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     if (NeedShowScreenLocks(state)) {
         ShowCurrentScreenLocks();
     }
-
+    CancelAutoSleep();
     HandleProximityScreenOffTimer(state, reason);
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
