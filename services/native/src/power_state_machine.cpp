@@ -2002,9 +2002,11 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         POWER_HILOGE(FEATURE_POWER_STATE, "ffrtTimer_ is nullptr");
         return false;
     }
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     if (curTask == ffrtTimer_->GetTaskHandlePtr(TIMER_ID_AUTO_SLEEP)) {
         return true;
     }
+#endif
     const void* pendingTask = nullptr;
     switch (state) {
         case PowerState::DIM:
@@ -2044,7 +2046,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     if (NeedShowScreenLocks(state)) {
         ShowCurrentScreenLocks();
     }
-    CancelAutoSleep();
+
     HandleProximityScreenOffTimer(state, reason);
     std::shared_ptr<StateController> pController = GetStateController(state);
     if (pController == nullptr) {
@@ -2073,6 +2075,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 void PowerStateMachine::CancelAutoSleep()
 {
     auto powerMS = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -2086,6 +2089,7 @@ void PowerStateMachine::CancelAutoSleep()
         }
     }
 }
+#endif
 
 void PowerStateMachine::WriteHiSysEvent(TransitResult ret, StateChangeReason reason,
     int32_t beginTimeMs, PowerState state)
