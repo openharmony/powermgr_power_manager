@@ -1340,6 +1340,11 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         return PowerErrors::ERR_FAILURE;
     }
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (suspendController_) {
+        suspendController_->StopSleep();
+    }
+#endif
     powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
     return PowerErrors::ERR_OK;
 }
@@ -1367,6 +1372,11 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reas
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to hibernate, pid: %{public}d, uid: %{public}d, clearMemory: %{public}d, reason: %{public}s",
         pid, uid, static_cast<int>(clearMemory), reason.c_str());
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (suspendController_) {
+        suspendController_->StopSleep();
+    }
+#endif
     BackgroundRunningLock hibernateGuard(
         "hibernateGuard", HIBERNATE_GUARD_TIMEOUT_MS); // avoid hibernate breaked by S3/ULSR
     HibernateControllerInit();
