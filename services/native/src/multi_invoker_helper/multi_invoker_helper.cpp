@@ -189,7 +189,6 @@ void MultiInvokerHelper::OnRemoteDied(const wptr<IRemoteObject>& object)
     if (!RemoveInvoker(desc)) {
         POWER_HILOGW(FEATURE_POWER_STATE, "remote died, but the invoker to be removed does not exit");
     }
-    // XXXXXXXXXXXXXXXXXXXXXXXXXX
     POWER_HILOGW(FEATURE_POWER_STATE, "removed invoker proxy: %{public}s", Str16ToStr8(desc).c_str());
     strongRef->RemoveDeathRecipient(this);
 }
