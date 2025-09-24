@@ -15,7 +15,9 @@
 #include <gtest/gtest.h>
 #include <ipc_object_proxy.h>
 #include <ipc_skeleton.h>
+#define private public
 #include <multi_invoker_helper/multi_invoker_helper.h>
+#undef private
 #include <power_log.h>
 
 namespace OHOS {
@@ -67,6 +69,12 @@ HWTEST_F(MultiInvokerHelperTest, MultiInvokerHelperTest001, TestSize.Level0)
     EXPECT_EQ(testHelper->GetResult(), 0);
 
     POWER_HILOGI(LABEL_TEST, "phase 5 dump: %{public}s", testHelper->Dump().c_str());
+
+    // cover abnormal branch
+    testHelper->invokers_.emplace(u"emptyInvoker", MultiInvokerHelper::Invoker {paramCount, testProxy, testPid});
+    POWER_HILOGI(LABEL_TEST, "phase 6 dump: %{public}s", testHelper->Dump().c_str());
+    testHelper->RemoveInvoker(u"emptyInvoker");
+    
     POWER_HILOGI(LABEL_TEST, "MultiInvokerHelperTest001 function end!");
 }
 } // namespace
