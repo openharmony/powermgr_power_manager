@@ -391,6 +391,9 @@ void SuspendController::StopSleep()
     sleepTime_ = -1;
     sleepAction_ = static_cast<uint32_t>(SuspendAction::ACTION_NONE);
     ffrtMutexMap_.Unlock(TIMER_ID_SLEEP);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    stateMachine_->CancelAutoSleep();
+#endif
 }
 
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
