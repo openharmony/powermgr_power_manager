@@ -568,11 +568,16 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
         SleepGuard sleepGuard(pms);
         Wakeup();
         SystemSuspendController::GetInstance().Wakeup();
+        auto suspendController = pms->GetSuspendController();
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+        if (suspendController) {
+            suspendController->StopSleep();
+        }
+#endif
         POWER_HILOGI(FEATURE_WAKEUP, "wakeup Request: %{public}d", reason);
         if (!stateMachine_->SetState(PowerState::AWAKE, stateMachine_->GetReasonByWakeType(reason), true)) {
             POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] setstate wakeup error");
         }
-        auto suspendController = pms->GetSuspendController();
         if (suspendController != nullptr && stateMachine_->GetState() == PowerState::AWAKE) {
             POWER_HILOGI(FEATURE_WAKEUP, "WakeupController::ControlListener TriggerSyncSleepCallback start.");
             suspendController->TriggerSyncSleepCallback(true);
