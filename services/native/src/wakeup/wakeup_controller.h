@@ -152,7 +152,7 @@ public:
         listener_ = listener;
     }
 
-    void Notify()
+    void Notify() const
     {
         listener_(reason_);
     }
@@ -176,7 +176,7 @@ public:
 
 private:
     int32_t powerkeyShortPressId_ {-1};
-    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent);
+    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const;
 };
 
 class KeyboardWakeupMonitor : public WakeupMonitor {

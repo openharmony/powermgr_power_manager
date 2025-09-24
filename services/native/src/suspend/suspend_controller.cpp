@@ -227,11 +227,11 @@ void SuspendController::Init()
         POWER_HILOGI(FEATURE_SUSPEND, "registered type=%{public}u action=%{public}u delayMs=%{public}u",
             (*source).GetReason(), (*source).GetAction(), (*source).GetDelay());
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+        monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+            this->ControlListener(reason, action, delay);
+        });
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_SUSPEND, "monitor init success, type=%{public}u", (*source).GetReason());
-            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
-                this->ControlListener(reason, action, delay);
-            });
             g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
             g_monitorMutex.unlock();
@@ -307,12 +307,12 @@ void SuspendController::UpdateSuspendSources()
     uint32_t id = 0;
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+        monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+            this->ControlListener(reason, action, delay);
+        });
         POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
             id, source->GetReason());
         if (monitor != nullptr && monitor->Init()) {
-            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
-                this->ControlListener(reason, action, delay);
-            });
             g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
             g_monitorMutex.unlock();
@@ -844,8 +844,8 @@ bool PowerKeySuspendMonitor::Init()
         return false;
     }
     powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            this->ReceivePowerkeyCallback(keyEvent);
+        keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            ReceivePowerkeyCallback(keyEvent);
         });
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
@@ -854,7 +854,7 @@ bool PowerKeySuspendMonitor::Init()
 #endif
 }
 
-void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
+void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const
 {
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
 
@@ -1010,9 +1010,9 @@ bool TPCoverSuspendMonitor::Init()
         return false;
     }
     TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+        keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
-            this->Notify();
+            Notify();
         });
     POWER_HILOGI(FEATURE_SUSPEND, "TPCoverReleaseId_=%{public}d", TPCoverReleaseId_);
     return TPCoverReleaseId_ >= 0 ? true : false;
