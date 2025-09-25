@@ -706,6 +706,16 @@ PowerErrors PowerMgrClient::LockScreenAfterTimingOut(bool enabledLockScreen, boo
     return ret;
 }
 
+PowerErrors PowerMgrClient::LockScreenAfterTimingOutWithAppid(pid_t appid, bool lockScreen)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->LockScreenAfterTimingOutWithAppidIpc(appid, lockScreen, token_, powerError);
+    PowerErrors ret = static_cast<PowerErrors>(powerError);
+    return ret;
+}
+
 PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, bool& result)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();

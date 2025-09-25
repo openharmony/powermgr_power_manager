@@ -1,0 +1,195 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "multi_invoker_helper.h"
+#include <ipc_skeleton.h>
+#include <power_log.h>
+#include <string_ex.h>
+namespace OHOS::PowerMgr {
+using namespace std;
+// the user i.e MultiInvokerHelper should provide mutex
+std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::Invoker::SetValue(
+    pid_t appid, const std::bitset<MAX_PARAM_NUMBER>& input)
+{
+    const auto iter = entries_.find(appid);
+    std::bitset<MAX_PARAM_NUMBER> previous = (iter == entries_.end() ? 0 : iter->second);
+    // update counter according to current entries and counter
+    // an add for each parameter + extra space for saving counter VS a bitwise-or for each entry.
+    // I would prefer just doing bitwise-or but well it doesn't matter much.
+    for (size_t index = 0; index < paramCount_; index++) {
+        if (previous[index] && !input[index]) {
+            result_[index] = static_cast<bool>(--sum_[index]);
+        } else if (!previous[index] && input[index]) {
+            result_[index] = static_cast<bool>(++sum_[index]);
+        }
+    }
+    // update entry
+    if (input != 0) {
+        entries_[appid] = input;
+    } else if (iter != entries_.end()) {
+        entries_.erase(iter);
+    }
+    return result_;
+}
+
+std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::Invoker::GetResult() const
+{
+    return result_;
+}
+
+pid_t MultiInvokerHelper::Invoker::GetPid() const
+{
+    return pid_;
+}
+
+std::string MultiInvokerHelper::Invoker::Dump() const
+{
+    constexpr int lastCharsToRemove = 2;
+    std::string prefix {};
+    prefix += "sums:[";
+    // print sums in reverse order to match the bitset appearance
+    for (auto iter = sum_.crbegin(); iter != sum_.crend(); iter++) {
+        prefix += to_string(*iter);
+        if (std::next(iter) != sum_.crend()) {
+            prefix += ", ";
+        } else {
+            prefix += "] ";
+        }
+    }
+    std::string res {};
+    for (const auto& item : entries_) {
+        // to_string(integral type) and std::bitset::to_string()
+        res += to_string(item.first) + ": " + item.second.to_string() + ", ";
+    }
+    if (!res.empty()) {
+        res.erase(res.size() - lastCharsToRemove);
+    }
+    return prefix + res;
+}
+
+std::string MultiInvokerHelper::DumpInner() const
+{
+    std::string ret {};
+    ret += "sums:[";
+    // print sums in reverse order to match the bitset appearance
+    for (auto iter = sum_.crbegin(); iter != sum_.crend(); iter++) {
+        ret += to_string(*iter);
+        if (std::next(iter) != sum_.crend()) {
+            ret += ", ";
+        } else {
+            ret += "] ";
+        }
+    }
+    for (auto iter = invokers_.cbegin(); iter != invokers_.cend(); iter++) {
+        ret += to_string(iter->second.GetPid()) + ": {" + iter->second.Dump() + "}";
+        if (std::next(iter) != invokers_.cend()) {
+            ret += ", ";
+        }
+    }
+    return ret;
+}
+
+std::string MultiInvokerHelper::Dump()
+{
+    std::lock_guard lock(mutex_);
+    return DumpInner();
+}
+
+std::bitset<MAX_PARAM_NUMBER> MultiInvokerHelper::GetResult()
+{
+    std::lock_guard lock(mutex_);
+    return result_;
+}
+
+bool MultiInvokerHelper::RemoveInvoker(std::u16string remoteObjDesc)
+{
+    std::lock_guard lock(mutex_);
+    const auto iter = invokers_.find(remoteObjDesc);
+    if (iter == invokers_.cend()) {
+        return false;
+    }
+    for (size_t index = 0; index < paramCount_; index++) {
+        result_[index] = static_cast<bool>(sum_[index] -= iter->second.GetResult()[index]);
+    }
+    invokers_.erase(iter);
+    OnChange();
+    return true;
+}
+
+void MultiInvokerHelper::Set(
+    const sptr<IRemoteObject>& remoteObj, pid_t invokerPid, pid_t appid, std::bitset<MAX_PARAM_NUMBER>& input)
+{
+    if (!remoteObj) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "%{public}s: remoteObj is nullptr", __func__);
+        return;
+    }
+    std::bitset<MAX_PARAM_NUMBER> deltaInput = input ^ defaultParam_;
+    std::lock_guard lock(mutex_);
+    std::u16string remoteObjDesc = remoteObj->GetObjectDescriptor();
+    auto [iter, _] = invokers_.try_emplace(remoteObjDesc, Invoker {paramCount_, remoteObj, invokerPid});
+    std::bitset<MAX_PARAM_NUMBER> previous = iter->second.GetResult();
+    pid_t inputKey = appid != -1 ? appid : invokerPid;
+    std::bitset<MAX_PARAM_NUMBER> result = iter->second.SetValue(inputKey, deltaInput);
+
+    for (size_t index = 0; index < paramCount_; index++) {
+        if (previous[index] && !result[index]) {
+            result_[index] = static_cast<bool>(--sum_[index]);
+        } else if (!previous[index] && result[index]) {
+            result_[index] = static_cast<bool>(++sum_[index]);
+        }
+    }
+
+    POWER_HILOGI(FEATURE_POWER_STATE, "previous: %{public}s, result: %{public}s", previous.to_string().c_str(),
+        result.to_string().c_str());
+    if (previous == 0 && result != 0) {
+        // implicitly cast this to IRemoteObject::DeathRecipient.
+        // Thus the instance should only be created by using MakeSptr.
+        remoteObj->AddDeathRecipient(this);
+    } else if (previous != 0 && result == 0) {
+        remoteObj->RemoveDeathRecipient(this);
+    }
+    if (result == 0) {
+        invokers_.erase(iter);
+    }
+    OnChange();
+}
+
+void MultiInvokerHelper::OnChange()
+{
+    std::string dumpStr = DumpInner();
+    POWER_HILOGI(FEATURE_POWER_STATE, "final result may have changed.");
+    POWER_HILOGI(FEATURE_POWER_STATE, "current invokers: %{public}s", dumpStr.c_str());
+    if (onChange_) {
+        onChange_(result_ ^ defaultParam_);
+    } else {
+        POWER_HILOGE(FEATURE_POWER_STATE, "callback is null, the server internal values are not updated");
+    }
+}
+
+void MultiInvokerHelper::OnRemoteDied(const wptr<IRemoteObject>& object)
+{
+    auto strongRef = object.promote();
+    if (!strongRef) {
+        POWER_HILOGW(FEATURE_POWER_STATE, "remote died, but IRemoteObject invalid");
+        return;
+    }
+    std::u16string desc = strongRef->GetObjectDescriptor();
+    if (!RemoveInvoker(desc)) {
+        POWER_HILOGW(FEATURE_POWER_STATE, "remote died, but the invoker to be removed does not exit");
+    }
+    POWER_HILOGW(FEATURE_POWER_STATE, "removed invoker proxy: %{public}s", Str16ToStr8(desc).c_str());
+    strongRef->RemoveDeathRecipient(this);
+}
+} // namespace OHOS::PowerMgr
