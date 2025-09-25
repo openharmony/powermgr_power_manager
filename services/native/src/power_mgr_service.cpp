@@ -37,6 +37,7 @@
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
 #include "ffrt_utils.h"
+#include <multi_invoker_helper/multi_invoker_helper.h>
 #include "permission.h"
 #include "power_common.h"
 #include "power_ext_intf_wrapper.h"
@@ -2101,37 +2102,53 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled, const sptr<IRemoteO
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::LockScreenAfterTimingOut(
-    bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token)
+PowerErrors PowerMgrService::LockScreenAfterTimingOutWithAppid(
+    pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token)
 {
-    static sptr<IRemoteObject> thisInterfaceInvoker = nullptr;
-    static std::mutex localMutex;
-    static sptr<InvokerDeathRecipient> drt =
-        sptr<InvokerDeathRecipient>::MakeSptr(__func__, [](sptr<PowerMgrService> pms) {
-            auto stateMachine = pms->GetPowerStateMachine();
-            if (!stateMachine) {
-                POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
-                return;
-            }
-            stateMachine->LockScreenAfterTimingOut(true, false, true);
-            POWER_HILOGI(COMP_SVC, "the variables related to LockScreenAfterTimingOut has been reset");
-        });
-
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    localMutex.lock();
-    if (token && token->IsProxyObject() && token != thisInterfaceInvoker) {
-        // The localMutex only ensures that the "remove, assign, add" actions are thread safe.
-        // AddDeathRecipient/RemoveDeathRecipient are thread safe theirselves.
-        if (thisInterfaceInvoker) {
-            thisInterfaceInvoker->RemoveDeathRecipient(drt);
-        } // removed from the old invoker
-        thisInterfaceInvoker = token;
-        thisInterfaceInvoker->AddDeathRecipient(drt); // added to the new invoker
+    if (!Permission::IsPermissionGranted("ohos.permission.TIMEOUT_SCREENOFF_DISABLE_LOCK")) {
+        return PowerErrors::ERR_PERMISSION_DENIED;
     }
-    localMutex.unlock();
-    powerStateMachine_->LockScreenAfterTimingOut(enabledLockScreen, checkLock, sendScreenOffEvent);
+    POWER_HILOGI(COMP_SVC,
+        "LockScreenAfterTimingOutWithAppid called, appid:%{public}d, lockScreen:%{public}d, remotePid:%{public}d",
+        appid, lockScreen, IPCSkeleton::GetCallingPid());
+    if (lockScreen) {
+        return LockScreenAfterTimingOut(true, false, true, token, appid);
+    } else {
+        return LockScreenAfterTimingOut(false, false, false, token, appid);
+    }
+}
+
+PowerErrors PowerMgrService::LockScreenAfterTimingOut(
+    bool enabledLockScreen, bool checkLock, bool sendScreenOffEvent, const sptr<IRemoteObject>& token, pid_t appid)
+{
+    constexpr std::bitset<MAX_PARAM_NUMBER> defaultParams = 0b101;
+    constexpr size_t paramNumber = 3;
+    constexpr size_t firtParamPos = 2;   // index of enabledLockScreen
+    constexpr size_t secondParamPos = 1; // index of checkLock
+    constexpr size_t thirdParamPos = 0;  // index of sendScreenOffEvent
+    static sptr<MultiInvokerHelper> multiInvokerhelper = sptr<MultiInvokerHelper>::MakeSptr(
+        paramNumber, defaultParams, [this](const std::bitset<MAX_PARAM_NUMBER>& input) {
+            auto stateMachine = powerStateMachine_;
+            if (!powerStateMachine_) {
+                POWER_HILOGE(COMP_SVC, "%{public}s: powerstatemachine is nullptr", __func__);
+                return;
+            }
+            powerStateMachine_->LockScreenAfterTimingOut(
+                input[firtParamPos], input[secondParamPos], input[thirdParamPos]);
+        });
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    POWER_HILOGI(COMP_SVC,
+        "LockScreenAfterTimingOut called, pid: %{public}d, input parameters: %{public}d, %{public}d, %{public}d",
+        callingPid, enabledLockScreen, checkLock, sendScreenOffEvent);
+    std::bitset<MAX_PARAM_NUMBER> input =
+        MultiInvokerHelper::ToBitset(enabledLockScreen, checkLock, sendScreenOffEvent);
+    multiInvokerhelper->Set(token, callingPid, appid, input);
     return PowerErrors::ERR_OK;
 }
 

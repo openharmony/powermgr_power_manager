@@ -91,6 +91,68 @@ if (has_hiviewdfx_hisysevent_part) {
 }
 defs = [ "POWER_GTEST" ]
 
+##############################test_power_shell#####################################
+ohos_unittest("test_power_shell") {
+  module_out_path = module_output_path
+  include_dirs = [ "${powermgr_utils_path}/shell/include" ]
+  sources = [
+    "${powermgr_utils_path}/shell/src/power_shell_command.cpp",
+    "src/power_shell_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  external_deps = deps_ex
+  external_deps += [
+    "ability_runtime:tools_aa_source_set",
+    "init:libbegetutil",
+  ]
+
+  deps = [ "${powermgr_inner_api}:powermgr_client" ]
+
+  if (has_display_manager_part) {
+    external_deps += [ "display_manager:displaymgr" ]
+  }
+}
+
+##############################multi_invoker_helper_test############################
+ohos_unittest("test_multi_invoker_helper") {
+  module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [
+    "src/multi_invoker_helper_test.cpp",
+    "${powermgr_service_path}/native/src/multi_invoker_helper/multi_invoker_helper.cpp"
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  defines += [ "POWERMGR_GTEST" ]
+
+  external_deps = deps_ex
+}
 ##############################client_test##########################################
 
 ohos_unittest("test_power_key_option") {
@@ -1823,6 +1885,7 @@ group("unittest") {
     ":test_mock_parcel",
     ":test_mock_peer",
     ":test_mock_proxy",
+    ":test_multi_invoker_helper",
     ":test_power_config_parse",
     ":test_power_config_parse_two",
     ":test_power_coordination_lock",
@@ -1844,6 +1907,7 @@ group("unittest") {
     ":test_power_parsesources_mock",
     ":test_power_screenon_mock",
     ":test_power_set_mode",
+    ":test_power_shell",
     ":test_power_shutdown_clinet",
     ":test_power_state_level_framework",
     ":test_power_state_machine",
