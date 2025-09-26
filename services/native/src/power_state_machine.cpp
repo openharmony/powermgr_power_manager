@@ -2075,22 +2075,6 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
 }
 
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-void PowerStateMachine::CancelAutoSleep()
-{
-    auto powerMS = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (powerMS != nullptr) {
-        auto suspendController = powerMS->GetSuspendController();
-        if (suspendController != nullptr) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "stop auto sleep");
-            suspendController->StopAutoSleep();
-        } else {
-            POWER_HILOGI(FEATURE_POWER_STATE, "suspendController is nullptr, can't stop sleep ffrt task");
-        }
-    }
-}
-#endif
-
 void PowerStateMachine::WriteHiSysEvent(TransitResult ret, StateChangeReason reason,
     int32_t beginTimeMs, PowerState state)
 {
