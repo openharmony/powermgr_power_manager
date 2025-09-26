@@ -158,9 +158,6 @@ public:
     void ResetSleepTimer();
     void SetAutoSuspend(SuspendDeviceType type, uint32_t delay);
     bool SetState(PowerState state, StateChangeReason reason, bool force = false);
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    void CancelAutoSleep();
-#endif
     bool TryToCancelScreenOff();
     void BeginPowerkeyScreenOff();
     void EndPowerkeyScreenOff();
