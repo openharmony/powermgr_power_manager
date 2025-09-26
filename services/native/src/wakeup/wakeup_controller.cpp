@@ -655,7 +655,9 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    if (!keyEvent->HasFlag(InputEvent::EVENT_FLAG_DISABLE_USER_ACTION)) {
+        pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    }
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
         return;
@@ -744,7 +746,9 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         return;
     }
     int64_t now = static_cast<int64_t>(time(nullptr));
-    pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    if (!pointerEvent->HasFlag(InputEvent::EVENT_FLAG_DISABLE_USER_ACTION)) {
+        pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    }
     PowerState state = pms->GetState();
     if (TouchEventAfterScreenOn(pointerEvent, state)) {
         return;

@@ -743,4 +743,64 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest022, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest022 function end!");
 }
 #endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest023
+ * @tc.desc: test OnInputEvent(keyEvent)
+ * @tc.type: FUNC
+ * @tc.require: issueICXI8K
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest023, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest023 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest023: start";
+    PowerMgrClient::GetInstance().SuspendDevice();
+    std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
+    InputCallback callback;
+    keyEvent->AddFlag(InputEvent::EVENT_FLAG_DISABLE_USER_ACTION);
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    powerStateMachine->mDeviceState_.lastRefreshActivityTime = 0;
+    callback.OnInputEvent(keyEvent);
+    int64_t time = powerStateMachine->GetLastRefreshActivityTime();
+    EXPECT_TRUE(time == 0);
+    keyEvent->ClearFlag();
+    powerStateMachine->mDeviceState_.lastRefreshActivityTime = 0;
+    callback.OnInputEvent(keyEvent);
+    time = powerStateMachine->GetLastRefreshActivityTime();
+    EXPECT_TRUE(time != 0);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest023: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest023 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest024
+ * @tc.desc: test OnInputEvent(pointerEvent)
+ * @tc.type: FUNC
+ * @tc.require: issueICXI8K
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest024, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest024 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest024: start";
+    PowerMgrClient::GetInstance().SuspendDevice();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    InputCallback callback;
+    pointerEvent->AddFlag(InputEvent::EVENT_FLAG_DISABLE_USER_ACTION);
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    powerStateMachine->mDeviceState_.lastRefreshActivityTime = 0;
+    callback.OnInputEvent(pointerEvent);
+    int64_t time = powerStateMachine->GetLastRefreshActivityTime();
+    EXPECT_TRUE(time == 0);
+    pointerEvent->ClearFlag();
+    powerStateMachine->mDeviceState_.lastRefreshActivityTime = 0;
+    callback.OnInputEvent(pointerEvent);
+    time = powerStateMachine->GetLastRefreshActivityTime();
+    EXPECT_TRUE(time != 0);
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest024: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest024 function end!");
+}
+#endif
 } // namespace
