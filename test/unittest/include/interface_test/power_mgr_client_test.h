@@ -18,7 +18,9 @@
 
 #include <gtest/gtest.h>
 #include <ipc_skeleton.h>
+#include <gmock/gmock.h>
 
+#include "permission.h"
 #include "mock_lock_action.h"
 #include "mock_power_action.h"
 #include "mock_state_action.h"
@@ -45,6 +47,17 @@ constexpr float DIM_RATE = 0.8;
 constexpr uint32_t DOUBLE_TIMES = 2;
 
 class PowerMgrClientTest : public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp(void);
+    void TearDown(void);
+    testing::NiceMock<MockStateAction>* stateActionMock {nullptr};
+    testing::NiceMock<MockStateAction>* shutdownStateActionMock {nullptr};
+    testing::NiceMock<MockPowerAction>* powerActionMock {nullptr};
+    testing::NiceMock<MockLockAction>* lockActionMock {nullptr};
+
+    static inline sptr<PowerMgrService> stub_ {nullptr};
 };
 } // namespace PowerMgr
 } // namespace OHOS

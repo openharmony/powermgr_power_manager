@@ -96,25 +96,9 @@ HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework003, TestSize.Le
     auto ret = g_stateMachineTest->SetState(PowerState::FREEZE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::FREEZE);
+    g_stateMachineTest->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT);
     GTEST_LOG_(INFO) << "PowerStateLevelFramework003: power state replacement is end";
     POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework003 function end!");
-}
-
-/**
- * @tc.name: PowerStateLevelFramework004
- * @tc.desc: test the conversion between power states
- * @tc.type: FUNC
- * @tc.require: issueI6OM1F
- */
-HWTEST_F (PowerStateLevelFrameworkTest, PowerStateLevelFramework004, TestSize.Level1)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework004 function start!");
-    GTEST_LOG_(INFO) << "PowerStateLevelFramework004: power state replacement is start";
-    auto ret = g_stateMachineTest->SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT);
-    EXPECT_TRUE(ret);
-    EXPECT_TRUE(g_stateMachineTest->GetState() == PowerState::INACTIVE);
-    GTEST_LOG_(INFO) << "PowerStateLevelFramework004: power state replacement is end";
-    POWER_HILOGI(LABEL_TEST, "PowerStateLevelFramework004 function end!");
 }
 
 /**

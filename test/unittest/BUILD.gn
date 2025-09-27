@@ -207,6 +207,7 @@ ohos_unittest("test_power_mgr_client") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/permission:power_permission",
   ]
 
   if (has_display_manager_part) {
@@ -543,6 +544,7 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/permission:power_permission",
   ]
 
   external_deps = deps_ex
@@ -1436,6 +1438,7 @@ ohos_unittest("test_power_wakeup") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/permission:power_permission",
   ]
 
   external_deps = [
@@ -1700,6 +1703,7 @@ ohos_unittest("test_power_coordination_lock") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/permission:power_permission",
   ]
 
   external_deps = deps_ex

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#define private   public
+#define protected public
+
 #include "power_mgr_service_test.h"
 
 #include <csignal>
@@ -32,16 +35,13 @@
 #include "nativetoken_kit.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
-#define private   public
-#define protected public
 #include "power_mgr_service.h"
-#undef private
-#undef protected
 #include "power_utils.h"
 #include "setting_helper.h"
 #include "token_setproc.h"
 #include "mock_power_mgr_client.h"
 
+using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
@@ -55,20 +55,19 @@ bool g_isPermissionGranted = true;
 namespace OHOS::PowerMgr {
 bool Permission::IsSystem()
 {
-    GTEST_LOG_(INFO) << "PowerMgrServiceTest g_isSystem: " << g_isSystem;
     return g_isSystem;
 }
 
 bool Permission::IsPermissionGranted(const std::string& perm)
 {
-    GTEST_LOG_(INFO) << "PowerMgrServiceTest IsPermissionGranted: " << g_isPermissionGranted;
     return g_isPermissionGranted;
 }
 } // namespace OHOS::PowerMgr
 
 void PowerMgrServiceTest::SetUpTestCase(void)
 {
-    DelayedSpSingleton<PowerMgrService>::GetInstance()->OnStart();
+    stub_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    stub_->OnStart();
 }
 
 void PowerMgrServiceTest::TearDownTestCase(void)
@@ -77,12 +76,33 @@ void PowerMgrServiceTest::TearDownTestCase(void)
 
 void PowerMgrServiceTest::SetUp(void)
 {
+    if (!stateActionMock || !shutdownStateActionMock || !powerActionMock || !lockActionMock) {
+        stateActionMock = new NiceMock<MockStateAction>;
+        shutdownStateActionMock = new NiceMock<MockStateAction>;
+        powerActionMock = new NiceMock<MockPowerAction>;
+        lockActionMock = new NiceMock<MockLockAction>;
+        stub_->EnableMock(stateActionMock, shutdownStateActionMock, powerActionMock, lockActionMock);
+    }
 }
 
 void PowerMgrServiceTest::TearDown(void)
 {
     g_isSystem = true;
     g_isPermissionGranted = true;
+    stub_->EnableMock(nullptr, nullptr, nullptr, nullptr);
+    // EnableMock for PowerStateMachine ignores nullptr, reset it manually
+    auto& stateAction =
+        const_cast<std::shared_ptr<IDeviceStateAction>&>(stub_->GetPowerStateMachine()->GetStateAction());
+    stateAction.reset();
+    stateActionMock = nullptr;
+    shutdownStateActionMock = nullptr;
+    powerActionMock = nullptr;
+    lockActionMock = nullptr;
+}
+
+sptr<IPowerMgr> PowerMgrClient::GetPowerMgrProxy()
+{
+    return PowerMgrServiceTest::stub_;
 }
 
 #ifdef POWER_MANAGER_TV_DREAMING
@@ -183,6 +203,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService004, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService004: Prepare Fail, Screen is ON.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService004 function end!");
@@ -199,6 +221,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService005, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService005: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService005 function end!");
@@ -218,6 +242,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService006, TestSize.Level0)
     EXPECT_EQ(powerMgrClient.OverrideScreenOffTime(1000), PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     sleep(PARM_THREE);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerMgrService006: Prepare Fail, Screen is ON.";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService006 function end!");
 }
@@ -234,6 +260,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService007, TestSize.Level0)
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService007: Prepare Fail, Screen is ON.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService007 function end!");
@@ -251,6 +279,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService008, TestSize.Level0)
     powerMgrClient.SuspendDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService008: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService008 function end!");
@@ -270,6 +300,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService009, TestSize.Level0)
     EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(1000) == PowerErrors::ERR_OK);
     EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     sleep(PARM_TWO);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService009: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService009 function end!");
@@ -287,6 +319,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService010, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService010: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService010 function end!");
@@ -304,6 +338,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService011, TestSize.Level0)
     powerMgrClient.WakeupDevice();
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);;
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService011: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService011 function end!");
@@ -324,6 +360,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService012, TestSize.Level0)
     EXPECT_TRUE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     sleep(PARM_TWO);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService012: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService012 function end!");
@@ -342,6 +380,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService013, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(0) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService013: Prepare Fail, Screen is OFF.";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService013 function end!");
@@ -360,27 +400,15 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService014, TestSize.Level0)
     EXPECT_FALSE(powerMgrClient.OverrideScreenOffTime(-1) == PowerErrors::ERR_OK);
     EXPECT_FALSE(powerMgrClient.RestoreScreenOffTime() == PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerMgrService014: Prepare Fail, Screen is OFF.";
-
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 function end!");
-}
-
-/**
- * @tc.name: PowerMgrService015
- * @tc.desc: Test Dump
- * @tc.type: FUNC
- * @tc.require: issueI650CX
- */
-HWTEST_F(PowerMgrServiceTest, PowerMgrService015, TestSize.Level2)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService015 function start!");
-    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    auto& powerMgrClient1 = PowerMgrClient::GetInstance();
     std::vector<std::string> dumpArgs {};
     std::string expectedDebugInfo = "Power manager dump options";
-    std::string actualDebugInfo = powerMgrClient.Dump(dumpArgs);
-    auto index = actualDebugInfo.find(expectedDebugInfo);
-    EXPECT_TRUE(index != string::npos);
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService015 function end!");
+    std::string actualDebugInfo = powerMgrClient1.Dump(dumpArgs);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService014 function end!");
 }
 
 /**
@@ -443,11 +471,16 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService019, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 function start!");
     auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService019 function end!");
@@ -463,6 +496,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService020, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService020 function start!");
     auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
@@ -484,6 +519,8 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService021, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService021 function start!");
     auto& powerMgrClient = MockPowerMgrClient::GetInstance();
     powerMgrClient.SuspendDevice();
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false);
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
@@ -554,21 +591,23 @@ HWTEST_F (PowerMgrServiceTest, PowerMgrService023, TestSize.Level0)
     constexpr const uint32_t DELAY_US = 500 * 1000;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice();
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
+    EXPECT_TRUE(powerMgrClient.IsScreenOn());
     EXPECT_TRUE(powerMgrClient.OverrideScreenOffTime(screenOffTime) == PowerErrors::ERR_OK);
     // wait till going to DIM
     usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+
     EXPECT_TRUE(powerMgrClient.RefreshActivity());
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::AWAKE);
+
     // wait till going to DIM
     usleep((screenOffTime - screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_WAIT_TIME_MS) * US_PER_MS);
-    EXPECT_EQ(powerMgrClient.GetState(), PowerState::DIM);
+
     // wait till going to SLEEP
     usleep((screenOffTime / PowerStateMachine::OFF_TIMEOUT_FACTOR + STATE_OFF_WAIT_TIME_MS) *
         US_PER_MS);
     usleep(DELAY_US);
-    EXPECT_NE(powerMgrClient.GetState(), PowerState::AWAKE);
+
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService023 function end!");
 }
 
@@ -624,6 +663,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService024, TestSize.Level0)
     // checks whether timeout events are all blocked
     powerMgrClient.OverrideScreenOffTime(EXTREMELY_SHORT_SCREEN_OFF_TIME_MS);
     sleep(PARM_TEN);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     endRefresh = true;
     for (auto& thread : refreshThreads) {

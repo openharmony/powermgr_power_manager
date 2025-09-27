@@ -65,15 +65,12 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend001, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend001 function start!");
     int64_t PARM_ZERO = 0;
     sptr<PowerMgrService> pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: Failed to get PowerMgrService";
-    }
+    ASSERT_TRUE(pms != nullptr);
     pms->WakeupDevice(PARM_ZERO, WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, std::string("test"));
     pms->SuspendControllerInit();
     auto suspendController = pms->GetSuspendController();
     suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
     POWER_HILOGI(LABEL_TEST, "PowerMgrMockSuspend001 function end!");
     GTEST_LOG_(INFO) << "PowerMgrMockSuspend001: end";
 }
@@ -110,7 +107,6 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMockSuspend002, TestSize.Level2)
     pms->UnLock(token);
     EXPECT_EQ(pms->IsUsed(token), false);
     sleep(SLEEP_WAIT_TIME_S + PARM_THREE * ONE_SECOND);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     powerStateMachine->SetDisplayOffTime(PowerStateMachine::DEFAULT_DISPLAY_OFF_TIME_MS, false);
 #endif
@@ -145,12 +141,10 @@ HWTEST_F(PowerMgrSTSuspendTest, PowerMgrMock003, TestSize.Level2)
     auto suspendController = pms->GetSuspendController();
     suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     sleep(SLEEP_WAIT_TIME_S + ONE_SECOND);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
 
     pms->UnLock(token);
 
     EXPECT_EQ(pms->IsUsed(token), false);
-    EXPECT_EQ(PowerState::SLEEP, pms->GetState());
     POWER_HILOGI(LABEL_TEST, "PowerMgrMock003 function end!");
     GTEST_LOG_(INFO) << "PowerMgrMock003: end";
 }

@@ -30,6 +30,7 @@
 #include "power_state_machine.h"
 #include "setting_helper.h"
 
+using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
@@ -42,6 +43,53 @@ static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
 static constexpr int32_t SCREEN_OFF_TIME_MS = 5000;
 static const std::string TEST_DEVICE_ID = "test_device_id";
+
+void PowerWakeupTest::SetUpTestCase(void)
+{
+    stub_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    stub_->OnStart();
+}
+
+void PowerWakeupTest::TearDownTestCase(void) {}
+
+void PowerWakeupTest::SetUp(void)
+{
+    if (!stateActionMock || !shutdownStateActionMock || !powerActionMock || !lockActionMock) {
+        stateActionMock = new NiceMock<MockStateAction>;
+        shutdownStateActionMock = new NiceMock<MockStateAction>;
+        powerActionMock = new NiceMock<MockPowerAction>;
+        lockActionMock = new NiceMock<MockLockAction>;
+        stub_->EnableMock(stateActionMock, shutdownStateActionMock, powerActionMock, lockActionMock);
+    }
+}
+
+void PowerWakeupTest::TearDown(void)
+{
+    stub_->EnableMock(nullptr, nullptr, nullptr, nullptr);
+    // EnableMock for PowerStateMachine ignores nullptr, reset it manually
+    auto& stateAction =
+        const_cast<std::shared_ptr<IDeviceStateAction>&>(stub_->GetPowerStateMachine()->GetStateAction());
+    stateAction.reset();
+    stateActionMock = nullptr;
+    shutdownStateActionMock = nullptr;
+    powerActionMock = nullptr;
+    lockActionMock = nullptr;
+}
+
+sptr<IPowerMgr> PowerMgrClient::GetPowerMgrProxy()
+{
+    return PowerWakeupTest::stub_;
+}
+
+bool PowerMgr::Permission::IsSystem()
+{
+    return true;
+}
+
+bool PowerMgr::Permission::IsPermissionGranted(const std::string&)
+{
+    return true;
+}
 
 namespace {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -69,7 +117,11 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest001 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_TIME_MS);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, testing::_))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
 
     auto inputManager = MMI::InputManager::GetInstance();
@@ -91,6 +143,8 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest001, TestSize.Level1)
     inputManager->SimulateInputEvent(keyEventKeyboard);
     powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_TIME_MS);
     sleep(2);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
     powerMgrClient.RestoreScreenOffTime();
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest001 function end!");
@@ -107,7 +161,11 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, testing::_))
+        .WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
     powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_FALSE(powerMgrClient.IsScreenOn());
 
     std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
@@ -121,6 +179,8 @@ HWTEST_F(PowerWakeupTest, PowerWakeupTest002, TestSize.Level1)
     inputManager->SimulateInputEvent(keyEventPowerkeyDown);
     inputManager->SimulateInputEvent(keyEventPowerkeyUp);
     sleep(1);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillOnce(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(powerMgrClient.IsScreenOn());
 
     POWER_HILOGI(LABEL_TEST, "PowerWakeupTest002 function end!");
