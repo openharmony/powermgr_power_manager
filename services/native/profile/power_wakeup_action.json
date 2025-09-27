@@ -19,6 +19,11 @@
         "action": 1,
         "description": "(such as)56 is a wakeup reason by reading node through HDI interface(GetWakeupReason)"
     },
+    "57": {
+        "scene": "UlsrWakeupAlarm",
+        "action": 0,
+        "description": "(such as)57 is a wakeup reason by reading node through HDI interface(GetWakeupReason)"
+    },
     "74": {
         "scene": "UlsrWakeupNearlinkRing",
         "action": 0,
