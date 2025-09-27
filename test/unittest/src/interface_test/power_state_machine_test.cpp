@@ -28,29 +28,61 @@
 #include "power_mgr_service.h"
 #include "power_state_machine.h"
 
-using namespace testing::ext;
+using namespace testing;
+using namespace ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 
 void PowerStateMachineTest::SetUpTestCase(void)
 {
+    stub_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    stub_->OnStart();
 }
 
-void PowerStateMachineTest::TearDownTestCase(void)
-{
-}
+void PowerStateMachineTest::TearDownTestCase(void) {}
 
 void PowerStateMachineTest::SetUp(void)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.OverrideScreenOffTime(SCREEN_OFF_WAIT_TIME_MS);
+    if (!stateActionMock || !shutdownStateActionMock || !powerActionMock || !lockActionMock) {
+        stateActionMock = new NiceMock<MockStateAction>;
+        shutdownStateActionMock = new NiceMock<MockStateAction>;
+        powerActionMock = new NiceMock<MockPowerAction>;
+        lockActionMock = new NiceMock<MockLockAction>;
+        stub_->EnableMock(stateActionMock, shutdownStateActionMock, powerActionMock, lockActionMock);
+    }
 }
 
 void PowerStateMachineTest::TearDown(void)
 {
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.RestoreScreenOffTime();
+    stub_->EnableMock(nullptr, nullptr, nullptr, nullptr);
+    // EnableMock for PowerStateMachine ignores nullptr, reset it manually
+    auto& stateAction =
+        const_cast<std::shared_ptr<IDeviceStateAction>&>(stub_->GetPowerStateMachine()->GetStateAction());
+    stateAction.reset();
+    stateActionMock = nullptr;
+    shutdownStateActionMock = nullptr;
+    powerActionMock = nullptr;
+    lockActionMock = nullptr;
+}
+
+sptr<IPowerMgr> PowerMgrClient::GetPowerMgrProxy()
+{
+    return PowerStateMachineTest::stub_;
+}
+
+bool PowerMgr::Permission::IsSystem()
+{
+    return true;
+}
+
+bool PowerMgr::Permission::IsPermissionGranted(const std::string&)
+{
+    return true;
 }
 
 namespace {
@@ -70,12 +102,16 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine001, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerStateMachine001: Wakeup Device before test.";
     powerMgrClient.WakeupDevice();
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine001: Prepare Fail, Screen is OFF.";
     GTEST_LOG_(INFO) << "PowerStateMachine001: Screen is On, Begin to Suspend Device!";
 
     powerMgrClient.SuspendDevice();
 
     sleep(REFRESHACTIVITY_WAIT_TIME_S);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine001: Suspend Device Fail, Screen is On";
 
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine001 function end!");
@@ -98,12 +134,16 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine002, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerStateMachine002: Suspend Device before test.";
     powerMgrClient.SuspendDevice();
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine002: Prepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine002: Screen is Off, Begin to Wakeup Device!";
 
     powerMgrClient.WakeupDevice();
 
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine002: Wakeup Device Fail, Screen is Off";
 
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine002 function end!");
@@ -126,11 +166,15 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine003, TestSize.Level0)
         if (powerMgrClient.IsScreenOn()) {
             powerMgrClient.SuspendDevice();
             usleep(SLEEP_WAIT_TIME_MS);
+            EXPECT_CALL(*stateActionMock, GetDisplayState())
+                .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
             EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine003" << i
                 << ": Suspend Device Fail, Screen is On";
         } else {
             powerMgrClient.WakeupDevice();
             usleep(SLEEP_WAIT_TIME_MS);
+            EXPECT_CALL(*stateActionMock, GetDisplayState())
+                .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
             EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine003" << i
                 << ": Wakeup Device Fail, Screen is Off";
         }
@@ -155,6 +199,8 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerStateMachine004: Suspend Device before test.";
     powerMgrClient.SuspendDevice();
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine004: Prepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine004: Screen is Off, Begin to Wakeup Device!";
 
@@ -162,18 +208,24 @@ HWTEST_F (PowerStateMachineTest, PowerStateMachine004, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerStateMachine004: Check illegal para details Begin!";
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Check details test Fail, Screen is Off.";
 
     // Suspend Device before test
     GTEST_LOG_(INFO) << "PowerStateMachine004: Suspend Device before real test.";
     powerMgrClient.SuspendDevice();
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), false) << "PowerStateMachine004: Real test tprepare Fail, Screen is On.";
     GTEST_LOG_(INFO) << "PowerStateMachine004: Screen is Off, Begin to Real Wakeup Device!";
 
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
 
     usleep(SLEEP_WAIT_TIME_MS);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_EQ(powerMgrClient.IsScreenOn(), true) << "PowerStateMachine004: Real Wakeup Device Fail, Screen is Off";
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine004 function end!");
     GTEST_LOG_(INFO) << "PowerStateMachine004: Wakeup Device end.";

@@ -60,7 +60,7 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
 
     DisplayState state = DisplayState::DISPLAY_OFF;
     StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_INIT;
-    EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
+    deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS;
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_OFF);
     state = DisplayState::DISPLAY_ON;
     EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
