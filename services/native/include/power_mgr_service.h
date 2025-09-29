@@ -203,7 +203,6 @@ public:
     void PowerConnectStatusInit();
     bool IsPowerConnected();
     void UpdateSettingInvalidDisplayOffTime();
-    int64_t GetSettingPowerSleepTime(int64_t defaultTime);
 #endif
     void OnChargeStateChanged();
 
