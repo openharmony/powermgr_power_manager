@@ -719,8 +719,15 @@ int64_t SuspendController::GetSettingPowerSleepTime(int64_t defaultTime)
     return settingTime;
 }
 
-uint32_t SuspendController::CalculateAutoSleepDelay(int64_t displayOffTime, int64_t powerSleepTime)
+uint32_t SuspendController::CalculateAutoSleepDelay()
 {
+    int64_t displayOffTime = 0;
+    int64_t powerSleepTime = 0;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr) {
+        displayOffTime = pms->GetSettingDisplayOffTime(POWER_SLEEP_DEFAULT_TIME);
+    }
+    powerSleepTime = GetSettingPowerSleepTime(POWER_SLEEP_DEFAULT_TIME);
     if (powerSleepTime == POWER_SLEEP_NEVER) {
         return static_cast<uint32_t>(POWER_SLEEP_NEVER);
     }
@@ -735,14 +742,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    int64_t displayOffTime = 0;
-    int64_t powerSleepTime = 0;
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms != nullptr) {
-        displayOffTime = pms->GetSettingDisplayOffTime(POWER_SLEEP_DEFAULT_TIME);
-    }
-    powerSleepTime = GetSettingPowerSleepTime(POWER_SLEEP_DEFAULT_TIME);
-    uint32_t delay = CalculateAutoSleepDelay(displayOffTime, powerSleepTime);
+    uint32_t delay = CalculateAutoSleepDelay();
     if (delay == static_cast<uint32_t>(POWER_SLEEP_NEVER)) {
         POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
         return;
