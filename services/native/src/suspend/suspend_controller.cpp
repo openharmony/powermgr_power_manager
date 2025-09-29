@@ -728,6 +728,8 @@ uint32_t SuspendController::CalculateAutoSleepDelay()
         displayOffTime = pms->GetSettingDisplayOffTime(POWER_SLEEP_DEFAULT_TIME);
     }
     powerSleepTime = GetSettingPowerSleepTime(POWER_SLEEP_DEFAULT_TIME);
+    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}ld), powerSleepTime(%{public}ld)",
+        __func__, displayOffTime, powerSleepTime);
     if (powerSleepTime == POWER_SLEEP_NEVER) {
         return static_cast<uint32_t>(POWER_SLEEP_NEVER);
     }
@@ -747,8 +749,6 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
         POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
         return;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}ld), powerSleepTime(%{public}ld)",
-        __func__, displayOffTime, powerSleepTime);
     if (delay == POWER_SLEEP_NOW) {
         POWER_HILOGI(FEATURE_SUSPEND, "start auto sleep");
         SetAutoSleep(reason);
