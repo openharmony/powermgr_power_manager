@@ -44,7 +44,7 @@ sptr<SettingObserver> g_suspendSourcesKeyAcObserver = nullptr;
 sptr<SettingObserver> g_suspendSourcesKeyDcObserver = nullptr;
 constexpr int64_t POWER_SLEEP_DEFAULT_TIME = 60000; // ms
 constexpr int64_t POWER_SLEEP_NEVER = -1;
-constexpr uint32_t POWER_SLEEP_NOW = 0;
+constexpr int64_t POWER_SLEEP_NOW = 0;
 #else
 sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 #endif
@@ -719,7 +719,7 @@ int64_t SuspendController::GetSettingPowerSleepTime(int64_t defaultTime)
     return settingTime;
 }
 
-uint32_t SuspendController::CalculateAutoSleepDelay()
+int64_t SuspendController::CalculateAutoSleepResult()
 {
     int64_t displayOffTime = 0;
     int64_t powerSleepTime = 0;
@@ -731,12 +731,12 @@ uint32_t SuspendController::CalculateAutoSleepDelay()
     POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: displayOffTime(%{public}ld), powerSleepTime(%{public}ld)",
         __func__, displayOffTime, powerSleepTime);
     if (powerSleepTime == POWER_SLEEP_NEVER) {
-        return static_cast<uint32_t>(POWER_SLEEP_NEVER);
+        return POWER_SLEEP_NEVER;
     }
     if (powerSleepTime <= displayOffTime) {
         return POWER_SLEEP_NOW;
     }
-    return static_cast<uint32_t>(powerSleepTime - displayOffTime);
+    return powerSleepTime - displayOffTime;
 }
 #endif
 
@@ -744,16 +744,17 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    uint32_t delay = CalculateAutoSleepDelay();
-    if (delay == static_cast<uint32_t>(POWER_SLEEP_NEVER)) {
+    int64_t autoSleepResult = CalculateAutoSleepResult();
+    if (autoSleepResult == POWER_SLEEP_NEVER) {
         POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
         return;
     }
-    if (delay == POWER_SLEEP_NOW) {
+    if (autoSleepResult == POWER_SLEEP_NOW) {
         POWER_HILOGI(FEATURE_SUSPEND, "start auto sleep");
         SetAutoSleep(reason);
         return;
     }
+    uint32_t delay = static_cast<uint32_t>(autoSleepResult);
     FFRTTask task = [this, reason] {
         SetAutoSleep(reason);
     };
