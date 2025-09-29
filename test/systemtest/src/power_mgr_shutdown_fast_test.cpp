@@ -143,6 +143,7 @@ HWTEST_F(PowerMgrShutDownFast, PowerMgr_FastShutDown_002, TestSize.Level2)
     EXPECT_TRUE(powerMgrClient.GetState() == PowerState::INACTIVE ||
         powerMgrClient.GetState() == PowerState::SLEEP);
     EXPECT_TRUE(g_action.empty());
+
     POWER_HILOGI(LABEL_TEST, "PowerMgr_FastShutDown_002 function end!");
 }
 }

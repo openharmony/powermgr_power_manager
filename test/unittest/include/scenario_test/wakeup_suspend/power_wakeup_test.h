@@ -17,6 +17,12 @@
 #define POWER_WAKEUP_TEST_H
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "permission.h"
+#include "power_mgr_service.h"
+#include <mock_lock_action.h>
+#include <mock_power_action.h>
+#include <mock_state_action.h>
 
 #ifdef POWERMGR_GTEST
 #define private   public
@@ -27,6 +33,16 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerWakeupTest : public testing::Test {
 public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp(void);
+    void TearDown(void);
+    testing::NiceMock<MockStateAction>* stateActionMock {nullptr};
+    testing::NiceMock<MockStateAction>* shutdownStateActionMock {nullptr};
+    testing::NiceMock<MockPowerAction>* powerActionMock {nullptr};
+    testing::NiceMock<MockLockAction>* lockActionMock {nullptr};
+
+    static inline sptr<PowerMgrService> stub_ {nullptr};
 };
 } // namespace PowerMgr
 } // namespace OHOS

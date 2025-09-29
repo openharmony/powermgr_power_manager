@@ -33,6 +33,9 @@
 #include "power_state_machine.h"
 #include "setting_helper.h"
 #include "power_state_machine_info.h"
+#include "mock_lock_action.h"
+#include "mock_power_action.h"
+#include "mock_state_action.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -42,16 +45,37 @@ static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
 static constexpr int NEXT_WAIT_TIME_S = 1;
 
+static MockStateAction* g_shutdownState;
+static MockStateAction* g_stateAction;
+static MockPowerAction* g_powerAction;
+static MockLockAction* g_lockAction;
+
+static void ResetMockAction()
+{
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
+    g_stateAction = new MockStateAction();
+    g_shutdownState = new MockStateAction();
+    g_powerAction = new MockPowerAction();
+    g_lockAction = new MockLockAction();
+    g_service->EnableMock(g_stateAction, g_shutdownState, g_powerAction, g_lockAction);
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:End");
+}
+
 void PowerSuspendControllerTest::SetUpTestCase(void)
 {
     g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_service->OnStart();
+    ResetMockAction();
 }
 
 void PowerSuspendControllerTest::TearDownTestCase(void)
 {
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
+    delete g_shutdownState;
+    delete g_stateAction;
+    delete g_powerAction;
+    delete g_lockAction;
 }
 
 class SuspendPowerStateCallback : public PowerStateCallbackStub {
@@ -202,6 +226,8 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest007, TestSize.Lev
     g_service->SuspendControllerInit();
     g_service->suspendController_->stateMachine_->stateAction_->SetDisplayState(DisplayState::DISPLAY_OFF);
     g_service->suspendController_->RecordPowerKeyDown();
+    EXPECT_CALL(*g_stateAction, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_TRUE(
         g_service->suspendController_->stateMachine_->stateAction_->GetDisplayState() == DisplayState::DISPLAY_OFF);
     g_service->suspendController_->powerkeyDownWhenScreenOff_ = false;
@@ -248,6 +274,11 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Lev
         WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendControllerTest009");
 
     g_service->suspendController_->stateMachine_->EmplaceInactive();
+    EXPECT_CALL(*g_stateAction, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_ON, testing::_))
+        .Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(ActionResult::FAILED));
     g_service->WakeupDevice(static_cast<int64_t>(time(nullptr)),
         WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, "PowerSuspendControllerTest009");
     g_service->suspendController_->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT, 1, 0);
