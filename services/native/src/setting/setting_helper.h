@@ -56,6 +56,8 @@ public:
     static const std::string GetSettingDcSuspendSources();
     static void SetSettingDcSuspendSources(const std::string& jsonConfig);
     static sptr<SettingObserver> RegisterSettingDcSuspendSourcesObserver(SettingObserver::UpdateFunc& func);
+    static int64_t GetSettingPowerAcSleepTime(int64_t defaultVal);
+    static int64_t GetSettingPowerDcSleepTime(int64_t defaultVal);
 #else
     static int64_t GetSettingDisplayOffTime(int64_t defaultVal);
     static void SetSettingDisplayOffTime(int64_t time);
@@ -129,6 +131,8 @@ private:
     // DC for Direct Current, means battery supply
     static constexpr const char* SETTING_DISPLAY_AC_OFF_TIME_KEY {"settings.display.ac.screen_off_timeout"};
     static constexpr const char* SETTING_DISPLAY_DC_OFF_TIME_KEY {"settings.display.dc.screen_off_timeout"};
+    static constexpr const char* SETTING_POWER_AC_SLEEP_TIME_KEY {"settings.power.ac.sleep_timeout"};
+    static constexpr const char* SETTING_POWER_DC_SLEEP_TIME_KEY {"settings.power.dc.sleep_timeout"};
     static constexpr const char* SETTING_POWER_AC_SUSPEND_SOURCES_KEY {"settings.power.ac.suspend_sources"};
     static constexpr const char* SETTING_POWER_DC_SUSPEND_SOURCES_KEY {"settings.power.dc.suspend_sources"};
 #else
