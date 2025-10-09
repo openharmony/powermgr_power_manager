@@ -2002,6 +2002,11 @@ bool PowerStateMachine::CheckFFRTTaskAvailability(PowerState state, StateChangeR
         POWER_HILOGE(FEATURE_POWER_STATE, "ffrtTimer_ is nullptr");
         return false;
     }
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (curTask == ffrtTimer_->GetTaskHandlePtr(TIMER_ID_AUTO_SLEEP)) {
+        return true;
+    }
+#endif
     const void* pendingTask = nullptr;
     switch (state) {
         case PowerState::DIM:
