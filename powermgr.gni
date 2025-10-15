@@ -42,7 +42,7 @@ declare_args() {
   power_manager_feature_watch_update_adapt = false
   power_manager_feature_watch_boot_completed = false
   power_manager_feature_surport_takeover_suspend = false
-  power_manager_feature_init_proximity_controller = false
+  power_manager_feature_proximity_controller_override = false
   power_manager_feature_enable_lid_check = false
   power_manager_feature_lid_fold = false
 }
@@ -61,8 +61,8 @@ if (power_manager_feature_audio_lock_unproxy) {
   defines += [ "POWER_MANAGER_AUDIO_LOCK_UNPROXY" ]
 }
 
-if (power_manager_feature_init_proximity_controller) {
-  defines += [ "POWER_MANAGER_INIT_PROXIMITY_CONTROLLER" ]
+if (power_manager_feature_proximity_controller_override) {
+  defines += [ "POWER_MANAGER_PROXIMITY_CONTROLLER_OVERRIDE" ]
 }
 
 if (power_manager_feature_enable_lid_check) {
