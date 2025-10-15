@@ -19,6 +19,7 @@ import("../../../../powermgr_test.gni")
 config("module_mock_private_config") {
   include_dirs = [
     "${powermgr_test_path}/unittest/include/mock",
+    "${powermgr_test_path}/mock/action",
     "${powermgr_service_path}/native/include",
     "${powermgr_service_path}/native/src/",
     "${powermgr_service_path}/native/src/actions/",

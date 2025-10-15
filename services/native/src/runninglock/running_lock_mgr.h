@@ -88,7 +88,7 @@ private:
 #ifdef HAS_SENSORS_SENSOR_PART
     void InitLocksTypeProximity();
     bool InitProximityController();
-    void HandleProximityCloseEvent();
+    void HandleProximityCloseEvent(bool needDelay = true);
     void HandleProximityAwayEvent();
     bool IsVoiceAppForeground();
 #endif
