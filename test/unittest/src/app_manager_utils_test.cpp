@@ -46,8 +46,10 @@ HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest001, TestSize.Level0)
 HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 function start!");
-    std::string unExistApp = "com.example.UNEXISTED_APP";
+    std::set<std::string> unExistApp;
     bool res = AppManagerUtils::IsForegroundApplication(unExistApp);
+    unExistApp.insert("com.example.UNEXISTED_APP");
+    res = AppManagerUtils::IsForegroundApplication(unExistApp);
     EXPECT_FALSE(res);
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 function end!");
 }

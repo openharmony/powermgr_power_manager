@@ -27,7 +27,7 @@ class AppManagerUtils final {
 public:
     static sptr<OHOS::AppExecFwk::IAppMgr> GetAppManagerInstance();
     static void GetForegroundApplications(std::vector<OHOS::AppExecFwk::AppStateData>& appsData);
-    static bool IsForegroundApplication(const std::string& appName);
+    static bool IsForegroundApplication(const std::set<std::string>& appNames);
     static int32_t GetApiTargetVersion();
 
 private:
