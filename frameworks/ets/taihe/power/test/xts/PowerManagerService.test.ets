@@ -49,10 +49,14 @@ export default function PowerManagerServiceTest() {
           power_.wakeup("PowerManagerServiceTest0200");
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
-          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
-          expect(e.code).assertEqual(ERROR_CODE);
-          done();
+        } catch (e) {
+          if (e instanceof BusinessError) {
+            hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+            expect(e.code).assertEqual(ERROR_CODE);
+            done();
+          } else {
+            throw e;
+          }
         }
       })
     it("PowerManagerServiceTest0300", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
@@ -63,10 +67,14 @@ export default function PowerManagerServiceTest() {
           power_.suspend(true);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
-          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
-          expect(e.code).assertEqual(ERROR_CODE);
-          done();
+        } catch (e) {
+          if (e instanceof BusinessError) {
+            hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+            expect(e.code).assertEqual(ERROR_CODE);
+            done();
+          } else {
+            throw e;
+          }
         }
       })
     it("PowerManagerServiceTest0400", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
@@ -77,10 +85,14 @@ export default function PowerManagerServiceTest() {
           power_.suspend(false);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
-          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
-          expect(e.code).assertEqual(ERROR_CODE);
-          done();
+        } catch (e) {
+          if (e instanceof BusinessError) {
+            hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+            expect(e.code).assertEqual(ERROR_CODE);
+            done();
+          } else {
+            throw e;
+          }
         }
       })
     it("PowerManagerServiceTest0500", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
@@ -91,10 +103,14 @@ export default function PowerManagerServiceTest() {
           power_.suspend();
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
-          hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
-          expect(e.code).assertEqual(ERROR_CODE);
-          done();
+        } catch (e) {
+          if (e instanceof BusinessError) {
+            hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
+            expect(e.code).assertEqual(ERROR_CODE);
+            done();
+          } else {
+            throw e;
+          }
         }
       })
     it("PowerManagerServiceTest0600", TestType.FUNCTION | Size.MEDIUMTEST | Level.LEVEL1,
@@ -120,7 +136,10 @@ export default function PowerManagerServiceTest() {
           await power_.setPowerMode(power_.DevicePowerMode.MODE_PERFORMANCE);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)) {
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -134,7 +153,10 @@ export default function PowerManagerServiceTest() {
           await power_.setPowerMode(power_.DevicePowerMode.MODE_PERFORMANCE);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)){
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -162,7 +184,7 @@ export default function PowerManagerServiceTest() {
           power_.setScreenOffTime(3000);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -212,7 +234,10 @@ export default function PowerManagerServiceTest() {
           power_.shutdown("PowerManagerServiceTest1500");
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)) {
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -227,7 +252,10 @@ export default function PowerManagerServiceTest() {
           power_.reboot("PowerManagerServiceTest1600");
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)) {
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -242,7 +270,10 @@ export default function PowerManagerServiceTest() {
           power_.hibernate(true);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)) {
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -256,7 +287,10 @@ export default function PowerManagerServiceTest() {
           power_.hibernate(false);
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)) {
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();

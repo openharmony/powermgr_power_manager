@@ -48,7 +48,10 @@ export default function RunningLockTest() {
           })
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)){
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
@@ -70,7 +73,10 @@ export default function RunningLockTest() {
           expect(typeof isHold).assertEqual('boolean');
           console.info(TAG + ' end');
           done();
-        } catch (e : BusinessError) {
+        } catch (e) {
+          if (!(e instanceof BusinessError)) {
+            throw e;
+          }
           hilog.error(domain, tag, '%{public}s', JSON.stringify(e));
           expect(e.code).assertEqual(ERROR_CODE);
           done();
