@@ -19,6 +19,7 @@
 #define private public
 #include "power_mgr_service.h"
 #undef private
+#include "mock_state_action.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -37,13 +38,38 @@ namespace OHOS {
 namespace PowerMgr {
 class ProximityRunningLockTest : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
-    void SetUp();
-    void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() {};
+    void TearDown() {};
+    bool HoldProximityLock();
+    bool UnholdProximityLock();
+private:
+    static inline sptr<IRemoteObject> lockToken_ {nullptr};
 };
 
-void ProximityRunningLockTest::SetUp()
+bool ProximityRunningLockTest::HoldProximityLock()
+{
+    if (lockToken_ == nullptr) {
+        lockToken_ = sptr<RunningLockTokenStub>::MakeSptr();
+        RunningLockInfo info = {"ProximityRunningLockTest", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL};
+        g_pmsTest->CreateRunningLock(lockToken_, info);
+    }
+    g_pmsTest->Lock(lockToken_);
+    return true;
+}
+
+bool ProximityRunningLockTest::UnholdProximityLock()
+{
+    if (lockToken_ == nullptr) {
+        POWER_HILOGE(LABEL_TEST, "lockToken_ is nullptr");
+        return false;
+    }
+    g_pmsTest->UnLock(lockToken_);
+    return true;
+}
+
+void ProximityRunningLockTest::SetUpTestCase()
 {
     g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     EXPECT_TRUE(g_pmsTest != nullptr) << "ProximityRunningLockTest fail to get PowerMgrService";
@@ -52,7 +78,7 @@ void ProximityRunningLockTest::SetUp()
     g_pmsTest->WakeupControllerInit();
 }
 
-void ProximityRunningLockTest::TearDown()
+void ProximityRunningLockTest::TearDownTestCase()
 {
     g_pmsTest->OnStop();
 }
@@ -73,9 +99,6 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest001, TestSize.Level1)
     SensorEvent closeEvent = {
         .sensorTypeId = SENSOR_TYPE_ID_PROXIMITY,
         .data = reinterpret_cast<uint8_t *>(&closeData) };
-    sptr<IRemoteObject> runningLockToken = sptr<RunningLockTokenStub>::MakeSptr();
-    RunningLockInfo info = {"ProximityRunningLockTest", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL};
-    g_pmsTest->CreateRunningLock(runningLockToken, info);
 
     ProximityData awayData = {.distance = ProximityControllerBase::PROXIMITY_AWAY_SCALAR};
     SensorEvent awayEvent = {
@@ -83,7 +106,7 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest001, TestSize.Level1)
         .data = reinterpret_cast<uint8_t *>(&awayData) };
     // Try three times
     for (int i = 0; i < TRY_TIMES; ++i) {
-        g_pmsTest->Lock(runningLockToken);
+        HoldProximityLock();
         RunningLockMgr::ProximityController::RecordSensorCallback(&closeEvent);
         usleep((SLEEP_WAIT_TIME_MS + DELAY_WORK_WAIT_TIME_MS) * TRANSFER_NS_TO_MS);
         POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest close IsScreenOn:%{public}d", g_pmsTest->IsScreenOn());
@@ -104,7 +127,7 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest001, TestSize.Level1)
         g_pmsTest->GetRunningLockMgr()->HandleProximityAwayEvent();
         g_pmsTest->GetPowerStateMachine()->SetDuringCallState(false);
         EXPECT_TRUE(g_pmsTest->IsScreenOn());
-        g_pmsTest->UnLock(runningLockToken);
+        UnholdProximityLock();
         usleep(SLEEP_WAIT_TIME_MS * TRANSFER_NS_TO_MS / 10); // 100ms for unlock async screen on
         if (i) {
             g_pmsTest->isDuringCallStateEnable_ = false;
@@ -112,5 +135,32 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest001, TestSize.Level1)
         }
     }
     POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest001 function end!");
+}
+
+/**
+ * @tc.name: ProximityRunningLockTest002
+ * @tc.desc: Test HandleProximityCloseEvent needDelay false
+ * @tc.type: FUNC
+ * @tc.require: issues#1567
+ */
+HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest002, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest002 function start!");
+    auto stateMachine = g_pmsTest->GetPowerStateMachine();
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
+    HoldProximityLock();
+    g_pmsTest->GetRunningLockMgr()->HandleProximityCloseEvent(false);
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_FALSE(g_pmsTest->IsScreenOn());
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
+        .WillOnce(::testing::Return(ActionResult::FAILED));
+    UnholdProximityLock();
+    ::testing::Mock::AllowLeak(stateActionMock);
+    POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest002 function end!");
 }
 } // namespace

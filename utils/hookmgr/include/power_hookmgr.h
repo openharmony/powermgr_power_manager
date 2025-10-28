@@ -41,7 +41,7 @@ struct RebootCmdInfo {
 
 struct ProximityControllerContext {
     std::shared_ptr<IProximityController> controllerPtr {nullptr};
-    std::function<void(uint32_t)> action {nullptr};
+    std::function<void(uint32_t, bool)> action {nullptr};
 };
 
 HOOK_MGR* GetPowerHookMgr();

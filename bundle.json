@@ -47,6 +47,7 @@
             "power_manager_feature_judging_takeover_shutdown",
             "power_manager_feature_watch_limit_screen_common_event_publish",
             "power_manager_feature_watch_update_adapt",
+            "power_manager_feature_proximity_controller_override",
             "power_manager_feature_surport_takeover_suspend",
             "power_manager_feature_enable_lid_check",
             "power_manager_feature_lid_fold"
