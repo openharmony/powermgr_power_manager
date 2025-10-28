@@ -1189,7 +1189,7 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
     std::lock_guard lock(mutex_);
     int64_t now = GetTickCount();
     // Send Notification event
-    SendEventToPowerMgrNotify(state, now);
+    SendEventToPowerMgrNotify(state, now, PowerUtils::GetReasonTypeString(reason));
 
     // Call back all native function
     for (auto& listener : asyncPowerStateListeners_) {
@@ -1213,7 +1213,7 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
     }
 }
 
-void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t callTime)
+void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t callTime, const std::string& reason)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -1229,8 +1229,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
     switch (state) {
         case PowerState::AWAKE: {
             DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
-                notify, PowerState::AWAKE, callTime);
-            notify->PublishScreenOnEvents(callTime);
+                notify, PowerState::AWAKE, callTime, reason);
             isAwakeNotified_.store(true, std::memory_order_relaxed);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
             auto suspendController = pms->GetSuspendController();
@@ -1244,8 +1243,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         }
         case PowerState::INACTIVE: {
             DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
-                notify, PowerState::INACTIVE, callTime);
-            notify->PublishScreenOffEvents(callTime);
+                notify, PowerState::INACTIVE, callTime, reason);
             isAwakeNotified_.store(false, std::memory_order_relaxed);
             break;
         }
