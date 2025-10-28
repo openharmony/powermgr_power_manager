@@ -366,7 +366,7 @@ private:
     bool CanTransitTo(PowerState from, PowerState to, StateChangeReason reason);
     void NotifyPowerStateChanged(PowerState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
-    void SendEventToPowerMgrNotify(PowerState state, int64_t callTime);
+    void SendEventToPowerMgrNotify(PowerState state, int64_t callTime, const std::string& reason);
     bool CheckRunningLock(PowerState state);
     void HandleActivityTimeout();
     void HandleActivitySleepTimeout();
