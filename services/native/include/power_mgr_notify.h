@@ -28,8 +28,8 @@ namespace PowerMgr {
 class PowerMgrNotify {
 public:
     void RegisterPublishEvents();
-    void PublishScreenOffEvents(int64_t eventTime);
-    void PublishScreenOnEvents(int64_t eventTime);
+    void PublishScreenOffEvents(int64_t eventTime, const std::string& reason);
+    void PublishScreenOnEvents(int64_t eventTime, const std::string& reason);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     void PublishEnterForceSleepEvents(int64_t eventTime);
     void PublishExitForceSleepEvents(int64_t eventTime);

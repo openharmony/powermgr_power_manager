@@ -73,7 +73,7 @@ void CustomizedScreenEventRules::NotifyOperateEventAfterScreenOn()
 #endif
 
 void CustomizedScreenEventRules::SendCustomizedScreenEvent(
-    std::shared_ptr<PowerMgrNotify> notify, PowerState state, int64_t callTime)
+    std::shared_ptr<PowerMgrNotify> notify, PowerState state, int64_t callTime, const std::string& reason)
 {
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     if (state == PowerState::AWAKE) {
@@ -83,9 +83,9 @@ void CustomizedScreenEventRules::SendCustomizedScreenEvent(
     }
 #else
     if (state == PowerState::AWAKE) {
-        notify->PublishScreenOnEvents(callTime);
+        notify->PublishScreenOnEvents(callTime, reason);
     } else if (state == PowerState::INACTIVE) {
-        notify->PublishScreenOffEvents(callTime);
+        notify->PublishScreenOffEvents(callTime, reason);
     }
 #endif
 }

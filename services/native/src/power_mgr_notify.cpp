@@ -75,7 +75,7 @@ void PowerMgrNotify::PublishEvents(int64_t eventTime, sptr<IntentWant> want)
     CommonEventManager::PublishCommonEvent(event, *publishInfo_, nullptr);
 }
 
-void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
+void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime, const std::string& reason)
 {
     if (screenOffWant_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
@@ -83,11 +83,12 @@ void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
     }
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         screenOffWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    screenOffWant_->SetParam("reason", reason);
     PublishEvents(eventTime, screenOffWant_);
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", screenOffWant_->GetAction().c_str());
 }
 
-void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
+void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime, const std::string& reason)
 {
     if (screenOnWant_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
@@ -95,6 +96,7 @@ void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
     }
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
         screenOnWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    screenOnWant_->SetParam("reason", reason);
     PublishEvents(eventTime, screenOnWant_);
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", screenOnWant_->GetAction().c_str());
 }

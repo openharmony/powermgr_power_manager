@@ -42,7 +42,8 @@ public:
     static void NotifyOperateEventAfterScreenOn();
     static std::vector<std::string> GetForegroundBundleNames();
 #endif
-    void SendCustomizedScreenEvent(std::shared_ptr<PowerMgrNotify> notify, PowerState state, int64_t callTime);
+    void SendCustomizedScreenEvent(
+        std::shared_ptr<PowerMgrNotify> notify, PowerState state, int64_t callTime, const std::string& reason);
 };
 }  //namespace PowerMgr
 }  //namespace OHOS
