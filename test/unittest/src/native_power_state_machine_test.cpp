@@ -18,6 +18,7 @@
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
+#include "mock_state_action.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -643,4 +644,26 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine016, TestSize.Level
 }
 #endif
 #endif
+
+/**
+ * @tc.name: NativePowerStateMachine017
+ * @tc.desc: test HandleProximityClose
+ * @tc.type: FUNC
+ * @tc.require: issues#1567
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine017, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine017 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
+        .WillOnce(::testing::Return(ActionResult::FAILED));
+    stateMachine->HandleProximityClose();
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine017 function end!");
+}
 } // namespace

@@ -1282,6 +1282,26 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wpt
     FFRTUtils::SubmitTask(unRegFunc);
 }
 
+void PowerStateMachine::HandleProximityClose()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
+        return;
+    }
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGW(
+            FEATURE_POWER_STATE, "suspendController is nullptr, exit proximity-screen-off task");
+        return;
+    }
+    bool ret = SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
+    if (ret) {
+        suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
+            static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
+    }
+}
+
 void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
 {
     if (!ffrtTimer_) {
@@ -1311,18 +1331,7 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
             FFRTTask delayScreenOffTask = [this] {
                 POWER_HILOGI(FEATURE_POWER_STATE, "proximity-screen-off timer task is triggered");
                 proximityScreenOffTimerStarted_.store(false, std::memory_order_relaxed);
-                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-                auto suspendController = pms->GetSuspendController();
-                if (suspendController == nullptr) {
-                    POWER_HILOGW(
-                        FEATURE_POWER_STATE, "suspendController is nullptr, exit proximity-screen-off timer task");
-                    return;
-                }
-                bool ret = SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY, true);
-                if (ret) {
-                    suspendController->StartSleepTimer(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-                        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), 0);
-                }
+                HandleProximityClose();
             };
             ffrtTimer_->SetTimer(TIMER_ID_PROXIMITY_SCREEN_OFF, delayScreenOffTask, delayTime);
             proximityScreenOffTimerStarted_.store(true, std::memory_order_relaxed);

@@ -32,7 +32,7 @@ constexpr uint32_t CLOSE_PROXIMITY_ACTION = 1;
 constexpr uint32_t INVALID_PROXIMITY_ACTION = 2;
 sptr<PowerMgrService> g_pmsTest {nullptr};
 std::shared_ptr<IProximityController> g_controller {nullptr};
-std::function<void(uint32_t)> g_action {nullptr};
+std::function<void(uint32_t, bool)> g_action {nullptr};
 bool g_isRealInstance = false;
 void SetInstanceReal()
 {
@@ -40,7 +40,7 @@ void SetInstanceReal()
 }
 } // namespace
 
-#ifdef POWER_MANAGER_INIT_PROXIMITY_CONTROLLER
+#ifdef POWER_MANAGER_PROXIMITY_CONTROLLER_OVERRIDE
 int HookMgrExecute(HOOK_MGR* hookMgr, int stage, void* context, const HOOK_EXEC_OPTIONS* options)
 {
     if (static_cast<PowerHookStage>(stage) == PowerHookStage::POWER_PROXIMITY_CONTROLLER_INIT) {
@@ -322,7 +322,7 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest007, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: ICGV1M
  */
-#ifdef POWER_MANAGER_INIT_PROXIMITY_CONTROLLER
+#ifdef POWER_MANAGER_PROXIMITY_CONTROLLER_OVERRIDE
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest008, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest008 function start!");
@@ -331,21 +331,21 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest008, TestSize.Lev
     lockMgr->InitLocksTypeProximity();
     ASSERT_TRUE(g_action != nullptr) << "g_action == nullptr";
 
-    g_action(INVALID_PROXIMITY_ACTION);
+    g_action(INVALID_PROXIMITY_ACTION, true);
     EXPECT_TRUE(g_pmsTest == nullptr);
 
     SetInstanceReal();
     g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     EXPECT_TRUE(g_pmsTest != nullptr);
-    g_action(INVALID_PROXIMITY_ACTION);
+    g_action(INVALID_PROXIMITY_ACTION, true);
 
     g_pmsTest->runningLockMgr_ = lockMgr;
     EXPECT_TRUE(g_pmsTest->GetRunningLockMgr() != nullptr);
-    g_action(INVALID_PROXIMITY_ACTION);
+    g_action(INVALID_PROXIMITY_ACTION, true);
 
-    g_action(CLOSE_PROXIMITY_ACTION);
+    g_action(CLOSE_PROXIMITY_ACTION, true);
 
-    g_action(AWAY_PROXIMITY_ACTION);
+    g_action(AWAY_PROXIMITY_ACTION, true);
     EXPECT_FALSE(lockMgr->IsProximityClose());
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest008 function end!");
 }
@@ -379,5 +379,26 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest010, TestSize.Lev
     bool ret = lockMgr->IsVoiceAppForeground();
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest010 function end!");
+}
+
+/**
+ * @tc.name: RunningLockMgrAbnormalTest011
+ * @tc.desc: Test PowerStateMachine HandleProximityClose abnormal
+ * @tc.type: FUNC
+ * @tc.require: issues#1567
+ */
+HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest011, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest011 function start!");
+    g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = std::make_shared<PowerStateMachine>(g_pmsTest);
+    stateMachine->HandleProximityClose();
+    EXPECT_TRUE(g_pmsTest == nullptr);
+    SetInstanceReal();
+    g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    stateMachine = std::make_shared<PowerStateMachine>(g_pmsTest);
+    stateMachine->HandleProximityClose();
+    EXPECT_TRUE(g_pmsTest != nullptr && g_pmsTest->GetSuspendController() == nullptr);
+    POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest011 function end!");
 }
 } // namespace

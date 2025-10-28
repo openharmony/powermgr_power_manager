@@ -152,8 +152,8 @@ bool RunningLockMgr::InitProximityController()
     if (proximityController_ != nullptr) {
         return true;
     }
-#ifdef POWER_MANAGER_INIT_PROXIMITY_CONTROLLER
-    auto action = [](uint32_t status) {
+#ifdef POWER_MANAGER_PROXIMITY_CONTROLLER_OVERRIDE
+    auto action = [](uint32_t status, bool needDelay) {
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms == nullptr) {
             POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
@@ -165,7 +165,7 @@ bool RunningLockMgr::InitProximityController()
             return;
         }
         if (status == IProximityController::PROXIMITY_CLOSE) {
-            runningLock->HandleProximityCloseEvent();
+            runningLock->HandleProximityCloseEvent(needDelay);
         } else if (status == IProximityController::PROXIMITY_AWAY) {
             runningLock->HandleProximityAwayEvent();
         }
@@ -963,7 +963,7 @@ bool RunningLockMgr::IsVoiceAppForeground()
     return false;
 }
 
-void RunningLockMgr::HandleProximityCloseEvent()
+void RunningLockMgr::HandleProximityCloseEvent(bool needDelay)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -999,8 +999,13 @@ void RunningLockMgr::HandleProximityCloseEvent()
                 delayTime, FFRTTimerId::TIMER_ID_PROXIMITY_SCREEN_SWITCH_TO_SUB, delayScreenSwitchToSubTask);
             return;
         }
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "Start proximity-screen-off timer, delay time:%{public}u", delayTime);
-        stateMachine->SetDelayTimer(delayTime, PowerStateMachine::CHECK_PROXIMITY_SCREEN_OFF_MSG);
+        POWER_HILOGI(FEATURE_RUNNING_LOCK,
+            "Start proximity-screen-off task, delay time:%{public}u", needDelay ? delayTime : 0);
+        if (needDelay) {
+            stateMachine->SetDelayTimer(delayTime, PowerStateMachine::CHECK_PROXIMITY_SCREEN_OFF_MSG);
+        } else {
+            stateMachine->HandleProximityClose();
+        }
     } else {
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Unholding PROXIMITY LOCK");
     }

@@ -252,6 +252,7 @@ public:
     void SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason);
 #endif
     bool HandleDuringCall(bool isProximityClose);
+    void HandleProximityClose();
 
 private:
     enum PreBrightState : uint32_t {
