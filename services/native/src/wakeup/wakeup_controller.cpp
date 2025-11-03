@@ -1046,6 +1046,7 @@ void PowerkeyWakeupMonitor::Cancel()
     if (powerkeyShortPressId_ >= 0) {
         POWER_HILOGI(FEATURE_WAKEUP, "UnsubscribeKeyEvent: PowerkeyWakeupMonitor");
         inputManager->UnsubscribeKeyEvent(powerkeyShortPressId_);
+        powerkeyShortPressId_ = -1;
     }
 #endif
 }

@@ -28,16 +28,11 @@ sptr<PowerMgrService> g_service;
 constexpr int SLEEP_WAIT_TIME_US = 500000;
 constexpr uint32_t NO_DELAY = 0;
 bool g_killProcsee = false;
-enum class SubscriberState : int32_t {
-    FAILURE = -1,
-    SUCCESS = 0,
-    RETRY_SUCCESS = 1
-};
 std::map<SubscriberState, std::shared_ptr<ServiceState>> g_stateMap {
     {SubscriberState::FAILURE, std::make_shared<DeadServiceState>()},
     {SubscriberState::RETRY_SUCCESS, std::make_shared<RestartingServiceState>()},
     {SubscriberState::SUCCESS, std::make_shared<AliveServiceState>()}
-}
+};
 }
 
 namespace OHOS::PowerMgr {
@@ -121,7 +116,7 @@ int32_t MMI::InputManager::SubscribeKeyEvent(std::shared_ptr<KeyOption> keyOptio
     } else if (keyOption->GetFinalKey() == MMI::KeyEvent::KEYCODE_SLEEP) {
         callbackTp_ = callback;
     }
-    RequestContext context(g_stateMap[SubscriberState::SUCCESS]);
+    static RequestContext context(g_stateMap[SubscriberState::SUCCESS]);
     return static_cast<int32_t>(context.HandleRequest());
 }
 #endif
@@ -263,6 +258,8 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest004, TestSize.Level0)
     WakeupSource source(
         WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, true, static_cast<uint32_t>(WakeUpAction::CLICK_DOUBLE));
     auto powerkeyWakeupMonitor = std::make_shared<PowerkeyWakeupMonitor>(source);
+    EXPECT_TRUE(powerkeyWakeupMonitor->Init());
+    powerkeyWakeupMonitor->Cancel();
     g_killProcsee = true;
     EXPECT_FALSE(powerkeyWakeupMonitor->Init());
     EXPECT_TRUE(powerkeyWakeupMonitor->Init());
@@ -285,6 +282,8 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest005, TestSize.Level0)
     SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY,
         static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), NO_DELAY);
     auto powerkeySuspendMonitor = std::make_shared<PowerKeySuspendMonitor>(source);
+    EXPECT_TRUE(powerkeySuspendMonitor->Init());
+    powerkeySuspendMonitor->Cancel();
     g_killProcsee = true;
     EXPECT_FALSE(powerkeySuspendMonitor->Init());
     EXPECT_TRUE(powerkeySuspendMonitor->Init());
@@ -307,6 +306,8 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest006, TestSize.Level0)
     SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER,
         static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), NO_DELAY);
     auto tpCoverSuspendMonitor = std::make_shared<TPCoverSuspendMonitor>(source);
+    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
+    tpCoverSuspendMonitor->Cancel();
     g_killProcsee = true;
     EXPECT_FALSE(tpCoverSuspendMonitor->Init());
     EXPECT_TRUE(tpCoverSuspendMonitor->Init());

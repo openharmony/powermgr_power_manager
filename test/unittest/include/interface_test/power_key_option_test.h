@@ -33,8 +33,17 @@ public:
     void TearDown();
 };
 
+enum class SubscriberState : int32_t {
+    FAILURE = -1,
+    SUCCESS = 0,
+    RETRY_SUCCESS = 1
+};
+
+class RequestContext;
 class ServiceState {
 public:
+    ServiceState() = default;
+    virtual ~ServiceState() = default;
     virtual SubscriberState Handle(RequestContext& context) = 0;
 private:
     static inline int32_t deathRetryCount_ = 0;
@@ -50,16 +59,22 @@ public:
 
 class AliveServiceState : public ServiceState {
 public:
+    AliveServiceState() = default;
+    virtual ~AliveServiceState() = default;
     SubscriberState Handle(RequestContext& context) override;
 };
 
 class RestartingServiceState : public ServiceState {
 public:
+    RestartingServiceState() = default;
+    virtual ~RestartingServiceState() = default;
     SubscriberState Handle(RequestContext& context) override;
 };
 
 class DeadServiceState : public ServiceState {
 public:
+    DeadServiceState() = default;
+    virtual ~DeadServiceState() = default;
     SubscriberState Handle(RequestContext& context) override;
 };
 } // namespace PowerMgr
