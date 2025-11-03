@@ -367,6 +367,78 @@ ohos_systemtest("test_power_st_mgr_mock_suspend") {
   external_deps = deps_ex
 }
 
+##############################settinghelp##########################################
+ohos_systemtest("test_power_setting_help") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [ "src/power_setting_help_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+
+  if (power_manager_feature_disable_auto_displayoff) {
+    defines += [ "POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF" ]
+  }
+  
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+  ]
+
+  external_deps = [ "data_share:datashare_consumer" ]
+  external_deps += deps_ex
+}
+
+##############################settinghelper##########################################
+ohos_systemtest("test_power_setting_helper") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [ "src/power_setting_helper_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+
+  if (power_manager_feature_disable_auto_displayoff) {
+    defines += [ "POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF" ]
+  }
+  
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+  ]
+
+  external_deps = [ "data_share:datashare_consumer" ]
+  external_deps += deps_ex
+}
+
 group("systemtest_powermgr") {
   testonly = true
   deps = [
@@ -379,5 +451,7 @@ group("systemtest_powermgr") {
     ":test_power_mgr_system",
     ":test_power_st_mgr_mock",
     ":test_power_st_mgr_mock_suspend",
+    ":test_power_setting_help",
+    ":test_power_setting_helper",
   ]
 }
