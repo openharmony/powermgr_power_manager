@@ -563,6 +563,9 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    stateMachine_->ReportWakeupStart(static_cast<int32_t>(uid), static_cast<int32_t>(reason));
+#endif
     if (stateMachine_->GetState() != PowerState::AWAKE || reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH ||
         reason == WakeupDeviceType::WAKEUP_DEVICE_LID) {
         SleepGuard sleepGuard(pms);

@@ -138,8 +138,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
     started_ = true;
     POWER_KHILOGI(FEATURE_SHUTDOWN, "Start to detach shutdown thread");
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
+    ReportDoShutdown();
 #endif
     PublishShutdownEvent();
     std::string actionTimeStr = std::to_string(GetCurrentRealTimeMs());
@@ -296,13 +295,27 @@ bool ShutdownController::TriggerTakeOverShutdownCallbackInner(
     std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info)
 {
     bool isTakeover = false;
+    int32_t takeoverUid = 0;
     for (const auto& obj : callbacks) {
         auto pidUid = takeoverShutdownCallbackHolder_->FindCallbackPidUid(obj);
         // ITakeOverShutdownCallback->OnTakeOverShutdown calling pid uid
         POWER_HILOGI(FEATURE_SHUTDOWN, "TOScb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
-        isTakeover = callback->OnTakeOverShutdown(info);
+        if (!callback) {
+            POWER_HILOGE(FEATURE_SHUTDOWN, "TOScb callback null error");
+            continue;
+        }
+        if (callback->OnTakeOverShutdown(info)) {
+            isTakeover = true;
+            takeoverUid = pidUid.second;
+        }
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    if (isTakeover) {
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SHUTDOWN_STATISTIC",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "TAKEOVER_UID", takeoverUid);
+    }
+#endif
     return isTakeover;
 }
 
@@ -310,13 +323,27 @@ bool ShutdownController::TriggerTakeOverHibernateCallbackInner(
     std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info)
 {
     bool isTakeover = false;
+    int32_t takeoverUid = 0;
     for (const auto& obj : callbacks) {
         auto pidUid = takeoverShutdownCallbackHolder_->FindCallbackPidUid(obj);
         // ITakeOverShutdownCallback->OnTakeOverHibernate calling pid uid
         POWER_HILOGI(FEATURE_SHUTDOWN, "TOHcb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
         auto callback = iface_cast<ITakeOverShutdownCallback>(obj);
-        isTakeover = callback->OnTakeOverHibernate(info);
+        if (!callback) {
+            POWER_HILOGE(FEATURE_SHUTDOWN, "TOHcb callback null error");
+            continue;
+        }
+        if (callback->OnTakeOverHibernate(info)) {
+            isTakeover = true;
+            takeoverUid = pidUid.second;
+        }
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    if (isTakeover) {
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_STATISTIC",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "TAKEOVER_UID", takeoverUid);
+    }
+#endif
     return isTakeover;
 }
 
@@ -396,5 +423,16 @@ bool ShutdownController::AllowedToBeTakenOver(const std::string& reason) const
     (void)reason;
     return true;
 }
+
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+bool ShutdownController::ReportDoShutdown()
+{
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "STATE", HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "STATE", static_cast<uint32_t>(PowerState::SHUTDOWN));
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SHUTDOWN_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "DO_SHUTDOWN", static_cast<int8_t>(true));
+    return true;
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
