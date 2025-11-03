@@ -160,6 +160,8 @@ void SystemSuspendController::Suspend(
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_SUSPEND", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "TYPE", static_cast<int32_t>(1));
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SUSPEND_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "DO_SUSPEND", static_cast<int8_t>(true));
 #endif
     if (force) {
         powerInterface->ForceSuspend();
@@ -194,6 +196,8 @@ bool SystemSuspendController::Hibernate()
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_HIBERNATE",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "DO_HIBERNATE", static_cast<int8_t>(true));
 #endif
     int32_t ret = powerInterface->Hibernate();
     if (ret != HDF_SUCCESS) {

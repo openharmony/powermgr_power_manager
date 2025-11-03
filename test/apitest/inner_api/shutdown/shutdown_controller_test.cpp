@@ -32,6 +32,16 @@ public:
         ~TakeOverShutdownCallback() override = default;
         bool OnTakeOverShutdown(const TakeOverInfo& info) override
         {
+            if (info.reason_ == "takeoverFalse") {
+                return false;
+            }
+            return true;
+        }
+        bool OnTakeOverHibernate(const TakeOverInfo& info) override
+        {
+            if (info.reason_ == "takeoverFalse") {
+                return false;
+            }
             return true;
         }
     };
@@ -66,6 +76,42 @@ HWTEST_F(ShutDownControllerTest, ShutDownControllerTest001, TestSize.Level0)
     std::unique_lock lock(localMutex);
     cv.wait(lock, [&notified]() { return notified; });
     POWER_HILOGI(LABEL_TEST, "ShutdownControllerTest001 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest002
+ * @tc.desc: Test TriggerTakeoverHibernateCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest002 function start!");
+    sptr<ITakeOverShutdownCallback> callback = sptr<TakeOverShutdownCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(callback, ShutdownPriority::DEFAULT);
+    bool ret = controller.TriggerTakeOverHibernateCallback(TakeOverInfo("takeoverTrue", true));
+    EXPECT_TRUE(ret);
+    ret = controller.TriggerTakeOverHibernateCallback(TakeOverInfo("takeoverFalse", false));
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest002 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest003
+ * @tc.desc: Test TriggerTakeoverShutdownCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest003, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest003 function start!");
+    sptr<ITakeOverShutdownCallback> callback = sptr<TakeOverShutdownCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(callback, ShutdownPriority::DEFAULT);
+    bool ret = controller.TriggerTakeOverShutdownCallback(TakeOverInfo("takeoverTrue", true));
+    EXPECT_TRUE(ret);
+    ret = controller.TriggerTakeOverShutdownCallback(TakeOverInfo("takeoverFalse", false));
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest003 function end!");
 }
 } // namespace
 } // namespace OHOS::PowerMgr
