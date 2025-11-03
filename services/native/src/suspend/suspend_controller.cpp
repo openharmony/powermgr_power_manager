@@ -541,9 +541,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         force = false;
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SLEEP_START",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TRIGGER_EVENT_TYPE", static_cast<int32_t>(reason),
-        "ACTION_EVENT_TYPE", static_cast<int32_t>(force));
+    stateMachine_->ReportSuspendStart(static_cast<int32_t>(uid), static_cast<int32_t>(reason), force);
 #endif
     bool ret = stateMachine_->SetState(
         PowerState::INACTIVE, stateMachine_->GetReasonBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
