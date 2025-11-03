@@ -47,6 +47,8 @@ sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 #endif
 FFRTMutex g_monitorMutex;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
+constexpr int32_t RETRY_COUNT_TIMES = 10;
+constexpr int32_t RETRY_INTERVAL_MS = 100;
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -843,10 +845,17 @@ bool PowerKeySuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorInit inputManager is null");
         return false;
     }
-    powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            ReceivePowerkeyCallback(keyEvent);
-        });
+    int32_t retryCount = 0;
+    do {
+        powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
+            keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                ReceivePowerkeyCallback(keyEvent);
+            });
+        if (powerkeyReleaseId_ < 0) {
+            POWER_HILOGE(FEATURE_SUSPEND, "powerkey up register failed, retry times %{public}d", retryCount++);
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+        }
+    } while (powerkeyReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 #else
@@ -1009,11 +1018,18 @@ bool TPCoverSuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
         return false;
     }
-    TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
-            Notify();
-        });
+    int32_t retryCount = 0;
+    do {
+        TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
+            keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
+                Notify();
+            });
+        if (TPCoverReleaseId_ < 0) {
+            POWER_HILOGE(FEATURE_SUSPEND, "TPCover register failed, retry times %{public}d", retryCount++);
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+        }
+    } while (TPCoverReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
     POWER_HILOGI(FEATURE_SUSPEND, "TPCoverReleaseId_=%{public}d", TPCoverReleaseId_);
     return TPCoverReleaseId_ >= 0 ? true : false;
 #else

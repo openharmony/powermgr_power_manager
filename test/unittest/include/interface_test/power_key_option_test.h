@@ -29,6 +29,38 @@ class PowerKeyOptionTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+};
+
+class ServiceState {
+public:
+    virtual SubscriberState Handle(RequestContext& context) = 0;
+private:
+    static inline int32_t deathRetryCount_ = 0;
+};
+
+class RequestContext {
+public:
+    explicit RequestContext(const std::shared_ptr<ServiceState> state) : state_(state) {}
+    ~RequestContext() = default;
+    std::shared_ptr<ServiceState> state_ {nullptr};
+    SubscriberState HandleRequest();
+};
+
+class AliveServiceState : public ServiceState {
+public:
+    SubscriberState Handle(RequestContext& context) override;
+};
+
+class RestartingServiceState : public ServiceState {
+public:
+    SubscriberState Handle(RequestContext& context) override;
+};
+
+class DeadServiceState : public ServiceState {
+public:
+    SubscriberState Handle(RequestContext& context) override;
 };
 } // namespace PowerMgr
 } // namespace OHOS
