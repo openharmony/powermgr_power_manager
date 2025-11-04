@@ -23,8 +23,61 @@ using namespace OHOS::MMI;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
-static sptr<PowerMgrService> g_service;
-static constexpr int SLEEP_WAIT_TIME_US = 500000;
+namespace {
+sptr<PowerMgrService> g_service;
+constexpr int SLEEP_WAIT_TIME_US = 500000;
+constexpr uint32_t NO_DELAY = 0;
+bool g_killProcsee = false;
+std::map<SubscriberState, std::shared_ptr<ServiceState>> g_stateMap {
+    {SubscriberState::FAILURE, std::make_shared<DeadServiceState>()},
+    {SubscriberState::RETRY_SUCCESS, std::make_shared<RestartingServiceState>()},
+    {SubscriberState::SUCCESS, std::make_shared<AliveServiceState>()}
+};
+}
+
+namespace OHOS::PowerMgr {
+SubscriberState RequestContext::HandleRequest()
+{
+    SubscriberState ret = SubscriberState::SUCCESS;
+    if (state_) {
+        ret = state_->Handle(*this);
+    }
+    return ret;
+}
+
+SubscriberState AliveServiceState::Handle(RequestContext& context)
+{
+    if (g_killProcsee) {
+        context.state_ = g_stateMap[SubscriberState::FAILURE];
+        return SubscriberState::FAILURE;
+    }
+    return SubscriberState::SUCCESS;
+}
+
+SubscriberState RestartingServiceState::Handle(RequestContext& context)
+{
+    constexpr int32_t MAX_RETRY_COUNT = 5;
+    if (deathRetryCount_ >= MAX_RETRY_COUNT) {
+        context.state_ = g_stateMap[SubscriberState::SUCCESS];
+        deathRetryCount_ = 0;
+        g_killProcsee = false;
+        return SubscriberState::RETRY_SUCCESS;
+    }
+    deathRetryCount_++;
+    return SubscriberState::FAILURE;
+}
+
+SubscriberState DeadServiceState::Handle(RequestContext& context)
+{
+    constexpr int32_t MAX_RETRY_COUNT = 10;
+    deathRetryCount_++;
+    if (deathRetryCount_ >= MAX_RETRY_COUNT) {
+        context.state_ = g_stateMap[SubscriberState::RETRY_SUCCESS];
+        deathRetryCount_ = 0;
+    }
+    return SubscriberState::FAILURE;
+}
+} // namespace OHOS::PowerMgr
 
 void PowerKeyOptionTest::SetUpTestCase(void)
 {
@@ -36,6 +89,13 @@ void PowerKeyOptionTest::TearDownTestCase(void)
 {
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
+}
+
+void PowerKeyOptionTest::SetUp() {}
+
+void PowerKeyOptionTest::TearDown()
+{
+    g_killProcsee = false;
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -56,7 +116,8 @@ int32_t MMI::InputManager::SubscribeKeyEvent(std::shared_ptr<KeyOption> keyOptio
     } else if (keyOption->GetFinalKey() == MMI::KeyEvent::KEYCODE_SLEEP) {
         callbackTp_ = callback;
     }
-    return 0;
+    static RequestContext context(g_stateMap[SubscriberState::SUCCESS]);
+    return static_cast<int32_t>(context.HandleRequest());
 }
 #endif
 
@@ -181,6 +242,78 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest003, TestSize.Level0)
     }
     GTEST_LOG_(INFO) << "PowerKeyOptionTest003: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest003 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerKeyOptionTest004
+ * @tc.desc: test PowerkeyWakeupMonitor init retry
+ * @tc.type: FUNC
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest004, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest004 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest004: start";
+    WakeupSource source(
+        WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON, true, static_cast<uint32_t>(WakeUpAction::CLICK_DOUBLE));
+    auto powerkeyWakeupMonitor = std::make_shared<PowerkeyWakeupMonitor>(source);
+    EXPECT_TRUE(powerkeyWakeupMonitor->Init());
+    powerkeyWakeupMonitor->Cancel();
+    g_killProcsee = true;
+    EXPECT_FALSE(powerkeyWakeupMonitor->Init());
+    EXPECT_TRUE(powerkeyWakeupMonitor->Init());
+    EXPECT_TRUE(powerkeyWakeupMonitor->Init());
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest004: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest004 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerKeyOptionTest005
+ * @tc.desc: test PowerKeySuspendMonitor init retry
+ * @tc.type: FUNC
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest005, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest005 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest005: start";
+    SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY,
+        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), NO_DELAY);
+    auto powerkeySuspendMonitor = std::make_shared<PowerKeySuspendMonitor>(source);
+    EXPECT_TRUE(powerkeySuspendMonitor->Init());
+    powerkeySuspendMonitor->Cancel();
+    g_killProcsee = true;
+    EXPECT_FALSE(powerkeySuspendMonitor->Init());
+    EXPECT_TRUE(powerkeySuspendMonitor->Init());
+    EXPECT_TRUE(powerkeySuspendMonitor->Init());
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest005: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest005 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerKeyOptionTest006
+ * @tc.desc: test TPCoverSuspendMonitor init retry
+ * @tc.type: FUNC
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest006, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest006 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest006: start";
+    SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER,
+        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), NO_DELAY);
+    auto tpCoverSuspendMonitor = std::make_shared<TPCoverSuspendMonitor>(source);
+    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
+    tpCoverSuspendMonitor->Cancel();
+    g_killProcsee = true;
+    EXPECT_FALSE(tpCoverSuspendMonitor->Init());
+    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
+    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest006: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest006 function end!");
 }
 #endif
 } // namespace
