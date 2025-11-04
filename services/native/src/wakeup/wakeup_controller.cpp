@@ -968,7 +968,8 @@ bool PowerkeyWakeupMonitor::Init()
                 ReceivePowerkeyCallback(keyEvent);
             });
         if (powerkeyShortPressId_ < 0) {
-            POWER_HILOGE(FEATURE_WAKEUP, "powerkey down register failed, retry times %{public}d", retryCount++);
+            POWER_HILOGE(FEATURE_WAKEUP, "powerkey down register failed, retry times %{public}d", retryCount);
+            retryCount++;
             std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
         }
     } while (powerkeyShortPressId_ < 0 && retryCount < RETRY_COUNT_TIMES);

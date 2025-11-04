@@ -852,7 +852,8 @@ bool PowerKeySuspendMonitor::Init()
                 ReceivePowerkeyCallback(keyEvent);
             });
         if (powerkeyReleaseId_ < 0) {
-            POWER_HILOGE(FEATURE_SUSPEND, "powerkey up register failed, retry times %{public}d", retryCount++);
+            POWER_HILOGE(FEATURE_SUSPEND, "powerkey up register failed, retry times %{public}d", retryCount);
+            retryCount++;
             std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
         }
     } while (powerkeyReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
@@ -1026,7 +1027,8 @@ bool TPCoverSuspendMonitor::Init()
                 Notify();
             });
         if (TPCoverReleaseId_ < 0) {
-            POWER_HILOGE(FEATURE_SUSPEND, "TPCover register failed, retry times %{public}d", retryCount++);
+            POWER_HILOGE(FEATURE_SUSPEND, "TPCover register failed, retry times %{public}d", retryCount);
+            retryCount++;
             std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
         }
     } while (TPCoverReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
