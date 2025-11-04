@@ -50,6 +50,8 @@ sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 #endif
 FFRTMutex g_monitorMutex;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
+constexpr int32_t RETRY_COUNT_TIMES = 10;
+constexpr int32_t RETRY_INTERVAL_MS = 100;
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -230,11 +232,11 @@ void SuspendController::Init()
         POWER_HILOGI(FEATURE_SUSPEND, "registered type=%{public}u action=%{public}u delayMs=%{public}u",
             (*source).GetReason(), (*source).GetAction(), (*source).GetDelay());
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+        monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+            this->ControlListener(reason, action, delay);
+        });
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_SUSPEND, "monitor init success, type=%{public}u", (*source).GetReason());
-            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
-                this->ControlListener(reason, action, delay);
-            });
             g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
             g_monitorMutex.unlock();
@@ -310,12 +312,12 @@ void SuspendController::UpdateSuspendSources()
     uint32_t id = 0;
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
+        monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
+            this->ControlListener(reason, action, delay);
+        });
         POWER_HILOGI(FEATURE_SUSPEND, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
             id, source->GetReason());
         if (monitor != nullptr && monitor->Init()) {
-            monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
-                this->ControlListener(reason, action, delay);
-            });
             g_monitorMutex.lock();
             monitorMap_.emplace(monitor->GetReason(), monitor);
             g_monitorMutex.unlock();
@@ -913,10 +915,18 @@ bool PowerKeySuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "PowerKeySuspendMonitorInit inputManager is null");
         return false;
     }
-    powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            this->ReceivePowerkeyCallback(keyEvent);
-        });
+    int32_t retryCount = 0;
+    do {
+        powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
+            keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                ReceivePowerkeyCallback(keyEvent);
+            });
+        if (powerkeyReleaseId_ < 0) {
+            POWER_HILOGE(FEATURE_SUSPEND, "powerkey up register failed, retry times %{public}d", retryCount);
+            retryCount++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+        }
+    } while (powerkeyReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 #else
@@ -924,7 +934,7 @@ bool PowerKeySuspendMonitor::Init()
 #endif
 }
 
-void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
+void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const
 {
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
 
@@ -1079,11 +1089,19 @@ bool TPCoverSuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
         return false;
     }
-    TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
-            this->Notify();
-        });
+    int32_t retryCount = 0;
+    do {
+        TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
+            keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
+                Notify();
+            });
+        if (TPCoverReleaseId_ < 0) {
+            POWER_HILOGE(FEATURE_SUSPEND, "TPCover register failed, retry times %{public}d", retryCount);
+            retryCount++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+        }
+    } while (TPCoverReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
     POWER_HILOGI(FEATURE_SUSPEND, "TPCoverReleaseId_=%{public}d", TPCoverReleaseId_);
     return TPCoverReleaseId_ >= 0 ? true : false;
 #else

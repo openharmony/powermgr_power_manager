@@ -182,7 +182,7 @@ public:
         listener_ = listener;
     }
 
-    void Notify()
+    void Notify() const
     {
         if (listener_ == nullptr) {
             return;
@@ -213,7 +213,7 @@ public:
 private:
     void BeginPowerkeyScreenOff() const;
     void EndPowerkeyScreenOff() const;
-    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent);
+    void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const;
     static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     int32_t powerkeyReleaseId_ {-1};

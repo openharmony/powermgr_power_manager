@@ -54,6 +54,8 @@ constexpr int32_t EVENT_INTERVAL_MS = 1000;
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t OTHER_SYSTEM_DEVICE_ID = 0xAAAAAAFE;
+constexpr int32_t RETRY_COUNT_TIMES = 10;
+constexpr int32_t RETRY_INTERVAL_MS = 100;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -131,9 +133,9 @@ void WakeupController::Init()
         POWER_HILOGI(FEATURE_WAKEUP, "registered type=%{public}u", (*source).GetReason());
         SetOriginSettingValue((*source));
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
+        monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
-            monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
     }
@@ -173,10 +175,10 @@ void WakeupController::RegisterSettingsObserver()
         uint32_t id = 0;
         for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
             std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
+            monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
             POWER_HILOGI(FEATURE_WAKEUP, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
                 id, source->GetReason());
             if (monitor != nullptr && monitor->Init()) {
-                monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
                 monitorMap_.emplace(monitor->GetReason(), monitor);
             }
         }
@@ -966,10 +968,18 @@ bool PowerkeyWakeupMonitor::Init()
         POWER_HILOGE(FEATURE_WAKEUP, "PowerkeyWakeupMonitorInit inputManager is null");
         return false;
     }
-    powerkeyShortPressId_ = inputManager->SubscribeKeyEvent(
-        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-            this->ReceivePowerkeyCallback(keyEvent);
-        });
+    int32_t retryCount = 0;
+    do {
+        powerkeyShortPressId_ = inputManager->SubscribeKeyEvent(
+            keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+                ReceivePowerkeyCallback(keyEvent);
+            });
+        if (powerkeyShortPressId_ < 0) {
+            POWER_HILOGE(FEATURE_WAKEUP, "powerkey down register failed, retry times %{public}d", retryCount);
+            retryCount++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+        }
+    } while (powerkeyShortPressId_ < 0 && retryCount < RETRY_COUNT_TIMES);
 
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
     return powerkeyShortPressId_ >= 0 ? true : false;
@@ -978,7 +988,7 @@ bool PowerkeyWakeupMonitor::Init()
 #endif
 }
 
-void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent)
+void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const
 {
 #ifndef POWER_MANAGER_ALLOW_INTERRUPTING_POWERKEY_OFF
     ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
@@ -1044,6 +1054,7 @@ void PowerkeyWakeupMonitor::Cancel()
     if (powerkeyShortPressId_ >= 0) {
         POWER_HILOGI(FEATURE_WAKEUP, "UnsubscribeKeyEvent: PowerkeyWakeupMonitor");
         inputManager->UnsubscribeKeyEvent(powerkeyShortPressId_);
+        powerkeyShortPressId_ = -1;
     }
 #endif
 }
