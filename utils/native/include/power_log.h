@@ -78,9 +78,7 @@ enum PowerManagerLogLabel {
     COMP_LOCK = 0,
     COMP_FWK = 1,
     COMP_SVC = 2,
-    COMP_HDI = 3,
-    COMP_DRV = 4,
-    COMP_UTILS = 5,
+    COMP_UTILS = 3,
     // Feature labels, use to mark major features
     FEATURE_WAKEUP,
 #ifdef POWER_MANAGER_WAKEUP_ACTION
@@ -102,68 +100,81 @@ enum PowerManagerLogLabel {
 };
 
 enum PowerManagerLogDomain {
-    DOMAIN_LOCK = POWER_DOMAIN_ID_START + COMP_LOCK, // 0xD002900
-    DOMAIN_FRAMEWORK, // 0xD002901
-    DOMAIN_SERVICE, // 0xD002902
-    DOMAIN_HDI, // 0xD002903
-    DOMAIN_DRIVER, // 0xD002904
-    DOMAIN_UTILS, // 0xD002905
-    DOMAIN_FEATURE_WAKEUP,
-#ifdef POWER_MANAGER_WAKEUP_ACTION
-    DOMAIN_FEATURE_WAKEUP_ACTION,
-#endif
-    DOMAIN_FEATURE_SUSPEND,
-    DOMAIN_FEATURE_RUNNING_LOCK,
-    DOMAIN_FEATURE_ACTIVITY,
-    DOMAIN_FEATURE_POWER_STATE,
-    DOMAIN_FEATURE_SCREEN_OFF_PRE,
-    DOMAIN_FEATURE_POWER_MODE,
-    DOMAIN_FEATURE_SHUTDOWN,
-    DOMAIN_FEATURE_INPUT,
-    DOMAIN_FEATURE_UTIL,
+    DOMAIN_SERVICE = POWER_DOMAIN_ID_START + COMP_FWK, // 0xD002901
+    DOMAIN_FEATURE_SHUTDOWN,  // Provided for fdsan to use as parameters
     DOMAIN_TEST = TEST_DOMAIN_ID, // 0xD000F00
-    DOMAIN_END = POWER_DOMAIN_ID_END, // Max to 0xD002920, keep the sequence and length same as PowerManagerLogLabel
+    DOMAIN_END = POWER_DOMAIN_ID_END, // Max to 0xD002920, keep the sequence same as PowerManagerLogLabel
 };
 
-struct PowerManagerLogLabelDomain {
-    unsigned int domainId;
+struct PowerManagerLogLabelTag {
+    uint32_t logLabel;
     const char* tag;
 };
 
-// Keep the sequence and length same as PowerManagerLogDomain
-static const PowerManagerLogLabelDomain POWER_LABEL[LABEL_END] = {
-    {DOMAIN_LOCK,                  "PowerLock"},
-    {DOMAIN_FRAMEWORK,            "PowerFwk"},
-    {DOMAIN_SERVICE,              "PowerSvc"},
-    {DOMAIN_HDI,                  "PowerHdi"},
-    {DOMAIN_DRIVER,               "PowerDrv"},
-    {DOMAIN_UTILS,                "PowerUtils"},
-    {DOMAIN_FEATURE_WAKEUP,       "PowerWakeup"},
+// Keep the sequence same as PowerManagerLogLabel
+static constexpr PowerManagerLogLabelTag POWER_LABEL_TAG[LABEL_END] = {
+    {COMP_LOCK,                  "PowerLock"},
+    {COMP_FWK,                   "PowerFwk"},
+    {COMP_SVC,                   "PowerSvc"},
+    {COMP_UTILS,                 "PowerUtils"},
+    {FEATURE_WAKEUP,             "PowerWakeup"},
 #ifdef POWER_MANAGER_WAKEUP_ACTION
-    {DOMAIN_FEATURE_WAKEUP_ACTION,       "PowerWakeupAction"},
+    {FEATURE_WAKEUP_ACTION,      "PowerWakeupAction"},
 #endif
-    {DOMAIN_FEATURE_SUSPEND,      "PowerSuspend"},
-    {DOMAIN_FEATURE_RUNNING_LOCK, "PowerRunningLock"},
-    {DOMAIN_FEATURE_ACTIVITY,     "PowerActivity"},
-    {DOMAIN_FEATURE_POWER_STATE,  "PowerState"},
-    {DOMAIN_FEATURE_SCREEN_OFF_PRE,  "PowerScreenOffPre"},
-    {DOMAIN_FEATURE_POWER_MODE,   "PowerMode"},
-    {DOMAIN_FEATURE_SHUTDOWN,     "PowerShutdown"},
-    {DOMAIN_FEATURE_INPUT,        "PowerInput"},
-    {DOMAIN_FEATURE_UTIL,         "PowerUtil"},
-    {DOMAIN_TEST,                 "PowerTest"},
+    {FEATURE_SUSPEND,            "PowerSuspend"},
+    {FEATURE_RUNNING_LOCK,       "PowerRunningLock"},
+    {FEATURE_ACTIVITY,           "PowerActivity"},
+    {FEATURE_POWER_STATE,        "PowerState"},
+    {FEATURE_SCREEN_OFF_PRE,     "PowerScreenOffPre"},
+    {FEATURE_POWER_MODE,         "PowerMode"},
+    {FEATURE_SHUTDOWN,           "PowerShutdown"},
+    {FEATURE_INPUT,              "PowerInput"},
+    {FEATURE_UTIL,               "PowerUtil"},
+    {LABEL_TEST,                 "PowerTest"},
+};
+
+struct PowerManagerLogLabelDomain {
+    uint32_t logLabel;
+    unsigned int domainId;
+};
+
+// Keep the sequence as PowerManagerLogDomain
+static constexpr PowerManagerLogLabelDomain POWER_LABEL_DOMAIN[LABEL_END] = {
+    {COMP_LOCK,                  DOMAIN_SERVICE},
+    {COMP_FWK,                   DOMAIN_SERVICE},
+    {COMP_SVC,                   DOMAIN_SERVICE},
+    {COMP_UTILS,                 DOMAIN_SERVICE},
+    {FEATURE_WAKEUP,             DOMAIN_SERVICE},
+#ifdef POWER_MANAGER_WAKEUP_ACTION
+    {FEATURE_WAKEUP_ACTION,      DOMAIN_SERVICE},
+#endif
+    {FEATURE_SUSPEND,            DOMAIN_SERVICE},
+    {FEATURE_RUNNING_LOCK,       DOMAIN_SERVICE},
+    {FEATURE_ACTIVITY,           DOMAIN_SERVICE},
+    {FEATURE_POWER_STATE,        DOMAIN_SERVICE},
+    {FEATURE_SCREEN_OFF_PRE,     DOMAIN_SERVICE},
+    {FEATURE_POWER_MODE,         DOMAIN_SERVICE},
+    {FEATURE_SHUTDOWN,           DOMAIN_SERVICE},
+    {FEATURE_INPUT,              DOMAIN_SERVICE},
+    {FEATURE_UTIL,               DOMAIN_SERVICE},
+    {LABEL_TEST,                 DOMAIN_TEST},
 };
 
 #define POWER_HILOGF(domain, ...) \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,   \
+    ##__VA_ARGS__))
 #define POWER_HILOGE(domain, ...) \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,   \
+    ##__VA_ARGS__))
 #define POWER_HILOGW(domain, ...) \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,    \
+    ##__VA_ARGS__))
 #define POWER_HILOGI(domain, ...) \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,    \
+    ##__VA_ARGS__))
 #define POWER_HILOGD(domain, ...) \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__))
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,   \
+    ##__VA_ARGS__))
 
 constexpr OHOS::HiviewDFX::HiLogLabel POWER_KERNEL_LABEL = {
     LOG_KMSG,
@@ -174,31 +185,36 @@ constexpr OHOS::HiviewDFX::HiLogLabel POWER_KERNEL_LABEL = {
 #define POWER_KHILOGF(domain, ...) \
     do { \
         (void)OHOS::HiviewDFX::HiLog::Fatal(POWER_KERNEL_LABEL, __VA_ARGS__); \
-        ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,   \
+        ##__VA_ARGS__)); \
     } while (0)
 
 #define POWER_KHILOGE(domain, ...) \
     do { \
         (void)OHOS::HiviewDFX::HiLog::Error(POWER_KERNEL_LABEL, __VA_ARGS__); \
-        ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,   \
+        ##__VA_ARGS__)); \
     } while (0)
 
 #define POWER_KHILOGW(domain, ...) \
     do { \
         (void)OHOS::HiviewDFX::HiLog::Warn(POWER_KERNEL_LABEL, __VA_ARGS__); \
-        ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,    \
+        ##__VA_ARGS__)); \
     } while (0)
 
 #define POWER_KHILOGI(domain, ...) \
     do { \
         (void)OHOS::HiviewDFX::HiLog::Info(POWER_KERNEL_LABEL, __VA_ARGS__); \
-        ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,    \
+        ##__VA_ARGS__)); \
     } while (0)
 
 #define POWER_KHILOGD(domain, ...) \
     do { \
         (void)OHOS::HiviewDFX::HiLog::Debug(POWER_KERNEL_LABEL, __VA_ARGS__); \
-        ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL[domain].domainId, POWER_LABEL[domain].tag, ##__VA_ARGS__)); \
+        ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, POWER_LABEL_DOMAIN[domain].domainId, POWER_LABEL_TAG[domain].tag,   \
+        ##__VA_ARGS__)); \
     } while (0)
 
 } // namespace PowerMgr
