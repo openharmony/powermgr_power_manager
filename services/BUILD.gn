@@ -32,7 +32,7 @@ config("powermgr_private_config") {
     "native/src/wakeup",
     "native/src/hibernate",
     "native/src/screenoffpre",
-    "native/src/watch_customized_screen_common_event",
+    "native/src/screen_common_event_customized",
   ]
 
   if (power_manager_feature_wakeup_action) {
@@ -77,7 +77,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/wakeup/wakeup_controller.cpp",
     "native/src/wakeup/wakeup_source_parser.cpp",
     "native/src/wakeup/wakeup_sources.cpp",
-    "native/src/watch_customized_screen_common_event/customized_screen_event_rules.cpp",
+    "native/src/screen_common_event_customized/screen_common_event_controller.cpp",
   ]
 
   configs = [

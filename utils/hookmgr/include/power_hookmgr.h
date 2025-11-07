@@ -21,6 +21,7 @@
 #include <hookmgr.h>
 #include "modulemgr.h"
 #include "iproximity_controller.h"
+#include "iscreen_common_event_controller.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -31,6 +32,7 @@ enum class PowerHookStage : int32_t {
     POWER_PRE_DO_REBOOT,
     POWER_PRE_DO_SHUTDOWN,
     POWER_PROXIMITY_CONTROLLER_INIT,
+    POWER_SCREEN_COMMON_EVENT_CUSTOMIZED_CONTROLLER_INIT,
     POWER_HOOK_STAGE_MAX = 1000,
 };
 
@@ -42,6 +44,10 @@ struct RebootCmdInfo {
 struct ProximityControllerContext {
     std::shared_ptr<IProximityController> controllerPtr {nullptr};
     std::function<void(uint32_t, bool)> action {nullptr};
+};
+
+struct ScreenCommonEventCustomizedContext {
+    std::shared_ptr<IScreenCommonEventController> controllerPtr {nullptr};
 };
 
 HOOK_MGR* GetPowerHookMgr();
