@@ -139,7 +139,7 @@
                         "power_state_machine_info.h",
                         "running_lock.h",
                         "running_lock_info.h",
-                        "iscreen_common_event_controller.h"
+                        "iscreen_common_event_controller.h",
                         "shutdown/async_shutdown_callback_stub.h",
                         "shutdown/ishutdown_client.h",
                         "shutdown/itakeover_shutdown_callback.h",
