@@ -18,9 +18,6 @@
 
 #include <vector>
 #include "interface_loader.h"
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-#include "power_state_machine_info.h"
-#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -53,13 +50,6 @@ public:
     ErrCode UnSubscribeScreenLockCommonEvent() const;
     ErrCode BlockHibernateUntilScrLckReady() const;
     void OnHibernateEnd(bool hibernateResult);
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    ErrCode SetScreenOnEventRules(StateChangeReason reason, const std::vector<StateChangeReason>& stateChangeReason,
-        const std::vector<WakeupDeviceType>& wakeupDeviceTypes);
-    void PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames);
-    bool NotifyScreenOnEventAgain(WakeupDeviceType reason, std::vector<std::string> bundleNames);
-    void NotifyOperateEventAfterScreenOn(std::vector<std::string> bundleNames);
-#endif
 
 private:
     PowerExtIntfWrapper(const std::string& libPath, const std::vector<std::string>& symbolArr)

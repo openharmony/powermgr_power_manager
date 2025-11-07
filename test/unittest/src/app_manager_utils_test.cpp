@@ -53,5 +53,19 @@ HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest002, TestSize.Level0)
     EXPECT_FALSE(res);
     POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest002 function end!");
 }
+
+/**
+ * @tc.name: AppManagerUtilsTest003
+ * @tc.desc: test GetForegroundBundleNames
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppManagerUtilsTest, AppManagerUtilsTest003, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest003 function start!");
+    std::set<std::string> bundleNames;
+    AppManagerUtils::GetForegroundBundleNames(bundleNames);
+    EXPECT_FALSE(bundleNames.size() > 5);
+    POWER_HILOGI(LABEL_TEST, "AppManagerUtilsTest003 function end!");
+}
 } // PowerMgr
 } // OHOS
