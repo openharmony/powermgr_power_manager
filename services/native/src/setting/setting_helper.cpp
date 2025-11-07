@@ -27,6 +27,9 @@ namespace {
 constexpr int32_t WAKEUP_SOURCE_OPEN = 1;
 constexpr int32_t WAKEUP_SOURCE_CLOSE = 0;
 constexpr int32_t MIN_DISPLAY_OFF_TIME_MS = 1000;
+#ifdef POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF
+const std::string SCREEN_NEVER_SLEEP_SUPPORT = "const.settings.screen_never_sleep";
+#endif
 }
 sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
@@ -268,7 +271,8 @@ int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
     int64_t value = GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, defaultVal);
 #ifdef POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF
     constexpr int64_t PARAMETER_ZERO = 0;
-    if (value < PARAMETER_ZERO) {
+    static bool isSupportScreenNeverSleep = OHOS::system::GetBoolParameter(SCREEN_NEVER_SLEEP_SUPPORT, false);
+    if (isSupportScreenNeverSleep == true && value < PARAMETER_ZERO) {
         POWER_HILOGI(COMP_UTILS, "disable auto displayoff, value=(%{public}" PRId64 ")", value);
         return value;
     }
