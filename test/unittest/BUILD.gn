@@ -1896,6 +1896,7 @@ ohos_unittest("test_power_screen_common_event") {
   include_dirs = [ "${powermgr_service_path}/native/src/screen_common_event_customized" ]
   deps = [
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/hookmgr:power_hookmgr",
   ]
   external_deps = deps_ex
 }
