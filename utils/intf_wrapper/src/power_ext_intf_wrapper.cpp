@@ -25,12 +25,6 @@ const std::vector<std::string> ALL_POWER_EXT_INTF_SYMBOL = {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     "OnHibernateEnd",
 #endif
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    "SetScreenOnEventRules",
-    "PublishCustomizedScreenEvent",
-    "NotifyScreenOnEventAgain",
-    "NotifyOperateEventAfterScreenOn",
-#endif
 };
 } // namespace
 
@@ -96,53 +90,6 @@ void PowerExtIntfWrapper::OnHibernateEnd(bool hibernateResult)
     auto OnHibernateEndFunc = reinterpret_cast<void (*)(bool)>(funcPtr);
     OnHibernateEndFunc(hibernateResult);
 }
-
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-PowerExtIntfWrapper::ErrCode PowerExtIntfWrapper::SetScreenOnEventRules(StateChangeReason reason,
-    const std::vector<StateChangeReason>& stateChangeReason, const std::vector<WakeupDeviceType>& wakeupDeviceTypes)
-{
-    void *funcPtr = intfLoader_.QueryInterface("SetScreenOnEventRules");
-    if (funcPtr == nullptr) {
-        return PowerExtIntfWrapper::ErrCode::ERR_NOT_FOUND;
-    }
-    auto setScreenOnEventRulesFunc = reinterpret_cast<void (*)(
-        StateChangeReason, const std::vector<StateChangeReason>&, const std::vector<WakeupDeviceType>&)>(funcPtr);
-    setScreenOnEventRulesFunc(reason, stateChangeReason, wakeupDeviceTypes);
-    return PowerExtIntfWrapper::ErrCode::ERR_OK;
-}
-
-void PowerExtIntfWrapper::PublishCustomizedScreenEvent(PowerState state, std::vector<std::string> bundleNames)
-{
-    void *funcPtr = intfLoader_.QueryInterface("PublishCustomizedScreenEvent");
-    if (funcPtr == nullptr) {
-        return;
-    }
-    auto publishCustomizedScreenEventFunc =
-        reinterpret_cast<void (*)(PowerState, std::vector<std::string>)>(funcPtr);
-    publishCustomizedScreenEventFunc(state, bundleNames);
-}
-
-bool PowerExtIntfWrapper::NotifyScreenOnEventAgain(WakeupDeviceType reason, std::vector<std::string> bundleNames)
-{
-    void *funcPtr = intfLoader_.QueryInterface("NotifyScreenOnEventAgain");
-    if (funcPtr == nullptr) {
-        return false;
-    }
-    auto notifyScreenOnEventAgain =
-        reinterpret_cast<bool (*)(WakeupDeviceType, std::vector<std::string>)>(funcPtr);
-    return notifyScreenOnEventAgain(reason, bundleNames);
-}
-
-void PowerExtIntfWrapper::NotifyOperateEventAfterScreenOn(std::vector<std::string> bundleNames)
-{
-    void *funcPtr = intfLoader_.QueryInterface("NotifyOperateEventAfterScreenOn");
-    if (funcPtr == nullptr) {
-        return;
-    }
-    auto notifyOperateEventAfterScreenOnFunc = reinterpret_cast<void (*)(std::vector<std::string>)>(funcPtr);
-    notifyOperateEventAfterScreenOnFunc(bundleNames);
-}
-#endif
 
 } // namespace PowerMgr
 } // namespace OHOS

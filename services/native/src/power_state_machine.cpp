@@ -42,7 +42,7 @@
 #ifdef MSDP_MOVEMENT_ENABLE
 #include <dlfcn.h>
 #endif
-#include "customized_screen_event_rules.h"
+#include "screen_common_event_controller.h"
 #include "display_manager_lite.h"
 
 namespace OHOS {
@@ -77,18 +77,6 @@ constexpr int32_t SCREEN_OFF_ABNORMAL = 0;
 constexpr int32_t SCREEN_OFF_INVALID = 1;
 #endif
 }
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-const std::vector<StateChangeReason> WATCH_CUSTOMIZED_STATE_CHANGE_REASONS {
-    StateChangeReason::STATE_CHANGE_REASON_PICKUP,
-    StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL,
-    StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL
-};
-static std::vector<WakeupDeviceType> WATCH_CUSTOMIZED_WAKEUP_DEVICE_TYPES {
-    WakeupDeviceType::WAKEUP_DEVICE_PICKUP,
-    WakeupDeviceType::WAKEUP_DEVICE_INCOMING_CALL,
-    WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL
-};
-#endif
 PowerStateMachine::PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
     : pms_(pms), ffrtTimer_(ffrtTimer), currentState_(PowerState::UNKNOWN)
 {
@@ -694,15 +682,6 @@ void PowerStateMachine::WakeupDeviceInner(
 
     // Call legacy wakeup, Check the screen state
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    if (!pms->IsScreenOn() && !WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.empty() &&
-        std::find(WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.begin(),
-            WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.end(),
-            GetReasonByWakeType(type)) != WATCH_CUSTOMIZED_STATE_CHANGE_REASONS.end()) {
-        DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SetScreenOnEventRules(
-            GetReasonByWakeType(type), WATCH_CUSTOMIZED_STATE_CHANGE_REASONS, WATCH_CUSTOMIZED_WAKEUP_DEVICE_TYPES);
-    }
-#endif
 
 #ifdef POWER_MANAGER_TV_DREAMING
     if (details == "start_dream") {
@@ -1253,11 +1232,14 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         POWER_HILOGE(FEATURE_POWER_STATE, "Notify is null");
         return;
     }
-
+    auto screenCommonEventController = DelayedSingleton<ScreenCommonEventController>::GetInstance();
+    if (screenCommonEventController == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine ScreenCommonEventController is nullptr.");
+        return;
+    }
     switch (state) {
         case PowerState::AWAKE: {
-            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
-                notify, PowerState::AWAKE, callTime, reason);
+            screenCommonEventController->SendCustomizedScreenEvent(notify, PowerState::AWAKE, callTime, reason);
             isAwakeNotified_.store(true, std::memory_order_relaxed);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
             auto suspendController = pms->GetSuspendController();
@@ -1270,8 +1252,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
             break;
         }
         case PowerState::INACTIVE: {
-            DelayedSingleton<CustomizedScreenEventRules>::GetInstance()->SendCustomizedScreenEvent(
-                notify, PowerState::INACTIVE, callTime, reason);
+            screenCommonEventController->SendCustomizedScreenEvent(notify, PowerState::INACTIVE, callTime, reason);
             isAwakeNotified_.store(false, std::memory_order_relaxed);
             break;
         }
@@ -2094,6 +2075,12 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
             g_callSetForceTimingOutPid, g_callSetForceTimingOutUid);
     }
     UpdateSettingStateFlag(state, reason);
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+    if (!SetScreenCommonEventRules(reason)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine screenCommonEventController is nullptr.");
+        return false;
+    }
+#endif
     auto pms = pms_.promote();
     std::shared_ptr<WakeupController> wakeupController = pms ? pms->GetWakeupController() : nullptr;
     if (wakeupController && state == PowerState::INACTIVE) {
@@ -2281,6 +2268,9 @@ StateChangeReason PowerStateMachine::GetReasonByWakeType(WakeupDeviceType type)
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_FROM_ULSR:
             ret = StateChangeReason::STATE_CHANGE_REASON_WAKEUP_FROM_ULSR;
+            break;
+        case WakeupDeviceType::WAKEUP_DEVICE_MESSAGE_NOTIFICATION:
+            ret = StateChangeReason::STATE_CHANGE_REASON_MESSAGE_NOTIFICATION;
             break;
         case WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN: // fall through
         default:
@@ -2854,6 +2844,19 @@ void PowerStateMachine::ReportShutdownStart(int32_t uid, const std::string& reas
         HiviewDFX::HiSysEvent::EventType::STATISTIC, "START_REASON", reason, "START_UID", uid, "SWITCH", switchOpen,
         "CHARGE", chargeConnect, "EXSCREEN", externalScreen, "IS_REBOOT", static_cast<int8_t>(isReboot));
 }
+#endif
+
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+    bool PowerStateMachine::SetScreenCommonEventRules(StateChangeReason reason)
+    {
+        auto screenCommonEventController = DelayedSingleton<ScreenCommonEventController>::GetInstance();
+        if (screenCommonEventController == nullptr) {
+            POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine screenCommonEventController is nullptr.");
+            return false;
+        }
+        screenCommonEventController->SetScreenOnCommonEventRules(reason);
+        return true;
+    }
 #endif
 } // namespace PowerMgr
 } // namespace OHOS

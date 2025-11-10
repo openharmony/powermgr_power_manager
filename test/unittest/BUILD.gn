@@ -1878,6 +1878,29 @@ if (power_manager_feature_surport_takeover_suspend) {
   defines += [ "POWER_MANAGER_TAKEOVER_SUSPEND" ]
 }
 
+##############################test_power_screen_common_event##############################
+ohos_unittest("test_power_screen_common_event") {
+  module_out_path = module_output_path
+
+  sources = [ "src/screen_common_event_controller_test.cpp" ]
+
+  if (power_manager_feature_watch_limit_screen_common_event_publish) {
+    defines += [ "POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES" ]
+  }
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+  include_dirs = [ "${powermgr_service_path}/native/src/screen_common_event_customized" ]
+  deps = [
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/hookmgr:power_hookmgr",
+  ]
+  external_deps = deps_ex
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -1938,6 +1961,9 @@ group("unittest") {
   }
   if (has_display_manager_part) {
     deps += [ ":test_device_state_action_native" ]
+  }
+  if (power_manager_feature_watch_limit_screen_common_event_publish) {
+    deps += [ ":test_power_screen_common_event" ]
   }
 }
 
