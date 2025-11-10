@@ -1232,11 +1232,14 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
         POWER_HILOGE(FEATURE_POWER_STATE, "Notify is null");
         return;
     }
-
+    auto screenCommonEventController = DelayedSingleton<ScreenCommonEventController>::GetInstance();
+    if (screenCommonEventController == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine ScreenCommonEventController is nullptr.");
+        return;
+    }
     switch (state) {
         case PowerState::AWAKE: {
-            DelayedSingleton<ScreenCommonEventController>::GetInstance()->SendCustomizedScreenEvent(
-                notify, PowerState::AWAKE, callTime, reason);
+            screenCommonEventController->SendCustomizedScreenEvent(notify, PowerState::AWAKE, callTime, reason);
             isAwakeNotified_.store(true, std::memory_order_relaxed);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
             auto suspendController = pms->GetSuspendController();
@@ -1249,8 +1252,7 @@ void PowerStateMachine::SendEventToPowerMgrNotify(PowerState state, int64_t call
             break;
         }
         case PowerState::INACTIVE: {
-            DelayedSingleton<ScreenCommonEventController>::GetInstance()->SendCustomizedScreenEvent(
-                notify, PowerState::INACTIVE, callTime, reason);
+            screenCommonEventController->SendCustomizedScreenEvent(notify, PowerState::INACTIVE, callTime, reason);
             isAwakeNotified_.store(false, std::memory_order_relaxed);
             break;
         }
@@ -2075,6 +2077,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     UpdateSettingStateFlag(state, reason);
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     if (!SetScreenCommonEventRules(reason)) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine screenCommonEventController is nullptr.");
         return false;
     }
 #endif
