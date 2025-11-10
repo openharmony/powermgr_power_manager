@@ -14,6 +14,10 @@
  */
 
 #include "screen_common_event_controller.h"
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+#include "app_manager_utils.h"
+#include "power_hookmgr.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {

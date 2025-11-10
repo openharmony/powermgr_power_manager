@@ -18,15 +18,6 @@
 
 #include "singleton.h"
 #include "power_mgr_service.h"
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-#include "app_manager_utils.h"
-#include "power_hookmgr.h"
-#include "if_system_ability_manager.h"
-#include "iservice_registry.h"
-#include "power_log.h"
-#include "app_mgr_interface.h"
-#include <mutex>
-#endif
 
 namespace OHOS {
 namespace PowerMgr {
