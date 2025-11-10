@@ -708,6 +708,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService025, TestSize.Level2)
         StateChangeReason::STATE_CHANGE_REASON_PICKUP);
     EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_FROM_ULSR),
         StateChangeReason::STATE_CHANGE_REASON_WAKEUP_FROM_ULSR);
+    EXPECT_EQ(stateMaschine_->GetReasonByWakeType(WakeupDeviceType::WAKEUP_DEVICE_MESSAGE_NOTIFICATION),
+        StateChangeReason::STATE_CHANGE_REASON_MESSAGE_NOTIFICATION);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService025 function end!");
 }
@@ -736,6 +738,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
         WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
     EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("wake up screen:receive bluetooth call"),
         WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL);
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("wake up screen:wake screen switch on and receive notification"),
+        WakeupDeviceType::WAKEUP_DEVICE_MESSAGE_NOTIFICATION);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 function end!");
 }
@@ -1123,6 +1127,27 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService039, TestSize.Level2) {
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 5 failed";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService039 end!");
+}
+
+/**
+ * @tc.name: PowerMgrService040
+ * @tc.desc: Test   StateChangeReasonToStringConversion
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService040, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService040 start!");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_MESSAGE_NOTIFICATION),
+        "MESSAGE_NOTIFICATION");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_BLUETOOTH_INCOMING_CALL),
+        "BLUETOOTH_INCOMING_CALL");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_PICKUP),
+        "PICKUP");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL),
+        "INCOMING_CALL");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_POWER_KEY),
+        "POWER_KEY");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService040 end!");
 }
 
 /**

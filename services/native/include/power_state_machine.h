@@ -464,6 +464,9 @@ private:
 #endif
     std::atomic<bool> isDuringCall_ {false};
     bool SetDreamingState(StateChangeReason reason);
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+    bool SetScreenCommonEventRules(StateChangeReason reason);
+#endif
 };
 } // namespace PowerMgr
 } // namespace OHOS

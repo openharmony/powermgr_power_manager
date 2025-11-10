@@ -29,6 +29,7 @@ public:
     static void GetForegroundApplications(std::vector<OHOS::AppExecFwk::AppStateData>& appsData);
     static bool IsForegroundApplication(const std::set<std::string>& appNames);
     static int32_t GetApiTargetVersion();
+    static void GetForegroundBundleNames(std::set<std::string>& bundleNames);
 
 private:
     static sptr<OHOS::AppExecFwk::IAppMgr> appManagerInstance_;

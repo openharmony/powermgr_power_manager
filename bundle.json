@@ -134,6 +134,7 @@
                         "ipower_state_callback.h",
                         "iproximity_controller.h",
                         "iscreen_off_pre_callback.h",
+                        "iscreen_common_event_controller.h",
                         "power_errors.h",
                         "power_mgr_client.h",
                         "power_state_machine_info.h",

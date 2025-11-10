@@ -127,5 +127,14 @@ int32_t AppManagerUtils::GetApiTargetVersion()
 #endif
 }
 
+void AppManagerUtils::GetForegroundBundleNames(std::set<std::string>& bundleNames)
+{
+    std::vector<OHOS::AppExecFwk::AppStateData> appList;
+    GetForegroundApplications(appList);
+    for (const auto &curApp : appList) {
+        bundleNames.emplace(curApp.bundleName);
+    }
+}
+
 } // namespace PowerMgr
 } // namespace OHOS
