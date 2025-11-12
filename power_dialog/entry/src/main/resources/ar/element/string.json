@@ -4,42 +4,42 @@
             "name":"WARNING_TIP",
             "value":"يتيح هذا التحكم في شاشتك عن بُعد أثناء مشاركة الشاشة.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"سماح",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"text_inject_tip_title",
             "value":"هل تسمح لتطبيق %s باستخدام شاشتك؟",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_title",
             "value":"المساعدة عن بُعد",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_text",
             "value":"يُساعدك %s على العمل عن بُعد",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_not_agree",
             "value":"رفض",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

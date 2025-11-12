@@ -4,42 +4,42 @@
             "name":"WARNING_TIP",
             "value":"Это необходимо для удаленного управления экраном во время демонстрации.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Разрешить",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"text_inject_tip_title",
             "value":"Разрешить приложению %s использовать контент экрана?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_title",
             "value":"Удаленная поддержка",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_text",
             "value":"Выполняется удаленная поддержка пользователем %s",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_not_agree",
             "value":"Запретить",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

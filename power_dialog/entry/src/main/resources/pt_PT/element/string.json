@@ -2,77 +2,77 @@
     "string":[
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"취소",
+            "value":"Cancelar",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"다시 시작",
+            "value":"Reiniciar",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"원격 지원 종료",
+            "value":"Terminar assistência remota",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"WARNING_TIP",
-            "value":"화면 공유 중에도 원격으로 화면을 제어할 수 있습니다.",
+            "value":"Isto permite que o seu ecrã seja controlado remotamente durante a partilha de ecrã.",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"bn_agree",
-            "value":"허용",
+            "value":"Permitir",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"text_inject_tip_title",
-            "value":"%s에서 화면을 사용하도록 허용하시겠습니까?",
+            "value":"Permitir a %s utilizar o seu ecrã?",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"전원 옵션",
+            "value":"Opções do botão ligar/desligar",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"notice_title",
-            "value":"원격 지원",
+            "value":"Assistência remota",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"notice_text",
-            "value":"%s님이 원격으로 지원 중",
+            "value":"Está a receber assistência remota de %s",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"bn_not_agree",
-            "value":"거부",
+            "value":"Negar",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"전원 끄기",
+            "value":"Desligar",
             "attr":{
                 "priority":"translate"
             }
