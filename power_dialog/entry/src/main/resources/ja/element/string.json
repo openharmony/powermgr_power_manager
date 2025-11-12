@@ -25,21 +25,21 @@
             "name":"WARNING_TIP",
             "value":"これは画面共有中にリモートで画面を操作できるようにします。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"許可",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"text_inject_tip_title",
             "value":"%sに画面の使用を許可しますか？",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -53,21 +53,21 @@
             "name":"notice_title",
             "value":"リモートアシスタンス",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_text",
             "value":"%sがリモートであなたをサポートしています",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_not_agree",
             "value":"拒否",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

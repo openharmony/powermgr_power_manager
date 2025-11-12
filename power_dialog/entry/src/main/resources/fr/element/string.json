@@ -25,21 +25,21 @@
             "name":"WARNING_TIP",
             "value":"Cette option permet de contrôler votre écran à distance pendant le partage d'écran.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Autoriser",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"text_inject_tip_title",
             "value":"Autoriser %s à utiliser votre écran ?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -53,26 +53,26 @@
             "name":"notice_title",
             "value":"Assistance à distance",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_text",
             "value":"%s vous assiste à distance",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_not_agree",
             "value":"Refuser",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"Mise hors tension",
+            "value":"Éteindre",
             "attr":{
                 "priority":"translate"
             }
