@@ -1,0 +1,81 @@
+{
+    "string":[
+        {
+            "name":"BUTTON_CANCEL_POWERDIALOG",
+            "value":"ပယ်ဖျက်မည်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BUTTON_REBOOT_POWERDIALOG",
+            "value":"ပြန်လည်စတင်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_notice_cancel",
+            "value":"အဝေးထိန်း အကူအညီ အဆုံးသတ်ရန်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"WARNING_TIP",
+            "value":"စက်မျက်နှာပြင် ဝေမျှထားစဉ်အတွင်း သင့်စက်မျက်နှာပြင်ကို အဝေးမှ ထိန်းချုပ်ခွင့်ပြုပါသည်။",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_agree",
+            "value":"ခွင့်ပြုရန်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"text_inject_tip_title",
+            "value":"%s အား သင့်စက်မျက်နှာပြင်ကို သုံးခွင့်ပြုမည်လား။",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
+            "value":"ပါဝါ ရွေးချယ်မှု",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_title",
+            "value":"အဝေးထိန်း အကူအညီ",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"notice_text",
+            "value":"%s က သင့်ကို အဝေးမှ ကူညီနေပါသည်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"bn_not_agree",
+            "value":"ပိတ်ပင်ရန်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BUTTON_SHUTDOWN_POWERDIALOG",
+            "value":"ပါဝါ ပိတ်ရန်",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

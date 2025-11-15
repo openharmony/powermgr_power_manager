@@ -2,77 +2,77 @@
     "string":[
         {
             "name":"BUTTON_CANCEL_POWERDIALOG",
-            "value":"취소",
+            "value":"Batalkan",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"BUTTON_REBOOT_POWERDIALOG",
-            "value":"다시 시작",
+            "value":"Mulakan semula",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"bn_notice_cancel",
-            "value":"원격 지원 종료",
+            "value":"Tamatkan bantuan jauh",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"WARNING_TIP",
-            "value":"화면 공유 중에도 원격으로 화면을 제어할 수 있습니다.",
+            "value":"Ini membolehkan skrin anda dikawal secara jauh semasa perkongsian skrin.",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"bn_agree",
-            "value":"허용",
+            "value":"Benarkan",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"text_inject_tip_title",
-            "value":"%s에서 화면을 사용하도록 허용하시겠습니까?",
+            "value":"Benarkan %s menggunakan skrin anda?",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"TEXT_POWER_OPTIONS_POWERDIALOG",
-            "value":"전원 옵션",
+            "value":"Pilihan Kuasa",
             "attr":{
                 "priority":"translate"
             }
         },
         {
             "name":"notice_title",
-            "value":"원격 지원",
+            "value":"Bantuan jauh",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"notice_text",
-            "value":"%s님이 원격으로 지원 중",
+            "value":"%s sedang membantu anda secara jauh",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"bn_not_agree",
-            "value":"거부",
+            "value":"Tolak",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
             "name":"BUTTON_SHUTDOWN_POWERDIALOG",
-            "value":"전원 끄기",
+            "value":"Matikan kuasa",
             "attr":{
                 "priority":"translate"
             }
