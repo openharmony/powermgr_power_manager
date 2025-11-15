@@ -25,21 +25,21 @@
             "name":"WARNING_TIP",
             "value":"Tính năng này cho phép điều khiển màn hình của bạn từ xa trong khi chia sẻ màn hình.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Cho phép",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"text_inject_tip_title",
             "value":"Cho phép %s sử dụng màn hình của bạn?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -53,21 +53,21 @@
             "name":"notice_title",
             "value":"Hỗ trợ từ xa",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notice_text",
             "value":"%s đang hỗ trợ bạn từ xa",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_not_agree",
             "value":"Từ chối",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
