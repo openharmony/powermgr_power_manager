@@ -1046,6 +1046,9 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
     if (suspendController_) {
         suspendController_->StopSleep();
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    powerStateMachine_->ReportShutdownStart(uid, reason, true);
+#endif
     POWER_KHILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Reboot(reason);
     return PowerErrors::ERR_OK;
@@ -1076,7 +1079,9 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
         suspendController_->StopSleep();
     }
     SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
-
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    powerStateMachine_->ReportShutdownStart(uid, reason, false);
+#endif
     POWER_KHILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
     shutdownController_->Shutdown(reason);
     return PowerErrors::ERR_OK;
@@ -1123,6 +1128,9 @@ PowerErrors PowerMgrService::SuspendDevice(
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
         return PowerErrors::ERR_OK;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    powerStateMachine_->ReportSuspendStart(uid, static_cast<int32_t>(reason), false);
+#endif
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->SuspendDeviceInner(pid, callTimeMs, reason, suspendImmed);
     return PowerErrors::ERR_OK;
@@ -1151,7 +1159,9 @@ PowerErrors PowerMgrService::WakeupDevice(
         return PowerErrors::ERR_FAILURE;
     }
 #endif
-
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    powerStateMachine_->ReportWakeupStart(uid, static_cast<int32_t>(reason));
+#endif
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid: %{public}d, uid: %{public}d", pid, uid);
 
     BackgroundRunningLock wakeupRunningLock("W", WAKEUP_LOCK_TIMEOUT_MS);
@@ -1300,6 +1310,10 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't force suspend");
         return PowerErrors::ERR_FAILURE;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    powerStateMachine_->ReportSuspendStart(
+        uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
+#endif
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
     powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
     return PowerErrors::ERR_OK;
@@ -1332,8 +1346,8 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reas
         "hibernateGuard", HIBERNATE_GUARD_TIMEOUT_MS); // avoid hibernate breaked by S3/ULSR
     HibernateControllerInit();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
+    powerStateMachine_->ReportHibernateStart(
+        static_cast<int32_t>(uid), reason, clearMemory);
 #endif
     bool ret = powerStateMachine_->HibernateInner(clearMemory, reason);
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;

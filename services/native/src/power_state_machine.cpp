@@ -832,6 +832,35 @@ void PowerStateMachine::DelayForHibernateInactive(bool clearMemory)
     }
 }
 
+bool PowerStateMachine::ActivateDefaultAccount()
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate begin.");
+    if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        ReportHibernatePrepareFailed(HibernatePrepareFailedReason::HIBERNATE_PREPARE_DEACTIVATE_ACCOUNTS_FAILED);
+#endif
+        return false;
+    }
+    int32_t id = 0;
+    if (AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(id) != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "get default activated os account failed.");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        ReportHibernatePrepareFailed(HibernatePrepareFailedReason::HIBERNATE_PREPARE_GET_DEFAULT_ACCOUNT_FAILED);
+#endif
+        return false;
+    }
+    if (AccountSA::OsAccountManager::ActivateOsAccount(id) != ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "activate os account failed.");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        ReportHibernatePrepareFailed(HibernatePrepareFailedReason::HIBERNATE_PREPARE_ACTIVATE_DEFAULT_ACCOUNT_FAILED);
+#endif
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate end.");
+    return true;
+}
+
 bool PowerStateMachine::PrepareHibernate(bool clearMemory)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -851,24 +880,17 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     if (clearMemory) {
         auto hookMgr = GetPowerHookMgr();
         HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_PRE_SWITCH_ACCOUNT), nullptr, nullptr);
-        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate begin.");
-        if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
-            POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
-            return false;
+        ret = ActivateDefaultAccount();
+        if (ret == false) {
+            return ret;
         }
-        int32_t id;
-        if (AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(id) != ERR_OK) {
-            POWER_HILOGE(FEATURE_SUSPEND, "get default activated os account failed.");
-            return false;
-        }
-        if (AccountSA::OsAccountManager::ActivateOsAccount(id) != ERR_OK) {
-            POWER_HILOGE(FEATURE_SUSPEND, "activate os account failed.");
-            return false;
-        }
-        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate end.");
 
         if (!OHOS::system::SetParameter(POWERMGR_STOPSERVICE.c_str(), "true")) {
             POWER_HILOGE(FEATURE_SUSPEND, "set parameter POWERMGR_STOPSERVICE true failed.");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+            ReportHibernatePrepareFailed(
+                HibernatePrepareFailedReason::HIBERNATE_PREPARE_SET_POWERMGR_STOPSERVICE_FAILED);
+#endif
             return false;
         }
         HookMgrExecute(hookMgr, static_cast<int32_t>(PowerHookStage::POWER_POST_SWITCH_ACCOUNT), nullptr, nullptr);
@@ -878,6 +900,9 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
 
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        ReportHibernatePrepareFailed(HibernatePrepareFailedReason::HIBERNATE_PREPARE_SET_STATE_HIBERNATE_FAILED);
+#endif
         ret = false;
     }
     if (ret && clearMemory) {
@@ -901,6 +926,9 @@ bool PowerStateMachine::PrepareHibernateWithTimeout(bool clearMemory)
     if (status == std::future_status::timeout) {
         POWER_HILOGE(FEATURE_SUSPEND, "Prepare hibernate execution timeout");
         g_prepareResult = false;
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        ReportHibernatePrepareFailed(HibernatePrepareFailedReason::HIBERNATE_PREPARE_TIMEOUT);
+#endif
     }
     bool prepareResult = g_prepareResult.load(); // avoid g_prepareResult changed after timeout
     POWER_HILOGI(
@@ -2729,6 +2757,87 @@ TransitResult PowerStateMachine::TakeOverSuspendAction(StateChangeReason reason)
         return TransitResult::TAKEN_OVER;
     }
     return TransitResult::SUCCESS;
+}
+#endif
+
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+void PowerStateMachine::GetSceneStatusInfo(int8_t& switchOpen, int8_t& chargeConnect, int8_t& externalScreen)
+{
+    constexpr int8_t INVALID_VALUE = 127;
+    switchOpen = INVALID_VALUE;     // 0: switch or lid close, 1: switch or lid open, 127: default
+    chargeConnect = INVALID_VALUE;  // 0: DC, 1: AC, 127: default
+    externalScreen = INVALID_VALUE; // 0: no external screen, 1: one external screen, 127: default
+
+#ifdef POWER_MANAGER_ENABLE_LID_CHECK
+    switchOpen = static_cast<int8_t>(!PowerMgrService::isInLidMode_);
+#else
+    switchOpen = static_cast<int8_t>(IsSwitchOpen());
+#endif
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr) {
+        chargeConnect = static_cast<int8_t>(pms->GetPowerConnectStatus());
+    }
+#endif
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    externalScreen = static_cast<int8_t>(GetExternalScreenNumber());
+#endif
+}
+
+void PowerStateMachine::ReportSuspendStart(int32_t uid, int32_t reason, bool force)
+{
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SLEEP_START", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "TRIGGER_EVENT_TYPE", static_cast<int32_t>(reason), "ACTION_EVENT_TYPE", static_cast<int32_t>(force));
+    
+    int8_t switchOpen = 0;
+    int8_t chargeConnect = 0;
+    int8_t externalScreen = 0;
+    GetSceneStatusInfo(switchOpen, chargeConnect, externalScreen);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SUSPEND_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "FORCE", static_cast<int8_t>(force), "UID", uid, "REASON", reason,
+        "SWITCH", switchOpen, "CHARGE", chargeConnect, "EXSCREEN", externalScreen);
+}
+
+void PowerStateMachine::ReportWakeupStart(int32_t uid, int32_t reason)
+{
+    int8_t switchOpen = 0;
+    int8_t chargeConnect = 0;
+    int8_t externalScreen = 0;
+    GetSceneStatusInfo(switchOpen, chargeConnect, externalScreen);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "WAKEUP_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "UID", uid, "REASON", reason, "SWITCH", switchOpen, "CHARGE",
+        chargeConnect, "EXSCREEN", externalScreen);
+}
+
+void PowerStateMachine::ReportHibernateStart(int32_t uid, const std::string& reason, bool clearMemory)
+{
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_START",
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "CLEAR_MEMORY", static_cast<int32_t>(clearMemory));
+
+    int8_t switchOpen = 0;
+    int8_t chargeConnect = 0;
+    int8_t externalScreen = 0;
+    GetSceneStatusInfo(switchOpen, chargeConnect, externalScreen);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "CLEAR_MEMORY", static_cast<int8_t>(clearMemory), "START_REASON",
+        reason, "START_UID", uid, "SWITCH", switchOpen, "CHARGE", chargeConnect, "EXSCREEN", externalScreen);
+}
+
+void PowerStateMachine::ReportHibernatePrepareFailed(HibernatePrepareFailedReason reason)
+{
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "HIBERNATE_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "PREPARE_FAILED_REASON", static_cast<int32_t>(reason));
+}
+
+void PowerStateMachine::ReportShutdownStart(int32_t uid, const std::string& reason, bool isReboot)
+{
+    int8_t switchOpen = 0;
+    int8_t chargeConnect = 0;
+    int8_t externalScreen = 0;
+    GetSceneStatusInfo(switchOpen, chargeConnect, externalScreen);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SHUTDOWN_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "START_REASON", reason, "START_UID", uid, "SWITCH", switchOpen,
+        "CHARGE", chargeConnect, "EXSCREEN", externalScreen, "IS_REBOOT", static_cast<int8_t>(isReboot));
 }
 #endif
 } // namespace PowerMgr
