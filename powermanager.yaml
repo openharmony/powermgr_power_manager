@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -78,3 +78,57 @@ APP_HOLD_RUNNINGLOCK_TIMEOUT:
   UID: {type: INT32, desc: session uid}
   TYPE: {type: INT32, desc: runninglock type}
   NAME: {type: STRING, desc: runninglock name}
+
+WAKEUP_STATISTIC:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: wakeup statistic, preserve: true}
+  UID: {type: INT32, desc: start wakeup application uid}
+  REASON: {type: INT32, desc: wakeup reason}
+  SWITCH: {type: INT8, desc: switch state}
+  CHARGE: {type: INT8, desc: charge state}
+  EXSCREEN: {type: INT8, desc: external screen number}
+  WAKEUP_REASON: {type: STRING, desc: wakeup reason}
+
+SUSPEND_STATISTIC:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: suspend statistic, preserve: true}
+  FORCE: {type: INT8, desc: is force suspend}
+  UID: {type: INT32, desc: start suspend application uid}
+  REASON: {type: INT32, desc: start suspend reason}
+  SWITCH: {type: INT8, desc: switch state}
+  CHARGE: {type: INT8, desc: charge state}
+  EXSCREEN: {type: INT8, desc: external screen number}
+  DO_SUSPEND: {type: INT8, desc: do suspend}
+
+HIBERNATE_STATISTIC:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: hibernate statistic, preserve: true}
+  CLEAR_MEMORY: {type: INT8, desc: whether clear memory}
+  START_REASON: {type: STRING, desc: the reason to hibernate}
+  START_UID: {type: INT32, desc: start hibernate application uid}
+  PREPARE_FAILED_REASON: {type: INT32, desc: hibernate prepare failed reason}
+  SWITCH: {type: INT8, desc: switch state}
+  CHARGE: {type: INT8, desc: charge state}
+  EXSCREEN: {type: INT8, desc: external screen number}
+  DO_HIBERNATE: {type: INT8, desc: do hibernate}
+  TAKEOVER_UID: {type: INT32, desc: takeover hibernate application uid}
+
+SHUTDOWN_STATISTIC:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: shutdown statistic, preserve: true}
+  START_REASON: {type: STRING, desc: start shutdown reason}
+  START_UID: {type: INT32, desc: start shutdown application uid}
+  SWITCH: {type: INT8, desc: switch state}
+  CHARGE: {type: INT8, desc: charge state}
+  EXSCREEN: {type: INT8, desc: external screen number}
+  TAKEOVER_UID: {type: INT32, desc: takeover shutdown application uid}
+  DO_SHUTDOWN: {type: INT8, desc: do shutdown}
+  IS_REBOOT: {type: INT8, desc: is reboot}
+
+MXSR_STANDBY_STATISTIC:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: Sx standby statistic, preserve: true}
+  STANDBY_TYPE: {type: INT32, desc: Sx standby type}
+  ENTER_TIME: {type: INT64, desc: Sx standby state enter time}
+  EXIT_TIME: {type: INT64, desc: Sx standby state exit time}
+  ENTER_CAUSE: {type: INT32, desc: Sx standby state enter cause}
+  EXIT_CAUSE: {type: STRING, desc: Sx standby state exit cause}
+  ENTER_BATTERY_CAP: {type: INT32, desc: Battery capacity when enter Sx standby state}
+  EXIT_BATTERY_CAP: {type: INT32, desc: Battery capacity when exit Sx standby state}
+  LID_STATUS: {type: INT32, desc: Lid status}
+  ERR_CODE: {type: STRING, desc: Error code}
