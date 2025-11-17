@@ -95,6 +95,7 @@ HWTEST_F(PowerMgrPowerSavemodeTest, PowerSavemode_002, TestSize.Level2)
     GTEST_LOG_(INFO) << "PowerSavemode_002: SetDeviceMode start.";
     POWER_HILOGI(LABEL_TEST, "PowerSavemode_002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE);
     PowerMode modeFirst = PowerMode::PERFORMANCE_MODE;
     PowerMode modeSecond = PowerMode::PERFORMANCE_MODE;
     powerMgrClient.SetDeviceMode(modeFirst);

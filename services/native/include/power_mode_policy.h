@@ -38,6 +38,7 @@ public:
         static constexpr uint32_t AUTO_WINDOWN_RORATION = 107;
         static constexpr uint32_t LCD_BRIGHTNESS = 115;
         static constexpr uint32_t VIBRATORS_STATE = 120;
+        static constexpr uint32_t SOC_PERF = 121;
     };
 
     ~PowerModePolicy() = default;

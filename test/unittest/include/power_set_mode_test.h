@@ -26,6 +26,9 @@ namespace PowerMgr {
 constexpr int SLEEP_WAIT_TIME_S = 6;
 class PowerSetModeTest : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    static inline PowerMode savedMode_ {PowerMode::NORMAL_MODE};
 };
 } // namespace PowerMgr
 } // namespace OHOS
