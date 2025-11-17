@@ -50,7 +50,8 @@
             "power_manager_feature_proximity_controller_override",
             "power_manager_feature_surport_takeover_suspend",
             "power_manager_feature_enable_lid_check",
-            "power_manager_feature_lid_fold"
+            "power_manager_feature_lid_fold",
+            "power_manager_feature_enable_performance_mode"
         ],
         "adapted_system_type": [
             "standard"
@@ -99,6 +100,7 @@
                 "window_manager",
                 "miscdevice",
                 "bundle_framework",
+                "resource_schedule_service",
                 "selinux_adapter"
             ]
         },
