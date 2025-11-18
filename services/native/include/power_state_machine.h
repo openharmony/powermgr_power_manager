@@ -70,6 +70,15 @@ enum class TransitResult {
     OTHER_ERR = 99
 };
 
+enum class HibernatePrepareFailedReason : uint32_t {
+    HIBERNATE_PREPARE_TIMEOUT = 1,
+    HIBERNATE_PREPARE_DEACTIVATE_ACCOUNTS_FAILED = 2,
+    HIBERNATE_PREPARE_GET_DEFAULT_ACCOUNT_FAILED = 3,
+    HIBERNATE_PREPARE_ACTIVATE_DEFAULT_ACCOUNT_FAILED = 4,
+    HIBERNATE_PREPARE_SET_POWERMGR_STOPSERVICE_FAILED = 5,
+    HIBERNATE_PREPARE_SET_STATE_HIBERNATE_FAILED = 6,
+};
+
 class PowerStateMachine : public std::enable_shared_from_this<PowerStateMachine> {
 public:
     PowerStateMachine(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer = nullptr);
@@ -252,6 +261,12 @@ public:
     void SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason);
 #endif
     bool HandleDuringCall(bool isProximityClose);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    void ReportSuspendStart(int32_t uid, int32_t reason, bool force);
+    void ReportWakeupStart(int32_t uid, int32_t reason);
+    void ReportHibernateStart(int32_t uid, const std::string& reason, bool clearMemory);
+    void ReportShutdownStart(int32_t uid, const std::string& reason, bool isReboot);
+#endif
 
 private:
     enum PreBrightState : uint32_t {
@@ -383,6 +398,7 @@ private:
     void DelayForHibernateInactive(bool clearMemory);
     bool PrepareHibernate(bool clearMemory);
     bool PrepareHibernateWithTimeout(bool clearMemory);
+    bool ActivateDefaultAccount();
     void RestoreHibernate(bool clearMemory, HibernateStatus status,
         const std::shared_ptr<HibernateController>& hibernateController, const std::shared_ptr<PowerMgrNotify>& notify);
     void RollbackHibernate(
@@ -396,6 +412,8 @@ private:
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     bool ReportScreenOffInvalidEvent(StateChangeReason reason);
     bool ReportAbnormalScreenOffEvent(StateChangeReason reason);
+    void GetSceneStatusInfo(int8_t& switchOpen, int8_t& chargeConnect, int8_t& externalScreen);
+    void ReportHibernatePrepareFailed(HibernatePrepareFailedReason reason);
 #endif
 #ifdef POWER_MANAGER_TAKEOVER_SUSPEND
     TransitResult TakeOverSuspendAction(StateChangeReason reason);

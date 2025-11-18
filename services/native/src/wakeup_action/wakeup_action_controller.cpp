@@ -19,6 +19,9 @@
 #include "power_log.h"
 #include "power_mgr_service.h"
 #include "system_suspend_controller.h"
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#include <hisysevent.h>
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -79,6 +82,11 @@ bool WakeupActionController::ExecuteByGetReason()
             "WakeupAction device, pid=%{public}d, uid=%{public}d, reason=%{public}s, scene=%{public}s, "
             "action=%{public}u",
             pid, uid, reason.c_str(), sourceMap_[reason]->GetScene().c_str(), sourceMap_[reason]->GetAction());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        std::string str = reason + ":" + std::to_string(sourceMap_[reason]->GetAction());
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "WAKEUP_STATISTIC",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "WAKEUP_REASON", str.c_str());
+#endif
         HandleAction(reason);
         return true;
     }
