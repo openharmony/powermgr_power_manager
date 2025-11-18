@@ -30,11 +30,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-std::atomic<SettingProvider*> SettingProvider::instance_ {nullptr};
 static ffrt::mutex g_settingMutex;
-sptr<IRemoteObject> SettingProvider::remoteObj_;
-const int32_t INITIAL_USER_ID = 100;
-int32_t SettingProvider::currentUserId_ = INITIAL_USER_ID;
 namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
@@ -413,26 +409,24 @@ ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::strin
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)
 {
-    std::vector<std::string> needMultiUserStrVec {
-        SETTING_POWER_WAKEUP_DOUBLE_KEY,
-        SETTING_POWER_WAKEUP_PICKUP_KEY,
-        SETTING_POWER_WAKEUP_SOURCES_KEY,
-        SETTING_DURING_CALL_STATE_KEY,
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-        SETTING_DISPLAY_AC_OFF_TIME_KEY,
-        SETTING_DISPLAY_DC_OFF_TIME_KEY,
-        SETTING_POWER_AC_SLEEP_TIME_KEY,
-        SETTING_POWER_DC_SLEEP_TIME_KEY,
-        SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
-        SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
-#endif
-        SETTING_ELDER_CARE_SWITCH_ENABLED,
-    };
-    
-    if (std::count(needMultiUserStrVec.begin(), needMultiUserStrVec.end(), key)) {
+    if (std::find(needMultiUserStrVec.begin(), needMultiUserStrVec.end(), key) != needMultiUserStrVec.end()) {
         return true;
     }
     return false;
+}
+
+bool SettingProvider::AddMultiUserKey(const std::string& key)
+{
+    std::lock_guard<ffrt::mutex> lock(g_settingMutex);
+    if (IsNeedMultiUser(key)) {
+        return true;
+    }
+    if (needMultiUserStrVec.size() >= MULTI_USER_STR_VEC_SIZE_MAX) {
+        POWER_HILOGW(COMP_UTILS, "Vector capacity limit reached: size=%{public}zu", needMultiUserStrVec.size());
+        return false;
+    }
+    needMultiUserStrVec.emplace_back(key);
+    return true;
 }
 
 std::string SettingProvider::ReplaceUserIdForUri(int32_t userId)
