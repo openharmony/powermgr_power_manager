@@ -426,6 +426,7 @@ bool SettingProvider::IsNeedMultiUser(const std::string& key)
         SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
         SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
 #endif
+        SETTING_ELDER_CARE_SWITCH_ENABLED,
     };
     
     if (std::count(needMultiUserStrVec.begin(), needMultiUserStrVec.end(), key)) {
