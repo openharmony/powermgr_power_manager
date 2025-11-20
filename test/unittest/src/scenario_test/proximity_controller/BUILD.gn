@@ -94,6 +94,8 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
+  include_dirs = []
+
   deps = [
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
@@ -110,6 +112,15 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
       defined(global_parts_info.powermgr_battery_manager)) {
     defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
     deps_ex += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_external_screen_management) {
+    defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
+  }
+
+  if (power_manager_feature_wakeup_action) {
+    defines += [ "POWER_MANAGER_WAKEUP_ACTION" ]
+    include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
   }
   external_deps = deps_ex
 }

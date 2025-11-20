@@ -25,12 +25,13 @@
 #include "power_log.h"
 #include "ipower_mgr.h"
 #include "power_mgr_proxy.h"
+#include "power_mgr_async_reply_stub.h"
 
 using OHOS::HiviewDFX::HiLog;
 namespace OHOS {
 namespace PowerMgr {
 constexpr int32_t MAX_PROXY_RUNNINGLOCK_NUM = 2000;
-PowerMgrServiceTestProxy::PowerMgrServiceTestProxy(const sptr<PowerMgrService>& service)
+PowerMgrServiceTestProxy::PowerMgrServiceTestProxy(const sptr<PowerMgrService>& service) : PowerMgrProxy(service)
 {
     if (service != nullptr) {
         stub_ = static_cast<PowerMgrStub*>(service);
@@ -668,31 +669,8 @@ int32_t PowerMgrServiceTestProxy::RestoreScreenOffTimeIpc(const std::string& api
 
 int32_t PowerMgrServiceTestProxy::ForceSuspendDeviceIpc(int64_t callTimeMs)
 {
-    RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
-        HiLog::Error(LABEL, "Write interface token failed!");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteInt64(callTimeMs)) {
-        HiLog::Error(LABEL, "Write [callTimeMs] failed!");
-        return ERR_INVALID_DATA;
-    }
-
-    int32_t result = stub_->OnRemoteRequest(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_FORCE_SUSPEND_DEVICE_IPC), data, reply, option);
-    if (FAILED(result)) {
-        HiLog::Error(LABEL, "Send request failed!");
-        return result;
-    }
-    int32_t error = ERR_OK;
-    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(reply, Int32, error, ERR_OK);
-    return error;
+    sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
+    return PowerMgrProxy::ForceSuspendDeviceIpc(callTimeMs, "-1", asyncCallback);
 }
 
 int32_t PowerMgrServiceTestProxy::GetStateIpc(int32_t& powerState)

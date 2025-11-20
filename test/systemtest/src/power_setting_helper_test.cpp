@@ -36,10 +36,12 @@ bool GetBoolParameter(const std::string& key, bool def)
 }
 }
 
+namespace OHOS::PowerMgr {
 int64_t SettingHelper::GetSettingLongValue(const std::string& key, int64_t defaultVal)
 {
     return g_getSettingLongValue;
 }
+} // namespace OHOS::PowerMgr
 
 namespace {
 /**

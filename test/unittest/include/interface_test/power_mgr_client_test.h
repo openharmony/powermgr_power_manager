@@ -26,7 +26,11 @@
 #include "mock_state_action.h"
 #include "power_common.h"
 #include "power_mgr_client.h"
+#define private   public
+#define protected public
 #include "power_mgr_service.h"
+#undef private
+#undef protected
 #include "power_state_machine_info.h"
 
 namespace OHOS {
