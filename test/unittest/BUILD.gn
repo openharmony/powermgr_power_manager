@@ -1816,6 +1816,22 @@ ohos_unittest("test_power_config_parse") {
   if (power_manager_feature_pickup) {
     defines += [ "POWER_PICKUP_ENABLE" ]
   }
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_external_screen_management) {
+    defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
+  }
+
+  if (power_manager_feature_wakeup_action) {
+    defines += [ "POWER_MANAGER_WAKEUP_ACTION" ]
+    include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
+  }
 }
 
 ##############################test_power_config_parse_two.#############################

@@ -459,7 +459,14 @@ group("systemtest_powermgr") {
     ":test_power_mgr_system",
     ":test_power_st_mgr_mock",
     ":test_power_st_mgr_mock_suspend",
-    ":test_power_setting_help",
-    ":test_power_setting_helper",
   ]
+# some functions used in those tests below are not even defined if the feature is on
+# Incrementcal coverage compilation will fail if it is executed for devices enabling this feature
+# In that case, the test suites need to be modified as well. 
+  if (!power_manager_feature_charging_type_setting) {
+    deps += [
+      ":test_power_setting_help",
+      ":test_power_setting_helper",
+    ]
+  }
 }
