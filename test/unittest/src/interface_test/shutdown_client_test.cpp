@@ -35,6 +35,7 @@ bool g_isOnTakeOverShutdown = false;
 bool g_isOnTakeOverHibernate = false;
 bool g_isOnAsyncShutdownOrReboot = false;
 bool g_isOnSyncShutdownOrReboot = false;
+sptr<PowerMgrService> g_pmsTest = nullptr;
 }
 using namespace testing::ext;
 
@@ -286,6 +287,26 @@ HWTEST_F(ShutdownClientTest, SyncShutdownOrRebootCallbackStub001, TestSize.Level
     int32_t ret = syncShutdownCallback.OnRemoteRequest(code, data, g_reply, g_option);
     EXPECT_EQ(ret, ERR_OK);
     POWER_HILOGI(LABEL_TEST, "SyncShutdownOrRebootCallbackStub001 function end!");
+}
+
+/**
+ * @tc.name: GetShutdownReason001
+ * @tc.desc: Test GetShutdownReason
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ShutdownClientTest, GetShutdownReason001, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "GetShutdownReason001 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    std::string setReasonFirst = "reasonfirst";
+    std::string setReasonSecond =
+        "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirst";
+    PowerErrors ret = powerMgrClient.GetShutdownReason(setReasonFirst);
+    EXPECT_TRUE(ret != PowerErrors::ERR_PERMISSION_DENIED);
+    ret = powerMgrClient.GetShutdownReason(setReasonSecond);
+    EXPECT_TRUE(ret != PowerErrors::ERR_PERMISSION_DENIED);
+    POWER_HILOGI(LABEL_TEST, "GetShutdownReason001 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr

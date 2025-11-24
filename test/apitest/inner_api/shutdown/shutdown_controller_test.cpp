@@ -16,14 +16,22 @@
 #include <condition_variable>
 #include <mutex>
 
+#ifdef POWERMGR_GTEST
+#define private   public
+#define protected public
+#endif
+
 #include <gtest/gtest.h>
 #include <mock_power_action.h>
 #include <mock_state_action.h>
 #include <power_log.h>
 #include <shutdown/takeover_shutdown_callback_stub.h>
 #include <shutdown_controller.h>
+#include "power_errors.h"
+#include "power_mgr_service.h"
 
 namespace OHOS::PowerMgr {
+sptr<PowerMgrService> g_pmsTest = nullptr;
 class ShutDownControllerTest : public testing::Test {
 public:
     bool called = false;
@@ -112,6 +120,35 @@ HWTEST_F(ShutDownControllerTest, ShutDownControllerTest003, TestSize.Level0)
     ret = controller.TriggerTakeOverShutdownCallback(TakeOverInfo("takeoverFalse", false));
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest003 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest004
+ * @tc.desc: Test SetShutdownReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest004, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest004 function start!");
+    ShutdownController controller;
+    g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(g_pmsTest != nullptr);
+    g_pmsTest->OnStart();
+    std::string setReasonFirst = "reasonfirst";
+    std::string setReasonSecond =
+        "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirst";
+    std::string getReasonFirst = "";
+    std::string getReasonSecond = "";
+    controller.SetShutdownReason(setReasonFirst);
+    PowerErrors ret = g_pmsTest->GetShutdownReason(getReasonFirst);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    EXPECT_TRUE(getReasonFirst == "reasonfirst");
+    controller.SetShutdownReason(setReasonSecond);
+    ret = g_pmsTest->GetShutdownReason(getReasonSecond);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    EXPECT_TRUE(getReasonSecond ==
+        "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonf");
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest004 function end!");
 }
 } // namespace
 } // namespace OHOS::PowerMgr

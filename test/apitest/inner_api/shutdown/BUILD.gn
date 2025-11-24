@@ -123,6 +123,7 @@ ohos_unittest("shutdown_controller_test") {
   ]
   external_deps = deps_ex
   module_out_path = module_output_path
+  defines += [ "POWERMGR_GTEST" ]
 }
 
 group("unittest") {

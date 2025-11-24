@@ -955,7 +955,10 @@ ohos_unittest("test_power_mgr_service_native") {
     blocklist = "../cfi_blocklist.txt"
   }
 
-  include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
+  include_dirs = [
+    "${powermgr_service_path}/native/src/setting/",
+    "${powermgr_utils_path}/permission/include",
+  ]
   defines += [ "THERMAL_GTEST" ]
 
   sources = [ "src/power_mgr_service_native_test.cpp" ]
