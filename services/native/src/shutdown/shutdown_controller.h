@@ -74,6 +74,7 @@ private:
         std::set<sptr<IRemoteObject>>& callbacks, const TakeOverInfo& info);
     void TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
     void TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot);
+    void SetShutdownReason(const std::string& reason);
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     bool ReportDoShutdown();
 #endif
