@@ -114,4 +114,5 @@ interface OHOS.PowerMgr.IPowerMgr {
         [out] int powerError);
 
     void SetPowerKeyFilteringStrategyIpc([in] int strategy, [out] int powerError);
+    void GetShutdownReasonIpc([out] String reason, [out] int powerError);
 }

@@ -27,6 +27,7 @@
 #include "key_event.h"
 #include "pointer_event.h"
 #endif
+#include "permission.h"
 #include "power_common.h"
 #include "power_mgr_service.h"
 #include "setting_helper.h"
@@ -45,7 +46,13 @@ constexpr int32_t UNCANCELID = -1;
 constexpr int32_t INVALID_CODE = -1;
 constexpr int32_t TRY_TIMES = 2;
 sptr<PowerMgrService> g_pmsTest;
+bool g_isSystem = true;
 } // namespace
+
+bool Permission::IsSystem()
+{
+    return g_isSystem;
+}
 
 void PowerMgrServiceNativeTest::SetUp()
 {
@@ -509,5 +516,49 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative017, TestSize.Level1)
     EXPECT_TRUE(SettingHelper::duringCallObserver_ == nullptr);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative017 function end!");
     GTEST_LOG_(INFO) << "PowerMgrServiceNative017 end.";
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative018
+ * @tc.desc: Test GetShutdownReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative018, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative018 function start!");
+    auto g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(g_pmsTest != nullptr);
+    g_pmsTest->OnStart();
+    std::string setReasonFirst = "reasonfirst";
+    std::string setReasonSecond =
+        "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirst";
+    g_isSystem = true;
+    PowerErrors ret = g_pmsTest->GetShutdownReason(setReasonFirst);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    ret = g_pmsTest->GetShutdownReason(setReasonSecond);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative018 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative019
+ * @tc.desc: Test GetShutdownReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative019, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative019 function start!");
+    auto g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(g_pmsTest != nullptr);
+    g_pmsTest->OnStart();
+    std::string setReasonFirst = "reasonfirst";
+    std::string setReasonSecond =
+        "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirst";
+    g_isSystem = false;
+    PowerErrors ret = g_pmsTest->GetShutdownReason(setReasonFirst);
+    EXPECT_TRUE(ret != PowerErrors::ERR_PERMISSION_DENIED);
+    ret = g_pmsTest->GetShutdownReason(setReasonSecond);
+    EXPECT_TRUE(ret != PowerErrors::ERR_PERMISSION_DENIED);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative019 function end!");
 }
 } // namespace

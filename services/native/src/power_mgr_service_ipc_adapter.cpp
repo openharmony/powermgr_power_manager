@@ -54,6 +54,13 @@ int32_t PowerMgrServiceAdapter::ShutDownDeviceIpc(const std::string& reason, int
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::GetShutdownReasonIpc(std::string& reason, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::GetShutdownReason", false);
+    powerError = static_cast<int32_t>(GetShutdownReason(reason));
+    return ERR_OK;
+}
+
 int32_t PowerMgrServiceAdapter::SetSuspendTagIpc(const std::string& tag, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetSuspendTag", false);

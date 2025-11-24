@@ -274,6 +274,14 @@ public:
      */
     PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy);
 
+    /**
+     * Get the last shutdown reason.
+     * The maximum length retrieved is 96 bytes.
+     * @param reason The reason to get the last shutdown reason.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors GetShutdownReason(std::string& reason);
+
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:
 #endif

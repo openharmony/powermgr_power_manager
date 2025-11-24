@@ -216,6 +216,10 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
+    PowerErrors GetShutdownReason(std::string& reason)
+    {
+        return PowerErrors::ERR_OK;
+    }
     PowerErrors LockScreenAfterTimingOutWithAppid(
         pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token)
     {
@@ -383,5 +387,24 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter006, TestSize.L
     int32_t result = adapter->HibernateIpc(clearMemory, reason, apiVersion, nullptr);
     EXPECT_EQ(result, -1);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter006 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter007
+ * @tc.desc: test PowerMgrServiceIpcAdapter.GetShutdownReasonIpc
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter007, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter007 function start!");
+    std::string setReasonFirst = "reasonfirst";
+    std::string setReasonSecond =
+        "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirst";
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->GetShutdownReasonIpc(setReasonFirst, powerError);
+    EXPECT_TRUE(ret == static_cast<int32_t>(PowerErrors::ERR_OK));
+    ret = adapter->GetShutdownReasonIpc(setReasonSecond, powerError);
+    EXPECT_TRUE(ret == static_cast<int32_t>(PowerErrors::ERR_OK));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter007 function end!");
 }
 }
