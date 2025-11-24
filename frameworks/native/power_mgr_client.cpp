@@ -255,6 +255,15 @@ PowerErrors PowerMgrClient::ShutDownDevice(const std::string& reason)
     return static_cast<PowerErrors>(powerError);
 }
 
+PowerErrors PowerMgrClient::GetShutdownReason(std::string& reason)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->GetShutdownReasonIpc(reason, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
 PowerErrors PowerMgrClient::SetSuspendTag(const std::string &tag)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();

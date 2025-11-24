@@ -88,6 +88,7 @@ ohos_systemtest("ces_system") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
   ]

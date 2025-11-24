@@ -1127,6 +1127,19 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     return PowerErrors::ERR_OK;
 }
 
+PowerErrors PowerMgrService::GetShutdownReason(std::string& reason)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Get SR failed,System permission reject");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    reason = system::GetParameter("persist.dfx.shutdown_reason", "");
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Get SR,P=%{public}d,U=%{public}d,R=%{public}s", pid, uid, reason.c_str());
+    return PowerErrors::ERR_OK;
+}
+
 PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
 {
     std::lock_guard lock(suspendMutex_);

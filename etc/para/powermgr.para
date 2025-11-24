@@ -17,5 +17,6 @@ persist.dfx.userclicktime = 0
 persist.dfx.shutdownactiontime = 0
 persist.dfx.shutdowncompletetime = 0
 persist.dfx.eventtype = 0
+persist.dfx.shutdown_reason = ""
 const.power.during_call_state_enable = false
 const.powerkey.down_duration = 3000

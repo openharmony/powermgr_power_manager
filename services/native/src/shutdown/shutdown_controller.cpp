@@ -116,6 +116,21 @@ std::future<void> g_futForSyncCb;
 std::future<void> g_futForOff;
 }
 
+void ShutdownController::SetShutdownReason(const std::string& reason)
+{
+    constexpr uint32_t PARAM_ZERO = 0;
+    constexpr uint32_t MAX_LENGTH = 95;
+    std::string tempReason = reason;
+    if (reason.size() > MAX_LENGTH) {
+        tempReason = reason.substr(PARAM_ZERO, MAX_LENGTH);
+        POWER_KHILOGE(FEATURE_SHUTDOWN, "Truncate reason,reason=%{public}s,tempReason=%{public}s",
+            reason.c_str(), tempReason.c_str());
+    } else {
+        POWER_KHILOGI(FEATURE_SHUTDOWN, "SetShutdownReason=%{public}s", tempReason.c_str());
+    }
+    system::SetParameter("persist.dfx.shutdown_reason", tempReason);
+}
+
 void ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot, bool force)
 {
     // skip takeover callback
@@ -140,6 +155,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     ReportDoShutdown();
 #endif
+    SetShutdownReason(reason);
     PublishShutdownEvent();
     std::string actionTimeStr = std::to_string(GetCurrentRealTimeMs());
     PowerEventType eventType = isReboot ? PowerEventType::REBOOT : PowerEventType::SHUTDOWN;
