@@ -308,7 +308,10 @@ ohos_unittest("test_power_set_mode") {
 ohos_unittest("test_power_device_mode") {
   module_out_path = module_output_path
 
-  sources = [ "src/power_device_mode_test.cpp" ]
+  sources = [
+    "src/power_device_mode_test.cpp",
+    "src/interface_test/power_mgr_service_ipc_adapter_test.cpp",
+  ]
 
   configs = [
     "${powermgr_utils_path}:utils_config",

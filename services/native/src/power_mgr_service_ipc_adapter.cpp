@@ -141,6 +141,10 @@ int32_t PowerMgrServiceAdapter::IsCollaborationScreenOnIpc(bool& isCollaboration
 int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIpc(
     int64_t callTimeMs, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy)
 {
+    if (!powerProxy) {
+        POWER_HILOGE(FEATURE_SUSPEND, "the powerProxy is null");
+        return INIT_VALUE;
+    }
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::ForceSuspendDevice", false);
     int32_t result = static_cast<int32_t>(ForceSuspendDevice(callTimeMs, apiVersion));
     powerProxy->SendAsyncReply(result);
@@ -150,6 +154,10 @@ int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIpc(
 int32_t PowerMgrServiceAdapter::HibernateIpc(bool clearMemory, const std::string& reason,
     const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy)
 {
+    if (!powerProxy) {
+        POWER_HILOGE(FEATURE_SUSPEND, "the powerProxy is null");
+        return INIT_VALUE;
+    }
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::Hibernate", false);
     int32_t result = static_cast<int32_t>(Hibernate(clearMemory, reason, apiVersion));
     powerProxy->SendAsyncReply(result);
