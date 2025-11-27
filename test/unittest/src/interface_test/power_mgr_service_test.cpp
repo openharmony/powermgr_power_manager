@@ -912,6 +912,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest030, TestSize.Level2)
 HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest031, TestSize.Level2)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest031 function start!");
+    stub_->suspendController_ =
+        std::make_shared<SuspendController>(stub_->shutdownController_, stub_->powerStateMachine_, stub_->ffrtTimer_);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
     WakeupDeviceType abnormaltype = WakeupDeviceType(wakeupReason);
@@ -942,6 +944,14 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrServiceTest031, TestSize.Level2)
     powerMgrClient.WakeupDevice();
     sleep(NEXT_WAIT_TIME_S);
     EXPECT_EQ(powerMgrClient.IsForceSleeping(), false);
+
+    // try to wait ffrt tasks to end
+    auto ffrtTimer = stub_->ffrtTimer_;
+    if (ffrtTimer) {
+        ffrtTimer->Clear();
+    }
+    ffrt::wait();
+    stub_->suspendController_ = nullptr;
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest031 function end!");
 }
 

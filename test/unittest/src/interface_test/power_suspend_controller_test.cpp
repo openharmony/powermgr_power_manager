@@ -401,11 +401,14 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest015, TestSize.Lev
 {
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest015 function start!");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest015: start";
+    ResetMockAction();
     g_service->WakeupControllerInit();
     g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
     sleep(NEXT_WAIT_TIME_S);
     EXPECT_EQ(g_service->IsForceSleeping(), false);
     g_service->SuspendControllerInit();
+    // to make IsScreenOn to return true, otherwise the suspend action will return early
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY);
     sleep(NEXT_WAIT_TIME_S);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -415,10 +418,12 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest015, TestSize.Lev
 #endif
 
     g_service->WakeupControllerInit();
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     g_service->wakeupController_->ExecWakeupMonitorByReason(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK);
     sleep(NEXT_WAIT_TIME_S);
     EXPECT_EQ(g_service->IsForceSleeping(), false);
     g_service->SuspendControllerInit();
+    EXPECT_CALL(*g_stateAction, GetDisplayState()).WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     g_service->suspendController_->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     sleep(NEXT_WAIT_TIME_S);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -426,6 +431,15 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest015, TestSize.Lev
 #else
     EXPECT_EQ(g_service->IsForceSleeping(), false);
 #endif
+
+    // try to wait ffrt tasks to end
+    auto ffrtTimer = g_service->ffrtTimer_;
+    if (ffrtTimer) {
+        ffrtTimer->Clear();
+    }
+    ffrt::wait();
+    g_service->suspendController_ = nullptr;
+    ResetMockAction();
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest015: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest015 function end!");
 }
