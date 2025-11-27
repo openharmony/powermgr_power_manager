@@ -611,6 +611,13 @@ void SuspendController::PowerOffAllScreens(SuspendDeviceType type)
     auto changeReason = stateMachine_->GetReasonBySuspendType(type);
     auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
     bool ret = ScreenManagerLite::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF, dmsReason);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    if (!ret) {
+        std::string eventReason = "PowerOffAllScreens failed";
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "EXTERNAL_SCREEN", "REASON", eventReason);
+    }
+#endif
     POWER_HILOGI(
         FEATURE_SUSPEND, "[UL_POWER] Power off all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }

@@ -225,6 +225,13 @@ void ShutdownController::TurnOffScreen()
     POWER_HILOGD(FEATURE_SHUTDOWN, "Turn off screen before shutdown");
     bool ret = Rosen::ScreenManagerLite::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_OFF,
         Rosen::PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    if (!ret) {
+        std::string eventReason = "TurnOffScreen failed";
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "EXTERNAL_SCREEN", "REASON", eventReason);
+    }
+#endif
     POWER_KHILOGE(FEATURE_SHUTDOWN, "Turn off screen before shutting down, ret = %{public}d", ret);
 }
 

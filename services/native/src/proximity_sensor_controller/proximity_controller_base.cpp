@@ -19,6 +19,9 @@
 #include "power_log.h"
 #include "errors.h"
 #include "setting_helper.h"
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#include <hisysevent.h>
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -77,18 +80,33 @@ void ProximityControllerBase::Enable()
     POWER_HILOGD(FEATURE_INPUT, "Enter");
     SetEnabled(true);
     if (!IsSupported() && !InitProximitySensorUser()) {
-        POWER_HILOGE(FEATURE_INPUT, "Enable PROXIMITY sensor not support");
+        std::string eventReason = "Enable PROXIMITY sensor not support";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s", eventReason.c_str());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
         return;
     }
     int32_t errorCode = SubscribeSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
     if (errorCode != ERR_OK) {
-        POWER_HILOGW(FEATURE_INPUT, "SubscribeSensor PROXIMITY failed, errorCode=%{public}d", errorCode);
+        std::string eventReason = "SubscribeSensor PROXIMITY failed";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s, errorCode=%{public}d", eventReason.c_str(), errorCode);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
         return;
     }
     SetBatch(SENSOR_TYPE_ID_PROXIMITY, &user_, SAMPLING_RATE, SAMPLING_RATE);
     errorCode = ActivateSensor(SENSOR_TYPE_ID_PROXIMITY, &user_);
     if (errorCode != ERR_OK) {
-        POWER_HILOGW(FEATURE_INPUT, "ActivateSensor PROXIMITY failed, errorCode=%{public}d", errorCode);
+        std::string eventReason = "ActivateSensor PROXIMITY failed";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s, errorCode=%{public}d", eventReason.c_str(), errorCode);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
         return;
     }
     SetMode(SENSOR_TYPE_ID_PROXIMITY, &user_, SENSOR_ON_CHANGE);

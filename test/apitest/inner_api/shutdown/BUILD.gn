@@ -58,6 +58,7 @@ deps_ex = [
   "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "window_manager:libdm_lite",
   "window_manager:libwm_lite",
 ]
 
@@ -122,6 +123,9 @@ ohos_unittest("shutdown_controller_test") {
     "${powermgr_service_path}:powermgrservice",
   ]
   external_deps = deps_ex
+  if (has_hiviewdfx_hisysevent_part) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
   module_out_path = module_output_path
   defines += [ "POWERMGR_GTEST" ]
 }
