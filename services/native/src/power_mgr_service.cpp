@@ -87,6 +87,7 @@ static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 40000; // PREPARE_HIBERNATE_TIMEOUT_MS + 10000
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
+constexpr int32_t INPUT_TASK_TIMEOUT = 50000;
 constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
@@ -455,7 +456,12 @@ void PowerMgrService::HallSensorSubscriberInit()
 #ifdef HAS_SENSORS_SENSOR_PART
     POWER_HILOGI(COMP_SVC, "Start to subscribe hall sensor");
     if (!IsSupportSensor(SENSOR_TYPE_ID_HALL)) {
-        POWER_HILOGW(FEATURE_INPUT, "SENSOR_TYPE_ID_HALL sensor not support");
+        std::string eventReason = "SENSOR_TYPE_ID_HALL sensor not support";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s", eventReason.c_str());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
         return;
     }
     if (strcpy_s(sensorUser_.name, sizeof(sensorUser_.name), "PowerManager") != EOK) {
@@ -465,9 +471,17 @@ void PowerMgrService::HallSensorSubscriberInit()
     isInLidMode_ = false;
     sensorUser_.userData = nullptr;
     sensorUser_.callback = &HallSensorCallback;
-    SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    int32_t ret = SubscribeSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
     SetBatch(SENSOR_TYPE_ID_HALL, &sensorUser_, HALL_SAMPLING_RATE, HALL_REPORT_INTERVAL);
-    ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    int32_t active = ActivateSensor(SENSOR_TYPE_ID_HALL, &sensorUser_);
+    if (ret != ERR_OK || active != ERR_OK) {
+        std::string eventReason = "HallSensorSubscriberInit failed";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s,ret=%{public}d,active=%{public}d", eventReason.c_str(), ret, active);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
+    }
 #endif
 }
 
@@ -583,7 +597,12 @@ void PowerMgrService::SwitchSubscriberInit()
     POWER_HILOGW(FEATURE_INPUT, "Initialize the subscription switch");
     auto inputManager = InputManager::GetInstance();
     if (!inputManager) {
-        POWER_HILOGE(FEATURE_INPUT, "SwitchSubscriberInit inputManager is null");
+        std::string eventReason = "SwitchSubscriberInit inputManager is null";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s", eventReason.c_str());
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
         return;
     }
     switchId_ =
@@ -611,6 +630,14 @@ void PowerMgrService::SwitchSubscriberInit()
                 wakeupController->ExecWakeupMonitorByReason(reason);
             }
         });
+    if (switchId_ == -1 || switchId_ > INPUT_TASK_TIMEOUT) {
+        std::string eventReason = "SwitchSubscriberInit failed";
+        POWER_HILOGW(FEATURE_INPUT, "%{public}s,switchId_=%{public}d", eventReason.c_str(), switchId_);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
+#endif
+    }
 #endif
 }
 
@@ -2289,6 +2316,13 @@ void PowerMgrService::RegisterExternalScreenListener()
         externalScreenListener_ = sptr<ExternalScreenListener>::MakeSptr();
         ret = Rosen::ScreenManagerLite::GetInstance().RegisterScreenListener(externalScreenListener_);
         POWER_HILOGI(COMP_SVC, "Register external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        if (ret != Rosen::DMError::DM_OK) {
+            std::string eventReason = "Register external screen listener failed";
+            HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+                HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "EXTERNAL_SCREEN", "REASON", eventReason);
+        }
+#endif
     }
 
     if (abnormalExScreenListener_ == nullptr) {
@@ -2297,6 +2331,13 @@ void PowerMgrService::RegisterExternalScreenListener()
             abnormalExScreenListener_);
         POWER_HILOGI(
             COMP_SVC, "Register abnormal external screen listener, ret: %{public}d", static_cast<int32_t>(ret));
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        if (ret != Rosen::DMError::DM_OK) {
+            std::string eventReason = "Register abnormal external screen listener failed";
+            HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+                HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "EXTERNAL_SCREEN", "REASON", eventReason);
+        }
+#endif
     }
 }
 

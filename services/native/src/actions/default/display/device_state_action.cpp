@@ -23,6 +23,9 @@
 #include "power_state_machine_info.h"
 #include "power_utils.h"
 #include "system_suspend_controller.h"
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#include <hisysevent.h>
+#endif
 
 using namespace std;
 
@@ -272,6 +275,13 @@ void DeviceStateAction::SetInternalScreenDisplayPower(DisplayState state, StateC
     auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(reason);
     uint64_t screenId = Rosen::DisplayManagerLite::GetInstance().GetInternalScreenId();
     bool ret = DisplayManagerLite::GetInstance().SetScreenPowerById(screenId, status, dmsReason);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    if (!ret) {
+        std::string eventReason = "SetInternalScreenDisplayPower failed";
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "EXTERNAL_SCREEN", "REASON", eventReason);
+    }
+#endif
     POWER_HILOGI(FEATURE_POWER_STATE,
         "SetInternalScreenDisplayPower, state=%{public}u, reason=%{public}u, ret = %{public}d", state, reason, ret);
 }

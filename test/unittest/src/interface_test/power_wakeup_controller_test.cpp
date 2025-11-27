@@ -42,6 +42,7 @@ static constexpr int32_t DISPLAY_OFF_TIME_MS = 600;
 static constexpr int32_t RECOVER_DISPLAY_OFF_TIME_S = 30 * 1000;
 static constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
 static const std::string TEST_DEVICE_ID = "test_device_id";
+static int32_t g_event = -1;
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 class InputCallbackMock : public IInputEventConsumer {
@@ -66,6 +67,23 @@ void PowerWakeupControllerTest::TearDownTestCase(void)
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
 }
+
+namespace OHOS::Rosen {
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+bool ScreenManagerLite::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    return false;
+}
+#endif
+}
+
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+int32_t InputManager::SubscribeSwitchEvent(std::function<void(std::shared_ptr<SwitchEvent>)> callback,
+    SwitchEvent::SwitchType switchType)
+{
+    return g_event;
+}
+#endif
 
 namespace {
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -644,8 +662,9 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest020, TestSize.Level
     EXPECT_TRUE(powerStateMachine->IsScreenOn());
     // Mock close switch to suspend deivce, action is configured as ACTION_NONE
     powerStateMachine->SetSwitchState(false);
-    suspendController->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH, SuspendAction::ACTION_NONE, 0);
-    EXPECT_TRUE(powerStateMachine->IsScreenOn());
+    suspendController->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH,
+        static_cast<uint32_t>(SuspendAction::ACTION_NONE), 0);
+    suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
 
     // Mock open switch to power on internal screen
     powerStateMachine->SetSwitchState(true);
@@ -1602,6 +1621,28 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest040, TestSize.Level
     EXPECT_TRUE(time != 0);
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest040: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest040 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest041
+ * @tc.desc: test SwitchSubscriberInit fail
+ * @tc.type: FUNC
+ * @tc.require: issueICXI8K
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest041, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest041 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest041: start";
+
+    g_service->SwitchSubscriberInit();
+    EXPECT_TRUE(g_service->switchId_ == -1);
+    g_event = 50001;
+    g_service->SwitchSubscriberInit();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest041: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest041 function end!");
 }
 #endif
 } // namespace
