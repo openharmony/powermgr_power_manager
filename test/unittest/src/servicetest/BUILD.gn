@@ -34,7 +34,7 @@ config("module_private_config") {
     "${powermgr_root_path}/test/unittest/include/servicetest",
     "${powermgr_root_path}/test/unittest/include/servicetest/mock",
   ]
-
+  cflags_cc = [ "-Wno-overloaded-virtual" ]
   if (power_manager_feature_wakeup_action) {
     include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
   }

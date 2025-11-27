@@ -32,11 +32,15 @@
 #include "running_lock_info.h"
 #include "power_errors.h"
 #include "power_mgr_service.h"
+#include "power_mgr_proxy.h"
 #include "power_state_machine_info.h"
 
 namespace OHOS {
 namespace PowerMgr {
-class PowerMgrServiceTestProxy {
+// Intentionally hide the virtual functions in base class if they differ. Make sure to disable compiler errors
+// Only invoke base class method if tests fail due to invalidated mock method to minimize the changes
+// Actually we don't need this class here at all.
+class PowerMgrServiceTestProxy : public PowerMgrProxy {
 public:
     PowerMgrServiceTestProxy(const sptr<PowerMgrService>& service);
     ~PowerMgrServiceTestProxy() = default;
@@ -65,7 +69,6 @@ public:
     int32_t ForceSuspendDeviceIpc(int64_t callTimeMs);
     int32_t IsForceSleepingIpc(bool& isForceSleeping);
     int32_t RebootDeviceIpc(const std::string& reason, int32_t& powerError);
-    int32_t RebootDeviceForDeprecatedIpc(const std::string& reason, int32_t& powerError);
     int32_t ShutDownDeviceIpc(const std::string& reason, int32_t& powerError);
     int32_t RegisterPowerStateCallbackIpc(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     int32_t UnRegisterPowerStateCallbackIpc(const sptr<IPowerStateCallback>& callback);
@@ -75,8 +78,10 @@ public:
     int32_t UnRegisterScreenStateCallbackIpc(const sptr<IScreenOffPreCallback>& callback);
     int32_t RegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback);
     int32_t UnRegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
     bool RegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback);
     bool UnRegisterSuspendTakeoverCallbackIpc(const sptr<ITakeOverSuspendCallback>& callback);
+#endif
     int32_t SetDisplaySuspendIpc(bool enable);
     int32_t SetDeviceModeIpc(int32_t modeValue, int32_t& powerError);
     int32_t GetDeviceModeIpc(int32_t& powerMode);

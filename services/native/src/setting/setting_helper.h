@@ -120,7 +120,7 @@ private:
     static bool IsSettingKeyValid(const std::string& key);
     static int32_t GetSettingIntValue(const std::string& key, int32_t defaultVal);
     static void SetSettingIntValue(const std::string& key, int32_t value);
-    static int64_t GetSettingLongValue(const std::string& key, int64_t defaultVal);
+    static __attribute__((noinline)) int64_t GetSettingLongValue(const std::string& key, int64_t defaultVal);
     static void SetSettingLongValue(const std::string& key, int64_t value);
     static const std::string GetSettingStringValue(const std::string& key);
     static void SetSettingJsonStringValue(const std::string& key, const std::string& jsonConfig);

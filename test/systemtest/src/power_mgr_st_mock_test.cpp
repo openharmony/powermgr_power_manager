@@ -60,6 +60,8 @@ void PowerMgrSTMockTest::SetUp(void)
 
 void PowerMgrSTMockTest::TearDown(void)
 {
+    g_service->Reset();
+    ffrt::wait();
     ResetMockAction();
 }
 
