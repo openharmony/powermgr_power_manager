@@ -43,6 +43,7 @@
 #include <dlfcn.h>
 #endif
 #include "screen_common_event_controller.h"
+#include "screen_manager_lite.h"
 #include "display_manager_lite.h"
 
 namespace OHOS {
@@ -281,12 +282,14 @@ void PowerStateMachine::InitState()
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_ON);
 #endif
         SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
+        Rosen::ScreenManagerLite::GetInstance().SyncScreenPowerState(Rosen::ScreenPowerState::POWER_ON);
     } else {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_OFF);
 #endif
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
+        Rosen::ScreenManagerLite::GetInstance().SyncScreenPowerState(Rosen::ScreenPowerState::POWER_OFF);
     }
 }
 
