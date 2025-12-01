@@ -54,8 +54,9 @@ constexpr int32_t EVENT_INTERVAL_MS = 1000;
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t OTHER_SYSTEM_DEVICE_ID = 0xAAAAAAFE;
-constexpr int32_t RETRY_COUNT_TIMES = 10;
+constexpr int32_t RETRY_COUNT_TIMES = 4;
 constexpr int32_t RETRY_INTERVAL_MS = 100;
+int32_t g_powerkeyShortPressIdCache = -1;
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -957,8 +958,6 @@ bool PowerkeyWakeupMonitor::Init()
     }
     std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
     std::set<int32_t> preKeys;
-    keyOption.reset();
-    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(true);
@@ -969,18 +968,25 @@ bool PowerkeyWakeupMonitor::Init()
         return false;
     }
     int32_t retryCount = 0;
+    bool subscribeOrLastUnsubscribeFailed = false;
     do {
+        inputManager->UnsubscribeKeyEvent(g_powerkeyShortPressIdCache);
         powerkeyShortPressId_ = inputManager->SubscribeKeyEvent(
             keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
                 ReceivePowerkeyCallback(keyEvent);
             });
-        if (powerkeyShortPressId_ < 0) {
-            POWER_HILOGE(FEATURE_WAKEUP, "powerkey down register failed, retry times %{public}d", retryCount);
+        subscribeOrLastUnsubscribeFailed =
+            powerkeyShortPressId_ < 0 || powerkeyShortPressId_ == g_powerkeyShortPressIdCache;
+        if (subscribeOrLastUnsubscribeFailed) {
+            POWER_HILOGE(FEATURE_WAKEUP, "powerkey down retry, id:%{public}d cache:%{public}d count:%{public}d",
+                powerkeyShortPressId_, g_powerkeyShortPressIdCache, retryCount);
             retryCount++;
-            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+            if (retryCount < RETRY_COUNT_TIMES) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+            }
         }
-    } while (powerkeyShortPressId_ < 0 && retryCount < RETRY_COUNT_TIMES);
-
+    } while (subscribeOrLastUnsubscribeFailed && retryCount < RETRY_COUNT_TIMES);
+    g_powerkeyShortPressIdCache = powerkeyShortPressId_;
     POWER_HILOGI(FEATURE_WAKEUP, "powerkey register powerkeyShortPressId_=%{public}d", powerkeyShortPressId_);
     return powerkeyShortPressId_ >= 0 ? true : false;
 #else

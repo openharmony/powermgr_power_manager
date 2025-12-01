@@ -31,6 +31,7 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
+    void MockDisplayAction();
 };
 
 enum class SubscriberState : int32_t {
