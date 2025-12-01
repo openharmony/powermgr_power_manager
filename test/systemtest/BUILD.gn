@@ -396,10 +396,6 @@ ohos_systemtest("test_power_setting_help") {
   ]
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
-
-  if (power_manager_feature_disable_auto_displayoff) {
-    defines += [ "POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF" ]
-  }
   
   deps = [
     "${powermgr_inner_api}:powermgr_client",
@@ -410,6 +406,17 @@ ohos_systemtest("test_power_setting_help") {
 
   external_deps = [ "data_share:datashare_consumer" ]
   external_deps += deps_ex
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_disable_auto_displayoff) {
+    defines += [ "POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF" ]
+  }
 }
 
 ##############################settinghelper##########################################
@@ -433,10 +440,6 @@ ohos_systemtest("test_power_setting_helper") {
 
   include_dirs = [ "${powermgr_service_path}/native/src/setting/" ]
 
-  if (power_manager_feature_disable_auto_displayoff) {
-    defines += [ "POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF" ]
-  }
-  
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
@@ -446,6 +449,17 @@ ohos_systemtest("test_power_setting_helper") {
 
   external_deps = [ "data_share:datashare_consumer" ]
   external_deps += deps_ex
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+
+  if (power_manager_feature_disable_auto_displayoff) {
+    defines += [ "POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF" ]
+  }
 }
 
 group("systemtest_powermgr") {
@@ -460,14 +474,7 @@ group("systemtest_powermgr") {
     ":test_power_mgr_system",
     ":test_power_st_mgr_mock",
     ":test_power_st_mgr_mock_suspend",
+    ":test_power_setting_help",
+    ":test_power_setting_helper",
   ]
-# some functions used in those tests below are not even defined if the feature is on
-# Incrementcal coverage compilation will fail if it is executed for devices enabling this feature
-# In that case, the test suites need to be modified as well. 
-  if (!power_manager_feature_charging_type_setting) {
-    deps += [
-      ":test_power_setting_help",
-      ":test_power_setting_helper",
-    ]
-  }
 }
