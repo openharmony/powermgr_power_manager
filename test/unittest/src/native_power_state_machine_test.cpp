@@ -38,6 +38,19 @@ void DisplayManagerLite::SetFoldDisplayMode(FoldDisplayMode mode)
 {
     g_foldDisplayMode = mode;
 }
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+DMError ScreenManagerLite::RegisterScreenListener(sptr<IScreenListener> listener)
+{
+    return Rosen::DMError::DM_ERROR_NULLPTR;
+}
+
+DMError ScreenManagerLite::RegisterAbnormalScreenConnectChangeListener(
+    sptr<IAbnormalScreenConnectChangeListener> listener)
+{
+    return Rosen::DMError::DM_ERROR_NULLPTR;
+}
+#endif
 } // namespace OHOS::Rosen
 
 void NativePowerStateMachineTest::SetUpTestCase() {}

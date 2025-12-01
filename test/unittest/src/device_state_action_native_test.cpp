@@ -19,11 +19,19 @@
 
 #include "actions/irunning_lock_action.h"
 #include "display_power_mgr_client.h"
+#include "display_manager_lite.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
+
+namespace OHOS::Rosen {
+bool DisplayManagerLite::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason dmsReason)
+{
+    return false;
+}
+}
 
 void DeviceStateActionNativeTest::SetUpTestCase() {}
 
@@ -73,6 +81,10 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
     EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_SUSPEND);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_OFF, reason);
     deviceStateAction->SetDisplayState(DisplayState::DISPLAY_ON, reason);
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    deviceStateAction->SetInternalScreenDisplayPower(DisplayState::DISPLAY_OFF,
+        StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
+#endif
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001 function end!");
 }
 } // namespace

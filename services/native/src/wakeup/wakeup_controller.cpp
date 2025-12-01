@@ -838,6 +838,13 @@ void WakeupController::PowerOnAllScreens(WakeupDeviceType type)
     auto dmsReason = PowerUtils::GetDmsReasonByPowerReason(changeReason);
     bool ret =
         Rosen::ScreenManagerLite::GetInstance().SetScreenPowerForAll(Rosen::ScreenPowerState::POWER_ON, dmsReason);
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    if (!ret) {
+        std::string eventReason = "PowerOnAllScreens failed";
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "EXTERNAL_SCREEN", "REASON", eventReason);
+    }
+#endif
     POWER_HILOGI(FEATURE_WAKEUP, "Power on all screens, reason = %{public}u, ret = %{public}d", dmsReason, ret);
 }
 

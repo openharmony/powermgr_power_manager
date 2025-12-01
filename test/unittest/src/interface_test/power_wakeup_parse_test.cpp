@@ -38,6 +38,11 @@ using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
 static sptr<PowerMgrService> g_service;
+SensorInfo* g_sensorInfo = nullptr;
+int32_t g_count = 0;
+int32_t g_intReturnValue = 0;
+int32_t g_intReturnValue1 = 0;
+int32_t g_intReturnValue2 = 0;
 
 void PowerWakeupParseTest::SetUpTestCase(void)
 {
@@ -49,6 +54,23 @@ void PowerWakeupParseTest::TearDownTestCase(void)
 {
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
+}
+
+int32_t GetAllSensors(SensorInfo **sensorInfo, int32_t *count)
+{
+    *sensorInfo = g_sensorInfo;
+    *count = g_count;
+    return g_intReturnValue;
+}
+
+int32_t SubscribeSensor(int32_t /* sensorId */, const SensorUser* /* user */)
+{
+    return g_intReturnValue1;
+}
+
+int32_t ActivateSensor(int32_t /* sensorId */, const SensorUser* /* user */)
+{
+    return g_intReturnValue2;
 }
 
 namespace {
@@ -130,5 +152,46 @@ HWTEST_F(PowerWakeupParseTest, PowerWakeupParse001, TestSize.Level0)
 
     GTEST_LOG_(INFO) << "PowerWakeupParse001: end";
     POWER_HILOGI(LABEL_TEST, "PowerWakeupParse001 function end!");
+}
+
+/**
+ * @tc.name: PowerWakeupParse002
+ * @tc.desc: test Wakeup source parse
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerWakeupParseTest, PowerWakeupParse002, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse002 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupParse002: start";
+
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pmsTest_ == nullptr) {
+        GTEST_LOG_(INFO) << "PowerWakeupParse002: Failed to get PowerMgrService";
+    }
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_HALL}};
+    g_sensorInfo = infos;
+    g_count = 1;
+
+    auto ret = pmsTest_->Init();
+    EXPECT_TRUE(ret);
+    pmsTest_->WakeupControllerInit();
+    pmsTest_->wakeupController_->Init();
+    pmsTest_->HallSensorSubscriberInit();
+
+    g_intReturnValue = 1;
+    pmsTest_->HallSensorSubscriberInit();
+
+    g_intReturnValue = 0;
+    g_intReturnValue1 = 1;
+    pmsTest_->HallSensorSubscriberInit();
+
+    g_intReturnValue = 0;
+    g_intReturnValue1 = 0;
+    g_intReturnValue2 = 1;
+    pmsTest_->HallSensorSubscriberInit();
+
+    pmsTest_->HallSensorSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupParse002: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupParse002 function end!");
 }
 } // namespace

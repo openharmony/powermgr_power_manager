@@ -132,3 +132,8 @@ MXSR_STANDBY_STATISTIC:
   EXIT_BATTERY_CAP: {type: INT32, desc: Battery capacity when exit Sx standby state}
   LID_STATUS: {type: INT32, desc: Lid status}
   ERR_CODE: {type: STRING, desc: Error code}
+
+ABNORMAL_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Subscription registration callback and other abnormal failures}
+  TYPE: {type: STRING, desc: Fault Type}
+  REASON: {type: STRING, desc: Cause of Failure}

@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define private   public
+#define protected public
 
 #include <condition_variable>
 #include <mutex>
@@ -29,6 +31,14 @@
 #include <shutdown_controller.h>
 #include "power_errors.h"
 #include "power_mgr_service.h"
+#include <screen_manager_lite.h>
+
+namespace OHOS::Rosen {
+bool ScreenManagerLite::SetScreenPowerForAll(Rosen::ScreenPowerState state, Rosen::PowerStateChangeReason reason)
+{
+    return false;
+}
+}
 
 namespace OHOS::PowerMgr {
 sptr<PowerMgrService> g_pmsTest = nullptr;
