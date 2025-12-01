@@ -24,6 +24,14 @@
 #include "power_state_machine.h"
 #include "sp_singleton.h"
 #include "wakeup_controller.h"
+#include <screen_manager_lite.h>
+
+namespace OHOS::Rosen {
+bool ScreenManagerLite::SetScreenPowerForAll(Rosen::ScreenPowerState state, Rosen::PowerStateChangeReason reason)
+{
+    return false;
+}
+}
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -66,6 +74,9 @@ HWTEST_F(PowerGetControllerMockTest, PowerGetControllerMockTest001, TestSize.Lev
     callback->OnInputEvent(keyEvent);
     EXPECT_TRUE(callback != nullptr);
     delete callback;
+#endif
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    wakeupController_->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_EX_SCREEN_INIT);
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerGetControllerMockTest001 function end!");
     GTEST_LOG_(INFO) << "PowerGetControllerMockTest001: end";
