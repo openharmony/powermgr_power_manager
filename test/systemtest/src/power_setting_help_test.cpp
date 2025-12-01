@@ -23,24 +23,30 @@ using namespace OHOS;
 using namespace std;
 
 namespace {
+#ifndef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 constexpr int SLEEP_WAIT_TIME_S = -1;
 static int32_t g_getSettingLongValue = 0;
+#endif
 } // namespace
 
 namespace OHOS {
 namespace system {
+#ifndef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 bool GetBoolParameter(const std::string& key, bool def)
 {
     return false;
 }
+#endif
 }
 }
 
 namespace OHOS::PowerMgr {
+#ifndef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 int64_t SettingHelper::GetSettingLongValue(const std::string& key, int64_t defaultVal)
 {
     return g_getSettingLongValue;
 }
+#endif
 } // namespace OHOS::PowerMgr
 
 namespace {
@@ -50,6 +56,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issue1579
  */
+#ifndef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 HWTEST_F(PowerSettingHelpTest, PowerSettingHelpTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerSettingHelpTest001 function start!");
@@ -67,4 +74,5 @@ HWTEST_F(PowerSettingHelpTest, PowerSettingHelpTest001, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "PowerSettingHelpTest001 function end!");
     GTEST_LOG_(INFO) << "PowerSettingHelpTest001: end";
 }
+#endif
 } // namespace
