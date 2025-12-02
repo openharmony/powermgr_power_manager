@@ -20,6 +20,7 @@
 #include <memory>
 #include <mutex>
 #include <vector>
+#include "ffrt.h"
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include "i_input_event_consumer.h"
@@ -106,7 +107,7 @@ private:
     std::shared_ptr<PowerStateMachine> stateMachine_;
     WakeupDeviceType wakeupReason_ {0};
     std::mutex mutex_;
-    std::mutex monitorMutex_;
+    ffrt::mutex monitorMutex_;
     std::mutex eventHandleMutex_;
     std::mutex mmiMonitorMutex_;
     static std::mutex sourceUpdateMutex_;
