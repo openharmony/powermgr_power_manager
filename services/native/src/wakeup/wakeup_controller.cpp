@@ -564,7 +564,9 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
 
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d", pid, uid);
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Try to wakeup device, pid=%{public}d, uid=%{public}d, ffrtId=%{public}u",
+        pid, uid, ffrtId);
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     stateMachine_->ReportWakeupStart(static_cast<int32_t>(uid), static_cast<int32_t>(reason));
 #endif
