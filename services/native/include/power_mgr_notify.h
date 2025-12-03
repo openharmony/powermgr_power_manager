@@ -22,6 +22,7 @@
 
 #include "errors.h"
 #include "want.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace PowerMgr {
