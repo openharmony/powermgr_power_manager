@@ -1326,5 +1326,73 @@ int32_t PowerMgrServiceTestProxy::IsStandbyIpc(bool& isStandby, int32_t& powerEr
     powerError = reply.ReadInt32();
     return ERR_OK;
 }
+
+int32_t PowerMgrServiceTestProxy::RegisterUlsrCallbackIpc(
+    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr || (callback == nullptr)), ERR_INVALID_DATA);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_WAKEUP, "Write descriptor failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int32_t result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_ULSR_CALLBACK_IPC), data, reply, option);
+    if (FAILED(result)) {
+        HiLog::Error(LABEL, "Send request failed!");
+        return result;
+    }
+
+    ErrCode errCode = reply.ReadInt32();
+    if (FAILED(errCode)) {
+        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
+            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_REGISTER_ULSR_CALLBACK_IPC));
+        return errCode;
+    }
+
+    powerError = reply.ReadInt32();
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceTestProxy::UnRegisterUlsrCallbackIpc(
+    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+{
+    RETURN_IF_WITH_RET((stub_ == nullptr || (callback == nullptr)), ERR_INVALID_DATA);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
+        POWER_HILOGE(FEATURE_WAKEUP, "Write descriptor failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    data.WriteRemoteObject(callback->AsObject());
+
+    int32_t result = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_ULSR_CALLBACK_IPC), data, reply, option);
+    if (FAILED(result)) {
+        HiLog::Error(LABEL, "Send request failed!");
+        return result;
+    }
+
+    ErrCode errCode = reply.ReadInt32();
+    if (FAILED(errCode)) {
+        HiLog::Error(LABEL, "Read result failed, code is: %{public}d.",
+            static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_UN_REGISTER_ULSR_CALLBACK_IPC));
+        return errCode;
+    }
+
+    powerError = reply.ReadInt32();
+    return ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

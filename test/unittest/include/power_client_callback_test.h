@@ -23,6 +23,7 @@
 #include "screen_off_pre_callback_stub.h"
 #include "sync_hibernate_callback_stub.h"
 #include "sync_sleep_callback_stub.h"
+#include "async_ulsr_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -57,6 +58,12 @@ public:
         virtual ~PowerSyncSleepTest1Callback() {};
         virtual void OnSyncSleep(bool onForceSleep) override;
         virtual void OnSyncWakeup(bool onForceSleep) override;
+    };
+    class AsyncUlsrTestCallback : public AsyncUlsrCallbackStub {
+    public:
+        AsyncUlsrTestCallback() {};
+        virtual ~AsyncUlsrTestCallback() {};
+        virtual void OnAsyncWakeup() override;
     };
 };
 } // namespace PowerMgr

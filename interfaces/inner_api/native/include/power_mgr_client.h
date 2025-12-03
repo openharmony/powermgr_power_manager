@@ -23,6 +23,7 @@
 #include "running_lock.h"
 #include "suspend/itake_over_suspend_callback.h"
 #include "isync_sleep_callback.h"
+#include "iasync_ulsr_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -267,6 +268,20 @@ public:
      */
     PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result);
 
+    /**
+     * Register asynchronous callback, trigger when ulsr wakeup
+     * @param callback Asynchronous callback object
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback);
+
+    /**
+     * UnRegister asynchronous callback
+     * @param callback Asynchronous callback object
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback);
+    
     /**
      * Set the power key filtering strategy.
      * @param strategy The power key filtering strategy.

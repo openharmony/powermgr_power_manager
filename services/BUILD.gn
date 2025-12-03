@@ -31,6 +31,7 @@ config("powermgr_private_config") {
     "native/src/suspend",
     "native/src/wakeup",
     "native/src/hibernate",
+    "native/src/ulsr",
     "native/src/screenoffpre",
     "native/src/screen_common_event_customized",
   ]
@@ -227,6 +228,10 @@ ohos_shared_library("powermgrservice") {
 
   if (power_manager_feature_enable_ulsr_plugin) {
     defines += [ "POWER_MANAGER_ENABLE_ULSR_PLUGIN" ]
+  }
+
+  if (power_manager_feature_enable_suspend_with_tag) {
+    sources += [ "native/src/ulsr/ulsr_callback_holder.cpp" ]
   }
 
   if (power_manager_feature_force_sleep_broadcast) {
