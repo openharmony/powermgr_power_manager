@@ -735,6 +735,28 @@ PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, boo
     return static_cast<PowerErrors>(powerError);
 }
 
+PowerErrors PowerMgrClient::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    POWER_HILOGI(FEATURE_WAKEUP, "Register Ulsr Callback by client");
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->RegisterUlsrCallbackIpc(callback, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
+PowerErrors PowerMgrClient::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    POWER_HILOGI(FEATURE_WAKEUP, "Unregister Ulsr Callback by client");
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->UnRegisterUlsrCallbackIpc(callback, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
 PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::string& refreshReason)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();

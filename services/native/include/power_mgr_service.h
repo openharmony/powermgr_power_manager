@@ -42,6 +42,9 @@
 #ifdef POWER_MANAGER_WAKEUP_ACTION
 #include "wakeup_action_controller.h"
 #endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+#include "ulsr_callback_holder.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -127,6 +130,9 @@ public:
     virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
     virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
 
+    virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) override;
+    virtual PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) override;
+
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
 
@@ -206,6 +212,9 @@ public:
     void PowerConnectStatusInit();
     bool IsPowerConnected();
     void UpdateSettingInvalidDisplayOffTime();
+#endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    void TriggerUlsrWakeupCallback();
 #endif
     void OnChargeStateChanged();
 
@@ -387,6 +396,9 @@ private:
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::mutex hibernateMutex_;
 #endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    std::mutex ulsrMutex_;
+#endif
     std::mutex stateMutex_;
     std::mutex shutdownMutex_;
     std::mutex modeMutex_;
@@ -405,6 +417,9 @@ private:
     sptr<IRemoteObject> ptoken_ {nullptr};
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::shared_ptr<HibernateController> hibernateController_ {nullptr};
+#endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    sptr<UlsrCallbackHolder> ulsrCallbackHolder_ {nullptr};
 #endif
     std::shared_ptr<ScreenOffPreController> screenOffPreController_ {nullptr};
 #ifdef POWER_MANAGER_WAKEUP_ACTION

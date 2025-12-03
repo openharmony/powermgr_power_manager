@@ -87,6 +87,8 @@ public:
     int32_t GetDeviceModeIpc(int32_t& powerMode);
     int32_t ShellDumpIpc(const std::vector<std::string>& args, uint32_t argc, std::string& returnDump);
     int32_t IsStandbyIpc(bool& isStandby, int32_t& powerError);
+    int32_t RegisterUlsrCallbackIpc(const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError);
+    int32_t UnRegisterUlsrCallbackIpc(const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError);
 private:
     static constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0xD000F00, "PowerTest"};
     sptr<PowerMgrStub> stub_ {nullptr};
