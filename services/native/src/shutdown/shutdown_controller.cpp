@@ -332,6 +332,7 @@ bool ShutdownController::TriggerTakeOverShutdownCallbackInner(
             isTakeover = true;
             takeoverUid = pidUid.second;
         }
+        POWER_HILOGI(FEATURE_SHUTDOWN, "TOScb end");
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     if (isTakeover) {
@@ -360,6 +361,7 @@ bool ShutdownController::TriggerTakeOverHibernateCallbackInner(
             isTakeover = true;
             takeoverUid = pidUid.second;
         }
+        POWER_HILOGI(FEATURE_SHUTDOWN, "TOHcb end");
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     if (isTakeover) {
