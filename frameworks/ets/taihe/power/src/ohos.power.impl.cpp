@@ -33,11 +33,12 @@ using namespace OHOS::PowerMgr;
 
 namespace {
 std::map<PowerErrors, std::string> g_errorTable = {
-    {PowerErrors::ERR_CONNECTION_FAIL,   "Failed to connect to the service."},
-    {PowerErrors::ERR_PERMISSION_DENIED, "Permission is denied"             },
-    {PowerErrors::ERR_SYSTEM_API_DENIED, "System permission is denied"      },
-    {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         },
-    {PowerErrors::ERR_FREQUENT_FUNCTION_CALL, "Frequent function calls."    }
+    {PowerErrors::ERR_CONNECTION_FAIL,           "Failed to connect to the service." },
+    {PowerErrors::ERR_PERMISSION_DENIED,         "Permission is denied"              },
+    {PowerErrors::ERR_SYSTEM_API_DENIED,         "System permission is denied"       },
+    {PowerErrors::ERR_PARAM_INVALID,             "Invalid input parameter."          },
+    {PowerErrors::ERR_FREQUENT_FUNCTION_CALL,    "Frequent function calls."          },
+    {PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED, "Setting the power mode failed."    },
 };
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;

@@ -15,6 +15,9 @@
 
 #include "power_mode_module.h"
 
+#ifdef HAS_RESOURCE_SCHEDULE_SERVICE_PART
+#include <res_sched_client.h>
+#endif
 #ifdef HAS_DISPLAY_MANAGER
 #include "display_power_mgr_client.h"
 #endif
@@ -59,6 +62,17 @@ PowerModeModule::PowerModeModule()
     policy->AddAction(PowerModePolicy::ServiceType::AUTO_WINDOWN_RORATION, onOffRotationAction);
     PowerModePolicy::ModeAction intellVoiceAction = [&](bool isInit) { SetIntellVoiceState(isInit); };
     policy->AddAction(PowerModePolicy::ServiceType::INTELL_VOICE, intellVoiceAction);
+    PowerModePolicy::ModeAction socPerfAction = [&](bool isInit) { SetSocPerfState(isInit); };
+    policy->AddAction(PowerModePolicy::ServiceType::SOC_PERF, socPerfAction);
+
+    InitPowerModeTransitMap();
+}
+
+void PowerModeModule::InitPowerModeTransitMap()
+{
+    forbidMap_.emplace(PowerMode::POWER_SAVE_MODE, std::set<PowerMode>{ PowerMode::PERFORMANCE_MODE });
+    forbidMap_.emplace(PowerMode::EXTREME_POWER_SAVE_MODE, std::set<PowerMode>{ PowerMode::PERFORMANCE_MODE });
+    forbidMap_.emplace(PowerMode::CUSTOM_POWER_SAVE_MODE, std::set<PowerMode>{ PowerMode::PERFORMANCE_MODE });
 }
 
 void PowerModeModule::InitPowerMode()
@@ -70,28 +84,53 @@ void PowerModeModule::InitPowerMode()
     if (!DelayedSingleton<PowerModePolicy>::GetInstance()->InitRecoverMap()) {
         UpdateModepolicy();
         RunAction(false);
+        return;
     }
+#ifdef HAS_RESOURCE_SCHEDULE_SERVICE_PART
+    if (IsBootNeedActions()) {
+        UpdateModepolicy();
+        RunAction(true);
+    }
+#endif
 }
 
-void PowerModeModule::SetModeItem(PowerMode mode)
+bool PowerModeModule::IsBootNeedActions()
 {
-    POWER_HILOGI(FEATURE_POWER_MODE, "SetModeItem mode_: %{public}u, mode: %{public}u", mode_, mode);
+    POWER_HILOGI(FEATURE_POWER_MODE, "lastMode_:%{public}u, this->mode:%{public}u",
+        lastMode_, static_cast<uint32_t>(mode_));
+    return lastMode_ == LAST_MODE_FLAG && this->mode_ == PowerMode::PERFORMANCE_MODE;
+}
 
+bool PowerModeModule::CanTransitTo(PowerMode from, PowerMode to)
+{
+    if (forbidMap_.count(from) != 0 && forbidMap_[from].count(to) != 0) {
+        return false;
+    }
+    return true;
+}
+
+PowerErrors PowerModeModule::SetModeItem(PowerMode mode)
+{
+    POWER_HILOGI(FEATURE_POWER_MODE, "SetModeItem from %{public}u to %{public}u", mode_, mode);
     /* Same as the previous mode */
-    if (this->mode_ == mode && this->mode_ != PowerMode::PERFORMANCE_MODE) {
-        return;
+    if (this->mode_ == mode) {
+        return PowerErrors::ERR_OK;
     }
 
     /* If it's a valid mode */
     if (mode > PowerMode::EXTREME_POWER_SAVE_MODE && mode < PowerMode::POWER_MODE_MAX) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid mode %{public}d", mode);
-        return;
+        return PowerErrors::ERR_PARAM_INVALID;
     }
 
     /* If it's a valid mode */
     if (mode < PowerMode::POWER_MODE_MIN || mode > PowerMode::POWER_MODE_MAX) {
         POWER_HILOGW(FEATURE_POWER_MODE, "Invalid mode %{public}d", mode);
-        return;
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
+    if (!CanTransitTo(mode_, mode)) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Can't transit power mode from %{public}u to %{public}u", mode_, mode);
+        return PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED;
     }
 
     /* unregister setting observer for current mode */
@@ -102,6 +141,7 @@ void PowerModeModule::SetModeItem(PowerMode mode)
 
     /* register setting observer for save mode */
     RegisterSaveModeObserver();
+    return PowerErrors::ERR_OK;
 }
 
 PowerMode PowerModeModule::GetModeItem()
@@ -519,6 +559,36 @@ void PowerModeModule::SetIntellVoiceState(bool isBoot)
         return;
     }
     SettingHelper::SetSettingIntellVoice(static_cast<SettingHelper::SwitchStatus>(state));
+}
+
+void PowerModeModule::SetSocPerfState([[maybe_unused]]bool isBoot)
+{
+    int32_t state = DelayedSingleton<PowerModePolicy>::GetInstance()
+        ->GetPowerModeValuePolicy(PowerModePolicy::ServiceType::SOC_PERF);
+    if (state == INIT_VALUE_FALSE) {
+        return;
+    }
+    POWER_HILOGD(FEATURE_POWER_MODE, "Set soc perf state %{public}d", state);
+#ifdef HAS_RESOURCE_SCHEDULE_SERVICE_PART
+    std::unordered_map<std::string, std::string> mapPayload;
+    const std::string PERF_MODE_STR = "perfMode";
+    const std::string NORMAL_MODE_STR = "normalMode";
+    switch (state) {
+        case SocPerformance::HIGH:
+            mapPayload["schedMode"] = PERF_MODE_STR;
+            ResourceSchedule::ResSchedClient::GetInstance().ReportData(
+                ResourceSchedule::ResType::RES_TYPE_SCHED_MODE_CHANGE, SocPerformance::HIGH, mapPayload);
+            break;
+        case SocPerformance::STANDARD:
+            mapPayload["schedMode"] = NORMAL_MODE_STR;
+            ResourceSchedule::ResSchedClient::GetInstance().ReportData(
+                ResourceSchedule::ResType::RES_TYPE_SCHED_MODE_CHANGE, SocPerformance::STANDARD, mapPayload);
+            break;
+        default:
+            POWER_HILOGE(FEATURE_POWER_MODE, "Invalid perf state %{public}d", state);
+            break;
+    }
+#endif
 }
 } // namespace PowerMgr
 } // namespace OHOS

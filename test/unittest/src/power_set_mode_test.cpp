@@ -42,6 +42,18 @@ char* GetOneCfgFile(const char *pathSuffix, char *buf, unsigned int bufLength)
     return const_cast<char*>(ret.c_str());
 }
 
+void PowerSetModeTest::SetUpTestCase()
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    savedMode_ = powerMgrClient.GetDeviceMode();
+}
+
+void PowerSetModeTest::TearDownTestCase()
+{
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    powerMgrClient.SetDeviceMode(savedMode_);
+}
+
 namespace {
 /**
  * @tc.name: SetModeTest001
@@ -51,29 +63,61 @@ namespace {
 HWTEST_F (PowerSetModeTest, SetModeTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "SetModeTest001 function start!");
-    sleep(SLEEP_WAIT_TIME_S);
     GTEST_LOG_(INFO) << "SetModeTest001: SetMode start.";
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-
+    powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE);
     PowerMode mode1 = PowerMode::POWER_SAVE_MODE;
-    if (true) {
-        powerMgrClient.SetDeviceMode(mode1);
-        EXPECT_EQ(mode1, powerMgrClient.GetDeviceMode());
-    }
-    sleep(SLEEP_WAIT_TIME_S);
+    powerMgrClient.SetDeviceMode(mode1);
+    EXPECT_EQ(mode1, powerMgrClient.GetDeviceMode());
+    powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE);
     PowerMode mode2 = PowerMode::PERFORMANCE_MODE;
-    if (true) {
-        powerMgrClient.SetDeviceMode(mode2);
-        EXPECT_EQ(mode2, powerMgrClient.GetDeviceMode());
-    }
-    sleep(SLEEP_WAIT_TIME_S);
+    powerMgrClient.SetDeviceMode(mode2);
+    EXPECT_EQ(mode2, powerMgrClient.GetDeviceMode());
+    powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE);
     PowerMode mode3 = PowerMode::EXTREME_POWER_SAVE_MODE;
-    if (true) {
-        powerMgrClient.SetDeviceMode(mode3);
-        EXPECT_EQ(mode3, powerMgrClient.GetDeviceMode());
-    }
+    powerMgrClient.SetDeviceMode(mode3);
+    EXPECT_EQ(mode3, powerMgrClient.GetDeviceMode());
     POWER_HILOGI(LABEL_TEST, "SetModeTest001 function end!");
     GTEST_LOG_(INFO) << "SetModeTest001: SetMode end.";
+}
+
+/**
+ * @tc.name: SetModeTest002
+ * @tc.desc: test SetDeviceMode ret
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerSetModeTest, SetModeTest002, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "SetModeTest002 function start!");
+    GTEST_LOG_(INFO) << "SetModeTest002: SetMode start.";
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    PowerErrors error = powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_OK);
+    error = powerMgrClient.SetDeviceMode(PowerMode::NORMAL_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_OK);
+    error = powerMgrClient.SetDeviceMode(PowerMode::POWER_SAVE_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_OK);
+    error = powerMgrClient.SetDeviceMode(PowerMode::PERFORMANCE_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED);
+    error = powerMgrClient.SetDeviceMode(PowerMode::EXTREME_POWER_SAVE_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_OK);
+    error = powerMgrClient.SetDeviceMode(PowerMode::PERFORMANCE_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED);
+    error = powerMgrClient.SetDeviceMode(PowerMode::CUSTOM_POWER_SAVE_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_OK);
+    error = powerMgrClient.SetDeviceMode(PowerMode::PERFORMANCE_MODE);
+    EXPECT_EQ(error, PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED);
+    constexpr uint32_t PARAM_INVALID_FIRST = 609;
+    error = powerMgrClient.SetDeviceMode(static_cast<PowerMode>(PARAM_INVALID_FIRST));
+    EXPECT_EQ(error, PowerErrors::ERR_PARAM_INVALID);
+    constexpr uint32_t PARAM_INVALID_SECOND = 700;
+    error = powerMgrClient.SetDeviceMode(static_cast<PowerMode>(PARAM_INVALID_SECOND));
+    EXPECT_EQ(error, PowerErrors::ERR_PARAM_INVALID);
+    constexpr uint32_t PARAM_PENGLAI_MODE = 650;
+    error = powerMgrClient.SetDeviceMode(static_cast<PowerMode>(PARAM_PENGLAI_MODE));
+    EXPECT_EQ(error, PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "SetModeTest002 function end!");
+    GTEST_LOG_(INFO) << "SetModeTest002: SetMode end.";
 }
 
 /**
