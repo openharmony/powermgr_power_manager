@@ -30,6 +30,7 @@
     AutoWindowRotation = 107,
     SystemBrightness = 115,
     VibratorsState = 120,
+    SocPerf = 121,
 -->
 <switch_proxy version="1">
     <proxy id="600">
@@ -39,6 +40,7 @@
         <switch id="107" value="1" recover_flag="0"/>
         <switch id="115" value="102" recover_flag="0"/>
         <switch id="120" value="1" recover_flag="0"/>
+        <switch id="121" value="0" recover_flag="0"/>
     </proxy>
     <proxy id="601">
         <switch id="101" value="10000" recover_flag="0"/>
@@ -47,6 +49,7 @@
         <switch id="107" value="-1" recover_flag="0"/>
         <switch id="115" value="50" recover_flag="0"/>
         <switch id="120" value="-1" recover_flag="0"/>
+        <switch id="121" value="0" recover_flag="0"/>
     </proxy>
     <proxy id="602">
         <switch id="101" value="-1" recover_flag="0"/>
@@ -55,6 +58,7 @@
         <switch id="107" value="1" recover_flag="0"/>
         <switch id="115" value="255" recover_flag="0"/>
         <switch id="120" value="1" recover_flag="0"/>
+        <switch id="121" value="1" recover_flag="0"/>
     </proxy>
     <proxy id="603">
         <switch id="101" value="5000" recover_flag="0"/>
@@ -63,6 +67,7 @@
         <switch id="107" value="-1" recover_flag="0"/>
         <switch id="115" value="25" recover_flag="0"/>
         <switch id="120" value="-1" recover_flag="0"/>
+        <switch id="121" value="0" recover_flag="0"/>
     </proxy>
     <proxy id="650">
         <switch id="101" value="5000" recover_flag="0"/>
@@ -71,5 +76,6 @@
         <switch id="107" value="-1" recover_flag="0"/>
         <switch id="115" value="25" recover_flag="0"/>
         <switch id="120" value="-1" recover_flag="0"/>
+        <switch id="121" value="0" recover_flag="0"/>
     </proxy>
 </switch_proxy>

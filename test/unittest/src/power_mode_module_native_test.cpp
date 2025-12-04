@@ -22,6 +22,8 @@ using namespace std;
 
 void PowerModeModuleNativeTest::SetUpTestCase()
 {
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
 }
 
 void PowerModeModuleNativeTest::TearDownTestCase()
@@ -91,6 +93,31 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest001, TestSize.Leve
 
     POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest001 function end!");
     GTEST_LOG_(INFO) << "PowerModeModuleNativeTest001 end.";
+}
+
+/**
+ * @tc.name: PowerModeModuleNativeTest002
+ * @tc.desc: test PowerModeModule policy action
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerModeModuleNativeTest002 start.";
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest002 function start!");
+    auto modePolicy = DelayedSingleton<PowerModePolicy>::GetInstance();
+    std::shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    powerModeModuleTest->EnableMode(PowerMode::PERFORMANCE_MODE, false);
+    EXPECT_EQ(powerModeModuleTest->GetModeItem(), PowerMode::PERFORMANCE_MODE);
+    modePolicy->switchMap_.clear();
+    modePolicy->switchMap_.emplace(PowerModePolicy::ServiceType::SOC_PERF, PowerModeModule::SocPerformance::STANDARD);
+    powerModeModuleTest->SetSocPerfState(false);
+    modePolicy->switchMap_[PowerModePolicy::ServiceType::SOC_PERF] = PowerModeModule::SocPerformance::HIGH;
+    powerModeModuleTest->SetSocPerfState(false);
+    constexpr int32_t INVALID_SOC_PERFORMANCE_CODE = 3;
+    modePolicy->switchMap_[PowerModePolicy::ServiceType::SOC_PERF] = INVALID_SOC_PERFORMANCE_CODE;
+    powerModeModuleTest->SetSocPerfState(false);
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest002 function end!");
+    GTEST_LOG_(INFO) << "PowerModeModuleNativeTest002 end.";
 }
 
 /**

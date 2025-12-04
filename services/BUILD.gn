@@ -240,6 +240,13 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "battery_manager:batterysrv_client" ]
   }
 
+  if (power_manager_feature_enable_performance_mode &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+        external_deps += [ "resource_schedule_service:ressched_client" ]
+        defines += [ "HAS_RESOURCE_SCHEDULE_SERVICE_PART" ]
+      }
+
   if (power_manager_feature_external_screen_management) {
     defines += [ "POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT" ]
   }

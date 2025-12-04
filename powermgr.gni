@@ -45,6 +45,7 @@ declare_args() {
   power_manager_feature_proximity_controller_override = false
   power_manager_feature_enable_lid_check = false
   power_manager_feature_lid_fold = false
+  power_manager_feature_enable_performance_mode = false
 }
 
 defines = []

@@ -1908,8 +1908,7 @@ PowerErrors PowerMgrService::SetDeviceMode(const PowerMode& mode)
     if (!Permission::IsPermissionGranted("ohos.permission.POWER_OPTIMIZATION")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-    powerModeModule_.SetModeItem(mode);
-    return PowerErrors::ERR_OK;
+    return powerModeModule_.SetModeItem(mode);
 }
 
 PowerMode PowerMgrService::GetDeviceMode()

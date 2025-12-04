@@ -17,6 +17,7 @@
 #define POWER_MODE_THREAD_H
 
 #include <map>
+#include <set>
 #include "ipc_skeleton.h"
 #include <common_event_data.h>
 #include <common_event_manager.h>
@@ -24,6 +25,7 @@
 #include <common_event_support.h>
 
 #include "ipower_mode_callback.h"
+#include "power_errors.h"
 
 #define FLAG_FALSE (-1)
 #define LAST_MODE_FLAG 0
@@ -35,10 +37,14 @@ namespace OHOS {
 namespace PowerMgr {
 class PowerModeModule {
 public:
+    enum SocPerformance {
+        STANDARD = 0,
+        HIGH = 1,
+    };
     PowerModeModule();
     ~PowerModeModule() = default;
     void InitPowerMode();
-    void SetModeItem(PowerMode mode);
+    PowerErrors SetModeItem(PowerMode mode);
     PowerMode GetModeItem();
     void EnableMode(PowerMode mode, bool isBoot = false);
     void AddPowerModeCallback(const sptr<IPowerModeCallback>& callback);
@@ -66,6 +72,7 @@ private:
     PowerMode mode_;
     uint32_t lastMode_;
     bool observerRegisted_ = false;
+    std::map<PowerMode, std::set<PowerMode>> forbidMap_;
 
     void Prepare();
     void PublishPowerModeEvent();
@@ -75,6 +82,9 @@ private:
     void RegisterAutoWindowRotationObserver();
     void RegisterVibrateStateObserver();
     void RegisterIntellVoiceObserver();
+    void InitPowerModeTransitMap();
+    bool IsBootNeedActions();
+    bool CanTransitTo(PowerMode from, PowerMode to);
 
     sptr<CallbackManager> callbackMgr_;
     void UpdateModepolicy();
@@ -86,6 +96,7 @@ private:
     static void SetVibration(bool isBoot);
     static void SetWindowRotation(bool isBoot);
     static void SetIntellVoiceState(bool isBoot);
+    static void SetSocPerfState([[maybe_unused]]bool isBoot);
 
     std::atomic<bool> started_;
     std::mutex mutex_;
