@@ -932,9 +932,6 @@ void PowerStateMachine::RestoreHibernate(bool clearMemory, HibernateStatus statu
 {
     // hibernateController and notify already judge empty
     bool hibernateRes = (status == HibernateStatus::HIBERNATE_SUCCESS);
-    if (hibernateRes) {
-        switchOpen_ = true;
-    }
     hibernating_ = false;
 
     if (notify) {
