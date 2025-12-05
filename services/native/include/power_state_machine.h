@@ -426,7 +426,7 @@ private:
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
     std::mutex mutex_;
     // all change to currentState_ should be inside stateMutex_
-    std::mutex stateMutex_;
+    ffrt::mutex stateMutex_;
     DevicePowerState mDeviceState_;
     sptr<IRemoteObject::DeathRecipient> powerStateCBDeathRecipient_;
     std::set<const sptr<IPowerStateCallback>, classcomp> syncPowerStateListeners_;

@@ -1083,7 +1083,7 @@ bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 
 bool PowerStateMachine::IsScreenOnAcqLock()
 {
-    std::lock_guard<std::mutex> lock(stateMutex_);
+    std::lock_guard<ffrt::mutex> lock(stateMutex_);
     DisplayState state = stateAction_->GetDisplayState();
     bool isScreenOn = (state == DisplayState::DISPLAY_ON) || (state == DisplayState::DISPLAY_DIM);
     return isScreenOn;
@@ -1218,13 +1218,14 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
     int64_t now = GetTickCount();
     // Send Notification event
     SendEventToPowerMgrNotify(state, now);
-
+    uint32_t ffrtId = ffrt::this_task::get_id();
     // Call back all native function
     for (auto& listener : asyncPowerStateListeners_) {
         auto iter = cachedRegister_.find(listener);
         auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
         // IPowerStateCallback calling pid uid
-        POWER_HILOGI(FEATURE_POWER_STATE, "APSCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
+        POWER_HILOGI(FEATURE_POWER_STATE, "APSCb P=%{public}dU=%{public}dffrtId=%{public}u",
+            pidUid.first, pidUid.second, ffrtId);
         listener->OnAsyncPowerStateChanged(state);
         POWER_HILOGI(FEATURE_POWER_STATE, "APSCb End");
     }
@@ -1235,7 +1236,8 @@ void PowerStateMachine::NotifyPowerStateChanged(PowerState state, StateChangeRea
         auto iter = cachedRegister_.find(listener);
         auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
         // IPowerStateCallback calling pid uid
-        POWER_HILOGI(FEATURE_POWER_STATE, "IPSCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
+        POWER_HILOGI(FEATURE_POWER_STATE, "IPSCb P=%{public}dU=%{public}dffrtId=%{public}u",
+            pidUid.first, pidUid.second, ffrtId);
         listener->OnPowerStateChanged(state);
         POWER_HILOGI(FEATURE_POWER_STATE, "IPSCb End");
     }
@@ -1614,7 +1616,7 @@ void PowerStateMachine::SetEnableDoze(bool enable)
 
 bool PowerStateMachine::SetDozeMode(DisplayState state)
 {
-    std::lock_guard<std::mutex> lock(stateMutex_);
+    std::lock_guard<ffrt::mutex> lock(stateMutex_);
     if (IsScreenOn()) {
         POWER_HILOGW(FEATURE_POWER_STATE, "the screen is on, not allowed to set doze mode");
         return false;
@@ -1628,15 +1630,18 @@ bool PowerStateMachine::SetDozeMode(DisplayState state)
 void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason)
 {
     std::lock_guard<std::mutex> lock(internalScreenStateMutex_);
+    uint32_t ffrtId = ffrt::this_task::get_id();
     if (state == DisplayState::DISPLAY_ON) {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
         if (IsHibernating()) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Do not power the internal screen while hibernating");
+            POWER_HILOGI(FEATURE_POWER_STATE,
+                "[UL_POWER] Do not power the internal screen while hibernating, ffrtId=%{public}u", ffrtId);
             return;
         }
 #endif
         if (!IsSwitchOpen()) {
-            POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] Do not power the internal screen while switch is close");
+            POWER_HILOGI(FEATURE_POWER_STATE,
+                "[UL_POWER] Do not power the internal screen while switch is close, ffrtId=%{public}u", ffrtId);
             return;
         }
         this->stateAction_->SetInternalScreenDisplayPower(state, reason);
@@ -1644,8 +1649,9 @@ void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateC
     } else if (state == DisplayState::DISPLAY_OFF) {
         this->stateAction_->SetInternalScreenDisplayPower(state, reason);
     } else {
-        POWER_HILOGW(
-            FEATURE_POWER_STATE, "[UL_POWER] SetInternalScreenDisplayState, invalid display state: %{public}u", state);
+        POWER_HILOGW(FEATURE_POWER_STATE,
+            "[UL_POWER] SetInternalScreenDisplayState, invalid display state: %{public}u, ffrtId=%{public}u",
+            state, ffrtId);
     }
 }
 #endif
@@ -1973,6 +1979,8 @@ bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChange
 {
     bool ret = false;
     PowerStateMachine::PreBrightState curState = preBrightState_.load();
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER]HandlePreBrightState start ffrtId: %{public}u", ffrtId);
     if (reason == StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
         if (ffrtTimer_ != nullptr) {
             FFRTTask authFailTask = [this] {
@@ -2056,9 +2064,11 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     int32_t beginTimeMs = GetTickCount();
 #endif
-    POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d",
-        PowerUtils::GetPowerStateString(state).c_str(), PowerUtils::GetReasonTypeString(reason).c_str(), force);
-    std::lock_guard<std::mutex> lock(stateMutex_);
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGD(FEATURE_POWER_STATE, "state=%{public}s, reason=%{public}s, force=%{public}d, ffrtId=%{public}u",
+        PowerUtils::GetPowerStateString(state).c_str(),
+        PowerUtils::GetReasonTypeString(reason).c_str(), force, ffrtId);
+    std::lock_guard<ffrt::mutex> lock(stateMutex_);
     if (!CheckFFRTTaskAvailability(state, reason)) {
         POWER_HILOGI(FEATURE_POWER_STATE, "this timeout task is invalidated, directly return");
         return false;
@@ -2078,8 +2088,8 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     }
     if (IsTimeoutReason(reason) && forceTimingOut_.load()) {
         force = true;
-        POWER_HILOGI(FEATURE_POWER_STATE, "Call SetForceTimingOut PID=%{public}d, UID=%{public}d",
-            g_callSetForceTimingOutPid, g_callSetForceTimingOutUid);
+        POWER_HILOGI(FEATURE_POWER_STATE, "Call SetForceTimingOut PID=%{public}d, UID=%{public}d, ffrtId=%{public}u",
+            g_callSetForceTimingOutPid, g_callSetForceTimingOutUid, ffrtId);
     }
     UpdateSettingStateFlag(state, reason);
     auto pms = pms_.promote();
@@ -2091,8 +2101,9 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     if (wakeupController) {
         wakeupController->RegisterMonitor(GetState());
     }
-    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d",
-        PowerUtils::GetPowerStateString(state).c_str(), ret);
+    POWER_HILOGI(FEATURE_POWER_STATE,
+        "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d, ffrtId=%{public}u",
+        PowerUtils::GetPowerStateString(state).c_str(), ret, ffrtId);
     RestoreSettingStateFlag();
     WriteHiSysEvent(ret, reason, beginTimeMs, state);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
@@ -2142,7 +2153,7 @@ bool PowerStateMachine::IsTransitFailed(TransitResult ret)
 void PowerStateMachine::SetDisplaySuspend(bool enable)
 {
     POWER_HILOGD(FEATURE_POWER_STATE, "enable: %{public}d", enable);
-    std::lock_guard<std::mutex> lock(stateMutex_);
+    std::lock_guard<ffrt::mutex> lock(stateMutex_);
     enableDisplaySuspend_ = enable;
     if (GetState() == PowerState::INACTIVE) {
         POWER_HILOGI(FEATURE_POWER_STATE, "Change display state");

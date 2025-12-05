@@ -525,10 +525,11 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
+    uint32_t ffrtId = ffrt::this_task::get_id();
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to suspend device, pid=%{public}d, uid=%{public}d, reason=%{public}d, action=%{public}u, "
-        "delay=%{public}u",
-        pid, uid, reason, action, delay);
+        "delay=%{public}u, ffrtId=%{public}u",
+        pid, uid, reason, action, delay, ffrtId);
     bool force = true;
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
         force = false;
