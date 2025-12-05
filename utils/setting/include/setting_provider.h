@@ -34,6 +34,7 @@ public:
     ErrCode PutLongValue(const std::string& key, int64_t value, bool needNotify = true);
     ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
     bool IsValidKey(const std::string& key);
+    static bool AddMultiUserKey(const std::string& key);
     sptr<SettingObserver> CreateObserver(const std::string& key, const SettingObserver::UpdateFunc& func);
     static void ExecRegisterCb(const sptr<SettingObserver>& observer);
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
@@ -70,10 +71,26 @@ private:
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static constexpr const char* SETTING_DURING_CALL_STATE_KEY {"during_call_state"};
-    static constexpr const char* SETTING_ELDER_CARE_SWITCH_ENABLED {"accessibility_elder_care_switch_enabled"};
-    static std::atomic<SettingProvider*> instance_;
-    static sptr<IRemoteObject> remoteObj_;
-    static int32_t currentUserId_;
+    static constexpr const int32_t INITIAL_USER_ID = 100;
+    static constexpr const uint32_t MULTI_USER_STR_VEC_SIZE_MAX = 1000;
+
+    static inline std::atomic<SettingProvider*> instance_{nullptr};
+    static inline sptr<IRemoteObject> remoteObj_;
+    static inline int32_t currentUserId_ = INITIAL_USER_ID;
+    static inline std::vector<std::string> needMultiUserStrVec = {
+        SETTING_POWER_WAKEUP_DOUBLE_KEY,
+        SETTING_POWER_WAKEUP_PICKUP_KEY,
+        SETTING_POWER_WAKEUP_SOURCES_KEY,
+        SETTING_DURING_CALL_STATE_KEY,
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+        SETTING_DISPLAY_AC_OFF_TIME_KEY,
+        SETTING_DISPLAY_DC_OFF_TIME_KEY,
+        SETTING_POWER_AC_SLEEP_TIME_KEY,
+        SETTING_POWER_DC_SLEEP_TIME_KEY,
+        SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
+        SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
+#endif
+    };
 
     static void Initialize(int32_t systemAbilityId);
     static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string& key);

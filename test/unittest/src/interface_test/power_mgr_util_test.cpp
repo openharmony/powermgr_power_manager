@@ -350,6 +350,30 @@ HWTEST_F(PowerMgrUtilTest, SettingProvider006, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SettingProvider007
+ * @tc.desc: test AddMultiUserKey func
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, SettingProvider007, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "SettingProvider007 function start!");
+    auto& settingProvider = SettingProvider::GetInstance(OHOS::POWER_MANAGER_SERVICE_ID);
+    static constexpr const char* SETTING_POWER_WAKEUP_SOURCES_KEY {"settings.power.wakeup_sources"};
+    EXPECT_TRUE(settingProvider.AddMultiUserKey(SETTING_POWER_WAKEUP_SOURCES_KEY));
+    static constexpr const char* SETTING_POWER_TEST_KEY_PREFIX {"settings.power.test."};
+    for (int i = 0; i < 1000; i++) { // max capacity = 1000 (MULTI_USER_STR_VEC_SIZE_MAX)
+        auto ret = settingProvider.AddMultiUserKey("settings.power.SettingProvider007." + std::to_string(i));
+        if (i < 900) {               // 10 keys exist by default, so 900 inserts succeed
+            EXPECT_TRUE(ret);
+        }
+    }
+    EXPECT_FALSE(settingProvider.AddMultiUserKey("settings.power.SettingProvider007.1000"));
+    EXPECT_TRUE(settingProvider.AddMultiUserKey("settings.power.SettingProvider007.1"));
+    EXPECT_TRUE(settingProvider.AddMultiUserKey(SETTING_POWER_WAKEUP_SOURCES_KEY));
+    POWER_HILOGI(LABEL_TEST, "SettingProvider007 function end!");
+}
+
+/**
  * @tc.name: Sysparam001
  * @tc.desc: test GetIntValue in proxy
  * @tc.type: FUNC
