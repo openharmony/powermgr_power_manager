@@ -382,7 +382,7 @@ private:
     std::mutex shutdownMutex_;
     std::mutex modeMutex_;
     std::mutex screenOffPreMutex_;
-    std::mutex screenMutex_;
+    ffrt::mutex screenMutex_;
     std::mutex dumpMutex_;
     std::mutex lockMutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_ {nullptr};
