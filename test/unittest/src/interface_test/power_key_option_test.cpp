@@ -17,6 +17,7 @@
 #include <input_manager.h>
 #endif
 #include "power_mgr_service.h"
+#include "mock_state_action.h"
 
 using namespace testing::ext;
 using namespace OHOS::MMI;
@@ -25,6 +26,7 @@ using namespace OHOS;
 using namespace std;
 namespace {
 sptr<PowerMgrService> g_service;
+DisplayState g_displayState = DisplayState::DISPLAY_ON;
 constexpr int SLEEP_WAIT_TIME_US = 500000;
 constexpr uint32_t NO_DELAY = 0;
 bool g_killProcsee = false;
@@ -56,7 +58,7 @@ SubscriberState AliveServiceState::Handle(RequestContext& context)
 
 SubscriberState RestartingServiceState::Handle(RequestContext& context)
 {
-    constexpr int32_t MAX_RETRY_COUNT = 5;
+    constexpr int32_t MAX_RETRY_COUNT = 2;
     if (deathRetryCount_ >= MAX_RETRY_COUNT) {
         context.state_ = g_stateMap[SubscriberState::SUCCESS];
         deathRetryCount_ = 0;
@@ -69,7 +71,7 @@ SubscriberState RestartingServiceState::Handle(RequestContext& context)
 
 SubscriberState DeadServiceState::Handle(RequestContext& context)
 {
-    constexpr int32_t MAX_RETRY_COUNT = 10;
+    constexpr int32_t MAX_RETRY_COUNT = 4;
     deathRetryCount_++;
     if (deathRetryCount_ >= MAX_RETRY_COUNT) {
         context.state_ = g_stateMap[SubscriberState::RETRY_SUCCESS];
@@ -89,6 +91,28 @@ void PowerKeyOptionTest::TearDownTestCase(void)
 {
     g_service->OnStop();
     DelayedSpSingleton<PowerMgrService>::DestroyInstance();
+}
+
+void PowerKeyOptionTest::MockDisplayAction()
+{
+    auto stateMachine = g_service->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr) << "MockDisplayAction failed to get PowerStateMachine";
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(::testing::_, ::testing::_))
+        .WillRepeatedly([](DisplayState state, StateChangeReason reason) {
+            POWER_HILOGI(LABEL_TEST,
+                "PowerKeyOptionTest SetDisplayState state:%{public}d", static_cast<int32_t>(state));
+            g_displayState = state;
+            return ActionResult::SUCCESS;
+        })
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly([]() {
+            POWER_HILOGI(LABEL_TEST,
+                "PowerKeyOptionTest GetDisplayState state:%{public}d", static_cast<int32_t>(g_displayState));
+            return g_displayState;
+        })
+    ::testing::Mock::AllowLeak(stateActionMock);
 }
 
 void PowerKeyOptionTest::SetUp() {}
@@ -134,6 +158,7 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest001, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerKeyOptionTest001: start";
     g_service->WakeupControllerInit();
     g_service->SuspendControllerInit();
+    MockDisplayAction();
     g_service->SuspendDevice(
         static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     EXPECT_FALSE(g_service->IsScreenOn());
@@ -179,6 +204,7 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest002, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerKeyOptionTest002: start";
     g_service->WakeupControllerInit();
     g_service->SuspendControllerInit();
+    MockDisplayAction();
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
     EXPECT_TRUE(g_service->IsScreenOn());
@@ -221,6 +247,7 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest003, TestSize.Level0)
     GTEST_LOG_(INFO) << "PowerKeyOptionTest003: start";
     g_service->WakeupControllerInit();
     g_service->SuspendControllerInit();
+    MockDisplayAction();
     g_service->WakeupDevice(
         static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
     EXPECT_TRUE(g_service->IsScreenOn());
@@ -290,30 +317,6 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest005, TestSize.Level0)
     EXPECT_TRUE(powerkeySuspendMonitor->Init());
     GTEST_LOG_(INFO) << "PowerKeyOptionTest005: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest005 function end!");
-}
-#endif
-
-/**
- * @tc.name: PowerKeyOptionTest006
- * @tc.desc: test TPCoverSuspendMonitor init retry
- * @tc.type: FUNC
- */
-#ifdef HAS_MULTIMODALINPUT_INPUT_PART
-HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest006, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest006 function start!");
-    GTEST_LOG_(INFO) << "PowerKeyOptionTest006: start";
-    SuspendSource source(SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER,
-        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND), NO_DELAY);
-    auto tpCoverSuspendMonitor = std::make_shared<TPCoverSuspendMonitor>(source);
-    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
-    tpCoverSuspendMonitor->Cancel();
-    g_killProcsee = true;
-    EXPECT_FALSE(tpCoverSuspendMonitor->Init());
-    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
-    EXPECT_TRUE(tpCoverSuspendMonitor->Init());
-    GTEST_LOG_(INFO) << "PowerKeyOptionTest006: end";
-    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest006 function end!");
 }
 #endif
 } // namespace

@@ -28,6 +28,10 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 
+namespace {
+constexpr int32_t INIT_VALUE = -1;
+} // namespace
+
 class TestPowerMgrServiceAdapter : public PowerMgrServiceAdapter {
 public:
     PowerErrors RebootDevice(const std::string& reason)
@@ -300,9 +304,17 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter001, TestSize.L
     TakeOverSuspendPriority priority = TakeOverSuspendPriority::HIGH;
     int32_t result = adapter->RegisterSuspendTakeoverCallbackIpc(callback, static_cast<int32_t>(priority));
     result = adapter->RegisterSuspendTakeoverCallbackIpc(callback, 10);
-    EXPECT_EQ(result, -1);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    EXPECT_EQ(result, INIT_VALUE);
+#else
+    EXPECT_EQ(result, ERR_OK);
+#endif
     result = adapter->RegisterSuspendTakeoverCallbackIpc(nullptr, static_cast<int32_t>(priority));
-    EXPECT_EQ(result, -1);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    EXPECT_EQ(result, INIT_VALUE);
+#else
+    EXPECT_EQ(result, ERR_OK);
+#endif
     sptr<TestTakeOverSuspendCallback> callback2 = new TestTakeOverSuspendCallback();
     result = adapter->RegisterSuspendTakeoverCallbackIpc(callback2, static_cast<int32_t>(-1));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter001 function end!");
@@ -319,7 +331,11 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter002, TestSize.L
     auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
     adapter->UnRegisterSuspendTakeoverCallbackIpc(callback);
     int32_t result = adapter->UnRegisterSuspendTakeoverCallbackIpc(nullptr);
-    EXPECT_EQ(result, -1);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
+    EXPECT_EQ(result, INIT_VALUE);
+#else
+    EXPECT_EQ(result, ERR_OK);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter002 function end!");
 }
 

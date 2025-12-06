@@ -50,8 +50,9 @@ sptr<SettingObserver> g_suspendSourcesKeyObserver = nullptr;
 #endif
 FFRTMutex g_monitorMutex;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
-constexpr int32_t RETRY_COUNT_TIMES = 10;
+constexpr int32_t RETRY_COUNT_TIMES = 4;
 constexpr int32_t RETRY_INTERVAL_MS = 100;
+int32_t g_powerkeyReleaseIdCache = -1;
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -910,10 +911,11 @@ bool PowerKeySuspendMonitor::Init()
         return true;
     }
     std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
+    if (keyOption == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "keyOption is nullptr");
+        return false;
+    }
     std::set<int32_t> preKeys;
-
-    keyOption.reset();
-    keyOption = std::make_shared<OHOS::MMI::KeyOption>();
     keyOption->SetPreKeys(preKeys);
     keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_POWER);
     keyOption->SetFinalKeyDown(false);
@@ -924,17 +926,25 @@ bool PowerKeySuspendMonitor::Init()
         return false;
     }
     int32_t retryCount = 0;
+    bool subscribeOrLastUnsubscribeFailed = false;
     do {
+        inputManager->UnsubscribeKeyEvent(g_powerkeyReleaseIdCache);
         powerkeyReleaseId_ = inputManager->SubscribeKeyEvent(
             keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
                 ReceivePowerkeyCallback(keyEvent);
             });
-        if (powerkeyReleaseId_ < 0) {
-            POWER_HILOGE(FEATURE_SUSPEND, "powerkey up register failed, retry times %{public}d", retryCount);
+        subscribeOrLastUnsubscribeFailed =
+            powerkeyReleaseId_ < 0 || powerkeyReleaseId_ == g_powerkeyReleaseIdCache;
+        if (subscribeOrLastUnsubscribeFailed) {
+            POWER_HILOGE(FEATURE_SUSPEND, "powerkey up retry, id:%{public}d cache:%{public}d count:%{public}d",
+                powerkeyReleaseId_, g_powerkeyReleaseIdCache, retryCount);
             retryCount++;
-            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+            if (retryCount < RETRY_COUNT_TIMES) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+            }
         }
-    } while (powerkeyReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
+    } while (subscribeOrLastUnsubscribeFailed && retryCount < RETRY_COUNT_TIMES);
+    g_powerkeyReleaseIdCache = powerkeyReleaseId_;
     POWER_HILOGI(FEATURE_SUSPEND, "powerkeyReleaseId_=%{public}d", powerkeyReleaseId_);
     return powerkeyReleaseId_ >= 0 ? true : false;
 #else
@@ -1097,19 +1107,11 @@ bool TPCoverSuspendMonitor::Init()
         POWER_HILOGE(FEATURE_SUSPEND, "TPCoverSuspendMonitorInit inputManager is null");
         return false;
     }
-    int32_t retryCount = 0;
-    do {
-        TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
-            keyOption, [*this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
-                POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
-                Notify();
-            });
-        if (TPCoverReleaseId_ < 0) {
-            POWER_HILOGE(FEATURE_SUSPEND, "TPCover register failed, retry times %{public}d", retryCount);
-            retryCount++;
-            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
-        }
-    } while (TPCoverReleaseId_ < 0 && retryCount < RETRY_COUNT_TIMES);
+    TPCoverReleaseId_ = inputManager->SubscribeKeyEvent(
+        keyOption, [this](std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received TPCover event");
+            this->Notify();
+        });
     POWER_HILOGI(FEATURE_SUSPEND, "TPCoverReleaseId_=%{public}d", TPCoverReleaseId_);
     return TPCoverReleaseId_ >= 0 ? true : false;
 #else
