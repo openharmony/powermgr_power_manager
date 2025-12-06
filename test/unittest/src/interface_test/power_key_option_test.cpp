@@ -105,13 +105,13 @@ void PowerKeyOptionTest::MockDisplayAction()
                 "PowerKeyOptionTest SetDisplayState state:%{public}d", static_cast<int32_t>(state));
             g_displayState = state;
             return ActionResult::SUCCESS;
-        })
+        });
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly([]() {
             POWER_HILOGI(LABEL_TEST,
                 "PowerKeyOptionTest GetDisplayState state:%{public}d", static_cast<int32_t>(g_displayState));
             return g_displayState;
-        })
+        });
     ::testing::Mock::AllowLeak(stateActionMock);
 }
 
