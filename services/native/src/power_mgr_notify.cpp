@@ -81,8 +81,9 @@ void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime)
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
-        screenOffWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld ffrtId=%{public}u",
+        screenOffWant_->GetAction().c_str(), static_cast<long long>(eventTime), ffrtId);
     PublishEvents(eventTime, screenOffWant_);
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", screenOffWant_->GetAction().c_str());
 }
@@ -93,8 +94,9 @@ void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime)
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
     }
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
-        screenOnWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld ffrtId=%{public}u",
+        screenOnWant_->GetAction().c_str(), static_cast<long long>(eventTime), ffrtId);
     PublishEvents(eventTime, screenOnWant_);
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", screenOnWant_->GetAction().c_str());
 }
@@ -106,8 +108,9 @@ void PowerMgrNotify::PublishEnterForceSleepEvents(int64_t eventTime)
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
-        enterForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld ffrtId=%{public}u",
+        enterForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime), ffrtId);
     PublishEvents(eventTime, enterForceSleepWant_);
     POWER_HILOGI(
         FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", enterForceSleepWant_->GetAction().c_str());
@@ -119,8 +122,9 @@ void PowerMgrNotify::PublishExitForceSleepEvents(int64_t eventTime)
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
     }
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
-        exitForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld ffrtId=%{public}u",
+        exitForceSleepWant_->GetAction().c_str(), static_cast<long long>(eventTime), ffrtId);
     PublishEvents(eventTime, exitForceSleepWant_);
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", exitForceSleepWant_->GetAction().c_str());
 }
@@ -133,8 +137,9 @@ void PowerMgrNotify::PublishEnterHibernateEvent(int64_t eventTime, bool clearMem
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
-        enterHibernateWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Start to publish event %{public}s at %{public}lld ffrtId=%{public}u",
+        enterHibernateWant_->GetAction().c_str(), static_cast<long long>(eventTime), ffrtId);
     enterHibernateWant_->SetParam("clearMemory", clearMemory);
     PublishEvents(eventTime, enterHibernateWant_);
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", enterHibernateWant_->GetAction().c_str());
@@ -146,8 +151,9 @@ void PowerMgrNotify::PublishExitHibernateEvent(int64_t eventTime, bool clearMemo
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
     }
-    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld",
-        exitHibernateWant_->GetAction().c_str(), static_cast<long long>(eventTime));
+    uint32_t ffrtId = ffrt::this_task::get_id();
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Start to publish event %{public}s at %{public}lld ffrtId=%{public}u",
+        exitHibernateWant_->GetAction().c_str(), static_cast<long long>(eventTime), ffrtId);
     exitHibernateWant_->SetParam("clearMemory", clearMemory);
     PublishEvents(eventTime, exitHibernateWant_);
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", exitHibernateWant_->GetAction().c_str());
