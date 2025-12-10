@@ -18,7 +18,10 @@
 @!sts_inject("""
 static { loadLibraryWithPermissionCheck("power_manager_runninglock_taihe_native.z", "@ohos.runningLock") }""")
 
-enum RunningLockType: i32 { PROXIMITY_SCREEN_CONTROL = 2 }
+enum RunningLockType: i32 {
+    BACKGROUND = 1,
+    PROXIMITY_SCREEN_CONTROL = 2
+}
 
 @class
 interface RunningLock {
