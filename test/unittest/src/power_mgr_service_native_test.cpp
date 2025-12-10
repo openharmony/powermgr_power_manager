@@ -30,6 +30,7 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_service.h"
+#include "async_ulsr_callback_stub.h"
 #include "setting_helper.h"
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -561,4 +562,74 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative019, TestSize.Level1)
     EXPECT_TRUE(ret != PowerErrors::ERR_PERMISSION_DENIED);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative019 function end!");
 }
+
+class TestAsyncUlsrCallback : public AsyncUlsrCallbackStub {
+public:
+    TestAsyncUlsrCallback() = default;
+    virtual ~TestAsyncUlsrCallback() = default;
+
+    void OnAsyncWakeup() override
+    {
+        POWER_HILOGI(LABEL_TEST, "TestAsyncUlsrCallback OnAsyncWakeup!");
+    }
+};
+
+/**
+ * @tc.name: PowerMgrServiceNative020
+ * @tc.desc: Test RegisterAsyncUlsrCallback && UnRegisterAsyncUlsrCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative020, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative020 start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+    
+    // Test case 1: No system permission
+    g_isSystem = false;
+    sptr<TestAsyncUlsrCallback> callback = new TestAsyncUlsrCallback();
+    ret = pmsTest_->RegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
+    ret = pmsTest_->UnRegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
+
+    // Test case 2: DEFAULT
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    g_isSystem = true;
+    ret = pmsTest_->RegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
+    ret = pmsTest_->UnRegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
+#else
+    g_isSystem = true;
+    ret = pmsTest_->RegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID) << "Test case 2 failed";
+    ret = pmsTest_->UnRegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID) << "Test case 2 failed";
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative020 end!");
+}
+
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+/**
+ * @tc.name: PowerMgrServiceNative021
+ * @tc.desc: Test TriggerUlsrWakeupCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative021, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative021 start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+    g_isSystem = true;
+    ret = pmsTest_->RegisterUlsrCallback(nullptr);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
+    sptr<TestAsyncUlsrCallback> callback = new TestAsyncUlsrCallback();
+    ret = pmsTest_->RegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
+    EXPECT_TRUE(pmsTest_->ulsrCallbackHolder_ != nullptr);
+    pmsTest_->TriggerUlsrWakeupCallback();
+    ret = pmsTest_->UnRegisterUlsrCallback(callback);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative021 end!");
+}
+#endif
 } // namespace

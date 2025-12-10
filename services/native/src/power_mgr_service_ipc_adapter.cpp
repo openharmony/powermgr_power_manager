@@ -512,6 +512,22 @@ int32_t PowerMgrServiceAdapter::IsForceSleepingIpc(bool& isForceSleeping)
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::RegisterUlsrCallbackIpc(
+    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterUlsrCallbackIpc", false);
+    powerError = static_cast<int32_t>(RegisterUlsrCallback(callback));
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::UnRegisterUlsrCallbackIpc(
+    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterUlsrCallbackIpc", false);
+    powerError = static_cast<int32_t>(UnRegisterUlsrCallback(callback));
+    return ERR_OK;
+}
+
 int32_t PowerMgrServiceAdapter::RefreshActivityIpc(
     int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError)
 {

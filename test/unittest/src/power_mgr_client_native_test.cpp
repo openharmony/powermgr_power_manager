@@ -77,6 +77,8 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(nullptr));
     EXPECT_FALSE(powerMgrClient.RegisterScreenStateCallback(0, nullptr));
     EXPECT_FALSE(powerMgrClient.UnRegisterScreenStateCallback(nullptr));
+    EXPECT_TRUE(powerMgrClient.RegisterUlsrCallback(nullptr) != PowerErrors::ERR_OK);
+    EXPECT_TRUE(powerMgrClient.UnRegisterUlsrCallback(nullptr) != PowerErrors::ERR_OK);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative001 function end!");
     GTEST_LOG_(INFO) << "PowerMgrClientNative001 function end!";

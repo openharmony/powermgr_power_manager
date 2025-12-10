@@ -1829,6 +1829,62 @@ bool PowerMgrService::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateC
 #endif
 }
 
+PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGE(FEATURE_WAKEUP, "RegisterUlsrCallback failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_WAKEUP, "RegisterUlsrCallback pid:%{public}d, uid:%{public}d", pid, uid);
+    std::lock_guard lock(ulsrMutex_);
+    if (ulsrCallbackHolder_ == nullptr) {
+        ulsrCallbackHolder_ = new UlsrCallbackHolder();
+    }
+    ulsrCallbackHolder_->AddCallback(callback, std::make_pair(pid, uid));
+    return PowerErrors::ERR_OK;
+#else
+    POWER_HILOGW(FEATURE_WAKEUP, "RegisterUlsrCallback interface not supported.");
+    return PowerErrors::ERR_PARAM_INVALID;
+#endif
+}
+
+PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGE(FEATURE_WAKEUP, "UnRegisterUlsrCallback failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_WAKEUP, "UnRegisterUlsrCallback pid:%{public}d, uid:%{public}d", pid, uid);
+    std::lock_guard lock(ulsrMutex_);
+    if (ulsrCallbackHolder_ == nullptr) {
+        ulsrCallbackHolder_ = new UlsrCallbackHolder();
+    }
+    ulsrCallbackHolder_->RemoveCallback(callback);
+    return PowerErrors::ERR_OK;
+#else
+    POWER_HILOGW(FEATURE_WAKEUP, "UnRegisterUlsrCallback interface not supported.");
+    return PowerErrors::ERR_PARAM_INVALID;
+#endif
+}
+
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+void PowerMgrService::TriggerUlsrWakeupCallback()
+{
+    std::lock_guard lock(ulsrMutex_);
+    if (ulsrCallbackHolder_ == nullptr) {
+        POWER_HILOGW(FEATURE_WAKEUP, "ulsrCallbackHolder null");
+        return;
+    }
+    ulsrCallbackHolder_->WakeupNotify();
+}
+#endif
+
 bool PowerMgrService::RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback)
 {
     std::lock_guard lock(modeMutex_);

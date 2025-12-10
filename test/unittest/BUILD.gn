@@ -36,6 +36,7 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/actions/",
     "${powermgr_service_path}/native/src/actions/default",
     "${powermgr_service_path}/native/src/hibernate",
+    "${powermgr_service_path}/native/src/ulsr",
     "${powermgr_service_path}/native/src/proximity_sensor_controller",
     "${powermgr_service_path}/native/src/runninglock",
     "${powermgr_service_path}/native/src/shutdown",
@@ -1569,6 +1570,44 @@ ohos_unittest("test_power_suspend_takeover") {
   external_deps = deps_ex
 }
 
+ohos_unittest("test_ulsr_callback_holder") {
+  module_out_path = module_output_path
+  include_dirs =  [ "${powermgr_inner_api}/native/include" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [ 
+    "src/interface_test/ulsr_callback_holder_test.cpp",
+    "${powermgr_service_path}/native/src/ulsr/ulsr_callback_holder.cpp",
+    "${powermgr_service_zidl}/src/async_ulsr_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/async_ulsr_callback_stub.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [ "${powermgr_utils_path}:power_utils" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+
+  defines += [ "POWERMGR_GTEST" ]
+}
+
 ohos_unittest("test_general_interfaces") {
   module_out_path = module_output_path
 
@@ -1834,6 +1873,7 @@ ohos_unittest("test_device_power_action") {
     "${powermgr_utils_path}:coverage_flags",
   ]
   deps = [
+    "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
   ]
@@ -2051,6 +2091,7 @@ group("unittest") {
     ":test_running_lock_native",
     ":test_running_lock_scenario",
     ":test_running_lock_timer_handler",
+    ":test_ulsr_callback_holder",
   ]
   if (power_manager_feature_surport_takeover_suspend) {
     deps += [
