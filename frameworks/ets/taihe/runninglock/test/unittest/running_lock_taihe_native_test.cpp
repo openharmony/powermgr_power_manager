@@ -161,6 +161,10 @@ HWTEST_F(RunningLockTaiheNativeTest, RunningLockTaiheNativeTest_003, TestSize.Le
     POWER_HILOGI(LABEL_TEST, "RunningLockTaiheNativeTest_003 start");
     ohos::runningLock::RunningLockType type(ohos::runningLock::RunningLockType::key_t::PROXIMITY_SCREEN_CONTROL);
     EXPECT_TRUE(IsSupported(type));
+    type = ohos::runningLock::RunningLockType::key_t::BACKGROUND;
+    EXPECT_TRUE(IsSupported(type));
+    type = ohos::runningLock::RunningLockType::from_value(100);
+    EXPECT_FALSE(IsSupported(type));
     POWER_HILOGI(LABEL_TEST, "RunningLockTaiheNativeTest_003 end");
 }
 } // namespace

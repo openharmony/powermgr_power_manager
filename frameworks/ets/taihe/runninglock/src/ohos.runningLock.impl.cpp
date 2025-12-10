@@ -102,7 +102,8 @@ ohos::runningLock::RunningLock CreateSync(string_view name, ohos::runningLock::R
 bool IsSupported(ohos::runningLock::RunningLockType type)
 {
     OHOS::PowerMgr::RunningLockType tp = static_cast<OHOS::PowerMgr::RunningLockType>(type.get_value());
-    return tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+    return tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND ||
+           tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
 }
 }  // namespace
 
