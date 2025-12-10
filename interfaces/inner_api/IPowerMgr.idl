@@ -27,6 +27,7 @@ interface OHOS.PowerMgr.ISyncShutdownCallback;
 interface OHOS.PowerMgr.IPowerRunninglockCallback;
 interface OHOS.PowerMgr.IPowerMgrAsync;
 interface OHOS.PowerMgr.ITakeOverSuspendCallback;
+interface OHOS.PowerMgr.IAsyncUlsrCallback;
 
 interface OHOS.PowerMgr.IPowerMgr {
     [ipccode 0] void CreateRunningLockIpc(
@@ -115,4 +116,7 @@ interface OHOS.PowerMgr.IPowerMgr {
 
     void SetPowerKeyFilteringStrategyIpc([in] int strategy, [out] int powerError);
     void GetShutdownReasonIpc([out] String reason, [out] int powerError);
+
+    void RegisterUlsrCallbackIpc([in] IAsyncUlsrCallback ulsrCallback, [out] int powerError);
+    void UnRegisterUlsrCallbackIpc([in] IAsyncUlsrCallback ulsrCallback, [out] int powerError);
 }

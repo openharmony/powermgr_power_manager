@@ -24,6 +24,7 @@
 #include "screen_off_pre_callback_stub.h"
 #include "power_runninglock_callback_stub.h"
 #include "suspend/itake_over_suspend_callback.h"
+#include "async_ulsr_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -69,6 +70,12 @@ public:
         PowerRunningLockTestCallback() {};
         virtual ~PowerRunningLockTestCallback() {};
         virtual void HandleRunningLockMessage(std::string message) override;
+    };
+    class AsyncUlsrCallback : public AsyncUlsrCallbackStub {
+    public:
+        AsyncUlsrCallback() {};
+        virtual ~AsyncUlsrCallback() {};
+        virtual void OnAsyncWakeup() override;
     };
 };
 } // namespace PowerMgr

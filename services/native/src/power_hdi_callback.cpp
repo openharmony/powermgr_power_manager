@@ -16,6 +16,7 @@
 #include "power_hdi_callback.h"
 #include "hdf_base.h"
 #include "power_hookmgr.h"
+#include "power_mgr_service.h"
 #include "power_log.h"
 
 using namespace OHOS::HDI::Power::V1_2;
@@ -49,6 +50,16 @@ int32_t PowerHdiCallbackExt::OnWakeupWithTag(const std::string& tag)
             nullptr, nullptr);
         POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, HookMgrExecute, stage: %{public}d, ret: %{public}d",
             PowerHookStage::POWER_HDI_CALLBACK_WAKEUP, ret);
+    }
+#endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    if (tag == "ulsr") {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGW(FEATURE_WAKEUP, "OnWakeupWithTag, pms null");
+            return HDF_FAILURE;
+        }
+        pms->TriggerUlsrWakeupCallback();
     }
 #endif
     return HDF_SUCCESS;

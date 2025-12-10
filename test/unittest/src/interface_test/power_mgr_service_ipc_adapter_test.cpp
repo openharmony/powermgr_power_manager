@@ -266,6 +266,14 @@ public:
     {
         return true;
     }
+    PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+    {
+        return PowerErrors::ERR_OK;
+    }
+    PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+    {
+        return PowerErrors::ERR_OK;
+    }
 };
 
 class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
