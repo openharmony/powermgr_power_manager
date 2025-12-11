@@ -544,5 +544,22 @@ int32_t PowerMgrServiceAdapter::SetPowerKeyFilteringStrategyIpc(int32_t strategy
     powerError = static_cast<int32_t>(SetPowerKeyFilteringStrategy(filteringStrategy));
     return ERR_OK;
 }
+
+int32_t PowerMgrServiceAdapter::RegisterAsyncShutdownCallbackIpc(
+    const sptr<IAsyncShutdownCallback>& callback, int32_t priorityValue, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterAsyncShutdownCallback", false);
+    ShutdownPriority priority = static_cast<ShutdownPriority>(priorityValue);
+    powerError = static_cast<int32_t>(RegisterAsyncShutdownCallback(callback, priority));
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::UnRegisterAsyncShutdownCallbackIpc(
+    const sptr<IAsyncShutdownCallback>& callback, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterAsyncShutdownCallback", false);
+    powerError = static_cast<int32_t>(UnRegisterAsyncShutdownCallback(callback));
+    return ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

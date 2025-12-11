@@ -35,6 +35,8 @@ ohos_unittest("power_taihe_native_test") {
     debug = false
   }
 
+  include_dirs = [ "../../include" ]
+
   sources = [
     "power_ani_constructor_test.cpp",
     "power_taihe_native_test.cpp",

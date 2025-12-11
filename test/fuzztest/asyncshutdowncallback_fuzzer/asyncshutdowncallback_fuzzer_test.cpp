@@ -34,5 +34,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         IPowerMgrIpcCode::COMMAND_REGISTER_SHUTDOWN_CALLBACK_IPC_IN_IASYNCSHUTDOWNCALLBACK_IN_INT), data, size);
     g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(
         IPowerMgrIpcCode::COMMAND_UN_REGISTER_SHUTDOWN_CALLBACK_IPC_IN_IASYNCSHUTDOWNCALLBACK), data, size);
+
+    /* RegisterAsyncShutdownCallback && UnRegisterAsyncShutdownCallback */
+    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(
+        IPowerMgrIpcCode::COMMAND_REGISTER_ASYNC_SHUTDOWN_CALLBACK_IPC), data, size);
+    g_serviceTest.TestPowerServiceStub(static_cast<uint32_t>(
+        IPowerMgrIpcCode::COMMAND_UN_REGISTER_ASYNC_SHUTDOWN_CALLBACK_IPC), data, size);
     return 0;
 }

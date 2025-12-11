@@ -20,6 +20,7 @@
 #include "power_common.h"
 #include "power_log.h"
 #include "power_mgr_client.h"
+#include "power_shutdown_callback.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -41,6 +42,7 @@ std::map<PowerErrors, std::string> g_errorTable = {
     {PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED, "Setting the power mode failed."    },
 };
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
+thread_local OHOS::sptr<PowerShutdownCallback> g_powerShutdownCallback = new (std::nothrow) PowerShutdownCallback();
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
 
 static void SetFrameworkBootStage(bool isReboot)
@@ -213,6 +215,44 @@ void RefreshActivity(string_view reason)
         taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
     }
 }
+
+void RegisterShutdownCallback(::taihe::callback_view<void(bool isReboot)> shutdownCb)
+{
+    POWER_HILOGI(FEATURE_SHUTDOWN, "ets RegisterShutdownCallback interface");
+    if (g_powerShutdownCallback == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "g_powerShutdownCallback is nullptr");
+        return;
+    }
+    g_powerShutdownCallback->CreateCallback(shutdownCb);
+    PowerErrors code = g_powerMgrClient.RegisterAsyncShutdownCallback(g_powerShutdownCallback,
+        ShutdownPriority::DEFAULT);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "RegisterShutdownCallback failed. code:%{public}d", static_cast<int32_t>(code));
+        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+    }
+}
+
+void UnRegisterShutdownCallback(::taihe::optional_view<::taihe::callback<void()>> callBack)
+{
+    POWER_HILOGI(FEATURE_SHUTDOWN, "ets UnRegisterShutdownCallback interface");
+    if (g_powerShutdownCallback == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "g_powerShutdownCallback is nullptr");
+        return;
+    }
+    PowerErrors code = g_powerMgrClient.UnRegisterAsyncShutdownCallback(g_powerShutdownCallback);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback failed. code:%{public}d",
+            static_cast<int32_t>(code));
+        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        return;
+    }
+    if (callBack.has_value()) {
+        POWER_HILOGI(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback callBack start");
+        callBack.value()();
+    } else {
+        POWER_HILOGI(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback callBack is null");
+    }
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive
@@ -228,4 +268,6 @@ TH_EXPORT_CPP_API_IsStandby(IsStandby);
 TH_EXPORT_CPP_API_Hibernate(Hibernate);
 TH_EXPORT_CPP_API_SetScreenOffTime(SetScreenOffTime);
 TH_EXPORT_CPP_API_RefreshActivity(RefreshActivity);
+TH_EXPORT_CPP_API_RegisterShutdownCallback(RegisterShutdownCallback);
+TH_EXPORT_CPP_API_UnRegisterShutdownCallback(UnRegisterShutdownCallback);
 // NOLINTEND
