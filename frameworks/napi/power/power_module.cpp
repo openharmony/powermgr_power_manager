@@ -130,7 +130,9 @@ static napi_value PowerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isStandby", PowerNapi::IsStandby),
         DECLARE_NAPI_FUNCTION("setScreenOffTime", PowerNapi::SetScreenOffTime),
         DECLARE_NAPI_FUNCTION("refreshActivity", PowerNapi::RefreshActivity),
-        DECLARE_NAPI_FUNCTION("setPowerKeyFilteringStrategy", PowerNapi::SetPowerKeyFilteringStrategy)};
+        DECLARE_NAPI_FUNCTION("setPowerKeyFilteringStrategy", PowerNapi::SetPowerKeyFilteringStrategy),
+        DECLARE_NAPI_FUNCTION("registerShutdownCallback", PowerNapi::RegisterShutdownCallback),
+        DECLARE_NAPI_FUNCTION("unregisterShutdownCallback", PowerNapi::UnRegisterShutdownCallback)};
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateDevicePowerMode(env, exports);
     CreatePowerKeyFilteringStrategy(env, exports);

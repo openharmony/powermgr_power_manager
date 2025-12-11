@@ -46,6 +46,7 @@ taihe_shared_library("power_manager_taihe_native") {
   sources += [
     "src/ani_constructor.cpp",
     "src/ohos.power.impl.cpp",
+    "src/power_shutdown_callback.cpp",
   ]
   deps = [
     ":run_taihe",

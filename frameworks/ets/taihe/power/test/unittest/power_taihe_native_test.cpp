@@ -20,6 +20,7 @@
 #include "ohos.power.user.hpp"
 #include "taihe/runtime.hpp"
 #include "power_mgr_client.h"
+#include "power_shutdown_callback.h"
 #include "power_errors.h"
 #include "power_log.h"
 
@@ -33,6 +34,7 @@ using namespace testing::ext;
 namespace {
 PowerErrors g_error = PowerErrors::ERR_OK;
 bool g_pass = false;
+bool g_cbFlag = false;
 PowerMode g_mode = PowerMode::NORMAL_MODE;
 int32_t g_errCode = 0;
 }
@@ -113,6 +115,19 @@ PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::st
     g_pass = true;
     return g_error;
 }
+
+PowerErrors PowerMgrClient::RegisterAsyncShutdownCallback(
+    const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    g_pass = true;
+    return g_error;
+}
+
+PowerErrors PowerMgrClient::UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    g_pass = true;
+    return g_error;
+}
 } // namespace OHOS::PowerMgr
 
 namespace {
@@ -128,6 +143,7 @@ public:
     {
         g_pass = false;
         g_mode = PowerMode::NORMAL_MODE;
+        g_cbFlag = false;
         g_error = PowerErrors::ERR_OK;
         g_errCode = 0;
     }
@@ -339,6 +355,59 @@ HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_009, TestSize.Level1)
     EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_FREQUENT_FUNCTION_CALL));
     EXPECT_TRUE(g_pass);
     POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_009 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_010
+ * @tc.desc: test power taihe native
+ * @tc.type: FUNC
+ * @tc.require: issue#ICTIYR
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_010, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_010 start");
+    struct MyCallbackImpl {
+        void operator()(bool isReboot)
+        {
+            g_cbFlag = true;
+            EXPECT_TRUE(isReboot == false);
+        }
+    };
+    callback<void(bool)> shutdownCb =
+        ::taihe::make_holder<MyCallbackImpl, ::taihe::callback<void(bool)>>();
+    RegisterShutdownCallback(shutdownCb);
+
+    std::shared_ptr<PowerShutdownCallback> cb = std::make_shared<PowerShutdownCallback>();
+    cb->CreateCallback(shutdownCb);
+    bool isReboot = false;
+    cb->OnAsyncShutdownOrReboot(isReboot);
+    EXPECT_TRUE(g_cbFlag);
+    EXPECT_TRUE(g_pass);
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_010 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_011
+ * @tc.desc: test power taihe native
+ * @tc.type: FUNC
+ * @tc.require: issue#ICTIYR
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_011, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_011 start");
+    struct MyCallbackImpl {
+        void operator()()
+        {
+            g_cbFlag = true;
+        }
+    };
+    callback<void()> shutdownCb =
+        ::taihe::make_holder<MyCallbackImpl, ::taihe::callback<void()>>();
+    optional<callback<void()>> cb = optional<callback<void()>>{std::in_place, shutdownCb};
+    UnRegisterShutdownCallback(cb);
+    EXPECT_TRUE(g_cbFlag);
+    EXPECT_TRUE(g_pass);
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_011 end");
 }
 } // namespace
 
