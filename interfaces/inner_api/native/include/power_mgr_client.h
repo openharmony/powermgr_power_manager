@@ -24,6 +24,7 @@
 #include "suspend/itake_over_suspend_callback.h"
 #include "isync_sleep_callback.h"
 #include "iasync_ulsr_callback.h"
+#include "shutdown/iasync_shutdown_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -296,6 +297,23 @@ public:
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
     PowerErrors GetShutdownReason(std::string& reason);
+
+    /**
+     * Register the synchronous shutdown callback interface
+     * Callbacks are executed in order of highest to lowest priority.
+     * @param callback Synchronous shutdown or reboot callbacks.
+     * @param priority Change the priority of execution.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors RegisterAsyncShutdownCallback(
+        const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority);
+
+    /**
+     * Unregister the synchronous shutdown callback interface.
+     * @param callback Registered callback to synchronous shutdown or reboot.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback);
 
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:

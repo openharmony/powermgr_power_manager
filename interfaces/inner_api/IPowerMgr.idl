@@ -119,4 +119,6 @@ interface OHOS.PowerMgr.IPowerMgr {
 
     void RegisterUlsrCallbackIpc([in] IAsyncUlsrCallback ulsrCallback, [out] int powerError);
     void UnRegisterUlsrCallbackIpc([in] IAsyncUlsrCallback ulsrCallback, [out] int powerError);
+    void RegisterAsyncShutdownCallbackIpc([in] IAsyncShutdownCallback powerCallback, [in] int priorityValue, [out] int powerError);
+    void UnRegisterAsyncShutdownCallbackIpc([in] IAsyncShutdownCallback powerCallback, [out] int powerError);
 }

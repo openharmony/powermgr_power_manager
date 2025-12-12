@@ -2737,5 +2737,56 @@ PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrat
     }
     return PowerErrors::ERR_OK;
 }
+
+PowerErrors PowerMgrService::RegisterAsyncShutdownCallback(
+    const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    if (callback == nullptr) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "RegisterAsyncShutdownCallback callback is null");
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
+    
+    if (!Permission::IsSystem()) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "RegisterAsyncShutdownCallback failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "RegisterAsyncShutdownCallback failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_SHUTDOWN,
+        "RegisterAsyncShutdownCallback pid: %{public}d, uid: %{public}d, priority: %{public}d", pid, uid, priority);
+    std::lock_guard lock(shutdownMutex_);
+    shutdownController_->AddCallback(callback, priority);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    if (callback == nullptr) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "UnRegisterAsyncShutdownCallback callback is null");
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
+    
+    if (!Permission::IsSystem()) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "UnRegisterAsyncShutdownCallback failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.REBOOT")) {
+        POWER_HILOGW(FEATURE_SHUTDOWN,
+            "UnRegisterAsyncShutdownCallback failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_SHUTDOWN,
+        "UnRegisterAsyncShutdownCallback pid: %{public}d, uid: %{public}d", pid, uid);
+
+    std::lock_guard lock(shutdownMutex_);
+    shutdownController_->RemoveCallback(callback);
+    return PowerErrors::ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

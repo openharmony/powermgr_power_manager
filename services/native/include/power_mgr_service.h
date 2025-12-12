@@ -156,6 +156,9 @@ public:
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;
     virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) override;
     virtual PowerErrors GetShutdownReason(std::string& reason) override;
+    virtual PowerErrors RegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback,
+        ShutdownPriority priority) override;
+    virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) override;
 
     void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;

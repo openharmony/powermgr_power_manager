@@ -32,6 +32,7 @@
 #include "power_mgr_service.h"
 #include "async_ulsr_callback_stub.h"
 #include "setting_helper.h"
+#include "shutdown/async_shutdown_callback_stub.h"
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
@@ -48,11 +49,17 @@ constexpr int32_t INVALID_CODE = -1;
 constexpr int32_t TRY_TIMES = 2;
 sptr<PowerMgrService> g_pmsTest;
 bool g_isSystem = true;
+bool g_isPermissionGranted = true;
 } // namespace
 
 bool Permission::IsSystem()
 {
     return g_isSystem;
+}
+
+bool Permission::IsPermissionGranted(const std::string& perm)
+{
+    return g_isPermissionGranted;
 }
 
 void PowerMgrServiceNativeTest::SetUp()
@@ -574,6 +581,17 @@ public:
     }
 };
 
+class TestAsyncShutdownCallback : public AsyncShutdownCallbackStub {
+public:
+    TestAsyncShutdownCallback() = default;
+    virtual ~TestAsyncShutdownCallback() = default;
+
+    void OnAsyncShutdownOrReboot(bool isReboot) override
+    {
+        POWER_HILOGI(LABEL_TEST, "TestAsyncShutdownCallback OnAsyncShutdownOrReboot");
+    }
+};
+
 /**
  * @tc.name: PowerMgrServiceNative020
  * @tc.desc: Test RegisterAsyncUlsrCallback && UnRegisterAsyncUlsrCallback
@@ -632,4 +650,48 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative021, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative021 end!");
 }
 #endif
+
+/**
+ * @tc.name: PowerMgrServiceNative022
+ * @tc.desc: Test RegisterAsyncShutdownCallback && UnRegisterAsyncShutdownCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative022, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative022 start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+
+    // Test case 0: nullptr
+    ret = pmsTest_->RegisterAsyncShutdownCallback(nullptr, ShutdownPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID) << "Test case 0 failed";
+    ret = pmsTest_->UnRegisterAsyncShutdownCallback(nullptr);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID) << "Test case 0 failed";
+
+    // Test case 1: No system permission
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    sptr<IAsyncShutdownCallback> callback0 = new TestAsyncShutdownCallback();
+    ret = pmsTest_->RegisterAsyncShutdownCallback(callback0, ShutdownPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
+    ret = pmsTest_->UnRegisterAsyncShutdownCallback(callback0);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
+
+    // Test case 2: No POWER_MANAGER permission
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest_->RegisterAsyncShutdownCallback(callback0, ShutdownPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED) << "Test case 2 failed";
+    ret = pmsTest_->UnRegisterAsyncShutdownCallback(callback0);
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED) << "Test case 2 failed";
+
+    // Test case 3: DEFAULT
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    ret = pmsTest_->RegisterAsyncShutdownCallback(callback0, ShutdownPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 3 failed";
+    ret = pmsTest_->UnRegisterAsyncShutdownCallback(callback0);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 3 failed";
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative022 end!");
+}
 } // namespace

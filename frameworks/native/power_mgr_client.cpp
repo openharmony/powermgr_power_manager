@@ -776,5 +776,27 @@ PowerErrors PowerMgrClient::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrate
     proxy->SetPowerKeyFilteringStrategyIpc(strategyValue, powerError);
     return static_cast<PowerErrors>(powerError);
 }
+
+PowerErrors PowerMgrClient::RegisterAsyncShutdownCallback(
+    const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t priorityValue = static_cast<int32_t>(priority);
+    proxy->RegisterAsyncShutdownCallbackIpc(callback, priorityValue, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
+PowerErrors PowerMgrClient::UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->UnRegisterAsyncShutdownCallbackIpc(callback, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
 } // namespace PowerMgr
 } // namespace OHOS

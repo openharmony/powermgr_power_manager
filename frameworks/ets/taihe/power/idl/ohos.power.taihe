@@ -42,6 +42,10 @@ function SetScreenOffTime(timeout: i64): void;
 
 function RefreshActivity(reason: String): void;
 
+function RegisterShutdownCallback(shutdownCb: (isReboot: bool) => void): void;
+
+function UnRegisterShutdownCallback(callBack: Optional<() => void>): void;
+
 enum DevicePowerMode : i32 {
   MODE_NORMAL = 600,
   MODE_POWER_SAVE,
