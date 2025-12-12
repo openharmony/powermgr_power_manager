@@ -253,6 +253,15 @@ public:
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) {}
     void UnRegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback) {}
 
+    PowerErrors RegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
+    {
+        return PowerErrors::ERR_OK;
+    }
+    PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback)
+    {
+        return PowerErrors::ERR_OK;
+    }
+
     void RegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority) {}
     void UnRegisterShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) {}
     void RegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback, ShutdownPriority priority) {}

@@ -20,9 +20,26 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
+#include "shutdown/async_shutdown_callback_stub.h"
 #include "async_callback_info.h"
 namespace OHOS {
 namespace PowerMgr {
+class PowerShutdownCallback : public AsyncShutdownCallbackStub {
+public:
+    PowerShutdownCallback() = default;
+    virtual ~PowerShutdownCallback();
+    void CreateCallback(napi_env env, napi_value jsCallback);
+    void ReleaseCallback();
+    void OnAsyncShutdownOrReboot(bool isReboot) override;
+    void OnShutdownOrReboot();
+
+private:
+    bool isReboot_ { false };
+    napi_ref callbackRef_ { nullptr };
+    napi_env env_ { nullptr };
+    std::mutex callbackMutex_;
+};
+
 class PowerNapi {
 public:
     static napi_value Shutdown(napi_env env, napi_callback_info info);
@@ -37,6 +54,8 @@ public:
     static napi_value SetScreenOffTime(napi_env env, napi_callback_info info);
     static napi_value RefreshActivity(napi_env env, napi_callback_info info);
     static napi_value SetPowerKeyFilteringStrategy(napi_env env, napi_callback_info info);
+    static napi_value RegisterShutdownCallback(napi_env env, napi_callback_info info);
+    static napi_value UnRegisterShutdownCallback(napi_env env, napi_callback_info info);
 
 private:
     static napi_value RebootOrShutdown(napi_env env, napi_callback_info info, bool isReboot);

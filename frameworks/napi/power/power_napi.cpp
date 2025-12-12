@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <uv.h>
 #include "app_manager_utils.h"
 
 #define SET_REBOOT _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
@@ -39,11 +40,98 @@ constexpr uint32_t SET_SCREEN_OFFTIME_ARGC = 1;
 constexpr uint32_t HIBERNATE_ARGC = 1;
 constexpr uint32_t REFRESH_ACTIVITY_ARGC = 1;
 constexpr uint32_t POWERRKEY_FILTERING_STRATEGY_ARGC = 1;
+constexpr uint32_t SHUTDOWN_CALLBACK_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
+thread_local sptr<PowerShutdownCallback> g_powerShutdownCallback = new (std::nothrow) PowerShutdownCallback();
 } // namespace
+
+PowerShutdownCallback::~PowerShutdownCallback()
+{
+    ReleaseCallback();
+}
+
+void PowerShutdownCallback::ReleaseCallback()
+{
+    std::lock_guard lock(callbackMutex_);
+    if (callbackRef_ != nullptr) {
+        napi_delete_reference(env_, callbackRef_);
+    }
+    callbackRef_ = nullptr;
+    env_ = nullptr;
+}
+
+void PowerShutdownCallback::CreateCallback(napi_env env, napi_value jsCallback)
+{
+    std::lock_guard lock(callbackMutex_);
+    if (napi_ok != napi_create_reference(env, jsCallback, SHUTDOWN_CALLBACK_ARGC, &callbackRef_)) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "Failed to create a JS callback reference");
+        callbackRef_ = nullptr;
+    }
+    env_ = env;
+}
+
+void PowerShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
+{
+    std::lock_guard lock(callbackMutex_);
+    isReboot_ = isReboot;
+    RETURN_IF(env_ == nullptr);
+    uv_work_t* work = new (std::nothrow) uv_work_t;
+    RETURN_IF(work == nullptr);
+    work->data = reinterpret_cast<void*>(this);
+    auto uvcallback = [work]() mutable {
+        PowerShutdownCallback* callback = reinterpret_cast<PowerShutdownCallback*>(work->data);
+        if (callback != nullptr) {
+            callback->OnShutdownOrReboot();
+        }
+        delete work;
+        work = nullptr;
+    };
+    if (napi_send_event(env_, uvcallback, napi_eprio_low, __func__) != napi_status::napi_ok) {
+        delete work;
+        work = nullptr;
+        POWER_HILOGW(FEATURE_SHUTDOWN, "uv_queue_work is failed");
+    }
+}
+
+void PowerShutdownCallback::OnShutdownOrReboot()
+{
+    POWER_HILOGI(FEATURE_SHUTDOWN, "OnShutdownOrReboot, isReboot: %{public}d", static_cast<int32_t>(isReboot_));
+    std::lock_guard lock(callbackMutex_);
+    RETURN_IF_WITH_LOG(callbackRef_ == nullptr || env_ == nullptr, "js callback ref or env is nullptr");
+    
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
+    if (scope == nullptr) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "scope is nullptr");
+        return;
+    }
+
+    napi_value isRebootValue = nullptr;
+    if (napi_ok != napi_get_boolean(env_, isReboot_, &isRebootValue)) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "napi_get_boolean callback failed");
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
+
+    napi_value callback = nullptr;
+    napi_status status = napi_get_reference_value(env_, callbackRef_, &callback);
+    if (status != napi_ok) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "napi_get_reference_value callback failed. status = %{public}d", status);
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
+
+    napi_value callResult = nullptr;
+    status = napi_call_function(env_, nullptr, callback, SHUTDOWN_CALLBACK_ARGC, &isRebootValue, &callResult);
+    if (status != napi_ok) {
+        POWER_HILOGW(FEATURE_SHUTDOWN, "napi_call_function callback failed, status = %{public}d", status);
+    }
+    napi_close_handle_scope(env_, scope);
+}
+
 napi_value PowerNapi::Shutdown(napi_env env, napi_callback_info info)
 {
     return RebootOrShutdown(env, info, false);
@@ -414,6 +502,87 @@ napi_value PowerNapi::SetPowerKeyFilteringStrategy(napi_env env, napi_callback_i
         return error.ThrowError(env, code);
     }
     return nullptr;
+}
+
+napi_value PowerNapi::RegisterShutdownCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = SHUTDOWN_CALLBACK_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors errors;
+    if (argc != SHUTDOWN_CALLBACK_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_function)) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "RegisterShutdownCallback ERR_PARAM_INVALID");
+        return errors.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    napi_value result;
+    napi_get_undefined(env, &result);
+
+    if (g_powerShutdownCallback == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "g_powerShutdownCallback null");
+        return nullptr;
+    }
+    g_powerShutdownCallback->ReleaseCallback();
+    g_powerShutdownCallback->CreateCallback(env, argv[INDEX_0]);
+    PowerErrors code = g_powerMgrClient.RegisterAsyncShutdownCallback(g_powerShutdownCallback,
+        ShutdownPriority::DEFAULT);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "RegisterShutdownCallback failed. code:%{public}d", static_cast<int32_t>(code));
+        return errors.ThrowError(env, code);
+    }
+
+    return result;
+}
+
+napi_value PowerNapi::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = SHUTDOWN_CALLBACK_ARGC;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    if (g_powerShutdownCallback == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "g_powerShutdownCallback null");
+        return nullptr;
+    }
+    NapiErrors errors;
+    g_powerShutdownCallback->ReleaseCallback();
+    PowerErrors code = g_powerMgrClient.UnRegisterAsyncShutdownCallback(g_powerShutdownCallback);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_SHUTDOWN,
+            "UnRegisterShutdownCallback failed. code:%{public}d", static_cast<int32_t>(code));
+        return errors.ThrowError(env, code);
+    }
+
+    RETURN_IF_WITH_RET(argc == INDEX_0, nullptr);
+    if (argc == SHUTDOWN_CALLBACK_ARGC && NapiUtils::CheckValueType(env, argv[INDEX_0], napi_undefined)) {
+        POWER_HILOGI(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback end");
+        return nullptr;
+    }
+    if (argc != SHUTDOWN_CALLBACK_ARGC || !NapiUtils::CheckValueType(env, argv[INDEX_0], napi_function)) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback ERR_PARAM_INVALID");
+        return errors.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    napi_value handler = nullptr;
+    napi_ref handlerRef = nullptr;
+    napi_create_reference(env, argv[INDEX_0], SHUTDOWN_CALLBACK_ARGC, &handlerRef);
+    napi_get_reference_value(env, handlerRef, &handler);
+    napi_delete_reference(env, handlerRef);
+
+    napi_value result = nullptr;
+    if (handler == nullptr) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Handler is nullptr");
+        return result;
+    }
+
+    napi_get_undefined(env, &result);
+    napi_status status = napi_call_function(env, nullptr, handler, INDEX_0, nullptr, &result);
+    if (status != napi_ok) {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "status=%{public}d", status);
+        return result;
+    }
+    return result;
 }
 } // namespace PowerMgr
 } // namespace OHOS

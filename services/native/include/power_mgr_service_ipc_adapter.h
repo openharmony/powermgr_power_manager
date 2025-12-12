@@ -111,6 +111,11 @@ public:
         int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError) override;
     virtual int32_t SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError) override;
     virtual int32_t GetShutdownReasonIpc(std::string& reason, int32_t& powerError) override;
+    virtual int32_t RegisterAsyncShutdownCallbackIpc(
+        const sptr<IAsyncShutdownCallback>& callback, int32_t priorityValue, int32_t& powerError) override;
+    virtual int32_t UnRegisterAsyncShutdownCallbackIpc(
+        const sptr<IAsyncShutdownCallback>& callback, int32_t& powerError) override;
+
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason, bool force = false) = 0;
     virtual PowerErrors ForceRebootDevice(const std::string& reason) = 0;
@@ -192,6 +197,10 @@ public:
     
     virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
     virtual PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
+
+    virtual PowerErrors RegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback,
+        ShutdownPriority priority) = 0;
+    virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

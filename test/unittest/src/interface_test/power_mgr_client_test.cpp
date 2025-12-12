@@ -35,6 +35,7 @@
 #include "takeover_suspend_callback_proxy.h"
 #include "takeover_suspend_callback_stub.h"
 #include "async_ulsr_callback_stub.h"
+#include "shutdown/async_shutdown_callback_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1824,6 +1825,43 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient061, TestSize.Level2)
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "STRATEGY_MAX should return error";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient061 end!");
+}
+
+class TestAsyncShutdownCallback : public AsyncShutdownCallbackStub {
+public:
+    TestAsyncShutdownCallback() = default;
+    virtual ~TestAsyncShutdownCallback() = default;
+
+    void OnAsyncShutdownOrReboot(bool isReboot) override
+    {
+        POWER_HILOGI(LABEL_TEST, "TestAsyncShutdownCallback OnAsyncShutdownOrReboot");
+    }
+};
+
+/**
+ * @tc.name: PowerMgrClient062
+ * @tc.desc: test RegisterAsyncShutdownCallback && UnRegisterAsyncShutdownCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient062, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient062 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    PowerErrors ret;
+
+    sptr<IAsyncShutdownCallback> callback0 = nullptr;
+    ret = powerMgrClinet.RegisterAsyncShutdownCallback(callback0, ShutdownPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+
+    ret = powerMgrClinet.UnRegisterAsyncShutdownCallback(callback0);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+
+    sptr<IAsyncShutdownCallback> callback1 = new TestAsyncShutdownCallback();
+    ret = powerMgrClinet.RegisterAsyncShutdownCallback(callback1, ShutdownPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    ret = powerMgrClinet.UnRegisterAsyncShutdownCallback(callback1);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient062 function end!");
 }
 
 } // namespace
