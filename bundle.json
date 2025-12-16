@@ -50,7 +50,8 @@
             "power_manager_feature_surport_takeover_suspend",
             "power_manager_feature_enable_lid_check",
             "power_manager_feature_lid_fold",
-            "power_manager_feature_enable_performance_mode"
+            "power_manager_feature_enable_performance_mode",
+            "power_manager_feature_runninglock_background_user_idle_permissive_permission_mode"
         ],
         "adapted_system_type": [
             "standard"

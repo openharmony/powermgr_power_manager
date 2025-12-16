@@ -126,13 +126,13 @@ namespace {
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest001, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest001 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->HandleProximityAwayEvent();
     EXPECT_EQ(g_pmsTest, nullptr);
 
     SetInstanceReal();
     g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->HandleProximityAwayEvent();
     EXPECT_NE(g_pmsTest, nullptr);
 
@@ -151,13 +151,13 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest001, TestSize.Lev
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest002, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest002 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->HandleProximityCloseEvent();
     EXPECT_EQ(g_pmsTest, nullptr);
 
     SetInstanceReal();
     g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->HandleProximityCloseEvent();
     EXPECT_NE(g_pmsTest, nullptr);
     EXPECT_EQ(g_pmsTest->powerStateMachine_, nullptr);
@@ -177,11 +177,11 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest002, TestSize.Lev
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest003, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest003 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     bool ret = lockMgr->InitProximityController();
     EXPECT_TRUE(lockMgr->proximityController_ != nullptr);
     
-    lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     g_controller = std::make_shared<RunningLockMgr::ProximityController>();
     ret = lockMgr->InitProximityController();
     EXPECT_TRUE(lockMgr->proximityController_ != nullptr);
@@ -200,7 +200,7 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest003, TestSize.Lev
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest004, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest004 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->InitProximityController();
     lockMgr->proximityController_->SetEnabled(false);
     lockMgr->proximityController_->OnAway();
@@ -240,7 +240,7 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest004, TestSize.Lev
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest005, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest005 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->InitProximityController();
     lockMgr->proximityController_->SetEnabled(false);
     lockMgr->proximityController_->OnClose();
@@ -300,7 +300,7 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest006, TestSize.Lev
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest007, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest007 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->InitLocksTypeProximity();
     RunningLockParam lockParam;
     auto iterator = lockMgr->lockCounters_.find(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
@@ -327,7 +327,7 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest008, TestSize.Lev
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest008 function start!");
     g_controller = std::make_shared<RunningLockMgr::ProximityController>();
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     lockMgr->InitLocksTypeProximity();
     ASSERT_TRUE(g_action != nullptr) << "g_action == nullptr";
 
@@ -375,7 +375,7 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest009, TestSize.Lev
 HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest010, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest010 function start!");
-    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr);
+    std::shared_ptr<RunningLockMgr> lockMgr = std::make_shared<RunningLockMgr>(nullptr, nullptr);
     bool ret = lockMgr->IsVoiceAppForeground();
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest010 function end!");
