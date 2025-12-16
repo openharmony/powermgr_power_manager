@@ -46,6 +46,7 @@ declare_args() {
   power_manager_feature_enable_lid_check = false
   power_manager_feature_lid_fold = false
   power_manager_feature_enable_performance_mode = false
+  power_manager_feature_runninglock_background_user_idle_permissive_permission_mode = false
 }
 
 defines = []
@@ -68,6 +69,10 @@ if (power_manager_feature_proximity_controller_override) {
 
 if (power_manager_feature_enable_lid_check) {
   defines += [ "POWER_MANAGER_ENABLE_LID_CHECK" ]
+}
+
+if (power_manager_feature_runninglock_background_user_idle_permissive_permission_mode) {
+  defines += [ "POWER_MANAGER_RUNNINGLOCK_BACKGROUND_USER_IDLE_PERMISSION_PERMISSIVE_MODE" ]
 }
 
 if (!defined(global_parts_info) ||

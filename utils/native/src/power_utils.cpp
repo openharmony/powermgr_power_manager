@@ -197,6 +197,8 @@ const std::string PowerUtils::GetRunningLockTypeString(RunningLockType type)
             return "BACKGROUND_NAVIGATION";
         case RunningLockType::RUNNINGLOCK_BACKGROUND_TASK:
             return "BACKGROUND_TASK";
+        case RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE:
+            return "BACKGROUND_USER_IDLE";
         case RunningLockType::RUNNINGLOCK_BUTT:
             return "BUTT";
         default:

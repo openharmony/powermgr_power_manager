@@ -160,7 +160,7 @@ bool PowerMgrService::Init()
         ffrtTimer_ = std::make_shared<FFRTTimer>("power_manager_ffrt_queue");
     }
     if (!runningLockMgr_) {
-        runningLockMgr_ = std::make_shared<RunningLockMgr>(pms);
+        runningLockMgr_ = std::make_shared<RunningLockMgr>(pms, ffrtTimer_);
     }
     if (!runningLockMgr_->Init()) {
         POWER_HILOGE(COMP_SVC, "Running lock init fail");
@@ -1518,23 +1518,36 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, c
 
 bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 {
+    static std::map<RunningLockType, std::set<Permission::Level>> typePermissionMap {
+        {RunningLockType::RUNNINGLOCK_SCREEN, {Permission::Level::SYSTEM_HAP, Permission::Level::NATIVE_PROCESS}},
+        {RunningLockType::RUNNINGLOCK_BACKGROUND, {
+            Permission::Level::NORMAL_HAP, Permission::Level::SYSTEM_HAP, Permission::Level::NATIVE_PROCESS}},
+        {RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, {
+            Permission::Level::NORMAL_HAP, Permission::Level::SYSTEM_HAP, Permission::Level::NATIVE_PROCESS}},
+#ifdef POWER_MANAGER_RUNNINGLOCK_BACKGROUND_USER_IDLE_PERMISSION_PERMISSIVE_MODE
+        {RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE, {
+            Permission::Level::NORMAL_HAP, Permission::Level::SYSTEM_HAP, Permission::Level::NATIVE_PROCESS}},
+#else
+        {RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE, {
+            Permission::Level::SYSTEM_HAP, Permission::Level::NATIVE_PROCESS}},
+#endif
+         {RunningLockType::RUNNINGLOCK_COORDINATION, {Permission::Level::NATIVE_PROCESS}},
+         {RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE, {Permission::Level::NATIVE_PROCESS}},
+         {RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION, {Permission::Level::NATIVE_PROCESS}},
+         {RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO, {Permission::Level::NATIVE_PROCESS}},
+         {RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT, {Permission::Level::NATIVE_PROCESS}},
+         {RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION, {Permission::Level::NATIVE_PROCESS}},
+         {RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, {Permission::Level::NATIVE_PROCESS}},
+    };
+    Permission::Level level = Permission::Level::NORMAL_HAP;
     if (Permission::IsHap()) {
         if (Permission::IsSystem()) {
-            return type <= RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+            level = Permission::Level::SYSTEM_HAP;
         }
-        return type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
-            type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+    } else {
+        level = Permission::Level::NATIVE_PROCESS;
     }
-    return type == RunningLockType::RUNNINGLOCK_SCREEN ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
-        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
-        type == RunningLockType::RUNNINGLOCK_COORDINATION ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION ||
-        type == RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+    return typePermissionMap.count(type) && typePermissionMap[type].count(level);
 }
 
 bool PowerMgrService::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
@@ -2542,6 +2555,7 @@ void PowerMgrService::SubscribeCommonEvent()
     if (!result) {
         POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT failed");
     }
+    runningLockMgr_->SubscribeCommonEvent();
 }
 
 void PowerMgrService::UnregisterAllSettingObserver()

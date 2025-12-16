@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace PowerMgr {
+std::mutex AsyncCallbackInfo::AsyncData::mutex_;
+
 void AsyncCallbackInfo::CallFunction(napi_env& env, napi_value results)
 {
     napi_value callback = nullptr;
@@ -77,10 +79,25 @@ void AsyncCallbackInfo::AsyncData::SetName(napi_env& env, napi_value& name)
     name_ = NapiUtils::GetStringFromNapi(env, name);
 }
 
+void AsyncCallbackInfo::AsyncData::ErrorReduce(RunningLockType type, PowerErrors& error)
+{
+    if (type == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE && error == PowerErrors::ERR_PARAM_INVALID) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "Type not support, silent error");
+        error = PowerErrors::ERR_OK;
+        if (runningLock_ == nullptr) {
+            // for ArkTs object but can not call native funcation like Lock/UnLock due to no proxy.
+            runningLock_ = std::make_shared<RunningLock>(nullptr, "InvalidLock", type);
+        }
+    }
+}
+
 PowerErrors AsyncCallbackInfo::AsyncData::CreateRunningLock()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     runningLock_ = PowerMgrClient::GetInstance().CreateRunningLock(name_, type_);
-    return PowerMgrClient::GetInstance().GetError();
+    PowerErrors error = PowerMgrClient::GetInstance().GetError();
+    ErrorReduce(type_, error);
+    return error;
 }
 
 napi_value AsyncCallbackInfo::AsyncData::CreateInstanceForRunningLock(napi_env& env)

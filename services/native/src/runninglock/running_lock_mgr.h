@@ -20,6 +20,7 @@
 #include <map>
 
 #include <iremote_object.h>
+#include <common_event_subscriber.h>
 
 #include "actions/irunning_lock_action.h"
 #include "running_lock_inner.h"
@@ -30,6 +31,7 @@
 #ifdef HAS_SENSORS_SENSOR_PART
 #include "proximity_controller_base.h"
 #endif
+#include "ffrt_utils.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -37,9 +39,10 @@ class PowerMgrService;
 class PowerStateMachine;
 using RunningLockMap = std::map<const sptr<IRemoteObject>, std::shared_ptr<RunningLockInner>>;
 
-class RunningLockMgr {
+class RunningLockMgr : public std::enable_shared_from_this<RunningLockMgr> {
 public:
-    explicit RunningLockMgr(const wptr<PowerMgrService>& pms) : pms_(pms) {}
+    RunningLockMgr(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
+        : pms_(pms), ffrtTimer_(ffrtTimer) {}
     ~RunningLockMgr();
 
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,
@@ -79,12 +82,19 @@ public:
     void DumpInfo(std::string& result);
     void EnableMock(IRunningLockAction* mockAction);
     bool IsExistAudioStream(pid_t uid);
+    bool ForceSleepReleaseLock();
+    void SubscribeCommonEvent();
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    void HandleEnterForceSleep();
+    void HandleExitForceSleep();
+#endif
 private:
 
     void AsyncWakeup();
     void InitLocksTypeScreen();
     void InitLocksTypeBackground();
     void InitLocksTypeCoordination();
+    void InitLocksTypeBackgroundUserIdle();
 #ifdef HAS_SENSORS_SENSOR_PART
     void InitLocksTypeProximity();
     bool InitProximityController();
@@ -142,6 +152,9 @@ private:
     void PreprocessBeforeAwake();
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
+    int32_t ForceUnLockByTypes(const std::vector<RunningLockType>& types);
+    std::vector<std::pair<sptr<IRemoteObject>, std::string>> GetEnabledRunningLocksByType(RunningLockType type);
+    bool ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remoteObj, const std::string& name);
 
     const wptr<PowerMgrService> pms_;
     std::mutex mutex_;
@@ -153,7 +166,22 @@ private:
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;
     std::shared_ptr<IRunningLockAction> runningLockAction_;
     std::map<std::string, RunningLockInfo> unSceneLockLists_;
+    std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
+    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_ {nullptr};
 };
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+class RunningLockCommonEventSubscriber : public EventFwk::CommonEventSubscriber {
+public:
+    RunningLockCommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
+        const std::weak_ptr<RunningLockMgr>& runningLockMgr)
+        : EventFwk::CommonEventSubscriber(subscribeInfo), runningLockMgr_(runningLockMgr) {}
+    virtual ~RunningLockCommonEventSubscriber() = default;
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
+private:
+    std::weak_ptr<RunningLockMgr> runningLockMgr_;
+};
+#endif
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_RUNNING_LOCK_MGR_H
