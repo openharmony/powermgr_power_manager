@@ -36,7 +36,7 @@ public:
     void StartVibrator();
     void LoadDialogConfig();
     void ParseJsonConfig(std::string& contentStr);
-    void SetShutdownDialogForbid(bool state);
+    void SetShutdownDialogForbid(bool forbid);
     static std::string GetBundleName()
     {
         return bundleName_;
