@@ -72,6 +72,9 @@ bool RunningLockMgr::Init()
     if (runninglockProxy_ == nullptr) {
         runninglockProxy_ = std::make_shared<RunningLockProxy>();
     }
+    if (ffrtTimer_ == nullptr) {
+        ffrtTimer_ = std::make_shared<FFRTTimer>("running_lock_ffrt_queue");
+    }
     bool ret = InitLocks();
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Init success");
     return ret;
@@ -157,11 +160,21 @@ void RunningLockMgr::InitLocksTypeBackgroundUserIdle()
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE,
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE,
             [this](bool active, RunningLockParam lockInnerParam) -> int32_t {
-                lockInnerParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "Idle active=%{public}d", active);
+                struct RunningLockParam backgroundLockParam = lockInnerParam;
+                backgroundLockParam.name =
+                    PowerUtils::GetRunningLockTypeString(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
+                backgroundLockParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+                auto iterator = lockCounters_.find(backgroundLockParam.type);
+                if (iterator == lockCounters_.end()) {
+                    POWER_HILOGE(FEATURE_RUNNING_LOCK, "unsupported type, type=%{public}d", backgroundLockParam.type);
+                    return RUNNINGLOCK_NOT_SUPPORT;
+                }
+                std::shared_ptr<LockCounter> counter = iterator->second;
                 if (active) {
-                    return runningLockAction_->Lock(lockInnerParam);
+                    return counter->Increase(backgroundLockParam);
                 } else {
-                    return runningLockAction_->Unlock(lockInnerParam);
+                    return counter->Decrease(backgroundLockParam);
                 }
             }
         )
@@ -1100,9 +1113,10 @@ bool RunningLockMgr::ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remot
         }
     }
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", lockInner->GetPid(), "UID", lockInner->GetUid(),
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "PID", lockInner->GetPid(), "UID", lockInner->GetUid(),
         "TYPE", static_cast<int32_t>(lockInner->GetParam().type), "NAME", lockInner->GetParam().name,
-        "BUNDLENAME", lockInner->GetBundleName(), "MESSAGE", "FORCE_SLEEP_UNLOCK_RUNNINGLOCK");
+        "STATE", static_cast<int32_t>(lockInner->GetState()), "BUNDLENAME", lockInner->GetBundleName(),
+        "MESSAGE", "FORCE_SLEEP_UNLOCK_RUNNINGLOCK");
     return true;
 }
 

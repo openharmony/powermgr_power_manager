@@ -72,7 +72,7 @@ void PowerMgrServiceNativeTest::SetUp()
     EXPECT_TRUE(stateMachine->Init());
     UserActivityType userActivityType = UserActivityType::USER_ACTIVITY_TYPE_ACCESSIBILITY;
     stateMachine->RefreshActivityInner(PID, CALLTIMEMS, userActivityType, true);
-    auto runningLockMgr = std::make_shared<RunningLockMgr>(g_pmsTest, nullptr);
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(g_pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
     sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
     RunningLockParam runningLockParam {0,

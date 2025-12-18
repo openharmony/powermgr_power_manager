@@ -41,8 +41,7 @@ using RunningLockMap = std::map<const sptr<IRemoteObject>, std::shared_ptr<Runni
 
 class RunningLockMgr : public std::enable_shared_from_this<RunningLockMgr> {
 public:
-    RunningLockMgr(const wptr<PowerMgrService>& pms, const std::shared_ptr<FFRTTimer>& ffrtTimer)
-        : pms_(pms), ffrtTimer_(ffrtTimer) {}
+    explicit RunningLockMgr(const wptr<PowerMgrService>& pms): pms_(pms) {}
     ~RunningLockMgr();
 
     std::shared_ptr<RunningLockInner> CreateRunningLock(const sptr<IRemoteObject>& remoteObj,

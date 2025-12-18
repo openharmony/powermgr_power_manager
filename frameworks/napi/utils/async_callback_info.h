@@ -63,7 +63,6 @@ public:
         }
 
     private:
-        static std::mutex mutex_;
         // power
         PowerMode powerMode_ = PowerMode::NORMAL_MODE;
         // runninglock
@@ -71,7 +70,6 @@ public:
         std::string name_;
         std::shared_ptr<RunningLock> runningLock_ = nullptr;
         napi_ref napiRunningLockIns_ = nullptr;
-        void ErrorReduce(RunningLockType type, PowerErrors& error);
     };
     inline AsyncData& GetData()
     {
