@@ -20,7 +20,8 @@ static { loadLibraryWithPermissionCheck("power_manager_runninglock_taihe_native.
 
 enum RunningLockType: i32 {
     BACKGROUND = 1,
-    PROXIMITY_SCREEN_CONTROL = 2
+    PROXIMITY_SCREEN_CONTROL = 2,
+    BACKGROUND_USER_IDLE = 129
 }
 
 @class

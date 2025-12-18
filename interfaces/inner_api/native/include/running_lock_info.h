@@ -70,6 +70,13 @@ enum class RunningLockType : uint32_t {
      */
     RUNNINGLOCK_BACKGROUND_TASK =  RUNNINGLOCK_BACKGROUND | 1 << 6, // 0b01000001
     /**
+     * Background runningLock type, keeping user idle background task active.
+     * This type of running lock has differences in device support and cannot prevent force sleep.
+     * To use this type of lock, you need to listen for system common event(usual.event.ENTER_FORCE_SLEEP)
+     * and release lock after detecting an event.
+     */
+    RUNNINGLOCK_BACKGROUND_USER_IDLE = RUNNINGLOCK_BACKGROUND | 1 << 7, // 129
+    /**
      * RunningLock reserved type.
      */
     RUNNINGLOCK_BUTT

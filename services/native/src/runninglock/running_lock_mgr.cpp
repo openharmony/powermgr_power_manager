@@ -25,7 +25,6 @@
 #ifdef HAS_HIVIEWDFX_HITRACE_PART
 #include "hitrace_meter.h"
 #endif
-#include "ffrt_utils.h"
 #include "power_log.h"
 #include "power_mgr_factory.h"
 #include "power_mgr_service.h"
@@ -49,7 +48,13 @@ constexpr uint32_t BACKGROUND_INCALL_DELAY_TIME_MS = 800;
 #endif
 }
 
-RunningLockMgr::~RunningLockMgr() {}
+RunningLockMgr::~RunningLockMgr()
+{
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriberPtr_);
+    subscriberPtr_ = nullptr;
+#endif
+}
 
 bool RunningLockMgr::Init()
 {
@@ -67,6 +72,9 @@ bool RunningLockMgr::Init()
     if (runninglockProxy_ == nullptr) {
         runninglockProxy_ = std::make_shared<RunningLockProxy>();
     }
+    if (ffrtTimer_ == nullptr) {
+        ffrtTimer_ = std::make_shared<FFRTTimer>("running_lock_ffrt_queue");
+    }
     bool ret = InitLocks();
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "Init success");
     return ret;
@@ -76,6 +84,7 @@ bool RunningLockMgr::InitLocks()
 {
     InitLocksTypeScreen();
     InitLocksTypeBackground();
+    InitLocksTypeBackgroundUserIdle();
 #ifdef HAS_SENSORS_SENSOR_PART
     InitLocksTypeProximity();
 #endif
@@ -144,6 +153,32 @@ void RunningLockMgr::InitLocksTypeBackground()
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION, activate));
     lockCounters_.emplace(RunningLockType::RUNNINGLOCK_BACKGROUND_TASK,
         std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, activate));
+}
+
+void RunningLockMgr::InitLocksTypeBackgroundUserIdle()
+{
+    lockCounters_.emplace(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE,
+        std::make_shared<LockCounter>(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE,
+            [this](bool active, RunningLockParam lockInnerParam) -> int32_t {
+                POWER_HILOGI(FEATURE_RUNNING_LOCK, "Idle active=%{public}d", active);
+                struct RunningLockParam backgroundLockParam = lockInnerParam;
+                backgroundLockParam.name =
+                    PowerUtils::GetRunningLockTypeString(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
+                backgroundLockParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+                auto iterator = lockCounters_.find(backgroundLockParam.type);
+                if (iterator == lockCounters_.end()) {
+                    POWER_HILOGE(FEATURE_RUNNING_LOCK, "unsupported type, type=%{public}d", backgroundLockParam.type);
+                    return RUNNINGLOCK_NOT_SUPPORT;
+                }
+                std::shared_ptr<LockCounter> counter = iterator->second;
+                if (active) {
+                    return counter->Increase(backgroundLockParam);
+                } else {
+                    return counter->Decrease(backgroundLockParam);
+                }
+            }
+        )
+    );
 }
 
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -378,7 +413,8 @@ bool RunningLockMgr::NeedNotify(RunningLockType type)
 {
     return IsSceneRunningLockType(type) ||
         type == RunningLockType::RUNNINGLOCK_SCREEN ||
-        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+        type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+        type == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE;
 }
 
 void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
@@ -1065,5 +1101,129 @@ bool RunningLockMgr::IsProximityClose()
 }
 #endif
 
+bool RunningLockMgr::ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remoteObj, const std::string& name)
+{
+    auto lockInner = GetRunningLockInner(remoteObj);
+    if (lockInner == nullptr) {
+        POWER_HILOGD(FEATURE_RUNNING_LOCK, "UnInner=null");
+        lockInner = GetRunningLockInnerByName(name);
+        if (lockInner == nullptr) {
+            POWER_HILOGD(FEATURE_RUNNING_LOCK, "%{public}s:LockInner not existed", __func__);
+            return false;
+        }
+    }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "RUNNINGLOCK",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "PID", lockInner->GetPid(), "UID", lockInner->GetUid(),
+        "TYPE", static_cast<int32_t>(lockInner->GetParam().type), "NAME", lockInner->GetParam().name,
+        "STATE", static_cast<int32_t>(lockInner->GetState()), "BUNDLENAME", lockInner->GetBundleName(),
+        "MESSAGE", "FORCE_SLEEP_UNLOCK_RUNNINGLOCK");
+    return true;
+}
+
+std::vector<std::pair<sptr<IRemoteObject>, std::string>> RunningLockMgr::GetEnabledRunningLocksByType(
+    RunningLockType type)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    std::vector<std::pair<sptr<IRemoteObject>, std::string>> runningLocks;
+    for (const auto& iter : runningLocks_) {
+        if (iter.second == nullptr) {
+            continue;
+        }
+        if (iter.second->GetType() == type &&
+            iter.second->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
+            runningLocks.emplace_back(iter.first, iter.second->GetName());
+        }
+    }
+    return runningLocks;
+}
+
+int32_t RunningLockMgr::ForceUnLockByTypes(const std::vector<RunningLockType>& types)
+{
+    int32_t releaseCount = 0;
+    auto pms = pms_.promote();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Power service is nullptr");
+        return releaseCount;
+    }
+    for (RunningLockType type : types) {
+        auto runningLocks = GetEnabledRunningLocksByType(type);
+        for (const auto& runningLock : runningLocks) {
+            pms->UnLock(runningLock.first, runningLock.second);
+            ForceUnlockWriteHiSysEvent(runningLock.first, runningLock.second);
+            releaseCount++;
+        }
+    }
+    return releaseCount;
+}
+
+bool RunningLockMgr::ForceSleepReleaseLock()
+{
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: enter", __func__);
+    if (GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE) == 0) {
+        return true;
+    }
+    POWER_HILOGW(FEATURE_RUNNING_LOCK, "%{public}s: begin", __func__);
+    int32_t releaseCount = ForceUnLockByTypes({RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE});
+    POWER_HILOGW(FEATURE_RUNNING_LOCK, "%{public}s: end, count:%{public}d", __func__, releaseCount);
+    return false;
+}
+
+void RunningLockMgr::SubscribeCommonEvent()
+{
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    using namespace OHOS::EventFwk;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_ENTER_FORCE_SLEEP);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_EXIT_FORCE_SLEEP);
+
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::COMMON);
+    if (!subscriberPtr_) {
+        subscriberPtr_ = std::make_shared<RunningLockCommonEventSubscriber>(subscribeInfo, shared_from_this());
+    }
+    bool result = CommonEventManager::SubscribeCommonEvent(subscriberPtr_);
+    if (!result) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Subscribe COMMON_EVENT failed");
+    }
+#endif
+}
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+void RunningLockCommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
+{
+    std::string action = data.GetWant().GetAction();
+    std::shared_ptr<RunningLockMgr> runningLockMgr = runningLockMgr_.lock();
+    if (runningLockMgr == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLockMgr is nullptr, return");
+        return;
+    }
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "received action: %{public}s", action.c_str());
+    if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_ENTER_FORCE_SLEEP) {
+        runningLockMgr->HandleEnterForceSleep();
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_EXIT_FORCE_SLEEP) {
+        runningLockMgr->HandleExitForceSleep();
+    }
+}
+
+void RunningLockMgr::HandleEnterForceSleep()
+{
+    if (ffrtTimer_ == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to set delay timer, the timer pointer is null");
+        return;
+    }
+    constexpr int32_t CHECK_DELAY_MS = 3000;
+    FFRTTask task = [this] { this->ForceSleepReleaseLock(); };
+    ffrtTimer_->SetTimer(FFRTTimerId::TIMER_ID_FORCE_RELEASE_LOCK, task, CHECK_DELAY_MS);
+}
+
+void RunningLockMgr::HandleExitForceSleep()
+{
+    if (ffrtTimer_ == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to cancel delay timer, the timer pointer is null");
+        return;
+    }
+    ffrtTimer_->CancelTimer(FFRTTimerId::TIMER_ID_FORCE_RELEASE_LOCK);
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS

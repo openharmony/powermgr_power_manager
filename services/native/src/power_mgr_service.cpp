@@ -1516,14 +1516,25 @@ bool PowerMgrService::ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, c
     return result;
 }
 
+bool PowerMgrService::IsDeviceSupportedTypeUserIdle()
+{
+#ifdef POWER_MANAGER_RUNNINGLOCK_BACKGROUND_USER_IDLE_PERMISSION_PERMISSIVE_MODE
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool PowerMgrService::IsRunningLockTypeSupported(RunningLockType type)
 {
     if (Permission::IsHap()) {
         if (Permission::IsSystem()) {
-            return type <= RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+            return type <= RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+                type == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE;
         }
         return type == RunningLockType::RUNNINGLOCK_BACKGROUND ||
-            type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+            type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+            (type == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE && IsDeviceSupportedTypeUserIdle());
     }
     return type == RunningLockType::RUNNINGLOCK_SCREEN ||
         type == RunningLockType::RUNNINGLOCK_BACKGROUND || // this will be instead by BACKGROUND_XXX types.
@@ -2542,6 +2553,7 @@ void PowerMgrService::SubscribeCommonEvent()
     if (!result) {
         POWER_HILOGE(COMP_SVC, "Subscribe COMMON_EVENT failed");
     }
+    runningLockMgr_->SubscribeCommonEvent();
 }
 
 void PowerMgrService::UnregisterAllSettingObserver()

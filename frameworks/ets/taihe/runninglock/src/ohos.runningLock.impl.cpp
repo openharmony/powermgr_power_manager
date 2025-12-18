@@ -91,6 +91,11 @@ ohos::runningLock::RunningLock CreateSync(string_view name, ohos::runningLock::R
 {
     std::shared_ptr<OHOS::PowerMgr::RunningLock> runLock = nullptr;
     OHOS::PowerMgr::RunningLockType tp = static_cast<OHOS::PowerMgr::RunningLockType>(type.get_value());
+    if (tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE &&
+        !PowerMgrClient::GetInstance().IsRunningLockTypeSupported(tp)) {
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Type not support, silent error");
+        return make_holder<RunningLockImpl, ohos::runningLock::RunningLock>(runLock);
+    }
     runLock = PowerMgrClient::GetInstance().CreateRunningLock(std::string(name), tp);
     PowerErrors code = PowerMgrClient::GetInstance().GetError();
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
@@ -103,7 +108,9 @@ bool IsSupported(ohos::runningLock::RunningLockType type)
 {
     OHOS::PowerMgr::RunningLockType tp = static_cast<OHOS::PowerMgr::RunningLockType>(type.get_value());
     return tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND ||
-           tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL;
+           tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL ||
+           (tp == OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE &&
+            PowerMgrClient::GetInstance().IsRunningLockTypeSupported(tp));
 }
 }  // namespace
 

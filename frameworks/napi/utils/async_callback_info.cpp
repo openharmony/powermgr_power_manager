@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+
 void AsyncCallbackInfo::CallFunction(napi_env& env, napi_value results)
 {
     napi_value callback = nullptr;
@@ -79,8 +80,21 @@ void AsyncCallbackInfo::AsyncData::SetName(napi_env& env, napi_value& name)
 
 PowerErrors AsyncCallbackInfo::AsyncData::CreateRunningLock()
 {
+    if (type_ == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE &&
+        !PowerMgrClient::GetInstance().IsRunningLockTypeSupported(type_)) {
+        /**
+         * for ArkTs object but can not call native funcation like Lock/UnLock due to no proxy.
+         * return ERR_OK should be consistent with the object being created successfully.
+         * otherwise, the application cannot detect the empty object(as the ArkTs interface annotation that
+         * this object is not-null when return ERR_OK), which may cause a crach during object invocation.
+         */
+        runningLock_ = std::make_shared<RunningLock>(nullptr, "InvalidLock", type_);
+        POWER_HILOGW(FEATURE_RUNNING_LOCK, "Type not support, silent error");
+        return PowerErrors::ERR_OK;
+    }
     runningLock_ = PowerMgrClient::GetInstance().CreateRunningLock(name_, type_);
-    return PowerMgrClient::GetInstance().GetError();
+    PowerErrors error = PowerMgrClient::GetInstance().GetError();
+    return error;
 }
 
 napi_value AsyncCallbackInfo::AsyncData::CreateInstanceForRunningLock(napi_env& env)

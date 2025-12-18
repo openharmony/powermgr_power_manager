@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "power_mgr_client.h"
 #include "napi_errors.h"
 #include "napi_utils.h"
 #include "power_common.h"
@@ -77,7 +78,9 @@ napi_value RunningLockNapi::IsSupported(napi_env env, napi_callback_info info)
     RunningLockType type = static_cast<RunningLockType>(numType);
 
     bool isSupported = (type == RunningLockType::RUNNINGLOCK_BACKGROUND) ||
-        (type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
+        (type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) ||
+        (type == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE &&
+            PowerMgrClient::GetInstance().IsRunningLockTypeSupported(type));
 
     napi_value result;
     napi_get_boolean(env, isSupported, &result);
