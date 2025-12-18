@@ -652,7 +652,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level1)
 
     runningLockMgr->UnLock(remoteObj);
 
-
     stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION);
 
     runningLockMgr->Lock(remoteObj);
@@ -660,7 +659,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative021, TestSize.Level1)
     // after the activation of screen-on lock the screen should no longer be in DIM state
 
     runningLockMgr->UnLock(remoteObj);
-    
+
     pmsTest->RestoreScreenOffTime();
     POWER_HILOGI(LABEL_TEST, "RunningLockNative021 function end!");
 }
@@ -715,7 +714,6 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level1)
 
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     EXPECT_TRUE(runningLockMgr->Init());
-    IRunningLockAction *runLockAction = new RunningLockAction();
 
     RunningLockParam runningLockParam0 {0,
         "runninglockNativeTest023_1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, PID, UID};
@@ -734,19 +732,71 @@ HWTEST_F (RunningLockNativeTest, RunningLockNative023, TestSize.Level1)
     EXPECT_TRUE(runningLockMgr->NeedNotify(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL));
     runningLockMgr->UnLock(token1);
     EXPECT_FALSE(runningLockMgr->ReleaseLock(token1));
-    
+
     POWER_HILOGI(LABEL_TEST, "RunningLockNative023 function end!");
 }
 
 /**
  * @tc.name: RunningLockNative024
+ * @tc.desc: test IsExistAudioStream GetRunningLockMgr is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F (RunningLockNativeTest, RunningLockNative024, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    bool result = runningLockMgr->runninglockProxy_->IsExistAudioStream(UID);
+    EXPECT_FALSE(result);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative025
+ * @tc.desc: test IsExistAudioStream
+ * @tc.type: FUNC
+ */
+HWTEST_F (RunningLockNativeTest, RunningLockNative025, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative025 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IRemoteObject> token0 = new RunningLockTokenStub();
+    sptr<IRemoteObject> token1 = new RunningLockTokenStub();
+    sptr<IRemoteObject> token2 = new RunningLockTokenStub();
+    RunningLockParam runningLockParam0 {
+        0, "runningLockNativeTest025_1", "", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO, TIMEOUTMS, PID, UID};
+    RunningLockParam runningLockParam1 {
+        1, "runningLockNativeTest025_1", "", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT, TIMEOUTMS, PID, UID};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token0, runningLockParam0) != nullptr);
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token1, runningLockParam1) != nullptr);
+    runningLockMgr->runninglockProxy_->AddRunningLock(PID, UID, token2);
+    runningLockMgr->Lock(token0);
+    EXPECT_TRUE(runningLockMgr->NeedNotify(RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO));
+    bool result = runningLockMgr->runninglockProxy_->IsExistAudioStream(UID);
+    EXPECT_FALSE(result);
+    std::map<int32_t, std::string> wks{{UID, ""}};
+    runningLockMgr->runninglockProxy_->UpdateWorkSource(PID, UID, token0, wks);
+    result = runningLockMgr->runninglockProxy_->IsExistAudioStream(UID);
+    EXPECT_TRUE(result);
+    runningLockMgr->UnLock(token0);
+    EXPECT_FALSE(runningLockMgr->ReleaseLock(token0));
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative025 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative026
  * @tc.desc: test IsVoiceAppForeground
  * @tc.type: FUNC
  * @tc.require: issueI7MNRN
  */
-HWTEST_F(RunningLockNativeTest, RunningLockNative024, TestSize.Level1)
+HWTEST_F(RunningLockNativeTest, RunningLockNative026, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function start!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative026 function start!");
     auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
     auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
     std::string str = "app.bundlename1;app.bundlename2";
@@ -756,6 +806,122 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative024, TestSize.Level1)
     sptr<IRemoteObject> remoteObject = new RunningLockTokenStub();
     bool ret = runningLockMgr->IsVoiceAppForeground();
     EXPECT_TRUE(ret);
-    POWER_HILOGI(LABEL_TEST, "RunningLockNative024 function end!");
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative026 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative027
+ * @tc.desc: test ForceSleepReleaseLock
+ * @tc.type: FUNC
+ * @tc.require: issues/1585
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative027, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative027 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    sptr<IRemoteObject> remoteObjToken = new RunningLockTokenStub();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    RunningLockParam runningLockParam0 {0,
+        "RunningLockNative027_1", "", RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE, TIMEOUTMS, pid, uid};
+    RunningLockParam runningLockParam1 {0,
+        "RunningLockNative027_2", "", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, TIMEOUTMS, pid, uid};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam0) != nullptr);
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObjToken, runningLockParam1) != nullptr);
+    runningLockMgr->Lock(remoteObj);
+    runningLockMgr->Lock(remoteObjToken);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    if (runningLockMgr->subscriberPtr_ != nullptr) {
+        runningLockMgr->subscriberPtr_ =
+            std::make_shared<RunningLockCommonEventSubscriber>(subscribeInfo, runningLockMgr);
+    }
+    EventFwk::CommonEventData data {};
+    runningLockMgr->subscriberPtr_->OnReceiveEvent(data);
+    EXPECT_TRUE(runningLockMgr->IsUsed(remoteObj));
+    EventFwk::Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_ENTER_FORCE_SLEEP);
+    data.SetWant(want);
+    runningLockMgr->subscriberPtr_->OnReceiveEvent(data);
+    EXPECT_TRUE(runningLockMgr->ffrtTimer_->get_task_cnt() != 0);
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_EXIT_FORCE_SLEEP);
+    data.SetWant(want);
+    runningLockMgr->subscriberPtr_->OnReceiveEvent(data);
+    EXPECT_TRUE(runningLockMgr->IsUsed(remoteObj));
+#endif
+    runningLockMgr->ForceSleepReleaseLock();
+    EXPECT_FALSE(runningLockMgr->IsUsed(remoteObj));
+    EXPECT_TRUE(runningLockMgr->IsUsed(remoteObjToken));
+    runningLockMgr->UnLock(remoteObjToken);
+    EXPECT_TRUE(runningLockMgr->ForceSleepReleaseLock());
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative027 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative028
+ * @tc.desc: test GetEnabledRunningLocksByType
+ * @tc.type: FUNC
+ * @tc.require: issues/1585
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative028, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative028 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    RunningLockParam runningLockParam {0,
+        "RunningLockNative028_1", "", RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE, TIMEOUTMS, pid, uid};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
+    auto locks = runningLockMgr->GetEnabledRunningLocksByType(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
+    EXPECT_TRUE(locks.size() == 0);
+    runningLockMgr->Lock(remoteObj);
+    locks = runningLockMgr->GetEnabledRunningLocksByType(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
+    int32_t lockSize = static_cast<int32_t>(locks.size());
+    EXPECT_TRUE(lockSize != 0);
+    sptr<IRemoteObject> remoteObjTokenInvalid = new RunningLockTokenStub();
+    runningLockMgr->runningLocks_.emplace(remoteObjTokenInvalid, nullptr);
+    locks = runningLockMgr->GetEnabledRunningLocksByType(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
+    EXPECT_TRUE(lockSize == locks.size());
+    sptr<IRemoteObject> remoteObjTokenOne = new RunningLockTokenStub();
+    RunningLockParam runningLockParamOne {0,
+        "RunningLockNative028_2", "", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK, TIMEOUTMS, pid, uid};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObjTokenOne, runningLockParamOne) != nullptr);
+    runningLockMgr->Lock(remoteObjTokenOne);
+    locks = runningLockMgr->GetEnabledRunningLocksByType(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
+    EXPECT_TRUE(lockSize == locks.size());
+    runningLockMgr->UnLock(remoteObj);
+    runningLockMgr->UnLock(remoteObjTokenOne);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative028 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative029
+ * @tc.desc: test ForceUnlockWriteHiSysEvent
+ * @tc.type: FUNC
+ * @tc.require: issues/1585
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative029, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative029 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+    sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    RunningLockParam runningLockParam {0,
+        "RunningLockNative029", "", RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE, TIMEOUTMS, pid, uid};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(remoteObj, runningLockParam) != nullptr);
+    runningLockMgr->Lock(remoteObj);
+    EXPECT_FALSE(runningLockMgr->ForceUnlockWriteHiSysEvent(nullptr, ""));
+    EXPECT_TRUE(runningLockMgr->ForceUnlockWriteHiSysEvent(nullptr, "RunningLockNative029"));
+    EXPECT_TRUE(runningLockMgr->ForceUnlockWriteHiSysEvent(remoteObj, "RunningLockNative029"));
+    runningLockMgr->UnLock(remoteObj);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative029 function end!");
 }
 } // namespace

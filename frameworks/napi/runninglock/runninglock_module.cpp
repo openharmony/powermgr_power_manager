@@ -88,14 +88,19 @@ static napi_value RunningLockTypeConstructor(napi_env env, napi_callback_info in
 static napi_value CreateRunningLockType(napi_env env, napi_value exports)
 {
     napi_value background = nullptr;
-    napi_value proximityscreencontrol = nullptr;
+    napi_value proximityScreenControl = nullptr;
+    napi_value backgroundUserIdle = nullptr;
 
-    napi_create_int32(env, (int32_t)RunningLockType::RUNNINGLOCK_BACKGROUND, &background);
-    napi_create_int32(env, (int32_t)RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL, &proximityscreencontrol);
+    napi_create_int32(env, static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BACKGROUND), &background);
+    napi_create_int32(
+        env, static_cast<int32_t>(RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL), &proximityScreenControl);
+    napi_create_int32(
+        env, static_cast<int32_t>(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE), &backgroundUserIdle);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND", background),
-        DECLARE_NAPI_STATIC_PROPERTY("PROXIMITY_SCREEN_CONTROL", proximityscreencontrol),
+        DECLARE_NAPI_STATIC_PROPERTY("PROXIMITY_SCREEN_CONTROL", proximityScreenControl),
+        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_USER_IDLE", backgroundUserIdle),
     };
     napi_value result = nullptr;
     napi_define_class(env, "RunningLockType", NAPI_AUTO_LENGTH, RunningLockTypeConstructor, nullptr,
