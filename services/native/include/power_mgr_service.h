@@ -390,6 +390,7 @@ private:
 #endif
     void RegisterExternalCallback();
     void UnregisterExternalCallback();
+    bool IsDeviceSupportedTypeUserIdle();
 
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};

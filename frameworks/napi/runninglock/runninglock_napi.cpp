@@ -80,7 +80,7 @@ napi_value RunningLockNapi::IsSupported(napi_env env, napi_callback_info info)
     bool isSupported = (type == RunningLockType::RUNNINGLOCK_BACKGROUND) ||
         (type == RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) ||
         (type == RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE &&
-        nullptr != PowerMgrClient::GetInstance().CreateRunningLock("IsSupportedNapi", type));
+            PowerMgrClient::GetInstance().IsRunningLockTypeSupported(type));
 
     napi_value result;
     napi_get_boolean(env, isSupported, &result);
