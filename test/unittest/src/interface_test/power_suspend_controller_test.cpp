@@ -45,18 +45,18 @@ static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
 static constexpr int NEXT_WAIT_TIME_S = 1;
 
-static MockStateAction* g_shutdownState;
-static MockStateAction* g_stateAction;
-static MockPowerAction* g_powerAction;
-static MockLockAction* g_lockAction;
+::testing::NiceMock<MockStateAction>* g_shutdownState;
+::testing::NiceMock<MockStateAction>* g_stateAction;
+::testing::NiceMock<MockPowerAction>* g_powerAction;
+::testing::NiceMock<MockLockAction>* g_lockAction;
 
 static void ResetMockAction()
 {
     POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
-    g_stateAction = new MockStateAction();
-    g_shutdownState = new MockStateAction();
-    g_powerAction = new MockPowerAction();
-    g_lockAction = new MockLockAction();
+    g_stateAction = new ::testing::NiceMock<MockStateAction>();
+    g_shutdownState = new ::testing::NiceMock<MockStateAction>();
+    g_powerAction = new ::testing::NiceMock<MockPowerAction>();
+    g_lockAction = new ::testing::NiceMock<MockLockAction>();
     g_service->EnableMock(g_stateAction, g_shutdownState, g_powerAction, g_lockAction);
     POWER_HILOGI(LABEL_TEST, "ResetMockAction:End");
 }
