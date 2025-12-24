@@ -18,6 +18,8 @@
 @!sts_inject("""
 static { loadLibraryWithPermissionCheck("power_manager_taihe_native.z", "@ohos.power") }""")
 
+union MyUndefined { @undefined Undefined; }
+
 function Shutdown(reason: String): void;
 
 function Reboot(reason: String): void;
@@ -44,7 +46,7 @@ function RefreshActivity(reason: String): void;
 
 function RegisterShutdownCallback(shutdownCb: (isReboot: bool) => void): void;
 
-function UnRegisterShutdownCallback(callBack: Optional<() => void>): void;
+function UnregisterShutdownCallback(callBack: Optional<(arg: MyUndefined) => void>): void;
 
 enum DevicePowerMode : i32 {
   MODE_NORMAL = 600,
