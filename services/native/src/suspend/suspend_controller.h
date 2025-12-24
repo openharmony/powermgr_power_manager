@@ -103,6 +103,7 @@ public:
     bool GetWakeupReasonConfigMatchedFlag();
     void SetWakeupReasonConfigMatchedFlag(bool flag);
 #endif
+    int32_t GetPowerkeyReleaseIdCache();
 
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
