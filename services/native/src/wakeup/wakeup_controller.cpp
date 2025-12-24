@@ -56,7 +56,7 @@ constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t OTHER_SYSTEM_DEVICE_ID = 0xAAAAAAFE;
 constexpr int32_t RETRY_COUNT_TIMES = 4;
 constexpr int32_t RETRY_INTERVAL_MS = 100;
-int32_t g_powerkeyShortPressIdCache = -1;
+int32_t g_powerkeyShortPressIdCache = 3301; // SA_ID
 }
 std::mutex WakeupController::sourceUpdateMutex_;
 
@@ -909,6 +909,11 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
     }
 
     return false;
+}
+
+int32_t WakeupController::GetPowerkeyShortPressIdCache()
+{
+    return g_powerkeyShortPressIdCache;
 }
 
 /* WakeupMonitor Implement */
