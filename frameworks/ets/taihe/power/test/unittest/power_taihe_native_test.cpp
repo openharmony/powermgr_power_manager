@@ -396,15 +396,16 @@ HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_011, TestSize.Level1)
 {
     POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_011 start");
     struct MyCallbackImpl {
-        void operator()()
+        void operator()(MyUndefined const&)
         {
             g_cbFlag = true;
         }
     };
-    callback<void()> shutdownCb =
-        ::taihe::make_holder<MyCallbackImpl, ::taihe::callback<void()>>();
-    optional<callback<void()>> cb = optional<callback<void()>>{std::in_place, shutdownCb};
-    UnRegisterShutdownCallback(cb);
+    callback<void(MyUndefined const&)> shutdownCb =
+        ::taihe::make_holder<MyCallbackImpl, ::taihe::callback<void(MyUndefined const&)>>();
+    optional<callback<void(MyUndefined const&)>> cb =
+        optional<callback<void(MyUndefined const&)>>{std::in_place, shutdownCb};
+    UnregisterShutdownCallback(cb);
     EXPECT_TRUE(g_cbFlag);
     EXPECT_TRUE(g_pass);
     POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_011 end");
