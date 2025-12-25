@@ -232,7 +232,7 @@ void RegisterShutdownCallback(::taihe::callback_view<void(bool isReboot)> shutdo
     }
 }
 
-void UnRegisterShutdownCallback(::taihe::optional_view<::taihe::callback<void()>> callBack)
+void UnregisterShutdownCallback(::taihe::optional_view<::taihe::callback<void(MyUndefined const&)>> callBack)
 {
     POWER_HILOGI(FEATURE_SHUTDOWN, "ets UnRegisterShutdownCallback interface");
     if (g_powerShutdownCallback == nullptr) {
@@ -248,7 +248,7 @@ void UnRegisterShutdownCallback(::taihe::optional_view<::taihe::callback<void()>
     }
     if (callBack.has_value()) {
         POWER_HILOGI(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback callBack start");
-        callBack.value()();
+        callBack.value()(MyUndefined::make_Undefined());
     } else {
         POWER_HILOGI(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback callBack is null");
     }
@@ -269,5 +269,5 @@ TH_EXPORT_CPP_API_Hibernate(Hibernate);
 TH_EXPORT_CPP_API_SetScreenOffTime(SetScreenOffTime);
 TH_EXPORT_CPP_API_RefreshActivity(RefreshActivity);
 TH_EXPORT_CPP_API_RegisterShutdownCallback(RegisterShutdownCallback);
-TH_EXPORT_CPP_API_UnRegisterShutdownCallback(UnRegisterShutdownCallback);
+TH_EXPORT_CPP_API_UnregisterShutdownCallback(UnregisterShutdownCallback);
 // NOLINTEND
