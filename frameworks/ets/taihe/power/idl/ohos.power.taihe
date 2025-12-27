@@ -44,6 +44,8 @@ function SetScreenOffTime(timeout: i64): void;
 
 function RefreshActivity(reason: String): void;
 
+function SetPowerKeyFilteringStrategy(strategy: PowerKeyFilteringStrategy): void;
+
 function RegisterShutdownCallback(shutdownCb: (isReboot: bool) => void): void;
 
 function UnregisterShutdownCallback(callBack: Optional<(arg: MyUndefined) => void>): void;
@@ -54,4 +56,9 @@ enum DevicePowerMode : i32 {
   MODE_PERFORMANCE,
   MODE_EXTREME_POWER_SAVE,
   MODE_CUSTOM_POWER_SAVE = 650
+}
+
+enum PowerKeyFilteringStrategy : i32 {
+  DISABLE_LONG_PRESS_FILTERING = 0,
+  LONG_PRESS_FILTERING_ONCE = 1
 }

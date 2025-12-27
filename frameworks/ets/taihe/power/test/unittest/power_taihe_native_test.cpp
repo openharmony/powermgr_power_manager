@@ -116,6 +116,12 @@ PowerErrors PowerMgrClient::RefreshActivity(UserActivityType type, const std::st
     return g_error;
 }
 
+PowerErrors PowerMgrClient::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)
+{
+    g_pass = true;
+    return g_error;
+}
+
 PowerErrors PowerMgrClient::RegisterAsyncShutdownCallback(
     const sptr<IAsyncShutdownCallback>& callback, ShutdownPriority priority)
 {
@@ -409,6 +415,26 @@ HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_011, TestSize.Level1)
     EXPECT_TRUE(g_cbFlag);
     EXPECT_TRUE(g_pass);
     POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_011 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_012
+ * @tc.desc: test power taihe native
+ * @tc.type: FUNC
+ * @tc.require: issue#ICTIYR
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_012, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_012 start");
+    g_error = PowerErrors::ERR_OK;
+    SetPowerKeyFilteringStrategy(ohos::power::PowerKeyFilteringStrategy::key_t::DISABLE_LONG_PRESS_FILTERING);
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_OK));
+    EXPECT_TRUE(g_pass);
+
+    g_error = PowerErrors::ERR_SYSTEM_API_DENIED;
+    SetPowerKeyFilteringStrategy(ohos::power::PowerKeyFilteringStrategy::key_t::LONG_PRESS_FILTERING_ONCE);
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_SYSTEM_API_DENIED));
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_012 end");
 }
 } // namespace
 
