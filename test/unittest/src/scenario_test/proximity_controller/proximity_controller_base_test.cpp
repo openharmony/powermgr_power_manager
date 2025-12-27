@@ -1114,4 +1114,404 @@ HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest052, TestSize.L
     EXPECT_FALSE(proximityControllerBase->IsSupported());
     POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest052 function end!");
 }
+
+/**
+ * @tc.name: ProximityControllerBaseTest053
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest053, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest053 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_FUSION_PRESSURE}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest053 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest054
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest054, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest054 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_RPC}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest054 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest055
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest055, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest055 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_DROP_DETECTION}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest055 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest056
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest056, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest056 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_HEADPOSTURE}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest056 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest057
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest057, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest057 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_POSTURE}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest057 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest058
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest058, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest058 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_PROXIMITY1}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest058 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest059
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest059, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest059 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_HALL_EXT}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest059 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest060
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest060, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest060 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_AMBIENT_LIGHT1}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest060 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest061
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest061, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest061 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_SAR}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest061 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest062
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest062, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest062 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_COLOR}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("it is for test a long string", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest062 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest063
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest063, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest063 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_FUSION_PRESSURE}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest063", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest063 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest064
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest064, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest064 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_RPC}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest064", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest064 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest065
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest065, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest065 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_DROP_DETECTION}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest065", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest065 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest066
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest066, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest066 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_HEADPOSTURE}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest066", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest066 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest067
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest067, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest067 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_POSTURE}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest067", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest067 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest068
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest068, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest068 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_PROXIMITY1}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest068", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest068 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest069
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest069, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest069 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_HALL_EXT}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest069", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest069 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest070
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest070, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest070 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_AMBIENT_LIGHT1}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest070", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest070 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest071
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest071, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest071 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_SAR}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest071", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest071 function end!");
+}
+
+/**
+ * @tc.name: ProximityControllerBaseTest072
+ * @tc.desc: Test proximity controller base InitProximitySensorUser abnormal branch
+ * @tc.type: FUNC
+ * @tc.require: ICGV1M
+ */
+HWTEST_F(ProximityControllerBaseTest, ProximityControllerBaseTest072, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest072 function start!");
+    SensorInfo infos[] {{.sensorTypeId = SENSOR_TYPE_ID_COLOR}};
+    g_sensorInfo = infos;
+    g_count = 1;
+    std::shared_ptr<ProximityControllerBase> proximityControllerBase =
+        std::make_shared<ProximityControllerBase>("ProximityControllerBaseTest072", nullptr);
+    proximityControllerBase->Enable();
+    proximityControllerBase->InitProximitySensorUser();
+    EXPECT_FALSE(proximityControllerBase->IsSupported());
+    POWER_HILOGI(LABEL_TEST, "ProximityControllerBaseTest072 function end!");
+}
 } // namespace

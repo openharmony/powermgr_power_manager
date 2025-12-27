@@ -1566,15 +1566,407 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest038, TestSize.Level
 
 /**
  * @tc.name: PowerWakeupControllerTest039
- * @tc.desc: test OnInputEvent(keyEvent)
+ * @tc.desc: test RegisterMonitor(Normal)
  * @tc.type: FUNC
- * @tc.require: issueICXI8K
+ * @tc.require: issueI7COGR
  */
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest039, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest039 function start!");
     GTEST_LOG_(INFO) << "PowerWakeupControllerTest039: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest039: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest039 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest040
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest040, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest040 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest040: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_RUNNING_LOCK);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest040: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest040 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest041
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest041, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest041 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest041: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_TOUCH);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest041: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest041 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest042
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest042, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest042 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest042: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_LID);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest042: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest042 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest043
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest043, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest043 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest043: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SWITCH);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest043: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest043 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest044
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest044, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest044 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest044: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_REFRESH);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest044: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest044 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest045
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest045, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest045 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest045: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_COORDINATION);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest045: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest045 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest046
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest046, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest046 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest046: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PROXIMITY);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest046: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest046 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest047
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest047, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest047 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest047: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INCOMING_CALL);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest047: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest047 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest048
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest048, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest048 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest048: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SHELL);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest048: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest048 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest049
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest049, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest049 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest049: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PICKUP);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest049: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest049 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest050
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest050, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest050 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest050: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_AOD_SLIDING);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest050: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest050 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest051
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest051, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest051 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest051: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PEN);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest051: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest051 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest052
+ * @tc.desc: test RegisterMonitor(Normal)
+ * @tc.type: FUNC
+ * @tc.require: issueI7COGR
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest052, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest052 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest052: start";
+    auto powerStateMachine = g_service->GetPowerStateMachine();
+    g_service->WakeupControllerInit();
+    auto wakeupController_ = g_service->GetWakeupController();
+    g_service->SwitchSubscriberInit();
+    g_service->InputMonitorInit();
+
+    powerStateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_PLUG_CHANGE);
+    wakeupController_->RegisterMonitor(PowerState::AWAKE);
+    EXPECT_EQ(wakeupController_->monitorId_, 0);
+
+    g_service->InputMonitorCancel();
+    g_service->SwitchSubscriberCancel();
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest052: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest052 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerWakeupControllerTest053
+ * @tc.desc: test OnInputEvent(keyEvent)
+ * @tc.type: FUNC
+ * @tc.require: issueICXI8K
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest053, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest053 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest053: start";
     PowerMgrClient::GetInstance().SuspendDevice();
     std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent = OHOS::MMI::KeyEvent::Create();
     InputCallback callback;
@@ -1589,22 +1981,22 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest039, TestSize.Level
     callback.OnInputEvent(keyEvent);
     time = powerStateMachine->GetLastRefreshActivityTime();
     EXPECT_TRUE(time != 0);
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest039: end";
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest039 function end!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest053: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest053 function end!");
 }
 #endif
 
 /**
- * @tc.name: PowerWakeupControllerTest040
+ * @tc.name: PowerWakeupControllerTest054
  * @tc.desc: test OnInputEvent(pointerEvent)
  * @tc.type: FUNC
  * @tc.require: issueICXI8K
  */
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
-HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest040, TestSize.Level0)
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest054, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest040 function start!");
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest040: start";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest054 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest054: start";
     PowerMgrClient::GetInstance().SuspendDevice();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     InputCallback callback;
@@ -1619,30 +2011,30 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest040, TestSize.Level
     callback.OnInputEvent(pointerEvent);
     time = powerStateMachine->GetLastRefreshActivityTime();
     EXPECT_TRUE(time != 0);
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest040: end";
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest040 function end!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest054: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest054 function end!");
 }
 #endif
 
 /**
- * @tc.name: PowerWakeupControllerTest041
+ * @tc.name: PowerWakeupControllerTest055
  * @tc.desc: test SwitchSubscriberInit fail
  * @tc.type: FUNC
  * @tc.require: issueICXI8K
  */
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
-HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest041, TestSize.Level0)
+HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest055, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest041 function start!");
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest041: start";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest055 function start!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest055: start";
 
     g_service->SwitchSubscriberInit();
     EXPECT_TRUE(g_service->switchId_ == -1);
     g_event = 50001;
     g_service->SwitchSubscriberInit();
     g_service->SwitchSubscriberCancel();
-    GTEST_LOG_(INFO) << "PowerWakeupControllerTest041: end";
-    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest041 function end!");
+    GTEST_LOG_(INFO) << "PowerWakeupControllerTest055: end";
+    POWER_HILOGI(LABEL_TEST, "PowerWakeupControllerTest055 function end!");
 }
 #endif
 } // namespace
