@@ -74,7 +74,6 @@ deps_ex = [
   "hilog:libhilog",
   "ipc:ipc_core",
   "libxml2:libxml2",
-  "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
@@ -121,7 +120,10 @@ ohos_unittest("test_power_shell") {
     "init:libbegetutil",
   ]
 
-  deps = [ "${powermgr_inner_api}:powermgr_client" ]
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   if (has_display_manager_part) {
     external_deps += [ "display_manager:displaymgr" ]
@@ -177,7 +179,10 @@ ohos_unittest("test_power_key_option") {
 
   defines += [ "POWERMGR_GTEST" ]
 
-  deps = [ "${powermgr_service_path}:powermgrservice" ]
+  deps = [
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   external_deps = deps_ex
 }
@@ -209,6 +214,7 @@ ohos_unittest("test_power_mgr_client") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   if (has_display_manager_part) {
@@ -245,6 +251,7 @@ ohos_unittest("test_register_callback_mode") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -273,6 +280,7 @@ ohos_unittest("test_power_get_mode") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -301,6 +309,7 @@ ohos_unittest("test_power_set_mode") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -323,6 +332,7 @@ ohos_unittest("test_power_device_mode") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -342,6 +352,7 @@ ohos_unittest("power_client_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -369,6 +380,7 @@ ohos_unittest("test_running_lock") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_proxy",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -388,6 +400,7 @@ ohos_unittest("test_running_lock_scenario") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -426,6 +439,7 @@ ohos_unittest("test_power_mgr_service") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex + [
@@ -466,7 +480,10 @@ ohos_unittest("test_power_mgr_service_ipc_adapter") {
     "${powermgr_utils_path}:coverage_flags",
   ]
   include_dirs = [ "${powermgr_service_path}/native/include" ]
-  deps = [ "${powermgr_service_path}:powermgrservice" ]
+  deps = [
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   external_deps = deps_ex + [
                     "access_token:libaccesstoken_sdk",
@@ -499,6 +516,7 @@ ohos_unittest("test_power_mgr_service_death") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -521,6 +539,7 @@ ohos_unittest("test_power_state_level_framework") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -549,6 +568,7 @@ ohos_unittest("test_power_state_machine") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/permission:power_permission",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -577,6 +597,7 @@ ohos_unittest("test_power_mgr_mock") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -605,6 +626,7 @@ ohos_unittest("test_power_mgr_fail_check") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -626,6 +648,7 @@ if (false) {
       "${powermgr_inner_api}:powermgr_client",
       "${powermgr_service_path}:powermgrservice",
       "${powermgr_service_path}/native/src/actions:powermgr_actions",
+      "${powermgr_utils_path}/ffrt:power_ffrt",
     ]
 
     external_deps = deps_ex
@@ -662,6 +685,7 @@ ohos_unittest("test_power_mgr_util") {
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/setting:power_setting",
     "${powermgr_utils_path}/vibrator:power_vibrator",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -690,7 +714,10 @@ ohos_unittest("test_power_mgr_power_appmgr") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [ "${powermgr_utils_path}/appmgr:power_appmgr" ]
+  deps = [
+    "${powermgr_utils_path}/appmgr:power_appmgr",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   external_deps = [
     "ability_runtime:ability_manager",
@@ -715,7 +742,10 @@ ohos_unittest("test_power_mgr_power_lib_loader") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [ "${powermgr_utils_path}/lib_loader:power_lib_loader" ]
+  deps = [
+    "${powermgr_utils_path}/lib_loader:power_lib_loader",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -739,6 +769,7 @@ ohos_unittest("test_power_mgr_power_intf_wrapper") {
   deps = [
     "${powermgr_utils_path}/intf_wrapper:power_intf_wrapper",
     "${powermgr_utils_path}/lib_loader:power_lib_loader",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -776,6 +807,7 @@ ohos_unittest("test_power_mock_object") {
     "${powermgr_inner_api}:powermgr_proxy",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -810,6 +842,7 @@ ohos_unittest("test_mock_parcel") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/permission:power_permission",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -842,6 +875,7 @@ ohos_unittest("test_mock_peer") {
     "${powermgr_inner_api}:powermgr_proxy",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -880,6 +914,7 @@ ohos_unittest("test_mock_proxy") {
     "${powermgr_inner_api}:powermgr_proxy",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -908,6 +943,7 @@ ohos_unittest("power_state_machine_native_test") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -940,6 +976,7 @@ ohos_unittest("test_running_lock_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -974,6 +1011,7 @@ ohos_unittest("test_power_mgr_service_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1006,6 +1044,7 @@ ohos_unittest("test_device_state_action_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   if (has_display_manager_part) {
@@ -1033,6 +1072,7 @@ ohos_unittest("test_power_mgr_dump") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -1061,6 +1101,7 @@ ohos_unittest("test_power_mgr_client_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -1087,6 +1128,7 @@ ohos_unittest("power_mode_module_native_test") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
 }
@@ -1119,6 +1161,7 @@ ohos_unittest("test_running_lock_hub_native") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -1147,6 +1190,7 @@ ohos_unittest("test_running_lock_mock") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -1180,6 +1224,7 @@ ohos_unittest("test_power_suspend_parse") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1193,6 +1238,34 @@ ohos_unittest("test_power_suspend_parse") {
     "samgr:samgr_proxy",
   ]
   external_deps += deps_ex
+}
+
+ohos_unittest("test_power_utils") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [ "src/interface_test/power_utils_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  defines += [ "POWERMGR_GTEST" ]
+
+  deps = [
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
 }
 
 ohos_unittest("test_power_wakeup_parse") {
@@ -1223,6 +1296,7 @@ ohos_unittest("test_power_wakeup_parse") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1267,6 +1341,7 @@ ohos_unittest("test_power_suspend_controller") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1315,6 +1390,7 @@ ohos_unittest("test_power_suspend") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1363,6 +1439,7 @@ ohos_unittest("test_power_wakeup_controller") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1476,6 +1553,7 @@ ohos_unittest("test_power_wakeup_controller_oninputevent") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1519,6 +1597,7 @@ ohos_unittest("test_power_wakeup") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
     "${powermgr_utils_path}/permission:power_permission",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1548,6 +1627,7 @@ ohos_unittest("test_power_shutdown_clinet") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
 }
@@ -1566,6 +1646,7 @@ ohos_unittest("test_power_suspend_takeover") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
 }
@@ -1594,7 +1675,10 @@ ohos_unittest("test_ulsr_callback_holder") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [ "${powermgr_utils_path}:power_utils" ]
+  deps = [
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -1623,6 +1707,7 @@ ohos_unittest("test_general_interfaces") {
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/permission:power_permission",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   
   external_deps = deps_ex
@@ -1658,6 +1743,7 @@ ohos_unittest("test_power_getcontroller_mock") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1706,6 +1792,7 @@ ohos_unittest("test_power_screenon_mock") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1748,6 +1835,7 @@ ohos_unittest("test_power_parsesources_mock") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -1793,6 +1881,7 @@ ohos_unittest("test_power_mgr_powerdialog") {
     "${powermgr_utils_path}/param:power_sysparam",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -1826,6 +1915,7 @@ ohos_unittest("test_power_coordination_lock") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/permission:power_permission",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = deps_ex
@@ -1846,7 +1936,10 @@ ohos_unittest("test_running_lock_timer_handler") {
     "${powermgr_utils_path}:coverage_flags",
   ]
 
-  deps = [ "${powermgr_inner_api}:powermgr_client" ]
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
 
   external_deps = deps_ex
 }
@@ -1876,6 +1969,7 @@ ohos_unittest("test_device_power_action") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
   external_deps += [
@@ -1919,6 +2013,7 @@ ohos_unittest("test_power_config_parse") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
     "${powermgr_utils_path}/vibrator:power_vibrator",
+    "${powermgr_utils_path}/ffrt:power_ffrt",  
   ]
 
   external_deps = [
@@ -1991,6 +2086,7 @@ ohos_unittest("test_power_config_parse_two") {
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/setting:power_setting",
     "${powermgr_utils_path}/vibrator:power_vibrator",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -2036,6 +2132,7 @@ ohos_unittest("test_power_screen_common_event") {
   deps = [
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
 }
@@ -2081,6 +2178,7 @@ group("unittest") {
     ":test_power_suspend",
     ":test_power_suspend_controller",
     ":test_power_suspend_parse",
+    ":test_power_utils",
     ":test_power_wakeup",
     ":test_power_wakeup_controller",
     ":test_power_wakeup_controller_oninputevent",
