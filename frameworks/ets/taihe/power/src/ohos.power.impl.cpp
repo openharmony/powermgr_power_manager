@@ -216,6 +216,17 @@ void RefreshActivity(string_view reason)
     }
 }
 
+void SetPowerKeyFilteringStrategy(ohos::power::PowerKeyFilteringStrategy strategy)
+{
+    PowerErrors code = g_powerMgrClient.SetPowerKeyFilteringStrategy(
+        OHOS::PowerMgr::PowerKeyFilteringStrategy(static_cast<uint32_t>(strategy)));
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_INPUT, "SetPowerKeyFilteringStrategy failed. code:%{public}d",
+            static_cast<int32_t>(code));
+        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+    }
+}
+
 void RegisterShutdownCallback(::taihe::callback_view<void(bool isReboot)> shutdownCb)
 {
     POWER_HILOGI(FEATURE_SHUTDOWN, "ets RegisterShutdownCallback interface");
@@ -268,6 +279,7 @@ TH_EXPORT_CPP_API_IsStandby(IsStandby);
 TH_EXPORT_CPP_API_Hibernate(Hibernate);
 TH_EXPORT_CPP_API_SetScreenOffTime(SetScreenOffTime);
 TH_EXPORT_CPP_API_RefreshActivity(RefreshActivity);
+TH_EXPORT_CPP_API_SetPowerKeyFilteringStrategy(SetPowerKeyFilteringStrategy);
 TH_EXPORT_CPP_API_RegisterShutdownCallback(RegisterShutdownCallback);
 TH_EXPORT_CPP_API_UnregisterShutdownCallback(UnregisterShutdownCallback);
 // NOLINTEND
