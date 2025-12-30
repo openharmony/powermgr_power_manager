@@ -419,6 +419,7 @@ private:
 #ifdef POWER_MANAGER_TAKEOVER_SUSPEND
     TransitResult TakeOverSuspendAction(StateChangeReason reason);
 #endif
+    inline std::pair<int32_t, int32_t> GetPowerKeySubscriberCacheIds();
 
     const wptr<PowerMgrService> pms_;
     std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};

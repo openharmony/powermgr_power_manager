@@ -2100,9 +2100,10 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
     if (wakeupController) {
         wakeupController->RegisterMonitor(GetState());
     }
-    POWER_HILOGI(FEATURE_POWER_STATE,
-        "[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d, ffrtId=%{public}u",
-        PowerUtils::GetPowerStateString(state).c_str(), ret, ffrtId);
+    const auto& [powerkeyPressCacheId, powerkeyReleaseCacheId] = GetPowerKeySubscriberCacheIds();
+    POWER_HILOGW(FEATURE_POWER_STATE,"[UL_POWER] StateController::TransitTo %{public}s ret: %{public}d, ffrtId="
+        "%{public}u, reason=%{public}s, kp=%{public}d, kr=%{public}d", PowerUtils::GetPowerStateString(state).c_str(),
+        ret, ffrtId, PowerUtils::GetReasonTypeString(reason).c_str(), powerkeyPressCacheId, powerkeyReleaseCacheId);
     RestoreSettingStateFlag();
     WriteHiSysEvent(ret, reason, beginTimeMs, state);
     return (ret == TransitResult::SUCCESS || ret == TransitResult::ALREADY_IN_STATE);
@@ -2147,6 +2148,26 @@ bool PowerStateMachine::IsTransitFailed(TransitResult ret)
     } else {
         return false;
     }
+}
+
+std::pair<int32_t, int32_t> PowerStateMachine::GetPowerKeySubscriberCacheIds()
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");
+        return {};
+    }
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Suspend controller is nullptr");
+        return {};
+    }
+    auto wakeupController =  pms->GetWakeupController();
+    if (wakeupController == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "Wakeup controller is nullptr");
+        return {};
+    }
+    return {wakeupController->GetPowerkeyShortPressIdCache(), suspendController->GetPowerkeyReleaseIdCache()};
 }
 
 void PowerStateMachine::SetDisplaySuspend(bool enable)

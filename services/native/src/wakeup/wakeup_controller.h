@@ -77,6 +77,7 @@ public:
     void PowerOnInternalScreen(WakeupDeviceType type);
     void PowerOnAllScreens(WakeupDeviceType type);
 #endif
+    int32_t GetPowerkeyShortPressIdCache();
 
 private:
     class SleepGuard final {

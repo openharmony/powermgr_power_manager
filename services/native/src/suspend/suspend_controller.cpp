@@ -52,7 +52,7 @@ FFRTMutex g_monitorMutex;
 constexpr int64_t POWERKEY_MIN_INTERVAL = 350; // ms
 constexpr int32_t RETRY_COUNT_TIMES = 4;
 constexpr int32_t RETRY_INTERVAL_MS = 100;
-int32_t g_powerkeyReleaseIdCache = -1;
+int32_t g_powerkeyReleaseIdCache = 3301; // SA_ID
 } // namespace
 
 std::atomic_bool onForceSleep = false;
@@ -875,6 +875,11 @@ void SuspendController::SetWakeupReasonConfigMatchedFlag(bool flag)
     isWakeupReasonConfigMatched_ = flag;
 }
 #endif
+
+int32_t SuspendController::GetPowerkeyReleaseIdCache()
+{
+    return g_powerkeyReleaseIdCache;
+}
 
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
