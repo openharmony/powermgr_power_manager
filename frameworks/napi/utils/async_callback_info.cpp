@@ -94,7 +94,7 @@ PowerErrors AsyncCallbackInfo::AsyncData::CreateRunningLock()
     }
     runningLock_ = PowerMgrClient::GetInstance().CreateRunningLock(name_, type_);
     PowerErrors error = PowerMgrClient::GetInstance().GetError();
-    return error;
+    return runningLock_ == nullptr ? error : PowerErrors::ERR_OK;
 }
 
 napi_value AsyncCallbackInfo::AsyncData::CreateInstanceForRunningLock(napi_env& env)
