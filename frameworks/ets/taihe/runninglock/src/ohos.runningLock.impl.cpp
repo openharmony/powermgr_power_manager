@@ -98,7 +98,7 @@ ohos::runningLock::RunningLock CreateSync(string_view name, ohos::runningLock::R
     }
     runLock = PowerMgrClient::GetInstance().CreateRunningLock(std::string(name), tp);
     PowerErrors code = PowerMgrClient::GetInstance().GetError();
-    if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
+    if (!runLock && code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
     }
     return make_holder<RunningLockImpl, ohos::runningLock::RunningLock>(runLock);
