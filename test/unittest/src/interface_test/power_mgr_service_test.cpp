@@ -1141,7 +1141,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService039, TestSize.Level2) {
 
 /**
  * @tc.name: PowerMgrService040
- * @tc.desc: Test   StateChangeReasonToStringConversion
+ * @tc.desc: Test StateChangeReasonToStringConversion
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService040, TestSize.Level2)
@@ -1157,6 +1157,30 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService040, TestSize.Level2)
         "INCOMING_CALL");
     EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_POWER_KEY),
         "POWER_KEY");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_THERMAL),
+        "THERMAL");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_SETTINGS),
+        "SETTINGS");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_RESET),
+        "RESET");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_COORDINATION),
+        "COORDINATION_OVERRIDE");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_SHELL),
+        "SHELL");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT_NO_SCREEN_LOCK),
+        "TIMEOUT_NO_SCREEN_LOCK");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_SCREEN_CONNECT),
+        "SCREEN_CONNECT");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_EXIT_SYSTEM_STR),
+        "EXIT_SYSTEM_STR");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT),
+        "ABNORMAL_SCREEN_CONNECT");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_ROLLBACK_HIBERNATE),
+        "ROLLBACK_HIBERNATE");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_WAKEUP_FROM_ULSR),
+        "WAKEUP_ULSR");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_MESSAGE_NOTIFICATION),
+        "MESSAGE_NOTIFICATION");
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService040 end!");
 }
 
