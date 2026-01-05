@@ -57,6 +57,7 @@ ohos_fuzztest("LockScreenAfterTimingOutWithAppidFuzzTest") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
 
   external_deps = [
@@ -68,7 +69,6 @@ ohos_fuzztest("LockScreenAfterTimingOutWithAppidFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "libxml2:libxml2",
-    "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
     "window_manager:libwm_lite",
   ]
