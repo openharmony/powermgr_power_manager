@@ -44,6 +44,7 @@ constexpr uint32_t SHUTDOWN_CALLBACK_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
+constexpr int32_t SHUTDOWN_CALLBACK_TIMEOUT = 5000;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 thread_local sptr<PowerShutdownCallback> g_powerShutdownCallback = new (std::nothrow) PowerShutdownCallback();
 } // namespace
@@ -75,24 +76,31 @@ void PowerShutdownCallback::CreateCallback(napi_env env, napi_value jsCallback)
 
 void PowerShutdownCallback::OnAsyncShutdownOrReboot(bool isReboot)
 {
-    std::lock_guard lock(callbackMutex_);
     isReboot_ = isReboot;
     RETURN_IF(env_ == nullptr);
     uv_work_t* work = new (std::nothrow) uv_work_t;
     RETURN_IF(work == nullptr);
     work->data = reinterpret_cast<void*>(this);
-    auto uvcallback = [work]() mutable {
+    std::shared_ptr<SyncContext> syncContext = std::make_shared<SyncContext>();
+    auto uvcallback = [work, syncContext]() mutable {
         PowerShutdownCallback* callback = reinterpret_cast<PowerShutdownCallback*>(work->data);
         if (callback != nullptr) {
             callback->OnShutdownOrReboot();
         }
         delete work;
         work = nullptr;
+        syncContext->NotifyOne();
     };
     if (napi_send_event(env_, uvcallback, napi_eprio_low, __func__) != napi_status::napi_ok) {
         delete work;
         work = nullptr;
         POWER_HILOGW(FEATURE_SHUTDOWN, "uv_queue_work is failed");
+        return;
+    }
+    if (syncContext->WaitFor(SHUTDOWN_CALLBACK_TIMEOUT)) {
+        POWER_HILOGI(FEATURE_SHUTDOWN, "OnShutdownOrReboot excuted end");
+    } else {
+        POWER_HILOGE(FEATURE_SHUTDOWN, "OnShutdownOrReboot excuted timeout");
     }
 }
 
