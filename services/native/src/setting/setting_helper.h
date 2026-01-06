@@ -119,10 +119,13 @@ public:
 private:
     static bool IsSettingKeyValid(const std::string& key);
     static int32_t GetSettingIntValue(const std::string& key, int32_t defaultVal);
+    static int32_t GetSettingIntValueWithRetry(const std::string& key, int32_t defaultVal);
     static void SetSettingIntValue(const std::string& key, int32_t value);
     static __attribute__((noinline)) int64_t GetSettingLongValue(const std::string& key, int64_t defaultVal);
     static void SetSettingLongValue(const std::string& key, int64_t value);
     static const std::string GetSettingStringValue(const std::string& key);
+    static const std::string GetSettingStringValueWithRetry(
+        const std::string& key, const std::string& defaultVal = "");
     static void SetSettingJsonStringValue(const std::string& key, const std::string& jsonConfig);
     static sptr<SettingObserver> RegisterSettingKeyObserver(const std::string& key, SettingObserver::UpdateFunc& func);
 
