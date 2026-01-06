@@ -49,6 +49,7 @@ public:
     void EnableMode(PowerMode mode, bool isBoot = false);
     void AddPowerModeCallback(const sptr<IPowerModeCallback>& callback);
     void DelPowerModeCallback(const sptr<IPowerModeCallback>& callback);
+    void SubscribeCommonEvent();
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
@@ -67,6 +68,13 @@ private:
         std::mutex mutex_;
         std::set<sptr<IRemoteObject>> callbacks_;
         std::map<sptr<IRemoteObject>, std::pair<int32_t, int32_t>> cachedRegister_;
+    };
+
+    class PowerModeCommonEventSubscriber : public EventFwk::CommonEventSubscriber {
+    public:
+        explicit PowerModeCommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo)
+            : CommonEventSubscriber(subscribeInfo) {}
+        void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
     };
 
     PowerMode mode_;
@@ -100,6 +108,8 @@ private:
 
     std::atomic<bool> started_;
     std::mutex mutex_;
+    std::once_flag isReady_;
+    std::shared_ptr<EventFwk::CommonEventSubscriber> subscriberPtr_ {nullptr};
 };
 } // namespace PowerMgr
 } // namespace OHOS

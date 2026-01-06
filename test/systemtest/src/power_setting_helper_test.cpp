@@ -14,8 +14,11 @@
  */
 #include "power_setting_helper_test.h"
 
+#include "power_test_utils.h"
 #include "power_log.h"
+#define private public
 #include "setting_helper.h"
+#undef private
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -47,6 +50,52 @@ int64_t SettingHelper::GetSettingLongValue(const std::string& key, int64_t defau
     return g_getSettingLongValue;
 }
 #endif
+
+static void PresetData(const std::string& testName)
+{
+    static std::map<std::string, std::function<void()>> caseFuncMap {
+        {"PowerSettingHelperTest002", []() {
+            DataFactory<tuple<std::string, int>>::Reset();
+            DataFactory<tuple<std::string, int>>::Produce({"pass", ERR_OK}); // case 0
+            DataFactory<tuple<std::string, int>>::Produce({"pass", ERR_INVALID_OPERATION}, 5); // case 1
+            DataFactory<tuple<std::string, int>>::Produce({"pass", ERR_OK}); // case 1
+            DataFactory<tuple<std::string, int>>::Produce({"fail", ERR_INVALID_OPERATION}, 21); // case 2
+            DataFactory<tuple<std::string, int>>::Produce({"not_found_key", ERR_NAME_NOT_FOUND}); // case 3
+        }},
+        {"PowerSettingHelperTest003", []() {
+            DataFactory<tuple<std::string, int>>::Reset();
+            DataFactory<tuple<std::string, int>>::Produce({"601", ERR_OK}); // case 0
+            DataFactory<tuple<std::string, int>>::Produce({"600", ERR_INVALID_OPERATION}, 5); // case 1
+            DataFactory<tuple<std::string, int>>::Produce({"600", ERR_OK}); // case 1
+            DataFactory<tuple<std::string, int>>::Produce({"0", ERR_INVALID_OPERATION}, 21); // case 2
+            DataFactory<tuple<std::string, int>>::Produce({"0", ERR_NAME_NOT_FOUND}); // case 3
+        }},
+    };
+    auto it = caseFuncMap.find(testName);
+    if (it != caseFuncMap.end() && it->second) {
+        it->second();
+    }
+}
+
+ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& value)
+{
+    const auto& data = DataFactory<tuple<std::string, int>>::Consume();
+    value = std::get<0>(data);
+    return std::get<1>(data);
+}
+
+void PowerSettingHelperTest::SetUp()
+{
+    const ::testing::UnitTest* unitTest = ::testing::UnitTest::GetInstance();
+    const ::testing::TestInfo* testInfo = unitTest->current_test_info();
+    const std::string testCaseName = testInfo->test_case_name();
+    const std::string testName = testInfo->name();
+    PresetData(testName);
+}
+
+void PowerSettingHelperTest::TearDown()
+{
+}
 } // namespace OHOS::PowerMgr
 
 namespace {
@@ -79,4 +128,58 @@ HWTEST_F(PowerSettingHelperTest, PowerSettingHelperTest001, TestSize.Level1)
     GTEST_LOG_(INFO) << "PowerSettingHelperTest001: end";
 }
 #endif
+
+/**
+ * @tc.name: PowerSettingHelperTest002
+ * @tc.desc: test SettingHelper GetSettingStringValueWithRetry
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSettingHelperTest, PowerSettingHelperTest002, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSettingHelperTest002 function start!");
+    GTEST_LOG_(INFO) << "PowerSettingHelperTest002: start";
+    std::string getKey = "SETTING_POWER_MODE_BACKUP_KEY";
+    std::string getValue = "";
+    // case 0: return ERR_OK without retry
+    std::string result = SettingHelper::GetSettingStringValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == "pass");
+    // case 1: return ERR_OK after 5 retries
+    result = SettingHelper::GetSettingStringValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == "pass");
+    // case 2: return ERR_INVALID_OPERATION after 20 retries, get value fail
+    result = SettingHelper::GetSettingStringValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == "fail");
+    // case 3: return ERR_NAME_NOT_FOUND because not found key
+    result = SettingHelper::GetSettingStringValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == "not_found_key");
+    POWER_HILOGI(LABEL_TEST, "PowerSettingHelperTest002 function end!");
+    GTEST_LOG_(INFO) << "PowerSettingHelperTest002: end";
+}
+
+/**
+ * @tc.name: PowerSettingHelperTest003
+ * @tc.desc: test SettingHelper GetSettingIntValueWithRetry
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSettingHelperTest, PowerSettingHelperTest003, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSettingHelperTest003 function start!");
+    GTEST_LOG_(INFO) << "PowerSettingHelperTest003: start";
+    std::string getKey = "SETTING_POWER_MODE_KEY";
+    int32_t getValue = 0;
+    // case 0: return ERR_OK without retry
+    int32_t result = SettingHelper::GetSettingIntValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == 601);
+    // case 1: return ERR_OK after 5 retries
+    result = SettingHelper::GetSettingIntValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == 600);
+    // case 2: return ERR_INVALID_OPERATION after 20 retries, get value fail
+    result = SettingHelper::GetSettingIntValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == 0);
+    // case 3: return ERR_NAME_NOT_FOUND because not found key
+    result = SettingHelper::GetSettingIntValueWithRetry(getKey, getValue);
+    EXPECT_TRUE(result == 0);
+    POWER_HILOGI(LABEL_TEST, "PowerSettingHelperTest003 function end!");
+    GTEST_LOG_(INFO) << "PowerSettingHelperTest003: end";
+}
 } // namespace
