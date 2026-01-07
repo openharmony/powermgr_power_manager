@@ -318,7 +318,7 @@ napi_value PowerNapi::RebootOrShutdown(napi_env env, napi_callback_info info, bo
     } else {
         code = g_powerMgrClient.ShutDownDevice(reason);
     }
-    if (code != PowerErrors::ERR_OK) {
+    if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_SKIP_FUNCTION_CALL) {
         error.ThrowError(env, code);
     }
 

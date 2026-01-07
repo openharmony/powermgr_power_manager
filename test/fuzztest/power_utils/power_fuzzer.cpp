@@ -45,8 +45,14 @@ class FuzzShutdownAction : public ShutdownController {
 public:
     FuzzShutdownAction() = default;
     virtual ~FuzzShutdownAction() = default;
-    virtual void Reboot([[maybe_unused]] const std::string& reason, bool force = false) {};
-    virtual void Shutdown([[maybe_unused]] const std::string& reason) {};
+    virtual PowerErrors Reboot([[maybe_unused]] const std::string& reason, bool force = false)
+    {
+        return PowerErrors::ERR_OK;
+    };
+    virtual PowerErrors Shutdown([[maybe_unused]] const std::string& reason)
+    {
+        return PowerErrors::ERR_OK;
+    };
 };
 
 class FuzzStateAction : public IDeviceStateAction {
