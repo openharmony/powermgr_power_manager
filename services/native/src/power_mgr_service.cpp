@@ -63,6 +63,7 @@
 #ifdef MSDP_MOVEMENT_ENABLE
 #include <dlfcn.h>
 #endif
+#include "death_recipient_manager.h"
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AAFwk;
@@ -2798,6 +2799,44 @@ PowerErrors PowerMgrService::UnRegisterAsyncShutdownCallback(const sptr<IAsyncSh
 
     std::lock_guard lock(shutdownMutex_);
     shutdownController_->RemoveCallback(callback);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::SetProxFilteringStrategy(
+    ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGW(COMP_SVC, "SetProxFilteringStrategy failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (powerStateMachine_ == nullptr) {
+        POWER_HILOGW(COMP_SVC, "SetProxFilteringStrategy failed, Service not ready");
+        return PowerErrors::ERR_FAILURE;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(COMP_SVC,"SetProxFilteringStrategy pid: %{public}d, uid: %{public}d, strategy:%{public}d",
+        pid, uid, static_cast<int32_t>(strategy));
+    constexpr int32_t gameServiceUid = 7011;
+    if (uid == gameServiceUid) {
+        std::function<void(const sptr<IRemoteObject>&)> cb = [uid](const sptr<IRemoteObject>& remote) {
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms == nullptr) {
+                POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+                return;
+            }
+            auto stateMachine = pms->GetPowerStateMachine();
+            if (!stateMachine) {
+                POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+                return;
+            }
+            stateMachine->SetProxFilteringStrategy(ProxFilteringStrategy::DEFAULT);
+            DeathRecipientManager::GetInstance().RemoveDeathRecipient(uid);
+            POWER_HILOGI(COMP_SVC, "SetProxFilteringStrategy to default");
+        }
+        DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
+    }
+    powerStateMachine_->SetProxFilteringStrategy(strategy);
     return PowerErrors::ERR_OK;
 }
 } // namespace PowerMgr

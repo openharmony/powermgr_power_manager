@@ -561,5 +561,14 @@ int32_t PowerMgrServiceAdapter::UnRegisterAsyncShutdownCallbackIpc(
     powerError = static_cast<int32_t>(UnRegisterAsyncShutdownCallback(callback));
     return ERR_OK;
 }
+
+int32_t PowerMgrServiceAdapter::SetProxFilteringStrategyIpc(
+    int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetProxFilteringStrategyIpc", false);
+    ProxFilteringStrategy proxFilteringStrategy = static_cast<ProxFilteringStrategy>(strategy);
+    powerError = static_cast<int32_t>(SetProxFilteringStrategy(proxFilteringStrategy, token));
+    return ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

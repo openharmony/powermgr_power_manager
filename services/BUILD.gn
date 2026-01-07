@@ -50,6 +50,7 @@ ohos_shared_library("powermgrservice") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "native/src/death_recipient_manager.cpp",
     "native/src/multi_invoker_helper/multi_invoker_helper.cpp",
     "native/src/power_hdi_callback.cpp",
     "native/src/power_mgr_dumper.cpp",
