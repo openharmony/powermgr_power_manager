@@ -27,6 +27,7 @@ enum class PowerErrors : int32_t {
     ERR_CONNECTION_FAIL = 4900101,
     ERR_FREQUENT_FUNCTION_CALL = 4900201,
     ERR_POWER_MODE_TRANSIT_FAILED = 4900301,
+    ERR_SKIP_FUNCTION_CALL = 4900401,
 };
 } // namespace PowerMgr
 } // namespace OHOS

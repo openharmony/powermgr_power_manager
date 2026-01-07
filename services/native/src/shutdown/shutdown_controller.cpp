@@ -73,14 +73,14 @@ ShutdownController::ShutdownController() : started_(false)
     syncShutdownCallbackHolder_ = new ShutdownCallbackHolder();
 }
 
-void ShutdownController::Reboot(const std::string& reason, bool force)
+PowerErrors ShutdownController::Reboot(const std::string& reason, bool force)
 {
-    RebootOrShutdown(reason, true, force);
+    return RebootOrShutdown(reason, true, force);
 }
 
-void ShutdownController::Shutdown(const std::string& reason)
+PowerErrors ShutdownController::Shutdown(const std::string& reason)
 {
-    RebootOrShutdown(reason, false);
+    return RebootOrShutdown(reason, false);
 }
 
 bool ShutdownController::IsShuttingDown()
@@ -131,20 +131,20 @@ void ShutdownController::SetShutdownReason(const std::string& reason)
     system::SetParameter("persist.dfx.shutdown_reason", tempReason);
 }
 
-void ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot, bool force)
+PowerErrors ShutdownController::RebootOrShutdown(const std::string& reason, bool isReboot, bool force)
 {
     // skip takeover callback
     // SetFrameworkFinishBootStage done in client
+    if (started_) {
+        POWER_KHILOGI(FEATURE_SHUTDOWN, "Shutdown is already running");
+        return PowerErrors::ERR_SKIP_FUNCTION_CALL;
+    }
     if (!force) {
-        if (started_) {
-            POWER_KHILOGI(FEATURE_SHUTDOWN, "Shutdown is already running");
-            return;
-        }
         started_ = true;
         bool isTakeOver = TakeOverShutdownAction(reason, isReboot);
         if (isTakeOver) {
             started_ = false;
-            return;
+            return PowerErrors::ERR_OK;
         }
         if (reason != "test_case") {
             SetFrameworkFinishBootStage();
@@ -185,6 +185,7 @@ void ShutdownController::RebootOrShutdown(const std::string& reason, bool isRebo
         }
         started_ = false;
     })->detach();
+    return PowerErrors::ERR_OK;
 }
 
 void ShutdownController::Prepare(bool isReboot)
