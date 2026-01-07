@@ -269,6 +269,12 @@ enum class PowerKeyFilteringStrategy : uint32_t {
     LONG_PRESS_FILTERING_ONCE = 1,    // only filtering the current long press, the next not filtering
     STRATEGY_MAX
 };
+
+enum class ProxFilteringStrategy : uint32_t {
+    DEFAULT = 0,
+    FILTERING_CLOSE = 1,
+    MAX,
+};
 } // namespace PowerMgr
 } // namespace OHOS
 #endif // POWERMGR_POWER_STATE_MACHINE_INFO_H

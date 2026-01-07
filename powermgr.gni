@@ -47,6 +47,7 @@ declare_args() {
   power_manager_feature_lid_fold = false
   power_manager_feature_enable_performance_mode = false
   power_manager_feature_runninglock_background_user_idle_permissive_permission_mode = false
+  power_manager_feature_support_intercept_proximity_close_event = false
 }
 
 defines = []
@@ -73,6 +74,10 @@ if (power_manager_feature_enable_lid_check) {
 
 if (power_manager_feature_runninglock_background_user_idle_permissive_permission_mode) {
   defines += [ "POWER_MANAGER_RUNNINGLOCK_BACKGROUND_USER_IDLE_PERMISSION_PERMISSIVE_MODE" ]
+}
+
+if (power_manager_feature_support_intercept_proximity_close_event) {
+  defines += [ "POWER_MANAGER_SUPPORT_INTERCEPT_PROXIMITY_CLOSE_EVENT" ]
 }
 
 if (!defined(global_parts_info) ||
