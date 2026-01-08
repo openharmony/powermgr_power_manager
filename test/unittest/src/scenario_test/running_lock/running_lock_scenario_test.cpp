@@ -132,6 +132,7 @@ HWTEST_F (RunningLockScenarioTest, RunningLockScenarioTest003, TestSize.Level1)
     EXPECT_TRUE(runningLock->UpdateWorkSource(workSource11) == 0);
     EXPECT_TRUE(runningLock->IsUsed());
     // freeze app0
+    usleep(5000);
     EXPECT_TRUE(powerMgrClient.ProxyRunningLock(true, curPid, app0Uid));
     EXPECT_TRUE(runningLock->IsUsed());
     // freeze app1
