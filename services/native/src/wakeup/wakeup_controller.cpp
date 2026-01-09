@@ -134,6 +134,7 @@ void WakeupController::Init()
         POWER_HILOGI(FEATURE_WAKEUP, "registered type=%{public}u", (*source).GetReason());
         SetOriginSettingValue((*source));
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
+        RETURN_IF(monitor == nullptr)
         monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
@@ -176,6 +177,7 @@ void WakeupController::RegisterSettingsObserver()
         uint32_t id = 0;
         for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
             std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
+            RETURN_IF(monitor == nullptr)
             monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
             POWER_HILOGI(FEATURE_WAKEUP, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
                 id, source->GetReason());
