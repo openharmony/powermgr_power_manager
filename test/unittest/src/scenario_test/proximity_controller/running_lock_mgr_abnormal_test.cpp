@@ -18,6 +18,7 @@
 #include "power_log.h"
 #define private public
 #include "power_mgr_service.h"
+#include "death_recipient_manager.h"
 #undef private
 #include "power_hookmgr.h"
 
@@ -34,9 +35,9 @@ sptr<PowerMgrService> g_pmsTest {nullptr};
 std::shared_ptr<IProximityController> g_controller {nullptr};
 std::function<void(uint32_t, bool)> g_action {nullptr};
 bool g_isRealInstance = false;
-void SetInstanceReal()
+void SetInstanceReal(bool real = true)
 {
-    g_isRealInstance = true;
+    g_isRealInstance = real;
 }
 } // namespace
 
@@ -400,5 +401,34 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest011, TestSize.Lev
     stateMachine->HandleProximityClose();
     EXPECT_TRUE(g_pmsTest != nullptr && g_pmsTest->GetSuspendController() == nullptr);
     POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest011 function end!");
+}
+
+/**
+ * @tc.name: PowerNullPointerTest001
+ * @tc.desc: Test SetProxFilteringStrategy pms == nullptr \ stateMachine == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockMgrAbnormalTest, PowerNullPointerTest001, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerNullPointerTest001 function start!");
+    SetInstanceReal();
+    g_pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(g_pmsTest != nullptr && g_pmsTest->PowerStateMachineInit());
+    sptr<IRemoteObject> obj = sptr<IPCObjectProxy>::MakeSptr(0, u"PowerNullPointerTest001");
+    g_pmsTest->SetProxFilteringStrategy(ProxFilteringStrategy::NOT_FILTERING, obj);
+    auto it = DeathRecipientManager::GetInstance().clientDeathRecipientMap_.find(obj);
+    EXPECT_TRUE(it != DeathRecipientManager::GetInstance().clientDeathRecipientMap_.end() && !it->second.empty());
+    auto callbackFunc = (it->second.begin())->func;
+    auto funcName = (it->second.begin())->funcName;
+    EXPECT_TRUE(callbackFunc != nullptr && funcName == "SetProxFilteringStrategy");
+    SetInstanceReal(false);
+    callbackFunc(obj);
+    EXPECT_TRUE(DelayedSpSingleton<PowerMgrService>::GetInstance() == nullptr);
+    SetInstanceReal();
+    g_pmsTest->powerStateMachine_.reset();
+    callbackFunc(obj);
+    EXPECT_TRUE(DelayedSpSingleton<PowerMgrService>::GetInstance() != nullptr &&
+                DelayedSpSingleton<PowerMgrService>::GetInstance()->GetPowerStateMachine() == nullptr);
+    POWER_HILOGI(LABEL_TEST, "PowerNullPointerTest001 function end!");
 }
 } // namespace

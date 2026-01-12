@@ -15,56 +15,68 @@
 
 #include "death_recipient_manager.h"
 
+#include <algorithm>
+
 namespace OHOS {
 namespace PowerMgr {
 
-DeathRecipientManager& DeathRecipientManager::GetInstance()
-{
-    static DeathRecipientManager instance;
-    return instance;
-}
-
-void DeathRecipientManager::CommonDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void DeathRecipientManager::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (!remote.promote()) {
         POWER_HILOGI(COMP_SVC, "proxy no longer exists, return early");
         return;
     }
     auto strongRef = remote.promote();
-    POWER_HILOGI(COMP_SVC, "OnRemoteDied Called, pid:%{public}d, uid:%{public}d, func:%{public}s",
-        callbackInfo_.pid, callbackInfo_.uid, callbackInfo_.funcName.c_str());
-    if (callbackInfo_.func) {
-        callbackInfo_.func(strongRef);
+    POWER_HILOGI(COMP_SVC, "OnRemoteDied Called");
+    RemoveDeathRecipient(strongRef);
+}
+
+void DeathRecipientManager::AddDeathRecipient(const sptr<IRemoteObject>& invoker, const CBInfo& info)
+{
+    RETURN_IF_WITH_LOG(!invoker || !invoker->IsProxyObject(), "invoker invalid");
+    std::lock_guard lock(callbacksMutex_);
+    auto iter = clientDeathRecipientMap_.find(invoker);
+    if (iter == clientDeathRecipientMap_.end()) {
+        invoker->AddDeathRecipient(this);
+        clientDeathRecipientMap_.emplace(invoker, std::set<CBInfo>{info});
+        POWER_HILOGI(COMP_SVC, "AddDeathRecipient pid:%{public}d, uid:%{public}d, func:%{public}s",
+            info.pid, info.uid, info.funcName.c_str());
+    } else {
+        auto result = iter->second.insert(info);
+        if (result.second) {
+            POWER_HILOGI(COMP_SVC, "AddDeathRecipient insert pid:%{public}d, uid:%{public}d, func:%{public}s",
+                info.pid, info.uid, info.funcName.c_str());
+        }
     }
 }
 
 void DeathRecipientManager::AddDeathRecipient(
-    int32_t uid, const sptr<IRemoteObject>& invoker, const sptr<IRemoteObject::DeathRecipient>& recipient)
+    const sptr<IRemoteObject>& invoker, const sptr<IRemoteObject::DeathRecipient>& recipient)
 {
     RETURN_IF_WITH_LOG(!invoker || !invoker->IsProxyObject(), "invoker invalid");
     std::lock_guard lock(callbacksMutex_);
-    if (clientDeathRecipientMap_.find(uid) == clientDeathRecipientMap_.end()) {
+    auto iter = clientDeathRecipientMap_.find(invoker);
+    if (iter == clientDeathRecipientMap_.end()) {
         invoker->AddDeathRecipient(recipient);
-        clientDeathRecipientMap_.emplace(uid, invoker);
+        invoker->AddDeathRecipient(this);
+        clientDeathRecipientMap_.emplace(invoker, std::set<CBInfo>{});
+        POWER_HILOGI(COMP_SVC, "AddDeathRecipient Success");
     }
 }
 
-void DeathRecipientManager::AddDeathRecipient(const sptr<IRemoteObject>& invoker, const CBInfo& callbackInfo)
-{
-    RETURN_IF_WITH_LOG(!invoker || !invoker->IsProxyObject(), "invoker invalid");
-    std::lock_guard lock(callbacksMutex_);
-    if (clientDeathRecipientMap_.find(callbackInfo.uid) == clientDeathRecipientMap_.end()) {
-        sptr<CommonDeathRecipient> drt = sptr<CommonDeathRecipient>::MakeSptr(callbackInfo);
-        invoker->AddDeathRecipient(drt);
-        clientDeathRecipientMap_.emplace(callbackInfo.uid, invoker);
-    }
-}
-
-void DeathRecipientManager::RemoveDeathRecipient(int32_t uid)
+void DeathRecipientManager::RemoveDeathRecipient(const sptr<IRemoteObject>& token)
 {
     std::lock_guard lock(callbacksMutex_);
-    auto iter = clientDeathRecipientMap_.find(uid);
+    auto iter = clientDeathRecipientMap_.find(token);
     if (iter != clientDeathRecipientMap_.end()) {
+        std::for_each(iter->second.begin(), iter->second.end(), [&token](const CBInfo& info) {
+            if (info.func) {
+                info.func(token);
+            }
+            POWER_HILOGI(COMP_SVC, "RemoveDeathRecipient uid:%{public}d pid:%{public}d func:%{public}s",
+                info.uid, info.pid, info.funcName.c_str());
+        });
+        POWER_HILOGI(COMP_SVC, "RemoveDeathRecipient Success");
         clientDeathRecipientMap_.erase(iter);
     }
 }

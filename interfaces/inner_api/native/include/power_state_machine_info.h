@@ -271,7 +271,7 @@ enum class PowerKeyFilteringStrategy : uint32_t {
 };
 
 enum class ProxFilteringStrategy : uint32_t {
-    DEFAULT = 0,
+    NOT_FILTERING = 0, // default strategy
     FILTERING_CLOSE = 1,
     MAX,
 };
