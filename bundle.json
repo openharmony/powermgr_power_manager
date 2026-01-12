@@ -52,7 +52,7 @@
             "power_manager_feature_lid_fold",
             "power_manager_feature_enable_performance_mode",
             "power_manager_feature_runninglock_background_user_idle_permissive_permission_mode",
-            "power_manager_feature_support_intercept_proximity_close_event"
+            "power_manager_feature_support_filtering_proximity_event"
         ],
         "adapted_system_type": [
             "standard"

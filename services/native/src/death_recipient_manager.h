@@ -17,6 +17,7 @@
 #define DEATH_RECIPIENT_MANAGER_H
 
 #include <map>
+#include <set>
 
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
@@ -24,33 +25,33 @@
 
 namespace OHOS {
 namespace PowerMgr {
-class DeathRecipientManager {
+class DeathRecipientManager : public IRemoteObject::DeathRecipient {
 public:
     using CallbackType = std::function<void(const sptr<IRemoteObject>&)>;
     struct CBInfo {
+        bool operator<(const CBInfo& other) const
+        {
+            return funcName < other.funcName;
+        }
         CallbackType func;
         std::string funcName;
         int32_t pid {-1};
         int32_t uid {-1};
     };
-    class CommonDeathRecipient : public IRemoteObject::DeathRecipient {
-    public:
-        CommonDeathRecipient(const CBInfo& callbackInfo) : callbackInfo_(callbackInfo) {}
-        virtual ~CommonDeathRecipient() = default;
-        virtual void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    private:
-        CBInfo callbackInfo_;
-    };
-    static DeathRecipientManager& GetInstance();
+    static DeathRecipientManager& GetInstance()
+    {
+        static sptr<DeathRecipientManager> instance = new DeathRecipientManager();
+        return *instance;
+    }
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
     void AddDeathRecipient(const sptr<IRemoteObject>& invoker, const CBInfo& info);
-    void AddDeathRecipient(
-        int32_t uid, const sptr<IRemoteObject>& invoker, const sptr<IRemoteObject::DeathRecipient>& recipient);
-    void RemoveDeathRecipient(int32_t uid);
+    void AddDeathRecipient(const sptr<IRemoteObject>& invoker, const sptr<IRemoteObject::DeathRecipient>& recipient);
+    void RemoveDeathRecipient(const sptr<IRemoteObject>& token);
 private:
     DeathRecipientManager() = default;
     ~DeathRecipientManager() = default;
     std::mutex callbacksMutex_;
-    std::unordered_map<int32_t, sptr<IRemoteObject>> clientDeathRecipientMap_;
+    std::map<sptr<IRemoteObject>, std::set<CBInfo>> clientDeathRecipientMap_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

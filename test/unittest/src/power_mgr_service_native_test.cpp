@@ -33,6 +33,8 @@
 #include "async_ulsr_callback_stub.h"
 #include "setting_helper.h"
 #include "shutdown/async_shutdown_callback_stub.h"
+#include "death_recipient_manager.h"
+
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
@@ -693,5 +695,62 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative022, TestSize.Level2) {
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 3 failed";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative022 end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative023
+ * @tc.desc: Test SetProxFilteringStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative023, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative023 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    // Test case 0: No system permission
+    g_isSystem = false;
+    pmsTest->SetProxFilteringStrategy(ProxFilteringStrategy::FILTERING_CLOSE, nullptr);
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    bool flag = stateMachine->isProximityCloseEventFiltered_;
+    EXPECT_FALSE(flag);
+    // Test case 1: DEFAULT - ProxFilteringStrategy::FILTERING_CLOSE
+    g_isSystem = true;
+    pmsTest->SetProxFilteringStrategy(ProxFilteringStrategy::FILTERING_CLOSE, nullptr);
+    flag = stateMachine->isProximityCloseEventFiltered_;
+#ifdef POWER_MANAGER_SUPPORT_FILTERING_PROXIMITY_EVENT
+    stateMachine->HandleProximityClose();
+    EXPECT_TRUE(flag);
+#else
+    EXPECT_FALSE(flag);
+#endif
+    // Test case 2: DEFAULT - ProxFilteringStrategy::NOT_FILTERING
+    pmsTest->SetProxFilteringStrategy(ProxFilteringStrategy::NOT_FILTERING, nullptr);
+    flag = stateMachine->isProximityCloseEventFiltered_;
+    EXPECT_FALSE(flag);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative023 end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative024
+ * @tc.desc: Test SetProxFilteringStrategy OnRemoteDied Callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative024, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative024 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    g_isSystem = true;
+    sptr<IRemoteObject> obj = sptr<IPCObjectProxy>::MakeSptr(0, u"PowerMgrServiceNative024");
+    pmsTest->SetProxFilteringStrategy(ProxFilteringStrategy::FILTERING_CLOSE, obj);
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    bool flag = stateMachine->isProximityCloseEventFiltered_;
+#ifdef POWER_MANAGER_SUPPORT_FILTERING_PROXIMITY_EVENT
+    stateMachine->HandleProximityClose();
+    EXPECT_TRUE(flag);
+#else
+    EXPECT_FALSE(flag);
+#endif
+    wptr<IRemoteObject> objWeak = obj;
+    DeathRecipientManager::GetInstance().OnRemoteDied(objWeak);
+    flag = stateMachine->isProximityCloseEventFiltered_;
+    EXPECT_FALSE(flag);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative024 end!");
 }
 } // namespace

@@ -2809,33 +2809,25 @@ PowerErrors PowerMgrService::SetProxFilteringStrategy(
         POWER_HILOGW(COMP_SVC, "SetProxFilteringStrategy failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    if (powerStateMachine_ == nullptr) {
-        POWER_HILOGW(COMP_SVC, "SetProxFilteringStrategy failed, Service not ready");
-        return PowerErrors::ERR_FAILURE;
-    }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(COMP_SVC,"SetProxFilteringStrategy pid: %{public}d, uid: %{public}d, strategy:%{public}d",
+    POWER_HILOGI(COMP_SVC, "SetProxFilteringStrategy pid: %{public}d, uid: %{public}d, strategy:%{public}d",
         pid, uid, static_cast<int32_t>(strategy));
-    constexpr int32_t gameServiceUid = 7011;
-    if (uid == gameServiceUid) {
-        std::function<void(const sptr<IRemoteObject>&)> cb = [uid](const sptr<IRemoteObject>& remote) {
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            if (pms == nullptr) {
-                POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
-                return;
-            }
-            auto stateMachine = pms->GetPowerStateMachine();
-            if (!stateMachine) {
-                POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
-                return;
-            }
-            stateMachine->SetProxFilteringStrategy(ProxFilteringStrategy::DEFAULT);
-            DeathRecipientManager::GetInstance().RemoveDeathRecipient(uid);
-            POWER_HILOGI(COMP_SVC, "SetProxFilteringStrategy to default");
+    std::function<void(const sptr<IRemoteObject>&)> cb = [](const sptr<IRemoteObject>& remote) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+            return;
         }
-        DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
-    }
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (!stateMachine) {
+            POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+            return;
+        }
+        stateMachine->SetProxFilteringStrategy(ProxFilteringStrategy::NOT_FILTERING);
+        POWER_HILOGI(COMP_SVC, "SetProxFilteringStrategy to default");
+    };
+    DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
     powerStateMachine_->SetProxFilteringStrategy(strategy);
     return PowerErrors::ERR_OK;
 }
