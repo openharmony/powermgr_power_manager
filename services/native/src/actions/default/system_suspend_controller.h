@@ -67,8 +67,8 @@ private:
     };
     OHOS::HDI::Power::V1_2::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
     sptr<V1_3::IPowerInterface> GetPowerInterface();
-    std::mutex mutex_;
-    std::mutex interfaceMutex_;
+    ffrt::mutex mutex_;
+    ffrt::mutex interfaceMutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
     sptr<V1_3::IPowerInterface> powerInterface_ { nullptr };
     sptr<V1_3::IPowerHdiCallbackExt> powerCallbackExt_ { nullptr };

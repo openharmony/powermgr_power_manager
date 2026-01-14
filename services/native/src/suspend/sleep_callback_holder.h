@@ -19,6 +19,7 @@
 #include <set>
 #include <map>
 
+#include <ffrt_utils.h>
 #include "ipc_skeleton.h"
 #include <singleton.h>
 #include "iremote_object.h"
@@ -52,7 +53,7 @@ private:
     void AddCallbackPidUid(const sptr<ISyncSleepCallback>& callback);
     void RemoveCallbackPidUid(const sptr<ISyncSleepCallback>& callback);
 
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     SleepCallbackContainerType highPriorityCallbacks_;
     SleepCallbackContainerType defaultPriorityCallbacks_;
     SleepCallbackContainerType lowPriorityCallbacks_;

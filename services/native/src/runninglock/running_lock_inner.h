@@ -113,7 +113,6 @@ public:
     }
 
 private:
-    std::mutex mutex_;
     RunningLockParam runningLockParam_;
     RunningLockState state_ = RunningLockState::RUNNINGLOCK_STATE_DISABLE;
     int64_t lockTimeMs_ = 0;

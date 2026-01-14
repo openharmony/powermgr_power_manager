@@ -21,6 +21,7 @@
 
 #include "actions/idevice_state_action.h"
 #include "display_power_callback_stub.h"
+#include <ffrt_utils.h>
 
 namespace OHOS {
 namespace PowerMgr {
@@ -55,13 +56,13 @@ private:
     private:
         void NotifyDisplayActionDone(uint32_t event);
         std::function<void(uint32_t)> notify_ {nullptr};
-        std::mutex notifyMutex_;
+        ffrt::mutex notifyMutex_;
     };
     DisplayPowerMgr::DisplayState GetDisplayPowerMgrDisplayState(DisplayState state);
     bool IsInterruptingScreenOff(Rosen::PowerStateChangeReason dispReason);
     bool IsOnState(DisplayState state);
-    std::mutex cancelScreenOffMutex_;
-    std::condition_variable cancelScreenOffCv_;
+    ffrt::mutex cancelScreenOffMutex_;
+    ffrt::condition_variable cancelScreenOffCv_;
     bool cancelScreenOffCvUnblocked_ {false};
     bool interruptingScreenOff_ {false};
     bool screenOffInterrupted_ {false};
