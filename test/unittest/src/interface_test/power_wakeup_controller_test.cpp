@@ -413,14 +413,13 @@ HWTEST_F(PowerWakeupControllerTest, PowerWakeupControllerTest011, TestSize.Level
     std::shared_ptr<WakeupSources> parseSources = std::make_shared<WakeupSources>();
 
     cJSON* root = cJSON_Parse(jsonStr.c_str());
-    if (!root) {
-        GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: json parse error";
-        return;
-    }
-    if (!cJSON_IsObject(root) || !cJSON_IsArray(root)) {
-        GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: root is not object";
+    ASSERT_TRUE(root != nullptr) << "PowerWakeupControllerTest011: json parse error";
+
+    bool isValidJson = cJSON_IsObject(root) || cJSON_IsArray(root);
+    if (!isValidJson) {
+        GTEST_LOG_(INFO) << "PowerWakeupControllerTest011: root is not object or array";
         cJSON_Delete(root);
-        return;
+        ASSERT_TRUE(isValidJson);
     }
 
     cJSON* item = NULL;
