@@ -323,7 +323,7 @@ void RunningLockMgr::InitLocksTypeCoordination()
 std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
     const sptr<IRemoteObject>& remoteObj)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     auto iterator = runningLocks_.find(remoteObj);
     if (iterator != runningLocks_.end()) {
         return iterator->second;
@@ -334,7 +334,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInner(
 std::shared_ptr<RunningLockInner> RunningLockMgr::GetRunningLockInnerByName(
     const std::string& name)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     std::shared_ptr<RunningLockInner> lockInner = nullptr;
     std::string result = ToString(runningLocks_.size());
     for (auto& iter : runningLocks_) {
@@ -362,7 +362,7 @@ std::shared_ptr<RunningLockInner> RunningLockMgr::CreateRunningLock(const sptr<I
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "CrtN:%{public}s,T:%{public}d",
         lockInner->GetName().c_str(), lockInner->GetType());
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<ffrt::mutex> lock(mutex_);
         runningLocks_.emplace(remoteObj, lockInner);
     }
     if (lockInner->GetType() != RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
@@ -389,7 +389,7 @@ bool RunningLockMgr::ReleaseLock(const sptr<IRemoteObject> remoteObj, const std:
         lockInner->GetName().c_str(), lockInner->GetType(), lockInner->GetBundleName().c_str());
     UnLock(remoteObj);
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<ffrt::mutex> lock(mutex_);
         runningLocks_.erase(remoteObj);
     }
     if (lockInner->GetType() != RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL) {
@@ -419,7 +419,7 @@ bool RunningLockMgr::NeedNotify(RunningLockType type)
 
 void RunningLockMgr::UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill)
 {
-    std::lock_guard<std::mutex> lock(screenLockListsMutex_);
+    std::lock_guard<ffrt::mutex> lock(screenLockListsMutex_);
     auto iterator = unSceneLockLists_.find(std::to_string(singleLockParam.lockid));
     if (fill) {
         if (iterator == unSceneLockLists_.end()) {
@@ -642,7 +642,7 @@ void RunningLockMgr::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockC
 
 void RunningLockMgr::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
 {
-    std::lock_guard<std::mutex> lock(screenLockListsMutex_);
+    std::lock_guard<ffrt::mutex> lock(screenLockListsMutex_);
     for (auto &iter : unSceneLockLists_) {
         runningLockLists.insert(std::pair<std::string, RunningLockInfo>(iter.first, iter.second));
     }
@@ -660,7 +660,7 @@ bool RunningLockMgr::IsUsed(const sptr<IRemoteObject>& remoteObj)
 
 uint32_t RunningLockMgr::GetRunningLockNum(RunningLockType type)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (type == RunningLockType::RUNNINGLOCK_BUTT) {
         return runningLocks_.size();
     }
@@ -683,7 +683,7 @@ uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type)
 
 bool RunningLockMgr::ExistValidRunningLock()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     for (auto it = runningLocks_.begin(); it != runningLocks_.end(); it++) {
         auto& lockinner = it->second;
         if (lockinner->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE) {
@@ -809,7 +809,7 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
 void RunningLockMgr::DumpInfo(std::string& result)
 {
     auto validSize = GetValidRunningLockNum();
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     result.append("RUNNING LOCK DUMP:\n");
     result.append("  totalSize=").append(ToString(runningLocks_.size()))
@@ -1123,7 +1123,7 @@ bool RunningLockMgr::ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remot
 std::vector<std::pair<sptr<IRemoteObject>, std::string>> RunningLockMgr::GetEnabledRunningLocksByType(
     RunningLockType type)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     std::vector<std::pair<sptr<IRemoteObject>, std::string>> runningLocks;
     for (const auto& iter : runningLocks_) {
         if (iter.second == nullptr) {

@@ -92,7 +92,7 @@ constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
 auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
 const bool G_REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
 SysParam::BootCompletedCallback g_bootCompletedCallback;
-static std::mutex powerInitMutex_;
+static ffrt::mutex powerInitMutex_;
 #ifdef POWER_PICKUP_ENABLE
 bool g_isPickUpOpen = false;
 #endif
@@ -2197,7 +2197,7 @@ void PowerMgrService::InvokerDeathRecipient::OnRemoteDied(const wptr<IRemoteObje
 PowerErrors PowerMgrService::SetForceTimingOut(bool enabled, const sptr<IRemoteObject>& token)
 {
     static sptr<IRemoteObject> thisInterfaceInvoker = nullptr;
-    static std::mutex localMutex;
+    static ffrt::mutex localMutex;
     static sptr<InvokerDeathRecipient> drt =
         sptr<InvokerDeathRecipient>::MakeSptr(__func__, [](const sptr<PowerMgrService>& pms) {
             auto stateMachine = pms->GetPowerStateMachine();

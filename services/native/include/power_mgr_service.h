@@ -395,21 +395,21 @@ private:
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};
     static std::atomic_bool foldScreenFlag_;
-    std::mutex wakeupMutex_;
-    std::mutex suspendMutex_;
+    ffrt::mutex wakeupMutex_;
+    ffrt::mutex suspendMutex_;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
-    std::mutex hibernateMutex_;
+    ffrt::mutex hibernateMutex_;
 #endif
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    std::mutex ulsrMutex_;
+    ffrt::mutex ulsrMutex_;
 #endif
-    std::mutex stateMutex_;
-    std::mutex shutdownMutex_;
-    std::mutex modeMutex_;
-    std::mutex screenOffPreMutex_;
+    ffrt::mutex stateMutex_;
+    ffrt::mutex shutdownMutex_;
+    ffrt::mutex modeMutex_;
+    ffrt::mutex screenOffPreMutex_;
     ffrt::mutex screenMutex_;
-    std::mutex dumpMutex_;
-    std::mutex lockMutex_;
+    ffrt::mutex dumpMutex_;
+    ffrt::mutex lockMutex_;
     std::shared_ptr<RunningLockMgr> runningLockMgr_ {nullptr};
     std::shared_ptr<PowerStateMachine> powerStateMachine_ {nullptr};
     std::shared_ptr<PowerMgrNotify> powerMgrNotify_ {nullptr};

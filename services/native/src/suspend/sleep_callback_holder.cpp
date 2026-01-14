@@ -23,7 +23,7 @@ SleepCallbackHolder::~SleepCallbackHolder() = default;
 
 void SleepCallbackHolder::AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     switch (priority) {
         case SleepPriority::LOW: {
             lowPriorityCallbacks_.insert(callback);
@@ -53,25 +53,25 @@ void SleepCallbackHolder::AddCallbackPidUid(const sptr<ISyncSleepCallback>& call
 
 SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetHighPriorityCallbacks()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     return highPriorityCallbacks_;
 }
 
 SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetDefaultPriorityCallbacks()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     return defaultPriorityCallbacks_;
 }
 
 SleepCallbackHolder::SleepCallbackContainerType SleepCallbackHolder::GetLowPriorityCallbacks()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     return lowPriorityCallbacks_;
 }
 
 void SleepCallbackHolder::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     RemoveCallback(lowPriorityCallbacks_, callback);
     RemoveCallback(defaultPriorityCallbacks_, callback);
     RemoveCallback(highPriorityCallbacks_, callback);
@@ -99,7 +99,7 @@ void SleepCallbackHolder::RemoveCallbackPidUid(const sptr<ISyncSleepCallback>& c
 
 std::pair<int32_t, int32_t> SleepCallbackHolder::FindCallbackPidUid(const sptr<ISyncSleepCallback>& callback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     auto iter = cachedRegister_.find(callback);
     return (iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0);
 }

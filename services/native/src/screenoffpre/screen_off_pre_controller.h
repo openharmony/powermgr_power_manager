@@ -46,15 +46,15 @@ private:
         void Notify();
 
     private:
-        std::mutex mutex_;
+        ffrt::mutex mutex_;
         std::set<sptr<IRemoteObject>> callbackSet_;
     };
 
     int32_t remainTime_ = 0;
     bool isRegistered_ = false;
     sptr<CallbackMgr> callbackMgr_;
-    std::mutex mutexLock_;
-    std::mutex ffrtMutex_;
+    ffrt::mutex mutexLock_;
+    ffrt::mutex ffrtMutex_;
     std::shared_ptr<PowerStateMachine> powerStateMachine_;
     std::shared_ptr<FFRTQueue> queue_;
     FFRTHandle eyeDetectTimeOutHandle_ {nullptr};

@@ -58,7 +58,7 @@ constexpr int32_t RETRY_COUNT_TIMES = 4;
 constexpr int32_t RETRY_INTERVAL_MS = 100;
 int32_t g_powerkeyShortPressIdCache = 3301; // SA_ID
 }
-std::mutex WakeupController::sourceUpdateMutex_;
+ffrt::mutex WakeupController::sourceUpdateMutex_;
 
 /** WakeupController Implement */
 WakeupController::WakeupController(std::shared_ptr<PowerStateMachine>& stateMachine)
