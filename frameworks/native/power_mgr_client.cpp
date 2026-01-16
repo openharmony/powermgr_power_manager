@@ -798,5 +798,15 @@ PowerErrors PowerMgrClient::UnRegisterAsyncShutdownCallback(const sptr<IAsyncShu
     proxy->UnRegisterAsyncShutdownCallbackIpc(callback, powerError);
     return static_cast<PowerErrors>(powerError);
 }
+
+PowerErrors PowerMgrClient::SetProxFilteringStrategy(ProxFilteringStrategy strategy)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WITH_RET(strategy >= ProxFilteringStrategy::MAX, PowerErrors::ERR_PARAM_INVALID);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->SetProxFilteringStrategyIpc(static_cast<int32_t>(strategy), token_, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
 } // namespace PowerMgr
 } // namespace OHOS

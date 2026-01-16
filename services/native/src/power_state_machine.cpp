@@ -1291,8 +1291,29 @@ void PowerStateMachine::PowerStateCallbackDeathRecipient::OnRemoteDied(const wpt
     FFRTUtils::SubmitTask(unRegFunc);
 }
 
+void PowerStateMachine::SetProxFilteringStrategy(ProxFilteringStrategy strategy)
+{
+#ifdef POWER_MANAGER_SUPPORT_FILTERING_PROXIMITY_EVENT
+    isProximityCloseEventFiltered_.store(
+        strategy == ProxFilteringStrategy::FILTERING_CLOSE, std::memory_order_relaxed);
+    POWER_HILOGI(FEATURE_POWER_STATE, "SetProxFilteringStrategy: %{public}d", static_cast<int32_t>(strategy));
+#endif
+}
+
+bool PowerStateMachine::FilterProximityCloseEvent()
+{
+#ifdef POWER_MANAGER_SUPPORT_FILTERING_PROXIMITY_EVENT
+    return isProximityCloseEventFiltered_.load(std::memory_order_relaxed);
+#endif
+    return false;
+}
+
 void PowerStateMachine::HandleProximityClose()
 {
+    if (FilterProximityCloseEvent()) {
+        POWER_HILOGI(FEATURE_POWER_STATE, "proximity close intercept, exit proximity-screen-off task");
+        return;
+    }
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_POWER_STATE, "Pms is nullptr");

@@ -315,6 +315,13 @@ public:
      */
     PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback);
 
+    /**
+     * Set the strategy of filtering the proximity event.
+     * @param strategy the strategy of filtering the proximity event.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors SetProxFilteringStrategy(ProxFilteringStrategy strategy);
+
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:
 #endif

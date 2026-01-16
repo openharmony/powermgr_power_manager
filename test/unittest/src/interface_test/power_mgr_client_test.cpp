@@ -1864,4 +1864,22 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient062, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient062 function end!");
 }
 
+/**
+ * @tc.name: PowerMgrClient063
+ * @tc.desc: test SetProxFilteringStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient063, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient063 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    PowerErrors ret = powerMgrClinet.SetProxFilteringStrategy(ProxFilteringStrategy::FILTERING_CLOSE);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    ret = powerMgrClinet.SetProxFilteringStrategy(ProxFilteringStrategy::NOT_FILTERING);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    ret = powerMgrClinet.SetProxFilteringStrategy(ProxFilteringStrategy::MAX);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+    ret = powerMgrClinet.SetProxFilteringStrategy(static_cast<ProxFilteringStrategy>(-1));
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient063 function end!");
+}
 } // namespace
