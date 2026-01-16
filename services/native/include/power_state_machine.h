@@ -244,6 +244,7 @@ public:
     {
         return isDuringCall_;
     }
+    void SetProxFilteringStrategy(ProxFilteringStrategy strategy);
 
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
@@ -262,6 +263,7 @@ public:
 #endif
     bool HandleDuringCall(bool isProximityClose);
     void HandleProximityClose();
+    bool FilterProximityCloseEvent();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     void ReportSuspendStart(int32_t uid, int32_t reason, bool force);
     void ReportWakeupStart(int32_t uid, int32_t reason);
@@ -464,6 +466,7 @@ private:
     static constexpr int32_t DISPLAY_MODE_ONLY_SECOND_SCREEN = 8;
 #endif
     std::atomic<bool> isDuringCall_ {false};
+    std::atomic<bool> isProximityCloseEventFiltered_ {false};
     bool SetDreamingState(StateChangeReason reason);
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     bool SetScreenCommonEventRules(StateChangeReason reason);

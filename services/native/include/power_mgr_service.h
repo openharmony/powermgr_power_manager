@@ -159,6 +159,8 @@ public:
     virtual PowerErrors RegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback,
         ShutdownPriority priority) override;
     virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) override;
+    virtual PowerErrors SetProxFilteringStrategy(
+        ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token) override;
 
     void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;
@@ -356,9 +358,8 @@ private:
     };
 
     class InvokerDeathRecipient : public DeathRecipient {
-        using CallbackType = std::function<void(const sptr<PowerMgrService>&)>;
-
     public:
+        using CallbackType = std::function<void(const sptr<PowerMgrService>&)>;
         InvokerDeathRecipient(std::string interfaceName, CallbackType callback)
             : interfaceName_(interfaceName),
               callback_(callback) {}

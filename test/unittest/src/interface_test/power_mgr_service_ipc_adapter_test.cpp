@@ -283,6 +283,10 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
+    PowerErrors SetProxFilteringStrategy(ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token)
+    {
+        return PowerErrors::ERR_OK;
+    }
 };
 
 class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {

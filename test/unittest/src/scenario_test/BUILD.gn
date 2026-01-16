@@ -16,7 +16,7 @@ import("../../../powermgr_test.gni")
 
 group("scenario_test") {
   testonly = true
-  deps = []
+  deps = [ "death_recipient:test_death_recipient_manager" ]
   if (has_sensors_sensor_part) {
     deps += [
       "proximity_controller:test_proximity_running_lock",
