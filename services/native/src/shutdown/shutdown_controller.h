@@ -18,6 +18,7 @@
 
 #include "actions/idevice_state_action.h"
 #include "device_power_action.h"
+#include "power_errors.h"
 #include "want.h"
 #include <atomic>
 #include <string>
@@ -35,8 +36,8 @@ public:
     ShutdownController();
     virtual ~ShutdownController() = default;
 
-    virtual void Reboot(const std::string& reason, bool force = false);
-    virtual void Shutdown(const std::string& reason);
+    virtual PowerErrors Reboot(const std::string& reason, bool force = false);
+    virtual PowerErrors Shutdown(const std::string& reason);
     bool IsShuttingDown();
     void EnableMock(IDevicePowerAction* mockPowerAction, IDeviceStateAction* mockStateAction)
     {
@@ -61,7 +62,7 @@ public:
 
 private:
     using IntentWant = OHOS::AAFwk::Want;
-    void RebootOrShutdown(const std::string& reason, bool isReboot, bool force = false);
+    PowerErrors RebootOrShutdown(const std::string& reason, bool isReboot, bool force = false);
     void Prepare(bool isReboot);
     void TurnOffScreen();
     void PublishShutdownEvent() const;

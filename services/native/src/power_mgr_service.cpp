@@ -1110,8 +1110,7 @@ PowerErrors PowerMgrService::RebootDeviceForDeprecated(const std::string& reason
     powerStateMachine_->ReportShutdownStart(uid, reason, true);
 #endif
     POWER_KHILOGI(FEATURE_SHUTDOWN, "Do reboot, called pid: %{public}d, uid: %{public}d", pid, uid);
-    shutdownController_->Reboot(reason, force);
-    return PowerErrors::ERR_OK;
+    return shutdownController_->Reboot(reason, force);
 }
 
 PowerErrors PowerMgrService::ForceRebootDevice(const std::string& reason)
@@ -1151,8 +1150,7 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
     powerStateMachine_->ReportShutdownStart(uid, reason, false);
 #endif
     POWER_KHILOGI(FEATURE_SHUTDOWN, "[UL_POWER] Do shutdown, called pid: %{public}d, uid: %{public}d", pid, uid);
-    shutdownController_->Shutdown(reason);
-    return PowerErrors::ERR_OK;
+    return shutdownController_->Shutdown(reason);
 }
 
 PowerErrors PowerMgrService::GetShutdownReason(std::string& reason)
