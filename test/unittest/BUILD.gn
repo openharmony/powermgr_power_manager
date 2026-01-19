@@ -77,7 +77,6 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
-  "window_manager:libwm_lite",
 ]
 
 if (has_multimodalinput_input_part) {
@@ -89,6 +88,11 @@ if (has_sensors_sensor_part) {
 if (has_hiviewdfx_hisysevent_part) {
   deps_ex += [ "hisysevent:libhisysevent" ]
 }
+if (power_manager_feature_report_screenoff_invalid) {
+  deps_ex += [ "window_manager:libwm_lite" ]
+  defines += [ "POWER_MANAGER_REPROT_SCREENOFF_INVALID" ]
+}
+
 defs = [ "POWER_GTEST" ]
 
 ##############################test_power_shell#####################################

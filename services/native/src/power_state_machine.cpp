@@ -73,7 +73,7 @@ std::atomic_bool g_prepareResult = true;
 pid_t g_callSetForceTimingOutPid = 0;
 pid_t g_callSetForceTimingOutUid = 0;
 const std::string LID_STATUS_SCENE_NAME = "lid_status";
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
 constexpr int32_t SCREEN_OFF_ABNORMAL = 0;
 constexpr int32_t SCREEN_OFF_INVALID = 1;
 #endif
@@ -366,7 +366,7 @@ void PowerStateMachine::EmplaceInactive()
                 && isDozeEnabled_.load(std::memory_order_relaxed)) {
                 state = DisplayState::DISPLAY_DOZE;
             }
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
             ReportScreenOffInvalidEvent(reason);
 #endif
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
@@ -449,7 +449,7 @@ void PowerStateMachine::EmplaceDim()
                 // failed but not return, still need to set screen off
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
             ReportAbnormalScreenOffEvent(reason);
 #endif
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
@@ -2729,12 +2729,14 @@ bool PowerStateMachine::IsSwitchOpenByPath()
     return status;
 }
 
+#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
 bool PowerStateMachine::ReportScreenOffInvalidEvent(StateChangeReason reason)
 {
     if (reason != StateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {
         POWER_HILOGD(FEATURE_POWER_STATE, "ReportScreenOffInvalidEvent fail, reason: %{public}d", reason);
         return false;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     FFRTTask task = [this] {
         // condition 1: no audiolock
         // condition 2: has screenlock
@@ -2755,6 +2757,7 @@ bool PowerStateMachine::ReportScreenOffInvalidEvent(StateChangeReason reason)
         }
     };
     FFRTUtils::SubmitTask(task);
+#endif
     return true;
 }
 
@@ -2765,6 +2768,7 @@ bool PowerStateMachine::ReportAbnormalScreenOffEvent(StateChangeReason reason)
         POWER_HILOGD(FEATURE_POWER_STATE, "ReportAbnormalScreenOffEvent fail, reason: %{public}d", reason);
         return false;
     }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     FFRTTask task = [this] {
         // condition 1: no cast
         if (forceTimingOut_.load()) {
@@ -2791,8 +2795,10 @@ bool PowerStateMachine::ReportAbnormalScreenOffEvent(StateChangeReason reason)
         }
     };
     FFRTUtils::SubmitTask(task);
+#endif
     return true;
 }
+#endif
 
 #ifdef POWER_MANAGER_TAKEOVER_SUSPEND
 TransitResult PowerStateMachine::TakeOverSuspendAction(StateChangeReason reason)
