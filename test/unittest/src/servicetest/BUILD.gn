@@ -64,7 +64,6 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "googletest:gtest_main",
-  "window_manager:libwm_lite",
 ]
 
 if (has_multimodalinput_input_part) {
@@ -73,6 +72,11 @@ if (has_multimodalinput_input_part) {
 
 if (has_sensors_sensor_part) {
   deps_ex += [ "sensor:sensor_interface_native" ]
+}
+
+if (power_manager_feature_report_screenoff_invalid) {
+  deps_ex += [ "window_manager:libwm_lite" ]
+  defines += [ "POWER_MANAGER_REPROT_SCREENOFF_INVALID" ]
 }
 
 ##############################native_test##########################################
