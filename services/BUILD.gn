@@ -136,7 +136,6 @@ ohos_shared_library("powermgrservice") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
-    "window_manager:libwm_lite",
   ]
 
   if (power_manager_feature_tv_dreaming) {
@@ -292,6 +291,11 @@ ohos_shared_library("powermgrservice") {
       "native/src/suspend/suspend_takeover_callback_holder.cpp",
     ]
     defines += [ "POWER_MANAGER_TAKEOVER_SUSPEND" ]
+  }
+
+  if (power_manager_feature_report_screenoff_invalid) {
+    external_deps += [ "window_manager:libwm_lite" ]
+    defines += [ "POWER_MANAGER_REPROT_SCREENOFF_INVALID" ]
   }
 
   subsystem_name = "powermgr"
