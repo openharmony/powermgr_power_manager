@@ -70,9 +70,13 @@ ohos_fuzztest("TakeOverShutdownCallbackFuzzTest") {
     "libxml2:libxml2",
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
-    "window_manager:libwm_lite",
   ]
   defines = []
+
+  if (power_manager_feature_report_screenoff_invalid) {
+    external_deps += [ "window_manager:libwm_lite" ]
+    defines += [ "POWER_MANAGER_REPROT_SCREENOFF_INVALID" ]
+  }
 
   if (has_hiviewdfx_hisysevent_part) {
     external_deps += [ "hisysevent:libhisysevent" ]

@@ -376,13 +376,16 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level
     pmsTest->UnLock(token);
     EXPECT_EQ(pmsTest->IsUsed(token), false);
 
+#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
     ret = stateMachine->ReportScreenOffInvalidEvent(StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     EXPECT_TRUE(ret);
     ret = stateMachine->ReportAbnormalScreenOffEvent(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
     EXPECT_TRUE(ret);
+#endif
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine007 function end!");
     GTEST_LOG_(INFO) << "NativePowerStateMachine007: Suspend Device end.";
 }
+
 /**
  * @tc.name: NativePowerStateMachine008
  * @tc.desc: test duration of DIM state

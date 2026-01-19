@@ -20,6 +20,8 @@ namespace PowerMgr {
 using namespace testing;
 using namespace testing::ext;
 
+const uint32_t ERROR_OK = 1;
+
 /**
  * @tc.name: ScreenCommonEventControllerTest
  * @tc.desc: test InitScreenCommonEventController
