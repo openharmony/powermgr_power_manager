@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"Consente di controllare lo schermo da remoto durante la condivisione dello schermo.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Consenti",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"Nega",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

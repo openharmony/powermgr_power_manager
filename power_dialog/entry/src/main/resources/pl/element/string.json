@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"Umożliwia kontrolowanie Twojego ekranu zdalnie w trakcie udostępniania ekranu.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Zezwól",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"Odmów",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

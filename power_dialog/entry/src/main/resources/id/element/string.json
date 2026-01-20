@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"Ini memungkinkan layar Anda dikontrol dari jarak jauh saat berbagi layar.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Izinkan",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"Tolak",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

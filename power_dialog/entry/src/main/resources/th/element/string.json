@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"ช่วยให้คุณสามารถควบคุมหน้าจอจากระยะไกลได้ในระหว่างการแบ่งปันหน้าจอ",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"อนุญาต",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"ปฏิเสธ",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
