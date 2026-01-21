@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"Isto permite que o seu ecrã seja controlado remotamente durante a partilha de ecrã.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Permitir",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"Negar",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

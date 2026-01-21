@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"Bu, ekran paylaşımı sırasında ekranınızın uzaktan kontrol edilmesini sağlar.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"İzin ver",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"Reddet",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

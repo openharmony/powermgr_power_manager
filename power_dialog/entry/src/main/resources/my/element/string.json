@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"စက်မျက်နှာပြင် ဝေမျှထားစဉ်အတွင်း သင့်စက်မျက်နှာပြင်ကို အဝေးမှ ထိန်းချုပ်ခွင့်ပြုပါသည်။",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"ခွင့်ပြုရန်",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -65,9 +65,9 @@
         },
         {
             "name":"bn_not_agree",
-            "value":"ပိတ်ပင်ရန်",
+            "value":"ငြင်းပယ်ရန်",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

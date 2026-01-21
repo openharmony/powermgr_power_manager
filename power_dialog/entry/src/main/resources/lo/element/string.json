@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"ສິ່ງ​ນີ້​ອະ​ນຸ​ຍາດ​ໃຫ້​​ຄວບ​ຄຸມ​ໜ້າ​ຈໍ​ຂອງທ່ານ​ຈາກ​ທາງ​ໄກ​ໃນ​ລະ​ຫວ່າງ​ການ​ແຊ​ຣ໌​ໜ້າ​ຈໍ.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"ອະນຸຍາດ",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"ປະຕິເສດ",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
