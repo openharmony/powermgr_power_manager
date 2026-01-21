@@ -25,14 +25,14 @@
             "name":"WARNING_TIP",
             "value":"Ini membolehkan skrin anda dikawal secara jauh semasa perkongsian skrin.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"bn_agree",
             "value":"Benarkan",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -67,7 +67,7 @@
             "name":"bn_not_agree",
             "value":"Tolak",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
