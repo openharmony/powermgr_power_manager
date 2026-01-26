@@ -30,7 +30,7 @@
 #include "power_state_machine_info.h"
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
 #include "window_manager_lite.h"
 #endif
 #include "suspend/itake_over_suspend_callback.h"
@@ -414,7 +414,7 @@ private:
     bool IsProximityClose();
 #endif
     void StartSleepTimer(PowerState from);
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
     bool ReportScreenOffInvalidEvent(StateChangeReason reason);
     bool ReportAbnormalScreenOffEvent(StateChangeReason reason);
 #endif

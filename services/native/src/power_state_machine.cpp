@@ -73,7 +73,7 @@ std::atomic_bool g_prepareResult = true;
 pid_t g_callSetForceTimingOutPid = 0;
 pid_t g_callSetForceTimingOutUid = 0;
 const std::string LID_STATUS_SCENE_NAME = "lid_status";
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
 constexpr int32_t SCREEN_OFF_ABNORMAL = 0;
 constexpr int32_t SCREEN_OFF_INVALID = 1;
 #endif
@@ -366,7 +366,7 @@ void PowerStateMachine::EmplaceInactive()
                 && isDozeEnabled_.load(std::memory_order_relaxed)) {
                 state = DisplayState::DISPLAY_DOZE;
             }
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
             ReportScreenOffInvalidEvent(reason);
 #endif
             uint32_t ret = this->stateAction_->SetDisplayState(state, reason);
@@ -449,7 +449,7 @@ void PowerStateMachine::EmplaceDim()
                 // failed but not return, still need to set screen off
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to DIM, display error, ret: %{public}u", ret);
             }
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
             ReportAbnormalScreenOffEvent(reason);
 #endif
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
@@ -2729,7 +2729,7 @@ bool PowerStateMachine::IsSwitchOpenByPath()
     return status;
 }
 
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
 bool PowerStateMachine::ReportScreenOffInvalidEvent(StateChangeReason reason)
 {
     if (reason != StateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {

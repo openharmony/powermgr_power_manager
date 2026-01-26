@@ -75,7 +75,7 @@ ohos_fuzztest("IsRunningLockTypeSupportedFuzzTest") {
 
   if (power_manager_feature_report_screenoff_invalid) {
     external_deps += [ "window_manager:libwm_lite" ]
-    defines += [ "POWER_MANAGER_REPROT_SCREENOFF_INVALID" ]
+    defines += [ "POWER_MANAGER_REPORT_SCREENOFF_INVALID" ]
   }
 
   if (has_hiviewdfx_hisysevent_part) {
