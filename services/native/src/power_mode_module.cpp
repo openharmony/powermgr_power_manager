@@ -77,21 +77,24 @@ void PowerModeModule::InitPowerModeTransitMap()
 
 void PowerModeModule::InitPowerMode()
 {
-    POWER_HILOGI(FEATURE_POWER_MODE, "Start to init power mode.");
-    int32_t saveMode = SettingHelper::ReadCurrentMode(static_cast<int32_t>(this->mode_));
-    this->mode_ = static_cast<PowerMode>(saveMode);
-    Prepare();
-    if (!DelayedSingleton<PowerModePolicy>::GetInstance()->InitRecoverMap()) {
-        UpdateModepolicy();
-        RunAction(false);
-        return;
-    }
+    std::call_once(isReady_, [this]() {
+        POWER_KHILOGI(FEATURE_POWER_MODE, "Start to init power mode.");
+        int32_t saveMode = SettingHelper::ReadCurrentMode(LAST_MODE_FLAG);
+        this->mode_ = (saveMode == LAST_MODE_FLAG ? PowerMode::NORMAL_MODE : static_cast<PowerMode>(saveMode));
+        Prepare();
+        if (!DelayedSingleton<PowerModePolicy>::GetInstance()->InitRecoverMap()) {
+            UpdateModepolicy();
+            RunAction(false);
+            return;
+        }
 #ifdef HAS_RESOURCE_SCHEDULE_SERVICE_PART
-    if (IsBootNeedActions()) {
-        UpdateModepolicy();
-        RunAction(true);
-    }
+        if (IsBootNeedActions()) {
+            UpdateModepolicy();
+            RunAction(true);
+        }
 #endif
+        POWER_KHILOGI(FEATURE_POWER_MODE, "init power mode done.");
+    });
 }
 
 bool PowerModeModule::IsBootNeedActions()
@@ -99,6 +102,34 @@ bool PowerModeModule::IsBootNeedActions()
     POWER_HILOGI(FEATURE_POWER_MODE, "lastMode_:%{public}u, this->mode:%{public}u",
         lastMode_, static_cast<uint32_t>(mode_));
     return lastMode_ == LAST_MODE_FLAG && this->mode_ == PowerMode::PERFORMANCE_MODE;
+}
+
+void PowerModeModule::SubscribeCommonEvent()
+{
+    using namespace OHOS::EventFwk;
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    if (subscriberPtr_ == nullptr) {
+        subscriberPtr_ = std::make_shared<PowerModeCommonEventSubscriber>(subscribeInfo);
+    }
+    if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr_)) {
+        POWER_HILOGE(FEATURE_POWER_MODE, "Subscribe COMMON_EVENT failed");
+        subscriberPtr_ = nullptr;
+    }
+}
+
+void PowerModeModule::PowerModeCommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
+{
+    std::string action = data.GetWant().GetAction();
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGI(FEATURE_POWER_MODE, "get PowerMgrService fail");
+        return;
+    }
+    if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY) {
+        pms->GetPowerModeModule().InitPowerMode();
+    }
 }
 
 bool PowerModeModule::CanTransitTo(PowerMode from, PowerMode to)

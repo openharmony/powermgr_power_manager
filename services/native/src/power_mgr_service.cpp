@@ -132,7 +132,6 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(SUSPEND_MANAGER_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_ID);
-    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(DISPLAY_MANAGER_SERVICE_SA_ID);
 #ifdef MSDP_MOVEMENT_ENABLE
     AddSystemAbilityListener(MSDP_MOVEMENT_SERVICE_ID);
@@ -140,6 +139,7 @@ void PowerMgrService::OnStart()
 #ifdef POWER_PICKUP_ENABLE
     AddSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
 #endif
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     PowerExtIntfWrapper::Instance().Init();
@@ -265,6 +265,8 @@ void PowerMgrService::PowerExternalAbilityInit()
 
 void PowerMgrService::RegisterSettingPowerModeObservers()
 {
+    auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    power->GetPowerModeModule().InitPowerMode();
     SettingObserver::UpdateFunc updateFunc = [&](const std::string &key) { PowerModeSettingUpdateFunc(key); };
     SettingHelper::RegisterSettingPowerModeObserver(updateFunc);
 }
@@ -832,11 +834,6 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 {
     POWER_HILOGI(COMP_SVC, "systemAbilityId=%{public}d, deviceId=%{private}s Add",
         systemAbilityId, deviceId.c_str());
-    if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        if (DelayedSpSingleton<PowerSaveMode>::GetInstance()) {
-            this->GetPowerModeModule().InitPowerMode();
-        }
-    }
 #ifdef HAS_DISPLAY_MANAGER_PART
     if (systemAbilityId == DISPLAY_MANAGER_SERVICE_ID) {
 #else
@@ -876,6 +873,15 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         WakeupController::PickupConnectMotionConfig(true);
     }
 #endif
+    OnAddSystemAbilityInner(systemAbilityId, deviceId);
+}
+
+void PowerMgrService::OnAddSystemAbilityInner(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
+{
+    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        this->GetPowerModeModule().SubscribeCommonEvent();
+        return;
+    }
 }
 
 #ifdef MSDP_MOVEMENT_ENABLE

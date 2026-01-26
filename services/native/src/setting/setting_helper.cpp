@@ -85,6 +85,25 @@ int32_t SettingHelper::GetSettingIntValue(const std::string& key, int32_t defaul
     return value;
 }
 
+int32_t SettingHelper::GetSettingIntValueWithRetry(const std::string& key, int32_t defaultVal)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    int32_t value = defaultVal;
+    ErrCode ret = settingProvider.GetIntValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting key=%{public}s failed, ret=%{public}d", key.c_str(), ret);
+        int32_t retryTimes = 20;
+        constexpr int32_t waitTime = 100;
+        while (ret == ERR_INVALID_OPERATION && retryTimes > 0) {
+            POWER_HILOGW(COMP_UTILS, "key=%{public}s, retryTimes=%{public}d ", key.c_str(), retryTimes);
+            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+            ret = settingProvider.GetIntValue(key, value);
+            retryTimes--;
+        }
+    }
+    return value;
+}
+
 void SettingHelper::SetSettingIntValue(const std::string& key, int32_t value)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
@@ -125,6 +144,25 @@ const std::string SettingHelper::GetSettingStringValue(const std::string& key)
     ErrCode ret = settingProvider.GetStringValue(key, value);
     if (ret != ERR_OK) {
         POWER_HILOGW(COMP_UTILS, "get setting key=%{public}s failed, ret=%{public}d", key.c_str(), ret);
+    }
+    return value;
+}
+
+const std::string SettingHelper::GetSettingStringValueWithRetry(const std::string& key, const std::string& defaultVal)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    std::string value = defaultVal;
+    ErrCode ret = settingProvider.GetStringValue(key, value);
+    if (ret != ERR_OK) {
+        POWER_HILOGW(COMP_UTILS, "get setting key=%{public}s failed, ret=%{public}d", key.c_str(), ret);
+        int32_t retryTimes = 20;
+        constexpr int32_t waitTime = 100;
+        while (ret == ERR_INVALID_OPERATION && retryTimes > 0) {
+            POWER_HILOGW(COMP_UTILS, "key=%{public}s, retryTimes=%{public}d ", key.c_str(), retryTimes);
+            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+            ret = settingProvider.GetStringValue(key, value);
+            retryTimes--;
+        }
     }
     return value;
 }
@@ -522,7 +560,7 @@ void SettingHelper::SaveCurrentMode(int32_t mode)
 
 int32_t SettingHelper::ReadCurrentMode(int32_t defaultMode)
 {
-    return GetSettingIntValue(SETTING_POWER_MODE_KEY, defaultMode);
+    return GetSettingIntValueWithRetry(SETTING_POWER_MODE_KEY, defaultMode);
 }
 
 void SettingHelper::RegisterSettingPowerModeObserver(SettingObserver::UpdateFunc& func)
@@ -582,7 +620,7 @@ bool SettingHelper::GetSettingDuringCallState(const std::string& key)
 
 const std::string SettingHelper::ReadPowerModeRecoverMap()
 {
-    return GetSettingStringValue(SETTING_POWER_MODE_BACKUP_KEY);
+    return GetSettingStringValueWithRetry(SETTING_POWER_MODE_BACKUP_KEY);
 }
 
 void SettingHelper::SavePowerModeRecoverMap(const std::string& jsonConfig)
