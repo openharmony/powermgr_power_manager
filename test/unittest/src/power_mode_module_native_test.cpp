@@ -43,8 +43,22 @@ void PowerModeTestCallback::OnPowerModeChanged(PowerMode mode)
     POWER_HILOGI(LABEL_TEST, "PowerModeTestCallback::OnPowerModeChanged.");
 }
 
+namespace OHOS::EventFwk {
+bool CommonEventManager::SubscribeCommonEvent(const std::shared_ptr<CommonEventSubscriber>& subscriber)
+{
+    bool ret = true;
+    static std::list<bool> data = {false, true, true, true};
+    if (!data.empty()) {
+        ret = data.front();
+        data.pop_front();
+    }
+    return ret;
+}
+} // OHOS::EventFwk
+
 namespace {
 using ModeActionPolicy = std::function<void(bool)>;
+constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 
 /**
  * @tc.name: PowerModeModuleNativeTest001
@@ -118,6 +132,52 @@ HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest002, TestSize.Leve
     powerModeModuleTest->SetSocPerfState(false);
     POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest002 function end!");
     GTEST_LOG_(INFO) << "PowerModeModuleNativeTest002 end.";
+}
+
+/**
+ * @tc.name: PowerModeModuleNativeTest003
+ * @tc.desc: test PowerModeModule InitPowerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerModeModuleNativeTest, PowerModeModuleNativeTest003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerModeModuleNativeTest003 start.";
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest003 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    // case 0: test SubscribeCommonEvent DATA_SHARE_READY fail
+    std::shared_ptr<PowerModeModule> powerModeModuleTest = make_shared<PowerModeModule>();
+    EXPECT_TRUE(powerModeModuleTest->subscriberPtr_ == nullptr);
+    powerModeModuleTest->SubscribeCommonEvent();
+    EXPECT_TRUE(powerModeModuleTest->subscriberPtr_ == nullptr);
+    // case 1: test SubscribeCommonEvent DATA_SHARE_READY success
+    powerModeModuleTest->SubscribeCommonEvent();
+    EXPECT_TRUE(powerModeModuleTest->subscriberPtr_ != nullptr);
+    // case 2: test SubscribeCommonEvent DATA_SHARE_READY repeatedly
+    powerModeModuleTest->SubscribeCommonEvent();
+    EXPECT_TRUE(powerModeModuleTest->subscriberPtr_ != nullptr);
+    // case 3: test PowerModeModule OnreceiveEvent empty want branch
+    class TestPowerModeCallback : public IRemoteStub<IPowerModeCallback> {
+    public:
+        void OnPowerModeChanged(PowerMode mode) override
+        {
+            callCount_++;
+        }
+        uint32_t callCount_ {0};
+    };
+    sptr<TestPowerModeCallback> callback = new TestPowerModeCallback();
+    pmsTest->GetPowerModeModule().AddPowerModeCallback(callback);
+    OHOS::AAFwk::Want want;
+    powerModeModuleTest->subscriberPtr_->OnReceiveEvent(OHOS::EventFwk::CommonEventData(want));
+    EXPECT_TRUE(callback->callCount_ == 0);
+    // case 4: test PowerModeModule OnreceiveEvent DATA_SHARE_READY branch
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
+    powerModeModuleTest->subscriberPtr_->OnReceiveEvent(OHOS::EventFwk::CommonEventData(want));
+    EXPECT_TRUE(callback->callCount_ == 1); // InitPowerMode called only once
+    // case 5: test PowerMgrService OnAddSystemAbilityInner
+    pmsTest->OnAddSystemAbility(COMMON_EVENT_SERVICE_ID, "");
+    EXPECT_TRUE(callback->callCount_ == 1); // InitPowerMode called only once
+    POWER_HILOGI(LABEL_TEST, "PowerModeModuleNativeTest003 function end!");
+    GTEST_LOG_(INFO) << "PowerModeModuleNativeTest003 end.";
 }
 
 /**

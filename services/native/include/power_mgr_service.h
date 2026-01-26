@@ -223,6 +223,11 @@ public:
 #endif
     void OnChargeStateChanged();
 
+    inline PowerModeModule& GetPowerModeModule()
+    {
+        return powerModeModule_;
+    }
+
     std::shared_ptr<RunningLockMgr> GetRunningLockMgr() const
     {
         return runningLockMgr_;
@@ -371,13 +376,9 @@ private:
         CallbackType callback_;
     };
 
-    inline PowerModeModule& GetPowerModeModule()
-    {
-        return powerModeModule_;
-    }
-
     bool Init();
     bool PowerStateMachineInit();
+    void OnAddSystemAbilityInner(int32_t systemAbilityId, const std::string& deviceId);
     std::string GetBundleNameByUid(const int32_t uid);
     RunningLockParam FillRunningLockParam(const RunningLockInfo& info, const uint64_t lockid, int32_t timeOutMS = -1);
     void SubscribeCommonEvent();
