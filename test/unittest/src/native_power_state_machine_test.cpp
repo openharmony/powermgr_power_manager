@@ -376,7 +376,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine007, TestSize.Level
     pmsTest->UnLock(token);
     EXPECT_EQ(pmsTest->IsUsed(token), false);
 
-#ifdef POWER_MANAGER_REPROT_SCREENOFF_INVALID
+#ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
     ret = stateMachine->ReportScreenOffInvalidEvent(StateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     EXPECT_TRUE(ret);
     ret = stateMachine->ReportAbnormalScreenOffEvent(StateChangeReason::STATE_CHANGE_REASON_TIMEOUT);
