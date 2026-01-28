@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../powermgr.gni")
+import("../../../powermgr_test.gni")
 
 module_output_path = "power_manager/power_manager"
 
@@ -34,6 +35,7 @@ config("module_private_config") {
     "${powermgr_root_path}/test/unittest/include",
     "${powermgr_root_path}/test/unittest/include/servicetest",
     "${powermgr_root_path}/test/unittest/include/servicetest/mock",
+    "${powermgr_test_path}/mock/action",
   ]
   cflags_cc = [ "-Wno-overloaded-virtual" ]
   if (power_manager_feature_wakeup_action) {
@@ -64,6 +66,7 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "googletest:gtest_main",
+  "googletest:gmock_main",
 ]
 
 if (has_multimodalinput_input_part) {
