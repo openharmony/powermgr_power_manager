@@ -80,7 +80,6 @@ const char* POWER_PLUGIN_AUTORUN_PATH = "/system/lib/powerplugin/autorun";
 #endif
 const std::string POWERMGR_SERVICE_NAME = "PowerMgrService";
 const std::string REASON_POWER_KEY = "power_key";
-static std::string g_wakeupReason = "";
 const std::string POWER_VIBRATOR_CONFIG_FILE = "etc/power_config/power_vibrator.json";
 const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/power_vibrator.json";
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
@@ -1137,11 +1136,9 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     if (reason == SHUTDOWN_FAST_REASON) {
-        g_wakeupReason = reason;
         POWER_HILOGD(FEATURE_SHUTDOWN, "Calling Fast ShutDownDevice success");
         return SuspendDevice(now, SuspendDeviceType::SUSPEND_DEVICE_REASON_STR, true);
     }
-    g_wakeupReason = "";
     std::lock_guard lock(shutdownMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
