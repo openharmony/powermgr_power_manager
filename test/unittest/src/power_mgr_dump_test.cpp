@@ -136,4 +136,122 @@ HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative004, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative004 function end!");
     GTEST_LOG_(INFO) << "PowerMgrDumpNative004 function end!";
 }
+
+/**
+ * @tc.name: PowerMgrDumpNative005
+ * @tc.desc: Test that args in PowerMgrDump is -t
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative005 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative005 function start!");
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative005 fail to get PowerMgrService";
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg = u"-t";
+    args.push_back(arg);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative005 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative005 function end!";
+}
+
+/**
+ * @tc.name: PowerMgrDumpNative006
+ * @tc.desc: Test that args in PowerMgrDump is -f
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative006 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative006 function start!");
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative006 fail to get PowerMgrService";
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg = u"-f";
+    args.push_back(arg);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative006 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative006 function end!";
+}
+
+/**
+ * @tc.name: PowerMgrDumpNative007
+ * @tc.desc: Test that args in PowerMgrDump is -d
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative007 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative007 function start!");
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative007 fail to get PowerMgrService";
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg = u"-d";
+    args.push_back(arg);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative007 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative007 function end!";
+}
+
+/**
+ * @tc.name: PowerMgrDumpNative008
+ * @tc.desc: Test that args in PowerMgrDump is -r
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative008 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative008 function start!");
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative008 fail to get PowerMgrService";
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg = u"-r";
+    args.push_back(arg);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative008 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative008 function end!";
+}
+
+/**
+ * @tc.name: PowerMgrDumpNative009
+ * @tc.desc: Test that args in PowerMgrDump is -s
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative009, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative009 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative009 function start!");
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative009 fail to get PowerMgrService";
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg = u"-s";
+    args.push_back(arg);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative009 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative009 function end!";
+}
+
+/**
+ * @tc.name: PowerMgrDumpNative010
+ * @tc.desc: Test that args in PowerMgrDump is -a
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerMgrDumpTest, PowerMgrDumpNative010, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative010 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative010 function start!");
+    EXPECT_TRUE(g_pmsTest != nullptr) << "PowerMgrDumpNative010 fail to get PowerMgrService";
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg = u"-a";
+    args.push_back(arg);
+    g_pmsTest->runningLockMgr_ = nullptr;
+    g_pmsTest->powerStateMachine_ = std::make_shared<PowerStateMachine>(nullptr);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    g_pmsTest->runningLockMgr_ = std::make_shared<RunningLockMgr>(g_pmsTest);
+    EXPECT_TRUE(g_pmsTest->Dump(fd, args) == ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrDumpNative010 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrDumpNative010 function end!";
+}
 } // namespace
