@@ -865,12 +865,9 @@ bool WakeupController::IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) 
 
 void WakeupController::ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrService>& pms, WakeupDeviceType reason)
 {
-    FFRTTask powerOnInternalScreenTask = [this, pms, reason]() {
-        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power on internal screen only when external screen is on");
-        PowerOnInternalScreen(reason);
-        pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
-    };
-    stateMachine_->SetDelayTimer(0, PowerStateMachine::SET_INTERNAL_SCREEN_STATE_MSG, powerOnInternalScreenTask);
+    POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Power on internal screen only when external screen is on");
+    PowerOnInternalScreen(reason);
+    pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
 }
 #endif
 
