@@ -155,4 +155,23 @@ HWTEST_F (PowerUtilsTest, PowerUtilsTest004, TestSize.Level0)
         StateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
     POWER_HILOGI(LABEL_TEST, "PowerUtilsTest004 function end!");
 }
+
+/**
+ * @tc.name: PowerUtilsTest005
+ * @tc.desc: Test JsonToSimpleStr
+ * @tc.type: FUNC
+ */
+HWTEST_F (PowerUtilsTest, PowerUtilsTest005, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerUtilsTest005 function start!");
+    std::string str = PowerUtils::JsonToSimpleStr("123456789");
+    EXPECT_EQ(str, "123456789");
+    str = PowerUtils::JsonToSimpleStr("12 3456789");
+    EXPECT_EQ(str, "123456789");
+    str = PowerUtils::JsonToSimpleStr("12\n3456789");
+    EXPECT_EQ(str, "123456789");
+    str = PowerUtils::JsonToSimpleStr("12\n3 456789");
+    EXPECT_EQ(str, "123456789");
+    POWER_HILOGI(LABEL_TEST, "PowerUtilsTest005 function end!");
+}
 }
