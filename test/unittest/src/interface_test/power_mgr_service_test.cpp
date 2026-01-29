@@ -740,6 +740,10 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService026, TestSize.Level2)
         WakeupDeviceType::WAKEUP_DEVICE_BLUETOOTH_INCOMING_CALL);
     EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("wake up screen:wake screen switch on and receive notification"),
         WakeupDeviceType::WAKEUP_DEVICE_MESSAGE_NOTIFICATION);
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("fake_str_check_unlock"),
+        WakeupDeviceType::WAKEUP_DEVICE_EXIT_SYSTEM_STR);
+    EXPECT_EQ(PowerUtils::ParseWakeupDeviceType("end_dream"),
+        WakeupDeviceType::WAKEUP_DEVICE_END_DREAM);
     pmsTest_->OnStop();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService026 function end!");
 }
@@ -1181,6 +1185,10 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService040, TestSize.Level2)
         "WAKEUP_ULSR");
     EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_MESSAGE_NOTIFICATION),
         "MESSAGE_NOTIFICATION");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_TP_TOUCH),
+        "TP_TOUCH");
+    EXPECT_EQ(PowerUtils::GetReasonTypeString(StateChangeReason::STATE_CHANGE_REASON_EX_SCREEN_INIT),
+        "EX_SCREEN_INIT");
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService040 end!");
 }
 
