@@ -90,9 +90,9 @@ void SuspendController::RemoveCallback(const sptr<ISyncSleepCallback>& callback)
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
 }
 
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
 void SuspendController::AddCallback(const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority)
 {
-#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
     if (callback == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
         return;
@@ -101,12 +101,10 @@ void SuspendController::AddCallback(const sptr<ITakeOverSuspendCallback>& callba
     POWER_HILOGI(FEATURE_SUSPEND,
         "TakeOver Suspend callback added, priority=%{public}u, pid=%{public}d, uid=%{public}d", priority,
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
-#endif
 }
 
 void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& callback)
 {
-#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
     if (callback == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
         return;
@@ -115,8 +113,8 @@ void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& cal
     POWER_HILOGI(FEATURE_SUSPEND,
         "TakeOver Suspend callback removed, pid=%{public}d, uid=%{public}d",
         IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
-#endif
 }
+#endif
 
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
@@ -168,9 +166,7 @@ bool SuspendController::TriggerTakeOverSuspendCallback(SuspendDeviceType type)
     isTakeover = TriggerTakeOverSuspendCallbackInner(lowPriorityCallbacks, "Low", type);
     return isTakeover;
 }
-#endif
 
-#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
 bool SuspendController::TriggerTakeOverSuspendCallbackInner(
     TakeOverSuspendCallbackHolder::TakeoverSuspendCallbackContainerType& callbacks,
     const std::string& priority, SuspendDeviceType type)
@@ -182,11 +178,11 @@ bool SuspendController::TriggerTakeOverSuspendCallbackInner(
         return isTakeover;
     }
     for (const auto& callback : callbacks) {
-        auto pidUid = TakeOverSuspendCallbackHolder::GetInstance().FindCallbackPidUid(callback);
         if (callback == nullptr) {
             POWER_HILOGE(FEATURE_SUSPEND, "callback is nullptr");
             continue;
         }
+        auto pidUid = TakeOverSuspendCallbackHolder::GetInstance().FindCallbackPidUid(callback);
         int64_t start = GetTickCount();
         isTakeover = isTakeover || callback->OnTakeOverSuspend(type);
         int64_t count = GetTickCount() - start;
@@ -233,7 +229,7 @@ void SuspendController::Init()
         POWER_HILOGI(FEATURE_SUSPEND, "registered type=%{public}u action=%{public}u delayMs=%{public}u",
             (*source).GetReason(), (*source).GetAction(), (*source).GetDelay());
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
-        RETURN_IF(monitor == nullptr)
+        if (monitor == nullptr) continue;
         monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
             this->ControlListener(reason, action, delay);
         });
@@ -261,7 +257,7 @@ void SuspendController::Init()
 
 void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
 {
-    FFRTUtils::SubmitTask([this, reason] {
+    FFRTTask suspendTask = [this, reason]() {
         g_monitorMutex.lock();
         auto suspendMonitor = GetSpecifiedSuspendMonitor(reason);
         if (suspendMonitor == nullptr) {
@@ -271,7 +267,15 @@ void SuspendController::ExecSuspendMonitorByReason(SuspendDeviceType reason)
         }
         suspendMonitor->Notify();
         g_monitorMutex.unlock();
-    });
+    };
+
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+        // make sure that open/close switch tasks are processed in the order they were created
+        POWER_HILOGI(FEATURE_SUSPEND, "switch trigger suspend");
+        stateMachine_->SetDelayTimer(0, PowerStateMachine::SWITCH_TRIGGER_WAKEUP_OR_SUSPEND_MSG, suspendTask);
+    } else {
+        FFRTUtils::SubmitTask(suspendTask);
+    }
 }
 
 void SuspendController::UpdateSuspendSources()
@@ -314,7 +318,7 @@ void SuspendController::UpdateSuspendSources()
     uint32_t id = 0;
     for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
         std::shared_ptr<SuspendMonitor> monitor = SuspendMonitor::CreateMonitor(*source);
-        RETURN_IF(monitor == nullptr)
+        if (monitor == nullptr) continue;
         monitor->RegisterListener([this](SuspendDeviceType reason, uint32_t action, uint32_t delay) {
             this->ControlListener(reason, action, delay);
         });
@@ -526,12 +530,35 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
 
 void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "get PowerStateMachine instance error");
         return;
     }
 
-    if (NeedToSkipCurrentSuspend(reason, action, delay)) {
+    if (pms->CheckDialogAndShuttingDown()) {
+        return;
+    }
+
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
+        stateMachine_->SetSwitchAction(action);
+    }
+    bool isScreenOn = stateMachine_->IsScreenOn();
+    if (!isScreenOn) {
+        SuspendWhenScreenOff(reason, action, delay);
+        return;
+    }
+
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
+        ProcessPowerOffInternalScreenOnly(pms, reason);
+        return;
+    }
+#endif
+    if (CheckDuringCall(pms, reason)) {
         return;
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -555,25 +582,8 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     }
 }
 
-bool SuspendController::NeedToSkipCurrentSuspend(SuspendDeviceType reason, uint32_t action, uint32_t delay)
+bool SuspendController::CheckDuringCall(const sptr<PowerMgrService>& pms, SuspendDeviceType reason)
 {
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "get PowerMgrService instance error");
-        return true;
-    }
-    if (pms->CheckDialogAndShuttingDown()) {
-        return true;
-    }
-
-    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-        stateMachine_->SetSwitchAction(action);
-    }
-    bool isScreenOn = stateMachine_->IsScreenOn();
-    if (!isScreenOn) {
-        SuspendWhenScreenOff(reason, action, delay);
-        return true;
-    }
     if (pms->IsDuringCallStateEnable()) {
         if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY &&
             Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode() == Rosen::FoldDisplayMode::SUB &&
@@ -582,13 +592,6 @@ bool SuspendController::NeedToSkipCurrentSuspend(SuspendDeviceType reason, uint3
             return true;
         }
     }
-
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
-        ProcessPowerOffInternalScreenOnly(pms, reason);
-        return true;
-    }
-#endif
     return false;
 }
 
@@ -637,13 +640,10 @@ bool SuspendController::IsPowerOffInernalScreenOnlyScene(
 
 void SuspendController::ProcessPowerOffInternalScreenOnly(const sptr<PowerMgrService>& pms, SuspendDeviceType reason)
 {
-    FFRTTask powerOffInternalScreenTask = [this, pms, reason]() {
-        POWER_HILOGI(
-            FEATURE_SUSPEND, "[UL_POWER] Power off internal screen when closing switch is configured as no operation");
-        PowerOffInternalScreen(reason);
-        pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
-    };
-    stateMachine_->SetDelayTimer(0, PowerStateMachine::SET_INTERNAL_SCREEN_STATE_MSG, powerOffInternalScreenTask);
+    POWER_HILOGI(
+        FEATURE_SUSPEND, "[UL_POWER] Power off internal screen when closing switch is configured as no operation");
+    PowerOffInternalScreen(reason);
+    pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
 }
 #endif
 
@@ -982,7 +982,7 @@ void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::
     bool isWakeupReasonConfigMatched = suspendController->GetWakeupReasonConfigMatchedFlag();
     if (isWakeupReasonConfigMatched
         || wakeupController->IsWakeupReasonConfigMatched(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON)) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] wakeup reason matcged config, skip powerkey up");
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] wakeup reason matched config, skip powerkey up");
         suspendController->SetWakeupReasonConfigMatchedFlag(false);
         return;
     }
@@ -991,8 +991,8 @@ void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::
     static int64_t lastPowerkeyUpTime = 0;
     int64_t currTime = GetTickCount();
     if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
-        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within 350ms, skip. "
-            "%{public}" PRId64 ", %{public}" PRId64, currTime, lastPowerkeyUpTime);
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within %{public}" PRId64 "ms, skip. "
+            "%{public}" PRId64 ", %{public}" PRId64, POWERKEY_MIN_INTERVAL, currTime, lastPowerkeyUpTime);
         return;
     }
     lastPowerkeyUpTime = currTime;

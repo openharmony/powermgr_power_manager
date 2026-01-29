@@ -353,21 +353,6 @@ HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest008, TestSize.Lev
 #endif
 
 /**
- * @tc.name: RunningLockMgrAbnormalTest009
- * @tc.desc: Test SuspendController pms == nullptr
- * @tc.type: FUNC
- * @tc.require: ICGV1M
- */
-HWTEST_F(RunningLockMgrAbnormalTest, RunningLockMgrAbnormalTest009, TestSize.Level1)
-{
-    POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest009 function start!");
-    auto suspendController = std::make_shared<SuspendController>(nullptr, nullptr, nullptr);
-    EXPECT_TRUE(suspendController->NeedToSkipCurrentSuspend(
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, 0, 0));
-    POWER_HILOGI(LABEL_TEST, "RunningLockMgrAbnormalTest009 function end!");
-}
-
-/**
  * @tc.name: RunningLockMgrAbnormalTest010
  * @tc.desc: Test IsVoiceAppForeground
  * @tc.type: FUNC

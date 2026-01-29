@@ -2906,16 +2906,16 @@ void PowerStateMachine::ReportShutdownStart(int32_t uid, const std::string& reas
 #endif
 
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-    bool PowerStateMachine::SetScreenCommonEventRules(StateChangeReason reason)
-    {
-        auto screenCommonEventController = DelayedSingleton<ScreenCommonEventController>::GetInstance();
-        if (screenCommonEventController == nullptr) {
-            POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine screenCommonEventController is nullptr.");
-            return false;
-        }
-        screenCommonEventController->SetScreenOnCommonEventRules(reason);
-        return true;
+bool PowerStateMachine::SetScreenCommonEventRules(StateChangeReason reason)
+{
+    auto screenCommonEventController = DelayedSingleton<ScreenCommonEventController>::GetInstance();
+    if (screenCommonEventController == nullptr) {
+        POWER_HILOGE(FEATURE_POWER_STATE, "PowerStateMachine screenCommonEventController is nullptr.");
+        return false;
     }
+    screenCommonEventController->SetScreenOnCommonEventRules(reason);
+    return true;
+}
 #endif
 } // namespace PowerMgr
 } // namespace OHOS
