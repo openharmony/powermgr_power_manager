@@ -320,8 +320,8 @@ HWTEST_F(ShutdownClientTest, GetShutdownReason002, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "GetShutdownReason002 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     std::string setReasonFirst = "test for a normal string";
- 	std::string setReasonSecond =
- 	    "testforaverylongstringinGetShutdownReason002GetShutdownReason002GetShutdownReason002GetShutdownReas";
+    std::string setReasonSecond =
+        "testforaverylongstringinGetShutdownReason002GetShutdownReason002GetShutdownReason002GetShutdownReas";
     PowerErrors ret = powerMgrClient.GetShutdownReason(setReasonFirst);
     EXPECT_TRUE(ret != PowerErrors::ERR_PERMISSION_DENIED);
     ret = powerMgrClient.GetShutdownReason(setReasonSecond);
