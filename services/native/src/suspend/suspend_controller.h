@@ -21,6 +21,7 @@
 #include <memory>
 #include <vector>
 
+#include "event_handler.h"
 #include "ffrt_utils.h"
 #include "power_state_machine.h"
 #ifdef HAS_SENSORS_SENSOR_PART
@@ -62,11 +63,13 @@ public:
     bool GetPowerkeyDownWhenScreenOff();
 
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
+#ifdef POWER_MANAGER_TAKEOVER_SUSPEND
     void AddCallback(const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority);
-    void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
     void RemoveCallback(const sptr<ITakeOverSuspendCallback>& callback);
-    void TriggerSyncSleepCallback(bool isWakeup);
     bool TriggerTakeOverSuspendCallback(SuspendDeviceType type);
+#endif
+    void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
+    void TriggerSyncSleepCallback(bool isWakeup);
     void UpdateSuspendSources();
 
     std::shared_ptr<PowerStateMachine> GetStateMachine() const

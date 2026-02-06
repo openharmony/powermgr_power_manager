@@ -18,6 +18,10 @@
 
 #include <gtest/gtest.h>
 
+#include "mock_lock_action.h"
+#include "mock_power_action.h"
+#include "mock_state_action.h"
+
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
 #include "power_mgr_client.h"
@@ -30,6 +34,7 @@ namespace PowerMgr {
 class PowerLevelEventSystemTestOff : public testing::Test {
 public:
     static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
 };
 } // namespace PowerMgr
 } // namespace OHOS

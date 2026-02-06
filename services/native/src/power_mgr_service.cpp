@@ -39,8 +39,8 @@
 #include "ffrt_utils.h"
 #include <multi_invoker_helper/multi_invoker_helper.h>
 #include "permission.h"
-#include "power_common.h"
 #include "power_ext_intf_wrapper.h"
+#include "power_common.h"
 #include "power_mgr_dumper.h"
 #include "power_vibrator.h"
 #include "power_xcollie.h"
@@ -190,7 +190,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
     POWER_HILOGI(COMP_SVC, "plan to RegisterBootCompletedCallback.");
     g_bootCompletedCallback = []() {
         std::lock_guard lock(powerInitMutex_);
-        if (!isNeedReInit_ ) {
+        if (!isNeedReInit_) {
             POWER_HILOGW(COMP_SVC, "Power initialization is not required.");
             return;
         }
@@ -515,6 +515,15 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
         return;
     }
 
+#ifdef POWER_LID_FOLD_ENABLE
+    Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
+    if (foldScreenFlag_ && (mode != Rosen::FoldDisplayMode::MAIN)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] disable Lid mode in the expanded state");
+        isInLidMode_ = false;
+        return;
+    }
+#endif
+
     std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
     if (suspendController == nullptr) {
         POWER_HILOGE(FEATURE_INPUT, "get suspendController instance error");
@@ -530,14 +539,6 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
     auto data = reinterpret_cast<HallData*>(event->data);
     auto status = static_cast<uint32_t>(data->status);
 
-#ifdef POWER_LID_FOLD_ENABLE
-    Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
-    if (foldScreenFlag_ && (mode != Rosen::FoldDisplayMode::MAIN)) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] disable Lid mode in the expanded state");
-        isInLidMode_ = false;
-        return;
-    }
-#endif
     if (status & LID_CLOSED_HALL_FLAG) {
         if (isInLidMode_) {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Lid close event received again");
@@ -1203,7 +1204,7 @@ PowerErrors PowerMgrService::SuspendDevice(
 
 #ifdef POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED
     if (isBootCompleted_ == false) {
-        POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
+        POWER_HILOGE(FEATURE_SUSPEND, "SuspendDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
             pid, uid);
         return PowerErrors::ERR_FAILURE;
     }
@@ -1239,7 +1240,7 @@ PowerErrors PowerMgrService::WakeupDevice(
 
 #ifdef POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED
     if (isBootCompleted_ == false) {
-        POWER_HILOGI(FEATURE_WAKEUP, "WakeupDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
+        POWER_HILOGE(FEATURE_WAKEUP, "WakeupDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
             pid, uid);
         return PowerErrors::ERR_FAILURE;
     }
@@ -1795,7 +1796,8 @@ bool PowerMgrService::RegisterSuspendTakeoverCallback(
     suspendController_->AddCallback(callback, priority);
     return true;
 #else
-    return true;
+    POWER_HILOGE(FEATURE_SUSPEND, "do not support SuspendTakeoverCallback");
+    return false;
 #endif
 }
 
@@ -1813,7 +1815,8 @@ bool PowerMgrService::UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSusp
     suspendController_->RemoveCallback(callback);
     return true;
 #else
-    return true;
+    POWER_HILOGE(FEATURE_SUSPEND, "do not support SuspendTakeoverCallback");
+    return false;
 #endif
 }
 
@@ -2311,7 +2314,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) cons
         stateMachine->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_COORDINATION) &&
         stateMachine->GetState() == PowerState::AWAKE) {
         stateMachine->SetState(PowerState::DIM, StateChangeReason::STATE_CHANGE_REASON_COORDINATION, true);
-        POWER_HILOGD(FEATURE_INPUT, "remote key event in coordinated state, override screen off time");
+        POWER_HILOGD(FEATURE_INPUT, "remote Key event in coordinated state, override screen off time");
     }
 }
 
