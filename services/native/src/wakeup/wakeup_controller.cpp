@@ -134,7 +134,7 @@ void WakeupController::Init()
         POWER_HILOGI(FEATURE_WAKEUP, "registered type=%{public}u", (*source).GetReason());
         SetOriginSettingValue((*source));
         std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
-        RETURN_IF(monitor == nullptr)
+        if (monitor == nullptr) continue;
         monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
         if (monitor != nullptr && monitor->Init()) {
             POWER_HILOGI(FEATURE_WAKEUP, "monitor init success, type=%{public}u", (*source).GetReason());
@@ -177,7 +177,7 @@ void WakeupController::RegisterSettingsObserver()
         uint32_t id = 0;
         for (auto source = sourceList_.begin(); source != sourceList_.end(); source++, id++) {
             std::shared_ptr<WakeupMonitor> monitor = WakeupMonitor::CreateMonitor(*source);
-            RETURN_IF(monitor == nullptr)
+            if (monitor == nullptr) continue;
             monitor->RegisterListener([this](WakeupDeviceType reason) { this->ControlListener(reason); });
             POWER_HILOGI(FEATURE_WAKEUP, "UpdateFunc CreateMonitor[%{public}u] reason=%{public}d",
                 id, source->GetReason());
@@ -466,13 +466,20 @@ void WakeupController::LidWakeupParseJsonConfig(bool updataEnable, std::string& 
 
 void WakeupController::ExecWakeupMonitorByReason(WakeupDeviceType reason)
 {
-    FFRTUtils::SubmitTask([this, reason] {
+    FFRTTask wakeupTask = [this, reason]() {
         std::lock_guard lock(monitorMutex_);
         if (monitorMap_.find(reason) != monitorMap_.end()) {
             auto monitor = monitorMap_[reason];
             monitor->Notify();
         }
-    });
+    };
+    if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH) {
+        // make sure that open/close switch tasks are processed in the order they were created
+        POWER_HILOGI(FEATURE_WAKEUP, "switch trigger wakeup");
+        stateMachine_->SetDelayTimer(0, PowerStateMachine::SWITCH_TRIGGER_WAKEUP_OR_SUSPEND_MSG, wakeupTask);
+    } else {
+        FFRTUtils::SubmitTask(wakeupTask);
+    }
 }
 
 void WakeupController::Wakeup()
@@ -589,7 +596,7 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
         }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
         if (suspendController != nullptr && stateMachine_->GetExternalScreenNumber() > 0 &&
-            !stateMachine_->IsSwitchOpenByPath()) {
+            reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH && !stateMachine_->IsSwitchOpenByPath()) {
             suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
         }
 #endif
@@ -667,6 +674,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const
     int64_t now = static_cast<int64_t>(time(nullptr));
     if (!keyEvent->HasFlag(InputEvent::EVENT_FLAG_DISABLE_USER_ACTION)) {
         pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    } else {
+        POWER_HILOGW(FEATURE_WAKEUP, "%{public}s: keyEvent disable refresh activity", __func__);
     }
     PowerState state = pms->GetState();
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
@@ -758,6 +767,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
     int64_t now = static_cast<int64_t>(time(nullptr));
     if (!pointerEvent->HasFlag(InputEvent::EVENT_FLAG_DISABLE_USER_ACTION)) {
         pms->RefreshActivityInner(now, UserActivityType::USER_ACTIVITY_TYPE_TOUCH, false);
+    } else {
+        POWER_HILOGW(FEATURE_WAKEUP, "%{public}s: pointerEvent disable refresh activity", __func__);
     }
     PowerState state = pms->GetState();
     if (TouchEventAfterScreenOn(pointerEvent, state)) {
@@ -885,9 +896,6 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
 #endif
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);
-#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-        DelayedSingleton<ScreenCommonEventController>::GetInstance()->NotifyOperateEventAfterScreenOn();
-#endif
         return true;
     }
 
@@ -904,6 +912,9 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
         (reason != WakeupDeviceType::WAKEUP_DEVICE_LID);
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Screen is on, skip current wakeup reason: %{public}u", reason);
+#ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
+        DelayedSingleton<ScreenCommonEventController>::GetInstance()->NotifyOperateEventAfterScreenOn();
+#endif
         return true;
     }
 
@@ -1031,6 +1042,7 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupController is nullptr");
         return;
     }
+
     std::shared_ptr<SuspendController> suspendController = pms->GetSuspendController();
     if (suspendController == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] suspendController is nullptr");
