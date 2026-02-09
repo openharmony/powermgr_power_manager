@@ -40,6 +40,13 @@ config("module_private_config") {
   if (power_manager_feature_wakeup_action) {
     include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
   }
+
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [
+      "${powermgr_service_path}/native/src/power_screen_saver",
+      "${powermgr_service_path}/native/src/setting",
+    ]
+  }
 }
 
 deps_ex = [
@@ -60,6 +67,8 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
 ]
 
 if (has_sensors_sensor_part) {

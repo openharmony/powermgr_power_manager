@@ -23,4 +23,7 @@ group("scenario_test") {
       "proximity_controller:test_proximity_running_lock_abnormal",
     ]
   }
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "native/src/power_screen_saver" ]
+  }
 }

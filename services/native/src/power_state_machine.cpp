@@ -1432,6 +1432,7 @@ void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
         expectedFlag, static_cast<int64_t>(SettingStateFlag::StateFlag::SETTING_DIM_INTERRUPTED));
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+    PublishRefreshEvent();
     if (this->GetDisplayOffTime() < 0) {
         if (needPrintLog) {
             POWER_HILOGI(FEATURE_ACTIVITY, "Auto display off is disabled");
@@ -1446,6 +1447,26 @@ void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
     if (needPrintLog) {
         POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}" PRId64, displayOffTime);
     }
+}
+
+void PowerStateMachine::PublishRefreshEvent()
+{
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Pms is null");
+        return;
+    }
+    auto notify  = pms->GetPowerMgrNotify();
+    if (notify == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Notify is null");
+        return;
+    }
+    POWER_HILOGD(FEATURE_SUSPEND, "Start to publish power refresh event.");
+    AAFwk::Want want;
+    want.SetAction("usual.event.power.USER_ACTIVITY");
+    notify->PublishCustomizedEvent(want);
+#endif
 }
 
 void PowerStateMachine::ResetScreenOffPreTimeForSwing(int64_t displayOffTime)

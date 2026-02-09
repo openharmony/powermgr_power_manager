@@ -71,6 +71,17 @@ ohos_fuzztest("ProxyRunningLockFuzzTest") {
     "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
   ]
+
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [
+      "${powermgr_service_path}/native/src/power_screen_saver",
+      "${powermgr_service_path}/native/src/setting",
+    ]
+    external_deps += [
+      "data_share:datashare_common",
+      "data_share:datashare_consumer",
+    ]
+  }
   defines = []
 
   if (power_manager_feature_report_screenoff_invalid) {

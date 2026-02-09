@@ -39,6 +39,10 @@ config("powermgr_private_config") {
   if (power_manager_feature_wakeup_action) {
     include_dirs += [ "native/src/wakeup_action" ]
   }
+
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "native/src/power_screen_saver" ]
+  }
 }
 
 ohos_shared_library("powermgrservice") {
@@ -296,6 +300,14 @@ ohos_shared_library("powermgrservice") {
   if (power_manager_feature_report_screenoff_invalid) {
     external_deps += [ "window_manager:libwm_lite" ]
     defines += [ "POWER_MANAGER_REPORT_SCREENOFF_INVALID" ]
+  }
+
+  if (power_manager_feature_screen_saver) {
+    sources += [
+        "native/src/power_screen_saver/power_plug_status_manager.cpp",
+        "native/src/power_screen_saver/screen_saver_timer_manager.cpp",
+        "native/src/power_screen_saver/power_screen_saver.cpp"
+    ]
   }
 
   subsystem_name = "powermgr"
