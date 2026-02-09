@@ -115,6 +115,12 @@ public:
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
     static const std::string GetBlockLongPress();
 #endif
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    static sptr<SettingObserver> RegisterSettingAcScreenSaverTimeObserver(SettingObserver::UpdateFunc& func);
+    static sptr<SettingObserver> RegisterSettingDcScreenSaverTimeObserver(SettingObserver::UpdateFunc& func);
+    static int64_t GetSettingAcScreenSaverTime(int64_t defaultVal);
+    static int64_t GetSettingDcScreenSaverTime(int64_t defaultVal);
+#endif
 
 private:
     static bool IsSettingKeyValid(const std::string& key);
@@ -158,6 +164,10 @@ private:
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static constexpr const char* SETTING_DURING_CALL_STATE_KEY {"during_call_state"};
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    static constexpr const char* SETTING_AC_SCREEN_SAVER_TIME_KEY {"settings.momentx.show_wait_time_with_charging"};
+    static constexpr const char* SETTING_DC_SCREEN_SAVER_TIME_KEY {"settings.momentx.show_wait_time_with_battery"};
+#endif
     static sptr<SettingObserver> doubleClickObserver_;
     static sptr<SettingObserver> pickUpObserver_;
     static sptr<SettingObserver> powerModeObserver_;

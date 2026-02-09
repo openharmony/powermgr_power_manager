@@ -426,6 +426,7 @@ private:
     TransitResult TakeOverSuspendAction(StateChangeReason reason);
 #endif
     inline std::pair<int32_t, int32_t> GetPowerKeySubscriberCacheIds();
+    void PublishRefreshEvent();
 
     const wptr<PowerMgrService> pms_;
     std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};

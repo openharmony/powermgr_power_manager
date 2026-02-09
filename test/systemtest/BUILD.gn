@@ -31,10 +31,15 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
     "${powermgr_service_path}/native/src/screenoffpre",
+    "${powermgr_service_path}/native/src/setting",
   ]
 
   if (power_manager_feature_wakeup_action) {
     include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
+  }
+
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "${powermgr_service_path}/native/src/power_screen_saver" ]
   }
 }
 
@@ -56,6 +61,8 @@ deps_ex = [
   "libxml2:libxml2",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "data_share:datashare_common",
+  "data_share:datashare_consumer",
 ]
 
 if (has_sensors_sensor_part) {

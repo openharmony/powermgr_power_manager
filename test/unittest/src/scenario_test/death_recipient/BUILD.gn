@@ -36,6 +36,10 @@ ohos_unittest("test_death_recipient_manager") {
 
   include_dirs = []
 
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "native/src/power_screen_saver" ]
+  }
+
   deps = [
     #"${powermgr_utils_path}:power_utils",
   ]

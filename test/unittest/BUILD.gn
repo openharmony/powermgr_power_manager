@@ -43,11 +43,17 @@ config("module_private_config") {
     "${powermgr_service_path}/native/src/suspend",
     "${powermgr_service_path}/native/src/wakeup",
     "${powermgr_service_path}/native/src/screenoffpre",
+    "${powermgr_service_path}/native/src/power_screen_saver",
     "${powermgr_test_path}/mock/action",
+    "${powermgr_service_path}/native/src/setting",
   ]
 
   if (power_manager_feature_wakeup_action) {
     include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
+  }
+
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "native/src/power_screen_saver" ]
   }
 }
 
@@ -77,6 +83,9 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
+  "data_share:datashare_common",
+  "data_share:datashare_consumer",
+
 ]
 
 if (has_multimodalinput_input_part) {
@@ -2186,6 +2195,151 @@ ohos_unittest("test_power_screen_common_event") {
   external_deps = deps_ex
 }
 
+##############################test_power_screen_saver############################
+ohos_unittest("test_power_screen_saver") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${powermgr_service_path}/native/src/power_screen_saver/power_screen_saver.cpp",
+    "${powermgr_service_path}/native/src/power_screen_saver/power_plug_status_manager.cpp",
+    "${powermgr_service_path}/native/src/power_screen_saver/screen_saver_timer_manager.cpp",
+    "src/power_screen_saver_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src/power_screen_saver",
+    "${powermgr_service_path}/native/src/setting/",
+    "src/mock",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+}
+
+ohos_unittest("test_power_plug_status_manager") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${powermgr_service_path}/native/src/power_screen_saver/power_plug_status_manager.cpp",
+    "src/power_plug_status_manager_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src/power_screen_saver",
+    "src/mock",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+}
+
+ohos_unittest("test_screen_saver_timer_manager") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${powermgr_service_path}/native/src/power_screen_saver/power_plug_status_manager.cpp",
+    "${powermgr_service_path}/native/src/power_screen_saver/screen_saver_timer_manager.cpp",
+    "src/screen_saver_timer_manager_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src/power_screen_saver",
+    "${powermgr_service_path}/native/src/setting/",
+    "src/mock",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+
+  if (power_manager_feature_charging_type_setting &&
+      defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_battery_manager)) {
+    defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
+    external_deps += [ "battery_manager:batterysrv_client" ]
+  }
+}
+
+ohos_unittest("test_setting_helper_screen_saver") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${powermgr_service_path}/native/src/setting/setting_helper.cpp",
+    "src/setting_helper_screen_saver_test.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src/power_screen_saver",
+    "${powermgr_service_path}/native/src/setting/",
+    "${powermgr_utils_path}/setting/include",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -2252,6 +2406,14 @@ group("unittest") {
   }
   if (power_manager_feature_watch_limit_screen_common_event_publish) {
     deps += [ ":test_power_screen_common_event" ]
+  }
+  if (power_manager_feature_screen_saver) {
+    deps += [
+      ":test_power_screen_saver",
+      ":test_power_plug_status_manager",
+      ":test_screen_saver_timer_manager",
+      ":test_setting_helper_screen_saver",
+    ]
   }
 }
 
