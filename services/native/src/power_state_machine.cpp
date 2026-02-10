@@ -817,7 +817,7 @@ void PowerStateMachine::DelayForHibernateInactive(bool clearMemory)
 bool PowerStateMachine::ActivateDefaultAccount()
 {
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate account deactivate begin.");
-    if (AccountSA::OsAccountManager::DeactivateAllOsAccounts() != ERR_OK) {
+    if (AccountSA::OsAccountManager::DeactivateAllOsAccounts(false) != ERR_OK) {
         POWER_HILOGE(FEATURE_SUSPEND, "deactivate all os accounts failed.");
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         ReportHibernatePrepareFailed(HibernatePrepareFailedReason::HIBERNATE_PREPARE_DEACTIVATE_ACCOUNTS_FAILED);
