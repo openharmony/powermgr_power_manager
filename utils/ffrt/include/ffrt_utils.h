@@ -17,7 +17,6 @@
 
 #include <functional>
 #include <vector>
-#include <cinttypes>
 
 #include "c/executor_task.h"
 #include "ffrt_inner.h"
