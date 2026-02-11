@@ -107,11 +107,11 @@ private:
     std::map<WakeupDeviceType, int64_t> eventHandleMap_;
     std::shared_ptr<PowerStateMachine> stateMachine_;
     WakeupDeviceType wakeupReason_ {0};
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     ffrt::mutex monitorMutex_;
-    std::mutex eventHandleMutex_;
-    std::mutex mmiMonitorMutex_;
-    static std::mutex sourceUpdateMutex_;
+    ffrt::mutex eventHandleMutex_;
+    ffrt::mutex mmiMonitorMutex_;
+    static ffrt::mutex sourceUpdateMutex_;
     int32_t monitorId_ {-1};
 };
 

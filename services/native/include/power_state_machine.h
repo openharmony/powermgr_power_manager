@@ -113,7 +113,7 @@ public:
     static constexpr int64_t OFF_TIMEOUT_FACTOR = 5;
     static constexpr int64_t MAX_DIM_TIME_MS = 7500;
     static constexpr int64_t COORDINATED_STATE_SCREEN_OFF_TIME_MS = 10000;
-    static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_MS = 10000;
+    static constexpr uint32_t SCREEN_CHANGE_TIMEOUT_US = 10000 * 1000;
     static constexpr uint32_t SCREEN_CHANGE_REPORT_INTERVAL_MS = 600000;
 
     static void onSuspend();
@@ -353,7 +353,7 @@ private:
 
     class ScreenChangeCheck {
     public:
-        ScreenChangeCheck(std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason);
+        ScreenChangeCheck(PowerState state, StateChangeReason reason);
         ~ScreenChangeCheck() noexcept;
         void SetReportTimerStartFlag(bool flag) const;
         void ReportSysEvent(const std::string& msg) const;
@@ -362,7 +362,7 @@ private:
         pid_t pid_ {-1};
         pid_t uid_ {-1};
         mutable bool isReportTimerStarted_ {false};
-        std::shared_ptr<FFRTTimer> ffrtTimer_ {nullptr};
+        FFRTHandle handle_;
         PowerState state_;
         StateChangeReason reason_;
     };
@@ -432,7 +432,7 @@ private:
     PowerState currentState_;
     std::map<PowerState, std::shared_ptr<std::vector<RunningLockType>>> lockMap_;
     std::map<PowerState, std::shared_ptr<StateController>> controllerMap_;
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     // all change to currentState_ should be inside stateMutex_
     ffrt::mutex stateMutex_;
     DevicePowerState mDeviceState_;
@@ -466,7 +466,7 @@ private:
     std::atomic<bool> isDozeEnabled_ {false};
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     std::atomic<int32_t> externalScreenNumber_ {0};
-    std::mutex internalScreenStateMutex_;
+    ffrt::mutex internalScreenStateMutex_;
     static constexpr int32_t DISPLAY_MODE_ONLY_SECOND_SCREEN = 8;
 #endif
     std::atomic<bool> isDuringCall_ {false};

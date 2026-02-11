@@ -17,6 +17,8 @@
 
 #include <set>
 #include <map>
+
+#include <ffrt_utils.h>
 #include <singleton.h>
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
@@ -51,7 +53,7 @@ private:
     void AddCallbackPidUid(const sptr<ITakeOverSuspendCallback>& callback);
     void RemoveCallbackPidUid(const sptr<ITakeOverSuspendCallback>& callback);
 
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     TakeoverSuspendCallbackContainerType highPriorityCallbacks_;
     TakeoverSuspendCallbackContainerType defaultPriorityCallbacks_;
     TakeoverSuspendCallbackContainerType lowPriorityCallbacks_;

@@ -14,6 +14,7 @@
  */
 #include "ffrt_utils_test.h"
 
+#include <datetime_ex.h>
 #include "ffrt_utils.h"
 #include "power_log.h"
 
@@ -405,6 +406,41 @@ HWTEST_F(FFRTUtilsTest, FFRTTimerTest003, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "FFRTTimerTest003 function end!");
 }
 
+/**
+ * @tc.name: FFRTDelayTaskTest
+ * @tc.desc: test execution of non-queued delay task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTDelayTaskTest, TestSize.Level1)
+{
+    constexpr uint64_t timeOutUs = 3 * 1000 * 1000; // 3 secconds delay
+    POWER_HILOGI(LABEL_TEST, "FFRTDelayTaskTest function start!");
+    bool flag {false};
+    int64_t tickBeforeSubmit = GetMicroTickCount();
+    auto handle = ffrt::submit_h([&flag] { flag = true; }, ffrt::task_attr().delay(timeOutUs));
+    ffrt::wait({handle});
+    int64_t tickAfterExecution = GetMicroTickCount();
+    EXPECT_TRUE(tickAfterExecution - tickBeforeSubmit >= timeOutUs);
+    EXPECT_EQ(flag, true);
+    POWER_HILOGI(LABEL_TEST, "FFRTDelayTaskTest function end!");
+}
+
+/**
+ * @tc.name: FFRTCancelTaskTest
+ * @tc.desc: test cancellation of non-queued task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, FFRTCancelTaskTest, TestSize.Level1)
+{
+    constexpr uint64_t timeOutUs = 3 * 1000 * 1000; // 3 secconds delay
+    POWER_HILOGI(LABEL_TEST, "FFRTCancelTaskTest function start!");
+    bool flag {false};
+    auto handle = ffrt::submit_h([&flag] { flag = true; }, ffrt::task_attr().delay(timeOutUs));
+    ffrt::skip(handle);
+    ffrt::wait({handle});
+    EXPECT_EQ(flag, false);
+    POWER_HILOGI(LABEL_TEST, "FFRTCancelTaskTest function end!");
+}
 } // namespace Test
 } // namespace PowerMgr
 } // namespace OHOS

@@ -156,8 +156,8 @@ private:
     bool ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remoteObj, const std::string& name);
 
     const wptr<PowerMgrService> pms_;
-    std::mutex mutex_;
-    std::mutex screenLockListsMutex_;
+    ffrt::mutex mutex_;
+    ffrt::mutex screenLockListsMutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
     std::shared_ptr<IProximityController> proximityController_ {nullptr};

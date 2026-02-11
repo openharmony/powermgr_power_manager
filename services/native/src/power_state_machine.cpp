@@ -1638,7 +1638,7 @@ bool PowerStateMachine::SetDozeMode(DisplayState state)
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
 void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(internalScreenStateMutex_);
+    std::lock_guard<ffrt::mutex> lock(internalScreenStateMutex_);
     uint32_t ffrtId = ffrt::this_task::get_id();
     if (state == DisplayState::DISPLAY_ON) {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
@@ -1860,30 +1860,25 @@ int64_t PowerStateMachine::GetSleepTime()
     return sleepTime_;
 }
 
-PowerStateMachine::ScreenChangeCheck::ScreenChangeCheck(
-    std::shared_ptr<FFRTTimer> ffrtTimer, PowerState state, StateChangeReason reason) :
-    ffrtTimer_(ffrtTimer),
-    state_(state), reason_(reason)
+PowerStateMachine::ScreenChangeCheck::ScreenChangeCheck(PowerState state, StateChangeReason reason)
+    : state_(state),
+      reason_(reason)
 {
     // only check for screen on/off event
     if (state != PowerState::INACTIVE && state != PowerState::AWAKE) {
         return;
     }
 
-    if (!ffrtTimer_) {
-        POWER_HILOGE(FEATURE_POWER_STATE, "ScreenChangeCheck failed: invalid timer");
-        return;
-    }
-
     pid_ = getpid();
     uid_ = static_cast<pid_t>(getuid());
+    int64_t submitTime = GetTickCount();
 
-    FFRTTask task = [checker = (*this)]() {
-        checker.ReportSysEvent("TIMEOUT");
+    FFRTTask task = [checker = (*this), submitTime]() {
+        checker.ReportSysEvent("TIMEOUT: timer started at " + std::to_string(submitTime));
         checker.SetReportTimerStartFlag(false);
     };
 
-    ffrtTimer_->SetTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK, task, SCREEN_CHANGE_TIMEOUT_MS);
+    handle_ = ffrt::submit_h(task, ffrt::task_attr().qos(ffrt::qos_user_interactive).delay(SCREEN_CHANGE_TIMEOUT_US));
     isReportTimerStarted_ = true;
 }
 
@@ -1892,7 +1887,8 @@ PowerStateMachine::ScreenChangeCheck::~ScreenChangeCheck() noexcept
     if (!isReportTimerStarted_) {
         return;
     }
-    ffrtTimer_->CancelTimer(TIMER_ID_SCREEN_TIMEOUT_CHECK);
+    // the callee does the nullptr check
+    ffrt::skip(handle_);
 }
 
 void PowerStateMachine::ScreenChangeCheck::SetReportTimerStartFlag(bool flag) const
@@ -2087,7 +2083,7 @@ bool PowerStateMachine::SetState(PowerState state, StateChangeReason reason, boo
         POWER_HILOGI(FEATURE_POWER_STATE, "this timeout task is invalidated, directly return");
         return false;
     }
-    ScreenChangeCheck timeoutCheck(ffrtTimer_, state, reason);
+    ScreenChangeCheck timeoutCheck(state, reason);
     SettingStateFlag flag(state, shared_from_this(), reason);
 
     if (NeedShowScreenLocks(state)) {
