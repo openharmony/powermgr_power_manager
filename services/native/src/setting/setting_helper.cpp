@@ -715,5 +715,37 @@ const std::string SettingHelper::GetBlockLongPress()
     return longPress;
 }
 #endif
+
+#ifdef POWER_MANAGER_SCREEN_SAVER
+sptr<SettingObserver> SettingHelper::RegisterSettingAcScreenSaverTimeObserver(SettingObserver::UpdateFunc& func)
+{
+    return RegisterSettingKeyObserver(SETTING_AC_SCREEN_SAVER_TIME_KEY, func);
+}
+
+sptr<SettingObserver> SettingHelper::RegisterSettingDcScreenSaverTimeObserver(SettingObserver::UpdateFunc& func)
+{
+    return RegisterSettingKeyObserver(SETTING_DC_SCREEN_SAVER_TIME_KEY, func);
+}
+
+int64_t SettingHelper::GetSettingAcScreenSaverTime(int64_t defaultVal)
+{
+    int64_t value = GetSettingLongValue(SETTING_AC_SCREEN_SAVER_TIME_KEY, defaultVal);
+    if (value >= 0 && value <= MIN_DISPLAY_OFF_TIME_MS) {
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}" PRId64 ")ms, use defaultVal", __func__, value);
+        value = defaultVal;
+    }
+    return value;
+}
+
+int64_t SettingHelper::GetSettingDcScreenSaverTime(int64_t defaultVal)
+{
+    int64_t value = GetSettingLongValue(SETTING_DC_SCREEN_SAVER_TIME_KEY, defaultVal);
+    if (value >= 0 && value <= MIN_DISPLAY_OFF_TIME_MS) {
+        POWER_HILOGW(COMP_UTILS, "%{public}s value=(%{public}" PRId64 ")ms, use defaultVal", __func__, value);
+        value = defaultVal;
+    }
+    return value;
+}
+#endif
 } // namespace PowerMgr
 } // namespace OHOS

@@ -53,7 +53,8 @@
             "power_manager_feature_enable_performance_mode",
             "power_manager_feature_runninglock_background_user_idle_permissive_permission_mode",
             "power_manager_feature_support_filtering_proximity_event",
-            "power_manager_feature_report_screenoff_invalid"
+            "power_manager_feature_report_screenoff_invalid",
+            "power_manager_feature_screen_saver"
         ],
         "adapted_system_type": [
             "standard"

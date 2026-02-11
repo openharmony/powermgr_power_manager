@@ -49,6 +49,7 @@ declare_args() {
   power_manager_feature_runninglock_background_user_idle_permissive_permission_mode = false
   power_manager_feature_support_filtering_proximity_event = false
   power_manager_feature_report_screenoff_invalid = true
+  power_manager_feature_screen_saver = false
 }
 
 defines = []
@@ -143,6 +144,10 @@ if (!defined(global_parts_info) ||
 } else {
   has_ability_runtime_part = false
 }
+
+  if (power_manager_feature_screen_saver) {
+    defines += [ "POWER_MANAGER_SCREEN_SAVER" ]
+  }
 
 ability_runtime_path = "//foundation/ability/ability_runtime"
 

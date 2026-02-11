@@ -45,6 +45,9 @@
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
 #include "ulsr_callback_holder.h"
 #endif
+#ifdef POWER_MANAGER_SCREEN_SAVER
+#include "power_screen_saver.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -324,6 +327,12 @@ public:
 #ifdef HAS_SENSORS_SENSOR_PART
     static std::atomic_bool isInLidMode_;
 #endif
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    std::shared_ptr<PowerScreenSaver> GetPowerScreenSaver() const
+    {
+        return powerScreenSaver_;
+    }
+#endif
 
 private:
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
@@ -393,6 +402,9 @@ private:
     void RegisterExternalCallback();
     void UnregisterExternalCallback();
     bool IsDeviceSupportedTypeUserIdle();
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    void ScreenSaverInit();
+#endif
 
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};
@@ -447,6 +459,9 @@ private:
 #endif
 #ifdef HAS_SENSORS_SENSOR_PART
     SensorUser sensorUser_{};
+#endif
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    std::shared_ptr<PowerScreenSaver> powerScreenSaver_ {nullptr};
 #endif
 };
 

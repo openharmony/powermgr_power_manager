@@ -71,6 +71,10 @@ private:
     static constexpr const char* SETTING_POWER_MODE_BACKUP_KEY  {"settings.power.smart_mode_status.backup"};
     static constexpr const char* SETTING_POWER_WAKEUP_LID_KEY {"settings.power.wakeup_lid"};
     static constexpr const char* SETTING_DURING_CALL_STATE_KEY {"during_call_state"};
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    static constexpr const char* SETTING_AC_SCREEN_SAVER_TIME_KEY {"settings.momentx.show_wait_time_with_charging"};
+    static constexpr const char* SETTING_DC_SCREEN_SAVER_TIME_KEY {"settings.momentx.show_wait_time_with_battery"};
+#endif
     static constexpr const int32_t INITIAL_USER_ID = 100;
     static constexpr const uint32_t MULTI_USER_STR_VEC_SIZE_MAX = 1000;
 
@@ -89,6 +93,10 @@ private:
         SETTING_POWER_DC_SLEEP_TIME_KEY,
         SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
         SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
+#endif
+#ifdef POWER_MANAGER_SCREEN_SAVER
+        SETTING_AC_SCREEN_SAVER_TIME_KEY,
+        SETTING_DC_SCREEN_SAVER_TIME_KEY
 #endif
     };
 
