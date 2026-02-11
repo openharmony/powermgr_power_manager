@@ -101,6 +101,10 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
 
   include_dirs = []
 
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "native/src/power_screen_saver" ]
+  }
+
   deps = [
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
@@ -153,6 +157,10 @@ ohos_unittest("test_proximity_running_lock") {
 
   if (has_display_manager_part) {
     deps_ex += [ "display_manager:displaymgr" ]
+  }
+
+  if (power_manager_feature_screen_saver) {
+    include_dirs += [ "native/src/power_screen_saver" ]
   }
   external_deps = deps_ex
 }

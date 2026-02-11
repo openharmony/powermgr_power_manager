@@ -226,6 +226,9 @@ void PowerMgrService::RegisterBootCompletedCallback()
 #endif
         PowerExternalAbilityInit();
         power->KeepScreenOnInit();
+#ifdef POWER_MANAGER_SCREEN_SAVER
+        power->ScreenSaverInit();
+#endif
         isBootCompleted_ = true;
     };
     SysParam::RegisterBootCompletedCallbackForPowerSa(g_bootCompletedCallback);
@@ -349,6 +352,17 @@ void PowerMgrService::KeepScreenOn(bool isOpenOn)
     }
     return;
 }
+
+#ifdef POWER_MANAGER_SCREEN_SAVER
+void PowerMgrService::ScreenSaverInit()
+{
+    POWER_HILOGI(COMP_SVC, "PMS init screen saver.");
+    if (powerScreenSaver_ == nullptr) {
+        powerScreenSaver_ = std::make_shared<PowerScreenSaver>();
+        powerScreenSaver_->Init();
+    }
+}
+#endif
 
 #ifdef POWER_DOUBLECLICK_ENABLE
 void PowerMgrService::RegisterSettingWakeupDoubleClickObservers()
@@ -2679,10 +2693,21 @@ void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEven
         POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
         return;
     }
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    auto screenSaverController = pms->GetPowerScreenSaver();
+    if (screenSaverController == nullptr) {
+        POWER_HILOGE(COMP_SVC, "get screenSaverController fail.");
+    }
+#endif
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         pms->UnregisterAllSettingObserver();    // unregister old user observer
         SettingHelper::UpdateCurrentUserId();   // update user Id
         pms->RegisterAllSettingObserver();      // register new user observer
+#ifdef POWER_MANAGER_SCREEN_SAVER
+    if (screenSaverController != nullptr) {
+        screenSaverController->RegisterSettingScreenSaverObservers();
+    }
+#endif
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED) {
         OnPowerConnectStatusChanged(PowerConnectStatus::POWER_CONNECT_AC);

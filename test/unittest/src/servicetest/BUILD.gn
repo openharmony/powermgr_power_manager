@@ -41,6 +41,14 @@ config("module_private_config") {
   if (power_manager_feature_wakeup_action) {
     include_dirs += [ "${powermgr_service_path}/native/src/wakeup_action" ]
   }
+
+  if (power_manager_feature_screen_saver) {
+      include_dirs += [
+        "${powermgr_service_path}/native/src/power_screen_saver",
+        "${powermgr_service_path}/native/src/setting",
+        "${powermgr_utils_path}/setting/include",
+      ]
+    }
 }
 
 config("module_mock_private_config") {
@@ -67,6 +75,8 @@ deps_ex = [
   "samgr:samgr_proxy",
   "googletest:gtest_main",
   "googletest:gmock_main",
+  "data_share:datashare_common",
+  "data_share:datashare_consumer",
 ]
 
 if (has_multimodalinput_input_part) {

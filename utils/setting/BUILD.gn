@@ -55,6 +55,10 @@ ohos_shared_library("power_setting") {
     defines += [ "POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING" ]
   }
 
+  if (power_manager_feature_screen_saver) {
+    defines += [ "POWER_MANAGER_SCREEN_SAVER" ]
+  }
+
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"
 }
