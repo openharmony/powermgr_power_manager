@@ -23,7 +23,7 @@ TakeOverSuspendCallbackHolder::~TakeOverSuspendCallbackHolder() = default;
 void TakeOverSuspendCallbackHolder::AddCallback(
     const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     switch (priority) {
         case TakeOverSuspendPriority::LOW: {
             auto iter = lowPriorityCallbacks_.insert(callback);
@@ -54,25 +54,25 @@ using CallbackContainer = TakeOverSuspendCallbackHolder::TakeoverSuspendCallback
 
 CallbackContainer TakeOverSuspendCallbackHolder::GetHighPriorityCallbacks()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     return highPriorityCallbacks_;
 }
 
 CallbackContainer TakeOverSuspendCallbackHolder::GetDefaultPriorityCallbacks()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     return defaultPriorityCallbacks_;
 }
 
 CallbackContainer TakeOverSuspendCallbackHolder::GetLowPriorityCallbacks()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     return lowPriorityCallbacks_;
 }
 
 void TakeOverSuspendCallbackHolder::RemoveCallback(const sptr<ITakeOverSuspendCallback>& callback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     RemoveCallback(lowPriorityCallbacks_, callback);
     RemoveCallback(defaultPriorityCallbacks_, callback);
     RemoveCallback(highPriorityCallbacks_, callback);
@@ -102,7 +102,7 @@ void TakeOverSuspendCallbackHolder::RemoveCallbackPidUid(const sptr<ITakeOverSus
 std::pair<int32_t, int32_t> TakeOverSuspendCallbackHolder::FindCallbackPidUid(
     const sptr<ITakeOverSuspendCallback>& callback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     auto iter = cachedRegister_.find(callback);
     return (iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0);
 }

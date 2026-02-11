@@ -59,7 +59,7 @@ private:
         void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
     private:
-        std::mutex mutex_;
+        ffrt::mutex mutex_;
     };
 
     void StartDialog();
