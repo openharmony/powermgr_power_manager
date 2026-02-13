@@ -41,7 +41,7 @@ public:
     static void TearDownTestCase() {}
 };
 
-class PowerSyncHibernateTestCallback: public IRemoteStub<ISyncHibernateCallback> {
+class PowerSyncHibernateTestCallback : public IRemoteStub<ISyncHibernateCallback> {
 public:
     PowerSyncHibernateTestCallback() {};
     virtual ~PowerSyncHibernateTestCallback() {};
