@@ -89,7 +89,8 @@ HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest001, TestSize.Level2)
     sleepCallbackHolder.AddCallback(callbackLow, SleepPriority::LOW);
 
     SleepCallbackHolder::SleepCallbackContainerType highCallbacks = sleepCallbackHolder.GetHighPriorityCallbacks();
-    SleepCallbackHolder::SleepCallbackContainerType defaultCallbacks = sleepCallbackHolder.GetDefaultPriorityCallbacks();
+    SleepCallbackHolder::SleepCallbackContainerType defaultCallbacks =
+        sleepCallbackHolder.GetDefaultPriorityCallbacks();
     SleepCallbackHolder::SleepCallbackContainerType lowCallbacks = sleepCallbackHolder.GetLowPriorityCallbacks();
     EXPECT_EQ(highCallbacks.size(), 1);
     EXPECT_EQ(defaultCallbacks.size(), 1);

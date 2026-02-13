@@ -15,8 +15,8 @@
 
 #include "hibernate_controller_test.h"
 
-namespace OHOS{
-namespace PowerMgr{
+namespace OHOS {
+namespace PowerMgr {
 
 using namespace testing;
 using namespace testing::ext;
