@@ -2475,6 +2475,53 @@ ohos_unittest("test_setting_helper_screen_saver") {
   external_deps = deps_ex
 }
 
+##############################test_hibernate_controller##############################
+ohos_unittest("test_hibernate_controller") {
+  module_out_path = module_output_path
+  defines += defs
+
+  sources = [ 
+    "src/hibernate_controller_test.cpp",
+    "${powermgr_service_path}/native/src/hibernate/hibernate_controller.cpp"
+  ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src",
+    "${powermgr_service_path}/native/src/actions",
+    "${powermgr_service_path}/native/src/actions/default",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+  external_deps += [
+    "hdf_core:libhdi",
+    "hdf_core:libpub_utils",
+    "drivers_interface_power:libpower_proxy_1.2",
+    "drivers_interface_power:libpower_proxy_1.3",
+    "init:libbegetutil",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -2529,6 +2576,7 @@ group("unittest") {
     ":test_running_lock_scenario",
     ":test_running_lock_timer_handler",
     ":test_ulsr_callback_holder",
+    ":test_hibernate_controller",
     ":test_sleep_callback_holder",
     ":test_suspend_takeover_callback_holder",
     ":test_shutdown_callback_holder",
