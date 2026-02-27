@@ -24,6 +24,7 @@
 #include "sync_hibernate_callback_stub.h"
 #include "sync_sleep_callback_stub.h"
 #include "async_ulsr_callback_stub.h"
+#include "running_lock_changed_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -64,6 +65,13 @@ public:
         AsyncUlsrTestCallback() {};
         virtual ~AsyncUlsrTestCallback() {};
         virtual void OnAsyncWakeup() override;
+    };
+
+    class RunningLockChangedTestCallback : public RunningLockChangedCallbackStub {
+    public:
+        RunningLockChangedTestCallback() {};
+        virtual ~RunningLockChangedTestCallback() {};
+        virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override;
     };
 };
 } // namespace PowerMgr

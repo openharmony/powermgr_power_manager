@@ -173,5 +173,22 @@ HWTEST_F(DeathRecipientManagerTest, DeathRecipientManagerTest005, TestSize.Level
     EXPECT_TRUE(drm.clientDeathRecipientMap_.size() == 0);
     POWER_HILOGI(LABEL_TEST, "DeathRecipientManagerTest005 function end!");
 }
+
+/**
+ * @tc.name: DeathRecipientManagerTest006
+ * @tc.desc: Test DeathRecipientManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeathRecipientManagerTest, DeathRecipientManagerTest006, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "DeathRecipientManagerTest006 function start!");
+    DeathRecipientManager& drm = DeathRecipientManager::GetInstance();
+    sptr<IRemoteObject> obj = sptr<IPCObjectProxy>::MakeSptr(0, u"DeathRecipientManagerTest006.test1");
+    DeathRecipientManager::GetInstance().AddDeathRecipient(obj, {nullptr, "", 0, 0});
+    EXPECT_TRUE(drm.clientDeathRecipientMap_.size() == 1);
+    DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(obj);
+    EXPECT_TRUE(drm.clientDeathRecipientMap_.size() == 0);
+    POWER_HILOGI(LABEL_TEST, "DeathRecipientManagerTest006 function end!");
+}
 } // namespace PowerMgr
 } // namespace OHOS

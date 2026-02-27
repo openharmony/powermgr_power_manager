@@ -371,6 +371,58 @@ ohos_unittest("power_client_callback_test") {
   external_deps = deps_ex
 }
 
+ohos_unittest("running_lock_changed_callback_proxy_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "src/running_lock_changed_callback_proxy_test.cpp",
+    "mock/mock_power_remote_object.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+}
+
+ohos_unittest("running_lock_changed_callback_stub_test") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  sources = [ "src/running_lock_changed_callback_stub_test.cpp" ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_inner_api}:powermgr_stub",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex
+}
+
 ohos_unittest("test_running_lock") {
   module_out_path = module_output_path
 
@@ -2413,6 +2465,12 @@ group("unittest") {
       ":test_power_plug_status_manager",
       ":test_screen_saver_timer_manager",
       ":test_setting_helper_screen_saver",
+    ]
+  }
+  if (power_manager_feature_enable_monitor_running_lock_change) {
+    deps += [
+      ":running_lock_changed_callback_proxy_test",
+      ":running_lock_changed_callback_stub_test",
     ]
   }
 }

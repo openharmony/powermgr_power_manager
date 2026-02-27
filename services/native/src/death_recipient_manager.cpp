@@ -80,5 +80,18 @@ void DeathRecipientManager::RemoveDeathRecipient(const sptr<IRemoteObject>& toke
         clientDeathRecipientMap_.erase(iter);
     }
 }
+
+void DeathRecipientManager::RemoveDeathRecipientObj(const sptr<IRemoteObject>& object)
+{
+    std::lock_guard lock(callbacksMutex_);
+    auto iter = clientDeathRecipientMap_.find(object);
+    if (iter != clientDeathRecipientMap_.end()) {
+        if (iter->first) {
+            iter->first->RemoveDeathRecipient(this);
+        }
+        clientDeathRecipientMap_.erase(iter);
+        POWER_HILOGI(COMP_SVC, "RemoveDeathRecipient Success");
+    }
+}
 } // namespace PowerMgr
 } // namespace OHOS

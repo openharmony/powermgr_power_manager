@@ -240,6 +240,26 @@ int32_t PowerMgrServiceAdapter::UnRegisterRunningLockCallbackIpc(const sptr<IPow
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::RegisterRunningLockChangedCallbackIpc(
+    const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError)
+{
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterRunningLockChangedCallback", false);
+    powerError = static_cast<int32_t>(RegisterRunningLockChangedCallback(callback));
+#endif
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::UnRegisterRunningLockChangedCallbackIpc(
+    const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError)
+{
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterRunningLockChangedCallback", false);
+    powerError = static_cast<int32_t>(UnRegisterRunningLockChangedCallback(callback));
+#endif
+    return ERR_OK;
+}
+
 int32_t PowerMgrServiceAdapter::IsUsedIpc(const sptr<IRemoteObject>& remoteObj, bool& isUsed)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::IsUsed", true);
