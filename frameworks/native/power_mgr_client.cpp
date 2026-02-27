@@ -808,5 +808,33 @@ PowerErrors PowerMgrClient::SetProxFilteringStrategy(ProxFilteringStrategy strat
     proxy->SetProxFilteringStrategyIpc(static_cast<int32_t>(strategy), token_, powerError);
     return static_cast<PowerErrors>(powerError);
 }
+
+PowerErrors PowerMgrClient::RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+{
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->RegisterRunningLockChangedCallbackIpc(callback, powerError);
+    return static_cast<PowerErrors>(powerError);
+#else
+    return PowerErrors::ERR_OK;
+#endif
+}
+
+PowerErrors PowerMgrClient::UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+{
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->UnRegisterRunningLockChangedCallbackIpc(callback, powerError);
+    return static_cast<PowerErrors>(powerError);
+#else
+    return PowerErrors::ERR_OK;
+#endif
+}
 } // namespace PowerMgr
 } // namespace OHOS

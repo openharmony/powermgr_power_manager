@@ -33,6 +33,7 @@
 #include "async_ulsr_callback_stub.h"
 #include "setting_helper.h"
 #include "shutdown/async_shutdown_callback_stub.h"
+#include "running_lock_changed_callback_stub.h"
 #include "death_recipient_manager.h"
 
 using namespace testing::ext;
@@ -753,4 +754,48 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative024, TestSize.Level2) {
     EXPECT_FALSE(flag);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative024 end!");
 }
+
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+/**
+ * @tc.name: PowerMgrServiceNative025
+ * @tc.desc: Test RegisterRunningLockChangedCallback & UnRegisterRunningLockChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative025, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative025 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() = default;
+        virtual ~TestRunningLockChangedCallback() = default;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    // Test case 0: No system permission
+    g_isSystem = false;
+    PowerErrors ret = pmsTest->RegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_SYSTEM_API_DENIED);
+    
+    ret = pmsTest->UnRegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_SYSTEM_API_DENIED);
+
+    // Test case 1: No POWER_MANAGER permission
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest->RegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_PERMISSION_DENIED);
+
+    ret = pmsTest->UnRegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_PERMISSION_DENIED);
+    
+    // Test case 2: DEFAULT
+    g_isPermissionGranted = true;
+    ret = pmsTest->RegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+
+    ret = pmsTest->UnRegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative025 end!");
+}
+#endif
 } // namespace

@@ -287,6 +287,14 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
+    PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+    {
+        return PowerErrors::ERR_OK;
+    }
+    PowerErrors UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+    {
+        return PowerErrors::ERR_OK;
+    }
 };
 
 class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {

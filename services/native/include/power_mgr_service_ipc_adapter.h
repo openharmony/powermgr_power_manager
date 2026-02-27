@@ -85,6 +85,10 @@ public:
 
     virtual int32_t RegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual int32_t UnRegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback) override;
+    virtual int32_t RegisterRunningLockChangedCallbackIpc(
+        const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError) override;
+    virtual int32_t UnRegisterRunningLockChangedCallbackIpc(
+        const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError) override;
     virtual int32_t SetDisplaySuspendIpc(bool enable) override;
     virtual int32_t SetDeviceModeIpc(int32_t modeValue, int32_t& powerError) override;
     virtual int32_t GetDeviceModeIpc(int32_t& powerMode) override;
@@ -196,6 +200,9 @@ public:
     virtual bool RegisterSuspendTakeoverCallback(
         const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority) = 0;
     virtual bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback) = 0;
+    
+    virtual PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback) = 0;
+    virtual PowerErrors UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback) = 0;
     
     virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
     virtual PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;

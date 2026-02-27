@@ -19,6 +19,8 @@
 #include "power_utils.h"
 
 #include "actions/irunning_lock_action.h"
+#include "running_lock_changed_callback_stub.h"
+#include "death_recipient_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -924,4 +926,490 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative029, TestSize.Level1)
     runningLockMgr->UnLock(remoteObj);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative029 function end!");
 }
+
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+/**
+ * @tc.name: RunningLockNative030
+ * @tc.desc: test RegisterRunningLockChangedCallback and UnRegisterRunningLockChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative030, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative030 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() : stateReceived_(false) {}
+        virtual ~TestRunningLockChangedCallback() = default;
+        void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override
+        {
+            stateReceived_ = true;
+            lastState_ = state;
+        }
+        bool stateReceived_;
+        RunningLockChangeState lastState_;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    EXPECT_EQ(runningLockMgr->runningLockChangedCallbacks_.size(), 1);
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    EXPECT_EQ(runningLockMgr->runningLockChangedCallbacks_.size(), 0);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative030 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative031
+ * @tc.desc: test RegisterRunningLockChangedCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative031, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative031 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    size_t initialSize = runningLockMgr->runningLockChangedCallbacks_.size();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(nullptr, pid, uid);
+    EXPECT_EQ(runningLockMgr->runningLockChangedCallbacks_.size(), initialSize);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative031 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative032
+ * @tc.desc: test UnRegisterRunningLockChangedCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative032, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative032 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    size_t initialSize = runningLockMgr->runningLockChangedCallbacks_.size();
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(nullptr);
+    EXPECT_EQ(runningLockMgr->runningLockChangedCallbacks_.size(), initialSize);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative032 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative033
+ * @tc.desc: test NotifyRunningLockChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative033, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative033 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() : stateReceived_(false) {}
+        virtual ~TestRunningLockChangedCallback() = default;
+        void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override
+        {
+            stateReceived_ = true;
+            lastState_ = state;
+        }
+        bool stateReceived_;
+        RunningLockChangeState lastState_;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    
+    runningLockMgr->NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    EXPECT_TRUE(callback->stateReceived_);
+    EXPECT_EQ(callback->lastState_, RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    
+    callback->stateReceived_ = false;
+    runningLockMgr->NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED);
+    EXPECT_TRUE(callback->stateReceived_);
+    EXPECT_EQ(callback->lastState_, RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED);
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative033 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative034
+ * @tc.desc: test NotifyRunningLockChanged with lock active
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative034, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative034 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() : stateReceived_(false) {}
+        virtual ~TestRunningLockChangedCallback() = default;
+        void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override
+        {
+            stateReceived_ = true;
+            lastState_ = state;
+        }
+        bool stateReceived_;
+        RunningLockChangeState lastState_;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    
+    sptr<IRemoteObject> token = new RunningLockTokenStub();
+    RunningLockParam runningLockParam {0,
+        "RunningLockNative034", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid};
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token, runningLockParam) != nullptr);
+    runningLockMgr->Lock(token);
+    
+    EXPECT_TRUE(callback->stateReceived_);
+    EXPECT_EQ(callback->lastState_, RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    
+    runningLockMgr->UnLock(token);
+    runningLockMgr->ReleaseLock(token);
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative034 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative035
+ * @tc.desc: test NotifyRunningLockChanged with lock inactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative035, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative035 function function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() : stateReceived_(false) {}
+        virtual ~TestRunningLockChangedCallback() = default;
+        void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override
+        {
+            stateReceived_ = true;
+            lastState_ = state;
+        }
+        bool stateReceived_;
+        RunningLockChangeState lastState_;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    
+    EXPECT_FALSE(callback->stateReceived_);
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    
+    EXPECT_TRUE(runningLockMgr != nullptr);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative035 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative036
+ * @tc.desc: test RunningLockMgr is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative036, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative036 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    EXPECT_TRUE(runningLockMgr != nullptr);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative036 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative037
+ * @tc.desc: test RegisterRunningLockChangedCallback duplicate
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative037, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative037 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() = default;
+        virtual ~TestRunningLockChangedCallback() = default;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    size_t sizeAfterFirstRegister = runningLockMgr->runningLockChangedCallbacks_.size();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    size_t sizeAfterSecondRegister = runningLockMgr->runningLockChangedCallbacks_.size();
+    
+    EXPECT_EQ(sizeAfterFirstRegister, sizeAfterSecondRegister);
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    EXPECT_EQ(runningLockMgr->runningLockChangedCallbacks_.size(), 0);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative037 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative038
+ * @tc.desc: test UnRegisterRunningLockChangedCallback not exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative038, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative038 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() = default;
+        virtual ~TestRunningLockChangedCallback() = default;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    size_t initialSize = runningLockMgr->runningLockChangedCallbacks_.size();
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    EXPECT_EQ(runningLockMgr->runningLockChangedCallbacks_.size(), initialSize);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative038 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative039
+ * @tc.desc: test NotifyRunningLockChanged with multiple callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative039, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative039 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() : stateReceived_(false) {}
+        virtual ~TestRunningLockChangedCallback() = default;
+        void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override
+        {
+            stateReceived_ = true;
+            lastState_ = state;
+        }
+        bool stateReceived_;
+        RunningLockChangeState lastState_;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback1 = new TestRunningLockChangedCallback();
+    sptr<TestRunningLockChangedCallback> callback2 = new TestRunningLockChangedCallback();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    
+    runningLockMgr->RegisterRunningLockChangedCallback(callback1->AsObject(), pid, uid);
+    runningLockMgr->RegisterRunningLockChangedCallback(callback2->AsObject(), pid, uid);
+    
+    runningLockMgr->NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    EXPECT_TRUE(callback1->stateReceived_);
+    EXPECT_TRUE(callback2->stateReceived_);
+    
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback1->AsObject());
+    runningLockMgr->UnRegisterRunningLockChangedCallback(callback2->AsObject());
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative039 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative040
+ * @tc.desc: test NotifyRunningLockChanged with no callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative040, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative040 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    
+    runningLockMgr->NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    
+    EXPECT_TRUE(runningLockMgr != nullptr);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative040 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative041
+ * @tc.desc: test PowerMgrService RegisterRunningLockChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative041, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative041 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() = default;
+        virtual ~TestRunningLockChangedCallback() = default;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    
+    PowerErrors ret = pmsTest->RegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    
+    ret = pmsTest->UnRegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative041 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative042
+ * @tc.desc: test PowerMgrService RegisterRunningLockChangedCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative042, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative042 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    
+    PowerErrors ret = pmsTest->RegisterRunningLockChangedCallback(nullptr);
+    EXPECT_TRUE(ret == PowerErrors::ERR_PARAM_INVALID);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative042 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative043
+ * @tc.desc: test PowerMgrService UnRegisterRunningLockChangedCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative043, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative043 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    
+    PowerErrors ret = pmsTest->UnRegisterRunningLockChangedCallback(nullptr);
+    EXPECT_TRUE(ret == PowerErrors::ERR_PARAM_INVALID);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative043 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative044
+ * @tc.desc: test DeathRecipient RemoveDeathRecipientObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative044, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative044 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() = default;
+        virtual ~TestRunningLockChangedCallback() = default;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    
+    PowerErrors ret = pmsTest->RegisterRunningLockChangedCallback(callback);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    
+    DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(callback->AsObject());
+    
+    ret = pmsTest->UnRegisterRunningLockChangedCallback(callback);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative044 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative045
+ * @tc.desc: test DeathRecipient RemoveDeathRecipientObj with non-existent callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative045, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative045 function start!");
+    
+    class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestRunningLockChangedCallback() = default;
+        virtual ~TestRunningLockChangedCallback() = default;
+    };
+    
+    sptr<TestRunningLockChangedCallback> callback = new TestRunningLockChangedCallback();
+    
+    DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(callback->AsObject());
+    
+    EXPECT_TRUE(callback != nullptr);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative045 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative046
+ * @tc.desc: test DeathRecipient RemoveDeathRecipientObj with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative046, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative046 function start!");
+    
+    DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(nullptr);
+    
+    EXPECT_TRUE(true);
+    
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative046 function end!");
+}
+#endif
 } // namespace

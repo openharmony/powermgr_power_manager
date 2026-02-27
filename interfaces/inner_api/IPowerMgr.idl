@@ -28,6 +28,7 @@ interface OHOS.PowerMgr.IPowerRunninglockCallback;
 interface OHOS.PowerMgr.IPowerMgrAsync;
 interface OHOS.PowerMgr.ITakeOverSuspendCallback;
 interface OHOS.PowerMgr.IAsyncUlsrCallback;
+interface OHOS.PowerMgr.IRunningLockChangedCallback;
 
 interface OHOS.PowerMgr.IPowerMgr {
     [ipccode 0] void CreateRunningLockIpc(
@@ -122,4 +123,7 @@ interface OHOS.PowerMgr.IPowerMgr {
     void RegisterAsyncShutdownCallbackIpc([in] IAsyncShutdownCallback powerCallback, [in] int priorityValue, [out] int powerError);
     void UnRegisterAsyncShutdownCallbackIpc([in] IAsyncShutdownCallback powerCallback, [out] int powerError);
     void SetProxFilteringStrategyIpc([in] int strategy, [in] IRemoteObject token, [out] int powerError);
+
+    void RegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback, [out] int powerError);
+    void UnRegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback, [out] int powerError);
 }

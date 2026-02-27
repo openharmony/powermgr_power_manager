@@ -144,6 +144,9 @@ public:
 
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
+    virtual PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback) override;
+    virtual PowerErrors UnRegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback) override;
     virtual bool SetDisplaySuspend(bool enable) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
