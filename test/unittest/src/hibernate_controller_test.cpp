@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,9 +56,8 @@ void PowerSyncHibernateTestCallback::OnSyncWakeup(bool hibernateResult)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest001, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest001 function start!");
-
-    // 测试构造函数
     EXPECT_TRUE(hibernateController_ != nullptr);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest001 function end!");
 }
 
 /**
@@ -69,9 +68,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest001, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest002 function start!");
-
-    // 测试空指针回调注册
     EXPECT_NO_THROW(hibernateController_->RegisterSyncHibernateCallback(nullptr));
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest002 function end!");
 }
 
 /**
@@ -82,9 +80,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest002, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest003, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest003 function start!");
-
-    // 测试空指针回调注销
     EXPECT_NO_THROW(hibernateController_->UnregisterSyncHibernateCallback(nullptr));
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest003 function end!");
 }
 
 /**
@@ -95,9 +92,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest003, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest004, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest004 function start!");
-
-    // 测试PreHibernate功能
     EXPECT_NO_THROW(hibernateController_->PreHibernate());
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest004 function end!");
 }
 
 /**
@@ -108,9 +104,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest004, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest005, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest005 function start!");
-
-    // 测试PostHibernate成功功能
     EXPECT_NO_THROW(hibernateController_->PostHibernate(true));
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest005 function end!");
 }
 
 /**
@@ -121,9 +116,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest005, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest006, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest006 function start!");
-
-    // 测试PostHibernate失败功能
     EXPECT_NO_THROW(hibernateController_->PostHibernate(false));
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest006 function end!");
 }
 
 /**
@@ -134,10 +128,9 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest006, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest007, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest007 function start!");
-
-    // 测试注册和注销序列
     EXPECT_NO_THROW(hibernateController_->RegisterSyncHibernateCallback(g_callback));
     EXPECT_NO_THROW(hibernateController_->UnregisterSyncHibernateCallback(g_callback));
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest007 function end!");
 }
 
 /**
@@ -148,11 +141,10 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest007, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest008, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest008 function start!");
-
-    // 测试PreHibernate和PostHibernate序列
     EXPECT_NO_THROW(hibernateController_->PreHibernate());
     EXPECT_NO_THROW(hibernateController_->PostHibernate(true));
     EXPECT_NO_THROW(hibernateController_->PostHibernate(false));
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest008 function end!");
 }
 
 /**
@@ -163,9 +155,9 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest008, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest009, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest009 function start!");
-
     EXPECT_NO_THROW(hibernateController_->RegisterSyncHibernateCallback(g_callback));
     EXPECT_EQ(hibernateController_->callbacks_.size(), 1);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest009 function end!");
 }
 
 /**
@@ -176,11 +168,9 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest009, TestSize.Level0)
 HWTEST_F(HibernateControllerTest, HibernateControllerTest010, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest010 function start!");
-
-    // 测试UnregisterSyncHibernateCallback
     EXPECT_NO_THROW(hibernateController_->UnregisterSyncHibernateCallback(g_callback));
     EXPECT_EQ(hibernateController_->callbacks_.size(), 0);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest010 function end!");
 }
-
 } // namespace PowerMgr
 } // namespace OHOS
