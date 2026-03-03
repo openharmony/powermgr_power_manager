@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,9 +48,6 @@ public:
     virtual void OnSyncHibernate() override;
     virtual void OnSyncWakeup(bool hibernateResult = false) override;
 };
-
 } // PowerMgr
 } // OHOS
-
-
 #endif //HIBERNATE_CONTROLLER_TEST_H_
