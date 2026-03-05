@@ -50,6 +50,7 @@ declare_args() {
   power_manager_feature_support_filtering_proximity_event = false
   power_manager_feature_report_screenoff_invalid = true
   power_manager_feature_screen_saver = false
+  power_manager_feature_enable_monitor_running_lock_change = false
 }
 
 defines = []
@@ -80,6 +81,10 @@ if (power_manager_feature_runninglock_background_user_idle_permissive_permission
 
 if (power_manager_feature_support_filtering_proximity_event) {
   defines += [ "POWER_MANAGER_SUPPORT_FILTERING_PROXIMITY_EVENT" ]
+}
+
+if (power_manager_feature_enable_monitor_running_lock_change) {
+  defines += [ "POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE" ]
 }
 
 if (!defined(global_parts_info) ||

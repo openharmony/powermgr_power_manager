@@ -1686,7 +1686,7 @@ bool PowerMgrService::UnRegisterRunningLockCallback(const sptr<IPowerRunninglock
         return false;
     }
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
-    runningLockMgr_->RegisterRunningLockCallback(callback);
+    runningLockMgr_->UnRegisterRunningLockCallback(callback);
     return true;
 }
 
@@ -2858,6 +2858,60 @@ PowerErrors PowerMgrService::SetProxFilteringStrategy(
     };
     DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
     powerStateMachine_->SetProxFilteringStrategy(strategy);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+{
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s failed, System permission intercept"
+            "pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: Permission denied for pid: %{public}d, uid: %{public}d",
+            __func__, pid, uid);
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+    runningLockMgr_->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+    std::function<void(const sptr<IRemoteObject>&)> cb = [](const sptr<IRemoteObject>& remote) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        RETURN_IF(pms == nullptr);
+        auto rlm = pms->GetRunningLockMgr();
+        RETURN_IF(rlm == nullptr);
+        rlm->UnRegisterRunningLockChangedCallback(remote);
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "RunningLockChangedCallback died, removed");
+    };
+    DeathRecipientManager::GetInstance().AddDeathRecipient(callback->AsObject(), {cb, __func__, pid, uid});
+#endif
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+{
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s failed, System permission intercept"
+            "pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s: Permission denied for pid: %{public}d, uid: %{public}d",
+            __func__, pid, uid);
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+    runningLockMgr_->UnRegisterRunningLockChangedCallback(callback->AsObject());
+    DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(callback->AsObject());
+#endif
     return PowerErrors::ERR_OK;
 }
 } // namespace PowerMgr

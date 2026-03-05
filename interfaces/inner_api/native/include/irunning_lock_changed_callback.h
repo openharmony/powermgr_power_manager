@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef POWER_MGR_SERVICE_IPC_ADAPTER_TEST_H
-#define POWER_MGR_SERVICE_IPC_ADAPTER_TEST_H
+#ifndef I_RUNNING_LOCK_CHANGED_CALLBACK_H
+#define I_RUNNING_LOCK_CHANGED_CALLBACK_H
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <iremote_broker.h>
 
 namespace OHOS {
 namespace PowerMgr {
+enum class RunningLockChangeState : uint32_t {
+    RUNNINGLOCK_STATE_LOCKED = 0,
+    RUNNINGLOCK_STATE_UNLOCKED = 1,
+};
 
-class PowerMgrServiceIpcAdapterTest : public testing::Test {
+class IRunningLockChangedCallback : public IRemoteBroker {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) = 0;
+
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IRunningLockChangedCallback");
 };
 } // namespace PowerMgr
 } // namespace OHOS
-
-#endif // POWER_MGR_SERVICE_IPC_ADAPTER_TEST_H
+#endif // I_RUNNING_LOCK_CHANGED_CALLBACK_H

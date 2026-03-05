@@ -28,6 +28,9 @@
 #include "running_lock_token_stub.h"
 #include "running_lock_info.h"
 #include "ipower_runninglock_callback.h"
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+#include "irunning_lock_changed_callback.h"
+#endif
 #ifdef HAS_SENSORS_SENSOR_PART
 #include "proximity_controller_base.h"
 #endif
@@ -54,6 +57,10 @@ public:
     void WriteHiSysEvent(std::shared_ptr<RunningLockInner>& lockInner);
     void RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    void RegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback, int32_t pid, int32_t uid);
+    void UnRegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback);
+#endif
     void QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
     uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
@@ -154,12 +161,19 @@ private:
     int32_t ForceUnLockByTypes(const std::vector<RunningLockType>& types);
     std::vector<std::pair<sptr<IRemoteObject>, std::string>> GetEnabledRunningLocksByType(RunningLockType type);
     bool ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remoteObj, const std::string& name);
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    void NotifyScreenRunningLockChanged(RunningLockChangeState state);
+#endif
 
     const wptr<PowerMgrService> pms_;
     ffrt::mutex mutex_;
     ffrt::mutex screenLockListsMutex_;
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    std::map<sptr<IRemoteObject>, std::pair<int32_t, int32_t>> runningLockChangedCallbacks_;
+    ffrt::mutex runningLockChangedCallbackMutex_;
+#endif
     std::shared_ptr<IProximityController> proximityController_ {nullptr};
     std::shared_ptr<RunningLockProxy> runninglockProxy_;
     sptr<IRemoteObject::DeathRecipient> runningLockDeathRecipient_;

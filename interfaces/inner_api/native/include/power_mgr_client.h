@@ -25,6 +25,7 @@
 #include "isync_sleep_callback.h"
 #include "iasync_ulsr_callback.h"
 #include "shutdown/iasync_shutdown_callback.h"
+#include "irunning_lock_changed_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -321,6 +322,21 @@ public:
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
     PowerErrors SetProxFilteringStrategy(ProxFilteringStrategy strategy);
+
+    /**
+     * Register the asynchronous running lock state change callback interface.
+     * @param callback Registered callback to running lock state change.
+     *     The callback will execute asynchronously when holding or unholding running lock.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback);
+
+    /**
+     * Unregister the asynchronous running lock state change callback interface.
+     * @param callback Registered callback to running lock state change.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback);
 
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:

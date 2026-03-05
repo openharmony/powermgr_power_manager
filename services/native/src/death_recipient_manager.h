@@ -47,6 +47,7 @@ public:
     void AddDeathRecipient(const sptr<IRemoteObject>& invoker, const CBInfo& info);
     void AddDeathRecipient(const sptr<IRemoteObject>& invoker, const sptr<IRemoteObject::DeathRecipient>& recipient);
     void RemoveDeathRecipient(const sptr<IRemoteObject>& token);
+    void RemoveDeathRecipientObj(const sptr<IRemoteObject>& object);
 private:
     DeathRecipientManager() = default;
     ~DeathRecipientManager() = default;
