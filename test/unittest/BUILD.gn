@@ -2522,6 +2522,54 @@ ohos_unittest("test_hibernate_controller") {
   ]
 }
 
+ohos_unittest("test_screen_off_pre_controller") {
+  module_out_path = module_output_path
+  defines += defs
+
+  sources = [ 
+    "src/screen_off_pre_controller_test.cpp",
+    "${powermgr_service_path}/native/src/screenoffpre/screen_off_pre_controller.cpp"
+  ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    ":module_mock_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${powermgr_service_path}/native/src",
+    "${powermgr_service_path}/native/src/actions",
+    "${powermgr_service_path}/native/src/actions/default",
+    "${powermgr_service_path}/native/src/setting",
+  ]
+
+  deps = [
+    "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_service_path}:powermgrservice",
+    "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/setting:power_setting",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = deps_ex + [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+  ]
+}
+
+
+
 group("unittest") {
   testonly = true
   deps = [
@@ -2575,6 +2623,7 @@ group("unittest") {
     ":test_running_lock_native",
     ":test_running_lock_scenario",
     ":test_running_lock_timer_handler",
+    ":test_screen_off_pre_controller",
     ":test_ulsr_callback_holder",
     ":test_hibernate_controller",
     ":test_sleep_callback_holder",
