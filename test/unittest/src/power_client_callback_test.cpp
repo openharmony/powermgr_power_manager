@@ -70,6 +70,13 @@ void PowerMgrClientCallbackTest::AsyncUlsrTestCallback::OnAsyncWakeup()
     POWER_HILOGI(LABEL_TEST, "AsyncUlsrTestCallback::OnAsyncWakeup.");
 }
 
+void PowerMgrClientCallbackTest::RunningLockChangedTestCallback::OnAsyncScreenRunningLockChanged(
+    RunningLockChangeState state)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockChangedTestCallback::OnAsyncScreenRunningLockChanged, state = %{public}d.",
+        static_cast<int32_t>(state));
+}
+
 namespace {
 /**
  * @tc.name: PowerMgrRunningLockCallback001
@@ -172,4 +179,54 @@ HWTEST_F(PowerMgrClientCallbackTest, PowerMgrUlsrCallback001, TestSize.Level1)
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrSyncSleepCallback001 function end!");
 }
+
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+/**
+ * @tc.name: PowerMgrRunningLockChangedCallback001
+ * @tc.desc: test RegisterRunningLockChangedCallback and UnRegisterRunningLockChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrRunningLockChangedCallback001, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrRunningLockChangedCallback001 function start!");
+    PowerErrors ret = PowerErrors::ERR_OK;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<IRunningLockChangedCallback> cb = new RunningLockChangedTestCallback();
+    ret = powerMgrClient.RegisterRunningLockChangedCallback(cb);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    ret = powerMgrClient.UnRegisterRunningLockChangedCallback(cb);
+    EXPECT_TRUE(ret == PowerErrors::ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrRunningLockChangedCallback001 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrRunningLockChangedCallback002
+ * @tc.desc: test RegisterRunningLockChangedCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrRunningLockChangedCallback002, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrRunningLockChangedCallback002 function start!");
+    PowerErrors ret = PowerErrors::ERR_OK;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    ret = powerMgrClient.RegisterRunningLockChangedCallback(nullptr);
+    EXPECT_TRUE(ret == PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrRunningLockChangedCallback002 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrRunningLockChangedCallback003
+ * @tc.desc: test UnRegisterRunningLockChangedCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrRunningLockChangedCallback003, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrRunningLockChangedCallback003 function start!");
+    PowerErrors ret = PowerErrors::ERR_OK;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    ret = powerMgrClient.UnRegisterRunningLockChangedCallback(nullptr);
+    EXPECT_TRUE(ret == PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrRunningLockChangedCallback003 function end!");
+}
+#endif
 }

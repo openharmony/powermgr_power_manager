@@ -110,6 +110,9 @@ void RunningLockMgr::InitLocksTypeScreen()
                 // RUNNINGLOCK_SCREEN active
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "SL active");
                 pms->RefreshActivityInner(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SOFTWARE, true);
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+                NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+#endif
             } else {
                 // RUNNINGLOCK_SCREEN inactive
                 POWER_HILOGI(FEATURE_RUNNING_LOCK, "SL inactive");
@@ -119,6 +122,9 @@ void RunningLockMgr::InitLocksTypeScreen()
                     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Screen unlock in state: %{public}d",
                         stateMachine->GetState());
                 }
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+                NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED);
+#endif
             }
 #ifdef POWER_MANAGER_TV_DREAMING
             AAFwk::Want want;
@@ -1223,6 +1229,42 @@ void RunningLockMgr::HandleExitForceSleep()
         return;
     }
     ffrtTimer_->CancelTimer(FFRTTimerId::TIMER_ID_FORCE_RELEASE_LOCK);
+}
+#endif
+
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+void RunningLockMgr::RegisterRunningLockChangedCallback(
+    const sptr<IRemoteObject>& callback, int32_t pid, int32_t uid)
+{
+    RETURN_IF(callback == nullptr);
+    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
+    auto [it, isOk] = runningLockChangedCallbacks_.emplace(callback, std::pair<int32_t, int32_t>(pid, uid));
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "runningLockChangedCallbacks_.size:%{public}zu, isOk:%{public}d",
+        runningLockChangedCallbacks_.size(), isOk);
+}
+
+void RunningLockMgr::UnRegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback)
+{
+    RETURN_IF(callback == nullptr);
+    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
+    auto iter = runningLockChangedCallbacks_.find(callback);
+    if (iter != runningLockChangedCallbacks_.end()) {
+        runningLockChangedCallbacks_.erase(iter);
+    }
+}
+
+void RunningLockMgr::NotifyScreenRunningLockChanged(RunningLockChangeState state)
+{
+    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
+    for (const auto& callbackPair : runningLockChangedCallbacks_) {
+        auto callback = callbackPair.first;
+        sptr<IRunningLockChangedCallback> screenLockCallback = iface_cast<IRunningLockChangedCallback>(callback);
+        if (screenLockCallback != nullptr) {
+            screenLockCallback->OnAsyncScreenRunningLockChanged(state);
+            POWER_HILOGI(FEATURE_RUNNING_LOCK, "SRL CB: P=%{public}dU=%{public}d",
+                callbackPair.second.first, callbackPair.second.second);
+        }
+    }
 }
 #endif
 } // namespace PowerMgr
