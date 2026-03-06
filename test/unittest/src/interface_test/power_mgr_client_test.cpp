@@ -1882,4 +1882,27 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient063, TestSize.Level0) {
     EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient063 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient064
+ * @tc.desc: test RegisterRunningLockChangedCallback & UnRegisterRunningLockChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient064, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient064 function start!");
+    auto& powerMgrClinet = PowerMgrClient::GetInstance();
+    PowerErrors ret = powerMgrClinet.RegisterRunningLockChangedCallback(nullptr);
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_OK); // nothing to do
+#endif
+    ret = powerMgrClinet.UnRegisterRunningLockChangedCallback(nullptr);
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_OK); // nothing to do
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient064 function end!");
+}
 } // namespace
