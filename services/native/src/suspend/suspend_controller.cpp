@@ -947,6 +947,13 @@ bool PowerKeySuspendMonitor::Init()
             retryCount++;
             if (retryCount < RETRY_COUNT_TIMES) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_MS));
+            } else {
+                POWER_HILOGE(FEATURE_SUSPEND, "trigger powerkeyupevent subscribe fail hiviewevent");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+                HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "SUBSCRIBE_POWERKEY_FAILED",
+                    HiviewDFX::HiSysEvent::EventType::FAULT, "SUBSCRIBE_ID", powerkeyReleaseId_, "SUBSCRIBE_ID_CACHE",
+                    g_powerkeyReleaseIdCache, "RETRY_COUNT", retryCount, "TYPE", "powerkeyupevent");
+#endif
             }
         }
     } while (subscribeOrLastUnsubscribeFailed && retryCount < RETRY_COUNT_TIMES);
