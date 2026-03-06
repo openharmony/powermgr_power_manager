@@ -47,6 +47,7 @@ group("fuzztest") {
     "queryrunninglocklists_fuzzer:QueryRunningLockListsFuzzTest",
     "rebootdevice_fuzzer:RebootDeviceFuzzTest",
     "refreshactivity_fuzzer:RefreshActivityFuzzTest",
+    "registerrunninglockchangedcallback_fuzzer:RegisterRunningLockChangedCallbackFuzzTest",
     "registersuspendtakeovercallback_fuzzer:RegisterSuspendTakeoverCallbackFuzzTest",
     "releaserunninglock_fuzzer:ReleaseRunningLockFuzzTest",
     "resetrunninglocks_fuzzer:ResetRunningLocksFuzzTest",
