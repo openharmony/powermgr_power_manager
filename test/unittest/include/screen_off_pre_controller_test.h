@@ -39,14 +39,9 @@ public:
     static void TearDownTestCase() {}
 
     std::shared_ptr<PowerStateMachine> stateMachine_;
-    ScreenOffPreController* controller_;
+    std::unique_ptr<ScreenOffPreController> controller_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
 
-
-
-
-
-
- #endif // SCREEN_OFF_PRE_CONTROLLER_TEST_H
+#endif // SCREEN_OFF_PRE_CONTROLLER_TEST_H

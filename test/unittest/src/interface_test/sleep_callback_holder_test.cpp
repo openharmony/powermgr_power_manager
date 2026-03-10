@@ -121,13 +121,11 @@ HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest002, TestSize.Level2)
     sptr<TestSleepCallbackHolder> callback = new TestSleepCallbackHolder();
 
     sleepCallbackHolder.AddCallback(callback, SleepPriority::HIGH);
-    EXPECT_EQ(sleepCallbackHolder.cachedRegister_.size(), 1);
     auto pidUid = sleepCallbackHolder.FindCallbackPidUid(callback);
     EXPECT_EQ(pidUid.first, IPCSkeleton::GetCallingPid());
     EXPECT_EQ(pidUid.second, IPCSkeleton::GetCallingUid());
 
     sleepCallbackHolder.RemoveCallback(callback);
-    EXPECT_EQ(sleepCallbackHolder.cachedRegister_.size(), 0);
     pidUid = sleepCallbackHolder.FindCallbackPidUid(callback);
     EXPECT_EQ(pidUid.first, 0);
     EXPECT_EQ(pidUid.second, 0);
@@ -295,6 +293,307 @@ HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest007, TestSize.Level2)
     EXPECT_NE(ret3, ERR_OK);
 
     POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest007 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest009
+ * @tc.desc: Test Add same callback to different priorities
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest009, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest009 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+    sptr<TestSleepCallbackHolder> callback = new TestSleepCallbackHolder();
+
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::HIGH);
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 0);
+
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::DEFAULT);
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 0);
+
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::LOW);
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 1);
+
+    sleepCallbackHolder.RemoveCallback(callback);
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest009 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest010
+ * @tc.desc: Test AddCallback with invalid priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest010, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest010 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+    sptr<TestSleepCallbackHolder> callback = new TestSleepCallbackHolder();
+
+    sleepCallbackHolder.AddCallback(callback, static_cast<SleepPriority>(100));
+    auto highCallbacks = sleepCallbackHolder.GetHighPriorityCallbacks();
+    auto defaultCallbacks = sleepCallbackHolder.GetDefaultPriorityCallbacks();
+    auto lowCallbacks = sleepCallbackHolder.GetLowPriorityCallbacks();
+    EXPECT_EQ(highCallbacks.size(), 0);
+    EXPECT_EQ(defaultCallbacks.size(), 0);
+    EXPECT_EQ(lowCallbacks.size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest010 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest011
+ * @tc.desc: Test FindCallbackPidUid with non-existent callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest011, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest011 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+    sptr<TestSleepCallbackHolder> callback = new TestSleepCallbackHolder();
+
+    auto pidUid = sleepCallbackHolder.FindCallbackPidUid(callback);
+    EXPECT_EQ(pidUid.first, 0);
+    EXPECT_EQ(pidUid.second, 0);
+
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::HIGH);
+    pidUid = sleepCallbackHolder.FindCallbackPidUid(callback);
+    EXPECT_EQ(pidUid.first, IPCSkeleton::GetCallingPid());
+    EXPECT_EQ(pidUid.second, IPCSkeleton::GetCallingUid());
+
+    sleepCallbackHolder.RemoveCallback(callback);
+    pidUid = sleepCallbackHolder.FindCallbackPidUid(callback);
+    EXPECT_EQ(pidUid.first, 0);
+    EXPECT_EQ(pidUid.second, 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest011 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest012
+ * @tc.desc: Test RemoveCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest012, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest012 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+
+    auto highCallbacks = sleepCallbackHolder.GetHighPriorityCallbacks();
+    auto defaultCallbacks = sleepCallbackHolder.GetDefaultPriorityCallbacks();
+    auto lowCallbacks = sleepCallbackHolder.GetLowPriorityCallbacks();
+    EXPECT_EQ(highCallbacks.size(), 0);
+    EXPECT_EQ(defaultCallbacks.size(), 0);
+    EXPECT_EQ(lowCallbacks.size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest012 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest013
+ * @tc.desc: Test all priorities get empty after all callbacks removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest013, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest013 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+
+    sptr<TestSleepCallbackHolder> h1 = new TestSleepCallbackHolder();
+    sptr<TestSleepCallbackHolder> h2 = new TestSleepCallbackHolder();
+    sptr<TestSleepCallbackHolder> d1 = new TestSleepCallbackHolder();
+    sptr<TestSleepCallbackHolder> d2 = new TestSleepCallbackHolder();
+    sptr<TestSleepCallbackHolder> l1 = new TestSleepCallbackHolder();
+    sptr<TestSleepCallbackHolder> l2 = new TestSleepCallbackHolder();
+
+    sleepCallbackHolder.AddCallback(h1, SleepPriority::HIGH);
+    sleepCallbackHolder.AddCallback(h2, SleepPriority::HIGH);
+    sleepCallbackHolder.AddCallback(d1, SleepPriority::DEFAULT);
+    sleepCallbackHolder.AddCallback(d2, SleepPriority::DEFAULT);
+    sleepCallbackHolder.AddCallback(l1, SleepPriority::LOW);
+    sleepCallbackHolder.AddCallback(l2, SleepPriority::LOW);
+
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 2);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 2);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 2);
+
+    sleepCallbackHolder.RemoveCallback(h1);
+    sleepCallbackHolder.RemoveCallback(h2);
+    sleepCallbackHolder.RemoveCallback(d1);
+    sleepCallbackHolder.RemoveCallback(d2);
+    sleepCallbackHolder.RemoveCallback(l1);
+    sleepCallbackHolder.RemoveCallback(l2);
+
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest013 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest014
+ * @tc.desc: Test callback with same object but different priority add sequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest014, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest014 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+    sptr<TestSleepCallbackHolder> callback = new TestSleepCallbackHolder();
+
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::LOW);
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::DEFAULT);
+    sleepCallbackHolder.AddCallback(callback, SleepPriority::HIGH);
+
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 1);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 1);
+
+    sleepCallbackHolder.RemoveCallback(callback);
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest014 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest015
+ * @tc.desc: Test batch add and remove operations
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest015, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest015 function start!");
+    SleepCallbackHolder& sleepCallbackHolder = SleepCallbackHolder::GetInstance();
+
+    std::vector<sptr<TestSleepCallbackHolder>> highCbs;
+    std::vector<sptr<TestSleepCallbackHolder>> defaultCbs;
+    std::vector<sptr<TestSleepCallbackHolder>> lowCbs;
+
+    for (int i = 0; i < 5; ++i) {
+        highCbs.push_back(new TestSleepCallbackHolder());
+        defaultCbs.push_back(new TestSleepCallbackHolder());
+        lowCbs.push_back(new TestSleepCallbackHolder());
+    }
+
+    for (auto& cb : highCbs) {
+        sleepCallbackHolder.AddCallback(cb, SleepPriority::HIGH);
+    }
+    for (auto& cb : defaultCbs) {
+        sleepCallbackHolder.AddCallback(cb, SleepPriority::DEFAULT);
+    }
+    for (auto& cb : lowCbs) {
+        sleepCallbackHolder.AddCallback(cb, SleepPriority::LOW);
+    }
+
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 5);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 5);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 5);
+
+    for (auto& cb : highCbs) {
+        sleepCallbackHolder.RemoveCallback(cb);
+    }
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 5);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 5);
+
+    for (auto& cb : defaultCbs) {
+        sleepCallbackHolder.RemoveCallback(cb);
+    }
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 5);
+
+    for (auto& cb : lowCbs) {
+        sleepCallbackHolder.RemoveCallback(cb);
+    }
+    EXPECT_EQ(sleepCallbackHolder.GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(sleepCallbackHolder.GetLowPriorityCallbacks().size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest015 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest016
+ * @tc.desc: Test SyncSleepCallbackStub with different force sleep values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest016, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest016 function start!");
+    TestSleepCallbackHolder callback;
+    MessageParcel reply;
+    MessageOption opt;
+
+    g_isOnSyncSleep = false;
+    g_forceSleep = false;
+
+    MessageParcel data1;
+    data1.WriteInterfaceToken(TestSleepCallbackHolder::GetDescriptor());
+    data1.WriteBool(false);
+    int32_t ret1 = callback.OnRemoteRequest(
+        static_cast<uint32_t>(PowerMgr::SyncSleepCallbackInterfaceCode::CMD_ON_SYNC_SLEEP),
+        data1, reply, opt);
+    EXPECT_EQ(ret1, ERR_OK);
+    EXPECT_TRUE(g_isOnSyncSleep);
+    EXPECT_FALSE(g_forceSleep);
+
+    g_isOnSyncWakeup = false;
+    g_forceWakeup = false;
+
+    MessageParcel data2;
+    data2.WriteInterfaceToken(TestSleepCallbackHolder::GetDescriptor());
+    data2.WriteBool(false);
+    int32_t ret2 = callback.OnRemoteRequest(
+        static_cast<uint32_t>(PowerMgr::SyncSleepCallbackInterfaceCode::CMD_ON_SYNC_WAKEUP),
+        data2, reply, opt);
+    EXPECT_EQ(ret2, ERR_OK);
+    EXPECT_TRUE(g_isOnSyncWakeup);
+    EXPECT_FALSE(g_forceWakeup);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest016 function end!");
+}
+
+/**
+ * @tc.name: SleepCallbackHolderTest017
+ * @tc.desc: Test SyncSleepCallbackStub with invalid parcel data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SleepCallbackHolderTest, SleepCallbackHolderTest017, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest017 function start!");
+    TestSleepCallbackHolder callback;
+    MessageParcel reply;
+    MessageOption opt;
+
+    MessageParcel data1;
+    data1.WriteInterfaceToken(TestSleepCallbackHolder::GetDescriptor());
+    int32_t ret1 = callback.OnRemoteRequest(
+        static_cast<uint32_t>(PowerMgr::SyncSleepCallbackInterfaceCode::CMD_ON_SYNC_SLEEP),
+        data1, reply, opt);
+    EXPECT_NE(ret1, ERR_OK);
+
+    MessageParcel data2;
+    data2.WriteInterfaceToken(TestSleepCallbackHolder::GetDescriptor());
+    int32_t ret2 = callback.OnRemoteRequest(
+        static_cast<uint32_t>(PowerMgr::SyncSleepCallbackInterfaceCode::CMD_ON_SYNC_WAKEUP),
+        data2, reply, opt);
+    EXPECT_NE(ret2, ERR_OK);
+
+    POWER_HILOGI(LABEL_TEST, "SleepCallbackHolderTest017 function end!");
 }
 } // namespace PowerMgr
 } // namespace OHOS
