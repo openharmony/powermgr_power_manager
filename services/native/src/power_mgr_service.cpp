@@ -139,6 +139,9 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
 #endif
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
+#endif
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     PowerExtIntfWrapper::Instance().Init();
@@ -896,6 +899,19 @@ void PowerMgrService::OnAddSystemAbilityInner(int32_t systemAbilityId, [[maybe_u
         this->GetPowerModeModule().SubscribeCommonEvent();
         return;
     }
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+    if (systemAbilityId == MULTIMODAL_INPUT_SERVICE_ID) {
+        auto inputManager = InputManager::GetInstance();
+        SwitchEvent::SwitchState state = SwitchEvent::STATE_ON;
+        int32_t ret = inputManager->QuerySwitchStatus(SwitchEvent::SwitchType::SWITCH_DEFAULT, state);
+        POWER_HILOGI(COMP_SVC, "[UI_POWER] QuerySwitchStatus: %{public}d, ret: %{public}d",
+            static_cast<int32_t>(state), ret);
+        if (state != SwitchEvent::STATE_UNKNOW) {
+            powerStateMachine_->SetSwitchState(state == SwitchEvent::STATE_ON);
+        }
+        return;
+    }
+#endif
 }
 
 #ifdef MSDP_MOVEMENT_ENABLE

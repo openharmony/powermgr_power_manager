@@ -16,6 +16,7 @@
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
 #include <input_manager.h>
 #endif
+#include <stack>
 #include "power_mgr_service.h"
 #include "mock_state_action.h"
 
@@ -29,6 +30,7 @@ sptr<PowerMgrService> g_service;
 DisplayState g_displayState = DisplayState::DISPLAY_ON;
 constexpr int SLEEP_WAIT_TIME_US = 500000;
 constexpr uint32_t NO_DELAY = 0;
+constexpr int32_t MULTIMODAL_INPUT_SERVICE_ID = 3101;
 bool g_killProcsee = false;
 std::map<SubscriberState, std::shared_ptr<ServiceState>> g_stateMap {
     {SubscriberState::FAILURE, std::make_shared<DeadServiceState>()},
@@ -142,6 +144,23 @@ int32_t MMI::InputManager::SubscribeKeyEvent(std::shared_ptr<KeyOption> keyOptio
     }
     static RequestContext context(g_stateMap[SubscriberState::SUCCESS]);
     return static_cast<int32_t>(context.HandleRequest());
+}
+
+int32_t InputManager::QuerySwitchStatus(SwitchEvent::SwitchType switchType, SwitchEvent::SwitchState &state)
+{
+    state = SwitchEvent::STATE_UNKNOW;
+    int32_t result = 0;
+    static std::stack<std::pair<int32_t, int32_t>> data(
+        std::deque<std::pair<int32_t, int32_t>>{{-1, -1}, {0, 0}, {0, 1}}
+    );
+    if (!data.empty()) {
+        auto [ret, switchState] = data.top();
+        POWER_HILOGI(LABEL_TEST, "QuerySwitchStatus ret:%{public}d, state:%{public}d", ret, switchState);
+        state = static_cast<SwitchEvent::SwitchState>(switchState);
+        result = ret;
+        data.pop();
+    }
+    return result;
 }
 #endif
 
@@ -317,6 +336,27 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest005, TestSize.Level0)
     EXPECT_TRUE(powerkeySuspendMonitor->Init());
     GTEST_LOG_(INFO) << "PowerKeyOptionTest005: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest005 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerKeyOptionTest006
+ * @tc.desc: test QuerySwitchStatus when OnAddSystemAbility
+ * @tc.type: FUNC
+ */
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest006, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest006 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest006: start";
+    g_service->OnAddSystemAbility(INT_MAX, "");
+    std::vector<int32_t> testRet = {0, 1, 1, 1, 1};
+    for (int32_t ret : testRet) {
+        g_service->OnAddSystemAbility(MULTIMODAL_INPUT_SERVICE_ID, "");
+        EXPECT_TRUE(g_service->GetPowerStateMachine()->IsSwitchOpen() == ret);
+    }
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest006: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest006 function end!");
 }
 #endif
 } // namespace
