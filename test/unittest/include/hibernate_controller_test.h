@@ -23,6 +23,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <memory>
 #include "power_log.h"
 
 #include "hibernate/hibernate_controller.h"
@@ -33,7 +34,7 @@ namespace PowerMgr {
 
 class HibernateControllerTest : public testing::Test {
 public:
-    HibernateController* hibernateController_;
+    std::unique_ptr<HibernateController> hibernateController_;
 
     void SetUp();
     void TearDown();

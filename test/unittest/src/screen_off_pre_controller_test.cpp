@@ -27,13 +27,12 @@ void ScreenOffPreControllerTest::SetUp()
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     stateMachine_ = std::make_shared<PowerStateMachine>(pms);
-    controller_ = new ScreenOffPreController(stateMachine_);
+    controller_ = std::make_unique<ScreenOffPreController>(stateMachine_);
 }
 
 void ScreenOffPreControllerTest::TearDown()
 {
-    delete controller_;
-    controller_ = nullptr;
+    controller_.reset();
     stateMachine_.reset();
 }
 
@@ -59,8 +58,8 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest001, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest002, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest002 function start!");
-
-    EXPECT_NO_THROW(controller_->Init());
+    controller_->Init();
+    EXPECT_FALSE(controller_->IsRegistered());
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest002 function end!");
 }
 
@@ -72,7 +71,8 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest002, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest003, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest003 function start!");
-    EXPECT_NO_THROW(controller_->Reset());
+    controller_->Reset();
+    EXPECT_TRUE(controller_->queue_ == nullptr);
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest003 function end!");
 }
 
@@ -84,7 +84,8 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest003, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest004, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest004 function start!");
-    EXPECT_NO_THROW(controller_->AddScreenStateCallback(0, nullptr));
+    controller_->AddScreenStateCallback(0, nullptr);
+    EXPECT_TRUE(controller_->isRegistered_);
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest004 function end!");
 }
 
@@ -96,7 +97,10 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest004, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest005, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest005 function start!");
-    EXPECT_NO_THROW(controller_->DelScreenStateCallback(nullptr));
+    controller_->AddScreenStateCallback(0, nullptr);
+    EXPECT_TRUE(controller_->isRegistered_);
+    controller_->DelScreenStateCallback(nullptr);
+    EXPECT_FALSE(controller_->isRegistered_);
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest005 function end!");
 }
 
@@ -108,7 +112,8 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest005, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest006, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest006 function start!");
-    EXPECT_NO_THROW(controller_->SchedulEyeDetectTimeout(-1, 0));
+    controller_->AddScreenStateCallback(-1, nullptr);
+    EXPECT_EQ(controller_->remainTime_, -1);
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest006 function end!");
 }
 
@@ -144,7 +149,8 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest008, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest009, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest009 function start!");
-    EXPECT_NO_THROW(controller_->CancelEyeDetectTimeout());
+    controller_->CancelEyeDetectTimeout();
+    EXPECT_TRUE(controller_->queue_ != nullptr);
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest009 function end!");
 }
 
@@ -156,8 +162,74 @@ HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest009, TestSize.Lev
 HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest010, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest010 function start!");
-    EXPECT_NO_THROW(controller_->TriggerCallback());
+    controller_->TriggerCallback();
+    EXPECT_TRUE(controller_->callbackMgr_ != nullptr);
     POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest010 function end!");
+}
+
+/**
+ * @tc.name: ScreenOffPreControllerTest011
+ * @tc.desc: test NeedEyeDetectLocked with zero time
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest011, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest011 function start!");
+    EXPECT_TRUE(controller_->NeedEyeDetectLocked(0));
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest011 function end!");
+}
+
+/**
+ * @tc.name: ScreenOffPreControllerTest012
+ * @tc.desc: test NeedEyeDetectLocked with large positive time
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest012, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest012 function start!");
+    EXPECT_TRUE(controller_->NeedEyeDetectLocked(10000));
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest012 function end!");
+}
+
+/**
+ * @tc.name: ScreenOffPreControllerTest013
+ * @tc.desc: test SchedulEyeDetectTimeout with zero time
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest013, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest013 function start!");
+    controller_->AddScreenStateCallback(0, nullptr);
+    EXPECT_EQ(controller_->remainTime_, 0);
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest013 function end!");
+}
+
+/**
+ * @tc.name: ScreenOffPreControllerTest014
+ * @tc.desc: test SchedulEyeDetectTimeout with valid time
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest014, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest014 function start!");
+    controller_->AddScreenStateCallback(100, nullptr);
+    EXPECT_EQ(controller_->remainTime_, 100);
+    controller_->SchedulEyeDetectTimeout(1000, 100);
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest014 function end!");
+}
+
+/**
+ * @tc.name: ScreenOffPreControllerTest015
+ * @tc.desc: test HandleEyeDetectTimeout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenOffPreControllerTest, ScreenOffPreControllerTest015, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest015 function start!");
+    controller_->Reset();
+    EXPECT_TRUE(controller_->queue_ == nullptr);
+    controller_->HandleEyeDetectTimeout(100);
+    POWER_HILOGI(LABEL_TEST, "ScreenOffPreControllerTest015 function end!");
 }
 
 } // namespace PowerMgr

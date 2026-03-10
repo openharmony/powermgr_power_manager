@@ -521,5 +521,111 @@ HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest010, TestSize.Lev
     EXPECT_NE(ret3, ERR_OK);
     POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest010 function end!");
 }
+
+/**
+ * @tc.name: ShutdownCallbackHolderTest012
+ * @tc.desc: Test Add same callback to different priorities
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest012, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest012 function start!");
+    sptr<ShutdownCallbackHolder> shutdownCallbackHolder = new ShutdownCallbackHolder();
+    sptr<TestAsyncShutdownCallback> asyncCallback = new TestAsyncShutdownCallback();
+
+    shutdownCallbackHolder->AddCallback(asyncCallback->AsObject(), ShutdownPriority::HIGH);
+    EXPECT_EQ(shutdownCallbackHolder->GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(shutdownCallbackHolder->GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(shutdownCallbackHolder->GetLowPriorityCallbacks().size(), 0);
+
+    shutdownCallbackHolder->AddCallback(asyncCallback->AsObject(), ShutdownPriority::DEFAULT);
+    EXPECT_EQ(shutdownCallbackHolder->GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(shutdownCallbackHolder->GetDefaultPriorityCallbacks().size(), 1);
+    EXPECT_EQ(shutdownCallbackHolder->GetLowPriorityCallbacks().size(), 0);
+
+    shutdownCallbackHolder->AddCallback(asyncCallback->AsObject(), ShutdownPriority::LOW);
+    EXPECT_EQ(shutdownCallbackHolder->GetHighPriorityCallbacks().size(), 1);
+    EXPECT_EQ(shutdownCallbackHolder->GetDefaultPriorityCallbacks().size(), 1);
+    EXPECT_EQ(shutdownCallbackHolder->GetLowPriorityCallbacks().size(), 1);
+
+    shutdownCallbackHolder->RemoveCallback(asyncCallback->AsObject());
+    EXPECT_EQ(shutdownCallbackHolder->GetHighPriorityCallbacks().size(), 0);
+    EXPECT_EQ(shutdownCallbackHolder->GetDefaultPriorityCallbacks().size(), 0);
+    EXPECT_EQ(shutdownCallbackHolder->GetLowPriorityCallbacks().size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest012 function end!");
+}
+
+/**
+ * @tc.name: ShutdownCallbackHolderTest013
+ * @tc.desc: Test AddCallback with invalid priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest013, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest013 function start!");
+    sptr<ShutdownCallbackHolder> shutdownCallbackHolder = new ShutdownCallbackHolder();
+    sptr<TestAsyncShutdownCallback> asyncCallback = new TestAsyncShutdownCallback();
+
+    shutdownCallbackHolder->AddCallback(asyncCallback->AsObject(), static_cast<ShutdownPriority>(100));
+    auto highCallbacks = shutdownCallbackHolder->GetHighPriorityCallbacks();
+    auto defaultCallbacks = shutdownCallbackHolder->GetDefaultPriorityCallbacks();
+    auto lowCallbacks = shutdownCallbackHolder->GetLowPriorityCallbacks();
+    EXPECT_EQ(highCallbacks.size(), 0);
+    EXPECT_EQ(defaultCallbacks.size(), 0);
+    EXPECT_EQ(lowCallbacks.size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest013 function end!");
+}
+
+/**
+ * @tc.name: ShutdownCallbackHolderTest014
+ * @tc.desc: Test FindCallbackPidUid with non-existent callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest014, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest014 function start!");
+    sptr<ShutdownCallbackHolder> shutdownCallbackHolder = new ShutdownCallbackHolder();
+    sptr<TestAsyncShutdownCallback> callback = new TestAsyncShutdownCallback();
+
+    auto pidUid = shutdownCallbackHolder->FindCallbackPidUid(callback->AsObject());
+    EXPECT_EQ(pidUid.first, 0);
+    EXPECT_EQ(pidUid.second, 0);
+
+    shutdownCallbackHolder->AddCallback(callback->AsObject(), ShutdownPriority::HIGH);
+    pidUid = shutdownCallbackHolder->FindCallbackPidUid(callback->AsObject());
+    EXPECT_EQ(pidUid.first, IPCSkeleton::GetCallingPid());
+    EXPECT_EQ(pidUid.second, IPCSkeleton::GetCallingUid());
+
+    shutdownCallbackHolder->RemoveCallback(callback->AsObject());
+    pidUid = shutdownCallbackHolder->FindCallbackPidUid(callback->AsObject());
+    EXPECT_EQ(pidUid.first, 0);
+    EXPECT_EQ(pidUid.second, 0);
+
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest014 function end!");
+}
+
+/**
+ * @tc.name: ShutdownCallbackHolderTest015
+ * @tc.desc: Test RemoveCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest015, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest015 function start!");
+    sptr<ShutdownCallbackHolder> shutdownCallbackHolder = new ShutdownCallbackHolder();
+
+    shutdownCallbackHolder->RemoveCallback(nullptr);
+
+    auto highCallbacks = shutdownCallbackHolder->GetHighPriorityCallbacks();
+    auto defaultCallbacks = shutdownCallbackHolder->GetDefaultPriorityCallbacks();
+    auto lowCallbacks = shutdownCallbackHolder->GetLowPriorityCallbacks();
+    EXPECT_EQ(highCallbacks.size(), 0);
+    EXPECT_EQ(defaultCallbacks.size(), 0);
+    EXPECT_EQ(lowCallbacks.size(), 0);
+
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest015 function end!");
+}
 } // namespace PowerMgr
 } // namespace OHOS
