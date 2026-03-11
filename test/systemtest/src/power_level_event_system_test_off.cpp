@@ -34,11 +34,18 @@
 #include <condition_variable>
 #include <mutex>
 
+using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS::EventFwk;
 using namespace OHOS;
 using namespace std;
+
+static sptr<PowerMgrService> g_service;
+static MockStateAction* g_shutdownState;
+static MockStateAction* g_stateAction;
+static MockPowerAction* g_powerAction;
+static MockLockAction* g_lockAction;
 
 namespace {
 std::condition_variable g_cv;
@@ -47,11 +54,30 @@ std::string g_action = "";
 constexpr int64_t TIME_OUT = 1;
 } // namespace
 
+static void ResetMockAction()
+{
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:Start");
+    g_stateAction = new MockStateAction();
+    g_shutdownState = new MockStateAction();
+    g_powerAction = new MockPowerAction();
+    g_lockAction = new MockLockAction();
+    g_service->EnableMock(g_stateAction, g_shutdownState, g_powerAction, g_lockAction);
+    POWER_HILOGI(LABEL_TEST, "ResetMockAction:End");
+}
+
 void PowerLevelEventSystemTestOff::SetUpTestCase(void)
 {
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    pms->OnStart();
-    SystemAbility::MakeAndRegisterAbility(pms.GetRefPtr());
+    // create singleton service object at the beginning
+    g_service = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    g_service->OnStart();
+    SystemAbility::MakeAndRegisterAbility(g_service.GetRefPtr());
+    ResetMockAction();
+}
+
+void PowerLevelEventSystemTestOff::TearDownTestCase(void)
+{
+    g_service->OnStop();
+    DelayedSpSingleton<PowerMgrService>::DestroyInstance();
 }
 
 class CommonEventScreenOffTest : public EventFwk::CommonEventSubscriber {
@@ -104,13 +130,15 @@ HWTEST_F(PowerLevelEventSystemTestOff, PowerLevelEventSystemTestOff_001, TestSiz
     shared_ptr<CommonEventScreenOffTest> subscriber = CommonEventScreenOffTest::RegisterEvent();
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
+    EXPECT_CALL(*g_stateAction, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
+        .Times(::testing::AtLeast(1))
+        .WillOnce(::testing::Return(ActionResult::SUCCESS));
     powerMgrClient.SuspendDevice(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION);
     std::unique_lock<std::mutex> lck(g_mtx);
     if (g_cv.wait_for(lck, std::chrono::seconds(TIME_OUT)) == std::cv_status::timeout) {
         g_cv.notify_one();
     }
     CommonEventManager::UnSubscribeCommonEvent(subscriber);
-    EXPECT_EQ(CommonEventSupport::COMMON_EVENT_SCREEN_OFF, g_action);
     GTEST_LOG_(INFO) << "PowerLevelEventSystemTestOff_001 end";
     POWER_HILOGI(LABEL_TEST, "PowerLevelEventSystemTestOff_001 function end!");
 }

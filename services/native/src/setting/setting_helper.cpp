@@ -706,7 +706,7 @@ int64_t SettingHelper::GetSettingPowerDcSleepTime(int64_t defaultVal)
 #ifdef POWER_MANAGER_ENABLE_BLOCK_LONG_PRESS
 const std::string SettingHelper::GetBlockLongPress()
 {
-    SettingProvider& SettingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
+    SettingProvider& settingProvider = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID);
     std::string longPress;
     ErrCode ret = settingProvider.GetStringValue(SETTING_POWER_BLOCK_LONG_PRESS_KEY, longPress);
     if (ret != ERR_OK) {
