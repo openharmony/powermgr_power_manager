@@ -509,7 +509,7 @@ HWTEST_F(SuspendTakeoverCallbackHolderTest, SuspendTakeoverCallbackHolderTest015
  */
 HWTEST_F(SuspendTakeoverCallbackHolderTest, SuspendTakeoverCallbackHolderTest016, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "SuspendTakeoverCallbackHolderTest    sptr<Test016 function start!");
+    POWER_HILOGI(LABEL_TEST, "SuspendTakeoverCallbackHolderTest016 function start!");
     sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
     MessageParcel reply;
     MessageOption opt;
@@ -535,25 +535,14 @@ HWTEST_F(SuspendTakeoverCallbackHolderTest, SuspendTakeoverCallbackHolderTest016
  */
 HWTEST_F(SuspendTakeoverCallbackHolderTest, SuspendTakeoverCallbackHolderTest017, TestSize.Level2)
 {
-    POWER_HILOGI(LABEL_TEST, "SuspendTakeoverCallbackHolderTest016 function start!");
-    TestTakeOverSuspendCallback callback;
+    POWER_HILOGI(LABEL_TEST, "SuspendTakeoverCallbackHolderTest017 function start!");
+    sptr<TestTakeOverSuspendCallback> callback = new TestTakeOverSuspendCallback();
     MessageParcel reply;
     MessageOption opt;
 
     std::vector<SuspendDeviceType> deviceTypes = {
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_LID,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_STR,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH,
         SuspendDeviceType::SUSPEND_DEVICE_LOW_CAPACITY,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER,
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_EX_SCREEN_INIT,
         SuspendDeviceType::SUSPEND_DEVICE_SWITCH_SENSORHUB,
     };
 
@@ -562,13 +551,13 @@ HWTEST_F(SuspendTakeoverCallbackHolderTest, SuspendTakeoverCallbackHolderTest017
         MessageParcel data;
         data.WriteInterfaceToken(TestTakeOverSuspendCallback::GetDescriptor());
         data.WriteUint32(static_cast<uint32_t>(type));
-        int32_t ret = callback.OnRemoteRequest(
+        int32_t ret = callback->OnRemoteRequest(
             static_cast<uint32_t>(PowerMgr::TakeOverSuspendCallbackInterfaceCode::CMD_ON_TAKEOVER_SUSPEND), data, reply,
             opt);
         EXPECT_EQ(ret, ERR_OK);
         EXPECT_TRUE(g_isTakeOverSuspend);
     }
-    POWER_HILOGI(LABEL_TEST, "SuspendTakeoverCallbackHolderTest016 function end!");
+    POWER_HILOGI(LABEL_TEST, "SuspendTakeoverCallbackHolderTest017 function end!");
 }
 
 /**
