@@ -329,6 +329,13 @@ int32_t PowerMgrServiceAdapter::RegisterPowerModeCallbackIpc(const sptr<IPowerMo
     return ERR_OK;
 }
 
+int32_t PowerMgrServiceAdapter::UnRegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterPowerModeCallback", false);
+    UnRegisterPowerModeCallback(callback);
+    return ERR_OK;
+}
+
 int32_t PowerMgrServiceAdapter::RegisterSuspendTakeoverCallbackIpc(
     const sptr<ITakeOverSuspendCallback>& callback, int32_t priority)
 {
@@ -343,10 +350,15 @@ int32_t PowerMgrServiceAdapter::RegisterSuspendTakeoverCallbackIpc(
         return INIT_VALUE;
     }
     TakeOverSuspendPriority takeOverSuspendPriority = static_cast<TakeOverSuspendPriority>(priority);
-    RegisterSuspendTakeoverCallback(callback, takeOverSuspendPriority);
+    bool ret = RegisterSuspendTakeoverCallback(callback, takeOverSuspendPriority);
+    if (ret == false) {
+        POWER_HILOGE(FEATURE_SUSPEND, "RegisterSuspendTakeoverCallbackIpc failed");
+        return INIT_VALUE;
+    }
     return ERR_OK;
 #else
-    return ERR_OK;
+    POWER_HILOGE(FEATURE_SUSPEND, "do not support RegisterSuspendTakeoverCallbackIpc");
+    return INIT_VALUE;
 #endif
 }
 
@@ -358,18 +370,16 @@ int32_t PowerMgrServiceAdapter::UnRegisterSuspendTakeoverCallbackIpc(const sptr<
         return INIT_VALUE;
     }
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterSuspendTakeoverCallback", false);
-    UnRegisterSuspendTakeoverCallback(callback);
+    bool ret = UnRegisterSuspendTakeoverCallback(callback);
+    if (ret == false) {
+        POWER_HILOGE(FEATURE_SUSPEND, "UnRegisterSuspendTakeoverCallbackIpc failed");
+        return INIT_VALUE;
+    }
     return ERR_OK;
 #else
-    return ERR_OK;
+    POWER_HILOGE(FEATURE_SUSPEND, "do not support UnRegisterSuspendTakeoverCallbackIpc");
+    return INIT_VALUE;
 #endif
-}
-
-int32_t PowerMgrServiceAdapter::UnRegisterPowerModeCallbackIpc(const sptr<IPowerModeCallback>& callback)
-{
-    PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterPowerModeCallback", false);
-    UnRegisterPowerModeCallback(callback);
-    return ERR_OK;
 }
 
 int32_t PowerMgrServiceAdapter::RegisterScreenStateCallbackIpc(
