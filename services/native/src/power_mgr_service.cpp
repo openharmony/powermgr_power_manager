@@ -531,6 +531,11 @@ void PowerMgrService::HallSensorCallback(SensorEvent* event)
         return;
     }
 
+    if (event->dataLen < sizeof(HallData)) {
+        POWER_HILOGE(FEATURE_INPUT, "dataLen:%{public}u, expected:%{public}zu", event->dataLen, sizeof(HallData));
+        return;
+    }
+
 #ifdef POWER_LID_FOLD_ENABLE
     Rosen::FoldDisplayMode mode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
     if (foldScreenFlag_ && (mode != Rosen::FoldDisplayMode::MAIN)) {
