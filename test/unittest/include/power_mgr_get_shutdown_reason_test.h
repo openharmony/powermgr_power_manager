@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef POWERMGR_GET_SHUTDOWN_REASON_TEST_H
+#define POWERMGR_GET_SHUTDOWN_REASON_TEST_H
+
+#ifdef POWER_GTEST
+#define private public
+#define protected public
+#endif
+
+#include <gtest/gtest.h>
+#include <string>
+#include <vector>
+#include <memory>
+
+#include "power_mgr_service.h"
+#include "permission.h"
+
+namespace OHOS {
+namespace PowerMgr {
+
+class PowerMgrServiceShutdownReasonTest : public testing::Test {
+public:
+    void SetUp();
+    void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+};
+
+bool Permission::IsSystem();
+bool Permission::IsPermissionGranted(const std::string& perm);
+
+} // namespace PowerMgr
+} // namespace OHOS
+
+#endif // POWERMGR_GET_SHUTDOWN_REASON_TEST_H
