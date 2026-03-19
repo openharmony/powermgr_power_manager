@@ -72,13 +72,6 @@ SCREEN_STATE_TRANSIT_FAILED:
   TRANSIT_RESULT: {type: INT32, desc: screen state transit result}
   REASON: {type: STRING, desc: screen on reason}
 
-SUBSCRIBE_POWERKEY_FAILED:
-  __BASE: {type: FAULT, level: CRITICAL, desc: subscribe powerkey result information}
-  SUBSCRIBE_ID: {type: INT32, desc: subscribe powerkey id result}
-  SUBSCRIBE_ID_CACHE: {type: INT32, desc: subscribe powerkey id cache result}
-  RETRY_COUNT: {type: INT32, desc: subscribe powerkey retry count result}
-  TYPE: {type: STRING, desc: subscribe powerkey type}
-
 APP_HOLD_RUNNINGLOCK_TIMEOUT:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: app hold runninglock timeout information}
   PID: {type: INT32, desc: session pid}
