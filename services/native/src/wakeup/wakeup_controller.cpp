@@ -1011,9 +1011,8 @@ bool PowerkeyWakeupMonitor::Init()
                 POWER_HILOGE(FEATURE_SUSPEND, "trigger powerkeydownevent subscribe fail hiviewevent");
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
                 HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER,
-                    "SUBSCRIBE_POWERKEY_FAILED", HiviewDFX::HiSysEvent::EventType::FAULT, "SUBSCRIBE_ID",
-                    powerkeyShortPressId_, "SUBSCRIBE_ID_CACHE", g_powerkeyShortPressIdCache, "RETRY_COUNT",
-                    retryCount, "TYPE", "powerkeydownevent");
+                    "ABNORMAL_FAULT", HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF",
+                    "REASON", "PowerkeyDownEvent Subscribe Fail");
 #endif
             }
         }
