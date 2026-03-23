@@ -123,6 +123,8 @@ interface OHOS.PowerMgr.IPowerMgr {
     void RegisterAsyncShutdownCallbackIpc([in] IAsyncShutdownCallback powerCallback, [in] int priorityValue, [out] int powerError);
     void UnRegisterAsyncShutdownCallbackIpc([in] IAsyncShutdownCallback powerCallback, [out] int powerError);
     void SetProxFilteringStrategyIpc([in] int strategy, [in] IRemoteObject token, [out] int powerError);
+    void GetPowerConfigIpc([in] String sceneName, [out] String configVal, [out] int powerError);
+    void SetPowerConfigIpc([in] String sceneName, [in] String configVal, [out] int powerError);
 
     void RegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback, [out] int powerError);
     void UnRegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback, [out] int powerError);

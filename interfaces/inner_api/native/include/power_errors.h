@@ -23,11 +23,16 @@ enum class PowerErrors : int32_t {
     ERR_FAILURE = 1,
     ERR_PERMISSION_DENIED = 201,
     ERR_SYSTEM_API_DENIED = 202,
+    /** Input is null, undefined, or mismatched type (basic type validation) */
     ERR_PARAM_INVALID = 401,
     ERR_CONNECTION_FAIL = 4900101,
     ERR_FREQUENT_FUNCTION_CALL = 4900201,
     ERR_POWER_MODE_TRANSIT_FAILED = 4900301,
     ERR_SKIP_FUNCTION_CALL = 4900401,
+    ERR_READ_OPERATION_FAILED = 4900501,
+    /** Input parameter value is not within expected range or valid values (value validation) */
+    ERR_USER_PARAM_INVALID = 4900400,
+    ERR_WRITE_OPERATION_FAILED = 4900601,
 };
 } // namespace PowerMgr
 } // namespace OHOS

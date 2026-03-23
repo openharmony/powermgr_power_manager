@@ -1205,6 +1205,48 @@ PowerErrors PowerMgrService::GetShutdownReason(std::string& reason)
     return PowerErrors::ERR_OK;
 }
 
+PowerErrors PowerMgrService::GetPowerConfig(const std::string& sceneName, std::string& configVal)
+{
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGD(COMP_SVC, "pid: %{public}d, uid: %{public}d, sceneName: %{public}s",
+        pid, uid, sceneName.c_str());
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_CONFIG")) {
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    int32_t ret = SystemSuspendController::GetInstance().GetPowerConfig(sceneName, configVal);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_SVC, "GetPowerConfig failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_READ_OPERATION_FAILED;
+    }
+    POWER_HILOGI(COMP_SVC, "GetPowerConfig success, configVal: %{public}s", configVal.c_str());
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::SetPowerConfig(const std::string& sceneName, const std::string& configVal)
+{
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGD(COMP_SVC, "pid: %{public}d, uid: %{public}d, sceneName: %{public}s",
+        pid, uid, sceneName.c_str());
+    if (!Permission::IsSystem()) {
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_CONFIG")) {
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    int32_t ret = SystemSuspendController::GetInstance().SetPowerConfig(sceneName, configVal);
+    if (ret != ERR_OK) {
+        POWER_HILOGE(COMP_SVC, "SetPowerConfig failed, ret: %{public}d", ret);
+        return PowerErrors::ERR_WRITE_OPERATION_FAILED;
+    }
+    POWER_HILOGI(COMP_SVC, "SetPowerConfig success");
+    return PowerErrors::ERR_OK;
+}
+
 PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
 {
     std::lock_guard lock(suspendMutex_);

@@ -295,6 +295,14 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
+    PowerErrors GetPowerConfig(const std::string& sceneName, std::string& configVal)
+    {
+        return PowerErrors::ERR_OK;
+    }
+    PowerErrors SetPowerConfig(const std::string& sceneName, const std::string& configVal)
+    {
+        return PowerErrors::ERR_OK;
+    }
 };
 
 class TestTakeOverSuspendCallback : public ITakeOverSuspendCallback {
