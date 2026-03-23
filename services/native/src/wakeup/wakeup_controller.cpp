@@ -114,6 +114,14 @@ void WakeupController::RegisterMonitor(PowerState state)
     std::shared_ptr<InputCallback> callback = std::make_shared<InputCallback>();
     monitorId_ = inputManager->SubscribeInputActive(std::static_pointer_cast<IInputEventConsumer>(callback),
         state == PowerState::AWAKE ? EVENT_INTERVAL_MS : static_cast<int64_t>(PARAM_ZERO));
+    if (monitorId_ < PARAM_ZERO) {
+        POWER_HILOGE(FEATURE_WAKEUP, "trigger InputActiveCallback subscribe fail hiviewevent");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF",
+            "REASON", "InputActive Callback Subscribe Fail");
+#endif
+    }
     curState = state;
     POWER_HILOGD(FEATURE_WAKEUP, "new monitorid = %{public}d, new state = %{public}d", monitorId_,
         static_cast<int32_t>(curState));
