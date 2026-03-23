@@ -1085,6 +1085,9 @@ ohos_unittest("test_power_mgr_service_native") {
     "data_share:datashare_consumer",
   ]
   external_deps += deps_ex
+  if (power_manager_feature_enable_s4) {
+    defines += [ "POWER_MANAGER_POWER_ENABLE_S4" ]
+  }
 }
 
 ohos_unittest("test_device_state_action_native") {

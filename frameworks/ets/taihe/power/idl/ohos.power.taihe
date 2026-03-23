@@ -46,6 +46,10 @@ function RefreshActivity(reason: String): void;
 
 function SetPowerKeyFilteringStrategy(strategy: PowerKeyFilteringStrategy): void;
 
+function GetPowerConfig(sceneName: String): String;
+
+function SetPowerConfig(sceneName: String, configVal: String): void;
+
 function RegisterShutdownCallback(shutdownCb: (isReboot: bool) => void): void;
 
 function UnregisterShutdownCallback(callBack: Optional<(arg: MyUndefined) => void>): void;

@@ -102,4 +102,44 @@ HWTEST_F(PowerMgrClientNativeTest, RunningLockNative001, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "RunningLockNative001 function end!");
     GTEST_LOG_(INFO) << "RunningLockNative001 function end!";
 }
+
+/**
+ * @tc.name: PowerMgrClientNative002
+ * @tc.desc: test GetPowerConfig and SetPowerConfig
+ * @tc.type: FUNC
+ * @tc.require: issueXXXXX
+ */
+HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative002, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerMgrClientNative002 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative002 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    
+    std::string sceneName = "test_scene";
+    std::string configVal;
+    
+    PowerErrors ret = powerMgrClient.GetPowerConfig(sceneName, configVal);
+    EXPECT_TRUE(configVal.empty());
+    POWER_HILOGI(LABEL_TEST, "GetPowerConfig ret = %{public}d, configVal = %{public}s",
+        static_cast<int32_t>(ret), configVal.c_str());
+    
+    ret = powerMgrClient.SetPowerConfig(sceneName, "test_value");
+    POWER_HILOGI(LABEL_TEST, "SetPowerConfig ret = %{public}d", static_cast<int32_t>(ret));
+    
+    ret = powerMgrClient.GetPowerConfig(sceneName, configVal);
+    POWER_HILOGI(LABEL_TEST, "GetPowerConfig again ret = %{public}d, configVal = %{public}s",
+        static_cast<int32_t>(ret), configVal.c_str());
+    
+    sceneName = "";
+    ret = powerMgrClient.GetPowerConfig(sceneName, configVal);
+    POWER_HILOGI(LABEL_TEST, "GetPowerConfig with empty sceneName ret = %{public}d",
+        static_cast<int32_t>(ret));
+    
+    ret = powerMgrClient.SetPowerConfig(sceneName, "test_value");
+    POWER_HILOGI(LABEL_TEST, "SetPowerConfig with empty sceneName ret = %{public}d",
+        static_cast<int32_t>(ret));
+    
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative002 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrClientNative002 function end!";
+}
 }

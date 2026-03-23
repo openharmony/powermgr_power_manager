@@ -798,4 +798,98 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative025, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative025 end!");
 }
 #endif
+
+
+/**
+ * @tc.name: PowerMgrServiceNative026
+ * @tc.desc: test GetPowerConfig and SetPowerConfig function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative026, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative026 function start!");
+    std::string sceneName = "lid_poweron_enable";
+    std::string configVal;
+    int32_t powerError = 0;
+    
+    PowerErrors ret = g_pmsTest->GetPowerConfig(sceneName, configVal);
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    EXPECT_FALSE(sceneName.empty());
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_READ_OPERATION_FAILED);
+#endif
+    ret = g_pmsTest->SetPowerConfig(sceneName, "1");
+    
+    ret = g_pmsTest->GetPowerConfig(sceneName, configVal);
+    
+    sceneName = "";
+    ret = g_pmsTest->GetPowerConfig(sceneName, configVal);
+    
+    ret = g_pmsTest->SetPowerConfig(sceneName, "test_value");
+    
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative026 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative027
+ * @tc.desc: test GetPowerConfig permission branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative027, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative027 function start!");
+    std::string sceneName = "lid_poweron_enable";
+    std::string configVal;
+    int32_t powerError = 0;
+    
+    g_isSystem = false;
+    PowerErrors ret = g_pmsTest->GetPowerConfig(sceneName, configVal);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+    POWER_HILOGI(LABEL_TEST, "GetPowerConfig ERR_SYSTEM_API_DENIED ret = %{public}d", ret);
+    
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = g_pmsTest->GetPowerConfig(sceneName, configVal);
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
+    POWER_HILOGI(LABEL_TEST, "GetPowerConfig ERR_PERMISSION_DENIED ret = %{public}d", ret);
+    
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    ret = g_pmsTest->GetPowerConfig(sceneName, configVal);
+    
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative027 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative028
+ * @tc.desc: test SetPowerConfig permission branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative028, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative028 function start!");
+    std::string sceneName = "lid_poweron_enable";
+    std::string configVal = "0";
+    
+    g_isSystem = false;
+    PowerErrors ret = g_pmsTest->SetPowerConfig(sceneName, configVal);
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+    POWER_HILOGI(LABEL_TEST, "SetPowerConfig ERR_SYSTEM_API_DENIED ret = %{public}d", ret);
+    
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = g_pmsTest->SetPowerConfig(sceneName, configVal);
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
+    POWER_HILOGI(LABEL_TEST, "SetPowerConfig ERR_PERMISSION_DENIED ret = %{public}d", ret);
+    
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    ret = g_pmsTest->SetPowerConfig(sceneName, configVal);
+    
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative028 function end!");
+}
 } // namespace

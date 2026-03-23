@@ -40,6 +40,8 @@ std::map<PowerErrors, std::string> g_errorTable = {
     {PowerErrors::ERR_PARAM_INVALID,             "Invalid input parameter."          },
     {PowerErrors::ERR_FREQUENT_FUNCTION_CALL,    "Frequent function calls."          },
     {PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED, "Setting the power mode failed."    },
+    {PowerErrors::ERR_READ_OPERATION_FAILED,     "Read operation failed."            },
+    {PowerErrors::ERR_WRITE_OPERATION_FAILED,    "Write operation failed."          },
 };
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 thread_local OHOS::sptr<PowerShutdownCallback> g_powerShutdownCallback = new (std::nothrow) PowerShutdownCallback();
@@ -227,6 +229,24 @@ void SetPowerKeyFilteringStrategy(ohos::power::PowerKeyFilteringStrategy strateg
     }
 }
 
+string GetPowerConfig(string_view sceneName)
+{
+    std::string configVal;
+    PowerErrors code = g_powerMgrClient.GetPowerConfig(std::string(sceneName), configVal);
+    if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
+        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+    }
+    return configVal;
+}
+
+void SetPowerConfig(string_view sceneName, string_view configVal)
+{
+    PowerErrors code = g_powerMgrClient.SetPowerConfig(std::string(sceneName), std::string(configVal));
+    if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
+        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+    }
+}
+
 void RegisterShutdownCallback(::taihe::callback_view<void(bool isReboot)> shutdownCb)
 {
     POWER_HILOGI(FEATURE_SHUTDOWN, "ets RegisterShutdownCallback interface");
@@ -280,6 +300,8 @@ TH_EXPORT_CPP_API_Hibernate(Hibernate);
 TH_EXPORT_CPP_API_SetScreenOffTime(SetScreenOffTime);
 TH_EXPORT_CPP_API_RefreshActivity(RefreshActivity);
 TH_EXPORT_CPP_API_SetPowerKeyFilteringStrategy(SetPowerKeyFilteringStrategy);
+TH_EXPORT_CPP_API_GetPowerConfig(GetPowerConfig);
+TH_EXPORT_CPP_API_SetPowerConfig(SetPowerConfig);
 TH_EXPORT_CPP_API_RegisterShutdownCallback(RegisterShutdownCallback);
 TH_EXPORT_CPP_API_UnregisterShutdownCallback(UnregisterShutdownCallback);
 // NOLINTEND

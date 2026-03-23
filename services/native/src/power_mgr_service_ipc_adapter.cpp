@@ -600,5 +600,21 @@ int32_t PowerMgrServiceAdapter::SetProxFilteringStrategyIpc(
     powerError = static_cast<int32_t>(SetProxFilteringStrategy(proxFilteringStrategy, token));
     return ERR_OK;
 }
+
+int32_t PowerMgrServiceAdapter::GetPowerConfigIpc(
+    const std::string& sceneName, std::string& configVal, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::GetPowerConfig", false);
+    powerError = static_cast<int32_t>(GetPowerConfig(sceneName, configVal));
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::SetPowerConfigIpc(
+    const std::string& sceneName, const std::string& configVal, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetPowerConfig", false);
+    powerError = static_cast<int32_t>(SetPowerConfig(sceneName, configVal));
+    return ERR_OK;
+}
 } // namespace PowerMgr
 } // namespace OHOS

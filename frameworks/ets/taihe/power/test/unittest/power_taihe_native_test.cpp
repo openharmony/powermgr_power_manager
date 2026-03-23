@@ -37,6 +37,7 @@ bool g_pass = false;
 bool g_cbFlag = false;
 PowerMode g_mode = PowerMode::NORMAL_MODE;
 int32_t g_errCode = 0;
+std::string g_configVal = "";
 }
 
 namespace taihe {
@@ -134,6 +135,20 @@ PowerErrors PowerMgrClient::UnRegisterAsyncShutdownCallback(const sptr<IAsyncShu
     g_pass = true;
     return g_error;
 }
+
+PowerErrors PowerMgrClient::GetPowerConfig(const std::string& sceneName, std::string& configVal)
+{
+    g_pass = true;
+    configVal = g_configVal;
+    return g_error;
+}
+
+PowerErrors PowerMgrClient::SetPowerConfig(const std::string& sceneName, const std::string& configVal)
+{
+    g_pass = true;
+    g_configVal = configVal;
+    return g_error;
+}
 } // namespace OHOS::PowerMgr
 
 namespace {
@@ -152,6 +167,7 @@ public:
         g_cbFlag = false;
         g_error = PowerErrors::ERR_OK;
         g_errCode = 0;
+        g_configVal.clear();
     }
 };
 
@@ -435,6 +451,97 @@ HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_012, TestSize.Level1)
     SetPowerKeyFilteringStrategy(ohos::power::PowerKeyFilteringStrategy::key_t::LONG_PRESS_FILTERING_ONCE);
     EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_SYSTEM_API_DENIED));
     POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_012 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_013
+ * @tc.desc: test GetPowerConfig interface
+ * @tc.type: FUNC
+ * @tc.require: issue#IXXXXX
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_013, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_013 start");
+    string_view sceneName = "test_scene";
+    g_configVal = "test_value";
+    
+    std::string result = std::string(GetPowerConfig(sceneName));
+    EXPECT_TRUE(g_pass);
+    EXPECT_EQ(result, "test_value");
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_013 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_014
+ * @tc.desc: test GetPowerConfig with error code
+ * @tc.type: FUNC
+ * @tc.require: issue#IXXXXX
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_014, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_014 start");
+    string_view sceneName = "test_scene";
+    
+    g_error = PowerErrors::ERR_FAILURE;
+    std::string result = std::string(GetPowerConfig(sceneName));
+    EXPECT_TRUE(g_errCode != static_cast<int32_t>(PowerErrors::ERR_FAILURE));
+    
+    g_error = PowerErrors::ERR_CONNECTION_FAIL;
+    result = GetPowerConfig(sceneName);
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL));
+    EXPECT_TRUE(g_pass);
+    
+    g_error = PowerErrors::ERR_READ_OPERATION_FAILED;
+    result = GetPowerConfig(sceneName);
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_READ_OPERATION_FAILED));
+    EXPECT_TRUE(g_pass);
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_014 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_015
+ * @tc.desc: test SetPowerConfig interface
+ * @tc.type: FUNC
+ * @tc.require: issue#IXXXXX
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_015, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_015 start");
+    string_view sceneName = "test_scene";
+    string_view configVal = "new_value";
+    
+    SetPowerConfig(sceneName, configVal);
+    EXPECT_TRUE(g_pass);
+    EXPECT_EQ(g_configVal, "new_value");
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_015 end");
+}
+
+/**
+ * @tc.name: PowerTaiheNativeTest_016
+ * @tc.desc: test SetPowerConfig with error code
+ * @tc.type: FUNC
+ * @tc.require: issue#IXXXXX
+ */
+HWTEST_F(PowerTaiheNativeTest, PowerTaiheNativeTest_016, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_016 start");
+    string_view sceneName = "test_scene";
+    string_view configVal = "new_value";
+    
+    g_error = PowerErrors::ERR_FAILURE;
+    SetPowerConfig(sceneName, configVal);
+    EXPECT_TRUE(g_errCode != static_cast<int32_t>(PowerErrors::ERR_FAILURE));
+    
+    g_error = PowerErrors::ERR_PERMISSION_DENIED;
+    SetPowerConfig(sceneName, configVal);
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_PERMISSION_DENIED));
+    EXPECT_TRUE(g_pass);
+    
+    g_error = PowerErrors::ERR_WRITE_OPERATION_FAILED;
+    SetPowerConfig(sceneName, configVal);
+    EXPECT_TRUE(g_errCode == static_cast<int32_t>(PowerErrors::ERR_WRITE_OPERATION_FAILED));
+    EXPECT_TRUE(g_pass);
+    POWER_HILOGI(LABEL_TEST, "PowerTaiheNativeTest_016 end");
 }
 } // namespace
 

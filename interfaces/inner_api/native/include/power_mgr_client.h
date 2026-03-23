@@ -186,6 +186,24 @@ public:
     PowerMode GetDeviceMode();
 
     /**
+     * Get power config by scene name.
+     *
+     * @param sceneName The scene name for the power config.
+     * @param configVal The output config value.
+     * @return PowerErrors Error code.
+     */
+    PowerErrors GetPowerConfig(const std::string& sceneName, std::string& configVal);
+
+    /**
+     * Set power config by scene name.
+     *
+     * @param sceneName The scene name for the power config.
+     * @param configVal The config value to set.
+     * @return PowerErrors Error code.
+     */
+    PowerErrors SetPowerConfig(const std::string& sceneName, const std::string& configVal);
+
+    /**
      * Check if the device has entered standby mode.
      */
     PowerErrors IsStandby(bool& isStandby);
