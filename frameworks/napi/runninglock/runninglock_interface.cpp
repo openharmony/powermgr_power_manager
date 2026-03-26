@@ -60,7 +60,7 @@ napi_value RunningLockInterface::CreateRunningLock(napi_env env, napi_callback_i
     napi_typeof(env, argv[INDEX_0], &valueType);
     NAPI_ASSERT(env, valueType == napi_string, "The input parameter type is not string");
     char name[RUNNINGLOCK_NAME_MAX] = {0};
-    napi_get_value_string_utf8(env, argv[INDEX_0], name, RUNNINGLOCK_NAME_MAX + 1, &asyncInfo->nameLen);
+    napi_get_value_string_utf8(env, argv[INDEX_0], name, RUNNINGLOCK_NAME_MAX, &asyncInfo->nameLen);
     asyncInfo->name = name;
 
     napi_typeof(env, argv[INDEX_1], &valueType);
