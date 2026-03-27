@@ -2367,6 +2367,9 @@ SuspendDeviceType PowerStateMachine::GetSuspendTypeByReason(StateChangeReason re
         case StateChangeReason::STATE_CHANGE_REASON_SYSTEM:
             ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND;
             break;
+        case StateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING:
+            ret = SuspendDeviceType::SUSPEND_DEVICE_REASON_PEOPLE_LEAVING;
+            break;
         default:
             break;
     }
@@ -2424,6 +2427,9 @@ StateChangeReason PowerStateMachine::GetReasonBySuspendType(SuspendDeviceType ty
             break;
         case SuspendDeviceType::SUSPEND_DEVICE_START_DREAM:
             ret = StateChangeReason::STATE_CHANGE_REASON_START_DREAM;
+            break;
+        case SuspendDeviceType::SUSPEND_DEVICE_REASON_PEOPLE_LEAVING:
+            ret = StateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING;
             break;
         default:
             break;

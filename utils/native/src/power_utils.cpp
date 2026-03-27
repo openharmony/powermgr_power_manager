@@ -120,6 +120,8 @@ const std::string PowerUtils::GetReasonTypeString(StateChangeReason type)
             return std::string("WAKEUP_ULSR");
         case StateChangeReason::STATE_CHANGE_REASON_MESSAGE_NOTIFICATION:
             return std::string("MESSAGE_NOTIFICATION");
+        case StateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING:
+            return std::string("PEOPLE_LEAVING");
         default:
             break;
     }
@@ -253,6 +255,9 @@ Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeR
             break;
         case StateChangeReason::STATE_CHANGE_REASON_END_DREAM:
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+            break;
+        case StateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING:
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING;
             break;
         default:
             break;
