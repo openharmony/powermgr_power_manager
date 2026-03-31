@@ -140,8 +140,18 @@ ohos_unittest("test_power_shell") {
   ]
 
   if (has_display_manager_part) {
-    external_deps += [ "display_manager:displaymgr" ]
+    defines += [ "HAS_DISPLAY_MANAGER" ]
+    external_deps += [
+      "display_manager:displaymgr",
+      "window_manager:libdm_lite",
+    ]
   }
+
+  if (build_variant == "user") {
+    defines += [ "POWER_SHELL_USER" ]
+  }
+
+  defines += [ "POWER_GTEST" ]
 }
 
 ##############################multi_invoker_helper_test############################
