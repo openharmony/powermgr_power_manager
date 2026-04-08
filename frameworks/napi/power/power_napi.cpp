@@ -274,6 +274,59 @@ napi_value PowerNapi::GetPowerMode(napi_env env, napi_callback_info info)
     return napiValue;
 }
 
+napi_value PowerNapi::GetPowerConfig(napi_env env, napi_callback_info info)
+{
+    constexpr size_t maxArgc = 1;
+    size_t argc = maxArgc;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors error;
+    if (argc != maxArgc || !NapiUtils::CheckValueType(env, argv[0], napi_string)) {
+        POWER_HILOGW(COMP_FWK, "GetPowerConfig invalid param");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    std::string sceneName = NapiUtils::GetStringFromNapi(env, argv[0]);
+    std::string configVal;
+    PowerErrors code = g_powerMgrClient.GetPowerConfig(sceneName, configVal);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "GetPowerConfig failed, code: %{public}d", static_cast<int32_t>(code));
+        return error.ThrowError(env, code);
+    }
+
+    napi_value napiValue;
+    NAPI_CALL(env, napi_create_string_utf8(env, configVal.c_str(), NAPI_AUTO_LENGTH, &napiValue));
+    return napiValue;
+}
+
+napi_value PowerNapi::SetPowerConfig(napi_env env, napi_callback_info info)
+{
+    constexpr size_t maxArgc = 2;
+    size_t argc = maxArgc;
+    napi_value argv[argc];
+    NapiUtils::GetCallbackInfo(env, info, argc, argv);
+
+    NapiErrors error;
+    if (argc != maxArgc || !NapiUtils::CheckValueType(env, argv[0], napi_string) ||
+        !NapiUtils::CheckValueType(env, argv[1], napi_string)) {
+        POWER_HILOGW(COMP_FWK, "SetPowerConfig invalid param");
+        return error.ThrowError(env, PowerErrors::ERR_PARAM_INVALID);
+    }
+
+    std::string sceneName = NapiUtils::GetStringFromNapi(env, argv[0]);
+    std::string configVal = NapiUtils::GetStringFromNapi(env, argv[1]);
+    PowerErrors code = g_powerMgrClient.SetPowerConfig(sceneName, configVal);
+    if (code != PowerErrors::ERR_OK) {
+        POWER_HILOGE(COMP_FWK, "SetPowerConfig failed, code: %{public}d", static_cast<int32_t>(code));
+        return error.ThrowError(env, code);
+    }
+
+    napi_value napiValue;
+    NAPI_CALL(env, napi_get_boolean(env, true, &napiValue));
+    return napiValue;
+}
+
 static void SetFrameworkBootStage(bool isReboot)
 {
     int fd = open("/dev/bbox", O_WRONLY);

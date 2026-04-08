@@ -50,6 +50,8 @@ public:
     static napi_value Hibernate(napi_env env, napi_callback_info info);
     static napi_value SetPowerMode(napi_env env, napi_callback_info info);
     static napi_value GetPowerMode(napi_env env, napi_callback_info info);
+    static napi_value GetPowerConfig(napi_env env, napi_callback_info info);
+    static napi_value SetPowerConfig(napi_env env, napi_callback_info info);
     static napi_value IsStandby(napi_env env, napi_callback_info info);
     static napi_value SetScreenOffTime(napi_env env, napi_callback_info info);
     static napi_value RefreshActivity(napi_env env, napi_callback_info info);
