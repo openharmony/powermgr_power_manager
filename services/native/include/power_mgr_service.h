@@ -167,6 +167,8 @@ public:
     virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) override;
     virtual PowerErrors SetProxFilteringStrategy(
         ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token) override;
+    virtual PowerErrors GetPowerConfig(const std::string& sceneName, std::string& configVal) override;
+    virtual PowerErrors SetPowerConfig(const std::string& sceneName, const std::string& configVal) override;
 
     void SetEnableDoze(bool enable);
     void RegisterShutdownCallback(const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) override;

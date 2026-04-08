@@ -50,6 +50,8 @@ std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
 std::mutex g_instanceMutex;
 constexpr int32_t MAX_VERSION_STRING_SIZE = 4;
+constexpr int32_t MAX_SCENE_NAME_STRING_SIZE = 128;
+constexpr int32_t MAX_CONFIG_VALUE_STRING_SIZE = 4096;
 constexpr uint32_t PARAM_MAX_NUM = 10;
 
 PowerMgrClient::PowerMgrClient()
@@ -653,6 +655,30 @@ PowerMode PowerMgrClient::GetDeviceMode()
     int32_t powerMode = 0;
     proxy->GetDeviceModeIpc(powerMode);
     return static_cast<PowerMode>(powerMode);
+}
+
+PowerErrors PowerMgrClient::GetPowerConfig(const std::string& sceneName, std::string& configVal)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WITH_RET((sceneName.empty() || sceneName.length() > MAX_SCENE_NAME_STRING_SIZE),
+        PowerErrors::ERR_USER_PARAM_INVALID);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->GetPowerConfigIpc(sceneName, configVal, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
+PowerErrors PowerMgrClient::SetPowerConfig(const std::string& sceneName, const std::string& configVal)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WITH_RET((sceneName.empty() || sceneName.length() > MAX_SCENE_NAME_STRING_SIZE),
+        PowerErrors::ERR_USER_PARAM_INVALID);
+    RETURN_IF_WITH_RET((configVal.empty() || configVal.length() > MAX_CONFIG_VALUE_STRING_SIZE),
+        PowerErrors::ERR_USER_PARAM_INVALID);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->SetPowerConfigIpc(sceneName, configVal, powerError);
+    return static_cast<PowerErrors>(powerError);
 }
 
 std::string PowerMgrClient::Dump(const std::vector<std::string>& args)

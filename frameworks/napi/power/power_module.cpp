@@ -127,6 +127,8 @@ static napi_value PowerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("hibernate", PowerNapi::Hibernate),
         DECLARE_NAPI_FUNCTION("setPowerMode", PowerNapi::SetPowerMode),
         DECLARE_NAPI_FUNCTION("getPowerMode", PowerNapi::GetPowerMode),
+        DECLARE_NAPI_FUNCTION("getPowerConfig", PowerNapi::GetPowerConfig),
+        DECLARE_NAPI_FUNCTION("setPowerConfig", PowerNapi::SetPowerConfig),
         DECLARE_NAPI_FUNCTION("isStandby", PowerNapi::IsStandby),
         DECLARE_NAPI_FUNCTION("setScreenOffTime", PowerNapi::SetScreenOffTime),
         DECLARE_NAPI_FUNCTION("refreshActivity", PowerNapi::RefreshActivity),

@@ -122,6 +122,11 @@ public:
     virtual int32_t SetProxFilteringStrategyIpc(
         int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError) override;
 
+    virtual int32_t GetPowerConfigIpc(
+        const std::string& sceneName, std::string& configVal, int32_t& powerError) override;
+    virtual int32_t SetPowerConfigIpc(
+        const std::string& sceneName, const std::string& configVal, int32_t& powerError) override;
+
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason, bool force = false) = 0;
     virtual PowerErrors ForceRebootDevice(const std::string& reason) = 0;
@@ -212,6 +217,9 @@ public:
     virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) = 0;
     virtual PowerErrors SetProxFilteringStrategy(
         ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token) = 0;
+
+    virtual PowerErrors GetPowerConfig(const std::string& sceneName, std::string& configVal) = 0;
+    virtual PowerErrors SetPowerConfig(const std::string& sceneName, const std::string& configVal) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS
