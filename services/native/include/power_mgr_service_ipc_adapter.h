@@ -58,7 +58,8 @@ public:
     virtual int32_t LockIpc(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs, int32_t& powerError) override;
     virtual int32_t UnLockIpc(
         const sptr<IRemoteObject>& remoteObj, const std::string& name, int32_t& powerError) override;
-    virtual int32_t QueryRunningLockListsIpc(std::map<std::string, RunningLockInfo>& runningLockLists) override;
+    virtual int32_t QueryRunningLockListsIpc(
+        uint64_t displayId, std::map<std::string, RunningLockInfo>& runningLockLists) override;
     virtual int32_t IsUsedIpc(const sptr<IRemoteObject>& remoteObj, bool& isUsed) override;
     virtual int32_t ProxyRunningLockIpc(bool isProxied, pid_t pid, pid_t uid) override;
     virtual int32_t ProxyRunningLocksIpc(bool isProxied, const VectorPair& vectorPairInfos) override;
@@ -86,9 +87,9 @@ public:
     virtual int32_t RegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual int32_t UnRegisterRunningLockCallbackIpc(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual int32_t RegisterRunningLockChangedCallbackIpc(
-        const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError) override;
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId, int32_t& powerError) override;
     virtual int32_t UnRegisterRunningLockChangedCallbackIpc(
-        const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError) override;
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId, int32_t& powerError) override;
     virtual int32_t SetDisplaySuspendIpc(bool enable) override;
     virtual int32_t SetDeviceModeIpc(int32_t modeValue, int32_t& powerError) override;
     virtual int32_t GetDeviceModeIpc(int32_t& powerMode) override;
@@ -99,7 +100,8 @@ public:
         const sptr<IRemoteObject>& token, int32_t& powerError) override;
     virtual int32_t LockScreenAfterTimingOutWithAppidIpc(
         pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token, int32_t& powerError) override;
-    virtual int32_t IsRunningLockEnabledIpc(int32_t lockType, bool& result, int32_t& powerError) override;
+    virtual int32_t IsRunningLockEnabledIpc(
+        int32_t lockType, uint64_t displayId, bool& result, int32_t& powerError) override;
 
     int32_t RegisterShutdownCallbackIpc(
         const sptr<ITakeOverShutdownCallback>& callback, int32_t priorityValue) override;
@@ -156,7 +158,8 @@ public:
         const std::vector<int32_t>& workSources) = 0;
     virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) = 0;
     virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") = 0;
-    virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) = 0;
+    virtual bool QueryRunningLockLists(
+        std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId = UINT64_MAX) = 0;
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) = 0;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) = 0;
     virtual bool ProxyRunningLocks(bool isProxied,
@@ -188,7 +191,8 @@ public:
         const sptr<IRemoteObject>& token, pid_t appid = -1) = 0;
     virtual PowerErrors LockScreenAfterTimingOutWithAppid(
         pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token) = 0;
-    virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) = 0;
+    virtual PowerErrors IsRunningLockEnabled(
+        const RunningLockType type, bool& result, uint64_t displayId = UINT64_MAX) = 0;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) = 0;
     virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) = 0;
@@ -205,10 +209,12 @@ public:
     virtual bool RegisterSuspendTakeoverCallback(
         const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority) = 0;
     virtual bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback) = 0;
-    
-    virtual PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback) = 0;
-    virtual PowerErrors UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback) = 0;
-    
+
+    virtual PowerErrors RegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX) = 0;
+    virtual PowerErrors UnRegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX) = 0;
+
     virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
     virtual PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
 

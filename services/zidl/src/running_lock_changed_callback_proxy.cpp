@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
-void RunningLockChangedCallbackProxy::OnAsyncScreenRunningLockChanged(RunningLockChangeState state)
+void RunningLockChangedCallbackProxy::OnAsyncScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -36,6 +36,11 @@ void RunningLockChangedCallbackProxy::OnAsyncScreenRunningLockChanged(RunningLoc
 
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write state failed");
+        return;
+    }
+
+    if (!data.WriteUint64(displayId)) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Write displayId failed");
         return;
     }
 

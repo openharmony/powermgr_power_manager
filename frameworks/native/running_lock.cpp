@@ -33,11 +33,13 @@ namespace PowerMgr {
 constexpr int32_t DEFAULT_TIMEOUT = 3000;
 constexpr int32_t PARAM_MAX_SIZE = 2000;
 constexpr int32_t NOT_USE_TIMEOUT = -1;
-RunningLock::RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type)
+RunningLock::RunningLock(
+    const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type, uint64_t displayId)
     : proxy_(proxy)
 {
     runningLockInfo_.name = name;
     runningLockInfo_.type = type;
+    runningLockInfo_.displayId = displayId;
 }
 
 RunningLock::~RunningLock()

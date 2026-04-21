@@ -892,4 +892,220 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative028, TestSize.Level2)
     g_isPermissionGranted = true;
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative028 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrServiceNative029
+ * @tc.desc: test CreateRunningLock with displayId parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative029, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative029 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isPermissionGranted = true;
+    sptr<IRemoteObject> token = new RunningLockTokenStub();
+    RunningLockInfo info("test_display_id", RunningLockType::RUNNINGLOCK_SCREEN);
+    info.displayId = 1001;
+
+    PowerErrors ret = pmsTest->CreateRunningLock(token, info);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    info.displayId = UINT64_MAX;
+    ret = pmsTest->CreateRunningLock(token, info);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative029 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative030
+ * @tc.desc: test QueryRunningLockLists with displayId parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative030, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative030 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isPermissionGranted = true;
+    std::map<std::string, RunningLockInfo> lists;
+
+    bool ret = pmsTest->QueryRunningLockLists(lists, UINT64_MAX);
+    EXPECT_TRUE(ret);
+
+    lists.clear();
+    ret = pmsTest->QueryRunningLockLists(lists, 1001);
+    EXPECT_TRUE(ret);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative030 function end!");
+}
+
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+/**
+ * @tc.name: PowerMgrServiceNative031
+ * @tc.desc: test RegisterRunningLockChangedCallback with displayId parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative031, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative031 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    class TestDisplayIdCallback : public RunningLockChangedCallbackStub {
+    public:
+        TestDisplayIdCallback() = default;
+        virtual ~TestDisplayIdCallback() = default;
+    };
+
+    sptr<TestDisplayIdCallback> callback = new TestDisplayIdCallback();
+
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    PowerErrors ret = pmsTest->RegisterRunningLockChangedCallback(callback, 1001);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    ret = pmsTest->UnRegisterRunningLockChangedCallback(callback, 1001);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative031 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerMgrServiceNative032
+ * @tc.desc: test IsRunningLockEnabled with displayId parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative032, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative032 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+
+    bool result = false;
+    PowerErrors ret = pmsTest->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN, result, UINT64_MAX);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    EXPECT_FALSE(result);
+
+    result = false;
+    ret = pmsTest->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN, result, 1001);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    EXPECT_FALSE(result);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative032 function end!");
+}
+
+#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
+/**
+ * @tc.name: PowerMgrServiceNative033
+ * @tc.desc: test RegisterRunningLockChangedCallback with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative033, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative033 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    PowerErrors ret = pmsTest->RegisterRunningLockChangedCallback(nullptr, 1001);
+    EXPECT_NE(ret, PowerErrors::ERR_OK);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative033 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative034
+ * @tc.desc: test UnRegisterRunningLockChangedCallback with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative034, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative034 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    PowerErrors ret = pmsTest->UnRegisterRunningLockChangedCallback(nullptr, 1001);
+    EXPECT_NE(ret, PowerErrors::ERR_OK);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative034 function end!");
+}
+#endif
+
+/**
+ * @tc.name: PowerMgrServiceNative035
+ * @tc.desc: test CreateRunningLock with displayId = 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative035, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative035 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isPermissionGranted = true;
+    sptr<IRemoteObject> token = new RunningLockTokenStub();
+    RunningLockInfo info("test_display_zero", RunningLockType::RUNNINGLOCK_SCREEN);
+    info.displayId = 0;
+
+    PowerErrors ret = pmsTest->CreateRunningLock(token, info);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative035 function end!");
+}
+
+#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+/**
+ * @tc.name: PowerMgrServiceNative036
+ * @tc.desc: test IsRunningLockEnabled with displayId filtering
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative036, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative036 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    EXPECT_TRUE(pmsTest != nullptr);
+
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+
+    sptr<IRemoteObject> token = new RunningLockTokenStub();
+    RunningLockInfo info("test_lock_1001", RunningLockType::RUNNINGLOCK_SCREEN);
+    info.displayId = 1001;
+
+    PowerErrors ret = pmsTest->CreateRunningLock(token, info);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    ret = pmsTest->Lock(token, -1);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    bool result = false;
+    ret = pmsTest->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN, result, 1001);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    EXPECT_TRUE(result);
+
+    result = false;
+    ret = pmsTest->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN, result, 1002);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    EXPECT_FALSE(result);
+
+    ret = pmsTest->UnLock(token);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    ret = pmsTest->ReleaseRunningLock(token);
+    EXPECT_TRUE(ret);
+
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative036 function end!");
+}
+#endif
 } // namespace

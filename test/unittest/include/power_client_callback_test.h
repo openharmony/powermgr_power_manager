@@ -71,7 +71,7 @@ public:
     public:
         RunningLockChangedTestCallback() {};
         virtual ~RunningLockChangedTestCallback() {};
-        virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override;
+        virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId) override;
     };
 };
 } // namespace PowerMgr

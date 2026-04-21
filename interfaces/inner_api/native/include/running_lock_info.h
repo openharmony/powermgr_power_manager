@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+
 /**
  * Runninglock acquisition type
  */
@@ -101,6 +102,7 @@ struct RunningLockInfo : public Parcelable {
     std::string bundleName;
     int32_t pid = 0;
     int32_t uid = 0;
+    uint64_t displayId = UINT64_MAX;
     RunningLockInfo() = default;
     RunningLockInfo(const std::string& namestr, RunningLockType locktype) : name(namestr), type(locktype) {}
     bool ReadFromParcel(Parcel& parcel);

@@ -28,7 +28,8 @@ namespace OHOS {
 namespace PowerMgr {
 class RunningLock {
 public:
-    RunningLock(const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type);
+    RunningLock(
+        const wptr<IPowerMgr>& proxy, const std::string& name, RunningLockType type, uint64_t displayId = UINT64_MAX);
     ~RunningLock();
     DISALLOW_COPY_AND_MOVE(RunningLock);
 

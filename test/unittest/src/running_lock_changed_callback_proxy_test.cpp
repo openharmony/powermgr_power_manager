@@ -44,7 +44,7 @@ HWTEST_F(RunningLockChangedCallbackProxyTest,
 
     sptr<RunningLockChangedCallbackProxy> proxy = new RunningLockChangedCallbackProxy(mockRemote);
 
-    proxy->OnAsyncScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    proxy->OnAsyncScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED, UINT64_MAX);
 
     EXPECT_TRUE(mockRemote != nullptr);
     EXPECT_TRUE(proxy != nullptr);
@@ -62,7 +62,7 @@ HWTEST_F(RunningLockChangedCallbackProxyTest,
 
     sptr<RunningLockChangedCallbackProxy> proxy = new RunningLockChangedCallbackProxy(mockRemote);
 
-    proxy->OnAsyncScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    proxy->OnAsyncScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED, UINT64_MAX);
 
     EXPECT_TRUE(mockRemote != nullptr);
     EXPECT_TRUE(proxy != nullptr);
@@ -80,7 +80,7 @@ HWTEST_F(RunningLockChangedCallbackProxyTest,
 
     sptr<RunningLockChangedCallbackProxy> proxy = new RunningLockChangedCallbackProxy(mockRemote);
 
-    proxy->OnAsyncScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED);
+    proxy->OnAsyncScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED, UINT64_MAX);
 
     EXPECT_TRUE(mockRemote != nullptr);
     EXPECT_TRUE(proxy != nullptr);

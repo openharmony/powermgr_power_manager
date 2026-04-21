@@ -32,13 +32,14 @@ interface OHOS.PowerMgr.IRunningLockChangedCallback;
 
 interface OHOS.PowerMgr.IPowerMgr {
     [ipccode 0] void CreateRunningLockIpc(
-        [in] IRemoteObject remoteObj, [in] RunningLockInfo runningLockInfo, [out] int powerError);
+        [in] IRemoteObject remoteObj, [in] RunningLockInfo runningLockInfo,
+        [out] int powerError);
     void ReleaseRunningLockIpc([in] IRemoteObject remoteObj, [in] String name);
     void IsRunningLockTypeSupportedIpc([in] int lockType, [out] boolean lockTypesSupported);
     [oneway] void UpdateWorkSourceIpc([in] IRemoteObject remoteObj, [in] int[] workSources);
     void LockIpc([in] IRemoteObject remoteObj, [in] int timeOutMs, [out] int powerError);
     void UnLockIpc([in] IRemoteObject remoteObj, [in] String name, [out] int powerError);
-    void QueryRunningLockListsIpc([out] OrderedMap<String, RunningLockInfo> runningLockLists);
+    void QueryRunningLockListsIpc([in] unsigned long displayId, [out] OrderedMap<String, RunningLockInfo> runningLockLists);
     void IsUsedIpc([in] IRemoteObject remoteObj, [out] boolean isUsed);
     void ProxyRunningLockIpc([in] boolean isProxied, [in] int pid, [in] int uid);
 
@@ -109,7 +110,7 @@ interface OHOS.PowerMgr.IPowerMgr {
 
     void RegisterRunningLockCallbackIpc([in] IPowerRunninglockCallback powerCallback);
     void UnRegisterRunningLockCallbackIpc([in] IPowerRunninglockCallback powerCallback);
-    void IsRunningLockEnabledIpc([in] int lockType, [out] boolean lockEnabledResult, [out] int powerError);
+    void IsRunningLockEnabledIpc([in] int lockType, [in] unsigned long displayId, [out] boolean lockEnabledResult, [out] int powerError);
     void IsForceSleepingIpc([out] boolean isForceSleeping);
 
     void RefreshActivityIpc([in] long callTimeMs, [in] int activityType, [in] String refreshReason,
@@ -126,6 +127,8 @@ interface OHOS.PowerMgr.IPowerMgr {
     void GetPowerConfigIpc([in] String sceneName, [out] String configVal, [out] int powerError);
     void SetPowerConfigIpc([in] String sceneName, [in] String configVal, [out] int powerError);
 
-    void RegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback, [out] int powerError);
-    void UnRegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback, [out] int powerError);
+    void RegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback,
+        [in] unsigned long displayId, [out] int powerError);
+    void UnRegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback,
+        [in] unsigned long displayId, [out] int powerError);
 }

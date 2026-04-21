@@ -39,6 +39,9 @@ bool RunningLockInfo::ReadFromParcel(Parcel& parcel)
     pid = readPid;
     RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Int32, readUid, false);
     uid = readUid;
+    uint64_t readDisplayId;
+    RETURN_IF_READ_PARCEL_FAILED_WITH_RET(parcel, Uint64, readDisplayId, false);
+    displayId = readDisplayId;
     return true;
 }
 
@@ -62,6 +65,7 @@ bool RunningLockInfo::Marshalling(Parcel& parcel) const
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, String16, Str8ToStr16(bundleName), false);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(pid), false);
     RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Int32, static_cast<int32_t>(uid), false);
+    RETURN_IF_WRITE_PARCEL_FAILED_WITH_RET(parcel, Uint64, displayId, false);
     return true;
 }
 

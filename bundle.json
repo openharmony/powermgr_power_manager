@@ -55,6 +55,7 @@
             "power_manager_feature_report_screenoff_invalid",
             "power_manager_feature_screen_saver",
             "power_manager_feature_enable_monitor_running_lock_change",
+            "power_manager_feature_enable_display_id_filtering",
             "power_manager_feature_support_power_cli",
             "power_manager_feature_enable_long_time_dim"
         ],

@@ -460,6 +460,34 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     return runningLock;
 }
 
+#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(
+    const std::string& name, RunningLockType type, uint64_t displayId)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, nullptr);
+
+    uint32_t nameLen = (name.size() > RunningLock::MAX_NAME_LEN) ? RunningLock::MAX_NAME_LEN : name.size();
+    std::string nameExt = name.substr(0, nameLen) + "_" + std::to_string(GetTickCount());
+    std::shared_ptr<RunningLock> runningLock = std::make_shared<RunningLock>(proxy, nameExt, type, displayId);
+    if (runningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Failed to create RunningLock record");
+        return nullptr;
+    }
+    POWER_HILOGI(COMP_LOCK, "CrtN:%{public}s,T=%{public}d,D=%{public}" PRIu64, name.c_str(), type, displayId);
+    auto error = runningLock->Init();
+    if (error != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "RunningLock init failed");
+        error_ = error;
+        return nullptr;
+    }
+
+    std::lock_guard<std::mutex> lock(runningLocksMutex_);
+    runningLocks_.push_back(std::weak_ptr<RunningLock>(runningLock));
+    return runningLock;
+}
+#endif
+
 bool PowerMgrClient::ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
@@ -712,12 +740,12 @@ PowerErrors PowerMgrClient::IsStandby(bool& isStandby)
     return static_cast<PowerErrors>(powerError);
 }
 
-bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, false);
     POWER_HILOGD(FEATURE_RUNNING_LOCK, "Query running lock lists by client");
-    int32_t ret = proxy->QueryRunningLockListsIpc(runningLockLists);
+    int32_t ret = proxy->QueryRunningLockListsIpc(displayId, runningLockLists);
     return ret == ERR_OK;
 }
 
@@ -751,13 +779,13 @@ PowerErrors PowerMgrClient::LockScreenAfterTimingOutWithAppid(pid_t appid, bool 
     return ret;
 }
 
-PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, bool& result)
+PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, bool& result, uint64_t displayId)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
     int32_t lockType = static_cast<int32_t>(type);
-    proxy->IsRunningLockEnabledIpc(lockType, result, powerError);
+    proxy->IsRunningLockEnabledIpc(lockType, displayId, result, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 
@@ -835,28 +863,30 @@ PowerErrors PowerMgrClient::SetProxFilteringStrategy(ProxFilteringStrategy strat
     return static_cast<PowerErrors>(powerError);
 }
 
-PowerErrors PowerMgrClient::RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+PowerErrors PowerMgrClient::RegisterRunningLockChangedCallback(
+    const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId)
 {
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
-    proxy->RegisterRunningLockChangedCallbackIpc(callback, powerError);
+    proxy->RegisterRunningLockChangedCallbackIpc(callback, displayId, powerError);
     return static_cast<PowerErrors>(powerError);
 #else
     return PowerErrors::ERR_OK;
 #endif
 }
 
-PowerErrors PowerMgrClient::UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+PowerErrors PowerMgrClient::UnRegisterRunningLockChangedCallback(
+    const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId)
 {
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
-    proxy->UnRegisterRunningLockChangedCallbackIpc(callback, powerError);
+    proxy->UnRegisterRunningLockChangedCallbackIpc(callback, displayId, powerError);
     return static_cast<PowerErrors>(powerError);
 #else
     return PowerErrors::ERR_OK;

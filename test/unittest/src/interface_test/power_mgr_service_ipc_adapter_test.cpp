@@ -125,7 +125,8 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
-    bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+    bool QueryRunningLockLists(
+        std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId = UINT64_MAX)
     {
         return true;
     }
@@ -242,7 +243,7 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result)
+    PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result, uint64_t displayId)
     {
         return PowerErrors::ERR_OK;
     }
@@ -287,11 +288,13 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+    PowerErrors RegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX)
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+    PowerErrors UnRegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX)
     {
         return PowerErrors::ERR_OK;
     }

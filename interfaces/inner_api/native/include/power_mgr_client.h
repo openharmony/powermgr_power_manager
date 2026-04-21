@@ -211,7 +211,8 @@ public:
     /**
      * Query the list of lock information.
      */
-    bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
+    bool QueryRunningLockLists(
+        std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId = UINT64_MAX);
 
     /**
      * Force auto screen-off after the set timeout. That is, the RUNNINGLOCK_SCREEN (or KeepScreenOn window attribute)
@@ -258,6 +259,9 @@ public:
     PowerErrors LockScreenAfterTimingOutWithAppid(pid_t appid, bool lockScreen);
 
     std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type);
+#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+    std::shared_ptr<RunningLock> CreateRunningLock(const std::string& name, RunningLockType type, uint64_t displayId);
+#endif
     bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid);
     bool ProxyRunningLocks(bool isProxied, const std::vector<std::pair<pid_t, pid_t>>& processInfos);
     bool ResetRunningLocks();
@@ -286,7 +290,7 @@ public:
      * @param result The result of whether the type of running lock is enabled
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
-    PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result);
+    PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result, uint64_t displayId = UINT64_MAX);
 
     /**
      * Register asynchronous callback, trigger when ulsr wakeup
@@ -345,16 +349,22 @@ public:
      * Register the asynchronous running lock state change callback interface.
      * @param callback Registered callback to running lock state change.
      *     The callback will execute asynchronously when holding or unholding running lock.
+     * @param displayId Display ID to filter running lock changes, defaults to UINT64_MAX for all displays.
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
-    PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback);
+    PowerErrors RegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX);
 
     /**
      * Unregister the asynchronous running lock state change callback interface.
      * @param callback Registered callback to running lock state change.
+     * @param displayId Display ID that was used during registration to filter running lock changes.
+     *     Must match the displayId passed to RegisterRunningLockChangedCallback. Defaults to UINT64_MAX for all
+     * displays.
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
-    PowerErrors UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback);
+    PowerErrors UnRegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX);
 
 #ifndef POWERMGR_SERVICE_DEATH_UT
 private:

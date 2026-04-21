@@ -18,6 +18,7 @@
 
 #include <array>
 #include <map>
+#include <set>
 
 #include <iremote_object.h>
 #include <common_event_subscriber.h>
@@ -58,12 +59,17 @@ public:
     void RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
     void UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback);
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-    void RegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback, int32_t pid, int32_t uid);
-    void UnRegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback);
+    void RegisterRunningLockChangedCallback(
+        const sptr<IRemoteObject>& callback, int32_t pid, int32_t uid, uint64_t displayId = UINT64_MAX);
+    void UnRegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback, uint64_t displayId = UINT64_MAX);
+    void RemoveAllRunningLockChangedCallbacks(const sptr<IRemoteObject>& callback);
+    bool HasRunningLockChangedCallbacks(const sptr<IRemoteObject>& callback);
 #endif
-    void QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists);
+    void QueryRunningLockLists(
+        std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId = UINT64_MAX);
     uint32_t GetRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
-    uint32_t GetValidRunningLockNum(RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT);
+    uint32_t GetValidRunningLockNum(
+        RunningLockType type = RunningLockType::RUNNINGLOCK_BUTT, uint64_t displayId = UINT64_MAX);
     bool Init();
     bool ExistValidRunningLock();
     std::shared_ptr<RunningLockInner> GetRunningLockInner(const sptr<IRemoteObject>& remoteObj);
@@ -112,7 +118,9 @@ private:
     class LockCounter {
     public:
         LockCounter(RunningLockType type, std::function<int32_t(bool, RunningLockParam)> activate)
-            : type_(type), activate_(activate), counter_(0) {}
+            : type_(type), activate_(activate), counter_(0)
+        {
+        }
         ~LockCounter() = default;
         int32_t Increase(const RunningLockParam& lockInnerParam);
         int32_t Decrease(const RunningLockParam& lockInnerParam);
@@ -155,6 +163,8 @@ private:
     static bool NeedNotify(RunningLockType type);
     static uint64_t TransformLockid(const sptr<IRemoteObject>& remoteObj);
     bool IsValidType(RunningLockType type);
+    bool PrepareLock(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
+        std::shared_ptr<LockCounter>& counter);
     void PreprocessBeforeAwake();
     RunningLockInfo FillAppRunningLockInfo(const RunningLockParam& info);
     void UpdateUnSceneLockLists(RunningLockParam& singleLockParam, bool fill);
@@ -162,7 +172,15 @@ private:
     std::vector<std::pair<sptr<IRemoteObject>, std::string>> GetEnabledRunningLocksByType(RunningLockType type);
     bool ForceUnlockWriteHiSysEvent(const sptr<IRemoteObject>& remoteObj, const std::string& name);
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-    void NotifyScreenRunningLockChanged(RunningLockChangeState state);
+    void NotifyScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId = UINT64_MAX);
+#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+    std::set<uint64_t> GetRegisteredDisplayIds();
+    void HandleScreenLockNotify(bool active, uint64_t displayId);
+    void UpdateScreenLockCount(bool active, uint64_t displayId);
+    void CollectNotifications(
+        bool active, uint64_t displayId, std::vector<std::pair<RunningLockChangeState, uint64_t>>& notifications);
+    uint32_t GetScreenLockCountInternal(uint64_t displayId);
+#endif
 #endif
 
     const wptr<PowerMgrService> pms_;
@@ -171,8 +189,15 @@ private:
     RunningLockMap runningLocks_;
     std::map<RunningLockType, std::shared_ptr<LockCounter>> lockCounters_;
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-    std::map<sptr<IRemoteObject>, std::pair<int32_t, int32_t>> runningLockChangedCallbacks_;
+    static constexpr size_t CALLBACK_TUPLE_INDEX_PID = 0;
+    static constexpr size_t CALLBACK_TUPLE_INDEX_UID = 1;
+    static constexpr size_t CALLBACK_TUPLE_INDEX_DISPLAY_ID = 2;
+    std::multimap<sptr<IRemoteObject>, std::tuple<int32_t, int32_t, uint64_t>> runningLockChangedCallbacks_;
     ffrt::mutex runningLockChangedCallbackMutex_;
+#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+    std::map<uint64_t, uint32_t> screenLockCountPerDisplayId_;
+    ffrt::mutex screenLockCountMutex_;
+#endif
 #endif
     std::shared_ptr<IProximityController> proximityController_ {nullptr};
     std::shared_ptr<RunningLockProxy> runninglockProxy_;

@@ -29,7 +29,7 @@ public:
     RunningLockChangedCallbackStub() = default;
     virtual ~RunningLockChangedCallbackStub() = default;
     int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override {};
+    void OnAsyncScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId) override {};
 };
 } // namespace PowerMgr
 } // namespace OHOS

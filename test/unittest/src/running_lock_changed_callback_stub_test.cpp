@@ -39,13 +39,15 @@ class TestRunningLockChangedCallback : public RunningLockChangedCallbackStub {
 public:
     TestRunningLockChangedCallback() : stateReceived_(false) {}
     virtual ~TestRunningLockChangedCallback() = default;
-    void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override
+    void OnAsyncScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId) override
     {
         stateReceived_ = true;
         lastState_ = state;
+        lastDisplayId_ = displayId;
     }
     bool stateReceived_;
     RunningLockChangeState lastState_;
+    uint64_t lastDisplayId_ = UINT64_MAX;
 };
 
 }
@@ -123,6 +125,7 @@ HWTEST_F(RunningLockChangedCallbackStubTest,
 
     data.WriteInterfaceToken(RunningLockChangedCallbackStub::GetDescriptor());
     data.WriteUint32(static_cast<uint32_t>(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED));
+    data.WriteUint64(1001);
 
     int ret = stub->OnRemoteRequest(
         static_cast<uint32_t>(RunningLockChangedCallbackInterfaceCode::RUNNINGLOCK_STATE_CHANGED),
@@ -131,6 +134,7 @@ HWTEST_F(RunningLockChangedCallbackStubTest,
     EXPECT_TRUE(ret == ERR_OK);
     EXPECT_TRUE(stub->stateReceived_);
     EXPECT_EQ(stub->lastState_, RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
+    EXPECT_EQ(stub->lastDisplayId_, 1001);
 
     POWER_HILOGI(LABEL_TEST, "OnRemoteRequest_Success_InvokeCallback end!");
 }
@@ -147,6 +151,7 @@ HWTEST_F(RunningLockChangedCallbackStubTest,
 
     data.WriteInterfaceToken(RunningLockChangedCallbackStub::GetDescriptor());
     data.WriteUint32(static_cast<uint32_t>(RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED));
+    data.WriteUint64(UINT64_MAX);
 
     int ret = stub->OnRemoteRequest(
         static_cast<uint32_t>(RunningLockChangedCallbackInterfaceCode::RUNNINGLOCK_STATE_CHANGED),
@@ -155,6 +160,28 @@ HWTEST_F(RunningLockChangedCallbackStubTest,
     EXPECT_TRUE(ret == ERR_OK);
     EXPECT_TRUE(stub->stateReceived_);
     EXPECT_EQ(stub->lastState_, RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED);
+    EXPECT_EQ(stub->lastDisplayId_, UINT64_MAX);
 
     POWER_HILOGI(LABEL_TEST, "OnRemoteRequest_UnlockedState_InvokeCallback end!");
+}
+
+HWTEST_F(RunningLockChangedCallbackStubTest, OnRemoteRequest_MissingDisplayId_ReturnError, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "OnRemoteRequest_MissingDisplayId_ReturnError start!");
+
+    sptr<TestRunningLockChangedCallback> stub = new TestRunningLockChangedCallback();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(RunningLockChangedCallbackStub::GetDescriptor());
+    data.WriteUint32(static_cast<uint32_t>(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED));
+
+    int ret = stub->OnRemoteRequest(
+        static_cast<uint32_t>(RunningLockChangedCallbackInterfaceCode::RUNNINGLOCK_STATE_CHANGED), data, reply, option);
+
+    EXPECT_TRUE(ret == E_READ_PARCEL_ERROR);
+    EXPECT_FALSE(stub->stateReceived_);
+
+    POWER_HILOGI(LABEL_TEST, "OnRemoteRequest_MissingDisplayId_ReturnError end!");
 }
