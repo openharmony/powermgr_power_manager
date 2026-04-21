@@ -24,7 +24,7 @@ config("public_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_source_set("power_appmgr") {
+ohos_shared_library("power_appmgr") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
