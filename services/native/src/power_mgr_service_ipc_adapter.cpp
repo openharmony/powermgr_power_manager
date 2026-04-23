@@ -18,6 +18,7 @@
 #include "power_log.h"
 #include "power_xcollie.h"
 #include "xcollie/watchdog.h"
+#include "hibernate/hibernate_callback_priority.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -328,10 +329,12 @@ int32_t PowerMgrServiceAdapter::UnRegisterSyncSleepCallbackIpc(const sptr<ISyncS
     return ERR_OK;
 }
 
-int32_t PowerMgrServiceAdapter::RegisterSyncHibernateCallbackIpc(const sptr<ISyncHibernateCallback>& callback)
+int32_t PowerMgrServiceAdapter::RegisterSyncHibernateCallbackIpc(
+    const sptr<ISyncHibernateCallback>& callback, int32_t priorityValue)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterSyncHibernateCallback", false);
-    RegisterSyncHibernateCallback(callback);
+    HibernateCallbackPriority priority = static_cast<HibernateCallbackPriority>(priorityValue);
+    RegisterSyncHibernateCallback(callback, priority);
     return ERR_OK;
 }
 

@@ -75,7 +75,7 @@ interface OHOS.PowerMgr.IPowerMgr {
     void RegisterSuspendTakeoverCallbackIpc([in] ITakeOverSuspendCallback takeOverSuspendCallback, [in] int priority);
     void UnRegisterSuspendTakeoverCallbackIpc([in] ITakeOverSuspendCallback takeOverSuspendCallback);
 
-    void RegisterSyncHibernateCallbackIpc([in] ISyncHibernateCallback powerCallback);
+    void RegisterSyncHibernateCallbackIpc([in] ISyncHibernateCallback powerCallback, [in] int priorityValue);
     void UnRegisterSyncHibernateCallbackIpc([in] ISyncHibernateCallback powerCallback);
 
     // Used for Callback registration upon power mode.

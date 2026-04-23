@@ -26,6 +26,7 @@
 #include "iasync_ulsr_callback.h"
 #include "shutdown/iasync_shutdown_callback.h"
 #include "irunning_lock_changed_callback.h"
+#include "hibernate/hibernate_callback_priority.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -263,7 +264,8 @@ public:
     bool ResetRunningLocks();
     bool RegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback, bool isSync = true);
     bool UnRegisterPowerStateCallback(const sptr<IPowerStateCallback>& callback);
-    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
+    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+        HibernateCallbackPriority priority = HibernateCallbackPriority::DEFAULT);
     bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback);
     bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
     bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback);

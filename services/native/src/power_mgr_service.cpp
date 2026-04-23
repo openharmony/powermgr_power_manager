@@ -1894,13 +1894,14 @@ bool PowerMgrService::UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSusp
 #endif
 }
 
-bool PowerMgrService::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+bool PowerMgrService::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+    HibernateCallbackPriority priority)
 {
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     POWER_HILOGI(FEATURE_SUSPEND, "RegisterSyncHibernateCallback begin.");
     std::lock_guard lock(hibernateMutex_);
     HibernateControllerInit();
-    hibernateController_->RegisterSyncHibernateCallback(callback);
+    hibernateController_->RegisterSyncHibernateCallback(callback, priority);
     return true;
 #else
     POWER_HILOGI(FEATURE_SUSPEND, "RegisterSyncHibernateCallback interface not supported.");

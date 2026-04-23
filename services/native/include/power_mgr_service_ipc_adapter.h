@@ -19,6 +19,7 @@
 #include <iremote_object.h>
 #include "ipower_mgr.h"
 #include "power_mgr_stub.h"
+#include "hibernate/hibernate_callback_priority.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -69,7 +70,8 @@ public:
     virtual int32_t RegisterSyncSleepCallbackIpc(
         const sptr<ISyncSleepCallback>& callback, int32_t priorityValue) override;
     virtual int32_t UnRegisterSyncSleepCallbackIpc(const sptr<ISyncSleepCallback>& callback) override;
-    virtual int32_t RegisterSyncHibernateCallbackIpc(const sptr<ISyncHibernateCallback>& callback) override;
+    virtual int32_t RegisterSyncHibernateCallbackIpc(
+        const sptr<ISyncHibernateCallback>& callback, int32_t priorityValue) override;
     virtual int32_t UnRegisterSyncHibernateCallbackIpc(const sptr<ISyncHibernateCallback>& callback) override;
 
     virtual int32_t RegisterSuspendTakeoverCallbackIpc(
@@ -167,7 +169,8 @@ public:
 
     virtual bool RegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority) = 0;
     virtual bool UnRegisterSyncSleepCallback(const sptr<ISyncSleepCallback>& callback) = 0;
-    virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) = 0;
+    virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+        HibernateCallbackPriority priority) = 0;
     virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) = 0;
 
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) = 0;
