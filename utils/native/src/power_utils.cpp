@@ -257,7 +257,7 @@ Rosen::PowerStateChangeReason PowerUtils::GetDmsReasonByPowerReason(StateChangeR
             dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
             break;
         case StateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING:
-            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_PEOPLE_LEAVING;
+            dmsReason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
             break;
         default:
             break;

@@ -18,8 +18,10 @@
 
 #include <set>
 #include <map>
+#include <mutex>
 
 #include "ipc_skeleton.h"
+#include "power_common.h"
 #include "hibernate/isync_hibernate_callback.h"
 
 namespace OHOS {
@@ -29,7 +31,7 @@ enum class HibernateStatus {
     HIBERNATE_FAILURE,
     HIBERNATE_INVALID_STATUS,
 };
-class HibernateController {
+class HibernateController : public IRemoteObject::DeathRecipient {
 public:
     struct HibernateCallbackCompare {
         bool operator()(const sptr<ISyncHibernateCallback>& lhs, const sptr<ISyncHibernateCallback>& rhs) const
@@ -43,6 +45,7 @@ public:
     HibernateController() {};
     virtual ~HibernateController() = default;
 
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
     virtual HibernateStatus Hibernate(bool clearMemory);
     virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);
     virtual void UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb);

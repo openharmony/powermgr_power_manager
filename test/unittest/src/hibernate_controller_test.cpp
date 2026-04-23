@@ -70,7 +70,7 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest002, TestSize.Level0)
     size_t beforeSize = hibernateController_->callbacks_.size();
     hibernateController_->RegisterSyncHibernateCallback(nullptr);
     size_t afterSize = hibernateController_->callbacks_.size();
-    EXPECT_EQ(afterSize, beforeSize + 1);
+    EXPECT_EQ(afterSize, beforeSize);
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest002 function end!");
 }
 
@@ -262,6 +262,94 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest015, TestSize.Level0)
     hibernateController_->UnregisterSyncHibernateCallback(g_callback);
     EXPECT_EQ(hibernateController_->cachedRegister_.size(), 0);
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest015 function end!");
+}
+
+/**
+ * @tc.name: HibernateControllerTest016
+ * @tc.desc: test OnRemoteDied removes callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(HibernateControllerTest, HibernateControllerTest016, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest016 function start!");
+    hibernateController_->RegisterSyncHibernateCallback(g_callback);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 1);
+    EXPECT_EQ(hibernateController_->cachedRegister_.size(), 1);
+    wptr<IRemoteObject> remote = g_callback->AsObject();
+    hibernateController_->OnRemoteDied(remote);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 0);
+    EXPECT_EQ(hibernateController_->cachedRegister_.size(), 0);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest016 function end!");
+}
+
+/**
+ * @tc.name: HibernateControllerTest017
+ * @tc.desc: test OnRemoteDied with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(HibernateControllerTest, HibernateControllerTest017, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest017 function start!");
+    hibernateController_->RegisterSyncHibernateCallback(g_callback);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 1);
+    wptr<IRemoteObject> remote = nullptr;
+    hibernateController_->OnRemoteDied(remote);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 1);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest017 function end!");
+}
+
+/**
+ * @tc.name: HibernateControllerTest018
+ * @tc.desc: test UnregisterSyncHibernateCallback with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(HibernateControllerTest, HibernateControllerTest018, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest018 function start!");
+    hibernateController_->RegisterSyncHibernateCallback(g_callback);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 1);
+    hibernateController_->UnregisterSyncHibernateCallback(nullptr);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 1);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest018 function end!");
+}
+
+/**
+ * @tc.name: HibernateControllerTest019
+ * @tc.desc: test PreHibernate with registered callback triggers OnSyncHibernate
+ * @tc.type: FUNC
+ */
+HWTEST_F(HibernateControllerTest, HibernateControllerTest019, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest019 function start!");
+    hibernateController_->RegisterSyncHibernateCallback(g_callback);
+    hibernateController_->PreHibernate();
+    EXPECT_TRUE(hibernateController_->prepared_);
+    hibernateController_->PostHibernate(true);
+    EXPECT_FALSE(hibernateController_->prepared_);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest019 function end!");
+}
+
+/**
+ * @tc.name: HibernateControllerTest020
+ * @tc.desc: test multiple callbacks pre and post hibernate
+ * @tc.type: FUNC
+ */
+HWTEST_F(HibernateControllerTest, HibernateControllerTest020, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest020 function start!");
+    sptr<ISyncHibernateCallback> callback1 = new PowerSyncHibernateTestCallback();
+    sptr<ISyncHibernateCallback> callback2 = new PowerSyncHibernateTestCallback();
+    hibernateController_->RegisterSyncHibernateCallback(callback1);
+    hibernateController_->RegisterSyncHibernateCallback(callback2);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 2);
+    hibernateController_->PreHibernate();
+    EXPECT_TRUE(hibernateController_->prepared_);
+    hibernateController_->PostHibernate(false);
+    EXPECT_FALSE(hibernateController_->prepared_);
+    hibernateController_->UnregisterSyncHibernateCallback(callback1);
+    hibernateController_->UnregisterSyncHibernateCallback(callback2);
+    EXPECT_EQ(hibernateController_->callbacks_.size(), 0);
+    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest020 function end!");
 }
 
 } // namespace PowerMgr
