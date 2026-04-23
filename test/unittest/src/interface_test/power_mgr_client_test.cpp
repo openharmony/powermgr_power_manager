@@ -1497,7 +1497,8 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient052, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient052 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr,
+        HibernateCallbackPriority::DEFAULT);
     // parameter is nullptr
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient052 function end!");

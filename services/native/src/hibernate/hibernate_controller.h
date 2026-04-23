@@ -46,7 +46,13 @@ public:
     virtual void PostHibernate(bool hibernateResult = false);
 
 private:
-    using CallbackContainerType = std::set<sptr<ISyncHibernateCallback>>;
+    struct HibernateCallbackCompare {
+        bool operator()(const sptr<ISyncHibernateCallback>& lhs, const sptr<ISyncHibernateCallback>& rhs) const
+        {
+            return lhs->AsObject() < rhs->AsObject();
+        }
+    };
+    using CallbackContainerType = std::set<sptr<ISyncHibernateCallback>, HibernateCallbackCompare>;
     void AddCallbackToHolder(const sptr<ISyncHibernateCallback>& cb, HibernateCallbackPriority priority);
     void RemoveCallbackFromHolder(const sptr<ISyncHibernateCallback>& cb);
     void AddCallbackPidUid(const sptr<ISyncHibernateCallback>& cb);

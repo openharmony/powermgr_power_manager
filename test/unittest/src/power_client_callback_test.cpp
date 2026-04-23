@@ -127,7 +127,8 @@ HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback001, TestSize.
     bool ret = 0;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
-    ret = powerMgrClient.RegisterSyncHibernateCallback(cb);
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::DEFAULT);
     EXPECT_TRUE(ret);
     ret = 0;
     ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);

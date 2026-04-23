@@ -162,7 +162,8 @@ public:
     {
         return true;
     }
-    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+        HibernateCallbackPriority priority)
     {
         return true;
     }
