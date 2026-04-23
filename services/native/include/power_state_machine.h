@@ -28,6 +28,7 @@
 #include "ipower_state_callback.h"
 #include "power_common.h"
 #include "power_state_machine_info.h"
+#include "adapter/iswitch_action.h"
 #include "running_lock_info.h"
 #include "power_mgr_notify.h"
 #ifdef POWER_MANAGER_REPORT_SCREENOFF_INVALID
@@ -227,6 +228,14 @@ public:
     {
         return switchOpen_;
     }
+    void SetSwitchAction(std::shared_ptr<ISwitchAction> action)
+    {
+        switchAction_ = action;
+    }
+    std::shared_ptr<ISwitchAction> GetSwitchActionPtr() const
+    {
+        return switchAction_;
+    }
     bool IsSwitchOpenByPath();
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     bool IsHibernating() const
@@ -372,6 +381,7 @@ private:
     void UpdateSettingStateFlag(PowerState state, StateChangeReason reason);
     void RestoreSettingStateFlag();
     void InitStateMap();
+    void InitSwitchAction();
     void EmplaceAwake();
     void EmplaceFreeze();
     void EmplaceInactive();
@@ -450,6 +460,7 @@ private:
     std::unordered_map<PowerState, std::set<PowerState>> forbidMap_;
     uint32_t switchActionValue_ {2}; // default value is 2 (stand for ACTION_FORCE_SUSPEND)
     std::atomic<bool> switchOpen_ {true};
+    std::shared_ptr<ISwitchAction> switchAction_ {nullptr};
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::atomic<bool> hibernating_ {false};
 #endif
