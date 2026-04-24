@@ -321,10 +321,7 @@ napi_value PowerNapi::SetPowerConfig(napi_env env, napi_callback_info info)
         POWER_HILOGE(COMP_FWK, "SetPowerConfig failed, code: %{public}d", static_cast<int32_t>(code));
         return error.ThrowError(env, code);
     }
-
-    napi_value napiValue;
-    NAPI_CALL(env, napi_get_boolean(env, true, &napiValue));
-    return napiValue;
+    return nullptr;
 }
 
 static void SetFrameworkBootStage(bool isReboot)
