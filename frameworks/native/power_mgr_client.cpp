@@ -51,7 +51,7 @@ std::mutex PowerMgrClient::runningLocksMutex_;
 std::mutex g_instanceMutex;
 constexpr int32_t MAX_VERSION_STRING_SIZE = 4;
 constexpr int32_t MAX_SCENE_NAME_STRING_SIZE = 128;
-constexpr int32_t MAX_CONFIG_VALUE_STRING_SIZE = 4096;
+constexpr int32_t MAX_CONFIG_VALUE_STRING_SIZE = 128;
 constexpr uint32_t PARAM_MAX_NUM = 10;
 
 PowerMgrClient::PowerMgrClient()
