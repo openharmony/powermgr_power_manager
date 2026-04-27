@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <map>
 #include "ohos.runningLock.proj.hpp"
 #include "taihe/runtime.hpp"
 #include "stdexcept"
@@ -28,12 +27,6 @@ using namespace ohos::runningLock;
 using namespace OHOS::PowerMgr;
 
 namespace {
-std::map<PowerErrors, std::string> g_errorTable = {
-    {PowerErrors::ERR_CONNECTION_FAIL,   "Failed to connect to the service."},
-    {PowerErrors::ERR_PERMISSION_DENIED, "Permission is denied"             },
-    {PowerErrors::ERR_SYSTEM_API_DENIED, "System permission is denied"      },
-    {PowerErrors::ERR_PARAM_INVALID,     "Invalid input parameter."         }
-};
 
 class RunningLockImpl {
 public:
@@ -54,7 +47,7 @@ public:
         OHOS::ErrCode code = runningLock_->Lock(timeout);
         if (code == E_PERMISSION_DENIED) {
             taihe::set_business_error(static_cast<int32_t>(PowerErrors::ERR_PERMISSION_DENIED),
-                g_errorTable[PowerErrors::ERR_PERMISSION_DENIED]);
+                GetErrorMessage(PowerErrors::ERR_PERMISSION_DENIED));
         }
     }
 
@@ -79,7 +72,7 @@ public:
         OHOS::ErrCode code = runningLock_->UnLock();
         if (code == E_PERMISSION_DENIED) {
             taihe::set_business_error(static_cast<int32_t>(PowerErrors::ERR_PERMISSION_DENIED),
-                g_errorTable[PowerErrors::ERR_PERMISSION_DENIED]);
+                GetErrorMessage(PowerErrors::ERR_PERMISSION_DENIED));
         }
     }
 
@@ -99,7 +92,7 @@ ohos::runningLock::RunningLock CreateSync(string_view name, ohos::runningLock::R
     runLock = PowerMgrClient::GetInstance().CreateRunningLock(std::string(name), tp);
     PowerErrors code = PowerMgrClient::GetInstance().GetError();
     if (!runLock && code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
     return make_holder<RunningLockImpl, ohos::runningLock::RunningLock>(runLock);
 }

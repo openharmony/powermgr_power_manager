@@ -33,16 +33,6 @@ using namespace ohos::power;
 using namespace OHOS::PowerMgr;
 
 namespace {
-std::map<PowerErrors, std::string> g_errorTable = {
-    {PowerErrors::ERR_CONNECTION_FAIL,           "Failed to connect to the service." },
-    {PowerErrors::ERR_PERMISSION_DENIED,         "Permission is denied"              },
-    {PowerErrors::ERR_SYSTEM_API_DENIED,         "System permission is denied"       },
-    {PowerErrors::ERR_PARAM_INVALID,             "Invalid input parameter."          },
-    {PowerErrors::ERR_FREQUENT_FUNCTION_CALL,    "Frequent function calls."          },
-    {PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED, "Setting the power mode failed."    },
-    {PowerErrors::ERR_READ_OPERATION_FAILED,     "Read operation failed."            },
-    {PowerErrors::ERR_WRITE_OPERATION_FAILED,    "Write operation failed."          },
-};
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 thread_local OHOS::sptr<PowerShutdownCallback> g_powerShutdownCallback = new (std::nothrow) PowerShutdownCallback();
 constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
@@ -84,7 +74,7 @@ void Shutdown(string_view reason)
     POWER_HILOGD(FEATURE_SHUTDOWN, "reboot: %{public}d, reason: %{public}s", false, reason.c_str());
     PowerErrors code = g_powerMgrClient.ShutDownDevice(std::string(reason));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -94,7 +84,7 @@ void Reboot(string_view reason)
     POWER_HILOGD(FEATURE_SHUTDOWN, "reboot: %{public}d, reason: %{public}s", true, reason.c_str());
     PowerErrors code = g_powerMgrClient.RebootDevice(std::string(reason));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -110,7 +100,7 @@ void Wakeup(string_view detail)
     PowerErrors code = g_powerMgrClient.WakeupDevice(
         WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string(detail), std::to_string(apiVersion));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -128,7 +118,7 @@ void Suspend(optional_view<bool> isImmediate)
     }
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         POWER_HILOGE(FEATURE_SUSPEND, "Suspend Device fail, isForce:%{public}d", isForce);
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -163,7 +153,7 @@ void SetPowerModeSync(DevicePowerMode mode)
 {
     PowerErrors code = g_powerMgrClient.SetDeviceMode(PowerMode(static_cast<uint32_t>(mode)));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -172,7 +162,7 @@ bool IsStandby()
     bool isStandby = false;
     PowerErrors code = g_powerMgrClient.IsStandby(isStandby);
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
     return isStandby;
 }
@@ -183,7 +173,7 @@ void Hibernate(bool clearMemory)
     PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, "", std::to_string(apiVersion));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         POWER_HILOGE(FEATURE_WAKEUP, "Hibernate failed.");
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -192,7 +182,7 @@ void SetScreenOffTime(int64_t timeout)
     if (timeout == 0 || (timeout < 0 && timeout != RESTORE_DEFAULT_SCREENOFF_TIME)) {
         POWER_HILOGE(FEATURE_WAKEUP, "timeout is not right.");
         taihe::set_business_error(
-            static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID), g_errorTable[PowerErrors::ERR_PARAM_INVALID]);
+            static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID), GetErrorMessage(PowerErrors::ERR_PARAM_INVALID));
     }
 
     PowerErrors code;
@@ -204,7 +194,7 @@ void SetScreenOffTime(int64_t timeout)
     }
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         POWER_HILOGE(FEATURE_WAKEUP, "SetScreenOffTime failed.");
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -214,7 +204,7 @@ void RefreshActivity(string_view reason)
         UserActivityType::USER_ACTIVITY_TYPE_APPLICATION, std::string(reason));
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_ACTIVITY, "RefreshActivity failed. code:%{public}d", static_cast<int32_t>(code));
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -225,7 +215,7 @@ void SetPowerKeyFilteringStrategy(ohos::power::PowerKeyFilteringStrategy strateg
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_INPUT, "SetPowerKeyFilteringStrategy failed. code:%{public}d",
             static_cast<int32_t>(code));
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -234,7 +224,7 @@ string GetPowerConfig(string_view sceneName)
     std::string configVal;
     PowerErrors code = g_powerMgrClient.GetPowerConfig(std::string(sceneName), configVal);
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
     return configVal;
 }
@@ -243,7 +233,7 @@ void SetPowerConfig(string_view sceneName, string_view configVal)
 {
     PowerErrors code = g_powerMgrClient.SetPowerConfig(std::string(sceneName), std::string(configVal));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -259,7 +249,7 @@ void RegisterShutdownCallback(::taihe::callback_view<void(bool isReboot)> shutdo
         ShutdownPriority::DEFAULT);
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "RegisterShutdownCallback failed. code:%{public}d", static_cast<int32_t>(code));
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
 }
 
@@ -274,7 +264,7 @@ void UnregisterShutdownCallback(::taihe::optional_view<::taihe::callback<void(My
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_SHUTDOWN, "UnRegisterShutdownCallback failed. code:%{public}d",
             static_cast<int32_t>(code));
-        taihe::set_business_error(static_cast<int32_t>(code), g_errorTable[code]);
+        taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
         return;
     }
     if (callBack.has_value()) {

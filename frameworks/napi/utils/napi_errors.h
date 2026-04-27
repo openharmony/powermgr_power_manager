@@ -16,9 +16,6 @@
 #ifndef POWER_NAPI_ERRORS_H
 #define POWER_NAPI_ERRORS_H
 
-#include <map>
-#include <string>
-
 #include "napi/native_node_api.h"
 #include "power_errors.h"
 
@@ -42,7 +39,6 @@ public:
 
 private:
     PowerErrors code_ {PowerErrors::ERR_OK};
-    static std::map<PowerErrors, std::string> errorTable_;
 };
 } // namespace PowerMgr
 } // namespace OHOS

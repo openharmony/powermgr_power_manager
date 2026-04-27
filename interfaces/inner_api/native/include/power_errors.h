@@ -16,6 +16,9 @@
 #ifndef POWERMGR_POWER_ERRORS_H
 #define POWERMGR_POWER_ERRORS_H
 
+#include <map>
+#include <string>
+
 namespace OHOS {
 namespace PowerMgr {
 enum class PowerErrors : int32_t {
@@ -34,6 +37,26 @@ enum class PowerErrors : int32_t {
     ERR_USER_PARAM_INVALID = 4900400,
     ERR_WRITE_OPERATION_FAILED = 4900601,
 };
+
+inline std::string GetErrorMessage(PowerErrors code)
+{
+    static const std::map<PowerErrors, std::string> errorTable = {
+        {PowerErrors::ERR_CONNECTION_FAIL,           "Failed to connect to the service."},
+        {PowerErrors::ERR_PERMISSION_DENIED,         "Permission is denied"},
+        {PowerErrors::ERR_SYSTEM_API_DENIED,         "System permission is denied"},
+        {PowerErrors::ERR_PARAM_INVALID,             "Invalid input parameter."},
+        {PowerErrors::ERR_FREQUENT_FUNCTION_CALL,    "Frequent function calls."},
+        {PowerErrors::ERR_POWER_MODE_TRANSIT_FAILED, "Setting the power mode failed."},
+        {PowerErrors::ERR_READ_OPERATION_FAILED,     "Read operation failed."},
+        {PowerErrors::ERR_USER_PARAM_INVALID,        "Invalid parameter"},
+        {PowerErrors::ERR_WRITE_OPERATION_FAILED,    "Write operation failed."},
+    };
+    auto it = errorTable.find(code);
+    if (it != errorTable.end()) {
+        return it->second;
+    }
+    return "";
+}
 } // namespace PowerMgr
 } // namespace OHOS
 
