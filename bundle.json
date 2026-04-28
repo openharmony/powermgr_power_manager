@@ -55,7 +55,8 @@
             "power_manager_feature_support_filtering_proximity_event",
             "power_manager_feature_report_screenoff_invalid",
             "power_manager_feature_screen_saver",
-            "power_manager_feature_enable_monitor_running_lock_change"
+            "power_manager_feature_enable_monitor_running_lock_change",
+            "power_manager_feature_support_power_cli"
         ],
         "adapted_system_type": [
             "standard"
@@ -120,7 +121,8 @@
                     "//base/powermgr/power_manager/utils/param:power_sysparam",
                     "//base/powermgr/power_manager/utils/permission:power_permission",
                     "//base/powermgr/power_manager/utils/setting:power_setting",
-                    "//base/powermgr/power_manager/power_dialog:dialog_hap"
+                    "//base/powermgr/power_manager/power_dialog:dialog_hap",
+                    "//base/powermgr/power_manager/tools/ohos-powerManager:ohos-powerManager-cli"
                 ],
                 "fwk_group": [
                     "//base/powermgr/power_manager/frameworks:power_napi",
@@ -235,6 +237,7 @@
                 "//base/powermgr/power_manager/test:unittest",
                 "//base/powermgr/power_manager/test:fuzztest",
                 "//base/powermgr/power_manager/test:systemtest",
+                "//base/powermgr/power_manager/tools/ohos-powerManager/tests:cli-test",
                 "//base/powermgr/power_manager/frameworks/ets/taihe:power_manager_taihe_test"
             ]
         }
