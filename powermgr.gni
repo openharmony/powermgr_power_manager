@@ -51,6 +51,7 @@ declare_args() {
   power_manager_feature_report_screenoff_invalid = true
   power_manager_feature_screen_saver = false
   power_manager_feature_enable_monitor_running_lock_change = false
+  power_manager_feature_support_power_cli = false
 }
 
 defines = []
