@@ -1,0 +1,162 @@
+{
+  "name": "ohos-powerManager",
+  "version": "1.0.0",
+  "description": "Power management CLI tool for device suspend, wakeup, power mode switching and screen off timeout management. Used for system administration and automated device power control scenarios. Does not support callback registration or long-running monitoring operations.",
+  "executablePath": "/system/bin/cli_tool/executable/ohos-powerManager",
+  "requirePermissions": [],
+  "inputSchema": {
+    "type": "object",
+    "properties": {}
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {}
+  },
+  "hasSubCommand": true,
+  "subcommands": {
+    "suspend": {
+      "description": "Suspend device and turn off screen with fixed 'application' reason. Used for remotely or programmatically putting the device into suspend state. Does not support custom suspend reasons other than 'application'.",
+      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "immediately": {
+            "type": "boolean",
+            "description": "Whether to suspend immediately without delay",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The executed command name",
+            "enum": ["suspend"]
+          },
+          "reason": {
+            "type": "string",
+            "description": "The fixed suspend reason",
+            "enum": ["application"]
+          },
+          "immediately": {
+            "type": "boolean",
+            "description": "Whether the immediately flag was set"
+          }
+        }
+      }
+    },
+    "wakeup": {
+      "description": "Wake up device and turn on screen with fixed 'application' reason. Used for remotely or programmatically waking the device from suspend state. Does not support custom wakeup reasons other than 'application'.",
+      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Wakeup detail description string, max 128 characters",
+            "default": "cli-call",
+            "maxLength": 128
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The executed command name",
+            "enum": ["wakeup"]
+          },
+          "reason": {
+            "type": "string",
+            "description": "The fixed wakeup reason",
+            "enum": ["application"]
+          },
+          "detail": {
+            "type": "string",
+            "description": "The wakeup detail string that was provided"
+          }
+        }
+      }
+    },
+    "set-power-mode": {
+      "description": "Set device power mode to normal or performance. Used for switching between balanced and high-performance power profiles. Does not support power-save, extreme or custom power modes.",
+      "requirePermissions": ["ohos.permission.POWER_OPTIMIZATION"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "Target power mode: 'normal' for balanced mode or 'performance' for high performance mode",
+            "enum": ["normal", "performance"]
+          }
+        },
+        "required": ["mode"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The executed command name",
+            "enum": ["set-power-mode"]
+          },
+          "mode": {
+            "type": "string",
+            "description": "The power mode that was set",
+            "enum": ["normal", "performance"]
+          }
+        }
+      }
+    },
+    "override-screen-off-time": {
+      "description": "Override the system screen off timeout with a custom value in milliseconds. Used for temporarily extending or shortening the screen off delay. Does not persist across device reboots.",
+      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "integer",
+            "description": "Screen off timeout in milliseconds, must be a positive integer",
+            "minimum": 1
+          }
+        },
+        "required": ["time"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The executed command name",
+            "enum": ["override-screen-off-time"]
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "The timeout value that was set, in milliseconds"
+          }
+        }
+      }
+    },
+    "restore-screen-off-time": {
+      "description": "Restore the screen off timeout to the system default value. Used for reverting a previous override-screen-off-time call. Has no effect if no override is currently active.",
+      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The executed command name",
+            "enum": ["restore-screen-off-time"]
+          }
+        }
+      }
+    }
+  }
+}
