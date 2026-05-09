@@ -7,7 +7,7 @@ ohos-powerManager is a command-line interface tool for HarmonyOS/OHOS power mana
 ## Dependencies
 
 - PowerMgrClient (inner_api)
-- nlohmann/json (via cJSON:cjson)
+- cJSON:cjson
 - c_utils
 - hilog
 - ipc_core
@@ -27,7 +27,7 @@ All commands require system caller identity and one of the following permissions
 |---|---|---|---|---|
 | `suspend` | Suspend device and turn screen off | `[--immediately]` | POWER_MANAGER | None |
 | `wakeup` | Wake up device and turn screen on | `[--detail <string>]` | POWER_MANAGER | None |
-| `set-power-mode` | Set device power mode | `--mode <mode>` (normal/performance) | POWER_OPTIMIZATION | None |
+| `set-power-mode` | Set device power mode | `--mode <mode>` (normal/powerSave) | POWER_OPTIMIZATION | None |
 | `override-screen-off-time` | Override screen off timeout | `--time <timeout_ms>` (positive integer) | POWER_MANAGER | None |
 | `restore-screen-off-time` | Restore screen off timeout to default | (none) | POWER_MANAGER | Prior override recommended |
 
@@ -75,8 +75,8 @@ Success output:
 # Set normal mode
 ohos-powerManager set-power-mode --mode normal
 
-# Set performance mode
-ohos-powerManager set-power-mode --mode performance
+# Set power save mode
+ohos-powerManager set-power-mode --mode powerSave
 ```
 
 Success output:
