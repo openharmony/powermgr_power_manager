@@ -25,6 +25,9 @@
 #include <unistd.h>
 #include <uv.h>
 #include "app_manager_utils.h"
+#ifdef POWER_API_METRICS_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 #define SET_REBOOT _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
 
@@ -47,6 +50,9 @@ constexpr int32_t RESTORE_DEFAULT_SCREENOFF_TIME = -1;
 constexpr int32_t SHUTDOWN_CALLBACK_TIMEOUT = 5000;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
 thread_local sptr<PowerShutdownCallback> g_powerShutdownCallback = new (std::nothrow) PowerShutdownCallback();
+#ifdef POWER_API_METRICS_ENABLE
+constexpr int32_t HISTOGRAM_API_CALL_COUNT = 1;
+#endif
 } // namespace
 
 PowerShutdownCallback::~PowerShutdownCallback()
@@ -501,6 +507,10 @@ napi_value PowerNapi::SetScreenOffTime(napi_env env, napi_callback_info info)
 
 napi_value PowerNapi::IsStandby(napi_env env, napi_callback_info info)
 {
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.isStandby.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
+
     bool isStandby = false;
     PowerErrors code = g_powerMgrClient.IsStandby(isStandby);
     if (code == PowerErrors::ERR_OK) {
@@ -564,6 +574,9 @@ napi_value PowerNapi::SetPowerKeyFilteringStrategy(napi_env env, napi_callback_i
 
 napi_value PowerNapi::RegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.registerShutdownCallback.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
     size_t argc = SHUTDOWN_CALLBACK_ARGC;
     napi_value argv[argc];
     NapiUtils::GetCallbackInfo(env, info, argc, argv);
@@ -595,6 +608,10 @@ napi_value PowerNapi::RegisterShutdownCallback(napi_env env, napi_callback_info 
 
 napi_value PowerNapi::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.unRegisterShutdownCallback.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
+
     size_t argc = SHUTDOWN_CALLBACK_ARGC;
     napi_value argv[argc];
     NapiUtils::GetCallbackInfo(env, info, argc, argv);

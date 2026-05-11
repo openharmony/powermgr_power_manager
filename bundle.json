@@ -106,7 +106,8 @@
                 "miscdevice",
                 "bundle_framework",
                 "resource_schedule_service",
-                "selinux_adapter"
+                "selinux_adapter",
+                "api_metrics"
             ]
         },
         "build": {
