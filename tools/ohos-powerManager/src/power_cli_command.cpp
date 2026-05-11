@@ -69,7 +69,10 @@ bool PowerCliCommand::HasHelpFlag(const std::vector<std::string>& args)
 int PowerCliCommand::Execute()
 {
     if (command_.empty()) {
-        ShowGlobalHelp();
+        OutputError(0,
+            "ERR_NO_COMMAND",
+            "No command specified",
+            "Run 'ohos-powerManager --help' for available commands");
         return 0;
     }
 
