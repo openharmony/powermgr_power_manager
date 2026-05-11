@@ -642,6 +642,12 @@ void PowerMgrService::SwitchSubscriberInit()
                     return;
                 }
                 powerStateMachine_->SetSwitchState(false);
+                auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+                if (switchAction != nullptr &&
+                    switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE) == SwitchActionRet::HANDLED) {
+                    POWER_HILOGI(FEATURE_INPUT, "[UL_POWER] HandleSwitchClose return!");
+                    return;
+                }
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
@@ -650,6 +656,10 @@ void PowerMgrService::SwitchSubscriberInit()
                 if (wakeupController == nullptr) {
                     POWER_HILOGE(FEATURE_INPUT, "get wakeupController instance error");
                     return;
+                }
+                auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+                if (switchAction != nullptr) {
+                    switchAction->HandleSwitchAction(SwitchActionType::SWITCH_OPEN);
                 }
                 powerStateMachine_->SetSwitchState(true);
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
@@ -872,6 +882,10 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     if (systemAbilityId ==  DISPLAY_MANAGER_SERVICE_SA_ID) {
         std::lock_guard lock(powerInitMutex_);
         POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID in PowerService");
+        auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+        if (switchAction) {
+            switchAction->HandleSwitchAction(SwitchActionType::REPORT_SWITCH_STATE);
+        }
         if (displayManagerServiceCrash_) {
             isNeedReInit_  = true;
             RegisterBootCompletedCallback();

@@ -126,6 +126,7 @@ bool PowerStateMachine::Init()
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
     InitTransitMap();
     InitStateMap();
+    InitSwitchAction();
 
     if (powerStateCBDeathRecipient_ == nullptr) {
         powerStateCBDeathRecipient_ = new PowerStateCallbackDeathRecipient();
@@ -276,7 +277,8 @@ void PowerStateMachine::StartSleepTimer(PowerState from)
 void PowerStateMachine::InitState()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "Init power state");
-    if (IsScreenOn()) {
+    if (IsScreenOn() ||
+        switchAction_->HandleSwitchAction(SwitchActionType::IS_SCREEN_ON) == SwitchActionRet::IS_SCREEN_ON) {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_ON);
@@ -290,6 +292,18 @@ void PowerStateMachine::InitState()
 #endif
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
         Rosen::ScreenManagerLite::GetInstance().SyncScreenPowerState(Rosen::ScreenPowerState::POWER_OFF);
+    }
+}
+
+void PowerStateMachine::InitSwitchAction()
+{
+    std::string foldType = system::GetParameter("const.window.foldscreen.type", "");
+    if (foldType == "5,2,0,0") {
+        SetSwitchAction(std::make_shared<DualScreenSwitchAction>());
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch action loaded from plugin");
+    } else {
+        SetSwitchAction(std::make_shared<ISwitchAction>());
+        POWER_HILOGI(FEATURE_WAKEUP, "Using default switch action");
     }
 }
 
