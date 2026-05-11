@@ -897,6 +897,11 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
     skipWakeup = PowerMgrService::isInLidMode_;
 #else
     skipWakeup = !stateMachine_->IsSwitchOpen();
+    if (skipWakeup && stateMachine_->GetSwitchActionPtr()) {
+        auto actionRet =
+            stateMachine_->GetSwitchActionPtr()->HandleSwitchAction(SwitchActionType::WAKEUP_IN_CLOSED_STATE);
+        skipWakeup = actionRet == SwitchActionRet::DEFAULT;
+    }
 #endif
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     skipWakeup = skipWakeup &&
