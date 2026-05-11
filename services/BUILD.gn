@@ -24,6 +24,7 @@ config("powermgr_public_config") {
 config("powermgr_private_config") {
   include_dirs = [
     "native/src",
+    "native/src/adapter",
     "native/src/proximity_sensor_controller",
     "native/src/runninglock",
     "native/src/setting",
@@ -66,6 +67,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mode_policy.cpp",
     "native/src/power_save_mode.cpp",
     "native/src/power_state_machine.cpp",
+    "native/src/adapter/iswitch_action.cpp",
     "native/src/proximity_sensor_controller/proximity_controller_base.cpp",
     "native/src/runninglock/running_lock_inner.cpp",
     "native/src/runninglock/running_lock_mgr.cpp",
