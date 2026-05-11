@@ -26,6 +26,9 @@
 #ifdef HAS_DFX_HIVIEW_PART
 #include "xpower_event_js.h"
 #endif
+#ifdef POWER_API_METRICS_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -37,6 +40,9 @@ constexpr uint32_t HOLD_MAX_ARGC = 1;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
+#ifdef POWER_API_METRICS_ENABLE
+constexpr int32_t HISTOGRAM_API_CALL_COUNT = 1;
+#endif
 }
 
 napi_value RunningLockNapi::Create(napi_env& env, napi_callback_info& info, napi_ref& napiRunningLockIns)
@@ -55,10 +61,16 @@ napi_value RunningLockNapi::Create(napi_env& env, napi_callback_info& info, napi
     asyncInfo->GetData().SetRunningLockInstance(napiRunningLockIns);
     // callback
     if (argc == CREATE_CALLBACK_MAX_ARGC) {
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.createAsync.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
         return CreateAsyncCallback(env, argv, asyncInfo);
     }
 
     // promise
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.create.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
     return CreatePromise(env, argv, asyncInfo);
 }
 
