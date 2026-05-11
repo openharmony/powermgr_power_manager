@@ -183,6 +183,7 @@ bool PowerMgrService::Init()
 #ifdef POWER_LID_FOLD_ENABLE
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
+    isExternalScreenWakeup_ = system::GetBoolParameter("const.power.external_screen_wakeup", false);
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }
@@ -2526,16 +2527,21 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
     bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOnAcqLock();
+    bool isExternalScreenWakeup = pms->IsExternalScreenWakeup();
     POWER_HILOGI(COMP_SVC,
         "External screen is connected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
-        "%{public}d, isScreenOn: %{public}d",
-        static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
+        "%{public}d, isScreenOn: %{public}d, isExternalScreenWakeup: %{public}d",
+        static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn, isExternalScreenWakeup);
 
     if (isSwitchOpen && isScreenOn) {
         wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
-        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Skip wakeup by external screen connected when screen off");
+        if (isExternalScreenWakeup) {
+            pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT, "ScreenConnected");
+        } else {
+            POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Skip wakeup by external screen connected when screen off");
+        }
     } else if (!isSwitchOpen && !isScreenOn) {
         suspendController->PowerOffAllScreens(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     } else {
