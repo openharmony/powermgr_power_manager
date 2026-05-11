@@ -48,7 +48,6 @@
             "power_manager_feature_watch_update_adapt",
             "power_manager_feature_proximity_controller_override",
             "power_manager_feature_surport_takeover_suspend",
-            "power_manager_feature_enable_lid_check",
             "power_manager_feature_lid_fold",
             "power_manager_feature_enable_performance_mode",
             "power_manager_feature_runninglock_background_user_idle_permissive_permission_mode",
@@ -56,7 +55,8 @@
             "power_manager_feature_report_screenoff_invalid",
             "power_manager_feature_screen_saver",
             "power_manager_feature_enable_monitor_running_lock_change",
-            "power_manager_feature_support_power_cli"
+            "power_manager_feature_support_power_cli",
+            "power_manager_feature_enable_long_time_dim"
         ],
         "adapted_system_type": [
             "standard"

@@ -183,6 +183,8 @@ bool PowerMgrService::Init()
 #ifdef POWER_LID_FOLD_ENABLE
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
+    activeTimeBeforeLongTimeDim_ =
+        static_cast<int64_t>(system::GetIntParameter("const.power.active_time_before_long_time_dim", -1));
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }

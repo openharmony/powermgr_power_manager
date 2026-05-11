@@ -43,7 +43,6 @@ declare_args() {
   power_manager_feature_watch_boot_completed = false
   power_manager_feature_surport_takeover_suspend = false
   power_manager_feature_proximity_controller_override = false
-  power_manager_feature_enable_lid_check = false
   power_manager_feature_lid_fold = false
   power_manager_feature_enable_performance_mode = false
   power_manager_feature_runninglock_background_user_idle_permissive_permission_mode = false
@@ -52,6 +51,7 @@ declare_args() {
   power_manager_feature_screen_saver = false
   power_manager_feature_enable_monitor_running_lock_change = false
   power_manager_feature_support_power_cli = false
+  power_manager_feature_enable_long_time_dim = false
 }
 
 defines = []
@@ -72,10 +72,6 @@ if (power_manager_feature_proximity_controller_override) {
   defines += [ "POWER_MANAGER_PROXIMITY_CONTROLLER_OVERRIDE" ]
 }
 
-if (power_manager_feature_enable_lid_check) {
-  defines += [ "POWER_MANAGER_ENABLE_LID_CHECK" ]
-}
-
 if (power_manager_feature_runninglock_background_user_idle_permissive_permission_mode) {
   defines += [ "POWER_MANAGER_RUNNINGLOCK_BACKGROUND_USER_IDLE_PERMISSION_PERMISSIVE_MODE" ]
 }
@@ -86,6 +82,10 @@ if (power_manager_feature_support_filtering_proximity_event) {
 
 if (power_manager_feature_enable_monitor_running_lock_change) {
   defines += [ "POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE" ]
+}
+
+if (power_manager_feature_enable_long_time_dim) {
+  defines += [ "POWER_MANAGER_ENABLE_LONG_TIME_DIM" ]
 }
 
 if (!defined(global_parts_info) ||
