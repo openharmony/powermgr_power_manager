@@ -183,6 +183,9 @@ bool PowerMgrService::Init()
 #ifdef POWER_LID_FOLD_ENABLE
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
+#endif
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }
@@ -1497,6 +1500,10 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reas
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+    if (!isHibernateEnable_) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate failed, system parameter const.power.enable_s4 is false");
+        return PowerErrors::ERR_FAILURE;
+    }
     std::lock_guard lock(hibernateMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();

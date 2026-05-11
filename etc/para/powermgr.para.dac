@@ -20,3 +20,4 @@ persist.dfx.eventtype = powermgr:powermgr:0776
 persist.dfx.shutdown_reason = powermgr:powermgr:0644
 const.power.during_call_state_enable = powermgr:powermgr:0444
 const.powerkey.down_duration = powermgr:powermgr:0444
+const.power.enable_s4 = powermgr:powermgr:0444
