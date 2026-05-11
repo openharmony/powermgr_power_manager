@@ -130,6 +130,8 @@ bool PowerStateMachine::Init()
     if (powerStateCBDeathRecipient_ == nullptr) {
         powerStateCBDeathRecipient_ = new PowerStateCallbackDeathRecipient();
     }
+    activeTimeBeforeLongTimeDim_ =
+        static_cast<int64_t>(system::GetIntParameter("const.power.active_time_before_long_time_dim", -1));
     POWER_HILOGD(FEATURE_POWER_STATE, "Init success");
     return true;
 }
@@ -1861,6 +1863,21 @@ int64_t PowerStateMachine::GetDisplayOffTime()
 int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
 {
     int64_t dimTime = displayOffTime / OFF_TIMEOUT_FACTOR;
+#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
+    }
+    constexpr int64_t DEFAULT_ACTIVE_TIME_MS = 600000; //10min
+    int64_t maxActiveTime = pms->GetActiveTimeBeforeLongTimeDim();
+    if (displayOffTime > 0 && maxActiveTime >= DEFAULT_ACTIVE_TIME_MS && displayOffTime > maxActiveTime) {
+        POWER_HILOGD(FEATURE_POWER_STATE,
+            "long time dim enable, dimTime: %{public}ld, displayOffTime: %{public}ld, maxActiveTime: %{public}ld",
+            dimTime, displayOffTime, maxActiveTime);
+        dimTime = displayOffTime - maxActiveTime;
+        return std::clamp(dimTime, static_cast<int64_t>(0), displayOffTime);
+    }
+#endif
     return std::clamp(dimTime, static_cast<int64_t>(0), MAX_DIM_TIME_MS);
 }
 
