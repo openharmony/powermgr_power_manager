@@ -893,11 +893,16 @@ void WakeupController::ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrServi
 bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason) const
 {
     bool skipWakeup = false;
-#ifdef POWER_MANAGER_ENABLE_LID_CHECK
-    skipWakeup = PowerMgrService::isInLidMode_;
-#else
-    skipWakeup = !stateMachine_->IsSwitchOpen();
-#endif
+    if (pms->IsLidCheckEnable()) {
+        skipWakeup = PowerMgrService::isInLidMode_;
+    } else {
+        skipWakeup = !stateMachine_->IsSwitchOpen();
+    }
+    if (skipWakeup && stateMachine_->GetSwitchActionPtr()) {
+        auto actionRet =
+        stateMachine_->GetSwitchActionPtr()->HandleSwitchAction(SwitchActionType::WAKEUP_IN_CLOSED_STATE);
+        skipWakeup = actionRet == SwitchActionRet::DEFAULT;
+    }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     skipWakeup = skipWakeup &&
         (stateMachine_->GetExternalScreenNumber() <= 0 || !stateMachine_->IsOnlySecondDisplayModeSupported());

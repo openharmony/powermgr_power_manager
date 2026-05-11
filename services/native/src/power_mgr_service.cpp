@@ -183,6 +183,7 @@ bool PowerMgrService::Init()
 #ifdef POWER_LID_FOLD_ENABLE
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
+    isLidCheckEnable_ = system::GetBoolParameter("const.power.enable_lid_check", false);
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
 }
