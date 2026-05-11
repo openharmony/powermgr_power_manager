@@ -329,6 +329,10 @@ public:
     {
         return isDuringCallStateEnable_;
     }
+    bool IsExternalScreenWakeup()
+    {
+        return isExternalScreenWakeup_;
+    }
 #ifdef HAS_SENSORS_SENSOR_PART
     static std::atomic_bool isInLidMode_;
 #endif
@@ -413,6 +417,7 @@ private:
 
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};
+    bool isExternalScreenWakeup_ {false};
     static std::atomic_bool foldScreenFlag_;
     ffrt::mutex wakeupMutex_;
     ffrt::mutex suspendMutex_;
