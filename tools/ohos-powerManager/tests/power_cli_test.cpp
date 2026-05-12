@@ -32,6 +32,12 @@ namespace PowerMgr {
 
 using namespace testing::ext;
 
+static constexpr int ARGC_WITH_COMMAND = 2;
+static constexpr int ARGC_WITH_ONE_ARG = 3;
+static constexpr int ARGC_WITH_KEY_VALUE = 4;
+static constexpr int ARGC_WITH_EXTRA = 5;
+static constexpr int DETAIL_OVERFLOW_SIZE = 200;
+
 static std::string g_lastCalled;
 
 static PowerErrors g_suspendResult = PowerErrors::ERR_OK;
@@ -54,19 +60,6 @@ static std::string CaptureStdout(std::function<void()> func)
     return result;
 }
 
-static std::string CaptureStderr(std::function<void()> func)
-{
-    std::stringstream captured;
-    auto* oldBuf = std::cerr.rdbuf();
-    std::cerr.rdbuf(captured.rdbuf());
-    func();
-    std::cerr.rdbuf(oldBuf);
-    std::string result = captured.str();
-    if (!result.empty() && result.back() == '\n') {
-        result.pop_back();
-    }
-    return result;
-}
 
 class PowerCliTest : public testing::Test {
 public:
@@ -124,7 +117,7 @@ namespace {
 
 /**
  * @tc.name: PowerCliEnumParserTest001
- * @tc.desc: Test ParsePowerMode with valid values (normal and performance)
+ * @tc.desc: Test ParsePowerMode with valid values (normal and powerSave)
  * @tc.type: FUNC
  */
 HWTEST_F(PowerCliTest, PowerCliEnumParserTest001, TestSize.Level0)
@@ -133,9 +126,9 @@ HWTEST_F(PowerCliTest, PowerCliEnumParserTest001, TestSize.Level0)
     EXPECT_TRUE(result.success);
     EXPECT_EQ(result.value, static_cast<int32_t>(PowerMode::NORMAL_MODE));
 
-    result = PowerCliEnumParser::ParsePowerMode("performance");
+    result = PowerCliEnumParser::ParsePowerMode("powerSave");
     EXPECT_TRUE(result.success);
-    EXPECT_EQ(result.value, static_cast<int32_t>(PowerMode::PERFORMANCE_MODE));
+    EXPECT_EQ(result.value, static_cast<int32_t>(PowerMode::POWER_SAVE_MODE));
 }
 
 /**
@@ -160,6 +153,7 @@ HWTEST_F(PowerCliTest, PowerCliEnumParserTest002, TestSize.Level0)
 
     result = PowerCliEnumParser::ParsePowerMode("custom");
     EXPECT_FALSE(result.success);
+    EXPECT_NE(result.error.find("custom"), std::string::npos);
 
     result = PowerCliEnumParser::ParsePowerMode("");
     EXPECT_FALSE(result.success);
@@ -174,7 +168,7 @@ HWTEST_F(PowerCliTest, PowerCliEnumParserTest003, TestSize.Level0)
 {
     auto powerModes = PowerCliEnumParser::GetValidPowerModes();
     EXPECT_NE(powerModes.find("normal"), std::string::npos);
-    EXPECT_NE(powerModes.find("performance"), std::string::npos);
+    EXPECT_NE(powerModes.find("powerSave"), std::string::npos);
 }
 
 // ============================================================================
@@ -183,7 +177,7 @@ HWTEST_F(PowerCliTest, PowerCliEnumParserTest003, TestSize.Level0)
 
 /**
  * @tc.name: PowerCliCommandTest001
- * @tc.desc: Test --help flag (output to stderr)
+ * @tc.desc: Test --help flag (output to stdout)
  * @tc.type: FUNC
  */
 HWTEST_F(PowerCliTest, PowerCliCommandTest001, TestSize.Level0)
@@ -192,20 +186,20 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest001, TestSize.Level0)
     char helpFlag[] = "--help";
     char* argv[] = {name, helpFlag};
 
-    std::string stderrOutput = CaptureStderr([&]() {
-        PowerCliCommand cmd(2, argv);
+    std::string stdoutOutput = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
-    EXPECT_NE(stderrOutput.find("suspend"), std::string::npos);
-    EXPECT_NE(stderrOutput.find("wakeup"), std::string::npos);
-    EXPECT_NE(stderrOutput.find("set-power-mode"), std::string::npos);
-    EXPECT_NE(stderrOutput.find("override-screen-off-time"), std::string::npos);
-    EXPECT_NE(stderrOutput.find("restore-screen-off-time"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("suspend"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("wakeup"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("set-power-mode"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("override-screen-off-time"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("restore-screen-off-time"), std::string::npos);
 }
 
 /**
  * @tc.name: PowerCliCommandTest002
- * @tc.desc: Test no arguments (shows help to stderr)
+ * @tc.desc: Test no arguments (shows help to stdout)
  * @tc.type: FUNC
  */
 HWTEST_F(PowerCliTest, PowerCliCommandTest002, TestSize.Level0)
@@ -213,11 +207,11 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest002, TestSize.Level0)
     char name[] = "power_cli_test";
     char* argv[] = {name};
 
-    std::string stderrOutput = CaptureStderr([&]() {
+    std::string stdoutOutput = CaptureStdout([&]() {
         PowerCliCommand cmd(1, argv);
         cmd.Execute();
     });
-    EXPECT_NE(stderrOutput.find("suspend"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("suspend"), std::string::npos);
 }
 
 /**
@@ -232,7 +226,7 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest003, TestSize.Level0)
     char* argv[] = {name, unknownCmd};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -251,7 +245,7 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest004, TestSize.Level0)
     char* argv[] = {name, helpCmd};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -260,7 +254,7 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest004, TestSize.Level0)
 
 /**
  * @tc.name: PowerCliCommandTest005
- * @tc.desc: Test subcommand --help outputs to stderr
+ * @tc.desc: Test subcommand --help outputs to stdout
  * @tc.type: FUNC
  */
 HWTEST_F(PowerCliTest, PowerCliCommandTest005, TestSize.Level0)
@@ -270,12 +264,196 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest005, TestSize.Level0)
     char helpFlag[] = "--help";
     char* argv[] = {name, command, helpFlag};
 
-    std::string stderrOutput = CaptureStderr([&]() {
-        PowerCliCommand cmd(3, argv);
+    std::string stdoutOutput = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
         cmd.Execute();
     });
-    EXPECT_NE(stderrOutput.find("suspend"), std::string::npos);
-    EXPECT_NE(stderrOutput.find("--immediately"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("suspend"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("--immediately"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest006
+ * @tc.desc: Test wakeup --help outputs to stdout
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest006, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "wakeup";
+    char helpFlag[] = "--help";
+    char* argv[] = {name, command, helpFlag};
+
+    std::string stdoutOutput = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(stdoutOutput.find("wakeup"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("--detail"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest007
+ * @tc.desc: Test set-power-mode --help outputs to stdout
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest007, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "set-power-mode";
+    char helpFlag[] = "--help";
+    char* argv[] = {name, command, helpFlag};
+
+    std::string stdoutOutput = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(stdoutOutput.find("set-power-mode"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("--mode"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest008
+ * @tc.desc: Test override-screen-off-time --help outputs to stdout
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest008, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "override-screen-off-time";
+    char helpFlag[] = "--help";
+    char* argv[] = {name, command, helpFlag};
+
+    std::string stdoutOutput = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(stdoutOutput.find("override-screen-off-time"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("--time"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest009
+ * @tc.desc: Test restore-screen-off-time --help outputs to stdout
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest009, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "restore-screen-off-time";
+    char helpFlag[] = "--help";
+    char* argv[] = {name, command, helpFlag};
+
+    std::string stdoutOutput = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(stdoutOutput.find("restore-screen-off-time"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest010
+ * @tc.desc: Test --help with extra argument returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest010, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char helpFlag[] = "--help";
+    char extra[] = "xxx";
+    char* argv[] = {name, helpFlag, extra};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unexpected argument after --help"), std::string::npos);
+    EXPECT_NE(output.find("xxx"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest011
+ * @tc.desc: Test subcommand --help with extra argument returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest011, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char helpFlag[] = "--help";
+    char extra[] = "xxx";
+    char* argv[] = {name, command, helpFlag, extra};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("--help must be the only argument"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest012
+ * @tc.desc: Test subcommand with --help mixed with other flags returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest012, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char immFlag[] = "--immediately";
+    char helpFlag[] = "--help";
+    char* argv[] = {name, command, immFlag, helpFlag};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("--help must be the only argument"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest013
+ * @tc.desc: Test unknown command with --help returns Unknown command error
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest013, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char unknownCmd[] = "xxx";
+    char helpFlag[] = "--help";
+    char* argv[] = {name, unknownCmd, helpFlag};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown command"), std::string::npos);
+    EXPECT_NE(output.find("xxx"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCommandTest014
+ * @tc.desc: Test unknown command with --help mixed with other args returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCommandTest014, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char unknownCmd[] = "xxx";
+    char helpFlag[] = "--help";
+    char extra[] = "yyy";
+    char* argv[] = {name, unknownCmd, helpFlag, extra};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("--help must be the only argument"), std::string::npos);
 }
 
 // ============================================================================
@@ -294,7 +472,7 @@ HWTEST_F(PowerCliTest, PowerCliSuspendTest001, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "SuspendDevice");
@@ -316,7 +494,7 @@ HWTEST_F(PowerCliTest, PowerCliSuspendTest002, TestSize.Level0)
     char* argv[] = {name, command, immFlag};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(3, argv);
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "SuspendDevice");
@@ -338,7 +516,7 @@ HWTEST_F(PowerCliTest, PowerCliSuspendTest003, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "SuspendDevice");
@@ -360,12 +538,185 @@ HWTEST_F(PowerCliTest, PowerCliSuspendTest004, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
     EXPECT_NE(output.find("Connection"), std::string::npos);
     EXPECT_NE(output.find("ERR_CONNECTION_FAIL"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest005
+ * @tc.desc: Test suspend with unknown parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest005, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char unknownParam[] = "--unknown";
+    char* argv[] = {name, command, unknownParam};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+    EXPECT_NE(output.find("--unknown"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest006
+ * @tc.desc: Test suspend with positional argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest006, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char positional[] = "extra";
+    char* argv[] = {name, command, positional};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest007
+ * @tc.desc: Test suspend with ERR_SYSTEM_API_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest007, TestSize.Level0)
+{
+    g_suspendResult = PowerErrors::ERR_SYSTEM_API_DENIED;
+
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("ERR_SYSTEM_API_DENIED"), std::string::npos);
+    EXPECT_NE(output.find("System API denied"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest008
+ * @tc.desc: Test suspend with ERR_FAILURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest008, TestSize.Level0)
+{
+    g_suspendResult = PowerErrors::ERR_FAILURE;
+
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("ERR_FAILURE"), std::string::npos);
+    EXPECT_NE(output.find("General failure"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest009
+ * @tc.desc: Test suspend with ERR_FREQUENT_FUNCTION_CALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest009, TestSize.Level0)
+{
+    g_suspendResult = PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
+
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("ERR_FREQUENT_FUNCTION_CALL"), std::string::npos);
+    EXPECT_NE(output.find("Too frequent"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest010
+ * @tc.desc: Test suspend with ERR_WRITE_OPERATION_FAILED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest010, TestSize.Level0)
+{
+    g_suspendResult = PowerErrors::ERR_WRITE_OPERATION_FAILED;
+
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("ERR_WRITE_OPERATION_FAILED"), std::string::npos);
+    EXPECT_NE(output.find("Write operation failed"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest011
+ * @tc.desc: Test suspend with ERR_USER_PARAM_INVALID
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest011, TestSize.Level0)
+{
+    g_suspendResult = PowerErrors::ERR_USER_PARAM_INVALID;
+
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("ERR_USER_PARAM_INVALID"), std::string::npos);
+    EXPECT_NE(output.find("User parameter value invalid"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendTest012
+ * @tc.desc: Test suspend with duplicate --immediately flag rejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendTest012, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char flag1[] = "--immediately";
+    char flag2[] = "--immediately";
+    char* argv[] = {name, command, flag1, flag2};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Duplicate parameter"), std::string::npos);
+    EXPECT_NE(output.find("--immediately"), std::string::npos);
 }
 
 // ============================================================================
@@ -384,7 +735,7 @@ HWTEST_F(PowerCliTest, PowerCliWakeupTest001, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "WakeupDevice");
@@ -408,7 +759,7 @@ HWTEST_F(PowerCliTest, PowerCliWakeupTest002, TestSize.Level0)
     char* argv[] = {name, command, detailFlag, detailVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "WakeupDevice");
@@ -426,13 +777,13 @@ HWTEST_F(PowerCliTest, PowerCliWakeupTest003, TestSize.Level0)
     char name[] = "power_cli_test";
     char command[] = "wakeup";
     char detailFlag[] = "--detail";
-    char detailVal[200];
-    memset(detailVal, 'x', 199);
-    detailVal[199] = '\0';
+    char detailVal[DETAIL_OVERFLOW_SIZE];
+    (void)memset_s(detailVal, sizeof(detailVal), 'x', DETAIL_OVERFLOW_SIZE - 1);
+    detailVal[DETAIL_OVERFLOW_SIZE - 1] = '\0';
     char* argv[] = {name, command, detailFlag, detailVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -452,7 +803,7 @@ HWTEST_F(PowerCliTest, PowerCliWakeupTest004, TestSize.Level0)
     char* argv[] = {name, command, detailFlag};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(3, argv);
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "WakeupDevice");
@@ -473,12 +824,77 @@ HWTEST_F(PowerCliTest, PowerCliWakeupTest005, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "WakeupDevice");
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
     EXPECT_NE(output.find("Permission denied"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliWakeupTest006
+ * @tc.desc: Test wakeup with unknown parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliWakeupTest006, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "wakeup";
+    char unknownParam[] = "--unknown";
+    char* argv[] = {name, command, unknownParam};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+    EXPECT_NE(output.find("--unknown"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliWakeupTest007
+ * @tc.desc: Test wakeup with positional argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliWakeupTest007, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "wakeup";
+    char positional[] = "extra";
+    char* argv[] = {name, command, positional};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliWakeupTest008
+ * @tc.desc: Test wakeup with duplicate --detail flag rejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliWakeupTest008, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "wakeup";
+    char flag1[] = "--detail";
+    char val1[] = "first";
+    char flag2[] = "--detail";
+    char val2[] = "second";
+    char* argv[] = {name, command, flag1, val1, flag2, val2};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(6, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Duplicate parameter"), std::string::npos);
+    EXPECT_NE(output.find("--detail"), std::string::npos);
 }
 
 // ============================================================================
@@ -499,7 +915,7 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest001, TestSize.Level0)
     char* argv[] = {name, command, modeFlag, modeVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "SetDeviceMode");
@@ -509,7 +925,7 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest001, TestSize.Level0)
 
 /**
  * @tc.name: PowerCliSetModeTest002
- * @tc.desc: Test set-power-mode --mode performance
+ * @tc.desc: Test set-power-mode --mode powerSave
  * @tc.type: FUNC
  */
 HWTEST_F(PowerCliTest, PowerCliSetModeTest002, TestSize.Level0)
@@ -517,16 +933,16 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest002, TestSize.Level0)
     char name[] = "power_cli_test";
     char command[] = "set-power-mode";
     char modeFlag[] = "--mode";
-    char modeVal[] = "performance";
+    char modeVal[] = "powerSave";
     char* argv[] = {name, command, modeFlag, modeVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "SetDeviceMode");
     EXPECT_NE(output.find("\"status\":\"success\""), std::string::npos);
-    EXPECT_NE(output.find("\"mode\":\"performance\""), std::string::npos);
+    EXPECT_NE(output.find("\"mode\":\"powerSave\""), std::string::npos);
 }
 
 /**
@@ -543,7 +959,7 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest003, TestSize.Level0)
     char* argv[] = {name, command, modeFlag, modeVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -564,7 +980,7 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest004, TestSize.Level0)
     char* argv[] = {name, command, modeFlag, modeVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -582,7 +998,7 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest005, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -603,7 +1019,7 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest006, TestSize.Level0)
     char* argv[] = {name, command, modeFlag, modeVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -622,17 +1038,104 @@ HWTEST_F(PowerCliTest, PowerCliSetModeTest007, TestSize.Level0)
     char name[] = "power_cli_test";
     char command[] = "set-power-mode";
     char modeFlag[] = "--mode";
-    char modeVal[] = "performance";
+    char modeVal[] = "powerSave";
     char* argv[] = {name, command, modeFlag, modeVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "SetDeviceMode");
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
     EXPECT_NE(output.find("mode transition failed"), std::string::npos);
     EXPECT_NE(output.find("ERR_POWER_MODE_TRANSIT_FAILED"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSetModeTest008
+ * @tc.desc: Test set-power-mode with unknown parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSetModeTest008, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "set-power-mode";
+    char modeFlag[] = "--mode";
+    char modeVal[] = "normal";
+    char unknownParam[] = "--unknown";
+    char* argv[] = {name, command, modeFlag, modeVal, unknownParam};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_EXTRA, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+    EXPECT_NE(output.find("--unknown"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSetModeTest009
+ * @tc.desc: Test set-power-mode with positional argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSetModeTest009, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "set-power-mode";
+    char positional[] = "extra";
+    char* argv[] = {name, command, positional};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSetModeTest010
+ * @tc.desc: Test set-power-mode --mode as last arg (no value following)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSetModeTest010, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "set-power-mode";
+    char modeFlag[] = "--mode";
+    char* argv[] = {name, command, modeFlag};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Missing required parameter: --mode"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSetModeTest011
+ * @tc.desc: Test set-power-mode with duplicate --mode flag rejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSetModeTest011, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "set-power-mode";
+    char flag1[] = "--mode";
+    char val1[] = "normal";
+    char flag2[] = "--mode";
+    char val2[] = "powerSave";
+    char* argv[] = {name, command, flag1, val1, flag2, val2};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(6, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Duplicate parameter"), std::string::npos);
+    EXPECT_NE(output.find("--mode"), std::string::npos);
 }
 
 // ============================================================================
@@ -653,7 +1156,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest001, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "OverrideScreenOffTime");
@@ -675,7 +1178,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest002, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "OverrideScreenOffTime");
@@ -697,7 +1200,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest003, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "OverrideScreenOffTime");
@@ -716,7 +1219,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest004, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -737,7 +1240,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest005, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -758,7 +1261,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest006, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -779,7 +1282,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest007, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -800,7 +1303,7 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest008, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
@@ -822,11 +1325,54 @@ HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest009, TestSize.Level0)
     char* argv[] = {name, command, timeFlag, timeoutVal};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(4, argv);
+        PowerCliCommand cmd(ARGC_WITH_KEY_VALUE, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "OverrideScreenOffTime");
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliOverrideTimeoutTest010
+ * @tc.desc: Test override-screen-off-time with unknown parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest010, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "override-screen-off-time";
+    char timeFlag[] = "--time";
+    char timeoutVal[] = "30000";
+    char unknownParam[] = "--unknown";
+    char* argv[] = {name, command, timeFlag, timeoutVal, unknownParam};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_EXTRA, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+    EXPECT_NE(output.find("--unknown"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliOverrideTimeoutTest011
+ * @tc.desc: Test override-screen-off-time with positional argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest011, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "override-screen-off-time";
+    char positional[] = "extra";
+    char* argv[] = {name, command, positional};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
 }
 
 // ============================================================================
@@ -845,7 +1391,7 @@ HWTEST_F(PowerCliTest, PowerCliRestoreTimeoutTest001, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "RestoreScreenOffTime");
@@ -867,12 +1413,153 @@ HWTEST_F(PowerCliTest, PowerCliRestoreTimeoutTest002, TestSize.Level0)
     char* argv[] = {name, command};
 
     std::string output = CaptureStdout([&]() {
-        PowerCliCommand cmd(2, argv);
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
         cmd.Execute();
     });
     EXPECT_EQ(g_lastCalled, "RestoreScreenOffTime");
     EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
     EXPECT_NE(output.find("Connection"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliRestoreTimeoutTest003
+ * @tc.desc: Test restore-screen-off-time with unknown parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliRestoreTimeoutTest003, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "restore-screen-off-time";
+    char unknownParam[] = "--unknown";
+    char* argv[] = {name, command, unknownParam};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+    EXPECT_NE(output.find("--unknown"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliRestoreTimeoutTest004
+ * @tc.desc: Test restore-screen-off-time with positional argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliRestoreTimeoutTest004, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "restore-screen-off-time";
+    char positional[] = "extra";
+    char* argv[] = {name, command, positional};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Unknown parameter"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliOverrideTimeoutTest012
+ * @tc.desc: Test override-screen-off-time --time as last arg (no value following)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest012, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "override-screen-off-time";
+    char timeFlag[] = "--time";
+    char* argv[] = {name, command, timeFlag};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_ONE_ARG, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Missing required parameter: --time"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliRestoreTimeoutTest005
+ * @tc.desc: Test restore-screen-off-time with ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliRestoreTimeoutTest005, TestSize.Level0)
+{
+    g_restoreResult = PowerErrors::ERR_PERMISSION_DENIED;
+
+    char name[] = "power_cli_test";
+    char command[] = "restore-screen-off-time";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Permission denied"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliOverrideTimeoutTest013
+ * @tc.desc: Test override-screen-off-time with duplicate --time flag rejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliOverrideTimeoutTest013, TestSize.Level0)
+{
+    char name[] = "power_cli_test";
+    char command[] = "override-screen-off-time";
+    char flag1[] = "--time";
+    char val1[] = "30000";
+    char flag2[] = "--time";
+    char val2[] = "60000";
+    char* argv[] = {name, command, flag1, val1, flag2, val2};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(6, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("Duplicate parameter"), std::string::npos);
+    EXPECT_NE(output.find("--time"), std::string::npos);
+}
+
+// ============================================================================
+// OutputFallbackError Tests
+// ============================================================================
+
+/**
+ * @tc.name: PowerCliFallbackTest001
+ * @tc.desc: Test OutputFallbackError outputs correct JSON format
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliFallbackTest001, TestSize.Level0)
+{
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand::OutputFallbackError("test error message");
+    });
+    EXPECT_NE(output.find("\"type\":\"result\""), std::string::npos);
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("\"errCode\":\"ERR_FAILURE\""), std::string::npos);
+    EXPECT_NE(output.find("test error message"), std::string::npos);
+    EXPECT_NE(output.find("Internal error"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliFallbackTest002
+ * @tc.desc: Test OutputFallbackError with empty message
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliFallbackTest002, TestSize.Level0)
+{
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand::OutputFallbackError("");
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("\"errCode\":\"ERR_FAILURE\""), std::string::npos);
 }
 
 } // namespace

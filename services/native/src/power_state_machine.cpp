@@ -126,6 +126,7 @@ bool PowerStateMachine::Init()
     stateAction_ = PowerMgrFactory::GetDeviceStateAction();
     InitTransitMap();
     InitStateMap();
+    InitSwitchAction();
 
     if (powerStateCBDeathRecipient_ == nullptr) {
         powerStateCBDeathRecipient_ = new PowerStateCallbackDeathRecipient();
@@ -278,7 +279,8 @@ void PowerStateMachine::StartSleepTimer(PowerState from)
 void PowerStateMachine::InitState()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "Init power state");
-    if (IsScreenOn()) {
+    if (IsScreenOn() ||
+        switchAction_->HandleSwitchAction(SwitchActionType::IS_SCREEN_ON) == SwitchActionRet::IS_SCREEN_ON) {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_ON);
@@ -292,6 +294,18 @@ void PowerStateMachine::InitState()
 #endif
         SetState(PowerState::INACTIVE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
         Rosen::ScreenManagerLite::GetInstance().SyncScreenPowerState(Rosen::ScreenPowerState::POWER_OFF);
+    }
+}
+
+void PowerStateMachine::InitSwitchAction()
+{
+    std::string foldType = system::GetParameter("const.window.foldscreen.type", "");
+    if (foldType == "5,2,0,0") {
+        SetSwitchAction(std::make_shared<DualScreenSwitchAction>());
+        POWER_HILOGI(FEATURE_WAKEUP, "Switch action loaded from plugin");
+    } else {
+        SetSwitchAction(std::make_shared<ISwitchAction>());
+        POWER_HILOGI(FEATURE_WAKEUP, "Using default switch action");
     }
 }
 
@@ -650,13 +664,18 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
 bool PowerStateMachine::IsWakeupDeviceSkip()
 {
     bool ret = false;
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     ret = ret || !IsSwitchOpen();
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     ret = ret || IsHibernating();
 #endif
-#ifdef POWER_MANAGER_ENABLE_LID_CHECK
-    ret = ret || PowerMgrService::isInLidMode_;
-#endif
+    if (pms && pms->IsLidCheckEnable()) {
+        ret = ret || PowerMgrService::isInLidMode_;
+    }
+    if (ret && switchAction_ != nullptr) {
+        auto actionRet = switchAction_->HandleSwitchAction(SwitchActionType::WAKEUP_IN_CLOSED_STATE);
+        ret = actionRet == SwitchActionRet::DEFAULT;
+    }
     return ret;
 }
 
@@ -2867,14 +2886,13 @@ void PowerStateMachine::GetSceneStatusInfo(int8_t& switchOpen, int8_t& chargeCon
     switchOpen = INVALID_VALUE;     // 0: switch or lid close, 1: switch or lid open, 127: default
     chargeConnect = INVALID_VALUE;  // 0: DC, 1: AC, 127: default
     externalScreen = INVALID_VALUE; // 0: no external screen, 1: one external screen, 127: default
-
-#ifdef POWER_MANAGER_ENABLE_LID_CHECK
-    switchOpen = static_cast<int8_t>(!PowerMgrService::isInLidMode_);
-#else
-    switchOpen = static_cast<int8_t>(IsSwitchOpen());
-#endif
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms && pms->IsLidCheckEnable()) {
+        switchOpen = static_cast<int8_t>(!PowerMgrService::isInLidMode_);
+    } else {
+        switchOpen = static_cast<int8_t>(IsSwitchOpen());
+    }
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     if (pms != nullptr) {
         chargeConnect = static_cast<int8_t>(pms->GetPowerConnectStatus());
     }
