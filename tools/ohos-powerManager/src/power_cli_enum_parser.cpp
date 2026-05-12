@@ -20,7 +20,7 @@ namespace PowerMgr {
 
 static const std::unordered_map<std::string, PowerMode> POWER_MODE_MAP = {
     {"normal",       PowerMode::NORMAL_MODE},
-    {"performance",  PowerMode::PERFORMANCE_MODE},
+    {"powerSave",    PowerMode::POWER_SAVE_MODE},
 };
 
 EnumParseResult PowerCliEnumParser::ParsePowerMode(const std::string& str)
@@ -34,7 +34,7 @@ EnumParseResult PowerCliEnumParser::ParsePowerMode(const std::string& str)
 
 std::string PowerCliEnumParser::GetValidPowerModes()
 {
-    return "normal, performance";
+    return "normal, powerSave";
 }
 
 } // namespace PowerMgr

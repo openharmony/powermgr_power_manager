@@ -39,6 +39,7 @@ private:
 
     static const std::unordered_map<std::string,
         std::function<int(const std::vector<std::string>&)>> COMMAND_TABLE;
+    static const std::unordered_map<std::string, std::function<void()>> COMMAND_HELP_TABLE;
 
     static int RunAsSuspendCommand(const std::vector<std::string>& args);
     static int RunAsWakeupCommand(const std::vector<std::string>& args);
@@ -56,6 +57,7 @@ private:
     static void OutputSuccess(cJSON* data);
     static void OutputError(int32_t code, const std::string& errCode, const std::string& message,
         const std::string& suggestion);
+    static void OutputFallbackError(const std::string& message);
     static std::string PowerErrorsToErrCode(PowerErrors err);
     static std::string PowerErrorsToString(PowerErrors err);
     static std::string GetSuggestion(PowerErrors err);
