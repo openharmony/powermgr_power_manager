@@ -57,7 +57,7 @@ SwitchActionRet DualScreenSwitchAction::DoReportSwitchState()
     RETURN_IF_WITH_RET(stateMachine == nullptr, SwitchActionRet::DEFAULT);
     bool isSwitchOpen = stateMachine->IsSwitchOpenByPath();
     Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(
-        static_cast<Rosen::ScreenClosedState>(isSwitchOpen), isScreenOn);
+        isSwitchOpen ? Rosen::ScreenClosedState::OPEN : Rosen::ScreenClosedState::CLOSE, isScreenOn);
     return SwitchActionRet::HANDLED;
 }
 
