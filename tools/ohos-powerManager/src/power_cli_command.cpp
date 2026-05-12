@@ -39,6 +39,7 @@ namespace PowerMgr {
 static constexpr const char* API_VERSION = "23";
 static constexpr const char* WAKEUP_DETAIL_DEFAULT = "cli-call";
 static constexpr int MAX_DETAIL_LENGTH = 128;
+static constexpr int MIN_COMMAND_ARGC = 2;
 
 PowerCliCommand::PowerCliCommand(int argc, char* argv[]) : argc_(argc), argv_(argv)
 {
@@ -47,10 +48,10 @@ PowerCliCommand::PowerCliCommand(int argc, char* argv[]) : argc_(argc), argv_(ar
 
 void PowerCliCommand::ParseArgs()
 {
-    if (argc_ >= 2) {
+    if (argc_ >= MIN_COMMAND_ARGC) {
         command_ = argv_[1];
     }
-    for (int i = 2; i < argc_; ++i) {
+    for (int i = MIN_COMMAND_ARGC; i < argc_; ++i) {
         args_.emplace_back(argv_[i]);
     }
 }
@@ -67,26 +68,46 @@ bool PowerCliCommand::HasHelpFlag(const std::vector<std::string>& args)
 
 int PowerCliCommand::Execute()
 {
-    if (command_.empty() || command_ == "--help") {
+    if (command_.empty()) {
+        OutputError(0,
+            "ERR_NO_COMMAND",
+            "No command specified",
+            "Run 'ohos-powerManager --help' for available commands");
+        return 0;
+    }
+
+    if (command_ == "--help") {
+        if (!args_.empty()) {
+            OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                "ERR_PARAM_INVALID",
+                "Unexpected argument after --help: " + args_[0],
+                "Run 'ohos-powerManager --help' for available commands");
+            return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+        }
         ShowGlobalHelp();
         return 0;
     }
 
-    if (HasHelpFlag(args_)) {
-        if (command_ == "suspend") {
-            ShowSuspendHelp();
-        } else if (command_ == "wakeup") {
-            ShowWakeupHelp();
-        } else if (command_ == "set-power-mode") {
-            ShowSetPowerModeHelp();
-        } else if (command_ == "override-screen-off-time") {
-            ShowOverrideScreenOffTimeHelp();
-        } else if (command_ == "restore-screen-off-time") {
-            ShowRestoreScreenOffTimeHelp();
+    if (args_.size() == 1 && args_[0] == "--help") {
+        auto it = COMMAND_TABLE.find(command_);
+        if (it != COMMAND_TABLE.end()) {
+            COMMAND_HELP_TABLE.at(command_)();
         } else {
-            ShowGlobalHelp();
+            OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                "ERR_PARAM_INVALID",
+                "Unknown command: " + command_,
+                "Run 'ohos-powerManager --help' for available commands");
+            return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         }
         return 0;
+    }
+
+    if (HasHelpFlag(args_)) {
+        OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+            "ERR_PARAM_INVALID",
+            "--help must be the only argument",
+            "Run 'ohos-powerManager " + command_ + " --help' for usage");
+        return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
     }
 
     auto it = COMMAND_TABLE.find(command_);
@@ -110,16 +131,37 @@ const std::unordered_map<std::string,
     {"restore-screen-off-time",  RunAsRestoreScreenOffTimeCommand},
 };
 
+const std::unordered_map<std::string, std::function<void()>> PowerCliCommand::COMMAND_HELP_TABLE = {
+    {"suspend",                  ShowSuspendHelp},
+    {"wakeup",                   ShowWakeupHelp},
+    {"set-power-mode",           ShowSetPowerModeHelp},
+    {"override-screen-off-time", ShowOverrideScreenOffTimeHelp},
+    {"restore-screen-off-time",  ShowRestoreScreenOffTimeHelp},
+};
+
+void PowerCliCommand::OutputFallbackError(const std::string& message)
+{
+    std::cout << "{\"type\":\"result\",\"status\":\"failed\",\"errCode\":\"ERR_FAILURE\","
+              << "\"errMsg\":\"" << message << "\","
+              << "\"suggestion\":\"Internal error, try again later\"}" << std::endl;
+}
+
 void PowerCliCommand::OutputSuccess(cJSON* data)
 {
     cJSON* output = cJSON_CreateObject();
     if (output == nullptr) {
         cJSON_Delete(data);
+        OutputFallbackError("Failed to create JSON output object");
         return;
     }
-    cJSON_AddStringToObject(output, "type", "result");
-    cJSON_AddStringToObject(output, "status", "success");
-    cJSON_AddItemToObject(output, "data", data);
+    if (cJSON_AddStringToObject(output, "type", "result") == nullptr ||
+        cJSON_AddStringToObject(output, "status", "success") == nullptr ||
+        !cJSON_AddItemToObject(output, "data", data)) {
+        cJSON_Delete(data);
+        cJSON_Delete(output);
+        OutputFallbackError("Failed to build JSON output");
+        return;
+    }
     char* jsonStr = cJSON_PrintUnformatted(output);
     if (jsonStr != nullptr) {
         std::cout << jsonStr << std::endl;
@@ -133,13 +175,18 @@ void PowerCliCommand::OutputError(int32_t code, const std::string& errCode, cons
 {
     cJSON* output = cJSON_CreateObject();
     if (output == nullptr) {
+        OutputFallbackError("Failed to create JSON output object");
         return;
     }
-    cJSON_AddStringToObject(output, "type", "result");
-    cJSON_AddStringToObject(output, "status", "failed");
-    cJSON_AddStringToObject(output, "errCode", errCode.c_str());
-    cJSON_AddStringToObject(output, "errMsg", message.c_str());
-    cJSON_AddStringToObject(output, "suggestion", suggestion.c_str());
+    if (cJSON_AddStringToObject(output, "type", "result") == nullptr ||
+        cJSON_AddStringToObject(output, "status", "failed") == nullptr ||
+        cJSON_AddStringToObject(output, "errCode", errCode.c_str()) == nullptr ||
+        cJSON_AddStringToObject(output, "errMsg", message.c_str()) == nullptr ||
+        cJSON_AddStringToObject(output, "suggestion", suggestion.c_str()) == nullptr) {
+        cJSON_Delete(output);
+        OutputFallbackError("Failed to build JSON output");
+        return;
+    }
     char* jsonStr = cJSON_PrintUnformatted(output);
     if (jsonStr != nullptr) {
         std::cout << jsonStr << std::endl;
@@ -235,7 +282,7 @@ std::string PowerCliCommand::GetSuggestion(PowerErrors err)
     }
 }
 
-// ---- Help functions (output to stderr) ----
+// ---- Help functions (output to stdout) ----
 
 void PowerCliCommand::ShowGlobalHelp()
 {
@@ -257,7 +304,7 @@ void PowerCliCommand::ShowGlobalHelp()
         "\n"
         "Use 'ohos-powerManager <command> --help' for more information on a command.\n";
 
-    std::cerr << helpText;
+    std::cout << helpText;
 }
 
 void PowerCliCommand::ShowSuspendHelp()
@@ -278,7 +325,7 @@ void PowerCliCommand::ShowSuspendHelp()
         "\n"
         "Permission: ohos.permission.POWER_MANAGER\n";
 
-    std::cerr << helpText;
+    std::cout << helpText;
 }
 
 void PowerCliCommand::ShowWakeupHelp()
@@ -299,7 +346,7 @@ void PowerCliCommand::ShowWakeupHelp()
         "\n"
         "Permission: ohos.permission.POWER_MANAGER\n";
 
-    std::cerr << helpText;
+    std::cout << helpText;
 }
 
 void PowerCliCommand::ShowSetPowerModeHelp()
@@ -311,16 +358,16 @@ void PowerCliCommand::ShowSetPowerModeHelp()
         "  ohos-powerManager set-power-mode --mode <mode>\n"
         "\n"
         "Parameters:\n"
-        "  --mode <mode>                Power mode to set (required, values: [normal, performance])\n"
+        "  --mode <mode>                Power mode to set (required, values: [normal, powerSave])\n"
         "  --help                       Display this help message\n"
         "\n"
         "Examples:\n"
         "  ohos-powerManager set-power-mode --mode normal\n"
-        "  ohos-powerManager set-power-mode --mode performance\n"
+        "  ohos-powerManager set-power-mode --mode powerSave\n"
         "\n"
         "Permission: ohos.permission.POWER_OPTIMIZATION\n";
 
-    std::cerr << helpText;
+    std::cout << helpText;
 }
 
 void PowerCliCommand::ShowOverrideScreenOffTimeHelp()
@@ -341,7 +388,7 @@ void PowerCliCommand::ShowOverrideScreenOffTimeHelp()
         "\n"
         "Permission: ohos.permission.POWER_MANAGER\n";
 
-    std::cerr << helpText;
+    std::cout << helpText;
 }
 
 void PowerCliCommand::ShowRestoreScreenOffTimeHelp()
@@ -360,7 +407,7 @@ void PowerCliCommand::ShowRestoreScreenOffTimeHelp()
         "\n"
         "Permission: ohos.permission.POWER_MANAGER\n";
 
-    std::cerr << helpText;
+    std::cout << helpText;
 }
 
 // ---- Command handlers ----
@@ -368,10 +415,25 @@ void PowerCliCommand::ShowRestoreScreenOffTimeHelp()
 int PowerCliCommand::RunAsSuspendCommand(const std::vector<std::string>& args)
 {
     bool immediately = false;
+    bool hasImmediately = false;
 
     for (size_t i = 0; i < args.size(); ++i) {
         if (args[i] == "--immediately") {
+            if (hasImmediately) {
+                OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                    "ERR_PARAM_INVALID",
+                    "Duplicate parameter: --immediately",
+                    "Each parameter may only be specified once. Run 'ohos-powerManager suspend --help' for usage");
+                return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+            }
             immediately = true;
+            hasImmediately = true;
+        } else {
+            OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                "ERR_PARAM_INVALID",
+                "Unknown parameter: " + args[i],
+                "Run 'ohos-powerManager suspend --help' for usage");
+            return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         }
     }
 
@@ -381,9 +443,17 @@ int PowerCliCommand::RunAsSuspendCommand(const std::vector<std::string>& args)
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
-        cJSON_AddStringToObject(data, "command", "suspend");
-        cJSON_AddStringToObject(data, "reason", "application");
-        cJSON_AddBoolToObject(data, "immediately", immediately);
+        if (data == nullptr) {
+            OutputFallbackError("Failed to create JSON data object");
+            return 0;
+        }
+        if (cJSON_AddStringToObject(data, "command", "suspend") == nullptr ||
+            cJSON_AddStringToObject(data, "reason", "application") == nullptr ||
+            cJSON_AddBoolToObject(data, "immediately", immediately) == nullptr) {
+            cJSON_Delete(data);
+            OutputFallbackError("Failed to build JSON data");
+            return 0;
+        }
         OutputSuccess(data);
         return 0;
     }
@@ -396,11 +466,28 @@ int PowerCliCommand::RunAsSuspendCommand(const std::vector<std::string>& args)
 int PowerCliCommand::RunAsWakeupCommand(const std::vector<std::string>& args)
 {
     std::string detail = WAKEUP_DETAIL_DEFAULT;
+    bool hasDetail = false;
 
     for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i] == "--detail" && i + 1 < args.size()) {
-            detail = args[i + 1];
-            break;
+        if (args[i] == "--detail") {
+            if (hasDetail) {
+                OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                    "ERR_PARAM_INVALID",
+                    "Duplicate parameter: --detail",
+                    "Each parameter may only be specified once. Run 'ohos-powerManager wakeup --help' for usage");
+                return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+            }
+            if (i + 1 < args.size()) {
+                detail = args[i + 1];
+                i++;
+            }
+            hasDetail = true;
+        } else {
+            OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                "ERR_PARAM_INVALID",
+                "Unknown parameter: " + args[i],
+                "Run 'ohos-powerManager wakeup --help' for usage");
+            return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         }
     }
 
@@ -418,9 +505,17 @@ int PowerCliCommand::RunAsWakeupCommand(const std::vector<std::string>& args)
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
-        cJSON_AddStringToObject(data, "command", "wakeup");
-        cJSON_AddStringToObject(data, "reason", "application");
-        cJSON_AddStringToObject(data, "detail", detail.c_str());
+        if (data == nullptr) {
+            OutputFallbackError("Failed to create JSON data object");
+            return 0;
+        }
+        if (cJSON_AddStringToObject(data, "command", "wakeup") == nullptr ||
+            cJSON_AddStringToObject(data, "reason", "application") == nullptr ||
+            cJSON_AddStringToObject(data, "detail", detail.c_str()) == nullptr) {
+            cJSON_Delete(data);
+            OutputFallbackError("Failed to build JSON data");
+            return 0;
+        }
         OutputSuccess(data);
         return 0;
     }
@@ -433,11 +528,29 @@ int PowerCliCommand::RunAsWakeupCommand(const std::vector<std::string>& args)
 int PowerCliCommand::RunAsSetPowerModeCommand(const std::vector<std::string>& args)
 {
     std::string modeStr;
+    bool hasMode = false;
 
     for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i] == "--mode" && i + 1 < args.size()) {
-            modeStr = args[i + 1];
-            break;
+        if (args[i] == "--mode") {
+            if (hasMode) {
+                OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                    "ERR_PARAM_INVALID",
+                    "Duplicate parameter: --mode",
+                    "Each parameter may only be specified once. "
+                    "Run 'ohos-powerManager set-power-mode --help' for usage");
+                return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+            }
+            if (i + 1 < args.size()) {
+                modeStr = args[i + 1];
+                i++;
+            }
+            hasMode = true;
+        } else {
+            OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                "ERR_PARAM_INVALID",
+                "Unknown parameter: " + args[i],
+                "Run 'ohos-powerManager set-power-mode --help' for usage");
+            return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         }
     }
 
@@ -465,8 +578,16 @@ int PowerCliCommand::RunAsSetPowerModeCommand(const std::vector<std::string>& ar
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
-        cJSON_AddStringToObject(data, "command", "set-power-mode");
-        cJSON_AddStringToObject(data, "mode", modeStr.c_str());
+        if (data == nullptr) {
+            OutputFallbackError("Failed to create JSON data object");
+            return 0;
+        }
+        if (cJSON_AddStringToObject(data, "command", "set-power-mode") == nullptr ||
+            cJSON_AddStringToObject(data, "mode", modeStr.c_str()) == nullptr) {
+            cJSON_Delete(data);
+            OutputFallbackError("Failed to build JSON data");
+            return 0;
+        }
         OutputSuccess(data);
         return 0;
     }
@@ -479,11 +600,29 @@ int PowerCliCommand::RunAsSetPowerModeCommand(const std::vector<std::string>& ar
 int PowerCliCommand::RunAsOverrideScreenOffTimeCommand(const std::vector<std::string>& args)
 {
     std::string timeoutStr;
+    bool hasTime = false;
 
     for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i] == "--time" && i + 1 < args.size()) {
-            timeoutStr = args[i + 1];
-            break;
+        if (args[i] == "--time") {
+            if (hasTime) {
+                OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                    "ERR_PARAM_INVALID",
+                    "Duplicate parameter: --time",
+                    "Each parameter may only be specified once. "
+                    "Run 'ohos-powerManager override-screen-off-time --help' for usage");
+                return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+            }
+            if (i + 1 < args.size()) {
+                timeoutStr = args[i + 1];
+                i++;
+            }
+            hasTime = true;
+        } else {
+            OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+                "ERR_PARAM_INVALID",
+                "Unknown parameter: " + args[i],
+                "Run 'ohos-powerManager override-screen-off-time --help' for usage");
+            return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
         }
     }
 
@@ -510,8 +649,16 @@ int PowerCliCommand::RunAsOverrideScreenOffTimeCommand(const std::vector<std::st
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
-        cJSON_AddStringToObject(data, "command", "override-screen-off-time");
-        cJSON_AddNumberToObject(data, "timeout", static_cast<double>(timeout));
+        if (data == nullptr) {
+            OutputFallbackError("Failed to create JSON data object");
+            return 0;
+        }
+        if (cJSON_AddStringToObject(data, "command", "override-screen-off-time") == nullptr ||
+            cJSON_AddNumberToObject(data, "timeout", static_cast<double>(timeout)) == nullptr) {
+            cJSON_Delete(data);
+            OutputFallbackError("Failed to build JSON data");
+            return 0;
+        }
         OutputSuccess(data);
         return 0;
     }
@@ -523,12 +670,29 @@ int PowerCliCommand::RunAsOverrideScreenOffTimeCommand(const std::vector<std::st
 
 int PowerCliCommand::RunAsRestoreScreenOffTimeCommand(const std::vector<std::string>& args)
 {
+    if (!args.empty()) {
+        OutputError(static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID),
+            "ERR_PARAM_INVALID",
+            "Unknown parameter: " + args[0],
+            "restore-screen-off-time takes no parameters. "
+            "Run 'ohos-powerManager restore-screen-off-time --help' for usage");
+        return static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+    }
+
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     PowerErrors ret = client.RestoreScreenOffTime(API_VERSION);
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
-        cJSON_AddStringToObject(data, "command", "restore-screen-off-time");
+        if (data == nullptr) {
+            OutputFallbackError("Failed to create JSON data object");
+            return 0;
+        }
+        if (cJSON_AddStringToObject(data, "command", "restore-screen-off-time") == nullptr) {
+            cJSON_Delete(data);
+            OutputFallbackError("Failed to build JSON data");
+            return 0;
+        }
         OutputSuccess(data);
         return 0;
     }

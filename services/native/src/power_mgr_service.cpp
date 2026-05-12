@@ -183,6 +183,10 @@ bool PowerMgrService::Init()
 #ifdef POWER_LID_FOLD_ENABLE
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
+    isLidCheckEnable_ = system::GetBoolParameter("const.power.enable_lid_check", false);
+#ifdef POWER_MANAGER_POWER_ENABLE_S4
+    isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
+#endif
     isExternalScreenWakeup_ = system::GetBoolParameter("const.power.external_screen_wakeup", false);
     POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
     return true;
@@ -642,6 +646,12 @@ void PowerMgrService::SwitchSubscriberInit()
                     return;
                 }
                 powerStateMachine_->SetSwitchState(false);
+                auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+                if (switchAction != nullptr &&
+                    switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE) == SwitchActionRet::HANDLED) {
+                    POWER_HILOGI(FEATURE_INPUT, "[UL_POWER] HandleSwitchClose return!");
+                    return;
+                }
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
@@ -650,6 +660,10 @@ void PowerMgrService::SwitchSubscriberInit()
                 if (wakeupController == nullptr) {
                     POWER_HILOGE(FEATURE_INPUT, "get wakeupController instance error");
                     return;
+                }
+                auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+                if (switchAction != nullptr) {
+                    switchAction->HandleSwitchAction(SwitchActionType::SWITCH_OPEN);
                 }
                 powerStateMachine_->SetSwitchState(true);
                 WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_SWITCH;
@@ -872,6 +886,10 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     if (systemAbilityId ==  DISPLAY_MANAGER_SERVICE_SA_ID) {
         std::lock_guard lock(powerInitMutex_);
         POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID in PowerService");
+        auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+        if (switchAction) {
+            switchAction->HandleSwitchAction(SwitchActionType::REPORT_SWITCH_STATE);
+        }
         if (displayManagerServiceCrash_) {
             isNeedReInit_  = true;
             RegisterBootCompletedCallback();
@@ -1498,6 +1516,10 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reas
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
+    if (!isHibernateEnable_) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate failed, system parameter const.power.enable_s4 is false");
+        return PowerErrors::ERR_FAILURE;
+    }
     std::lock_guard lock(hibernateMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();

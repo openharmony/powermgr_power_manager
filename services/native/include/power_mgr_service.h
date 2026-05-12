@@ -329,6 +329,10 @@ public:
     {
         return isDuringCallStateEnable_;
     }
+    bool IsLidCheckEnable()
+    {
+        return isLidCheckEnable_;
+    }
     bool IsExternalScreenWakeup()
     {
         return isExternalScreenWakeup_;
@@ -417,6 +421,7 @@ private:
 
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};
+    bool isLidCheckEnable_ {false};
     bool isExternalScreenWakeup_ {false};
     static std::atomic_bool foldScreenFlag_;
     ffrt::mutex wakeupMutex_;
@@ -445,6 +450,7 @@ private:
     sptr<IRemoteObject> ptoken_ {nullptr};
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     std::shared_ptr<HibernateController> hibernateController_ {nullptr};
+    bool isHibernateEnable_ {true};
 #endif
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     sptr<UlsrCallbackHolder> ulsrCallbackHolder_ {nullptr};
