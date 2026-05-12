@@ -298,7 +298,7 @@ void PowerStateMachine::InitState()
 void PowerStateMachine::InitSwitchAction()
 {
     std::string foldType = system::GetParameter("const.window.foldscreen.type", "");
-    if (foldType == "5,2,0,0") {
+    if (foldType == "5,3,0,0") {
         SetSwitchAction(std::make_shared<DualScreenSwitchAction>());
         POWER_HILOGI(FEATURE_WAKEUP, "Switch action loaded from plugin");
     } else {
