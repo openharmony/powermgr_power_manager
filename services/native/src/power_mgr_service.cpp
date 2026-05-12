@@ -183,6 +183,7 @@ bool PowerMgrService::Init()
 #ifdef POWER_LID_FOLD_ENABLE
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
+    isLidCheckEnable_ = system::GetBoolParameter("const.power.enable_lid_check", false);
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
 #endif
