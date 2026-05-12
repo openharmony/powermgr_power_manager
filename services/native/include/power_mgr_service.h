@@ -338,10 +338,6 @@ public:
         return powerScreenSaver_;
     }
 #endif
-    int64_t GetActiveTimeBeforeLongTimeDim() const
-    {
-        return activeTimeBeforeLongTimeDim_;
-    }
 
 private:
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
@@ -472,7 +468,6 @@ private:
 #ifdef POWER_MANAGER_SCREEN_SAVER
     std::shared_ptr<PowerScreenSaver> powerScreenSaver_ {nullptr};
 #endif
-    int64_t activeTimeBeforeLongTimeDim_ {-1};
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
