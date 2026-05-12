@@ -20,4 +20,6 @@ persist.dfx.eventtype = 0
 persist.dfx.shutdown_reason = ""
 const.power.during_call_state_enable = false
 const.powerkey.down_duration = 3000
+const.power.enable_lid_check = false
+const.power.enable_s4 = true
 const.power.external_screen_wakeup = false
