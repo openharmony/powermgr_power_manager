@@ -59,7 +59,6 @@ public:
     static int64_t GetSettingPowerAcSleepTime(int64_t defaultVal);
     static int64_t GetSettingPowerDcSleepTime(int64_t defaultVal);
 #else
-    static bool IsSupportLongTimeDim();
     static int64_t GetSettingDisplayOffTime(int64_t defaultVal);
     static void SetSettingDisplayOffTime(int64_t time);
     static sptr<SettingObserver> RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc& func);
@@ -146,10 +145,6 @@ private:
     static constexpr const char* SETTING_POWER_AC_SUSPEND_SOURCES_KEY {"settings.power.ac.suspend_sources"};
     static constexpr const char* SETTING_POWER_DC_SUSPEND_SOURCES_KEY {"settings.power.dc.suspend_sources"};
 #else
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-    static constexpr const char* SETTING_DISPLAY_OFF_TIME_FOR_LONG_TIME_DIM_KEY {
-        "settings.display.screen_off_timeout_for_long_time_dim"};
-#endif
     static constexpr const char* SETTING_DISPLAY_OFF_TIME_KEY {"settings.display.screen_off_timeout"};
     static constexpr const char* SETTING_POWER_SUSPEND_SOURCES_KEY {"settings.power.suspend_sources"};
 #endif

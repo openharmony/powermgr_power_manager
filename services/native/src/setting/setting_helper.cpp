@@ -30,9 +30,6 @@ constexpr int32_t MIN_DISPLAY_OFF_TIME_MS = 1000;
 #ifdef POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF
 const std::string SCREEN_NEVER_SLEEP_SUPPORT = "const.settings.screen_never_sleep";
 #endif
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-const std::string DEFAULT_ACTIVE_TIME_MS = 600000; //10min
-#endif
 }
 sptr<SettingObserver> SettingHelper::doubleClickObserver_ = nullptr;
 sptr<SettingObserver> SettingHelper::pickUpObserver_ = nullptr;
@@ -302,39 +299,14 @@ sptr<SettingObserver> SettingHelper::RegisterSettingDisplayDcScreenOffTimeObserv
     return RegisterSettingKeyObserver(SETTING_DISPLAY_DC_OFF_TIME_KEY, func);
 }
 #else
-bool SettingHelper::IsSupportLongTimeDim()
-{
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms == nullptr) {
-        return false;
-    }
-    int64_t maxActiveTime = pms->GetActiveTimeBeforeLongTimeDim();
-    if (maxActiveTime >= DEFAULT_ACTIVE_TIME_MS) {
-        return true;
-    }
-#endif
-    return false;
-}
-
 bool SettingHelper::IsDisplayOffTimeSettingValid()
 {
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-    if (IsSupportLongTimeDim()) {
-        return IsSettingKeyValid(SETTING_DISPLAY_OFF_TIME_FOR_LONG_TIME_DIM_KEY);
-    }
-#endif
     return IsSettingKeyValid(SETTING_DISPLAY_OFF_TIME_KEY);
 }
 
 int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
 {
     int64_t value = GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, defaultVal);
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-    if (IsSupportLongTimeDim()) {
-        value = GetSettingLongValue(SETTING_DISPLAY_OFF_TIME_FOR_LONG_TIME_DIM_KEY, defaultVal);
-    }
-#endif
 #ifdef POWER_MANAGER_DISABLE_AUTO_DISPLAYOFF
     constexpr int64_t PARAMETER_ZERO = 0;
     static bool isSupportScreenNeverSleep = OHOS::system::GetBoolParameter(SCREEN_NEVER_SLEEP_SUPPORT, false);
@@ -352,24 +324,11 @@ int64_t SettingHelper::GetSettingDisplayOffTime(int64_t defaultVal)
 
 void SettingHelper::SetSettingDisplayOffTime(int64_t time)
 {
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-    if (IsSupportLongTimeDim()) {
-        SetSettingLongValue(SETTING_DISPLAY_OFF_TIME_FOR_LONG_TIME_DIM_KEY, time);
-        if (time > DEFAULT_ACTIVE_TIME_MS) {
-            time = DEFAULT_ACTIVE_TIME_MS;
-        }
-    }
-#endif
     SetSettingLongValue(SETTING_DISPLAY_OFF_TIME_KEY, time);
 }
 
 sptr<SettingObserver> SettingHelper::RegisterSettingDisplayOffTimeObserver(SettingObserver::UpdateFunc& func)
 {
-#ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
-    if (IsSupportLongTimeDim()) {
-        return RegisterSettingKeyObserver(SETTING_DISPLAY_OFF_TIME_FOR_LONG_TIME_DIM_KEY, func);
-    }
-#endif
     return RegisterSettingKeyObserver(SETTING_DISPLAY_OFF_TIME_KEY, func);
 }
 #endif
