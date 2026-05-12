@@ -480,11 +480,10 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
 
 void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
-#ifdef POWER_MANAGER_ENABLE_LID_CHECK
-    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_LID) {
-#else
-    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-#endif
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    RETURN_IF(pms == nullptr);
+    if ((pms->IsLidCheckEnable() && reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_LID) ||
+        (!pms->IsLidCheckEnable() && reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH)) {
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendWhenScreenOff: Do nothing for reason %{public}u", reason);
         return;
     }
@@ -502,29 +501,35 @@ void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t 
             StartSleepTimer(reason, action, delay);
             break;
         case PowerState::SLEEP:
-            if (action != static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
-                break;
-            }
-            if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
-                SystemSuspendController::GetInstance().Wakeup();
-                StartSleepTimer(reason, action, 0);
-            } else if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
-#ifdef POWER_MANAGER_ENABLE_LID_CHECK
-                if (PowerMgrService::isInLidMode_ == false) {
-#else
-                if (stateMachine_->IsSwitchOpen()) {
-#endif
-                    POWER_HILOGI(FEATURE_SUSPEND, "switch off event is ignored.");
-                    return;
-                }
-                SystemSuspendController::GetInstance().Wakeup();
-                SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
-            } else {
-                POWER_HILOGD(FEATURE_SUSPEND, "Nothing to do for no suspend");
-            }
+            SuspendWhenStateSleep(reason, action);
             break;
         default:
             break;
+    }
+}
+
+void SuspendController::SuspendWhenStateSleep(SuspendDeviceType reason, uint32_t action)
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        return;
+    }
+    if (action != static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+        return;
+    }
+    if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND)) {
+        SystemSuspendController::GetInstance().Wakeup();
+        StartSleepTimer(reason, action, 0);
+    } else if (sleepType_ == static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
+        if ((pms->IsLidCheckEnable() && PowerMgrService::isInLidMode_ == false) ||
+            (!pms->IsLidCheckEnable() && stateMachine_->IsSwitchOpen())) {
+            POWER_HILOGI(FEATURE_SUSPEND, "switch off event is ignored.");
+            return;
+        }
+        SystemSuspendController::GetInstance().Wakeup();
+        SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+    } else {
+        POWER_HILOGD(FEATURE_SUSPEND, "Nothing to do for no suspend");
     }
 }
 
