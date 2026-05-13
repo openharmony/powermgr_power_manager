@@ -36,7 +36,13 @@ const constexpr int64_t INVALID_FFIDATA_ID = 0;
 extern "C" {
 void FfiOHOSRunningLockHold(int64_t id, int32_t timeout, int32_t *ret)
 {
-    auto runningLock = FFI::FFIData::GetData<CJRunningLock>(id)->GetRunningLock();
+    auto cjRunningLock = FFI::FFIData::GetData<CJRunningLock>(id);
+    if (cjRunningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "cjRunningLock is nullptr, id=%{public}" PRId64, id);
+        *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+        return;
+    }
+    auto runningLock = cjRunningLock->GetRunningLock();
     if (runningLock == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr, id=%{public}" PRId64, id);
         *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
@@ -47,7 +53,13 @@ void FfiOHOSRunningLockHold(int64_t id, int32_t timeout, int32_t *ret)
 
 bool FfiOHOSRunningLockIsHolding(int64_t id, int32_t *ret)
 {
-    auto runningLock = FFI::FFIData::GetData<CJRunningLock>(id)->GetRunningLock();
+    auto cjRunningLock = FFI::FFIData::GetData<CJRunningLock>(id);
+    if (cjRunningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "cjRunningLock is nullptr, id=%{public}" PRId64, id);
+        *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+        return false;
+    }
+    auto runningLock = cjRunningLock->GetRunningLock();
     if (runningLock == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr, id=%{public}" PRId64, id);
         *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
@@ -58,7 +70,13 @@ bool FfiOHOSRunningLockIsHolding(int64_t id, int32_t *ret)
 
 void FfiOHOSRunningLockUnhold(int64_t id, int32_t *ret)
 {
-    auto runningLock = FFI::FFIData::GetData<CJRunningLock>(id)->GetRunningLock();
+    auto cjRunningLock = FFI::FFIData::GetData<CJRunningLock>(id);
+    if (cjRunningLock == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "cjRunningLock is nullptr, id=%{public}" PRId64, id);
+        *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
+        return;
+    }
+    auto runningLock = cjRunningLock->GetRunningLock();
     if (runningLock == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "runningLock is nullptr, id=%{public}" PRId64, id);
         *ret = static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID);
