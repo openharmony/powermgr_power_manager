@@ -333,7 +333,7 @@ public:
     {
         return isLidCheckEnable_;
     }
-    bool IsExternalScreenWakeup()
+    bool IsExternalScreenWakeupEnable()
     {
         return isExternalScreenWakeup_;
     }
