@@ -2549,17 +2549,17 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
     bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOnAcqLock();
-    bool isExternalScreenWakeup = pms->IsExternalScreenWakeup();
+    bool isExternalScreenWakeupEnable = pms->IsExternalScreenWakeupEnable();
     POWER_HILOGI(COMP_SVC,
         "External screen is connected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
-        "%{public}d, isScreenOn: %{public}d, isExternalScreenWakeup: %{public}d",
-        static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn, isExternalScreenWakeup);
+        "%{public}d, isScreenOn: %{public}d, isExternalScreenWakeupEnable: %{public}d",
+        static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn, isExternalScreenWakeupEnable);
 
     if (isSwitchOpen && isScreenOn) {
         wakeupController->PowerOnAllScreens(WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT);
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (isSwitchOpen && !isScreenOn) {
-        if (isExternalScreenWakeup) {
+        if (isExternalScreenWakeupEnable) {
             pms->WakeupDevice(GetTickCount(), WakeupDeviceType::WAKEUP_DEVICE_SCREEN_CONNECT, "ScreenConnected");
         } else {
             POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Skip wakeup by external screen connected when screen off");
