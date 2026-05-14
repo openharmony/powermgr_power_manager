@@ -51,6 +51,7 @@ declare_args() {
   power_manager_feature_screen_saver = false
   power_manager_feature_enable_monitor_running_lock_change = false
   power_manager_feature_support_power_cli = false
+  power_manager_feature_enable_long_time_dim = false
 }
 
 defines = []
@@ -81,6 +82,10 @@ if (power_manager_feature_support_filtering_proximity_event) {
 
 if (power_manager_feature_enable_monitor_running_lock_change) {
   defines += [ "POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE" ]
+}
+
+if (power_manager_feature_enable_long_time_dim) {
+  defines += [ "POWER_MANAGER_ENABLE_LONG_TIME_DIM" ]
 }
 
 if (!defined(global_parts_info) ||
