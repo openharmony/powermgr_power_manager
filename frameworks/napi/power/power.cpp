@@ -25,6 +25,10 @@
 #include "power_log.h"
 #include "power_mgr_client.h"
 #include "power_state_machine_info.h"
+#ifdef POWER_API_METRICS_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
+
 
 namespace OHOS {
 namespace PowerMgr {
@@ -32,6 +36,9 @@ namespace {
 constexpr int REASON_MAX = 512;
 constexpr int RESULT_SIZE = 2;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
+#ifdef POWER_API_METRICS_ENABLE
+constexpr int32_t HISTOGRAM_API_CALL_COUNT = 1;
+#endif
 }
 
 napi_value Power::RebootOrShutdown(napi_env env, napi_callback_info info, bool isReboot)
@@ -70,6 +77,9 @@ napi_value Power::ShutdownDevice(napi_env env, napi_callback_info info)
 
 napi_value Power::RebootDevice(napi_env env, napi_callback_info info)
 {
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.rebootDevice.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
     return RebootOrShutdown(env, info, true);
 }
 
@@ -125,6 +135,9 @@ napi_value Power::IsScreenOn(napi_env env, napi_callback_info info)
     asyncCallbackInfo->env = env;
     napi_valuetype type;
     if (argc == 1) {
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.isScreenOnAsync.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
         NAPI_CALL(env, napi_typeof(env, args[0], &type));
         if (type != napi_function) {
             POWER_HILOGE(COMP_FWK, "Wrong argument type. napi_function expected");
@@ -134,6 +147,9 @@ napi_value Power::IsScreenOn(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     if (asyncCallbackInfo->callbackRef == nullptr) {
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.isScreenOn.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
         POWER_HILOGD(COMP_FWK, "callbackRef is null");
         napi_create_promise(env, &asyncCallbackInfo->deferred, &result);
     } else {

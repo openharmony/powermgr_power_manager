@@ -48,6 +48,12 @@ ohos_shared_library("runninglock") {
     }
   }
 
+  defines = []
+  if (enable_support_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += ["POWER_API_METRICS_ENABLE"]
+  }
+
   relative_install_dir = "module"
 
   subsystem_name = "powermgr"

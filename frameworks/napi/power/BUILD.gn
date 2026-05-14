@@ -56,6 +56,12 @@ ohos_shared_library("power") {
     external_deps += [ "ability_runtime:app_manager" ]
   }
 
+  defines = []
+  if (enable_support_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += ["POWER_API_METRICS_ENABLE"]
+  }
+
   relative_install_dir = "module"
 
   subsystem_name = "powermgr"
