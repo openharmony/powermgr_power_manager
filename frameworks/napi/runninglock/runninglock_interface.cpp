@@ -25,6 +25,9 @@
 #ifdef HAS_DFX_HIVIEW_PART
 #include "xpower_event_js.h"
 #endif
+#ifdef POWER_API_METRICS_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 namespace OHOS {
 namespace PowerMgr {
@@ -37,6 +40,9 @@ constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
 static PowerMgrClient& g_powerMgrClient = PowerMgrClient::GetInstance();
+#ifdef POWER_API_METRICS_ENABLE
+constexpr int32_t HISTOGRAM_API_CALL_COUNT = 1;
+#endif
 }
 
 napi_value RunningLockInterface::CreateRunningLock(napi_env env, napi_callback_info info, napi_ref& napiRunningLock)
@@ -70,6 +76,9 @@ napi_value RunningLockInterface::CreateRunningLock(napi_env env, napi_callback_i
     asyncInfo->type = static_cast<RunningLockType>(type);
 
     if (argc == CREATRUNNINGLOCK_ARGC) {
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.createRunningLockAsync.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
         napi_typeof(env, argv[INDEX_2], &valueType);
         NAPI_ASSERT(env, valueType == napi_function, "The input parameter type is not function");
         napi_create_reference(env, argv[INDEX_2], 1, &asyncInfo->callbackRef);
@@ -77,6 +86,9 @@ napi_value RunningLockInterface::CreateRunningLock(napi_env env, napi_callback_i
     napi_value result = nullptr;
     if (asyncInfo->callbackRef == nullptr) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "callbackRef is null");
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.createRunningLock.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
         napi_create_promise(env, &asyncInfo->deferred, &result);
     } else {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "callbackRef is not null");
@@ -110,6 +122,10 @@ napi_value RunningLockInterface::IsRunningLockTypeSupported(napi_env env, napi_c
     asyncInfo->type = static_cast<RunningLockType>(type);
 
     if (argc == ISRUNNINGLOCKTYPESUPPORTED_ARGC) {
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.isRunningLockTypeSupportedAsync.Boolean",
+            HISTOGRAM_API_CALL_COUNT);
+#endif
         napi_typeof(env, argv[INDEX_1], &valueType);
         NAPI_ASSERT(env, valueType == napi_function, "The input parameter type is not function");
         napi_create_reference(env, argv[INDEX_1], 1, &asyncInfo->callbackRef);
@@ -118,6 +134,9 @@ napi_value RunningLockInterface::IsRunningLockTypeSupported(napi_env env, napi_c
     napi_value result = nullptr;
     if (asyncInfo->callbackRef == nullptr) {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "callbackRef is null");
+#ifdef POWER_API_METRICS_ENABLE
+        HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.isRunningLockTypeSupported.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
         napi_create_promise(env, &asyncInfo->deferred, &result);
     } else {
         POWER_HILOGD(FEATURE_RUNNING_LOCK, "callbackRef is not null");
@@ -133,6 +152,10 @@ napi_value RunningLockInterface::Lock(napi_env env, napi_callback_info info)
     napi_value args[1] = {0};
     napi_value thisArg = nullptr;
     void* data = nullptr;
+
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.lock.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
 
     napi_status status = napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
     NAPI_ASSERT(env, (status == napi_ok) && (argc >= 1), "Failed to get cb info");
@@ -169,6 +192,10 @@ napi_value RunningLockInterface::IsUsed(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     void* data = nullptr;
 
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.isUsed.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
+
     napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
     NAPI_ASSERT(env, (status == napi_ok), "Failed to get cb info");
     napi_get_boolean(env, false, &result);
@@ -191,6 +218,10 @@ napi_value RunningLockInterface::Unlock(napi_env env, napi_callback_info info)
 {
     napi_value thisArg = nullptr;
     void* data = nullptr;
+
+#ifdef POWER_API_METRICS_ENABLE
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.unlock.Boolean", HISTOGRAM_API_CALL_COUNT);
+#endif
 
     napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
     NAPI_ASSERT(env, (status == napi_ok), "Unlock: failed to get cb info");
