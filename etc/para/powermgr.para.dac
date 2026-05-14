@@ -23,3 +23,4 @@ const.powerkey.down_duration = powermgr:powermgr:0444
 const.power.enable_lid_check = powermgr:powermgr:0444
 const.power.enable_s4 = powermgr:powermgr:0444
 const.power.external_screen_wakeup = powermgr:powermgr:0444
+const.power.active_time_before_long_time_dim = powermgr:powermgr:0444
