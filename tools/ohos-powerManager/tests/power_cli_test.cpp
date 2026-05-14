@@ -199,7 +199,7 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest001, TestSize.Level0)
 
 /**
  * @tc.name: PowerCliCommandTest002
- * @tc.desc: Test no arguments (shows help to stdout)
+ * @tc.desc: Test no arguments outputs JSON error to stdout
  * @tc.type: FUNC
  */
 HWTEST_F(PowerCliTest, PowerCliCommandTest002, TestSize.Level0)
@@ -211,7 +211,7 @@ HWTEST_F(PowerCliTest, PowerCliCommandTest002, TestSize.Level0)
         PowerCliCommand cmd(1, argv);
         cmd.Execute();
     });
-    EXPECT_NE(stdoutOutput.find("suspend"), std::string::npos);
+    EXPECT_NE(stdoutOutput.find("ERR_NO_COMMAND"), std::string::npos);
 }
 
 /**
