@@ -16,7 +16,7 @@
   "subcommands": {
     "suspend": {
       "description": "Suspend device and turn off screen with fixed 'application' reason. Used for remotely or programmatically putting the device into suspend state. Does not support custom suspend reasons other than 'application'.",
-      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "requirePermissions": ["ohos.permission.cli.POWER_MANAGER"],
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -59,7 +59,7 @@
     },
     "wakeup": {
       "description": "Wake up device and turn on screen with fixed 'application' reason. Used for remotely or programmatically waking the device from suspend state. Does not support custom wakeup reasons other than 'application'.",
-      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "requirePermissions": ["ohos.permission.cli.POWER_MANAGER"],
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -103,7 +103,7 @@
     },
     "set-power-mode": {
       "description": "Set device power mode to normal or powerSave. Used for switching between balanced and power-save profiles. Does not support performance, extreme or custom power modes.",
-      "requirePermissions": ["ohos.permission.POWER_OPTIMIZATION"],
+      "requirePermissions": ["ohos.permission.cli.POWER_OPTIMIZATION"],
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -143,7 +143,7 @@
     },
     "override-screen-off-time": {
       "description": "Override the system screen off timeout with a custom value in milliseconds. Used for temporarily extending or shortening the screen off delay. Does not persist across device reboots.",
-      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "requirePermissions": ["ohos.permission.cli.POWER_MANAGER"],
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -182,7 +182,7 @@
     },
     "restore-screen-off-time": {
       "description": "Restore the screen off timeout to the system default value. Used for reverting a previous override-screen-off-time call. Has no effect if no override is currently active.",
-      "requirePermissions": ["ohos.permission.POWER_MANAGER"],
+      "requirePermissions": ["ohos.permission.cli.POWER_MANAGER"],
       "inputSchema": {
         "type": "object",
         "properties": {}
