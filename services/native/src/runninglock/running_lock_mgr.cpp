@@ -126,7 +126,7 @@ void RunningLockMgr::InitLocksTypeScreen()
                                                         RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED;
                 POWER_HILOGD(FEATURE_RUNNING_LOCK, "Screen lock notify: state=%{public}d, D=%{public}" PRIu64,
                     static_cast<uint32_t>(state), RUNNINGLOCK_DISPLAY_ID_ALL);
-                NotifyScreenRunningLockChanged(state, RUNNINGLOCK_DISPLAY_ID_ALL);
+                callbackManager_.NotifyScreenRunningLockChanged(state, RUNNINGLOCK_DISPLAY_ID_ALL);
 #endif
 #endif
 #ifdef POWER_MANAGER_TV_DREAMING
@@ -517,8 +517,8 @@ bool RunningLockMgr::UpdateWorkSource(const sptr<IRemoteObject>& remoteObj,
     return true;
 }
 
-bool RunningLockMgr::PrepareLock(const sptr<IRemoteObject>& remoteObj, std::shared_ptr<RunningLockInner>& lockInner,
-    std::shared_ptr<LockCounter>& counter)
+bool RunningLockMgr::ValidateLockForEnable(const sptr<IRemoteObject>& remoteObj,
+    std::shared_ptr<RunningLockInner>& lockInner, std::shared_ptr<LockCounter>& counter)
 {
     lockInner = GetRunningLockInner(remoteObj);
     if (lockInner == nullptr) {
@@ -564,7 +564,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
 #endif
     std::shared_ptr<RunningLockInner> lockInner;
     std::shared_ptr<LockCounter> counter;
-    if (!PrepareLock(remoteObj, lockInner, counter)) {
+    if (!ValidateLockForEnable(remoteObj, lockInner, counter)) {
         return false;
     }
     RunningLockParam lockInnerParam = lockInner->GetParam();
@@ -575,11 +575,9 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
         UpdateUnSceneLockLists(lockInnerParam, true);
-#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#if defined(POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE) && defined(POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING)
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock SCREEN D=%{public}" PRIu64, lockInnerParam.displayId);
-        HandleScreenLockNotify(true, lockInnerParam.displayId);
-#endif
+        callbackManager_.HandleScreenLockNotify(true, lockInnerParam.displayId);
 #endif
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
@@ -631,11 +629,9 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
         UpdateUnSceneLockLists(lockInnerParam, false);
-#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#if defined(POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE) && defined(POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING)
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLock SCREEN D=%{public}" PRIu64, lockInnerParam.displayId);
-        HandleScreenLockNotify(false, lockInnerParam.displayId);
-#endif
+        callbackManager_.HandleScreenLockNotify(false, lockInnerParam.displayId);
 #endif
     }
     WriteHiSysEvent(lockInner);
@@ -678,7 +674,7 @@ void RunningLockMgr::QueryRunningLockLists(std::map<std::string, RunningLockInfo
     std::lock_guard<ffrt::mutex> lock(screenLockListsMutex_);
 #ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
     for (auto& iter : unSceneLockLists_) {
-        if (displayId == RUNNINGLOCK_DISPLAY_ID_ALL || iter.second.displayId == displayId) {
+        if (iter.second.displayId == displayId || iter.second.displayId == RUNNINGLOCK_DISPLAY_ID_ALL) {
             runningLockLists.insert(std::pair<std::string, RunningLockInfo>(iter.first, iter.second));
         }
     }
@@ -716,7 +712,7 @@ uint32_t RunningLockMgr::GetRunningLockNum(RunningLockType type)
 uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type, uint64_t displayId)
 {
 #ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-    if (type == RunningLockType::RUNNINGLOCK_SCREEN && displayId != RUNNINGLOCK_DISPLAY_ID_ALL) {
+    if (type == RunningLockType::RUNNINGLOCK_SCREEN) {
         std::lock_guard<ffrt::mutex> lock(mutex_);
         return std::count_if(runningLocks_.begin(), runningLocks_.end(), [&type, &displayId](const auto& pair) {
             if (pair.second == nullptr) {
@@ -724,7 +720,8 @@ uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type, uint64_t d
             }
             return pair.second->GetType() == type &&
                    pair.second->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE &&
-                   pair.second->GetParam().displayId == displayId;
+                   (pair.second->GetParam().displayId == displayId ||
+                       pair.second->GetParam().displayId == RUNNINGLOCK_DISPLAY_ID_ALL);
         });
     }
 #endif
@@ -857,12 +854,6 @@ void RunningLockMgr::EnableMock(IRunningLockAction* mockAction)
     runninglockProxy_->Clear();
 #ifdef HAS_SENSORS_SENSOR_PART
     proximityController_->Clear();
-#endif
-#ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-    std::lock_guard<ffrt::mutex> lock(screenLockCountMutex_);
-    screenLockCountPerDisplayId_.clear();
-#endif
 #endif
     std::shared_ptr<IRunningLockAction> mock(mockAction);
     runningLockAction_ = mock;
@@ -1292,212 +1283,34 @@ void RunningLockMgr::HandleExitForceSleep()
 void RunningLockMgr::RegisterRunningLockChangedCallback(
     const sptr<IRemoteObject>& callback, int32_t pid, int32_t uid, uint64_t displayId)
 {
-    RETURN_IF(callback == nullptr);
-    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
-    auto range = runningLockChangedCallbacks_.equal_range(callback);
-    for (auto it = range.first; it != range.second; ++it) {
-        if (std::get<CALLBACK_TUPLE_INDEX_DISPLAY_ID>(it->second) == displayId) {
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "RegisterRunningLockChangedCallback already exists D=%{public}" PRIu64,
-                displayId);
-            return;
-        }
-    }
-    runningLockChangedCallbacks_.emplace(callback, std::make_tuple(pid, uid, displayId));
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "runningLockChangedCallbacks_.size:%{public}zu, D=%{public}" PRIu64,
-        runningLockChangedCallbacks_.size(), displayId);
-#else
-    POWER_HILOGI(
-        FEATURE_RUNNING_LOCK, "runningLockChangedCallbacks_.size:%{public}zu", runningLockChangedCallbacks_.size());
-#endif
+    callbackManager_.Register(callback, pid, uid, displayId);
 }
 
 void RunningLockMgr::UnRegisterRunningLockChangedCallback(const sptr<IRemoteObject>& callback, uint64_t displayId)
 {
-    RETURN_IF(callback == nullptr);
-    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
-    auto range = runningLockChangedCallbacks_.equal_range(callback);
-    for (auto it = range.first; it != range.second; ++it) {
-        if (std::get<CALLBACK_TUPLE_INDEX_DISPLAY_ID>(it->second) == displayId) {
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-            POWER_HILOGI(FEATURE_RUNNING_LOCK,
-                "UnRegisterRunningLockChangedCallback D=%{public}" PRIu64 ", size:%{public}zu", displayId,
-                runningLockChangedCallbacks_.size() - 1);
-#else
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnRegisterRunningLockChangedCallback size:%{public}zu",
-                runningLockChangedCallbacks_.size() - 1);
-#endif
-            runningLockChangedCallbacks_.erase(it);
-            return;
-        }
-    }
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnRegisterRunningLockChangedCallback not found D=%{public}" PRIu64, displayId);
-#else
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnRegisterRunningLockChangedCallback not found");
-#endif
+    callbackManager_.UnRegister(callback, displayId);
 }
 
 void RunningLockMgr::RemoveAllRunningLockChangedCallbacks(const sptr<IRemoteObject>& callback)
 {
-    RETURN_IF(callback == nullptr);
-    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
-    auto range = runningLockChangedCallbacks_.equal_range(callback);
-    size_t count = std::distance(range.first, range.second);
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-    for (auto it = range.first; it != range.second; ++it) {
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "RemoveAllRunningLockChangedCallbacks D=%{public}" PRIu64,
-            std::get<CALLBACK_TUPLE_INDEX_DISPLAY_ID>(it->second));
-    }
-#endif
-    runningLockChangedCallbacks_.erase(range.first, range.second);
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "RemoveAllRunningLockChangedCallbacks removed %{public}zu, size:%{public}zu",
-        count, runningLockChangedCallbacks_.size());
+    callbackManager_.RemoveAll(callback);
 }
 
 bool RunningLockMgr::HasRunningLockChangedCallbacks(const sptr<IRemoteObject>& callback)
 {
-    if (callback == nullptr) {
-        return false;
-    }
-    std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
-    auto range = runningLockChangedCallbacks_.equal_range(callback);
-    return range.first != range.second;
+    return callbackManager_.HasCallbacks(callback);
+}
+
+size_t RunningLockMgr::GetRunningLockChangedCallbackCount()
+{
+    return callbackManager_.GetCallbackCount();
 }
 
 void RunningLockMgr::NotifyScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId)
 {
-    std::vector<std::pair<sptr<IRemoteObject>, std::tuple<int32_t, int32_t, uint64_t>>> callbacksCopy;
-    {
-        std::lock_guard<ffrt::mutex> lock(runningLockChangedCallbackMutex_);
-        for (const auto& callbackPair : runningLockChangedCallbacks_) {
-            callbacksCopy.push_back(callbackPair);
-        }
-    }
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-    POWER_HILOGI(FEATURE_RUNNING_LOCK,
-        "NotifyScreenRunningLockChanged state=%{public}d, D=%{public}" PRIu64 ", CBs=%{public}zu",
-        static_cast<uint32_t>(state), displayId, callbacksCopy.size());
-#else
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "NotifyScreenRunningLockChanged state=%{public}d, CBs=%{public}zu",
-        static_cast<uint32_t>(state), callbacksCopy.size());
-#endif
-    for (const auto& callbackPair : callbacksCopy) {
-        auto callback = callbackPair.first;
-        sptr<IRunningLockChangedCallback> screenLockCallback = iface_cast<IRunningLockChangedCallback>(callback);
-        if (screenLockCallback != nullptr) {
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-            uint64_t callbackDisplayId = std::get<CALLBACK_TUPLE_INDEX_DISPLAY_ID>(callbackPair.second);
-            if (callbackDisplayId != RUNNINGLOCK_DISPLAY_ID_ALL && callbackDisplayId != displayId) {
-                POWER_HILOGD(FEATURE_RUNNING_LOCK,
-                    "SRL CB skipped: P=%{public}d U=%{public}d regD=%{public}" PRIu64 " != notifyD=%{public}" PRIu64,
-                    std::get<CALLBACK_TUPLE_INDEX_PID>(callbackPair.second),
-                    std::get<CALLBACK_TUPLE_INDEX_UID>(callbackPair.second), callbackDisplayId, displayId);
-                continue;
-            }
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "SRL CB: P=%{public}d U=%{public}d D=%{public}" PRIu64,
-                std::get<CALLBACK_TUPLE_INDEX_PID>(callbackPair.second),
-                std::get<CALLBACK_TUPLE_INDEX_UID>(callbackPair.second), displayId);
-#else
-            POWER_HILOGI(FEATURE_RUNNING_LOCK, "SRL CB: P=%{public}d U=%{public}d",
-                std::get<CALLBACK_TUPLE_INDEX_PID>(callbackPair.second),
-                std::get<CALLBACK_TUPLE_INDEX_UID>(callbackPair.second));
-#endif
-            screenLockCallback->OnAsyncScreenRunningLockChanged(state, displayId);
-        } else {
-            POWER_HILOGD(FEATURE_RUNNING_LOCK, "SRL CB iface_cast failed: P=%{public}d U=%{public}d",
-                std::get<CALLBACK_TUPLE_INDEX_PID>(callbackPair.second),
-                std::get<CALLBACK_TUPLE_INDEX_UID>(callbackPair.second));
-        }
-    }
-}
-
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
-std::set<uint64_t> RunningLockMgr::GetRegisteredDisplayIds()
-{
-    std::set<uint64_t> displayIds;
-    for (const auto& callbackPair : runningLockChangedCallbacks_) {
-        uint64_t callbackDisplayId = std::get<CALLBACK_TUPLE_INDEX_DISPLAY_ID>(callbackPair.second);
-        displayIds.insert(callbackDisplayId);
-    }
-    return displayIds;
-}
-
-uint32_t RunningLockMgr::GetScreenLockCountInternal(uint64_t displayId)
-{
-    uint32_t count = 0;
-    auto it = screenLockCountPerDisplayId_.find(displayId);
-    if (it != screenLockCountPerDisplayId_.end()) {
-        count = it->second;
-    }
-    if (displayId != RUNNINGLOCK_DISPLAY_ID_ALL) {
-        auto allIt = screenLockCountPerDisplayId_.find(RUNNINGLOCK_DISPLAY_ID_ALL);
-        if (allIt != screenLockCountPerDisplayId_.end()) {
-            count += allIt->second;
-        }
-    }
-    return count;
-}
-
-void RunningLockMgr::UpdateScreenLockCount(bool active, uint64_t displayId)
-{
-    if (active) {
-        screenLockCountPerDisplayId_[displayId]++;
-        return;
-    }
-    auto it = screenLockCountPerDisplayId_.find(displayId);
-    if (it != screenLockCountPerDisplayId_.end() && it->second > 0) {
-        it->second--;
-        if (it->second == 0) {
-            screenLockCountPerDisplayId_.erase(it);
-        }
-    }
-}
-
-void RunningLockMgr::CollectNotifications(
-    bool active, uint64_t displayId, std::vector<std::pair<RunningLockChangeState, uint64_t>>& notifications)
-{
-    RunningLockChangeState state =
-        active ? RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED : RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED;
-    uint32_t countAfter = GetScreenLockCountInternal(displayId);
-    uint32_t countBefore = countAfter + (active ? 0 : 1) - (active ? 1 : 0);
-    if (active && countBefore == 0 && countAfter == 1) {
-        notifications.emplace_back(state, displayId);
-    } else if (!active && countBefore == 1 && countAfter == 0) {
-        notifications.emplace_back(state, displayId);
-    }
-}
-
-void RunningLockMgr::HandleScreenLockNotify(bool active, uint64_t displayId)
-{
-    POWER_HILOGI(FEATURE_RUNNING_LOCK, "HandleScreenLockNotify active=%{public}d, D=%{public}" PRIu64,
-        static_cast<int32_t>(active), displayId);
-    std::set<uint64_t> registeredDisplayIds;
-    std::vector<std::pair<RunningLockChangeState, uint64_t>> notifications;
-    {
-        std::lock_guard<ffrt::mutex> callbackLock(runningLockChangedCallbackMutex_);
-        registeredDisplayIds = GetRegisteredDisplayIds();
-        std::lock_guard<ffrt::mutex> countLock(screenLockCountMutex_);
-        UpdateScreenLockCount(active, displayId);
-        if (displayId == RUNNINGLOCK_DISPLAY_ID_ALL) {
-            registeredDisplayIds.erase(RUNNINGLOCK_DISPLAY_ID_ALL);
-            for (auto regDisplayId : registeredDisplayIds) {
-                CollectNotifications(active, regDisplayId, notifications);
-            }
-        }
-        CollectNotifications(active, displayId, notifications);
-    }
-    if (notifications.empty()) {
-        POWER_HILOGD(FEATURE_RUNNING_LOCK, "HandleScreenLockNotify no notifications: count did not cross threshold");
-        return;
-    }
-    POWER_HILOGI(
-        FEATURE_RUNNING_LOCK, "HandleScreenLockNotify collected %{public}zu notifications", notifications.size());
-    for (const auto& notifyPair : notifications) {
-        NotifyScreenRunningLockChanged(notifyPair.first, notifyPair.second);
-    }
+    callbackManager_.NotifyScreenRunningLockChanged(state, displayId);
 }
 #endif
-#endif
+
 } // namespace PowerMgr
 } // namespace OHOS

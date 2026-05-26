@@ -1612,7 +1612,7 @@ PowerErrors PowerMgrService::CreateRunningLock(
 
     uintptr_t remoteObjPtr = reinterpret_cast<uintptr_t>(remoteObj.GetRefPtr());
     uint64_t lockid = std::hash<uintptr_t>()(remoteObjPtr);
-    RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo, lockid, -1);
+    RunningLockParam runningLockParam = FillRunningLockParam(runningLockInfo, lockid);
     runningLockMgr_->CreateRunningLock(remoteObj, runningLockParam);
     return PowerErrors::ERR_OK;
 }
