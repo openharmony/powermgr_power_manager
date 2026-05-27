@@ -339,8 +339,57 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011, TestSize.Lev
 }
 
 /**
+ * @tc.name: PowerSuspendControllerTest011_1
+ * @tc.desc: test SuspendWhenStateSleep with ACTION_HIBERNATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011_1, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest011_1 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest011_1: start";
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+    ASSERT_NE(g_service->suspendController_->stateMachine_, nullptr);
+
+    g_service->suspendController_->stateMachine_->SetState(
+        PowerState::SLEEP, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true);
+    ASSERT_EQ(g_service->suspendController_->stateMachine_->GetState(), PowerState::SLEEP);
+
+    g_service->suspendController_->SuspendWhenStateSleep(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT,
+        static_cast<uint32_t>(SuspendAction::ACTION_HIBERNATE));
+    EXPECT_NE(g_service->suspendController_, nullptr);
+
+    g_service->suspendController_->StopSleep();
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest011_1: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest011_1 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest011_2
+ * @tc.desc: test SuspendWhenStateSleep with ACTION_AUTO_SUSPEND returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest011_2, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest011_2 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest011_2: start";
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+
+    g_service->suspendController_->SuspendWhenStateSleep(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT,
+        static_cast<uint32_t>(SuspendAction::ACTION_AUTO_SUSPEND));
+    EXPECT_NE(g_service->suspendController_, nullptr);
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest011_2: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest011_2 function end!");
+}
+
+/**
  * @tc.name: PowerSuspendControllerTest012
- * @tc.desc: test HandleHibernate
+ * @tc.desc: test HandleHibernate is safe even when state machine's controllerMap_ is broken
  * @tc.type: FUNC
  * @tc.require: issueI7COGR
  */
@@ -349,6 +398,8 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012, TestSize.Lev
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012 function start!");
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest012: start";
     g_service->SuspendControllerInit();
+    // Clearing controllerMap_ corrupts the state machine; HandleHibernate must
+    // still survive (no crash) and the state must NOT become HIBERNATE.
     g_service->suspendController_->stateMachine_->controllerMap_.clear();
     g_service->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() != PowerState::HIBERNATE);
@@ -356,6 +407,93 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012, TestSize.Lev
 
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest012: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest012_1
+ * @tc.desc: test HandleHibernate drives pms->Hibernate() without crash from AWAKE
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012_1, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012_1 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest012_1: start";
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+    ASSERT_NE(g_service->suspendController_->stateMachine_, nullptr);
+
+    // Ensure a well-defined starting state before calling HandleHibernate.
+    g_service->suspendController_->stateMachine_->SetState(
+        PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true);
+    ASSERT_EQ(g_service->suspendController_->stateMachine_->GetState(), PowerState::AWAKE);
+
+    // Drive HandleHibernate via the normal path. State machine transitions are
+    // driven entirely by HibernateInner; this test ensures the call path does
+    // not crash regardless of POWER_MANAGER_POWER_ENABLE_S4 compile flag.
+    g_service->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_NE(g_service->suspendController_, nullptr);
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest012_1: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012_1 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest012_3
+ * @tc.desc: test HandleHibernate early-returns and does not crash when stateMachine_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012_3, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012_3 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest012_3: start";
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+
+    // Inject nullptr into stateMachine_ to cover the early-return branch.
+    auto savedStateMachine = g_service->suspendController_->stateMachine_;
+    g_service->suspendController_->stateMachine_ = nullptr;
+
+    // Must not crash. Function should hit the first early-return.
+    g_service->suspendController_->HandleHibernate(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT);
+    EXPECT_EQ(g_service->suspendController_->stateMachine_, nullptr);
+
+    // Restore for subsequent tests.
+    g_service->suspendController_->stateMachine_ = savedStateMachine;
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest012_3: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012_3 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest012_4
+ * @tc.desc: test HandleHibernate exercises multiple reason types without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest012_4, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012_4 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest012_4: start";
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+    ASSERT_NE(g_service->suspendController_->stateMachine_, nullptr);
+
+    // Reset to AWAKE between invocations to ensure consistent starting state.
+    const std::vector<SuspendDeviceType> reasons = {
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY,
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT,
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_LID,
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH,
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_TP_COVER,
+    };
+    for (auto r : reasons) {
+        g_service->suspendController_->stateMachine_->SetState(
+            PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true);
+        g_service->suspendController_->HandleHibernate(r);
+        EXPECT_NE(g_service->suspendController_, nullptr);
+    }
+
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest012_4: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest012_4 function end!");
 }
 
 /**

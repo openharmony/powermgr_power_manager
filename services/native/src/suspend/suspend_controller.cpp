@@ -514,6 +514,12 @@ void SuspendController::SuspendWhenStateSleep(SuspendDeviceType reason, uint32_t
     if (pms == nullptr) {
         return;
     }
+    if (action == static_cast<uint32_t>(SuspendAction::ACTION_HIBERNATE)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "SuspendWhenStateSleep for hibernate");
+        SystemSuspendController::GetInstance().Wakeup();
+        StartSleepTimer(reason, action, 0);
+        return;
+    }
     if (action != static_cast<uint32_t>(SuspendAction::ACTION_FORCE_SUSPEND)) {
         return;
     }
@@ -845,17 +851,25 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
+    POWER_HILOGI(FEATURE_SUSPEND, "hibernate by reason=%{public}d", reason);
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return;
     }
-    bool ret = stateMachine_->SetState(
-        PowerState::HIBERNATE, stateMachine_->GetReasonBySuspendType(reason), true);
-    if (ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "State changed, call hibernate");
-    } else {
-        POWER_HILOGI(FEATURE_SUSPEND, "Hibernate: State change failed");
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerMgrService");
+        return;
+    }
+    // State machine transitions are driven entirely by HibernateInner:
+    //   current -> INACTIVE -> HIBERNATE -> AWAKE
+    // Do not pre-SetState(HIBERNATE) here to avoid the redundant
+    // HIBERNATE -> INACTIVE -> HIBERNATE sequence within the same call stack.
+    StateChangeReason stateReason = stateMachine_->GetReasonBySuspendType(reason);
+    std::string reasonStr = PowerUtils::GetReasonTypeString(stateReason);
+    PowerErrors hibernateRet = pms->Hibernate(false, reasonStr);
+    if (hibernateRet != PowerErrors::ERR_OK) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Hibernate failed, ret=%{public}d", static_cast<int32_t>(hibernateRet));
     }
 }
 
