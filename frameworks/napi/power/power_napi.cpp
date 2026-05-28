@@ -609,7 +609,7 @@ napi_value PowerNapi::RegisterShutdownCallback(napi_env env, napi_callback_info 
 napi_value PowerNapi::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
 #ifdef POWER_API_METRICS_ENABLE
-    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.unRegisterShutdownCallback.Boolean", HISTOGRAM_API_CALL_COUNT);
+    HISTOGRAM_BOOLEAN("BasicServicesKit.PowerManager.unregisterShutdownCallback.Boolean", HISTOGRAM_API_CALL_COUNT);
 #endif
 
     size_t argc = SHUTDOWN_CALLBACK_ARGC;
