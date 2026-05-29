@@ -49,7 +49,7 @@ public:
     size_t GetCallbackCount();
     void NotifyScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId = UINT64_MAX);
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     void HandleScreenLockNotify(bool active, uint64_t displayId);
 #endif
 
@@ -57,7 +57,7 @@ private:
     std::multimap<sptr<IRemoteObject>, std::tuple<int32_t, int32_t, uint64_t>> callbacks_;
     ffrt::mutex mutex_;
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     std::set<uint64_t> GetRegisteredDisplayIds();
     uint32_t GetScreenLockCountInternal(uint64_t displayId);
     void UpdateScreenLockCount(bool active, uint64_t displayId);

@@ -50,7 +50,7 @@ declare_args() {
   power_manager_feature_report_screenoff_invalid = true
   power_manager_feature_screen_saver = false
   power_manager_feature_enable_monitor_running_lock_change = false
-  power_manager_feature_enable_display_id_filtering = false
+  power_manager_feature_lock_screen_support_multi_screen = false
   power_manager_feature_support_power_cli = false
   power_manager_feature_enable_long_time_dim = false
 }
@@ -89,8 +89,8 @@ if (power_manager_feature_enable_long_time_dim) {
   defines += [ "POWER_MANAGER_ENABLE_LONG_TIME_DIM" ]
 }
 
-if (power_manager_feature_enable_display_id_filtering) {
-  defines += [ "POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING" ]
+if (power_manager_feature_lock_screen_support_multi_screen) {
+  defines += [ "POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN" ]
 }
 
 if (!defined(global_parts_info) ||

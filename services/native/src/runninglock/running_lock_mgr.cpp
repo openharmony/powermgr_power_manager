@@ -121,7 +121,7 @@ void RunningLockMgr::InitLocksTypeScreen()
                     }
                 }
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-#ifndef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifndef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
                 RunningLockChangeState state = active ? RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED :
                                                         RunningLockChangeState::RUNNINGLOCK_STATE_UNLOCKED;
                 POWER_HILOGD(FEATURE_RUNNING_LOCK, "Screen lock notify: state=%{public}d, D=%{public}" PRIu64,
@@ -575,7 +575,7 @@ bool RunningLockMgr::Lock(const sptr<IRemoteObject>& remoteObj)
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
         UpdateUnSceneLockLists(lockInnerParam, true);
-#if defined(POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE) && defined(POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING)
+#if defined(POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE) && defined(POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN)
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "Lock SCREEN D=%{public}" PRIu64, lockInnerParam.displayId);
         callbackManager_.HandleScreenLockNotify(true, lockInnerParam.displayId);
 #endif
@@ -629,7 +629,7 @@ bool RunningLockMgr::UnLock(const sptr<IRemoteObject> remoteObj, const std::stri
     }
     if (lockInnerParam.type == RunningLockType::RUNNINGLOCK_SCREEN) {
         UpdateUnSceneLockLists(lockInnerParam, false);
-#if defined(POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE) && defined(POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING)
+#if defined(POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE) && defined(POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN)
         POWER_HILOGI(FEATURE_RUNNING_LOCK, "UnLock SCREEN D=%{public}" PRIu64, lockInnerParam.displayId);
         callbackManager_.HandleScreenLockNotify(false, lockInnerParam.displayId);
 #endif
@@ -672,7 +672,7 @@ void RunningLockMgr::UnRegisterRunningLockCallback(const sptr<IPowerRunninglockC
 void RunningLockMgr::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId)
 {
     std::lock_guard<ffrt::mutex> lock(screenLockListsMutex_);
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     for (auto& iter : unSceneLockLists_) {
         if (iter.second.displayId == displayId || iter.second.displayId == RUNNINGLOCK_DISPLAY_ID_ALL) {
             runningLockLists.insert(std::pair<std::string, RunningLockInfo>(iter.first, iter.second));
@@ -711,17 +711,11 @@ uint32_t RunningLockMgr::GetRunningLockNum(RunningLockType type)
 
 uint32_t RunningLockMgr::GetValidRunningLockNum(RunningLockType type, uint64_t displayId)
 {
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     if (type == RunningLockType::RUNNINGLOCK_SCREEN) {
-        std::lock_guard<ffrt::mutex> lock(mutex_);
-        return std::count_if(runningLocks_.begin(), runningLocks_.end(), [&type, &displayId](const auto& pair) {
-            if (pair.second == nullptr) {
-                return false;
-            }
-            return pair.second->GetType() == type &&
-                   pair.second->GetState() == RunningLockState::RUNNINGLOCK_STATE_ENABLE &&
-                   (pair.second->GetParam().displayId == displayId ||
-                       pair.second->GetParam().displayId == RUNNINGLOCK_DISPLAY_ID_ALL);
+        std::lock_guard<ffrt::mutex> lock(screenLockListsMutex_);
+        return std::count_if(unSceneLockLists_.begin(), unSceneLockLists_.end(), [displayId](const auto& pair) {
+            return pair.second.displayId == displayId || pair.second.displayId == RUNNINGLOCK_DISPLAY_ID_ALL;
         });
     }
 #endif

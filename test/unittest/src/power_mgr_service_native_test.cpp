@@ -1032,7 +1032,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative035, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative035 function end!");
 }
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 /**
  * @tc.name: PowerMgrServiceNative036
  * @tc.desc: test IsRunningLockEnabled with displayId filtering
@@ -1140,7 +1140,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative039, TestSize.Level2)
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
 
     bool result = false;
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     ret = pmsTest->IsRunningLockEnabled(RunningLockType::RUNNINGLOCK_SCREEN, result, 1001);
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
     EXPECT_TRUE(result);
@@ -1159,7 +1159,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative039, TestSize.Level2)
 }
 
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 /**
  * @tc.name: PowerMgrServiceNative040
  * @tc.desc: test UnRegisterRunningLockChangedCallback keeps callbacks when other displayIds remain

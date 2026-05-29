@@ -100,7 +100,7 @@ constexpr int32_t API19 = 19;
 
 uint64_t NormalizeDisplayId(uint64_t displayId)
 {
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     return displayId;
 #else
     return UINT64_MAX;
@@ -2831,7 +2831,7 @@ PowerErrors PowerMgrService::IsRunningLockEnabled(const RunningLockType type, bo
     std::lock_guard lock(lockMutex_);
     uint64_t normalizedDisplayId = NormalizeDisplayId(displayId);
     uint32_t num = runningLockMgr_->GetValidRunningLockNum(type, normalizedDisplayId);
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     POWER_HILOGI(COMP_SVC, "Hold running lock type:%{public}u, num:%{public}u, D=%{public}" PRIu64,
         static_cast<uint32_t>(type), num, normalizedDisplayId);
 #else
@@ -2988,7 +2988,7 @@ PowerErrors PowerMgrService::RegisterRunningLockChangedCallback(
     }
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
     uint64_t normalizedDisplayId = NormalizeDisplayId(displayId);
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d, displayId: %{public}" PRIu64,
         __func__, pid, uid, normalizedDisplayId);
 #else
@@ -3026,7 +3026,7 @@ PowerErrors PowerMgrService::UnRegisterRunningLockChangedCallback(
     }
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
     uint64_t normalizedDisplayId = NormalizeDisplayId(displayId);
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d, displayId: %{public}" PRIu64,
         __func__, pid, uid, normalizedDisplayId);
 #else

@@ -40,7 +40,7 @@ constexpr uint32_t LOCKNUM_B = 1;
 constexpr int32_t TIMEOUTMS = 7;
 constexpr uint32_t MAXTYPE = 77;
 constexpr int32_t UNTYPE = -1;
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 class TestScreenLockCallback : public RunningLockChangedCallbackStub {
 public:
     TestScreenLockCallback()
@@ -1481,6 +1481,69 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative047, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RunningLockNative048
+ * @tc.desc: test QueryRunningLockLists with displayId parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative048, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative048 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = std::make_shared<RunningLockMgr>(pmsTest);
+    EXPECT_TRUE(runningLockMgr->Init());
+
+    sptr<IRemoteObject> token1 = new RunningLockTokenStub();
+    sptr<IRemoteObject> token2 = new RunningLockTokenStub();
+    uintptr_t token1Ptr = reinterpret_cast<uintptr_t>(token1.GetRefPtr());
+    uintptr_t token2Ptr = reinterpret_cast<uintptr_t>(token2.GetRefPtr());
+    uint64_t lockid1 = std::hash<uintptr_t>()(token1Ptr);
+    uint64_t lockid2 = std::hash<uintptr_t>()(token2Ptr);
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+
+    RunningLockParam param1 {
+        lockid1, "lock_display_1", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid, 1001};
+    RunningLockParam param2 {
+        lockid2, "lock_display_2", "", RunningLockType::RUNNINGLOCK_SCREEN, TIMEOUTMS, pid, uid, 1002};
+
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token1, param1) != nullptr);
+    EXPECT_TRUE(runningLockMgr->CreateRunningLock(token2, param2) != nullptr);
+    runningLockMgr->Lock(token1);
+    runningLockMgr->Lock(token2);
+
+    std::map<std::string, RunningLockInfo> lists;
+    runningLockMgr->QueryRunningLockLists(lists, UINT64_MAX);
+    EXPECT_EQ(lists.size(), 0);
+
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
+    lists.clear();
+    runningLockMgr->QueryRunningLockLists(lists, 1001);
+    EXPECT_EQ(lists.size(), 1);
+    for (auto& iter : lists) {
+        EXPECT_EQ(iter.second.displayId, 1001);
+    }
+
+    lists.clear();
+    runningLockMgr->QueryRunningLockLists(lists, 1002);
+    EXPECT_EQ(lists.size(), 1);
+    for (auto& iter : lists) {
+        EXPECT_EQ(iter.second.displayId, 1002);
+    }
+
+    lists.clear();
+    runningLockMgr->QueryRunningLockLists(lists, 9999);
+    EXPECT_EQ(lists.size(), 0);
+#endif
+
+    runningLockMgr->UnLock(token1);
+    runningLockMgr->UnLock(token2);
+    runningLockMgr->ReleaseLock(token1);
+    runningLockMgr->ReleaseLock(token2);
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative048 function end!");
+}
+
+/**
  * @tc.name: RunningLockNative049
  * @tc.desc: test GetValidRunningLockNum with displayId parameter
  * @tc.type: FUNC
@@ -1513,9 +1576,9 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative049, TestSize.Level1)
 
     runningLockMgr->Lock(token);
     countDefault = runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, UINT64_MAX);
-    EXPECT_EQ(countDefault, 1);
+    EXPECT_EQ(countDefault, 0);
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     countDisplay1 = runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, 1001);
     EXPECT_EQ(countDisplay1, 1);
 
@@ -1569,7 +1632,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative051, TestSize.Level1)
     EXPECT_TRUE(callback->stateReceived_);
     EXPECT_EQ(callback->lastState_, RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED);
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     callback->stateReceived_ = false;
     runningLockMgr->NotifyScreenRunningLockChanged(RunningLockChangeState::RUNNINGLOCK_STATE_LOCKED, 1002);
     EXPECT_FALSE(callback->stateReceived_);
@@ -1590,7 +1653,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative051, TestSize.Level1)
 #endif
 
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 /**
  * @tc.name: RunningLockNative051_1
  * @tc.desc: test DISPLAY_ID_ALL callback does NOT receive specific displayId notifications (exact-match filtering)
@@ -1782,7 +1845,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative055, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "RunningLockNative055 function end!");
 }
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 /**
  * @tc.name: RunningLockNative056
  * @tc.desc: test per-displayId notification transitions (0->1 and 1->0)
@@ -2167,7 +2230,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative064, TestSize.Level1)
     EXPECT_EQ(runningLockMgr->GetRunningLockInner(token)->GetParam().displayId, 0);
 
     runningLockMgr->Lock(token);
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     EXPECT_EQ(runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, 0), 1);
 #endif
     runningLockMgr->UnLock(token);
@@ -2204,7 +2267,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative065, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "RunningLockNative065 function end!");
 }
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
 
 /**
@@ -2226,13 +2289,13 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative067, TestSize.Level1)
     runningLockMgr->CreateRunningLock(tokenAll, paramAll);
 
     sptr<IRemoteObject> token1001 = new RunningLockTokenStub();
-    RunningLockParam param1001 {0, "Lock1001", "", RunningLockType::RUNNINGLOCK_SCREEN, -1, pid, uid, 1001};
+    RunningLockParam param1001 {1, "Lock1001", "", RunningLockType::RUNNINGLOCK_SCREEN, -1, pid, uid, 1001};
     runningLockMgr->CreateRunningLock(token1001, param1001);
 
     runningLockMgr->Lock(tokenAll);
     runningLockMgr->Lock(token1001);
 
-    EXPECT_EQ(runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, UINT64_MAX), 2);
+    EXPECT_EQ(runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, UINT64_MAX), 1);
     EXPECT_EQ(runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, 1001), 2);
 
     runningLockMgr->UnLock(tokenAll);
@@ -2648,6 +2711,53 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative081, TestSize.Level1)
     runningLockMgr->UnRegisterRunningLockChangedCallback(callback->AsObject(), 1001);
 
     POWER_HILOGI(LABEL_TEST, "RunningLockNative081 function end!");
+}
+
+/**
+ * @tc.name: RunningLockNative082
+ * @tc.desc: test QueryRunningLockLists with displayId filtering (DISPLAY_ID_ALL locks visible for specific displayId;
+ * DISPLAY_ID_ALL query returns only global locks)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RunningLockNativeTest, RunningLockNative082, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative082 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto runningLockMgr = pmsTest->GetRunningLockMgr();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+
+    sptr<IRemoteObject> token1001 = new RunningLockTokenStub();
+    RunningLockParam param1001 {0, "Lock1001", "", RunningLockType::RUNNINGLOCK_SCREEN, -1, pid, uid, 1001};
+    runningLockMgr->CreateRunningLock(token1001, param1001);
+    runningLockMgr->Lock(token1001);
+
+    sptr<IRemoteObject> tokenAll = new RunningLockTokenStub();
+    RunningLockParam paramAll {1, "LockAll", "", RunningLockType::RUNNINGLOCK_SCREEN, -1, pid, uid, UINT64_MAX};
+    runningLockMgr->CreateRunningLock(tokenAll, paramAll);
+    runningLockMgr->Lock(tokenAll);
+
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
+    std::map<std::string, RunningLockInfo> lists1001;
+    runningLockMgr->QueryRunningLockLists(lists1001, 1001);
+    EXPECT_EQ(lists1001.size(), 2);
+
+    std::map<std::string, RunningLockInfo> listsAll;
+    runningLockMgr->QueryRunningLockLists(listsAll, UINT64_MAX);
+    EXPECT_EQ(listsAll.size(), 1);
+
+    std::map<std::string, RunningLockInfo> lists1002;
+    runningLockMgr->QueryRunningLockLists(lists1002, 1002);
+    EXPECT_EQ(lists1002.size(), 1);
+#endif
+
+    runningLockMgr->UnLock(token1001);
+    runningLockMgr->UnLock(tokenAll);
+    runningLockMgr->ReleaseLock(token1001);
+    runningLockMgr->ReleaseLock(tokenAll);
+
+    POWER_HILOGI(LABEL_TEST, "RunningLockNative082 function end!");
 }
 
 /**

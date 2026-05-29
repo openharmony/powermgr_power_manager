@@ -460,7 +460,7 @@ std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(const std::string
     return runningLock;
 }
 
-#ifdef POWER_MANAGER_ENABLE_DISPLAY_ID_FILTERING
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 std::shared_ptr<RunningLock> PowerMgrClient::CreateRunningLock(
     const std::string& name, RunningLockType type, uint64_t displayId)
 {
