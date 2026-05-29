@@ -71,10 +71,12 @@ void PowerMgrClientCallbackTest::AsyncUlsrTestCallback::OnAsyncWakeup()
 }
 
 void PowerMgrClientCallbackTest::RunningLockChangedTestCallback::OnAsyncScreenRunningLockChanged(
-    RunningLockChangeState state)
+    RunningLockChangeState state, uint64_t displayId)
 {
-    POWER_HILOGI(LABEL_TEST, "RunningLockChangedTestCallback::OnAsyncScreenRunningLockChanged, state = %{public}d.",
-        static_cast<int32_t>(state));
+    POWER_HILOGI(LABEL_TEST,
+        "RunningLockChangedTestCallback::OnAsyncScreenRunningLockChanged, state = %{public}d, displayId = "
+        "%{public}" PRIu64,
+        static_cast<int32_t>(state), displayId);
 }
 
 namespace {

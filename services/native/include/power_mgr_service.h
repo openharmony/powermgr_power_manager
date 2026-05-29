@@ -115,7 +115,8 @@ public:
         const std::vector<int32_t>& workSources) override;
     virtual PowerErrors Lock(const sptr<IRemoteObject>& remoteObj, int32_t timeOutMs = -1) override;
     virtual PowerErrors UnLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;
-    virtual bool QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists) override;
+    virtual bool QueryRunningLockLists(
+        std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId = UINT64_MAX) override;
     virtual void ForceUnLock(const sptr<IRemoteObject>& remoteObj);
     virtual bool IsUsed(const sptr<IRemoteObject>& remoteObj) override;
     virtual bool ProxyRunningLock(bool isProxied, pid_t pid, pid_t uid) override;
@@ -144,9 +145,10 @@ public:
 
     virtual bool RegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
     virtual bool UnRegisterRunningLockCallback(const sptr<IPowerRunninglockCallback>& callback) override;
-    virtual PowerErrors RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback) override;
+    virtual PowerErrors RegisterRunningLockChangedCallback(
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX) override;
     virtual PowerErrors UnRegisterRunningLockChangedCallback(
-        const sptr<IRunningLockChangedCallback>& callback) override;
+        const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId = UINT64_MAX) override;
     virtual bool SetDisplaySuspend(bool enable) override;
     virtual PowerErrors SetDeviceMode(const PowerMode& mode) override;
     virtual PowerMode GetDeviceMode() override;
@@ -157,7 +159,8 @@ public:
         const sptr<IRemoteObject>& token, pid_t appid = -1) override;
     virtual PowerErrors LockScreenAfterTimingOutWithAppid(
         pid_t appid, bool lockScreen, const sptr<IRemoteObject>& token) override;
-    virtual PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result) override;
+    virtual PowerErrors IsRunningLockEnabled(
+        const RunningLockType type, bool& result, uint64_t displayId = UINT64_MAX) override;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;
     virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) override;
@@ -201,7 +204,8 @@ public:
     void HibernateControllerInit();
 #endif
     bool IsCollaborationState();
-    void QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists);
+    void QueryRunningLockListsInner(
+        std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId = UINT64_MAX);
     bool IsExistAudioStream(pid_t uid);
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     void WakeupActionControllerInit();

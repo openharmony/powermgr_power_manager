@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace PowerMgr {
+constexpr uint64_t RUNNINGLOCK_DISPLAY_ID_ALL = UINT64_MAX;
 /**
  * Enumerates runninglock operation return status
  */
@@ -53,6 +54,7 @@ struct RunningLockParam {
     int32_t timeoutMs = -1;
     int32_t pid = 0;
     int32_t uid = 0;
+    uint64_t displayId = RUNNINGLOCK_DISPLAY_ID_ALL;
 };
 } // namespace PowerMgr
 } // namespace OHOS

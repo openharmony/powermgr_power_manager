@@ -30,7 +30,7 @@ public:
     explicit RunningLockChangedCallbackProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<IRunningLockChangedCallback>(impl) {}
     virtual ~RunningLockChangedCallbackProxy() = default;
-    virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) override;
+    virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId) override;
 
 private:
     static inline BrokerDelegator<RunningLockChangedCallbackProxy> delegator_;

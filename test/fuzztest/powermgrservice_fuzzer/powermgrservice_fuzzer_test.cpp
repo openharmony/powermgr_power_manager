@@ -98,7 +98,7 @@ void PowerServiceFuzzTest()
     g_service->SetForceTimingOutIpc(enabled, token, powerError);
     g_service->LockScreenAfterTimingOutIpc(
         enabledLockScreen, checkLock, sendScreenOffEvent, token, powerError);
-    g_service->IsRunningLockEnabledIpc(lockType, result, powerError);
+    g_service->IsRunningLockEnabledIpc(lockType, UINT64_MAX, result, powerError);
 }
 
 void PowerServiceCallbackFuzzTest()

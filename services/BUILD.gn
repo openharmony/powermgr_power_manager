@@ -71,6 +71,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/proximity_sensor_controller/proximity_controller_base.cpp",
     "native/src/runninglock/running_lock_inner.cpp",
     "native/src/runninglock/running_lock_mgr.cpp",
+    "native/src/runninglock/running_lock_callback_manager.cpp",
     "native/src/runninglock/running_lock_proxy.cpp",
     "native/src/runninglock/running_lock_timer_handler.cpp",
     "native/src/screenoffpre/screen_off_pre_controller.cpp",

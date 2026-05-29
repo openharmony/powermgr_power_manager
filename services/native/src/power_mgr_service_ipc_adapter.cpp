@@ -217,10 +217,11 @@ int32_t PowerMgrServiceAdapter::UnLockIpc(
     return ERR_OK;
 }
 
-int32_t PowerMgrServiceAdapter::QueryRunningLockListsIpc(std::map<std::string, RunningLockInfo>& runningLockLists)
+int32_t PowerMgrServiceAdapter::QueryRunningLockListsIpc(
+    uint64_t displayId, std::map<std::string, RunningLockInfo>& runningLockLists)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::QueryRunningLockLists", true);
-    QueryRunningLockLists(runningLockLists);
+    QueryRunningLockLists(runningLockLists, displayId);
     int32_t num = static_cast<int32_t>(runningLockLists.size());
     RETURN_IF_WITH_RET(num > MAX_PARAM_NUM, INIT_VALUE);
     return ERR_OK;
@@ -241,21 +242,21 @@ int32_t PowerMgrServiceAdapter::UnRegisterRunningLockCallbackIpc(const sptr<IPow
 }
 
 int32_t PowerMgrServiceAdapter::RegisterRunningLockChangedCallbackIpc(
-    const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError)
+    const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId, int32_t& powerError)
 {
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterRunningLockChangedCallback", false);
-    powerError = static_cast<int32_t>(RegisterRunningLockChangedCallback(callback));
+    powerError = static_cast<int32_t>(RegisterRunningLockChangedCallback(callback, displayId));
 #endif
     return ERR_OK;
 }
 
 int32_t PowerMgrServiceAdapter::UnRegisterRunningLockChangedCallbackIpc(
-    const sptr<IRunningLockChangedCallback>& callback, int32_t& powerError)
+    const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId, int32_t& powerError)
 {
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterRunningLockChangedCallback", false);
-    powerError = static_cast<int32_t>(UnRegisterRunningLockChangedCallback(callback));
+    powerError = static_cast<int32_t>(UnRegisterRunningLockChangedCallback(callback, displayId));
 #endif
     return ERR_OK;
 }
@@ -527,11 +528,12 @@ int32_t PowerMgrServiceAdapter::LockScreenAfterTimingOutWithAppidIpc(pid_t appid
     return ERR_OK;
 }
 
-int32_t PowerMgrServiceAdapter::IsRunningLockEnabledIpc(int32_t lockType, bool& result, int32_t& powerError)
+int32_t PowerMgrServiceAdapter::IsRunningLockEnabledIpc(
+    int32_t lockType, uint64_t displayId, bool& result, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::IsRunningLockEnabled", false);
     RunningLockType type = static_cast<RunningLockType>(lockType);
-    powerError = static_cast<int32_t>(IsRunningLockEnabled(type, result));
+    powerError = static_cast<int32_t>(IsRunningLockEnabled(type, result, displayId));
     return ERR_OK;
 }
 

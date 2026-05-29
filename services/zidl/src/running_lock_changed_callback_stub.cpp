@@ -41,7 +41,9 @@ int RunningLockChangedCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel
     if (code == static_cast<uint32_t>(RunningLockChangedCallbackInterfaceCode::RUNNINGLOCK_STATE_CHANGED)) {
         uint32_t state;
         RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint32, state, E_READ_PARCEL_ERROR);
-        OnAsyncScreenRunningLockChanged(static_cast<RunningLockChangeState>(state));
+        uint64_t displayId;
+        RETURN_IF_READ_PARCEL_FAILED_WITH_RET(data, Uint64, displayId, E_READ_PARCEL_ERROR);
+        OnAsyncScreenRunningLockChanged(static_cast<RunningLockChangeState>(state), displayId);
     } else {
         ret = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }

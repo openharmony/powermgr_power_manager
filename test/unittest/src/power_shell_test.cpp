@@ -133,75 +133,28 @@ PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reaso
     return PowerErrors::ERR_OK;
 }
 
-bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+bool PowerMgrClient::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId)
 {
     runningLockLists.clear();
-    std::string lockid1 = "lockid1";
-    RunningLockInfo runningLockInfo1("locktest1", RunningLockType::RUNNINGLOCK_SCREEN);
-    runningLockInfo1.bundleName = "bundle1";
-    runningLockInfo1.pid = 1;
-    runningLockInfo1.uid = 1;
-    std::string lockid2 = "lockid2";
-    RunningLockInfo runningLockInfo2("locktest2", RunningLockType::RUNNINGLOCK_BACKGROUND);
-    runningLockInfo2.bundleName = "bundle2";
-    runningLockInfo2.pid = 2;
-    runningLockInfo2.uid = 2;
-    std::string lockid3 = "lockid3";
-    RunningLockInfo runningLockInfo3("locktest3", RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL);
-    runningLockInfo3.bundleName = "bundle3";
-    runningLockInfo3.pid = 3;
-    runningLockInfo3.uid = 3;
-    std::string lockid4 = "lockid4";
-    RunningLockInfo runningLockInfo4("locktest4", RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
-    runningLockInfo4.bundleName = "bundle4";
-    runningLockInfo4.pid = 4;
-    runningLockInfo4.uid = 4;
-    std::string lockid5 = "lockid5";
-    RunningLockInfo runningLockInfo5("locktest5", RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION);
-    runningLockInfo5.bundleName = "bundle5";
-    runningLockInfo5.pid = 5;
-    runningLockInfo5.uid = 5;
-    std::string lockid6 = "lockid6";
-    RunningLockInfo runningLockInfo6("locktest6", RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
-    runningLockInfo6.bundleName = "bundle6";
-    runningLockInfo6.pid = 6;
-    runningLockInfo6.uid = 6;
-    std::string lockid7 = "lockid7";
-    RunningLockInfo runningLockInfo7("locktest7", RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT);
-    runningLockInfo7.bundleName = "bundle7";
-    runningLockInfo7.pid = 7;
-    runningLockInfo7.uid = 7;
-    std::string lockid8 = "lockid8";
-    RunningLockInfo runningLockInfo8("locktest8", RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION);
-    runningLockInfo8.bundleName = "bundle8";
-    runningLockInfo8.pid = 8;
-    runningLockInfo8.uid = 8;
-    std::string lockid9 = "lockid9";
-    RunningLockInfo runningLockInfo9("locktest9", RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
-    runningLockInfo9.bundleName = "bundle9";
-    runningLockInfo9.pid = 9;
-    runningLockInfo9.uid = 9;
-    std::string lockid10 = "lockid10";
-    RunningLockInfo runningLockInfo10("locktest10", RunningLockType::RUNNINGLOCK_BUTT);
-    runningLockInfo10.bundleName = "bundle10";
-    runningLockInfo10.pid = 10;
-    runningLockInfo10.uid = 10;
-    std::string lockid11 = "lockid11";
-    RunningLockInfo runningLockInfo11("locktest11", static_cast<RunningLockType>(-1));
-    runningLockInfo11.bundleName = "bundle11";
-    runningLockInfo11.pid = 11;
-    runningLockInfo11.uid = 11;
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid1, runningLockInfo1));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid2, runningLockInfo2));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid3, runningLockInfo3));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid4, runningLockInfo4));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid5, runningLockInfo5));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid6, runningLockInfo6));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid7, runningLockInfo7));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid8, runningLockInfo8));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid9, runningLockInfo9));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid10, runningLockInfo10));
-    runningLockLists.insert(std::pair<std::string, RunningLockInfo>(lockid11, runningLockInfo11));
+    std::vector<std::pair<std::string, RunningLockInfo>> mockLocks = {
+        {"lockid1",  RunningLockInfo("locktest1",  RunningLockType::RUNNINGLOCK_SCREEN)                  },
+        {"lockid2",  RunningLockInfo("locktest2",  RunningLockType::RUNNINGLOCK_BACKGROUND)              },
+        {"lockid3",  RunningLockInfo("locktest3",  RunningLockType::RUNNINGLOCK_PROXIMITY_SCREEN_CONTROL)},
+        {"lockid4",  RunningLockInfo("locktest4",  RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE)        },
+        {"lockid5",  RunningLockInfo("locktest5",  RunningLockType::RUNNINGLOCK_BACKGROUND_NOTIFICATION) },
+        {"lockid6",  RunningLockInfo("locktest6",  RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO)        },
+        {"lockid7",  RunningLockInfo("locktest7",  RunningLockType::RUNNINGLOCK_BACKGROUND_SPORT)        },
+        {"lockid8",  RunningLockInfo("locktest8",  RunningLockType::RUNNINGLOCK_BACKGROUND_NAVIGATION)   },
+        {"lockid9",  RunningLockInfo("locktest9",  RunningLockType::RUNNINGLOCK_BACKGROUND_TASK)         },
+        {"lockid10", RunningLockInfo("locktest10", RunningLockType::RUNNINGLOCK_BUTT)                    },
+        {"lockid11", RunningLockInfo("locktest11", static_cast<RunningLockType>(-1))                     },
+    };
+    for (size_t i = 0; i < mockLocks.size(); ++i) {
+        mockLocks[i].second.bundleName = "bundle" + std::to_string(i + 1);
+        mockLocks[i].second.pid = static_cast<int32_t>(i + 1);
+        mockLocks[i].second.uid = static_cast<int32_t>(i + 1);
+        runningLockLists.insert(mockLocks[i]);
+    }
     g_lastCalled = "QueryRunningLockLists";
     return true;
 }

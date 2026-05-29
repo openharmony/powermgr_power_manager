@@ -97,6 +97,15 @@ static ffrt::mutex powerInitMutex_;
 bool g_isPickUpOpen = false;
 #endif
 constexpr int32_t API19 = 19;
+
+uint64_t NormalizeDisplayId(uint64_t displayId)
+{
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
+    return displayId;
+#else
+    return UINT64_MAX;
+#endif
+}
 } // namespace
 
 std::atomic_bool PowerMgrService::isBootCompleted_ = false;
@@ -1569,8 +1578,8 @@ std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
     return tempBundleName;
 }
 
-RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& info,
-    const uint64_t lockid, int32_t timeOutMS)
+RunningLockParam PowerMgrService::FillRunningLockParam(
+    const RunningLockInfo& info, const uint64_t lockid, int32_t timeOutMS)
 {
     RunningLockParam filledParam {};
     filledParam.lockid = lockid;
@@ -1583,6 +1592,7 @@ RunningLockParam PowerMgrService::FillRunningLockParam(const RunningLockInfo& in
     filledParam.pid = IPCSkeleton::GetCallingPid();
     filledParam.uid = IPCSkeleton::GetCallingUid();
     filledParam.bundleName = GetBundleNameByUid(filledParam.uid);
+    filledParam.displayId = info.displayId;
     return filledParam;
 }
 
@@ -1729,19 +1739,21 @@ PowerErrors PowerMgrService::UnLock(const sptr<IRemoteObject>& remoteObj, const 
     return PowerErrors::ERR_OK;
 }
 
-bool PowerMgrService::QueryRunningLockLists(std::map<std::string, RunningLockInfo>& runningLockLists)
+bool PowerMgrService::QueryRunningLockLists(
+    std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId)
 {
     std::lock_guard lock(lockMutex_);
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return false;
     }
-    QueryRunningLockListsInner(runningLockLists);
+    QueryRunningLockListsInner(runningLockLists, NormalizeDisplayId(displayId));
     return true;
 }
 
-void PowerMgrService::QueryRunningLockListsInner(std::map<std::string, RunningLockInfo>& runningLockLists)
+void PowerMgrService::QueryRunningLockListsInner(
+    std::map<std::string, RunningLockInfo>& runningLockLists, uint64_t displayId)
 {
-    runningLockMgr_->QueryRunningLockLists(runningLockLists);
+    runningLockMgr_->QueryRunningLockLists(runningLockLists, displayId);
 }
 
 bool PowerMgrService::IsExistAudioStream(pid_t uid)
@@ -2811,14 +2823,20 @@ void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEven
     }
 }
 
-PowerErrors PowerMgrService::IsRunningLockEnabled(const RunningLockType type, bool& result)
+PowerErrors PowerMgrService::IsRunningLockEnabled(const RunningLockType type, bool& result, uint64_t displayId)
 {
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     std::lock_guard lock(lockMutex_);
-    uint32_t num = runningLockMgr_->GetValidRunningLockNum(type);
+    uint64_t normalizedDisplayId = NormalizeDisplayId(displayId);
+    uint32_t num = runningLockMgr_->GetValidRunningLockNum(type, normalizedDisplayId);
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
+    POWER_HILOGI(COMP_SVC, "Hold running lock type:%{public}u, num:%{public}u, D=%{public}" PRIu64,
+        static_cast<uint32_t>(type), num, normalizedDisplayId);
+#else
     POWER_HILOGI(COMP_SVC, "Hold running lock type:%{public}u, num:%{public}u", static_cast<uint32_t>(type), num);
+#endif
     result = num > 0 ? true : false;
     return PowerErrors::ERR_OK;
 }
@@ -2952,7 +2970,8 @@ PowerErrors PowerMgrService::SetProxFilteringStrategy(
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::RegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+PowerErrors PowerMgrService::RegisterRunningLockChangedCallback(
+    const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId)
 {
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -2968,22 +2987,29 @@ PowerErrors PowerMgrService::RegisterRunningLockChangedCallback(const sptr<IRunn
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    uint64_t normalizedDisplayId = NormalizeDisplayId(displayId);
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d, displayId: %{public}" PRIu64,
+        __func__, pid, uid, normalizedDisplayId);
+#else
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
-    runningLockMgr_->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid);
+#endif
+    runningLockMgr_->RegisterRunningLockChangedCallback(callback->AsObject(), pid, uid, normalizedDisplayId);
     std::function<void(const sptr<IRemoteObject>&)> cb = [](const sptr<IRemoteObject>& remote) {
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         RETURN_IF(pms == nullptr);
         auto rlm = pms->GetRunningLockMgr();
         RETURN_IF(rlm == nullptr);
-        rlm->UnRegisterRunningLockChangedCallback(remote);
-        POWER_HILOGI(FEATURE_RUNNING_LOCK, "RunningLockChangedCallback died, removed");
+        rlm->RemoveAllRunningLockChangedCallbacks(remote);
+        POWER_HILOGI(FEATURE_RUNNING_LOCK, "RunningLockChangedCallback died, removed all");
     };
     DeathRecipientManager::GetInstance().AddDeathRecipient(callback->AsObject(), {cb, __func__, pid, uid});
 #endif
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::UnRegisterRunningLockChangedCallback(const sptr<IRunningLockChangedCallback>& callback)
+PowerErrors PowerMgrService::UnRegisterRunningLockChangedCallback(
+    const sptr<IRunningLockChangedCallback>& callback, uint64_t displayId)
 {
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -2999,9 +3025,17 @@ PowerErrors PowerMgrService::UnRegisterRunningLockChangedCallback(const sptr<IRu
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
+    uint64_t normalizedDisplayId = NormalizeDisplayId(displayId);
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
+    POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d, displayId: %{public}" PRIu64,
+        __func__, pid, uid, normalizedDisplayId);
+#else
     POWER_HILOGI(FEATURE_RUNNING_LOCK, "%{public}s: pid: %{public}d, uid: %{public}d", __func__, pid, uid);
-    runningLockMgr_->UnRegisterRunningLockChangedCallback(callback->AsObject());
-    DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(callback->AsObject());
+#endif
+    runningLockMgr_->UnRegisterRunningLockChangedCallback(callback->AsObject(), normalizedDisplayId);
+    if (!runningLockMgr_->HasRunningLockChangedCallbacks(callback->AsObject())) {
+        DeathRecipientManager::GetInstance().RemoveDeathRecipientObj(callback->AsObject());
+    }
 #endif
     return PowerErrors::ERR_OK;
 }

@@ -27,7 +27,7 @@ enum class RunningLockChangeState : uint32_t {
 
 class IRunningLockChangedCallback : public IRemoteBroker {
 public:
-    virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state) = 0;
+    virtual void OnAsyncScreenRunningLockChanged(RunningLockChangeState state, uint64_t displayId) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.powermgr.IRunningLockChangedCallback");
 };
