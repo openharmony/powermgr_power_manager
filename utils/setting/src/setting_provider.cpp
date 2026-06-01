@@ -36,7 +36,6 @@ const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
 const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 const std::string SETTING_URI_PROXY_USER = "datashare:///com.ohos.settingsdata/entry/settingsdata/";
-const std::string SETTING_URI_PROXY_USER_ADAPT = "USER_SETTINGSDATA_SECURE_##USERID##?Proxy=true";
 constexpr const char *USERID_REPLACE = "##USERID##";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 } // namespace
@@ -319,17 +318,24 @@ bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShar
     return true;
 }
 
+std::string SettingProvider::GetUriPrefix(int32_t userId, const std::string& key)
+{
+    if (IsNeedMultiUser(key)) {
+        static const std::regex pattern(USERID_REPLACE);
+        auto specialUri = std::regex_replace(needMultiUserStrMap[key], pattern, std::to_string(userId));
+        POWER_HILOGI(COMP_UTILS, "the non-global uri is %{public}s&key=%{public}s", specialUri.c_str(), key.c_str());
+        return specialUri;
+    } else {
+        return SETTING_URI_NORMAL;
+    }
+}
+
 Uri SettingProvider::AssembleUri(const std::string& key)
 {
     std::lock_guard<ffrt::mutex> lock(g_settingMutex);
-    if (IsNeedMultiUser(key)) {
-        std::string userSetting = ReplaceUserIdForUri(currentUserId_);
-        std::string specialUri = SETTING_URI_PROXY_USER + userSetting + "&key=" + key;
-        POWER_HILOGI(COMP_UTILS, "the non-global uri is %{public}s", specialUri.c_str());
-        Uri uri(specialUri);
-        return uri;
-    }
-    Uri uri(SETTING_URI_PROXY + "&key=" + key);
+    auto userSetting = GetUriPrefix(currentUserId_, key);
+    std::string specialUri = SETTING_URI_PROXY_USER + userSetting + "&key=" + key;
+    Uri uri(specialUri);
     return uri;
 }
 
@@ -409,31 +415,22 @@ ErrCode SettingProvider::GetStringValueGlobal(const std::string& key, std::strin
 
 bool SettingProvider::IsNeedMultiUser(const std::string& key)
 {
-    if (std::find(needMultiUserStrVec.begin(), needMultiUserStrVec.end(), key) != needMultiUserStrVec.end()) {
-        return true;
-    }
-    return false;
+    auto it = needMultiUserStrMap.find(key);
+    return it != needMultiUserStrMap.end();
 }
 
-bool SettingProvider::AddMultiUserKey(const std::string& key)
+bool SettingProvider::AddMultiUserKey(const std::string& key, const std::string& value)
 {
     std::lock_guard<ffrt::mutex> lock(g_settingMutex);
     if (IsNeedMultiUser(key)) {
         return true;
     }
-    if (needMultiUserStrVec.size() >= MULTI_USER_STR_VEC_SIZE_MAX) {
-        POWER_HILOGW(COMP_UTILS, "Vector capacity limit reached: size=%{public}zu", needMultiUserStrVec.size());
+    if (needMultiUserStrMap.size() >= MULTI_USER_STR_VEC_SIZE_MAX) {
+        POWER_HILOGW(COMP_UTILS, "capacity limit reached: size=%{public}zu", needMultiUserStrMap.size());
         return false;
     }
-    needMultiUserStrVec.emplace_back(key);
+    needMultiUserStrMap.emplace(key, value);
     return true;
-}
-
-std::string SettingProvider::ReplaceUserIdForUri(int32_t userId)
-{
-    std::string tempUri = SETTING_URI_PROXY_USER_ADAPT;
-    std::regex pattern(USERID_REPLACE);
-    return std::regex_replace(tempUri, pattern, std::to_string(userId));
 }
 
 void SettingProvider::UpdateCurrentUserId()
