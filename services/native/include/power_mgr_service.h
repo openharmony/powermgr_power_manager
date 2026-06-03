@@ -39,6 +39,7 @@
 #include "sp_singleton.h"
 #include "suspend_controller.h"
 #include "wakeup_controller.h"
+#include "hibernate/hibernate_callback_priority.h"
 #ifdef POWER_MANAGER_WAKEUP_ACTION
 #include "wakeup_action_controller.h"
 #endif
@@ -131,7 +132,8 @@ public:
     virtual bool RegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback,
         TakeOverSuspendPriority priority) override;
     virtual bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback) override;
-    virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
+    virtual bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+        HibernateCallbackPriority priority) override;
     virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
 
     virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) override;

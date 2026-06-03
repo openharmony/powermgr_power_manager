@@ -23,6 +23,7 @@
 #include "power_mgr_service_ipc_adapter.h"
 #include "power_mgr_stub.h"
 #include "sp_singleton.h"
+#include "sync_hibernate_callback_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -163,7 +164,8 @@ public:
     {
         return true;
     }
-    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+    bool RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+        HibernateCallbackPriority priority)
     {
         return true;
     }
@@ -450,5 +452,120 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter007, TestSize.L
     ret = adapter->GetShutdownReasonIpc(setReasonSecond, powerError);
     EXPECT_TRUE(ret == static_cast<int32_t>(PowerErrors::ERR_OK));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter007 function end!");
+}
+
+class TestSyncHibernateCallback : public IRemoteStub<ISyncHibernateCallback> {
+public:
+    TestSyncHibernateCallback() {};
+    virtual ~TestSyncHibernateCallback() {};
+    virtual void OnSyncHibernate() override {};
+    virtual void OnSyncWakeup(bool hibernateResult = false) override {};
+};
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter008
+ * @tc.desc: test RegisterSyncHibernateCallbackIpc with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter008, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter008 function start!");
+    sptr<TestSyncHibernateCallback> callback = new TestSyncHibernateCallback();
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->RegisterSyncHibernateCallbackIpc(callback,
+        static_cast<int32_t>(HibernateCallbackPriority::DEFAULT));
+    EXPECT_EQ(ret, ERR_OK);
+    ret = adapter->UnRegisterSyncHibernateCallbackIpc(callback);
+    EXPECT_EQ(ret, ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter008 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter009
+ * @tc.desc: test RegisterSyncHibernateCallbackIpc with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter009, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter009 function start!");
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->RegisterSyncHibernateCallbackIpc(nullptr,
+        static_cast<int32_t>(HibernateCallbackPriority::DEFAULT));
+    EXPECT_EQ(ret, ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter009 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter010
+ * @tc.desc: test UnRegisterSyncHibernateCallbackIpc with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter010, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter010 function start!");
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->UnRegisterSyncHibernateCallbackIpc(nullptr);
+    EXPECT_EQ(ret, ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter010 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter011
+ * @tc.desc: test RegisterSyncHibernateCallbackIpc with all priority values
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter011, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter011 function start!");
+    sptr<TestSyncHibernateCallback> cbLow = new TestSyncHibernateCallback();
+    sptr<TestSyncHibernateCallback> cbDefault = new TestSyncHibernateCallback();
+    sptr<TestSyncHibernateCallback> cbHigh = new TestSyncHibernateCallback();
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->RegisterSyncHibernateCallbackIpc(cbLow,
+        static_cast<int32_t>(HibernateCallbackPriority::LOW));
+    EXPECT_EQ(ret, ERR_OK);
+    ret = adapter->RegisterSyncHibernateCallbackIpc(cbDefault,
+        static_cast<int32_t>(HibernateCallbackPriority::DEFAULT));
+    EXPECT_EQ(ret, ERR_OK);
+    ret = adapter->RegisterSyncHibernateCallbackIpc(cbHigh,
+        static_cast<int32_t>(HibernateCallbackPriority::HIGH));
+    EXPECT_EQ(ret, ERR_OK);
+    adapter->UnRegisterSyncHibernateCallbackIpc(cbLow);
+    adapter->UnRegisterSyncHibernateCallbackIpc(cbDefault);
+    adapter->UnRegisterSyncHibernateCallbackIpc(cbHigh);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter011 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter012
+ * @tc.desc: test RegisterSyncHibernateCallbackIpc with invalid priority value
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter012, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter012 function start!");
+    sptr<TestSyncHibernateCallback> callback = new TestSyncHibernateCallback();
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->RegisterSyncHibernateCallbackIpc(callback, 999);
+    EXPECT_EQ(ret, ERR_OK);
+    adapter->UnRegisterSyncHibernateCallbackIpc(callback);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter012 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter013
+ * @tc.desc: test register and unregister multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter013, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter013 function start!");
+    sptr<TestSyncHibernateCallback> callback = new TestSyncHibernateCallback();
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    int32_t ret = adapter->RegisterSyncHibernateCallbackIpc(callback,
+        static_cast<int32_t>(HibernateCallbackPriority::DEFAULT));
+    EXPECT_EQ(ret, ERR_OK);
+    ret = adapter->UnRegisterSyncHibernateCallbackIpc(callback);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = adapter->RegisterSyncHibernateCallbackIpc(callback,
+        static_cast<int32_t>(HibernateCallbackPriority::HIGH));
+    EXPECT_EQ(ret, ERR_OK);
+    ret = adapter->UnRegisterSyncHibernateCallbackIpc(callback);
+    EXPECT_EQ(ret, ERR_OK);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter013 function end!");
 }
 }

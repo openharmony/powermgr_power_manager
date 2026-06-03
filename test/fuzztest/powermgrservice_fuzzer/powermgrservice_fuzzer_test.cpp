@@ -132,7 +132,7 @@ void PowerServiceCallbackFuzzTest()
     g_service->UnRegisterPowerStateCallbackIpc(stateCallback);
     g_service->RegisterSyncSleepCallbackIpc(sleepCallback, priorityValue);
     g_service->UnRegisterSyncSleepCallbackIpc(sleepCallback);
-    g_service->RegisterSyncHibernateCallbackIpc(hibernateCallback);
+    g_service->RegisterSyncHibernateCallbackIpc(hibernateCallback, priorityValue);
     g_service->UnRegisterSyncHibernateCallbackIpc(hibernateCallback);
     g_service->RegisterPowerModeCallbackIpc(modeCallback);
     g_service->UnRegisterPowerModeCallbackIpc(modeCallback);

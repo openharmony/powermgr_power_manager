@@ -120,7 +120,7 @@ HWTEST_F(PowerMgrClientCallbackTest, PowerMgrScreenOffCallback001, TestSize.Leve
 
 /**
  * @tc.name: PowerMgrSyncHibernateCallback001
- * @tc.desc: test SyncHibernateCallback
+ * @tc.desc: test SyncHibernateCallback with priority DEFAULT
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback001, TestSize.Level1)
@@ -129,12 +129,218 @@ HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback001, TestSize.
     bool ret = 0;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
-    ret = powerMgrClient.RegisterSyncHibernateCallback(cb);
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::DEFAULT);
     EXPECT_TRUE(ret);
     ret = 0;
     ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
     EXPECT_TRUE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback001 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback002
+ * @tc.desc: test RegisterSyncHibernateCallback without priority (overload, default priority)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback002, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback002 function start!");
+    bool ret = false;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    ret = false;
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback002 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback003
+ * @tc.desc: test RegisterSyncHibernateCallback with HIGH priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback003, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback003 function start!");
+    bool ret = false;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::HIGH);
+    EXPECT_TRUE(ret);
+    ret = false;
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback003 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback004
+ * @tc.desc: test RegisterSyncHibernateCallback with LOW priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback004, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback004 function start!");
+    bool ret = false;
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::LOW);
+    EXPECT_TRUE(ret);
+    ret = false;
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback004 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback005
+ * @tc.desc: test RegisterSyncHibernateCallback nullptr with overload (no priority)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback005, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback005 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback005 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback006
+ * @tc.desc: test RegisterSyncHibernateCallback nullptr with HIGH priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback006, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback006 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr,
+        HibernateCallbackPriority::HIGH);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback006 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback007
+ * @tc.desc: test RegisterSyncHibernateCallback nullptr with LOW priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback007, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback007 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr,
+        HibernateCallbackPriority::LOW);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback007 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback008
+ * @tc.desc: test UnRegisterSyncHibernateCallback nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback008, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback008 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback008 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback009
+ * @tc.desc: test register same callback twice with different priorities
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback009, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback009 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::LOW);
+    EXPECT_TRUE(ret);
+
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::HIGH);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback009 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback010
+ * @tc.desc: test register multiple callbacks with different priorities then unregister all
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback010, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback010 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cbLow = new PowerSyncHibernateTest1Callback();
+    sptr<ISyncHibernateCallback> cbDefault = new PowerSyncHibernateTest1Callback();
+    sptr<ISyncHibernateCallback> cbHigh = new PowerSyncHibernateTest1Callback();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(cbLow,
+        HibernateCallbackPriority::LOW);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cbDefault);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cbHigh,
+        HibernateCallbackPriority::HIGH);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cbLow);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cbDefault);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cbHigh);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback010 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback011
+ * @tc.desc: test unregister without register
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback011, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback011 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
+    bool ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback011 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrSyncHibernateCallback012
+ * @tc.desc: test register and unregister multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncHibernateCallback012, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback012 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTest1Callback();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.RegisterSyncHibernateCallback(cb,
+        HibernateCallbackPriority::HIGH);
+    EXPECT_TRUE(ret);
+    ret = powerMgrClient.UnRegisterSyncHibernateCallback(cb);
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncHibernateCallback012 function end!");
 }
 
 /**

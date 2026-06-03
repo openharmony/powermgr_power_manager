@@ -14,7 +14,9 @@
  */
 
 #include "hibernate_controller.h"
+#include <datetime_ex.h>
 #include "power_log.h"
+#include "power_common.h"
 #include "system_suspend_controller.h"
 
 namespace OHOS {
@@ -27,41 +29,123 @@ HibernateStatus HibernateController::Hibernate(bool clearMemory)
     return HibernateStatus::HIBERNATE_FAILURE;
 }
 
-void HibernateController::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
+void HibernateController::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    callbacks_.insert(cb);
+    RETURN_IF((remote == nullptr) || (remote.promote() == nullptr))
+    POWER_HILOGW(FEATURE_SUSPEND, "object dead, need remove the callback");
+    auto callback = iface_cast<ISyncHibernateCallback>(remote.promote());
+    UnregisterSyncHibernateCallback(callback);
+}
+
+void HibernateController::AddCallbackToHolder(
+    const sptr<ISyncHibernateCallback>& cb, HibernateCallbackPriority priority)
+{
+    switch (priority) {
+        case HibernateCallbackPriority::LOW: {
+            auto iter = lowPriorityCallbacks_.insert(cb);
+            if (iter.second) {
+                cb->AsObject()->AddDeathRecipient(this);
+            }
+            break;
+        }
+        case HibernateCallbackPriority::DEFAULT: {
+            auto iter = defaultPriorityCallbacks_.insert(cb);
+            if (iter.second) {
+                cb->AsObject()->AddDeathRecipient(this);
+            }
+            break;
+        }
+        case HibernateCallbackPriority::HIGH: {
+            auto iter = highPriorityCallbacks_.insert(cb);
+            if (iter.second) {
+                cb->AsObject()->AddDeathRecipient(this);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void HibernateController::AddCallbackPidUid(const sptr<ISyncHibernateCallback>& cb)
+{
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     cachedRegister_.emplace(cb, std::make_pair(pid, uid));
 }
 
-void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
+void HibernateController::RegisterSyncHibernateCallback(
+    const sptr<ISyncHibernateCallback>& cb, HibernateCallbackPriority priority)
 {
+    RETURN_IF((cb == nullptr) || (cb->AsObject() == nullptr));
     std::lock_guard<std::mutex> lock(mutex_);
-    size_t eraseNum = callbacks_.erase(cb);
-    if (eraseNum == 0) {
-        POWER_HILOGE(FEATURE_SUSPEND, "Cannot remove the hibernate callback");
+    AddCallbackToHolder(cb, priority);
+    AddCallbackPidUid(cb);
+}
+
+void HibernateController::RemoveCallbackFromHolder(const sptr<ISyncHibernateCallback>& cb)
+{
+    auto iter = lowPriorityCallbacks_.find(cb);
+    if (iter != lowPriorityCallbacks_.end()) {
+        lowPriorityCallbacks_.erase(iter);
     }
+    iter = defaultPriorityCallbacks_.find(cb);
+    if (iter != defaultPriorityCallbacks_.end()) {
+        defaultPriorityCallbacks_.erase(iter);
+    }
+    iter = highPriorityCallbacks_.find(cb);
+    if (iter != highPriorityCallbacks_.end()) {
+        highPriorityCallbacks_.erase(iter);
+    }
+}
+
+void HibernateController::RemoveCallbackPidUid(const sptr<ISyncHibernateCallback>& cb)
+{
     auto iter = cachedRegister_.find(cb);
     if (iter != cachedRegister_.end()) {
         cachedRegister_.erase(iter);
     }
 }
 
+void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb)
+{
+    RETURN_IF((cb == nullptr) || (cb->AsObject() == nullptr));
+    std::lock_guard<std::mutex> lock(mutex_);
+    RemoveCallbackFromHolder(cb);
+    cb->AsObject()->RemoveDeathRecipient(this);
+    RemoveCallbackPidUid(cb);
+}
+
+void HibernateController::TriggerCallbacks(const CallbackContainerType& callbacks,
+    bool isPreHibernate, bool hibernateResult)
+{
+    for (const auto& cb : callbacks) {
+        if (cb == nullptr) {
+            continue;
+        }
+        auto iter = cachedRegister_.find(cb);
+        auto pidUid = (iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0);
+        int64_t start = GetTickCount();
+        if (isPreHibernate) {
+            POWER_HILOGI(FEATURE_SUSPEND, "PreHcb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
+            cb->OnSyncHibernate();
+        } else {
+            POWER_HILOGI(FEATURE_SUSPEND, "PostHcb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
+            cb->OnSyncWakeup(hibernateResult);
+        }
+        int64_t cost = GetTickCount() - start;
+        POWER_HILOGI(FEATURE_SUSPEND, "HcbEnd P=%{public}dU=%{public}dT=%{public}ld",
+            pidUid.first, pidUid.second, static_cast<long>(cost));
+    }
+}
+
 void HibernateController::PreHibernate()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    for (const auto &cb : callbacks_) {
-        auto iter = cachedRegister_.find(cb);
-        auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
-        if (cb != nullptr) {
-            // PreHibernate calling callback pid uid
-            POWER_HILOGI(FEATURE_SUSPEND, "PreCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
-            cb->OnSyncHibernate();
-        }
-    }
     prepared_ = true;
+    TriggerCallbacks(highPriorityCallbacks_, true);
+    TriggerCallbacks(defaultPriorityCallbacks_, true);
+    TriggerCallbacks(lowPriorityCallbacks_, true);
 }
 
 void HibernateController::PostHibernate(bool hibernateResult)
@@ -72,15 +156,9 @@ void HibernateController::PostHibernate(bool hibernateResult)
         return;
     }
     prepared_ = false;
-    for (const auto &cb : callbacks_) {
-        auto iter = cachedRegister_.find(cb);
-        auto pidUid = ((iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0));
-        if (cb != nullptr) {
-            // PostHibernate calling callback pid uid
-            POWER_HILOGI(FEATURE_SUSPEND, "PostCb P=%{public}dU=%{public}d", pidUid.first, pidUid.second);
-            cb->OnSyncWakeup(hibernateResult);
-        }
-    }
+    TriggerCallbacks(highPriorityCallbacks_, false, hibernateResult);
+    TriggerCallbacks(defaultPriorityCallbacks_, false, hibernateResult);
+    TriggerCallbacks(lowPriorityCallbacks_, false, hibernateResult);
 }
 } // namespace PowerMgr
 } // namespace OHOS

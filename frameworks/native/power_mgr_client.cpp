@@ -578,9 +578,16 @@ bool PowerMgrClient::UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspe
 
 bool PowerMgrClient::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
 {
+    return RegisterSyncHibernateCallback(callback, HibernateCallbackPriority::DEFAULT);
+}
+
+bool PowerMgrClient::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
+    HibernateCallbackPriority priority)
+{
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET((callback == nullptr) || (proxy == nullptr), false);
-    int32_t ret = proxy->RegisterSyncHibernateCallbackIpc(callback);
+    int32_t priorityValue = static_cast<int32_t>(priority);
+    int32_t ret = proxy->RegisterSyncHibernateCallbackIpc(callback, priorityValue);
     return ret == ERR_OK;
 }
 
