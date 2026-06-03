@@ -1489,7 +1489,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient051, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrClient052
- * @tc.desc: test RegisterSyncHibernateCallback
+ * @tc.desc: test RegisterSyncHibernateCallback with nullptr and DEFAULT priority
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
@@ -1499,14 +1499,13 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient052, TestSize.Level0)
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr,
         HibernateCallbackPriority::DEFAULT);
-    // parameter is nullptr
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient052 function end!");
 }
 
 /**
  * @tc.name: PowerMgrClient053
- * @tc.desc: test unRegisterSyncHibernateCallback
+ * @tc.desc: test UnRegisterSyncHibernateCallback with nullptr
  * @tc.type: FUNC
  * @tc.require: issueI5MJZJ
  */
@@ -1517,6 +1516,50 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient053, TestSize.Level0)
     bool ret = powerMgrClient.UnRegisterSyncHibernateCallback(nullptr);
     EXPECT_FALSE(ret);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient053 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient065
+ * @tc.desc: test RegisterSyncHibernateCallback overload without priority with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient065, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient065 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient065 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient066
+ * @tc.desc: test RegisterSyncHibernateCallback with nullptr and HIGH priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient066, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient066 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr,
+        HibernateCallbackPriority::HIGH);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient066 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient067
+ * @tc.desc: test RegisterSyncHibernateCallback with nullptr and LOW priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient067, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient067 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    bool ret = powerMgrClient.RegisterSyncHibernateCallback(nullptr,
+        HibernateCallbackPriority::LOW);
+    EXPECT_FALSE(ret);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient067 function end!");
 }
 
 /**

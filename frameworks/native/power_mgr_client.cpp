@@ -548,6 +548,11 @@ bool PowerMgrClient::UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspe
     return ret == ERR_OK;
 }
 
+bool PowerMgrClient::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback)
+{
+    return RegisterSyncHibernateCallback(callback, HibernateCallbackPriority::DEFAULT);
+}
+
 bool PowerMgrClient::RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback,
     HibernateCallbackPriority priority)
 {

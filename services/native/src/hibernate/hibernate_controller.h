@@ -59,16 +59,13 @@ private:
     void RemoveCallbackPidUid(const sptr<ISyncHibernateCallback>& cb);
     void TriggerCallbacks(const CallbackContainerType& callbacks, bool isPreHibernate,
         bool hibernateResult = false);
-    CallbackContainerType GetHighPriorityCallbacks();
-    CallbackContainerType GetDefaultPriorityCallbacks();
-    CallbackContainerType GetLowPriorityCallbacks();
 
     bool prepared_ {false};
     std::mutex mutex_;
-    CallbackContainerType highPriorityCallbacks_;
-    CallbackContainerType defaultPriorityCallbacks_;
-    CallbackContainerType lowPriorityCallbacks_;
-    std::map<sptr<ISyncHibernateCallback>, std::pair<int32_t, int32_t>> cachedRegister_;
+    CallbackContainerType highPriorityCallbacks_; // guard by mutex_
+    CallbackContainerType defaultPriorityCallbacks_; // guard by mutex_
+    CallbackContainerType lowPriorityCallbacks_; // guard by mutex_
+    std::map<sptr<ISyncHibernateCallback>, std::pair<int32_t, int32_t>> cachedRegister_; // guard by mutex_
 };
 } // namespace PowerMgr
 } // namespace OHOS

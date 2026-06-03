@@ -88,12 +88,10 @@ void HibernateController::RemoveCallbackFromHolder(const sptr<ISyncHibernateCall
     auto iter = lowPriorityCallbacks_.find(cb);
     if (iter != lowPriorityCallbacks_.end()) {
         lowPriorityCallbacks_.erase(iter);
-        return;
     }
     iter = defaultPriorityCallbacks_.find(cb);
     if (iter != defaultPriorityCallbacks_.end()) {
         defaultPriorityCallbacks_.erase(iter);
-        return;
     }
     iter = highPriorityCallbacks_.find(cb);
     if (iter != highPriorityCallbacks_.end()) {
@@ -118,24 +116,6 @@ void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibern
     RemoveCallbackPidUid(cb);
 }
 
-HibernateController::CallbackContainerType HibernateController::GetHighPriorityCallbacks()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    return highPriorityCallbacks_;
-}
-
-HibernateController::CallbackContainerType HibernateController::GetDefaultPriorityCallbacks()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    return defaultPriorityCallbacks_;
-}
-
-HibernateController::CallbackContainerType HibernateController::GetLowPriorityCallbacks()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    return lowPriorityCallbacks_;
-}
-
 void HibernateController::TriggerCallbacks(const CallbackContainerType& callbacks,
     bool isPreHibernate, bool hibernateResult)
 {
@@ -143,7 +123,6 @@ void HibernateController::TriggerCallbacks(const CallbackContainerType& callback
         if (cb == nullptr) {
             continue;
         }
-        std::lock_guard<std::mutex> lock(mutex_);
         auto iter = cachedRegister_.find(cb);
         auto pidUid = (iter != cachedRegister_.end()) ? iter->second : std::make_pair(0, 0);
         int64_t start = GetTickCount();
@@ -162,28 +141,24 @@ void HibernateController::TriggerCallbacks(const CallbackContainerType& callback
 
 void HibernateController::PreHibernate()
 {
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        prepared_ = true;
-    }
-    TriggerCallbacks(GetHighPriorityCallbacks(), true);
-    TriggerCallbacks(GetDefaultPriorityCallbacks(), true);
-    TriggerCallbacks(GetLowPriorityCallbacks(), true);
+    std::lock_guard<std::mutex> lock(mutex_);
+    prepared_ = true;
+    TriggerCallbacks(highPriorityCallbacks_, true);
+    TriggerCallbacks(defaultPriorityCallbacks_, true);
+    TriggerCallbacks(lowPriorityCallbacks_, true);
 }
 
 void HibernateController::PostHibernate(bool hibernateResult)
 {
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!prepared_) {
-            POWER_HILOGE(FEATURE_SUSPEND, "No need to run OnSyncWakeup");
-            return;
-        }
-        prepared_ = false;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!prepared_) {
+        POWER_HILOGE(FEATURE_SUSPEND, "No need to run OnSyncWakeup");
+        return;
     }
-    TriggerCallbacks(GetHighPriorityCallbacks(), false, hibernateResult);
-    TriggerCallbacks(GetDefaultPriorityCallbacks(), false, hibernateResult);
-    TriggerCallbacks(GetLowPriorityCallbacks(), false, hibernateResult);
+    prepared_ = false;
+    TriggerCallbacks(highPriorityCallbacks_, false, hibernateResult);
+    TriggerCallbacks(defaultPriorityCallbacks_, false, hibernateResult);
+    TriggerCallbacks(lowPriorityCallbacks_, false, hibernateResult);
 }
 } // namespace PowerMgr
 } // namespace OHOS
