@@ -46,6 +46,7 @@ public:
     void SetCoordinated(bool coordinated) override;
     uint32_t GoToSleep(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force) override;
     void RegisterCallback(std::function<void(uint32_t)>& callback) override;
+    bool IsScreenOnStrengthen() override;
 
 private:
     static constexpr const char * const LOCK_TAG_DISPLAY_POWER = "display_power_lock";

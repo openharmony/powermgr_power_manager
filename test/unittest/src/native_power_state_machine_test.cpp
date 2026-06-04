@@ -668,4 +668,86 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine017, TestSize.Level
     stateMachine->HandleProximityClose();
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine017 function end!");
 }
+
+/**
+ * @tc.name: IsScreenOnStrengthen_001
+ * @tc.desc: test IsScreenOnStrengthen returns true when mock returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, IsScreenOnStrengthen_001, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_001 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, IsScreenOnStrengthen()).WillOnce(::testing::Return(true));
+    EXPECT_TRUE(stateMachine->IsScreenOnStrengthen());
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_001 function end!");
+}
+
+/**
+ * @tc.name: IsScreenOnStrengthen_002
+ * @tc.desc: test IsScreenOnStrengthen returns false when mock returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, IsScreenOnStrengthen_002, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_002 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, IsScreenOnStrengthen()).WillOnce(::testing::Return(false));
+    EXPECT_FALSE(stateMachine->IsScreenOnStrengthen());
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_002 function end!");
+}
+
+/**
+ * @tc.name: InitState_001
+ * @tc.desc: test InitState when IsScreenOnStrengthen returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, InitState_001, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "InitState_001 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, IsScreenOnStrengthen()).WillOnce(::testing::Return(true));
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
+        .WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
+    stateMachine->InitState();
+    EXPECT_EQ(stateMachine->GetState(), PowerState::AWAKE);
+    POWER_HILOGI(LABEL_TEST, "InitState_001 function end!");
+}
+
+/**
+ * @tc.name: InitState_002
+ * @tc.desc: test InitState when IsScreenOnStrengthen returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, InitState_002, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "InitState_002 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, IsScreenOnStrengthen()).WillOnce(::testing::Return(false));
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
+        .WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
+    stateMachine->InitState();
+    EXPECT_EQ(stateMachine->GetState(), PowerState::INACTIVE);
+    POWER_HILOGI(LABEL_TEST, "InitState_002 function end!");
+}
 } // namespace

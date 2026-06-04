@@ -26,13 +26,11 @@ enum class SwitchActionType : uint32_t {
     SWITCH_OPEN,
     SWITCH_CLOSE,
     REPORT_SWITCH_STATE,
-    IS_SCREEN_ON,
 };
 
 enum class SwitchActionRet : int32_t {
     DEFAULT = 0,
     HANDLED = 1,
-    IS_SCREEN_ON = 2,
 };
 
 class ISwitchAction {
@@ -51,8 +49,6 @@ public:
                 return DoSwitchClose();
             case SwitchActionType::REPORT_SWITCH_STATE:
                 return DoReportSwitchState();
-            case SwitchActionType::IS_SCREEN_ON:
-                return DoIsScreenOn();
             default:
                 return SwitchActionRet::DEFAULT;
         }
@@ -63,7 +59,6 @@ private:
     virtual SwitchActionRet DoSwitchOpen() { return SwitchActionRet::DEFAULT; }
     virtual SwitchActionRet DoSwitchClose() { return SwitchActionRet::DEFAULT; }
     virtual SwitchActionRet DoReportSwitchState() { return SwitchActionRet::DEFAULT; }
-    virtual SwitchActionRet DoIsScreenOn() { return SwitchActionRet::DEFAULT; }
 };
 
 class DualScreenSwitchAction : public ISwitchAction {
@@ -72,7 +67,6 @@ private:
     virtual SwitchActionRet DoSwitchOpen() override;
     virtual SwitchActionRet DoSwitchClose() override;
     virtual SwitchActionRet DoReportSwitchState() override;
-    virtual SwitchActionRet DoIsScreenOn() override;
 };
 } // namespace PowerMgr
 } // namespace OHOS
