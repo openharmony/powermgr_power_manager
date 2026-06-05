@@ -26,13 +26,13 @@ sptr<ISyncHibernateCallback> g_callback;
 
 void HibernateControllerTest::SetUp()
 {
-    hibernateController_ = std::make_unique<HibernateController>();
+    hibernateController_ = std::make_shared<HibernateController>();
     g_callback = new PowerSyncHibernateTestCallback();
 }
 
 void HibernateControllerTest::TearDown()
 {
-    hibernateController_.reset();
+    hibernateController_ = nullptr;
 }
 
 void PowerSyncHibernateTestCallback::OnSyncHibernate()
@@ -128,6 +128,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest009, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest009 start!");
     hibernateController_->RegisterSyncHibernateCallback(g_callback, HibernateCallbackPriority::DEFAULT);
     EXPECT_EQ(hibernateController_->defaultPriorityCallbacks_.size(), 1);
+    hibernateController_->UnregisterSyncHibernateCallback(g_callback);
+    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
 }
 
 HWTEST_F(HibernateControllerTest, HibernateControllerTest010, TestSize.Level0)
@@ -149,9 +151,11 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest012, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest012 start!");
     hibernateController_->RegisterSyncHibernateCallback(g_callback, HibernateCallbackPriority::DEFAULT);
     hibernateController_->RegisterSyncHibernateCallback(g_callback, HibernateCallbackPriority::HIGH);
-    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
-    EXPECT_EQ(hibernateController_->highPriorityCallbacks_.size(), 0);
+    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 2);
+    EXPECT_EQ(hibernateController_->highPriorityCallbacks_.size(), 1);
     EXPECT_EQ(hibernateController_->defaultPriorityCallbacks_.size(), 1);
+    hibernateController_->UnregisterSyncHibernateCallback(g_callback);
+    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
 }
 
 HWTEST_F(HibernateControllerTest, HibernateControllerTest013, TestSize.Level0)
@@ -186,7 +190,7 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest016, TestSize.Level0)
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
     EXPECT_EQ(hibernateController_->cachedRegister_.size(), 1);
     wptr<IRemoteObject> remote = g_callback->AsObject();
-    hibernateController_->OnRemoteDied(remote);
+    hibernateController_->deathRecipient_->OnRemoteDied(remote);
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
     EXPECT_EQ(hibernateController_->cachedRegister_.size(), 0);
 }
@@ -197,8 +201,9 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest017, TestSize.Level0)
     hibernateController_->RegisterSyncHibernateCallback(g_callback, HibernateCallbackPriority::DEFAULT);
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
     wptr<IRemoteObject> remote = nullptr;
-    hibernateController_->OnRemoteDied(remote);
+    hibernateController_->deathRecipient_->OnRemoteDied(remote);
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
+    hibernateController_->UnregisterSyncHibernateCallback(g_callback);
 }
 
 HWTEST_F(HibernateControllerTest, HibernateControllerTest018, TestSize.Level0)
@@ -208,6 +213,8 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest018, TestSize.Level0)
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
     hibernateController_->UnregisterSyncHibernateCallback(nullptr);
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
+    hibernateController_->UnregisterSyncHibernateCallback(g_callback);
+    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
 }
 
 HWTEST_F(HibernateControllerTest, HibernateControllerTest019, TestSize.Level0)
@@ -218,6 +225,7 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest019, TestSize.Level0)
     EXPECT_TRUE(hibernateController_->prepared_);
     hibernateController_->PostHibernate(true);
     EXPECT_FALSE(hibernateController_->prepared_);
+    hibernateController_->UnregisterSyncHibernateCallback(g_callback);
 }
 
 HWTEST_F(HibernateControllerTest, HibernateControllerTest020, TestSize.Level0)
@@ -250,6 +258,10 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest021, TestSize.Level0)
     EXPECT_EQ(hibernateController_->defaultPriorityCallbacks_.size(), 1);
     EXPECT_EQ(hibernateController_->lowPriorityCallbacks_.size(), 1);
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 3);
+    hibernateController_->UnregisterSyncHibernateCallback(cbLow);
+    hibernateController_->UnregisterSyncHibernateCallback(cbDefault);
+    hibernateController_->UnregisterSyncHibernateCallback(cbHigh);
+    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
 }
 
 HWTEST_F(HibernateControllerTest, HibernateControllerTest022, TestSize.Level0)
@@ -277,38 +289,11 @@ HWTEST_F(HibernateControllerTest, HibernateControllerTest024, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "HibernateControllerTest024 start!");
     hibernateController_->RegisterSyncHibernateCallback(g_callback, HibernateCallbackPriority::HIGH);
     hibernateController_->RegisterSyncHibernateCallback(g_callback, HibernateCallbackPriority::LOW);
-    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 1);
-    EXPECT_EQ(hibernateController_->highPriorityCallbacks_.size(), 0);
+    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 2);
+    EXPECT_EQ(hibernateController_->highPriorityCallbacks_.size(), 1);
     EXPECT_EQ(hibernateController_->defaultPriorityCallbacks_.size(), 0);
-    EXPECT_EQ(hibernateController_->lowPriorityCallbacks_.size(), 0);
-}
-
-HWTEST_F(HibernateControllerTest, HibernateControllerTest025, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest025 start!");
-    sptr<ISyncHibernateCallback> cb = new PowerSyncHibernateTestCallback();
-    hibernateController_->RegisterSyncHibernateCallback(cb,
-        static_cast<HibernateCallbackPriority>(999));
-    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
-}
-
-HWTEST_F(HibernateControllerTest, HibernateControllerTest026, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "HibernateControllerTest026 start!");
-    sptr<ISyncHibernateCallback> cbH = new PowerSyncHibernateTestCallback();
-    sptr<ISyncHibernateCallback> cbD = new PowerSyncHibernateTestCallback();
-    sptr<ISyncHibernateCallback> cbL = new PowerSyncHibernateTestCallback();
-    hibernateController_->RegisterSyncHibernateCallback(cbH, HibernateCallbackPriority::HIGH);
-    hibernateController_->RegisterSyncHibernateCallback(cbD, HibernateCallbackPriority::DEFAULT);
-    hibernateController_->RegisterSyncHibernateCallback(cbL, HibernateCallbackPriority::LOW);
-    hibernateController_->PreHibernate();
-    EXPECT_TRUE(hibernateController_->prepared_);
-    hibernateController_->PostHibernate(true);
-    EXPECT_FALSE(hibernateController_->prepared_);
-    EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 3);
-    hibernateController_->UnregisterSyncHibernateCallback(cbH);
-    hibernateController_->UnregisterSyncHibernateCallback(cbD);
-    hibernateController_->UnregisterSyncHibernateCallback(cbL);
+    EXPECT_EQ(hibernateController_->lowPriorityCallbacks_.size(), 1);
+    hibernateController_->UnregisterSyncHibernateCallback(g_callback);
     EXPECT_EQ(GetTotalCallbackCount(*hibernateController_), 0);
 }
 

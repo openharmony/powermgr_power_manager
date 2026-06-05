@@ -32,12 +32,11 @@ enum class HibernateStatus {
     HIBERNATE_FAILURE,
     HIBERNATE_INVALID_STATUS,
 };
-class HibernateController : public IRemoteObject::DeathRecipient {
+class HibernateController {
 public:
-    HibernateController() {};
+    HibernateController();
     virtual ~HibernateController() = default;
 
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
     virtual HibernateStatus Hibernate(bool clearMemory);
     virtual void RegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& cb,
         HibernateCallbackPriority priority);
@@ -52,6 +51,16 @@ private:
             return lhs->AsObject() < rhs->AsObject();
         }
     };
+
+    class HibernateDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit HibernateDeathRecipient(HibernateController& owner) : owner_(owner) {}
+        void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+        virtual ~HibernateDeathRecipient() = default;
+    private:
+        HibernateController& owner_;
+    };
+
     using CallbackContainerType = std::set<sptr<ISyncHibernateCallback>, HibernateCallbackCompare>;
     void AddCallbackToHolder(const sptr<ISyncHibernateCallback>& cb, HibernateCallbackPriority priority);
     void RemoveCallbackFromHolder(const sptr<ISyncHibernateCallback>& cb);
@@ -62,6 +71,7 @@ private:
 
     bool prepared_ {false};
     std::mutex mutex_;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     CallbackContainerType highPriorityCallbacks_; // guard by mutex_
     CallbackContainerType defaultPriorityCallbacks_; // guard by mutex_
     CallbackContainerType lowPriorityCallbacks_; // guard by mutex_

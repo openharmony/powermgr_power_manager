@@ -21,6 +21,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
+HibernateController::HibernateController()
+{
+    deathRecipient_ = new HibernateDeathRecipient(*this);
+}
+
 HibernateStatus HibernateController::Hibernate(bool clearMemory)
 {
     if (SystemSuspendController::GetInstance().Hibernate()) {
@@ -29,12 +34,15 @@ HibernateStatus HibernateController::Hibernate(bool clearMemory)
     return HibernateStatus::HIBERNATE_FAILURE;
 }
 
-void HibernateController::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void HibernateController::HibernateDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    RETURN_IF((remote == nullptr) || (remote.promote() == nullptr))
-    POWER_HILOGW(FEATURE_SUSPEND, "object dead, need remove the callback");
+    POWER_HILOGW(FEATURE_SUSPEND, "object dead, need remove the hibernate callback");
+    if (remote == nullptr || remote.promote() == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "remote is nullptr");
+        return;
+    }
     auto callback = iface_cast<ISyncHibernateCallback>(remote.promote());
-    UnregisterSyncHibernateCallback(callback);
+    owner_.UnregisterSyncHibernateCallback(callback);
 }
 
 void HibernateController::AddCallbackToHolder(
@@ -44,21 +52,21 @@ void HibernateController::AddCallbackToHolder(
         case HibernateCallbackPriority::LOW: {
             auto iter = lowPriorityCallbacks_.insert(cb);
             if (iter.second) {
-                cb->AsObject()->AddDeathRecipient(this);
+                cb->AsObject()->AddDeathRecipient(deathRecipient_);
             }
             break;
         }
         case HibernateCallbackPriority::DEFAULT: {
             auto iter = defaultPriorityCallbacks_.insert(cb);
             if (iter.second) {
-                cb->AsObject()->AddDeathRecipient(this);
+                cb->AsObject()->AddDeathRecipient(deathRecipient_);
             }
             break;
         }
         case HibernateCallbackPriority::HIGH: {
             auto iter = highPriorityCallbacks_.insert(cb);
             if (iter.second) {
-                cb->AsObject()->AddDeathRecipient(this);
+                cb->AsObject()->AddDeathRecipient(deathRecipient_);
             }
             break;
         }
@@ -112,7 +120,7 @@ void HibernateController::UnregisterSyncHibernateCallback(const sptr<ISyncHibern
     RETURN_IF((cb == nullptr) || (cb->AsObject() == nullptr));
     std::lock_guard<std::mutex> lock(mutex_);
     RemoveCallbackFromHolder(cb);
-    cb->AsObject()->RemoveDeathRecipient(this);
+    cb->AsObject()->RemoveDeathRecipient(deathRecipient_);
     RemoveCallbackPidUid(cb);
 }
 
