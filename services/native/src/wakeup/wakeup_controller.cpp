@@ -571,6 +571,35 @@ void WakeupController::ProcessWakeupReason()
 }
 #endif
 
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void WakeupController::HandleOnlySecondScreenWhenWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason)
+{
+    if (!stateMachine_->IsOnlySecondDisplayModeSupported()) {
+        return;
+    }
+    if ((pms->IsLidEventUsed() && reason == WakeupDeviceType::WAKEUP_DEVICE_LID && !PowerMgrService::isInLidMode_) ||
+        (!pms->IsLidEventUsed() && reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && stateMachine_->IsSwitchOpen())) {
+        POWER_HILOGI(FEATURE_WAKEUP, "power on internal screen when switch open");
+        PowerOnInternalScreen(reason);
+        return;
+    }
+    bool hasExternalScreen = stateMachine_->GetExternalScreenNumber() > 0;
+    bool isNeedEnterOnlySecondScreen = false;
+    if (pms->IsLidEventUsed()) {
+        isNeedEnterOnlySecondScreen = hasExternalScreen && reason != WakeupDeviceType::WAKEUP_DEVICE_LID &&
+            PowerMgrService::isInLidMode_;
+    } else {
+        isNeedEnterOnlySecondScreen = hasExternalScreen && reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH &&
+            !stateMachine_->IsSwitchOpenByPath();
+    }
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController != nullptr && isNeedEnterOnlySecondScreen) {
+        POWER_HILOGI(FEATURE_WAKEUP, "power off internal screen when wake up in switch closed state");
+        suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+    }
+}
+#endif
+
 void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason)
 {
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -603,10 +632,7 @@ void WakeupController::HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDevi
             suspendController->TriggerSyncSleepCallback(true);
         }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-        if (suspendController != nullptr && stateMachine_->GetExternalScreenNumber() > 0 &&
-            reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH && !stateMachine_->IsSwitchOpenByPath()) {
-            suspendController->PowerOffInternalScreen(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
-        }
+        HandleOnlySecondScreenWhenWakeup(pms, reason);
 #endif
     } else {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] state=%{public}u no transitor", stateMachine_->GetState());
@@ -904,8 +930,11 @@ bool WakeupController::NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms,
         skipWakeup = actionRet == SwitchActionRet::DEFAULT;
     }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-    skipWakeup = skipWakeup &&
-        (stateMachine_->GetExternalScreenNumber() <= 0 || !stateMachine_->IsOnlySecondDisplayModeSupported());
+    if (!pms->Is2In1PadMode()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] pc or pc mode, need check ExternalScreen status");
+        skipWakeup = skipWakeup &&
+            (stateMachine_->GetExternalScreenNumber() <= 0 || !stateMachine_->IsOnlySecondDisplayModeSupported());
+    }
 #endif
     if (skipWakeup) {
         POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Switch is closed, skip current wakeup reason: %{public}u", reason);

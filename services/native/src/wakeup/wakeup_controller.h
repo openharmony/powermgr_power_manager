@@ -97,6 +97,7 @@ private:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     bool IsPowerOnInernalScreenOnlyScene(WakeupDeviceType reason) const;
     void ProcessPowerOnInternalScreenOnly(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);
+    void HandleOnlySecondScreenWhenWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);
 #endif
     bool NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason) const;
     void HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);

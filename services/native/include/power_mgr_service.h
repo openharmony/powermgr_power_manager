@@ -185,6 +185,8 @@ public:
     void UnRegisterShutdownCallback(const sptr<ISyncShutdownCallback>& callback) override;
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+    bool Is2In1PadMode();
+    bool IsLidOrSwitchOpen();
     void ExternalScreenInit();
     void RegisterExternalScreenListener();
     void UnRegisterExternalScreenListener();
@@ -339,6 +341,10 @@ public:
     {
         return isLidCheckEnable_;
     }
+    bool IsLidEventUsed()
+    {
+        return isLidEventUsed_;
+    }
     bool IsExternalScreenWakeupEnable()
     {
         return isExternalScreenWakeup_;
@@ -428,6 +434,7 @@ private:
     bool ready_ {false};
     bool isDuringCallStateEnable_ {false};
     bool isLidCheckEnable_ {false};
+    bool isLidEventUsed_ {false};
     bool isExternalScreenWakeup_ {false};
     static std::atomic_bool foldScreenFlag_;
     ffrt::mutex wakeupMutex_;

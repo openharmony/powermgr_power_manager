@@ -336,11 +336,6 @@ void PowerStateMachine::EmplaceAwake()
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_ON_ERR;
             }
-#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-            if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen()) {
-                SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, reason);
-            }
-#endif
             if (reason != StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
                 ResetInactiveTimer();
             }
@@ -1690,7 +1685,8 @@ void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateC
             return;
         }
 #endif
-        if (!IsSwitchOpen()) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if ((pms && !pms->IsLidOrSwitchOpen()) || (pms == nullptr && !IsSwitchOpen())) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "[UL_POWER] Do not power the internal screen while switch is close, ffrtId=%{public}u", ffrtId);
             return;
