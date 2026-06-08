@@ -34,7 +34,7 @@ namespace PowerMgr {
 
 class HibernateControllerTest : public testing::Test {
 public:
-    std::unique_ptr<HibernateController> hibernateController_;
+    std::shared_ptr<HibernateController> hibernateController_;
 
     void SetUp();
     void TearDown();
