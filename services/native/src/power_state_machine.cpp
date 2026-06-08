@@ -1716,7 +1716,7 @@ void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateC
             return;
         }
 #endif
-       if (IsLidOrSwitchOpen()) {
+       if (!IsLidOrSwitchOpen()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "[UL_POWER] Do not power the internal screen while switch is close, ffrtId=%{public}u", ffrtId);
             return;
