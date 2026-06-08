@@ -2461,7 +2461,7 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) co
 bool PowerMgrService::Is2In1PadMode()
 {
     return system::GetBoolParameter("const.window.support_window_pcmode_switch", false) &&
-        !system::GetBoolParameter("persist.sceneboard.ispcmode",false);
+        !system::GetBoolParameter("persist.sceneboard.ispcmode", false);
 }
 
 bool PowerMgrService::IsLidOrSwitchOpen()
