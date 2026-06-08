@@ -194,12 +194,12 @@ public:
         return (displayMode & DISPLAY_MODE_ONLY_SECOND_SCREEN) > 0;
     }
     bool IsLidOrSwitchOpen();
-    void HandleOnlySecondScreenIfSwitchOpen(StateChangeReason reason);
-    bool IsLidEventUsed() 
+    void HandleOnlySecondScreenWhenCoverOpen(StateChangeReason reason);
+    bool IsLidEventUsed()
     {
         return system::GetIntParameter("const.power.lid_type_for_only_external_screen", 0) == 1;
     }
-    bool PowerMgrService::Is2In1PadMode()
+    bool Is2In1PadMode()
     {
         return system::GetBoolParameter("const.window.support_window_pcmode_switch", false) &&
             !system::GetBoolParameter("persist.sceneboard.ispcmode",false);

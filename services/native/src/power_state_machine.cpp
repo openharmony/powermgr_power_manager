@@ -316,12 +316,12 @@ void PowerStateMachine::HandleOnlySecondScreenWhenCoverOpen(StateChangeReason re
         return;
     }
     if (IsLidEventUsed()) {
-        if (reason == WakeupDeviceType::WAKEUP_DEVICE_LID && !PowerMgrService::isInLidMode_) {
+        if (reason == StateChangeReason::STATE_CHANGE_REASON_LID && !PowerMgrService::isInLidMode_) {
             POWER_HILOGI(FEATURE_WAKEUP, "power on internal screen when lid open");
             SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, reason);
         }
     } else {
-        if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && IsSwitchOpen()) {
+        if (reason == StateChangeReason::STATE_CHANGE_REASON_SWITCH && IsSwitchOpen()) {
             POWER_HILOGI(FEATURE_WAKEUP, "power on internal screen when switch open");
             SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, reason);
         }
@@ -357,7 +357,7 @@ void PowerStateMachine::EmplaceAwake()
                 return TransitResult::DISPLAY_ON_ERR;
             }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-            HandleOnlySecondScreenIfSwitchOpen(reason);
+            HandleOnlySecondScreenWhenCoverOpen(reason);
 #endif
             if (reason != StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
                 ResetInactiveTimer();
@@ -1696,7 +1696,7 @@ bool PowerStateMachine::SetDozeMode(DisplayState state)
 }
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-bool PowerMgrService::IsLidOrSwitchOpen()
+bool PowerStateMachine::IsLidOrSwitchOpen()
 {
     if (IsLidEventUsed()) {
         return !PowerMgrService::isInLidMode_;
