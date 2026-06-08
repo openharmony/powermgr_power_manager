@@ -193,7 +193,6 @@ bool PowerMgrService::Init()
     foldScreenFlag_ = system::GetParameter("const.window.foldscreen.type", "") != "";
 #endif
     isLidCheckEnable_ = system::GetBoolParameter("const.power.enable_lid_check", false);
-    isLidEventUsed_ = system::GetIntParameter("const.power.lid_type_for_only_external_screen", 0) == 1;
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
 #endif
@@ -2458,24 +2457,6 @@ void PowerMgrInputMonitor::OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) co
 #endif
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
-bool PowerMgrService::Is2In1PadMode()
-{
-    return system::GetBoolParameter("const.window.support_window_pcmode_switch", false) &&
-        !system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-}
-
-bool PowerMgrService::IsLidOrSwitchOpen()
-{
-    if (IsLidEventUsed()) {
-        return !PowerMgrService::isInLidMode_;
-    }
-    auto stateMachine = pms->GetPowerStateMachine();
-    if (stateMachine != nullptr) {
-        return stateMachine->IsSwitchOpen();
-    }
-    return true;
-}
-
 void PowerMgrService::ExternalScreenInit()
 {
     auto stateMachine = pms->GetPowerStateMachine();
@@ -2497,7 +2478,7 @@ void PowerMgrService::ExternalScreenInit()
         return;
     }
 
-    bool isSwitchOpen = pms->IsLidOrSwitchOpen();
+    bool isSwitchOpen = stateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = stateMachine->IsScreenOn();
     stateMachine->SetExternalScreenNumber(static_cast<int32_t>(screenIds.size()) - 1);
     POWER_HILOGI(
@@ -2579,7 +2560,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
 
     int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber() + 1;
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
-    bool isSwitchOpen = pms->IsLidOrSwitchOpen();
+    bool isSwitchOpen = powerStateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOnAcqLock();
     bool isExternalScreenWakeupEnable = pms->IsExternalScreenWakeupEnable();
     POWER_HILOGI(COMP_SVC,
@@ -2624,7 +2605,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
 
     int32_t curExternalScreenNum = std::max(powerStateMachine->GetExternalScreenNumber() - 1, 0);
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
-    bool isSwitchOpen = pms->IsLidOrSwitchOpen();
+    bool isSwitchOpen = powerStateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
     POWER_HILOGI(COMP_SVC,
         "External screen is disconnected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
@@ -2662,7 +2643,7 @@ void PowerMgrService::AbnormalExternalScreenConnectListener::NotifyAbnormalScree
         return;
     }
 
-    bool isSwitchOpen = pms->IsLidOrSwitchOpen();
+    bool isSwitchOpen = powerStateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
     POWER_HILOGI(COMP_SVC,
         "Received abnormal external screen connecting event, screenId: %{public}u, isSwitchOpen: %{public}d, "

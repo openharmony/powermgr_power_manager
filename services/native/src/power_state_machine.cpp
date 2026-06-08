@@ -309,6 +309,26 @@ void PowerStateMachine::InitSwitchAction()
     }
 }
 
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+void PowerStateMachine::HandleOnlySecondScreenWhenCoverOpen(StateChangeReason reason)
+{
+    if (!IsOnlySecondDisplayModeSupported()) {
+        return;
+    }
+    if (IsLidEventUsed()) {
+        if (reason == WakeupDeviceType::WAKEUP_DEVICE_LID && !PowerMgrService::isInLidMode_) {
+            POWER_HILOGI(FEATURE_WAKEUP, "power on internal screen when lid open");
+            SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, reason);
+        }
+    } else {
+        if (reason == WakeupDeviceType::WAKEUP_DEVICE_SWITCH && IsSwitchOpen()) {
+            POWER_HILOGI(FEATURE_WAKEUP, "power on internal screen when switch open");
+            SetInternalScreenDisplayState(DisplayState::DISPLAY_ON, reason);
+        }
+    }
+}
+#endif
+
 void PowerStateMachine::EmplaceAwake()
 {
     controllerMap_.emplace(PowerState::AWAKE,
@@ -336,6 +356,9 @@ void PowerStateMachine::EmplaceAwake()
                 POWER_HILOGE(FEATURE_POWER_STATE, "Failed to go to AWAKE, display error, ret: %{public}u", ret);
                 return TransitResult::DISPLAY_ON_ERR;
             }
+#ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+            HandleOnlySecondScreenIfSwitchOpen(reason);
+#endif
             if (reason != StateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
                 ResetInactiveTimer();
             }
@@ -1673,6 +1696,14 @@ bool PowerStateMachine::SetDozeMode(DisplayState state)
 }
 
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
+bool PowerMgrService::IsLidOrSwitchOpen()
+{
+    if (IsLidEventUsed()) {
+        return !PowerMgrService::isInLidMode_;
+    }
+    return IsSwitchOpen();
+}
+
 void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateChangeReason reason)
 {
     std::lock_guard<ffrt::mutex> lock(internalScreenStateMutex_);
@@ -1685,8 +1716,7 @@ void PowerStateMachine::SetInternalScreenDisplayState(DisplayState state, StateC
             return;
         }
 #endif
-        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if ((pms && !pms->IsLidOrSwitchOpen()) || (pms == nullptr && !IsSwitchOpen())) {
+       if (IsLidOrSwitchOpen()) {
             POWER_HILOGI(FEATURE_POWER_STATE,
                 "[UL_POWER] Do not power the internal screen while switch is close, ffrtId=%{public}u", ffrtId);
             return;
