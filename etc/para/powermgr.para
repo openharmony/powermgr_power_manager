@@ -24,3 +24,4 @@ const.power.enable_lid_check = false
 const.power.enable_s4 = true
 const.power.external_screen_wakeup = false
 const.power.active_time_before_long_time_dim = -1
+const.power.lid_type_for_only_external_screen = 0

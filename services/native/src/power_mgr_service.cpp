@@ -2478,7 +2478,7 @@ void PowerMgrService::ExternalScreenInit()
         return;
     }
 
-    bool isSwitchOpen = stateMachine->IsSwitchOpen();
+    bool isSwitchOpen = stateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = stateMachine->IsScreenOn();
     stateMachine->SetExternalScreenNumber(static_cast<int32_t>(screenIds.size()) - 1);
     POWER_HILOGI(
@@ -2560,7 +2560,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
 
     int32_t curExternalScreenNum = powerStateMachine->GetExternalScreenNumber() + 1;
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
-    bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
+    bool isSwitchOpen = powerStateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOnAcqLock();
     bool isExternalScreenWakeupEnable = pms->IsExternalScreenWakeupEnable();
     POWER_HILOGI(COMP_SVC,
@@ -2605,7 +2605,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
 
     int32_t curExternalScreenNum = std::max(powerStateMachine->GetExternalScreenNumber() - 1, 0);
     powerStateMachine->SetExternalScreenNumber(curExternalScreenNum);
-    bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
+    bool isSwitchOpen = powerStateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
     POWER_HILOGI(COMP_SVC,
         "External screen is disconnected, screenId: %{public}u, externalScreenNumber: %{public}d, isSwitchOpen: "
@@ -2643,7 +2643,7 @@ void PowerMgrService::AbnormalExternalScreenConnectListener::NotifyAbnormalScree
         return;
     }
 
-    bool isSwitchOpen = powerStateMachine->IsSwitchOpen();
+    bool isSwitchOpen = powerStateMachine->IsLidOrSwitchOpen();
     bool isScreenOn = powerStateMachine->IsScreenOn();
     POWER_HILOGI(COMP_SVC,
         "Received abnormal external screen connecting event, screenId: %{public}u, isSwitchOpen: %{public}d, "
