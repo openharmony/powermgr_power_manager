@@ -87,4 +87,23 @@ HWTEST_F(DeviceStateActionNativeTest, DeviceStateActionNative001, TestSize.Level
 #endif
     POWER_HILOGI(LABEL_TEST, "DeviceStateActionNative001 function end!");
 }
+
+/**
+ * @tc.name: IsScreenOnStrengthen_001
+ * @tc.desc: test IsScreenOnStrengthen in DeviceStateAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStateActionNativeTest, IsScreenOnStrengthen_001, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_001 function start!");
+    auto deviceStateAction = std::make_shared<DeviceStateAction>();
+    DisplayState state = DisplayState::DISPLAY_ON;
+    StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_INIT;
+    EXPECT_TRUE(deviceStateAction->SetDisplayState(state, reason) == ActionResult::SUCCESS);
+    EXPECT_TRUE(deviceStateAction->GetDisplayState() == DisplayState::DISPLAY_ON);
+    bool result = deviceStateAction->IsScreenOnStrengthen();
+    EXPECT_TRUE(result);
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_001 result = %{public}d", result);
+    POWER_HILOGI(LABEL_TEST, "IsScreenOnStrengthen_001 function end!");
+}
 } // namespace

@@ -33,7 +33,7 @@ SwitchActionRet DualScreenSwitchAction::DoSwitchOpen()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] %{public}s Enter", __func__);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    bool isScreenOn = pms->IsScreenOn();
+    bool isScreenOn = pms->IsFoldScreenOn();
     Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(Rosen::ScreenClosedState::OPEN, isScreenOn);
     return SwitchActionRet::HANDLED;
 }
@@ -42,7 +42,7 @@ SwitchActionRet DualScreenSwitchAction::DoSwitchClose()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] %{public}s Enter", __func__);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    bool isScreenOn = pms->IsScreenOn();
+    bool isScreenOn = pms->IsFoldScreenOn();
     Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(Rosen::ScreenClosedState::CLOSE, isScreenOn);
     pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
     return SwitchActionRet::HANDLED;
@@ -52,28 +52,12 @@ SwitchActionRet DualScreenSwitchAction::DoReportSwitchState()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] %{public}s Enter", __func__);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    bool isScreenOn = pms->IsScreenOn();
+    bool isScreenOn = pms->IsFoldScreenOn();
     auto stateMachine = pms->GetPowerStateMachine();
     RETURN_IF_WITH_RET(stateMachine == nullptr, SwitchActionRet::DEFAULT);
     bool isSwitchOpen = stateMachine->IsSwitchOpenByPath();
     Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(
         isSwitchOpen ? Rosen::ScreenClosedState::OPEN : Rosen::ScreenClosedState::CLOSE, isScreenOn);
-    return SwitchActionRet::HANDLED;
-}
-
-SwitchActionRet DualScreenSwitchAction::DoIsScreenOn()
-{
-    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] %{public}s Enter", __func__);
-    std::vector<uint64_t> screenIds;
-    Rosen::ScreenManagerLite::GetInstance().GetPhysicalScreenIds(screenIds);
-    for (uint64_t id : screenIds) {
-        Rosen::ScreenPowerState state = Rosen::ScreenManagerLite::GetInstance().GetScreenPower(id);
-        if (state == Rosen::ScreenPowerState::POWER_ON) {
-            POWER_HILOGE(FEATURE_POWER_STATE, "[UL_POWER] DoIsScreenOn state:%{public}d, id:%{public}d",
-                static_cast<int32_t>(state), static_cast<int32_t>(id));
-            return SwitchActionRet::IS_SCREEN_ON;
-        }
-    }
     return SwitchActionRet::HANDLED;
 }
 

@@ -137,6 +137,7 @@ public:
     bool RestoreScreenOffTimeInner();
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn(bool needPrintLog = true);
+    bool IsScreenOnStrengthen();
     bool IsScreenOnAcqLock();
     bool IsFoldScreenOn();
     bool IsCollaborationScreenOn();
@@ -182,6 +183,10 @@ public:
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     int32_t GetExternalScreenNumber() const
     {
+        if (switchAction_ != nullptr &&
+            switchAction_->HandleSwitchAction(SwitchActionType::WAKEUP_IN_CLOSED_STATE) != SwitchActionRet::DEFAULT) {
+            return externalScreenNumber_ <= 0 ? 0 : externalScreenNumber_ - 1;
+        }
         return externalScreenNumber_;
     }
     void SetExternalScreenNumber(int32_t exScreenNumber)
