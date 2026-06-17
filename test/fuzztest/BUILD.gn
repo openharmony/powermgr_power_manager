@@ -21,7 +21,7 @@ group("fuzztest") {
   deps += [
     # deps file
     "asyncshutdowncallback_fuzzer:AsyncShutdownCallbackFuzzTest",
-    "asynculsrcallback_fuzzer:AsyncUlsrCallbackFuzzTest",
+    "ulsrcallback_fuzzer:UlsrCallbackFuzzTest",
     "createrunninglock_fuzzer:CreateRunningLockFuzzTest",
     "forcesuspenddevice_fuzzer:ForceSuspendDeviceFuzzTest",
     "getsetdevicemode_fuzzer:GetSetDeviceModeFuzzTest",

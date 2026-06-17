@@ -121,6 +121,22 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
     std::lock_guard lock(sleepCbMutex_);
     POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d", isWakeup,
         onForceSleep == true);
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    if (isWakeup) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "TriggerSyncSleepCallback, pms is nullptr, skip TriggerUlsrWakeupCallback");
+        } else {
+            bool ulsrResult = pms->IsUlsrSucceed();
+            POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, TriggerUlsrWakeupCallback, result: %{public}d",
+                ulsrResult);
+            if (stateMachine_ != nullptr) {
+                stateMachine_->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+            }
+            pms->TriggerUlsrWakeupCallback(ulsrResult);
+        }
+    }
+#endif
     auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
     TriggerSyncSleepCallbackInner(highPriorityCallbacks, "High", isWakeup);
     auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();

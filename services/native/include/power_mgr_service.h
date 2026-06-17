@@ -136,8 +136,8 @@ public:
         HibernateCallbackPriority priority) override;
     virtual bool UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateCallback>& callback) override;
 
-    virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) override;
-    virtual PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) override;
+    virtual PowerErrors RegisterUlsrCallback(const sptr<IUlsrCallback>& callback, UlsrPriority priority) override;
+    virtual PowerErrors UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback) override;
 
     virtual bool RegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
     virtual bool UnRegisterPowerModeCallback(const sptr<IPowerModeCallback>& callback) override;
@@ -233,7 +233,10 @@ public:
     void UpdateSettingInvalidDisplayOffTime();
 #endif
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    void TriggerUlsrWakeupCallback();
+    bool TriggerUlsrSyncCallback();
+    void TriggerUlsrWakeupCallback(bool ulsrResult);
+    bool IsUlsrSucceed();
+    void OnUlsrTimerExpired();
 #endif
     void OnChargeStateChanged();
 

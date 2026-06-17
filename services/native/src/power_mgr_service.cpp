@@ -86,6 +86,13 @@ const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/
 static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 40000; // PREPARE_HIBERNATE_TIMEOUT_MS + 10000
+constexpr int32_t SET_SUSPEND_TAG_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+// Force trigger ULSR wakeup callback if ULSR has been blocked for more than 60s
+constexpr int32_t ULSR_TIMER_TIMEOUT_MS = 60000;
+constexpr int32_t ULSR_TIMER_EXPIRED_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
+const std::string ULSR_RESULT_PARAM = "persist.hdi_power.ulsr_result";
+#endif
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t INPUT_TASK_TIMEOUT = 50000;
 constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
@@ -1283,7 +1290,37 @@ PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
+    BackgroundRunningLock setTagRunningLock("setTagRunningLock", SET_SUSPEND_TAG_TIMEOUT_MS);
     POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, tag: %{public}s", pid, uid, tag.c_str());
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    // Trigger ULSR callback and setup timer
+    if (tag == "ulsr") {
+        // Check state - only allow ULSR when power state is SLEEP state
+        PowerState state = GetState();
+        if (state != PowerState::SLEEP) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set suspend tag %{public}s failed, state %{public}d != SLEEP",
+                tag.c_str(), static_cast<int32_t>(state));
+            return PowerErrors::ERR_FAILURE;
+        }
+        // Trigger sync ULSR callback before set suspend tag
+        if (powerStateMachine_ == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "state machine is nullptr");
+            return PowerErrors::ERR_FAILURE;
+        }
+        powerStateMachine_->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+        if (!TriggerUlsrSyncCallback() || ffrtTimer_ == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set suspend tag %{public}s failed, ULSR sync callback timeout or ffrt timer "
+                "nullptr, rollback", tag.c_str());
+            SystemSuspendController::GetInstance().SetSuspendTag("");
+            TriggerUlsrWakeupCallback(false);
+            return PowerErrors::ERR_FAILURE;
+        }
+        // Start FFRT timer to force trigger ULSR wakeup callback if ULSR has been blocked
+        POWER_HILOGI(FEATURE_SUSPEND, "Start ulsr ffrt timer");
+        powerStateMachine_->SetDelayTimer(ULSR_TIMER_TIMEOUT_MS,
+            PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    }
+#endif
     SystemSuspendController::GetInstance().SetSuspendTag(tag);
     return PowerErrors::ERR_OK;
 }
@@ -1958,7 +1995,7 @@ bool PowerMgrService::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateC
 #endif
 }
 
-PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IUlsrCallback>& callback, UlsrPriority priority)
 {
     if (!Permission::IsSystem()) {
         POWER_HILOGE(FEATURE_WAKEUP, "RegisterUlsrCallback failed, System permission intercept");
@@ -1967,12 +2004,13 @@ PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_WAKEUP, "RegisterUlsrCallback pid:%{public}d, uid:%{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_WAKEUP, "RegisterUlsrCallback pid:%{public}d, uid:%{public}d, priority:%{public}d",
+        pid, uid, static_cast<int32_t>(priority));
     std::lock_guard lock(ulsrMutex_);
     if (ulsrCallbackHolder_ == nullptr) {
         ulsrCallbackHolder_ = new UlsrCallbackHolder();
     }
-    ulsrCallbackHolder_->AddCallback(callback, std::make_pair(pid, uid));
+    ulsrCallbackHolder_->AddCallback(callback, std::make_pair(pid, uid), priority);
     return PowerErrors::ERR_OK;
 #else
     POWER_HILOGW(FEATURE_WAKEUP, "RegisterUlsrCallback interface not supported.");
@@ -1980,7 +2018,7 @@ PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>
 #endif
 }
 
-PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback)
 {
     if (!Permission::IsSystem()) {
         POWER_HILOGE(FEATURE_WAKEUP, "UnRegisterUlsrCallback failed, System permission intercept");
@@ -2003,14 +2041,42 @@ PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallbac
 }
 
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-void PowerMgrService::TriggerUlsrWakeupCallback()
+bool PowerMgrService::TriggerUlsrSyncCallback()
 {
+    POWER_HILOGI(FEATURE_SUSPEND, "TriggerUlsrSyncCallback");
     std::lock_guard lock(ulsrMutex_);
     if (ulsrCallbackHolder_ == nullptr) {
-        POWER_HILOGW(FEATURE_WAKEUP, "ulsrCallbackHolder null");
+        POWER_HILOGW(FEATURE_SUSPEND, "ulsrCallbackHolder null, sync callback skip");
+        return false;
+    }
+    return ulsrCallbackHolder_->SyncUlsrNotify();
+}
+
+void PowerMgrService::TriggerUlsrWakeupCallback(bool ulsrResult)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "TriggerUlsrWakeupCallback");
+    std::lock_guard lock(ulsrMutex_);
+    if (ulsrCallbackHolder_ == nullptr) {
+        POWER_HILOGW(FEATURE_WAKEUP, "ulsrCallbackHolder null, wakeup callback skip");
         return;
     }
-    ulsrCallbackHolder_->WakeupNotify();
+    ulsrCallbackHolder_->WakeupNotify(ulsrResult);
+}
+
+bool PowerMgrService::IsUlsrSucceed()
+{
+    std::string result = OHOS::system::GetParameter(ULSR_RESULT_PARAM, "");
+    POWER_HILOGI(FEATURE_WAKEUP, "IsUlsrSucceed, result: %{public}s", result.c_str());
+    return result == "success";
+}
+
+void PowerMgrService::OnUlsrTimerExpired()
+{
+    BackgroundRunningLock ulsrTimerExpiredRunningLock("ulsrTimerExpiredRunningLock", ULSR_TIMER_EXPIRED_TIMEOUT_MS);
+    // trigger ULSR wakeup callback and clear suspend tag if ULSR being blocked for more than 60s
+    POWER_HILOGW(FEATURE_SUSPEND, "ULSR timer expired, clear suspend tag and trigger wakeup callback");
+    SystemSuspendController::GetInstance().SetSuspendTag("");
+    TriggerUlsrWakeupCallback(false);
 }
 #endif
 

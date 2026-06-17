@@ -34,7 +34,7 @@
 #include "mock_power_remote_object.h"
 #include "takeover_suspend_callback_proxy.h"
 #include "takeover_suspend_callback_stub.h"
-#include "async_ulsr_callback_stub.h"
+#include "ulsr_callback_stub.h"
 #include "shutdown/async_shutdown_callback_stub.h"
 
 using namespace testing;
@@ -1458,7 +1458,22 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient050, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient050 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    powerMgrClient.WakeupDevice();
+    // Suspend Device before test
+    powerMgrClient.SuspendDevice();
+
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
+    EXPECT_EQ(powerMgrClient.IsScreenOn(), false)
+    if (powerMgrClient.GetState() != PowerState::SLEEP) {
+        EXPECT_EQ(powerMgrClient.SetSuspendTag("ulsr"), PowerErrors::ERR_FAILURE);
+    } else {
+        EXPECT_EQ(powerMgrClient.SetSuspendTag("ulsr"), PowerErrors::ERR_OK);
+    }
+#else
     EXPECT_EQ(powerMgrClient.SetSuspendTag("ulsr"), PowerErrors::ERR_OK);
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient050 function end!");
 }
 
@@ -1800,14 +1815,22 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient060, TestSize.Level0) {
 }
 #endif
 
-class TestAsyncUlsrCallback : public AsyncUlsrCallbackStub {
+class TestUlsrCallback : public IUlsrCallback {
 public:
-    TestAsyncUlsrCallback() = default;
-    virtual ~TestAsyncUlsrCallback() = default;
+    TestUlsrCallback() = default;
+    virtual ~TestUlsrCallback() = default;
 
-    void OnAsyncWakeup() override
+    void OnSyncUlsr() override
     {
-        POWER_HILOGI(LABEL_TEST, "TestAsyncUlsrCallback OnAsyncWakeup!");
+        POWER_HILOGI(LABEL_TEST, "TestUlsrCallback OnSyncUlsr!");
+    }
+    void OnAsyncWakeup(bool ulsrResult) override
+    {
+        POWER_HILOGI(LABEL_TEST, "TestUlsrCallback OnAsyncWakeup!");
+    }
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
     }
 };
 
@@ -1816,19 +1839,19 @@ public:
  * @tc.desc: test RegisterUlsrCallback && UnRegisterUlsrCallback
  * @tc.type: FUNC
  */
-HWTEST_F(PowerMgrClientTest, AsyncUlsrCallbackTest001, TestSize.Level0) {
-    POWER_HILOGI(LABEL_TEST, "AsyncUlsrCallbackTest001 function start!");
+HWTEST_F(PowerMgrClientTest, UlsrCallbackTest001, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "UlsrCallbackTest001 function start!");
     auto& powerMgrClinet = PowerMgrClient::GetInstance();
     PowerErrors ret = PowerErrors::ERR_OK;
 
-    sptr<TestAsyncUlsrCallback> callback0 = nullptr;
+    sptr<TestUlsrCallback> callback0 = nullptr;
     ret = powerMgrClinet.RegisterUlsrCallback(callback0);
     EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
 
     ret = powerMgrClinet.UnRegisterUlsrCallback(callback0);
     EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
 
-    sptr<TestAsyncUlsrCallback> callback1 = new TestAsyncUlsrCallback();
+    sptr<TestUlsrCallback> callback1 = new TestUlsrCallback();
     ret = powerMgrClinet.RegisterUlsrCallback(callback1);
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     EXPECT_EQ(ret, PowerErrors::ERR_OK);
@@ -1841,7 +1864,7 @@ HWTEST_F(PowerMgrClientTest, AsyncUlsrCallbackTest001, TestSize.Level0) {
 #else
     EXPECT_NE(ret, PowerErrors::ERR_OK);
 #endif
-    POWER_HILOGI(LABEL_TEST, "AsyncUlsrCallbackTest001 function end!");
+    POWER_HILOGI(LABEL_TEST, "UlsrCallbackTest001 function end!");
 }
 
 

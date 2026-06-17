@@ -1328,7 +1328,7 @@ int32_t PowerMgrServiceTestProxy::IsStandbyIpc(bool& isStandby, int32_t& powerEr
 }
 
 int32_t PowerMgrServiceTestProxy::RegisterUlsrCallbackIpc(
-    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+    const sptr<IUlsrCallback>& callback, int32_t& powerError)
 {
     RETURN_IF_WITH_RET((stub_ == nullptr || (callback == nullptr)), ERR_INVALID_DATA);
 
@@ -1362,7 +1362,7 @@ int32_t PowerMgrServiceTestProxy::RegisterUlsrCallbackIpc(
 }
 
 int32_t PowerMgrServiceTestProxy::UnRegisterUlsrCallbackIpc(
-    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+    const sptr<IUlsrCallback>& callback, int32_t& powerError)
 {
     RETURN_IF_WITH_RET((stub_ == nullptr || (callback == nullptr)), ERR_INVALID_DATA);
 

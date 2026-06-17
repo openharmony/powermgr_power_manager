@@ -548,15 +548,16 @@ int32_t PowerMgrServiceAdapter::IsForceSleepingIpc(bool& isForceSleeping)
 }
 
 int32_t PowerMgrServiceAdapter::RegisterUlsrCallbackIpc(
-    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+    const sptr<IUlsrCallback>& callback, int32_t priorityValue, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::RegisterUlsrCallbackIpc", false);
-    powerError = static_cast<int32_t>(RegisterUlsrCallback(callback));
+    UlsrPriority priority = static_cast<UlsrPriority>(priorityValue);
+    powerError = static_cast<int32_t>(RegisterUlsrCallback(callback, priority));
     return ERR_OK;
 }
 
 int32_t PowerMgrServiceAdapter::UnRegisterUlsrCallbackIpc(
-    const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError)
+    const sptr<IUlsrCallback>& callback, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::UnRegisterUlsrCallbackIpc", false);
     powerError = static_cast<int32_t>(UnRegisterUlsrCallback(callback));
