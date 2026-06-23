@@ -74,7 +74,7 @@ std::set<std::string> ScreenCommonEventController::GetForegroundBundleNames()
 uint32_t ScreenCommonEventController::CustomizedTouchEventsForSmartWatches(
     std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent)
 {
-    if(g_screenCommonEventController == nullptr) {
+    if (g_screenCommonEventController == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "CustomizedTouchEventsForSmartWatches g_screenCommonEventController is null.");
         return ERROR_FAIL;
     }
