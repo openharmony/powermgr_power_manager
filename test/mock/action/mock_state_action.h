@@ -40,7 +40,6 @@ public:
     MOCK_METHOD1(SetCoordinated, void(bool coordinated));
     MOCK_METHOD3(GoToSleep, uint32_t(std::function<void()> onSuspend, std::function<void()> onWakeup, bool force));
     MOCK_METHOD1(RegisterCallback, void(std::function<void(uint32_t)>& callback));
-    MOCK_METHOD0(IsScreenOnStrengthen, bool());
 };
 } // namespace PowerMgr
 } // namespace OHOS

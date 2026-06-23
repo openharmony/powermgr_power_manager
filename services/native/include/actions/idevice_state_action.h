@@ -54,7 +54,6 @@ public:
     virtual uint32_t GoToSleep(const std::function<void()> onSuspend,
         const std::function<void()> onWakeup, bool force) = 0;
     virtual void RegisterCallback(std::function<void(uint32_t)>& callback) = 0;
-    virtual bool IsScreenOnStrengthen() { return true; }
 };
 } // namespace PowerMgr
 } // namespace OHOS

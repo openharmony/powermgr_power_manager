@@ -94,11 +94,6 @@ DisplayState DeviceStateAction::GetDisplayState()
     return ret;
 }
 
-bool DeviceStateAction::IsScreenOnStrengthen()
-{
-    return DisplayPowerMgrClient::GetInstance().IsScreenOnStrengthen();
-}
-
 bool DeviceStateAction::TryToCancelScreenOff()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER]ready to call TryToCancelScreenOff");
