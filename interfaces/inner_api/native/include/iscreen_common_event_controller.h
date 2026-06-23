@@ -20,7 +20,7 @@
 #include <set>
 
 namespace OHOS {
-namespace MMI{
+namespace MMI {
 class PointerEvent;
 }
 namespace PowerMgr {
