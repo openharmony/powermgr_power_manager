@@ -18,6 +18,7 @@
 #include <functional>
 #include <vector>
 
+#include "c/ffrt_ipc.h"
 #include "c/executor_task.h"
 #include "ffrt_inner.h"
 
@@ -168,6 +169,19 @@ private:
     FFRTQueue queue_;
     std::unordered_map<uint32_t, FFRTHandle> handleMap_;
     std::unordered_map<uint32_t, uint32_t> taskId_;
+};
+
+class NoCoroutineSwitchGuard {
+public:
+    NoCoroutineSwitchGuard()
+    {
+        ffrt_this_task_set_legacy_mode(true); // prevent thread switching in ffrt
+    }
+
+    ~NoCoroutineSwitchGuard()
+    {
+        ffrt_this_task_set_legacy_mode(false);
+    }
 };
 } // namespace PowerMgr
 } // namespace OHOS

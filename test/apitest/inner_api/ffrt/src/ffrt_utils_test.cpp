@@ -441,6 +441,24 @@ HWTEST_F(FFRTUtilsTest, FFRTCancelTaskTest, TestSize.Level1)
     EXPECT_EQ(flag, false);
     POWER_HILOGI(LABEL_TEST, "FFRTCancelTaskTest function end!");
 }
+
+/**
+ * @tc.name: NoCoroutineSwitchGuardTest001
+ * @tc.desc: test NoCoroutineSwitchGuard prevents coroutine switching in ffrt task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTUtilsTest, NoCoroutineSwitchGuardTest001, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NoCoroutineSwitchGuardTest001 function start!");
+    int x = 0;
+    FFRTTask task = [&x]() {
+        NoCoroutineSwitchGuard guard;
+        x = 1;
+    };
+    FFRTUtils::SubmitTaskSync(task);
+    EXPECT_EQ(x, 1);
+    POWER_HILOGI(LABEL_TEST, "NoCoroutineSwitchGuardTest001 function end!");
+}
 } // namespace Test
 } // namespace PowerMgr
 } // namespace OHOS
