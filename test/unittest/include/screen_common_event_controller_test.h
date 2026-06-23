@@ -29,6 +29,9 @@
 #include <gmock/gmock.h>
 
 namespace OHOS {
+namespace MMI {
+class PointerEvent;
+}
 namespace PowerMgr {
 class ScreenCommonEventControllerTest : public testing::Test {
 public:
@@ -44,6 +47,7 @@ public:
         MOCK_METHOD(uint32_t, SendCustomizedScreenEvent, (PowerState state, const std::set<std::string>& bundleNames),
             (override));
         MOCK_METHOD(uint32_t, NotifyOperateEventAfterScreenOn, (), (override));
+        MOCK_METHOD(uint32_t, CustomizedTouchEventsForSmartWatches, (std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent), (override));
     };
 #endif
 };

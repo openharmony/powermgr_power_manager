@@ -20,6 +20,9 @@
 #include <set>
 
 namespace OHOS {
+namespace MMI{
+class PointerEvent;
+}
 namespace PowerMgr {
 class IScreenCommonEventController {
 public:
@@ -28,6 +31,7 @@ public:
     virtual uint32_t SetScreenOnCommonEventRules(StateChangeReason reason) = 0;
     virtual uint32_t SendCustomizedScreenEvent(PowerState state, const std::set<std::string>& bundleNames) = 0;
     virtual uint32_t NotifyOperateEventAfterScreenOn() = 0;
+    virtual uint32_t CustomizedTouchEventsForSmartWatches(std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent) = 0;
 };
 } // namespace PowerMgr
 } // namespace OHOS

@@ -83,6 +83,24 @@ HWTEST_F(ScreenCommonEventControllerTest, ScreenCommonEventControllerTest004, Te
     EXPECT_FALSE(bundleNames.size() > 5);
     POWER_HILOGI(LABEL_TEST, "GetForegroundBundleNames function end!");
 }
+
+/**
+ * @tc.name: ScreenCommonEventControllerTest
+ * @tc.desc: test CustomizedTouchEventsForSmartWatches
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCommonEventControllerTest, ScreenCommonEventControllerTest006, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "CustomizedTouchEventsForSmartWatches function start!");
+    ScreenCommonEventControllerTest::MockScreenCommonEventController mockController;
+    OHOS::MMI::PointerEvent pointerEvent;
+    EXPECT_CALL(mockController, CustomizedTouchEventsForSmartWatches(pointerEvent))
+        .WillOnce(::testing::Return(ERROR_OK));
+    ScreenCommonEventController screenController;
+    uint32_t result = screenController.CustomizedTouchEventsForSmartWatches(pointerEvent);
+    EXPECT_EQ(result, ERROR_OK);
+    POWER_HILOGI(LABEL_TEST, "CustomizedTouchEventsForSmartWatches function end!");
+}
 #endif
 
 /**

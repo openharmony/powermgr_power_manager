@@ -740,10 +740,8 @@ bool InputCallback::TouchEventAfterScreenOn(std::shared_ptr<PointerEvent> pointe
 {
     if (state == PowerState::AWAKE || state == PowerState::FREEZE) {
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
-        int32_t sourceType1 = pointerEvent->GetSourceType();
-        if (sourceType1 == PointerEvent::POINTER_ACTION_DOWN) {
-            DelayedSingleton<ScreenCommonEventController>::GetInstance()->NotifyOperateEventAfterScreenOn();
-        }
+        DelayedSingleton<ScreenCommonEventController>::GetInstance()->CustomizedTouchEventsForSmartWatches(
+            pointerEvent);
 #endif
         return true;
     }
