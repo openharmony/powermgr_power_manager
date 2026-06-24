@@ -18,6 +18,7 @@
 
 #include "singleton.h"
 #include "power_mgr_service.h"
+#include "pointer_event.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -33,6 +34,7 @@ public:
     uint32_t SetScreenOnCommonEventRules(StateChangeReason reason);
     uint32_t NotifyOperateEventAfterScreenOn();
     std::set<std::string> GetForegroundBundleNames();
+    uint32_t HandleTouchEvents(std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent);
 #endif
     uint32_t SendCustomizedScreenEvent(std::shared_ptr<PowerMgrNotify> notify, PowerState state,
         int64_t callTime, const std::string& reason);
