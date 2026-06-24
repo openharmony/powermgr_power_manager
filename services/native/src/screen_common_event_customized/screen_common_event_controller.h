@@ -34,7 +34,7 @@ public:
     uint32_t SetScreenOnCommonEventRules(StateChangeReason reason);
     uint32_t NotifyOperateEventAfterScreenOn();
     std::set<std::string> GetForegroundBundleNames();
-    uint32_t CustomizedTouchEventsForSmartWatches(std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent);
+    uint32_t HandleTouchEvents(std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent);
 #endif
     uint32_t SendCustomizedScreenEvent(std::shared_ptr<PowerMgrNotify> notify, PowerState state,
         int64_t callTime, const std::string& reason);

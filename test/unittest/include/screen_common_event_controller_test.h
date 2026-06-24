@@ -47,7 +47,7 @@ public:
         MOCK_METHOD(uint32_t, SendCustomizedScreenEvent, (PowerState state, const std::set<std::string>& bundleNames),
             (override));
         MOCK_METHOD(uint32_t, NotifyOperateEventAfterScreenOn, (), (override));
-        MOCK_METHOD(uint32_t, CustomizedTouchEventsForSmartWatches,
+        MOCK_METHOD(uint32_t, HandleTouchEvents,
             (std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent), (override));
     };
 #endif

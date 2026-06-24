@@ -86,20 +86,20 @@ HWTEST_F(ScreenCommonEventControllerTest, ScreenCommonEventControllerTest004, Te
 
 /**
  * @tc.name: ScreenCommonEventControllerTest
- * @tc.desc: test CustomizedTouchEventsForSmartWatches
+ * @tc.desc: test HandleTouchEvents
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenCommonEventControllerTest, ScreenCommonEventControllerTest006, TestSize.Level0)
 {
-    POWER_HILOGI(LABEL_TEST, "CustomizedTouchEventsForSmartWatches function start!");
+    POWER_HILOGI(LABEL_TEST, "HandleTouchEvents function start!");
     ScreenCommonEventControllerTest::MockScreenCommonEventController mockController;
     OHOS::MMI::PointerEvent pointerEvent;
-    EXPECT_CALL(mockController, CustomizedTouchEventsForSmartWatches(pointerEvent))
+    EXPECT_CALL(mockController, HandleTouchEvents(pointerEvent))
         .WillOnce(::testing::Return(ERROR_OK));
     ScreenCommonEventController screenController;
-    uint32_t result = screenController.CustomizedTouchEventsForSmartWatches(pointerEvent);
+    uint32_t result = screenController.HandleTouchEvents(pointerEvent);
     EXPECT_EQ(result, ERROR_OK);
-    POWER_HILOGI(LABEL_TEST, "CustomizedTouchEventsForSmartWatches function end!");
+    POWER_HILOGI(LABEL_TEST, "HandleTouchEvents function end!");
 }
 #endif
 
