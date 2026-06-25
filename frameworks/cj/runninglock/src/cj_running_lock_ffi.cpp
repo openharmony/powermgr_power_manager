@@ -94,6 +94,11 @@ bool FfiOHOSRunningLockIsSupported(int32_t num_type, int32_t *ret)
 
 int64_t FfiOHOSRunningLockCreate(char *name, int32_t num_type, int32_t *ret)
 {
+    if (name == nullptr) {
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "input name invalid");
+        *ret = ERR_OTHER;
+        return INVALID_FFIDATA_ID;
+    }
     auto native = FFI::FFIData::Create<CJRunningLock>(name, num_type);
     if (native == nullptr) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "create ffidata failed, name=%{public}s", name);
