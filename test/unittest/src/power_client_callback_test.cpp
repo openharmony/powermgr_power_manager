@@ -65,9 +65,14 @@ void PowerMgrClientCallbackTest::PowerSyncSleepTest1Callback::OnSyncWakeup(bool 
     POWER_HILOGI(LABEL_TEST, "PowerSyncSleepTest1Callback::OnSyncWakeup, onForceSleep = %{public}d.", onForceSleep);
 }
 
-void PowerMgrClientCallbackTest::AsyncUlsrTestCallback::OnAsyncWakeup()
+void PowerMgrClientCallbackTest::UlsrTestCallback::OnSyncUlsr()
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncUlsrTestCallback::OnAsyncWakeup.");
+    POWER_HILOGI(LABEL_TEST, "UlsrTestCallback::OnSyncUlsr.");
+}
+
+void PowerMgrClientCallbackTest::UlsrTestCallback::OnAsyncWakeup(bool ulsrResult)
+{
+    POWER_HILOGI(LABEL_TEST, "UlsrTestCallback::OnAsyncWakeup.");
 }
 
 void PowerMgrClientCallbackTest::RunningLockChangedTestCallback::OnAsyncScreenRunningLockChanged(
@@ -363,16 +368,16 @@ HWTEST_F(PowerMgrClientCallbackTest, PowerMgrSyncSleepCallback001, TestSize.Leve
 }
 
 /**
- * @tc.name: PowerMgrAsyncUlsrCallback001
- * @tc.desc: test AsyncUlsrCallback
+ * @tc.name: PowerMgrUlsrCallback001
+ * @tc.desc: test UlsrCallback
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrClientCallbackTest, PowerMgrUlsrCallback001, TestSize.Level1)
 {
-    POWER_HILOGI(LABEL_TEST, "PowerMgrAsyncUlsrCallback001 function start!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUlsrCallback001 function start!");
     PowerErrors ret = PowerErrors::ERR_OK;
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    sptr<IAsyncUlsrCallback> cb = new AsyncUlsrTestCallback();
+    sptr<IUlsrCallback> cb = new UlsrTestCallback();
     ret = powerMgrClient.RegisterUlsrCallback(cb);
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     EXPECT_TRUE(ret == PowerErrors::ERR_OK);
@@ -385,7 +390,7 @@ HWTEST_F(PowerMgrClientCallbackTest, PowerMgrUlsrCallback001, TestSize.Level1)
 #else
     EXPECT_TRUE(ret != PowerErrors::ERR_OK);
 #endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrSyncSleepCallback001 function end!");
+    POWER_HILOGI(LABEL_TEST, "PowerMgrUlsrCallback001 function end!");
 }
 
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE

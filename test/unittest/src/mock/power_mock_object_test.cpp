@@ -30,7 +30,7 @@
 #include "running_lock_token_stub.h"
 #include "power_mgr_async_reply_stub.h"
 #include "takeover_suspend_callback_proxy.h"
-#include "async_ulsr_callback_proxy.h"
+#include "ulsr_callback_proxy.h"
 
 using namespace testing::ext;
 using namespace OHOS::PowerMgr;
@@ -52,9 +52,14 @@ void PowerMockObjectTest::PowerRunningLockTestCallback::HandleRunningLockMessage
     POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 
-void PowerMockObjectTest::AsyncUlsrTestCallback::OnAsyncWakeup()
+void PowerMockObjectTest::UlsrTestCallback::OnSyncUlsr()
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncUlsrTestCallback::OnAsyncWakeup.");
+    POWER_HILOGI(LABEL_TEST, "UlsrTestCallback::OnSyncUlsr.");
+}
+
+void PowerMockObjectTest::UlsrTestCallback::OnAsyncWakeup(bool ulsrResult)
+{
+    POWER_HILOGI(LABEL_TEST, "UlsrTestCallback::OnAsyncWakeup.");
 }
 
 namespace {
@@ -87,9 +92,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest001, TestSize.Level2)
     SuspendDeviceType type = SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY;
     suspendCallbackProxy->OnTakeOverSuspend(type);
 #endif
-    std::shared_ptr<AsyncUlsrCallbackProxy> asyncUlsrCallbackProxy =
-    std::make_shared<AsyncUlsrCallbackProxy>(remote);
-    asyncUlsrCallbackProxy->OnAsyncWakeup();
+    std::shared_ptr<UlsrCallbackProxy> ulsrCallbackProxy = std::make_shared<UlsrCallbackProxy>(remote);
+    ulsrCallbackProxy->OnAsyncWakeup();
     sptr<IRemoteObject> token = new RunningLockTokenStub();
     RunningLockInfo info("test1", RunningLockType::RUNNINGLOCK_SCREEN);
     sptrProxy->CreateRunningLockIpc(token, info, powerError);

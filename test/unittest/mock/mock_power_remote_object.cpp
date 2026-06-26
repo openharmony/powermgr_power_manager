@@ -29,6 +29,11 @@ void MockPowerRemoteObject::SetRequestValue(int32_t value)
     g_code = value;
 }
 
+int32_t MockPowerRemoteObject::GetRequestValue()
+{
+    return g_code;
+}
+
 int32_t MockPowerRemoteObject::GetObjectRefCount()
 {
     return 0;

@@ -94,6 +94,7 @@ public:
         CHECK_PROXIMITY_SCREEN_OFF_MSG,
         SWITCH_TRIGGER_WAKEUP_OR_SUSPEND_MSG,
         CHECK_PROXIMITY_SCREEN_SWITCH_TO_SUB_MSG,
+        CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG,
     };
 
     class PowerStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {

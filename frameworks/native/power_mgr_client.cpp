@@ -796,18 +796,20 @@ PowerErrors PowerMgrClient::IsRunningLockEnabled(const RunningLockType type, boo
     return static_cast<PowerErrors>(powerError);
 }
 
-PowerErrors PowerMgrClient::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+PowerErrors PowerMgrClient::RegisterUlsrCallback(const sptr<IUlsrCallback>& callback, UlsrPriority priority)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    POWER_HILOGI(FEATURE_WAKEUP, "Register Ulsr Callback by client");
+    POWER_HILOGI(FEATURE_WAKEUP, "Register Ulsr Callback by client, priority=%{public}d",
+        static_cast<int32_t>(priority));
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
-    proxy->RegisterUlsrCallbackIpc(callback, powerError);
+    int32_t priorityValue = static_cast<int32_t>(priority);
+    proxy->RegisterUlsrCallbackIpc(callback, priorityValue, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 
-PowerErrors PowerMgrClient::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+PowerErrors PowerMgrClient::UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(callback == nullptr, PowerErrors::ERR_PARAM_INVALID);

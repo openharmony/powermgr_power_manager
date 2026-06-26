@@ -13,36 +13,83 @@
  * limitations under the License.
  */
 
-#ifndef ULSR_WAKEUP_CALLBACK_HOLER_H
-#define ULSR_WAKEUP_CALLBACK_HOLER_H
+#ifndef ULSR_CALLBACK_HOLDER_H
+#define ULSR_CALLBACK_HOLDER_H
 
-#include <map>
+#include <mutex>
+#include <string>
+#include <unordered_map>
 
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
-#include "ulsr/iasync_ulsr_callback.h"
+#include "ulsr/iulsr_callback.h"
 
 namespace OHOS {
 namespace PowerMgr {
 class UlsrCallbackHolder : public IRemoteObject::DeathRecipient {
 public:
-    struct UlsrCallbackCompare {
-        bool operator()(const sptr<IAsyncUlsrCallback>& lhs, const sptr<IAsyncUlsrCallback>& rhs) const
+    struct UlsrCallbackRecord {
+        sptr<IUlsrCallback> callback;
+        int32_t priority;
+        int32_t pid;
+        int32_t uid;
+        int32_t durationMs;
+    };
+    struct UlsrCallbackKeyHash {
+        size_t operator()(const sptr<IUlsrCallback>& callback) const
         {
-            return lhs->AsObject() < rhs->AsObject();
+            if (callback == nullptr) {
+                return 0;
+            }
+            return std::hash<void*>()(callback->AsObject().GetRefPtr());
         }
     };
+    struct UlsrCallbackKeyEqual {
+        bool operator()(const sptr<IUlsrCallback>& lhs, const sptr<IUlsrCallback>& rhs) const
+        {
+            if (lhs == nullptr && rhs == nullptr) {
+                return true;
+            }
+            if (lhs == nullptr || rhs == nullptr) {
+                return false;
+            }
+            return lhs->AsObject() == rhs->AsObject();
+        }
+    };
+    using UlsrCallbackContainerType = std::unordered_map<sptr<IUlsrCallback>, UlsrCallbackRecord,
+        UlsrCallbackKeyHash, UlsrCallbackKeyEqual>;
 
     void OnRemoteDied(const wptr<IRemoteObject>& object) override;
-    void AddCallback(const sptr<IAsyncUlsrCallback>& callback, const std::pair<int32_t, int32_t>& pidUid);
-    void RemoveCallback(const sptr<IAsyncUlsrCallback>& callback);
-    void WakeupNotify();
+    void AddCallback(const sptr<IUlsrCallback>& callback, const std::pair<int32_t, int32_t>& pidUid,
+        UlsrPriority priority = UlsrPriority::DEFAULT);
+    void RemoveCallback(const sptr<IUlsrCallback>& callback);
+    bool SyncUlsrNotify();
+    void WakeupNotify(bool ulsrResult = false);
 
 private:
+    enum class UlsrCallbackStage : int32_t {
+        STAGE_DONE = 0, // init or WakeupNotify() is called
+        STAGE_ENTER,    // SyncUlsrNotify() was called but WakeupNotify() hasn't been called
+    };
+
+    template<typename Func>
+    void ForEachContainer(Func&& func)
+    {
+        func(highPriorityCallbacks_);
+        func(defaultPriorityCallbacks_);
+        func(lowPriorityCallbacks_);
+    };
+
+    int64_t SyncUlsrNotifyInner(int64_t timeoutMs);
+    void ReportSyncUlsrResult(int64_t elapsedTimeMs, bool isTimeout);
+
     std::mutex callbacksMutex_;
-    std::map<sptr<IAsyncUlsrCallback>, std::pair<int32_t, int32_t>, UlsrCallbackCompare> cachedCallbacks_;
+    std::atomic<UlsrCallbackStage> callbackState_{UlsrCallbackStage::STAGE_DONE};
+    UlsrCallbackContainerType highPriorityCallbacks_;
+    UlsrCallbackContainerType defaultPriorityCallbacks_;
+    UlsrCallbackContainerType lowPriorityCallbacks_;
 };
 } // namespace PowerMgr
 } // namespace OHOS
 
-#endif // ULSR_WAKEUP_CALLBACK_HOLER_H
+#endif // ULSR_CALLBACK_HOLDER_H

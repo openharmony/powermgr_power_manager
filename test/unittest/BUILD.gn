@@ -1564,8 +1564,8 @@ ohos_unittest("test_power_wakeup_registermonitor") {
   sources = [ "src/interface_test/power_wakeup_registermonitor_test.cpp" ]
 
   configs = [
-    "${powermgr_utils_path}:utils_config",
     ":module_private_config",
+    "${powermgr_utils_path}:utils_config",
     ":module_mock_private_config",
     "${powermgr_utils_path}:coverage_flags",
   ]
@@ -1859,7 +1859,10 @@ ohos_unittest("test_suspend_takeover_callback_holder") {
 
 ohos_unittest("test_ulsr_callback_holder") {
   module_out_path = module_output_path
-  include_dirs =  [ "${powermgr_inner_api}/native/include" ]
+  include_dirs =  [
+    "${powermgr_inner_api}/native/include",
+    "${powermgr_inner_api}/native/include/ulsr"
+  ]
 
   sanitize = {
     cfi = true
@@ -1868,11 +1871,17 @@ ohos_unittest("test_ulsr_callback_holder") {
     blocklist = "../cfi_blocklist.txt"
   }
 
-  sources = [ 
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  sources = [
     "src/interface_test/ulsr_callback_holder_test.cpp",
+    "mock/mock_power_remote_object.cpp",
     "${powermgr_service_path}/native/src/ulsr/ulsr_callback_holder.cpp",
-    "${powermgr_service_zidl}/src/async_ulsr_callback_proxy.cpp",
-    "${powermgr_service_zidl}/src/async_ulsr_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_stub.cpp",
   ]
 
   configs = [
@@ -1888,12 +1897,71 @@ ohos_unittest("test_ulsr_callback_holder") {
 
   external_deps = [
     "c_utils:utils",
+    "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
+  if (has_hiviewdfx_hisysevent_part) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  defines += [ "POWERMGR_GTEST" ]
+}
+
+ohos_unittest("test_ulsr_callback_proxy") {
+  module_out_path = module_output_path
+  include_dirs =  [
+    "${powermgr_inner_api}/native/include",
+    "${powermgr_inner_api}/native/include/ulsr"
+  ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../cfi_blocklist.txt"
+  }
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  sources = [
+    "src/interface_test/ulsr_callback_proxy_test.cpp",
+    "mock/mock_power_remote_object.cpp",
+    "mock/mock_message_parcel.cpp",
+    "${powermgr_service_path}/native/src/ulsr/ulsr_callback_holder.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_stub.cpp",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+  if (has_hiviewdfx_hisysevent_part) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
 
   defines += [ "POWERMGR_GTEST" ]
 }
@@ -2660,6 +2728,7 @@ group("unittest") {
     ":test_running_lock_timer_handler",
     ":test_screen_off_pre_controller",
     ":test_ulsr_callback_holder",
+    ":test_ulsr_callback_proxy",
     ":test_hibernate_controller",
     ":test_sleep_callback_holder",
     ":test_suspend_takeover_callback_holder",

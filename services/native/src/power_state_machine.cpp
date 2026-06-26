@@ -1410,6 +1410,16 @@ void PowerStateMachine::SetDelayTimer(int64_t delayTime, int32_t event)
             proximityScreenOffTimerStarted_.store(true, std::memory_order_relaxed);
             break;
         }
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+        case CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG: {
+            FFRTTask timerCallback = [this]() {
+                DelayedSpSingleton<PowerMgrService>::GetInstance()->OnUlsrTimerExpired();
+            };
+            POWER_HILOGI(FEATURE_POWER_STATE, "Start ulsr sync callback timeout timer");
+            ffrtTimer_->SetTimer(TIMER_ID_ULSR, timerCallback, delayTime);
+            break;
+        }
+#endif
         default: {
             break;
         }
@@ -1461,6 +1471,12 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
             ffrtTimer_->CancelTimer(TIMER_ID_PROXIMITY_SCREEN_SWITCH_TO_SUB);
             break;
         }
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+        case CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG: {
+            ffrtTimer_->CancelTimer(TIMER_ID_ULSR);
+            break;
+        }
+#endif
         default: {
             break;
         }

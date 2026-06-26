@@ -30,7 +30,7 @@
 #include "permission.h"
 #include "power_common.h"
 #include "power_mgr_service.h"
-#include "async_ulsr_callback_stub.h"
+#include "ulsr_callback_stub.h"
 #include "setting_helper.h"
 #include "shutdown/async_shutdown_callback_stub.h"
 #include "running_lock_changed_callback_stub.h"
@@ -573,14 +573,18 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative019, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative019 function end!");
 }
 
-class TestAsyncUlsrCallback : public AsyncUlsrCallbackStub {
+class UlsrCallbackTest : public UlsrCallbackStub {
 public:
-    TestAsyncUlsrCallback() = default;
-    virtual ~TestAsyncUlsrCallback() = default;
+    UlsrCallbackTest() = default;
+    virtual ~UlsrCallbackTest() = default;
 
-    void OnAsyncWakeup() override
+    void OnSyncUlsr() override
     {
-        POWER_HILOGI(LABEL_TEST, "TestAsyncUlsrCallback OnAsyncWakeup!");
+        POWER_HILOGI(LABEL_TEST, "UlsrCallbackTest OnSyncUlsr!");
+    }
+    void OnAsyncWakeup(bool ulsrResult) override
+    {
+        POWER_HILOGI(LABEL_TEST, "UlsrCallbackTest OnAsyncWakeup!");
     }
 };
 
@@ -597,7 +601,7 @@ public:
 
 /**
  * @tc.name: PowerMgrServiceNative020
- * @tc.desc: Test RegisterAsyncUlsrCallback && UnRegisterAsyncUlsrCallback
+ * @tc.desc: Test RegisterUlsrCallback && UnRegisterUlsrCallback
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative020, TestSize.Level2) {
@@ -607,8 +611,8 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative020, TestSize.Level2) {
     
     // Test case 1: No system permission
     g_isSystem = false;
-    sptr<TestAsyncUlsrCallback> callback = new TestAsyncUlsrCallback();
-    ret = pmsTest_->RegisterUlsrCallback(callback);
+    sptr<UlsrCallbackTest> callback = new UlsrCallbackTest();
+    ret = pmsTest_->RegisterUlsrCallback(callback, UlsrPriority::DEFAULT);
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
     ret = pmsTest_->UnRegisterUlsrCallback(callback);
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
@@ -616,13 +620,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative020, TestSize.Level2) {
     // Test case 2: DEFAULT
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     g_isSystem = true;
-    ret = pmsTest_->RegisterUlsrCallback(callback);
+    ret = pmsTest_->RegisterUlsrCallback(callback, UlsrPriority::DEFAULT);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
     ret = pmsTest_->UnRegisterUlsrCallback(callback);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
 #else
     g_isSystem = true;
-    ret = pmsTest_->RegisterUlsrCallback(callback);
+    ret = pmsTest_->RegisterUlsrCallback(callback, UlsrPriority::DEFAULT);
     EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID) << "Test case 2 failed";
     ret = pmsTest_->UnRegisterUlsrCallback(callback);
     EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID) << "Test case 2 failed";
@@ -641,13 +645,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative021, TestSize.Level2) {
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     PowerErrors ret;
     g_isSystem = true;
-    ret = pmsTest_->RegisterUlsrCallback(nullptr);
+    ret = pmsTest_->RegisterUlsrCallback(nullptr, UlsrPriority::DEFAULT);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
-    sptr<TestAsyncUlsrCallback> callback = new TestAsyncUlsrCallback();
-    ret = pmsTest_->RegisterUlsrCallback(callback);
+    sptr<UlsrCallbackTest> callback = new UlsrCallbackTest();
+    ret = pmsTest_->RegisterUlsrCallback(callback, UlsrPriority::DEFAULT);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
     EXPECT_TRUE(pmsTest_->ulsrCallbackHolder_ != nullptr);
-    pmsTest_->TriggerUlsrWakeupCallback();
+    pmsTest_->TriggerUlsrWakeupCallback(true);
     ret = pmsTest_->UnRegisterUlsrCallback(callback);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 2 failed";
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative021 end!");
@@ -1208,4 +1212,57 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative040, TestSize.Level2)
 }
 #endif
 #endif
+
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+/**
+ * @tc.name: PowerMgrServiceNative041
+ * @tc.desc: Test TriggerUlsrSyncCallback - normal case and null holder
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative041, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative041 start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    sptr<UlsrCallbackTest> callback = new UlsrCallbackTest();
+    g_isSystem = true;
+
+    // Case 1: Trigger when ulsrCallbackHolder_ is nullptr - should skip gracefully
+    pmsTest_->TriggerUlsrSyncCallback();
+
+    // Case 2: Register callback and trigger
+    PowerErrors ret = pmsTest_->RegisterUlsrCallback(callback, UlsrPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    pmsTest_->TriggerUlsrSyncCallback();
+
+    // Clean up
+    pmsTest_->UnRegisterUlsrCallback(callback);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative041 end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative042
+ * @tc.desc: Test OnUlsrTimerExpired
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative042, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative042 start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    sptr<UlsrCallbackTest> callback = new UlsrCallbackTest();
+    g_isSystem = true;
+
+    // Register callback first
+    PowerErrors ret = pmsTest_->RegisterUlsrCallback(callback, UlsrPriority::DEFAULT);
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+
+    // OnUlsrTimerExpired with screen on - should skip
+    // Just verify no crash when called with various states
+    pmsTest_->OnUlsrTimerExpired();
+
+    // Clean up
+    pmsTest_->UnRegisterUlsrCallback(callback);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative042 end!");
+}
+#endif // POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+
 } // namespace

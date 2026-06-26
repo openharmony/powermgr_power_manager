@@ -15,7 +15,7 @@
 
 /* This files contains faultlog fuzzer test modules. */
 
-#define FUZZ_PROJECT_NAME "asynculsrcallback_fuzzer"
+#define FUZZ_PROJECT_NAME "ulsrcallback_fuzzer"
 
 #include "power_fuzzer.h"
 #include "ipower_mgr.h"

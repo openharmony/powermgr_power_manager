@@ -38,6 +38,22 @@ int32_t PowerHdiCallback::OnWakeup()
 int32_t PowerHdiCallbackExt::OnSuspendWithTag(const std::string& tag)
 {
     POWER_HILOGD(FEATURE_SUSPEND, "OnSuspendWithTag, tag:%{public}s", tag.c_str());
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    if (tag == "ulsr") {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "OnSuspendWithTag, pms nullptr");
+            return HDF_FAILURE;
+        }
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (stateMachine == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "OnSuspendWithTag, state machine nullptr");
+            return HDF_FAILURE;
+        }
+        POWER_HILOGI(FEATURE_SUSPEND, "OnSuspendWithTag, cancel ulsr sync callback timeout timer");
+        stateMachine->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    }
+#endif
     return HDF_SUCCESS;
 }
 
@@ -56,10 +72,18 @@ int32_t PowerHdiCallbackExt::OnWakeupWithTag(const std::string& tag)
     if (tag == "ulsr") {
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms == nullptr) {
-            POWER_HILOGW(FEATURE_WAKEUP, "OnWakeupWithTag, pms null");
+            POWER_HILOGE(FEATURE_WAKEUP, "OnWakeupWithTag, pms nullptr");
             return HDF_FAILURE;
         }
-        pms->TriggerUlsrWakeupCallback();
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (stateMachine == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "OnSuspendWithTag, state machine nullptr");
+            return HDF_FAILURE;
+        }
+        stateMachine->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+        bool ulsrResult = pms->IsUlsrSucceed();
+        POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, TriggerUlsrWakeupCallback, result: %{public}d", ulsrResult);
+        pms->TriggerUlsrWakeupCallback(ulsrResult);
     }
 #endif
     return HDF_SUCCESS;

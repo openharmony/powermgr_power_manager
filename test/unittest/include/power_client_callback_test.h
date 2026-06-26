@@ -23,7 +23,7 @@
 #include "screen_off_pre_callback_stub.h"
 #include "sync_hibernate_callback_stub.h"
 #include "sync_sleep_callback_stub.h"
-#include "async_ulsr_callback_stub.h"
+#include "ulsr_callback_stub.h"
 #include "running_lock_changed_callback_stub.h"
 
 namespace OHOS {
@@ -60,11 +60,12 @@ public:
         virtual void OnSyncSleep(bool onForceSleep) override;
         virtual void OnSyncWakeup(bool onForceSleep) override;
     };
-    class AsyncUlsrTestCallback : public AsyncUlsrCallbackStub {
+    class UlsrTestCallback : public UlsrCallbackStub {
     public:
-        AsyncUlsrTestCallback() {};
-        virtual ~AsyncUlsrTestCallback() {};
-        virtual void OnAsyncWakeup() override;
+        UlsrTestCallback() {};
+        virtual ~UlsrTestCallback() {};
+        virtual void OnSyncUlsr() override;
+        virtual void OnAsyncWakeup(bool ulsrResult = false) override;
     };
 
     class RunningLockChangedTestCallback : public RunningLockChangedCallbackStub {
