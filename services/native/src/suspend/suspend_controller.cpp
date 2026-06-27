@@ -756,7 +756,7 @@ int64_t SuspendController::GetSettingPowerSleepTime(int64_t defaultTime)
     return settingTime;
 }
 
-int64_t SuspendController::CalculateAutoSleepResult()
+int64_t SuspendController::CalculateAutoSleepResult(SuspendDeviceType reason)
 {
     int64_t displayOffTime = 0;
     int64_t powerSleepTime = 0;
@@ -770,6 +770,9 @@ int64_t SuspendController::CalculateAutoSleepResult()
     if (powerSleepTime == POWER_SLEEP_NEVER) {
         return POWER_SLEEP_NEVER;
     }
+    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
+        return powerSleepTime;
+    }
     if (powerSleepTime <= displayOffTime) {
         return POWER_SLEEP_NOW;
     }
@@ -781,7 +784,7 @@ void SuspendController::HandleAutoSleep(SuspendDeviceType reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "auto suspend by reason=%{public}d", reason);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    int64_t autoSleepResult = CalculateAutoSleepResult();
+    int64_t autoSleepResult = CalculateAutoSleepResult(reason);
     if (autoSleepResult == POWER_SLEEP_NEVER) {
         POWER_HILOGI(FEATURE_SUSPEND, "power sleep is never");
         return;
