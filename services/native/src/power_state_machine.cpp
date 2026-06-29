@@ -279,7 +279,8 @@ void PowerStateMachine::StartSleepTimer(PowerState from)
 void PowerStateMachine::InitState()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "Init power state");
-    if (IsScreenOnStrengthen()) {
+    if (IsScreenOn() ||
+        switchAction_->HandleSwitchAction(SwitchActionType::IS_SCREEN_ON) == SwitchActionRet::IS_SCREEN_ON) {
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::DISPLAY, "SCREEN_STATE",
             HiviewDFX::HiSysEvent::EventType::STATISTIC, "STATE", DISPLAY_ON);
@@ -1096,11 +1097,6 @@ bool PowerStateMachine::IsScreenOn(bool needPrintLog)
         POWER_HILOGD(FEATURE_POWER_STATE, "Current screen is %{public}s", isScreenOn ? "ON" : "OFF");
     }
     return isScreenOn;
-}
-
-bool PowerStateMachine::IsScreenOnStrengthen()
-{
-    return IsScreenOn() ? true : stateAction_->IsScreenOnStrengthen();
 }
 
 bool PowerStateMachine::IsScreenOnAcqLock()
