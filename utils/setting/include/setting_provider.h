@@ -34,7 +34,7 @@ public:
     ErrCode PutLongValue(const std::string& key, int64_t value, bool needNotify = true);
     ErrCode PutBoolValue(const std::string& key, bool value, bool needNotify = true);
     bool IsValidKey(const std::string& key);
-    static bool AddMultiUserKey(const std::string& key);
+    static bool AddMultiUserKey(const std::string& key, const std::string& value = SETTING_URI_USER_SECURE);
     sptr<SettingObserver> CreateObserver(const std::string& key, const SettingObserver::UpdateFunc& func);
     static void ExecRegisterCb(const sptr<SettingObserver>& observer);
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
@@ -77,26 +77,28 @@ private:
 #endif
     static constexpr const int32_t INITIAL_USER_ID = 100;
     static constexpr const uint32_t MULTI_USER_STR_VEC_SIZE_MAX = 1000;
+    static constexpr const char* SETTING_URI_NORMAL {"SETTINGSDATA?Proxy=true"};
+    static constexpr const char* SETTING_URI_USER_SECURE {"USER_SETTINGSDATA_SECURE_##USERID##?Proxy=true"};
 
     static inline std::atomic<SettingProvider*> instance_{nullptr};
     static inline sptr<IRemoteObject> remoteObj_;
     static inline int32_t currentUserId_ = INITIAL_USER_ID;
-    static inline std::vector<std::string> needMultiUserStrVec = {
-        SETTING_POWER_WAKEUP_DOUBLE_KEY,
-        SETTING_POWER_WAKEUP_PICKUP_KEY,
-        SETTING_POWER_WAKEUP_SOURCES_KEY,
-        SETTING_DURING_CALL_STATE_KEY,
+    static inline std::unordered_map<std::string, std::string> needMultiUserStrMap = {
+        {SETTING_POWER_WAKEUP_DOUBLE_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_POWER_WAKEUP_PICKUP_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_POWER_WAKEUP_SOURCES_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_DURING_CALL_STATE_KEY, SETTING_URI_USER_SECURE},
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-        SETTING_DISPLAY_AC_OFF_TIME_KEY,
-        SETTING_DISPLAY_DC_OFF_TIME_KEY,
-        SETTING_POWER_AC_SLEEP_TIME_KEY,
-        SETTING_POWER_DC_SLEEP_TIME_KEY,
-        SETTING_POWER_AC_SUSPEND_SOURCES_KEY,
-        SETTING_POWER_DC_SUSPEND_SOURCES_KEY,
+        {SETTING_DISPLAY_AC_OFF_TIME_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_DISPLAY_DC_OFF_TIME_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_POWER_AC_SLEEP_TIME_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_POWER_DC_SLEEP_TIME_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_POWER_AC_SUSPEND_SOURCES_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_POWER_DC_SUSPEND_SOURCES_KEY, SETTING_URI_USER_SECURE},
 #endif
 #ifdef POWER_MANAGER_SCREEN_SAVER
-        SETTING_AC_SCREEN_SAVER_TIME_KEY,
-        SETTING_DC_SCREEN_SAVER_TIME_KEY
+        {SETTING_AC_SCREEN_SAVER_TIME_KEY, SETTING_URI_USER_SECURE},
+        {SETTING_DC_SCREEN_SAVER_TIME_KEY, SETTING_URI_USER_SECURE}
 #endif
     };
 
@@ -105,7 +107,7 @@ private:
     static bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper);
     static Uri AssembleUri(const std::string& key);
     static bool IsNeedMultiUser(const std::string& key);
-    static std::string ReplaceUserIdForUri(int32_t userId);
+    static std::string GetUriPrefix(int32_t userId, const std::string& key);
     bool IsNeedDataMigrationCopy();
     void DataMigrationCopy();
     ErrCode GetStringValueGlobal(const std::string& key, std::string& value);
