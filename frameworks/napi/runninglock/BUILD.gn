@@ -41,7 +41,11 @@ ohos_shared_library("runninglock") {
   } else {
     external_deps = deps_ex
 
-    external_deps += [ "napi:ace_napi" ]
+    external_deps += [
+      "libuv:uv",
+      "napi:ace_napi",
+      "node:node_header_notice",
+    ]
 
     if (has_dfx_hiview_part) {
       external_deps += [ "hiview:libxpower_event_js" ]
