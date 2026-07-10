@@ -238,7 +238,9 @@ ohos_shared_library("powermgrservice") {
   }
 
   if (power_manager_feature_enable_suspend_with_tag) {
+    defines += [ "POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG" ]
     sources += [ "native/src/ulsr/ulsr_callback_holder.cpp" ]
+    external_deps += [ "init:libbeget_proxy" ]
   }
 
   if (power_manager_feature_force_sleep_broadcast) {

@@ -235,6 +235,8 @@ public:
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     bool TriggerUlsrSyncCallback();
     void TriggerUlsrWakeupCallback(bool ulsrResult);
+    void TriggerUlsrWakeupCallbackWithResult();
+    void WaitAndTriggerUlsrWakeup();
     bool IsUlsrSucceed();
     void OnUlsrTimerExpired();
 #endif
