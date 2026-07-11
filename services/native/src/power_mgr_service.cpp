@@ -60,6 +60,12 @@
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 #include "battery_srv_client.h"
 #endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+#include "syspara/parameter.h"
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#endif
 #ifdef MSDP_MOVEMENT_ENABLE
 #include <dlfcn.h>
 #endif
@@ -92,6 +98,8 @@ constexpr int32_t SET_SUSPEND_TAG_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIME
 constexpr int32_t ULSR_TIMER_TIMEOUT_MS = 60000;
 constexpr int32_t ULSR_TIMER_EXPIRED_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
 const std::string ULSR_RESULT_PARAM = "persist.hdi_power.ulsr_result";
+constexpr int32_t ULSR_RESULT_WAIT_TIMEOUT_MS = 2000; // Maximum waiting time for the ULSR result to be ready
+constexpr int32_t ERR_PARAM_WATCHER_REPEAT_ADD = 110;
 #endif
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t INPUT_TASK_TIMEOUT = 50000;
@@ -2061,6 +2069,55 @@ void PowerMgrService::TriggerUlsrWakeupCallback(bool ulsrResult)
         return;
     }
     ulsrCallbackHolder_->WakeupNotify(ulsrResult);
+}
+
+void PowerMgrService::TriggerUlsrWakeupCallbackWithResult()
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult");
+    if (powerStateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, state machine is nullptr");
+        return;
+    }
+    powerStateMachine_->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    // Wait + read + trigger run in an ffrt task to avoid blocking the caller
+    FFRTUtils::SubmitTask([this]() { WaitAndTriggerUlsrWakeup(); });
+}
+
+void PowerMgrService::WaitAndTriggerUlsrWakeup()
+{
+    // Wait (max 2s) for the ULSR result to be written
+    // Query first: the HDI path may have already written the result
+    if (OHOS::system::GetParameter(ULSR_RESULT_PARAM, "").empty()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result not ready, add parameter watcher");
+        struct WatchCtx {
+            std::mutex* mtx;
+            std::condition_variable* cv;
+            bool ready;
+        };
+        std::mutex mtx;
+        std::condition_variable cv;
+        WatchCtx ctx {&mtx, &cv, false};
+        ParameterChgPtr cb = [](const char* key, const char* value, void* context) {
+            if (value == nullptr || value[0] == '\0') {
+                return; // Ignore empty value changes
+            }
+            auto* c = static_cast<WatchCtx*>(context);
+            std::lock_guard lock(*(c->mtx));
+            c->ready = true;
+            c->cv->notify_one();
+        };
+        int32_t ret = WatchParameter(ULSR_RESULT_PARAM.c_str(), cb, &ctx);
+        if (ret == 0 || ret == ERR_PARAM_WATCHER_REPEAT_ADD) { // ERR_REPEAT_ADD is non-fatal, callback still works
+            std::unique_lock lock(mtx);
+            cv.wait_for(lock, std::chrono::milliseconds(ULSR_RESULT_WAIT_TIMEOUT_MS),
+                [&ctx]() { return ctx.ready; });
+            RemoveParameterWatcher(ULSR_RESULT_PARAM.c_str(), cb, &ctx);
+        }
+        POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result is ready or wait timeout");
+    }
+    bool ulsrResult = IsUlsrSucceed();
+    POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result: %{public}d", ulsrResult);
+    TriggerUlsrWakeupCallback(ulsrResult);
 }
 
 bool PowerMgrService::IsUlsrSucceed()
