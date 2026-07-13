@@ -96,7 +96,9 @@
                 "ipc",
                 "image_framework",
                 "libxml2",
+                "libuv",
                 "napi",
+                "node",
                 "os_account",
                 "runtime_core",
                 "safwk",
@@ -239,8 +241,7 @@
                 "//base/powermgr/power_manager/test:unittest",
                 "//base/powermgr/power_manager/test:fuzztest",
                 "//base/powermgr/power_manager/test:systemtest",
-                "//base/powermgr/power_manager/tools/ohos-powerManager/tests:cli-test",
-                "//base/powermgr/power_manager/frameworks/ets/taihe:power_manager_taihe_test"
+                "//base/powermgr/power_manager/tools/ohos-powerManager/tests:cli-test"
             ]
         }
     }

@@ -49,7 +49,11 @@ ohos_shared_library("power") {
     external_deps = deps_ex
   } else {
     external_deps = deps_ex
-    external_deps += [ "napi:ace_napi" ]
+    external_deps += [
+      "libuv:uv",
+      "napi:ace_napi",
+      "node:node_header_notice",
+    ]
   }
 
   if (has_ability_runtime_part) {
