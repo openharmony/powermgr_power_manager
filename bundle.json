@@ -57,7 +57,8 @@
             "power_manager_feature_enable_monitor_running_lock_change",
             "power_manager_feature_lock_screen_support_multi_screen",
             "power_manager_feature_support_power_cli",
-            "power_manager_feature_enable_long_time_dim"
+            "power_manager_feature_enable_long_time_dim",
+            "power_manager_feature_enable_ignore_pointer_move_event_near_force_suspend"
         ],
         "adapted_system_type": [
             "standard"
