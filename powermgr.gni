@@ -53,7 +53,7 @@ declare_args() {
   power_manager_feature_lock_screen_support_multi_screen = false
   power_manager_feature_support_power_cli = false
   power_manager_feature_enable_long_time_dim = false
-  power_manager_feature_enable_ignore_pointer_move_event_near_force_suspend = false
+  power_manager_feature_enable_suspend_mouse_filter = false
 }
 
 defines = []
@@ -94,8 +94,8 @@ if (power_manager_feature_lock_screen_support_multi_screen) {
   defines += [ "POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN" ]
 }
 
-if (power_manager_feature_enable_ignore_pointer_move_event_near_force_suspend) {
-  defines += [ "POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND" ]
+if (power_manager_feature_enable_suspend_mouse_filter) {
+  defines += [ "POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER" ]
 }
 
 if (!defined(global_parts_info) ||
