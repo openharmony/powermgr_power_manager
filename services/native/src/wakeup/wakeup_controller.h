@@ -78,10 +78,8 @@ public:
     void PowerOnAllScreens(WakeupDeviceType type);
 #endif
     int32_t GetPowerkeyShortPressIdCache();
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
     void SetLastForceSuspendStartTime(int64_t time);
-    int64_t GetLastForceSuspendStartTime();
-    int64_t GetForceSuspendIgnorePointerMoveEventTimeMs();
 #endif
 
 private:
@@ -107,6 +105,10 @@ private:
     bool NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason) const;
     void HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);
     void ControlListener(WakeupDeviceType reason);
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+    int64_t GetLastForceSuspendStartTime();
+    int64_t GetSuspendMouseFilterTimeMs();
+#endif
 
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
@@ -119,9 +121,9 @@ private:
     ffrt::mutex mmiMonitorMutex_;
     static ffrt::mutex sourceUpdateMutex_;
     int32_t monitorId_ {-1};
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
     int64_t lastForceSuspendStartTime_ {0};
-    int64_t forceSuspendIgnorePointerMoveEventTimeMs_ {1000};
+    int64_t suspendMouseFilterTimeMs_ {1000};
 #endif
 };
 
@@ -138,8 +140,8 @@ private:
     bool isRemoteEvent(std::shared_ptr<InputEvent> event) const;
     bool isKeyboardKeycode(int32_t keyCode) const;
     WakeupDeviceType DetermineWakeupDeviceType(int32_t deviceType, int32_t sourceType) const;
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
-    bool isPointerMoveEventNearForceSuspendStart(std::shared_ptr<PointerEvent> pointerEvent) const;
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+    bool isNeedSuspendMouseFilter(std::shared_ptr<PointerEvent> pointerEvent) const;
 #endif
 };
 #endif
