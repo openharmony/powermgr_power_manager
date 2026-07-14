@@ -110,6 +110,7 @@ public:
 
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
+    void ControlListenerInner(SuspendDeviceType reason, uint32_t action, uint32_t delay);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     int64_t GetSettingPowerSleepTime(int64_t defaultTime);
     int64_t CalculateAutoSleepResult(SuspendDeviceType reason);

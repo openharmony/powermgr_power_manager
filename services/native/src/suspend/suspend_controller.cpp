@@ -562,12 +562,18 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
         stateMachine_->SetSwitchAction(action);
     }
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH &&
+        action == static_cast<uint32_t>(SuspendAction::ACTION_NONE)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "skip suspend for ACTION_NONE, reason=%{public}d", reason);
+        return;
+    }
+#endif
     bool isScreenOn = stateMachine_->IsScreenOn();
     if (!isScreenOn) {
         SuspendWhenScreenOff(reason, action, delay);
         return;
     }
-
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     if (IsPowerOffInernalScreenOnlyScene(reason, static_cast<SuspendAction>(action), isScreenOn)) {
         ProcessPowerOffInternalScreenOnly(pms, reason);
@@ -577,6 +583,11 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     if (CheckDuringCall(pms, reason)) {
         return;
     }
+    ControlListenerInner(reason, action, delay);
+}
+
+void SuspendController::ControlListenerInner(SuspendDeviceType reason, uint32_t action, uint32_t delay)
+{
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     uint32_t ffrtId = ffrt::this_task::get_id();
@@ -759,7 +770,11 @@ int64_t SuspendController::CalculateAutoSleepResult(SuspendDeviceType reason)
     if (powerSleepTime == POWER_SLEEP_NEVER) {
         return POWER_SLEEP_NEVER;
     }
-    if (reason != SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT) {
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY ||
+        reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH ||
+        reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_LID) {
+        POWER_HILOGI(FEATURE_SUSPEND, "%{public}s: powerSleepTime without displayOffTime reason(%{public}d)",
+            __func__, reason);
         return powerSleepTime;
     }
     if (powerSleepTime <= displayOffTime) {
