@@ -1547,11 +1547,9 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     powerStateMachine_->ReportSuspendStart(
         uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
 #endif
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
     std::shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
-    if (wakeupController == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "wakeupController is not init");
-    } else {
+    if (wakeupController != nullptr) {
         int64_t now = GetTickCount();
         if (now > 0) {
             wakeupController->SetLastForceSuspendStartTime(now);
