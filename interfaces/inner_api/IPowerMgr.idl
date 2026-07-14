@@ -31,10 +31,10 @@ interface OHOS.PowerMgr.IUlsrCallback;
 interface OHOS.PowerMgr.IRunningLockChangedCallback;
 
 interface OHOS.PowerMgr.IPowerMgr {
-    [ipccode 0] void CreateRunningLockIpc(
+    [ipccode 0, customMsgOption flags=MessageOption::TF_IMAGE] void CreateRunningLockIpc(
         [in] IRemoteObject remoteObj, [in] RunningLockInfo runningLockInfo,
         [out] int powerError);
-    void ReleaseRunningLockIpc([in] IRemoteObject remoteObj, [in] String name);
+    [customMsgOption flags=MessageOption::TF_IMAGE] void ReleaseRunningLockIpc([in] IRemoteObject remoteObj, [in] String name);
     void IsRunningLockTypeSupportedIpc([in] int lockType, [out] boolean lockTypesSupported);
     [oneway] void UpdateWorkSourceIpc([in] IRemoteObject remoteObj, [in] int[] workSources);
     void LockIpc([in] IRemoteObject remoteObj, [in] int timeOutMs, [out] int powerError);
