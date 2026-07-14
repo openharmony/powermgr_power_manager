@@ -149,9 +149,9 @@ void WakeupController::Init()
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
     }
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
-    forceSuspendIgnorePointerMoveEventTimeMs_ = 
-        static_cast<int64_t>(system::GetIntParameter("const.power.force_suspend_ignore_pointer_move_event_time_ms", 1000));
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+    suspendMouseFilterTimeMs_ = 
+        static_cast<int64_t>(system::GetIntParameter("const.power.suspend_mouse_filter_time_ms", 1000));
 #endif
     RegisterSettingsObserver();
 }
@@ -775,8 +775,8 @@ WakeupDeviceType InputCallback::DetermineWakeupDeviceType(int32_t deviceType, in
     return wakeupType;
 }
 
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
-bool InputCallback::isPointerMoveEventNearForceSuspendStart(std::shared_ptr<PointerEvent> pointerEvent) const
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+bool InputCallback::isNeedSuspendMouseFilter(std::shared_ptr<PointerEvent> pointerEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -790,11 +790,12 @@ bool InputCallback::isPointerMoveEventNearForceSuspendStart(std::shared_ptr<Poin
     }
     int64_t now = GetTickCount();
     int64_t lastForceSuspendStartTime = wakeupController->GetLastForceSuspendStartTime();
-    int64_t forceSuspendIgnorePointerMoveEventTimeMs = wakeupController->GetForceSuspendIgnorePointerMoveEventTimeMs();
-    if (now > 0 && now - lastForceSuspendStartTime <= forceSuspendIgnorePointerMoveEventTimeMs &&
+    int64_t suspendMouseFilterTimeMs = wakeupController->GetSuspendMouseFilterTimeMs();
+    if (lastForceSuspendStartTime > 0 && now >= lastForceSuspendStartTime &&
+        now - lastForceSuspendStartTime <= suspendMouseFilterTimeMs &&
         pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_MOVE) {
-            POWER_HILOGE(FEATURE_WAKEUP, "pointer move event in 1s after force suspend, ignore");
-            return true;
+        POWER_HILOGE(FEATURE_WAKEUP, "pointer move event in 1s after force suspend, ignore");
+        return true;
     }
     return false;
 }
@@ -819,8 +820,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         POWER_HILOGE(FEATURE_WAKEUP, "is remote event, ignore");
         return;
     }
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
-    if (isPointerMoveEventNearForceSuspendStart(pointerEvent)) {
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+    if (isNeedSuspendMouseFilter(pointerEvent)) {
         return;
     }
 #endif
@@ -994,7 +995,7 @@ int32_t WakeupController::GetPowerkeyShortPressIdCache()
     return g_powerkeyShortPressIdCache;
 }
 
-#ifdef POWER_MANAGER_ENABLE_IGNORE_POINTER_MOVE_EVENT_NEAR_FORCE_SUSPEND
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
 void WakeupController::SetLastForceSuspendStartTime(int64_t time)
 {
     lastForceSuspendStartTime_ = time;
@@ -1005,9 +1006,9 @@ int64_t WakeupController::GetLastForceSuspendStartTime()
     return lastForceSuspendStartTime_;
 }
 
-int64_t WakeupController::GetForceSuspendIgnorePointerMoveEventTimeMs()
+int64_t WakeupController::GetSuspendMouseFilterTimeMs()
 {
-    return forceSuspendIgnorePointerMoveEventTimeMs_;
+    return suspendMouseFilterTimeMs_;
 }
 #endif
 
