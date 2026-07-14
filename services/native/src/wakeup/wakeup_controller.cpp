@@ -150,7 +150,7 @@ void WakeupController::Init()
         }
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-    suspendMouseFilterTimeMs_ = 
+    suspendMouseFilterTimeMs_ =
         static_cast<int64_t>(system::GetIntParameter("const.power.suspend_mouse_filter_time_ms", 1000));
 #endif
     RegisterSettingsObserver();
