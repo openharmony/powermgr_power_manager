@@ -1480,6 +1480,7 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative047, TestSize.Level1)
     POWER_HILOGI(LABEL_TEST, "RunningLockNative047 function end!");
 }
 
+#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
 /**
  * @tc.name: RunningLockNative048
  * @tc.desc: test QueryRunningLockLists with displayId parameter
@@ -1516,7 +1517,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative048, TestSize.Level1)
     runningLockMgr->QueryRunningLockLists(lists, UINT64_MAX);
     EXPECT_EQ(lists.size(), 0);
 
-#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     lists.clear();
     runningLockMgr->QueryRunningLockLists(lists, 1001);
     EXPECT_EQ(lists.size(), 1);
@@ -1534,7 +1534,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative048, TestSize.Level1)
     lists.clear();
     runningLockMgr->QueryRunningLockLists(lists, 9999);
     EXPECT_EQ(lists.size(), 0);
-#endif
 
     runningLockMgr->UnLock(token1);
     runningLockMgr->UnLock(token2);
@@ -1578,7 +1577,6 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative049, TestSize.Level1)
     countDefault = runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, UINT64_MAX);
     EXPECT_EQ(countDefault, 0);
 
-#ifdef POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN
     countDisplay1 = runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, 1001);
     EXPECT_EQ(countDisplay1, 1);
 
@@ -1587,12 +1585,12 @@ HWTEST_F(RunningLockNativeTest, RunningLockNative049, TestSize.Level1)
 
     uint32_t countDisplay999 = runningLockMgr->GetValidRunningLockNum(RunningLockType::RUNNINGLOCK_SCREEN, 9999);
     EXPECT_EQ(countDisplay999, 0);
-#endif
 
     runningLockMgr->UnLock(token);
     runningLockMgr->ReleaseLock(token);
     POWER_HILOGI(LABEL_TEST, "RunningLockNative049 function end!");
 }
+#endif
 
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
 /**
