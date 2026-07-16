@@ -408,6 +408,7 @@ private:
     void EmplaceShutdown();
     void EmplaceDim();
     void InitTransitMap();
+    void InitAllowMapByReason();
     bool CanTransitTo(PowerState from, PowerState to, StateChangeReason reason);
     void NotifyPowerStateChanged(PowerState state,
         StateChangeReason reason = StateChangeReason::STATE_CHANGE_REASON_APPLICATION);

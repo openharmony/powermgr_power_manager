@@ -1562,6 +1562,63 @@ HWTEST_F(PowerCliTest, PowerCliFallbackTest002, TestSize.Level0)
     EXPECT_NE(output.find("\"errCode\":\"ERR_FAILURE\""), std::string::npos);
 }
 
+/**
+ * @tc.name: PowerCliCapabilityNotSupported001
+ * @tc.desc: Test PowerErrorsToErrCode for ERR_CAPABILITY_NOT_SUPPORTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCapabilityNotSupported001, TestSize.Level0)
+{
+    std::string errCode = PowerCliCommand::PowerErrorsToErrCode(
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(errCode, "ERR_CAPABILITY_NOT_SUPPORTED");
+}
+
+/**
+ * @tc.name: PowerCliCapabilityNotSupported002
+ * @tc.desc: Test PowerErrorsToString for ERR_CAPABILITY_NOT_SUPPORTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCapabilityNotSupported002, TestSize.Level0)
+{
+    std::string errStr = PowerCliCommand::PowerErrorsToString(
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_NE(errStr.find("Capability not supported"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliCapabilityNotSupported003
+ * @tc.desc: Test GetSuggestion for ERR_CAPABILITY_NOT_SUPPORTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliCapabilityNotSupported003, TestSize.Level0)
+{
+    std::string suggestion = PowerCliCommand::GetSuggestion(
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_NE(suggestion.find("supported on the current device"), std::string::npos);
+}
+
+/**
+ * @tc.name: PowerCliSuspendCapabilityTest001
+ * @tc.desc: Test suspend with ERR_CAPABILITY_NOT_SUPPORTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerCliTest, PowerCliSuspendCapabilityTest001, TestSize.Level0)
+{
+    g_suspendResult = PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+
+    char name[] = "power_cli_test";
+    char command[] = "suspend";
+    char* argv[] = {name, command};
+
+    std::string output = CaptureStdout([&]() {
+        PowerCliCommand cmd(ARGC_WITH_COMMAND, argv);
+        cmd.Execute();
+    });
+    EXPECT_NE(output.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(output.find("ERR_CAPABILITY_NOT_SUPPORTED"), std::string::npos);
+}
+
 } // namespace
 } // namespace PowerMgr
 } // namespace OHOS
