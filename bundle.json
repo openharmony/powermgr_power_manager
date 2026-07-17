@@ -110,7 +110,8 @@
                 "bundle_framework",
                 "resource_schedule_service",
                 "selinux_adapter",
-                "api_metrics"
+                "api_metrics",
+                "taihe_ffi_gen"
             ]
         },
         "build": {
