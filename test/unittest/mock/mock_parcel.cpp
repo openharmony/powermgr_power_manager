@@ -13,7 +13,22 @@
  * limitations under the License.
  */
 
+#include "mock_parcel.h"
 #include "parcel.h"
+
+static bool g_parcelWriteResult = false;
+static bool g_useRuntimeParcelWrite = false;
+
+void MockParcelWrite(bool result)
+{
+    g_parcelWriteResult = result;
+    g_useRuntimeParcelWrite = true;
+}
+
+void ResetMockParcelWrite()
+{
+    g_useRuntimeParcelWrite = false;
+}
 
 namespace OHOS {
 
@@ -197,6 +212,9 @@ bool Parcel::WriteUnpadBuffer(const void* data, size_t size)
 template <typename T>
 bool Parcel::Write(T value)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)value;
     return false;
 }
@@ -288,24 +306,36 @@ bool Parcel::WritePointer(uintptr_t value)
 
 bool Parcel::WriteCString(const char* value)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)value;
     return false;
 }
 
 bool Parcel::WriteString(const std::string& value)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)value;
     return false;
 }
 
 bool Parcel::WriteString16(const std::u16string& value)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)value;
     return false;
 }
 
 bool Parcel::WriteString16WithLength(const char16_t* value, size_t len)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)value;
     (void)len;
     return false;
@@ -313,6 +343,9 @@ bool Parcel::WriteString16WithLength(const char16_t* value, size_t len)
 
 bool Parcel::WriteString8WithLength(const char* value, size_t len)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)value;
     (void)len;
     return false;
@@ -331,12 +364,18 @@ bool Parcel::WriteObjectOffset(binder_size_t offset)
 
 bool Parcel::WriteRemoteObject(const Parcelable* object)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)object;
     return false;
 }
 
 bool Parcel::WriteParcelable(const Parcelable* object)
 {
+    if (g_useRuntimeParcelWrite) {
+        return g_parcelWriteResult;
+    }
     (void)object;
     return false;
 }
