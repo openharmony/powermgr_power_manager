@@ -80,6 +80,8 @@ public:
     int32_t GetPowerkeyShortPressIdCache();
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
     void SetLastForceSuspendStartTime(int64_t time);
+    int64_t GetLastForceSuspendStartTime();
+    int64_t GetSuspendMouseFilterTimeMs();
 #endif
 
 private:
@@ -105,10 +107,6 @@ private:
     bool NeedToSkipCurrentWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason) const;
     void HandleWakeup(const sptr<PowerMgrService>& pms, WakeupDeviceType reason);
     void ControlListener(WakeupDeviceType reason);
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-    int64_t GetLastForceSuspendStartTime();
-    int64_t GetSuspendMouseFilterTimeMs();
-#endif
 
     std::vector<WakeupSource> sourceList_;
     std::map<WakeupDeviceType, std::shared_ptr<WakeupMonitor>> monitorMap_;
