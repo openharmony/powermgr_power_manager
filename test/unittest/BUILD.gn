@@ -2671,7 +2671,124 @@ ohos_unittest("test_screen_off_pre_controller") {
   ]
 }
 
+##############################zidl_callback_proxy_test##############################
+ohos_unittest("test_zidl_callback_proxy") {
+  module_out_path = module_output_path
 
+  sources = [
+    "src/zidl_callback_proxy_test.cpp",
+    "mock/mock_power_remote_object.cpp",
+    "mock/mock_message_parcel.cpp",
+    "mock/mock_parcel.cpp",
+    "${powermgr_service_zidl}/src/power_mode_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_runninglock_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/screen_off_pre_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/sync_hibernate_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/takeover_suspend_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/running_lock_changed_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_mgr_async_reply.cpp",
+    "${powermgr_service_zidl}/src/shutdown/async_shutdown_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/sync_shutdown_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
+    "${powermgr_framework_native}/shutdown/takeover_info.cpp",
+  ]
+
+  include_dirs = [
+    "${powermgr_inner_api}/native/include",
+    "${powermgr_inner_api}/native/include/shutdown",
+    "${powermgr_inner_api}/native/include/suspend",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+
+  defines += [
+    "POWERMGR_GTEST",
+    "MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE",
+  ]
+}
+
+ohos_unittest("test_zidl_callback_stub") {
+  module_out_path = module_output_path
+
+  sources = [
+    "src/zidl_callback_stub_test.cpp",
+    "mock/mock_message_parcel.cpp",
+    "${powermgr_service_zidl}/src/power_mode_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/power_runninglock_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/power_runninglock_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_state_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/power_state_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/screen_off_pre_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/screen_off_pre_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/ulsr_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/sync_hibernate_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/sync_hibernate_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/sync_sleep_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/running_lock_changed_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/running_lock_changed_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/takeover_suspend_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/takeover_suspend_callback_proxy.cpp",
+    "${powermgr_service_zidl}/src/power_mgr_async_reply.cpp",
+    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_stub.cpp",
+    "${powermgr_service_zidl}/src/shutdown/takeover_shutdown_callback_proxy.cpp",
+    "${powermgr_framework_native}/shutdown/takeover_info.cpp",
+    "mock/mock_power_remote_object.cpp",
+  ]
+
+  include_dirs = [
+    "${powermgr_inner_api}/native/include",
+    "${powermgr_inner_api}/native/include/shutdown",
+    "${powermgr_inner_api}/native/include/suspend",
+  ]
+
+  configs = [
+    "${powermgr_utils_path}:utils_config",
+    ":module_private_config",
+    "${powermgr_utils_path}:coverage_flags",
+  ]
+
+  deps = [
+    "${powermgr_utils_path}:power_utils",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+
+  defines += [
+    "POWERMGR_GTEST",
+    "MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE",
+  ]
+}
 
 group("unittest") {
   testonly = true
@@ -2734,6 +2851,8 @@ group("unittest") {
     ":test_suspend_takeover_callback_holder",
     ":test_shutdown_callback_holder",
     ":test_switch_action",
+    ":test_zidl_callback_proxy",
+    ":test_zidl_callback_stub",
   ]
   if (power_manager_feature_surport_takeover_suspend) {
     deps += [

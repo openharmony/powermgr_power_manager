@@ -25,7 +25,7 @@ declare_args() {
 config("coverage_flags") {
   if (power_manager_feature_coverage) {
     cflags = [ "--coverage" ]
-    cflags_cc += [ "--coverage" ]
+    cflags_cc = [ "--coverage" ]
     ldflags = [ "--coverage" ]
   }
 }
