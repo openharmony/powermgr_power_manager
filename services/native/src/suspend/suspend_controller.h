@@ -107,10 +107,10 @@ public:
     void SetWakeupReasonConfigMatchedFlag(bool flag);
 #endif
     int32_t GetPowerkeyReleaseIdCache();
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
  	void SetLastForceSuspendStartTime(int64_t time);
     int64_t GetLastForceSuspendStartTime();
- 	int64_t GetSuspendMouseFilterTimeMs();
+ 	int64_t GetSuspendMouseDebounceTimeMs();
 #endif
 
 private:
@@ -162,9 +162,9 @@ private:
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::atomic<bool> isWakeupReasonConfigMatched_ {false};
 #endif
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
  	int64_t lastForceSuspendStartTime_ {0};
- 	int64_t suspendMouseFilterTimeMs_ {1000};
+ 	int64_t suspendMouseDebounceTimeMs_ {1000};
 #endif
 };
 
