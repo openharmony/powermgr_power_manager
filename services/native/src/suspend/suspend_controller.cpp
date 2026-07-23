@@ -915,17 +915,17 @@ int32_t SuspendController::GetPowerkeyReleaseIdCache()
 }
 
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
-void WakeupController::SetLastForceSuspendStartTime(int64_t time)
+void SuspendController::SetLastForceSuspendStartTime(int64_t time)
 {
  	lastForceSuspendStartTime_ = time;
 }
  	 
-int64_t WakeupController::GetLastForceSuspendStartTime()
+int64_t SuspendController::GetLastForceSuspendStartTime()
 {
  	return lastForceSuspendStartTime_;
 }
  	 
-int64_t WakeupController::GetSuspendMouseDebounceTimeMs()
+int64_t SuspendController::GetSuspendMouseDebounceTimeMs()
 {
  	return suspendMouseDebounceTimeMs_;
 }
