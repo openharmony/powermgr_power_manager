@@ -149,10 +149,6 @@ void WakeupController::Init()
             monitorMap_.emplace(monitor->GetReason(), monitor);
         }
     }
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-    suspendMouseFilterTimeMs_ =
-        static_cast<int64_t>(system::GetIntParameter("const.power.suspend_mouse_filter_time_ms", 1000));
-#endif
     RegisterSettingsObserver();
 }
 
@@ -775,24 +771,24 @@ WakeupDeviceType InputCallback::DetermineWakeupDeviceType(int32_t deviceType, in
     return wakeupType;
 }
 
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-bool InputCallback::isNeedSuspendMouseFilter(std::shared_ptr<PointerEvent> pointerEvent) const
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
+bool InputCallback::isNeedSuspendMouseDebounce(std::shared_ptr<PointerEvent> pointerEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
         POWER_HILOGE(FEATURE_WAKEUP, "pms is nullptr");
         return false;
     }
-    std:shared_ptr<WakeupController> wakeupController = pms->GetWakeupController();
-    if (wakeupController == nullptr) {
-        POWER_HILOGE(FEATURE_WAKEUP, "wakeupController is nullptr");
+    auto suspendController = pms->GetSuspendController();
+    if (suspendController == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "suspendController is nullptr");
         return false;
     }
     int64_t now = GetTickCount();
-    int64_t lastForceSuspendStartTime = wakeupController->GetLastForceSuspendStartTime();
-    int64_t suspendMouseFilterTimeMs = wakeupController->GetSuspendMouseFilterTimeMs();
+    int64_t lastForceSuspendStartTime = suspendController->GetLastForceSuspendStartTime();
+    int64_t suspendMouseDebounceTimeMs = suspendController->GetSuspendMouseDebounceTimeMs();
     if (lastForceSuspendStartTime > 0 && now >= lastForceSuspendStartTime &&
-        now - lastForceSuspendStartTime <= suspendMouseFilterTimeMs &&
+        now - lastForceSuspendStartTime <= suspendMouseDebounceTimeMs &&
         pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_MOVE) {
         POWER_HILOGE(FEATURE_WAKEUP, "pointer move event in 1s after force suspend, ignore");
         return true;
@@ -820,7 +816,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         POWER_HILOGE(FEATURE_WAKEUP, "is remote event, ignore");
         return;
     }
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
     if (isNeedSuspendMouseFilter(pointerEvent)) {
         return;
     }
@@ -994,23 +990,6 @@ int32_t WakeupController::GetPowerkeyShortPressIdCache()
 {
     return g_powerkeyShortPressIdCache;
 }
-
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-void WakeupController::SetLastForceSuspendStartTime(int64_t time)
-{
-    lastForceSuspendStartTime_ = time;
-}
-
-int64_t WakeupController::GetLastForceSuspendStartTime()
-{
-    return lastForceSuspendStartTime_;
-}
-
-int64_t WakeupController::GetSuspendMouseFilterTimeMs()
-{
-    return suspendMouseFilterTimeMs_;
-}
-#endif
 
 /* WakeupMonitor Implement */
 
