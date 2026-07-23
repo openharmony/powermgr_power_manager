@@ -78,11 +78,6 @@ public:
     void PowerOnAllScreens(WakeupDeviceType type);
 #endif
     int32_t GetPowerkeyShortPressIdCache();
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-    void SetLastForceSuspendStartTime(int64_t time);
-    int64_t GetLastForceSuspendStartTime();
-    int64_t GetSuspendMouseFilterTimeMs();
-#endif
 
 private:
     class SleepGuard final {
@@ -119,10 +114,6 @@ private:
     ffrt::mutex mmiMonitorMutex_;
     static ffrt::mutex sourceUpdateMutex_;
     int32_t monitorId_ {-1};
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_FILTER
-    int64_t lastForceSuspendStartTime_ {0};
-    int64_t suspendMouseFilterTimeMs_ {1000};
-#endif
 };
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
