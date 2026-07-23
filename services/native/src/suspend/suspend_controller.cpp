@@ -260,6 +260,7 @@ void SuspendController::Init()
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
     suspendMouseDebounceTimeMs_ =
         static_cast<int64_t>(system::GetIntParameter("const.power.suspend_mouse_debounce_time_ms", 1000));
+#endif
 
     RegisterSettingsObserver();
 }
