@@ -817,7 +817,7 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         return;
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
-    if (isNeedSuspendMouseFilter(pointerEvent)) {
+    if (isNeedSuspendMouseDebounce(pointerEvent)) {
         return;
     }
 #endif
