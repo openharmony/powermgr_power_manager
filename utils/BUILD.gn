@@ -31,6 +31,13 @@ config("coverage_flags") {
 }
 
 ohos_source_set("power_utils") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "native/src/power_utils.cpp",
     "native/src/power_xcollie.cpp",
