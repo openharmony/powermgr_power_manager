@@ -668,4 +668,28 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine017, TestSize.Level
     stateMachine->HandleProximityClose();
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine017 function end!");
 }
+
+/**
+ * @tc.name: NativePowerStateMachine018
+ * @tc.desc: test InitTransitMap calls InitAllowMapByReason and populates allowMapByReason_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine018, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine018 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    stateMachine->InitTransitMap();
+    EXPECT_TRUE(stateMachine->allowMapByReason_.count(
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT) > 0);
+    EXPECT_TRUE(stateMachine->allowMapByReason_[
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT].count(PowerState::AWAKE) > 0);
+    EXPECT_TRUE(stateMachine->allowMapByReason_[
+        StateChangeReason::STATE_CHANGE_REASON_TIMEOUT][PowerState::AWAKE].count(PowerState::INACTIVE) > 0);
+    EXPECT_TRUE(stateMachine->allowMapByReason_.count(
+        StateChangeReason::STATE_CHANGE_REASON_REFRESH) > 0);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine018 function end!");
+}
+
 } // namespace

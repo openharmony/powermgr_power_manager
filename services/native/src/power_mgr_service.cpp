@@ -1436,11 +1436,16 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type,
     if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION") || !Permission::IsSystem()) {
         return false;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(FEATURE_ACTIVITY, "Refresh device active is not supported");
+    return false;
+#else
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_ACTIVITY,
         "Try to refresh activity, pid: %{public}d, uid: %{public}d, activity type: %{public}u", pid, uid, type);
     return RefreshActivityInner(callTimeMs, type, needChangeBacklight);
+#endif
 }
 
 bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
@@ -1468,11 +1473,16 @@ PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "OverrideScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(COMP_SVC, "OverrideScreenOffTime is not supported");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
     POWER_HILOGI(COMP_SVC,
         "Try to override screenOffTime, timeout=%{public}" PRId64 ", pid: %{public}d, uid: %{public}d",
         timeout, pid, uid);
     return powerStateMachine_->OverrideScreenOffTimeInner(timeout) ?
         PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+#endif
 }
 
 PowerErrors PowerMgrService::RestoreScreenOffTime(const std::string& apiVersion)
@@ -1487,9 +1497,14 @@ PowerErrors PowerMgrService::RestoreScreenOffTime(const std::string& apiVersion)
         POWER_HILOGI(FEATURE_SUSPEND, "RestoreScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(COMP_SVC, "RestoreScreenOffTime is not supported");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
     POWER_HILOGD(COMP_SVC, "Try to restore screen off time");
     return powerStateMachine_->RestoreScreenOffTimeInner() ?
         PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+#endif
 }
 
 PowerState PowerMgrService::GetState()
@@ -2997,6 +3012,10 @@ PowerErrors PowerMgrService::RefreshActivity(
         POWER_HILOGI(FEATURE_ACTIVITY, "RefreshActivity failed, The caller does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(FEATURE_ACTIVITY, "Refresh device active is not supported");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_ACTIVITY,
@@ -3004,6 +3023,7 @@ PowerErrors PowerMgrService::RefreshActivity(
         pid, uid, type, refreshReason.c_str());
     return RefreshActivityInner(callTimeMs, type, true) ? PowerErrors::ERR_OK :
         PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
+#endif
 }
 
 PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)
