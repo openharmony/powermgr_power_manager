@@ -229,7 +229,7 @@ bool PowerMgrService::Init()
     isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
 #endif
     isExternalScreenWakeup_ = system::GetBoolParameter("const.power.external_screen_wakeup", false);
-    POWER_HILOGI(COMP_SVC, "powermgr service init success %{public}d", isDuringCallStateEnable_);
+    POWER_HILOGI(COMP_SVC, "powermgr service init success, duringCallStateEnable: %{public}d", isDuringCallStateEnable_);
     return true;
 }
 
@@ -246,7 +246,7 @@ void PowerMgrService::RegisterBootCompletedCallback()
         isNeedReInit_  = false;
         auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (power == nullptr) {
-            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
             return;
         }
         auto powerStateMachine = power->GetPowerStateMachine();
@@ -287,7 +287,7 @@ void PowerMgrService::PowerExternalAbilityInit()
 {
     auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (power == nullptr) {
-        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
         return;
     }
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -371,13 +371,13 @@ void PowerMgrService::KeepScreenOnInit()
     }
     ptoken_ = new (std::nothrow) RunningLockTokenStub();
     if (ptoken_ == nullptr) {
-        POWER_HILOGI(COMP_SVC, "create runninglock token failed");
+        POWER_HILOGE(COMP_SVC, "create runninglock token failed");
         return;
     }
     RunningLockInfo info = {"PowerMgrKeepOnLock", OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN};
     PowerErrors ret = pms->CreateRunningLock(ptoken_, info);
     if (ret != PowerErrors::ERR_OK) {
-        POWER_HILOGI(COMP_SVC, "create runninglock failed");
+        POWER_HILOGE(COMP_SVC, "create runninglock failed");
     }
     return;
 }
@@ -509,7 +509,7 @@ void PowerMgrService::RegisterSettingWakeUpLidObserver()
     pms->HallSensorSubscriberInit();
     POWER_HILOGI(COMP_SVC, "Start to registerSettingWakeUpLidObserver");
     if (!SettingHelper::IsWakeupLidSettingValid()) {
-        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is valid.");
+        POWER_HILOGE(COMP_UTILS, "settings.power.wakeup_lid is invalid, skip register observer");
         return;
     }
     SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {WakeupLidSettingUpdateFunc(key);};
@@ -852,7 +852,7 @@ void PowerMgrService::OnStop()
     SettingHelper::UnRegisterSettingWakeupLidObserver();
     SettingHelper::UnRegisterSettingPowerModeObserver();
     if (!OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriberPtr_)) {
-        POWER_HILOGE(COMP_SVC, "Power Onstop unregister to commonevent manager failed!");
+        POWER_HILOGE(COMP_SVC, "Power Onstop unregister to CommonEvent manager failed!");
     }
 #ifdef MSDP_MOVEMENT_ENABLE
     UnRegisterMovementCallback();
@@ -895,7 +895,7 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
     if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
         auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (power == nullptr) {
-            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
             return;
         }
         power->ResetMovementState();
@@ -942,7 +942,7 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     if (systemAbilityId == MSDP_MOVEMENT_SERVICE_ID) {
         auto power = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (power == nullptr) {
-            POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
             return;
         }
         power->UnRegisterMovementCallback();
@@ -1177,9 +1177,7 @@ int32_t PowerMgrService::Dump(int32_t fd, const std::vector<std::u16string>& arg
     std::string result;
     PowerMgrDumper::Dump(argsInStr, result);
     if (!SaveStringToFd(fd, result)) {
-        POWER_HILOGE(COMP_SVC, "Dump failed, save to fd failed.");
-        POWER_HILOGE(COMP_SVC, "Dump Info:\n");
-        POWER_HILOGE(COMP_SVC, "%{public}s", result.c_str());
+        POWER_HILOGE(COMP_SVC, "Dump failed, save to fd failed, result length: %{public}zu", result.size());
         return ERR_OK;
     }
     return ERR_OK;
@@ -1255,13 +1253,13 @@ PowerErrors PowerMgrService::ShutDownDevice(const std::string& reason)
 PowerErrors PowerMgrService::GetShutdownReason(std::string& reason)
 {
     if (!Permission::IsSystem()) {
-        POWER_HILOGE(FEATURE_SHUTDOWN, "Get SR failed,System permission reject");
+        POWER_HILOGE(FEATURE_SHUTDOWN, "Get shutdown reason failed,System permission reject");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     reason = system::GetParameter("persist.dfx.shutdown_reason", "");
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Get SR,P=%{public}d,U=%{public}d,R=%{public}s", pid, uid, reason.c_str());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Get shutdown reason, pid: %{public}d, uid: %{public}d, reason: %{public}s", pid, uid, reason.c_str());
     return PowerErrors::ERR_OK;
 }
 
@@ -1391,7 +1389,7 @@ PowerErrors PowerMgrService::WakeupDevice(
 {
     std::lock_guard lock(wakeupMutex_);
     if (!Permission::IsSystem()) {
-        POWER_HILOGI(FEATURE_SUSPEND, "WakeupDevice failed, System permission intercept");
+        POWER_HILOGI(FEATURE_WAKEUP, "WakeupDevice failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
@@ -1633,10 +1631,10 @@ std::string PowerMgrService::GetBundleNameByUid(const int32_t uid)
     ErrCode res = bundleObj.GetNameForUid(uid, tempBundleName);
     IPCSkeleton::SetCallingIdentity(identity);
     if (res != ERR_OK) {
-        POWER_HILOGE(FEATURE_RUNNING_LOCK, "get B for U=%{public}d,Err:%{public}d",
+        POWER_HILOGE(FEATURE_RUNNING_LOCK, "Get bundle name failed, uid: %{public}d, err: %{public}d",
             uid, static_cast<int32_t>(res));
     }
-    POWER_HILOGD(FEATURE_RUNNING_LOCK, "U=%{public}d,B=%{public}s", uid, tempBundleName.c_str());
+    POWER_HILOGD(FEATURE_RUNNING_LOCK, "uid: %{public}d, bundle: %{public}s", uid, tempBundleName.c_str());
     return tempBundleName;
 }
 
@@ -2262,7 +2260,7 @@ std::string PowerMgrService::ShellDump(const std::vector<std::string>& args, uin
 
     std::string result;
     bool ret = PowerMgrDumper::Dump(args, result);
-    POWER_HILOGI(COMP_SVC, "%{public}s: pid: %{public}d, uid: %{public}d ret :%{public}d", __func__, pid, uid, ret);
+    POWER_HILOGI(COMP_SVC, "%{public}s: pid: %{public}d, uid: %{public}d ret: %{public}d", __func__, pid, uid, ret);
     return result;
 }
 
@@ -2607,7 +2605,7 @@ void PowerMgrService::ExternalScreenInit()
     auto suspendController = pms->GetSuspendController();
     auto wakeupController = pms->GetWakeupController();
     if (stateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "Get important instance error");
+        POWER_HILOGE(COMP_SVC, "get stateMachine, suspendController or wakeupController fail");
         return;
     }
 
@@ -2698,7 +2696,7 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
     auto suspendController = pms->GetSuspendController();
     auto wakeupController = pms->GetWakeupController();
     if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "Get important instance error, screenId: %{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "get powerStateMachine, suspendController or wakeupController fail, screenId: %{public}u", static_cast<uint32_t>(screenId));
         return;
     }
 
@@ -2743,7 +2741,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
     auto powerStateMachine = pms->GetPowerStateMachine();
     auto suspendController = pms->GetSuspendController();
     if (powerStateMachine == nullptr || suspendController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "Get important instance error, screenId:%{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "get powerStateMachine or suspendController fail, screenId:%{public}u", static_cast<uint32_t>(screenId));
         return;
     }
 
@@ -2783,7 +2781,7 @@ void PowerMgrService::AbnormalExternalScreenConnectListener::NotifyAbnormalScree
     auto suspendController = pms->GetSuspendController();
     auto wakeupController = pms->GetWakeupController();
     if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "Get important instance error, screenId: %{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "get powerStateMachine, suspendController or wakeupController fail, screenId: %{public}u", static_cast<uint32_t>(screenId));
         return;
     }
 
@@ -2827,7 +2825,7 @@ void PowerMgrService::UnregisterAllSettingObserver()
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
         return;
     }
     auto stateMachine = pms->GetPowerStateMachine();
@@ -2855,7 +2853,7 @@ void PowerMgrService::RegisterAllSettingObserver()
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
         return;
     }
 
@@ -2884,7 +2882,7 @@ int64_t PowerMgrService::GetSettingDisplayOffTime(int64_t defaultTime)
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGE(FEATURE_POWER_MODE, "get PowerMgrService fail");
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
         return settingTime;
     }
     if (pms->IsPowerConnected()) {
@@ -2941,7 +2939,7 @@ void PowerCommonEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEven
     std::string action = data.GetWant().GetAction();
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
-        POWER_HILOGI(COMP_SVC, "get PowerMgrService fail");
+        POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
         return;
     }
 #ifdef POWER_MANAGER_SCREEN_SAVER
@@ -3089,7 +3087,7 @@ PowerErrors PowerMgrService::SetProxFilteringStrategy(
     ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token)
 {
     if (!Permission::IsSystem()) {
-        POWER_HILOGW(COMP_SVC, "SetProxFilteringStrategy failed, System permission intercept");
+        POWER_HILOGW(FEATURE_INPUT, "SetProxFilteringStrategy failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -3123,7 +3121,7 @@ PowerErrors PowerMgrService::RegisterRunningLockChangedCallback(
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s failed, System permission intercept"
-            "pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+            " pid: %{public}d, uid: %{public}d", __func__, pid, uid);
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
@@ -3161,7 +3159,7 @@ PowerErrors PowerMgrService::UnRegisterRunningLockChangedCallback(
     auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         POWER_HILOGE(FEATURE_RUNNING_LOCK, "%{public}s failed, System permission intercept"
-            "pid: %{public}d, uid: %{public}d", __func__, pid, uid);
+            " pid: %{public}d, uid: %{public}d", __func__, pid, uid);
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
     if (!Permission::IsPermissionGranted("ohos.permission.RUNNING_LOCK")) {
