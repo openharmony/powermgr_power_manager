@@ -229,7 +229,8 @@ bool PowerMgrService::Init()
     isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
 #endif
     isExternalScreenWakeup_ = system::GetBoolParameter("const.power.external_screen_wakeup", false);
-    POWER_HILOGI(COMP_SVC, "powermgr service init success, duringCallStateEnable: %{public}d", isDuringCallStateEnable_);
+    POWER_HILOGI(COMP_SVC, "powermgr service init success, duringCallStateEnable: %{public}d",\
+        isDuringCallStateEnable_);
     return true;
 }
 
@@ -1259,7 +1260,8 @@ PowerErrors PowerMgrService::GetShutdownReason(std::string& reason)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     reason = system::GetParameter("persist.dfx.shutdown_reason", "");
-    POWER_HILOGI(FEATURE_SHUTDOWN, "Get shutdown reason, pid: %{public}d, uid: %{public}d, reason: %{public}s", pid, uid, reason.c_str());
+    POWER_HILOGI(FEATURE_SHUTDOWN, "Get shutdown reason, pid: %{public}d, uid: %{public}d, reason: %{public}s",\
+        pid, uid, reason.c_str());
     return PowerErrors::ERR_OK;
 }
 
@@ -2696,7 +2698,8 @@ void PowerMgrService::ExternalScreenListener::OnConnect(uint64_t screenId)
     auto suspendController = pms->GetSuspendController();
     auto wakeupController = pms->GetWakeupController();
     if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "get powerStateMachine, suspendController or wakeupController fail, screenId: %{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "get powerStateMachine, suspendController or wakeupController fail, screenId: %{public}u",\
+            static_cast<uint32_t>(screenId));
         return;
     }
 
@@ -2741,7 +2744,8 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
     auto powerStateMachine = pms->GetPowerStateMachine();
     auto suspendController = pms->GetSuspendController();
     if (powerStateMachine == nullptr || suspendController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "get powerStateMachine or suspendController fail, screenId:%{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "get powerStateMachine or suspendController fail, screenId:%{public}u",\
+            static_cast<uint32_t>(screenId));
         return;
     }
 
@@ -2781,7 +2785,8 @@ void PowerMgrService::AbnormalExternalScreenConnectListener::NotifyAbnormalScree
     auto suspendController = pms->GetSuspendController();
     auto wakeupController = pms->GetWakeupController();
     if (powerStateMachine == nullptr || suspendController == nullptr || wakeupController == nullptr) {
-        POWER_HILOGE(COMP_SVC, "get powerStateMachine, suspendController or wakeupController fail, screenId: %{public}u", static_cast<uint32_t>(screenId));
+        POWER_HILOGE(COMP_SVC, "get powerStateMachine, suspendController or wakeupController fail, screenId: %{public}u",\
+            static_cast<uint32_t>(screenId));
         return;
     }
 
