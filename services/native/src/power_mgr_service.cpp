@@ -100,6 +100,23 @@ constexpr int32_t ULSR_TIMER_EXPIRED_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_T
 const std::string ULSR_RESULT_PARAM = "persist.hdi_power.ulsr_result";
 constexpr int32_t ULSR_RESULT_WAIT_TIMEOUT_MS = 2000; // Maximum waiting time for the ULSR result to be ready
 constexpr int32_t ERR_PARAM_WATCHER_REPEAT_ADD = 110;
+// Global context for ULSR parameter watcher
+static std::mutex g_ulsrResultMutex;
+static std::condition_variable g_ulsrResultCv;
+static bool g_ulsrResultReady = false;
+static std::atomic_bool g_ulsrResultWaitTaskStart = false;
+// C-style callback for WatchParameter
+static void UlsrParamChangeCallback(const char* key, const char* value, void* context)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "UlsrParamChangeCallback, value: %{public}s", value);
+    if (value == nullptr || value[0] == '\0') {
+        POWER_HILOGI(FEATURE_WAKEUP, "UlsrParamChangeCallback, value is nullptr or empty, still not ready!");
+        return; // Ignore empty value changes
+    }
+    std::lock_guard lock(g_ulsrResultMutex);
+    g_ulsrResultReady = true;
+    g_ulsrResultCv.notify_all();
+}
 #endif
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t INPUT_TASK_TIMEOUT = 50000;
@@ -1419,11 +1436,16 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type,
     if (!Permission::IsPermissionGranted("ohos.permission.REFRESH_USER_ACTION") || !Permission::IsSystem()) {
         return false;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(FEATURE_ACTIVITY, "Refresh device active is not supported");
+    return false;
+#else
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_ACTIVITY,
         "Try to refresh activity, pid: %{public}d, uid: %{public}d, activity type: %{public}u", pid, uid, type);
     return RefreshActivityInner(callTimeMs, type, needChangeBacklight);
+#endif
 }
 
 bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
@@ -1451,11 +1473,16 @@ PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "OverrideScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(COMP_SVC, "OverrideScreenOffTime is not supported");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
     POWER_HILOGI(COMP_SVC,
         "Try to override screenOffTime, timeout=%{public}" PRId64 ", pid: %{public}d, uid: %{public}d",
         timeout, pid, uid);
     return powerStateMachine_->OverrideScreenOffTimeInner(timeout) ?
         PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+#endif
 }
 
 PowerErrors PowerMgrService::RestoreScreenOffTime(const std::string& apiVersion)
@@ -1470,9 +1497,14 @@ PowerErrors PowerMgrService::RestoreScreenOffTime(const std::string& apiVersion)
         POWER_HILOGI(FEATURE_SUSPEND, "RestoreScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(COMP_SVC, "RestoreScreenOffTime is not supported");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
     POWER_HILOGD(COMP_SVC, "Try to restore screen off time");
     return powerStateMachine_->RestoreScreenOffTimeInner() ?
         PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+#endif
 }
 
 PowerState PowerMgrService::GetState()
@@ -2087,45 +2119,49 @@ void PowerMgrService::TriggerUlsrWakeupCallbackWithResult()
         return;
     }
     powerStateMachine_->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    // Atomic CAS: only the first caller wins, others return early
+    bool expected = false;
+    if (!g_ulsrResultWaitTaskStart.compare_exchange_strong(expected, true)) {
+        POWER_HILOGW(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, wait for ulsr result task already started!");
+        return;
+    }
+    if (ulsrCallbackHolder_ == nullptr) {
+        POWER_HILOGW(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, ulsrCallbackHolder null, skip");
+        g_ulsrResultWaitTaskStart = false;
+        return;
+    }
+    // Anti-re-entry check: UlsrCallbackStage MUST be STAGE_ENTER when submitting the ffrt task
+    if (ulsrCallbackHolder_->GetCallbackState() != UlsrCallbackStage::STAGE_ENTER) {
+        POWER_HILOGW(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, ulsr callback state != STAGE_ENTER, skip");
+        g_ulsrResultWaitTaskStart = false;
+        return;
+    }
     // Wait + read + trigger run in an ffrt task to avoid blocking the caller
     FFRTUtils::SubmitTask([this]() { WaitAndTriggerUlsrWakeup(); });
 }
 
 void PowerMgrService::WaitAndTriggerUlsrWakeup()
 {
-    // Wait (max 2s) for the ULSR result to be written
-    // Query first: the HDI path may have already written the result
+    g_ulsrResultWaitTaskStart = true;
+    // Wait (max 2s) for the ULSR result to be written if result is empty
     if (OHOS::system::GetParameter(ULSR_RESULT_PARAM, "").empty()) {
         POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result not ready, add parameter watcher");
-        struct WatchCtx {
-            std::mutex* mtx;
-            std::condition_variable* cv;
-            bool ready;
-        };
-        std::mutex mtx;
-        std::condition_variable cv;
-        WatchCtx ctx {&mtx, &cv, false};
-        ParameterChgPtr cb = [](const char* key, const char* value, void* context) {
-            if (value == nullptr || value[0] == '\0') {
-                return; // Ignore empty value changes
-            }
-            auto* c = static_cast<WatchCtx*>(context);
-            std::lock_guard lock(*(c->mtx));
-            c->ready = true;
-            c->cv->notify_one();
-        };
-        int32_t ret = WatchParameter(ULSR_RESULT_PARAM.c_str(), cb, &ctx);
+        std::unique_lock<std::mutex> lock(g_ulsrResultMutex);
+        g_ulsrResultReady = false;
+        int32_t ret = WatchParameter(ULSR_RESULT_PARAM.c_str(), UlsrParamChangeCallback, nullptr);
+        POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, watcher add ret: %{public}d", ret);
         if (ret == 0 || ret == ERR_PARAM_WATCHER_REPEAT_ADD) { // ERR_REPEAT_ADD is non-fatal, callback still works
-            std::unique_lock lock(mtx);
-            cv.wait_for(lock, std::chrono::milliseconds(ULSR_RESULT_WAIT_TIMEOUT_MS),
-                [&ctx]() { return ctx.ready; });
-            RemoveParameterWatcher(ULSR_RESULT_PARAM.c_str(), cb, &ctx);
+            g_ulsrResultCv.wait_for(lock, std::chrono::milliseconds(ULSR_RESULT_WAIT_TIMEOUT_MS),
+                []() { return g_ulsrResultReady; });
+            ret = RemoveParameterWatcher(ULSR_RESULT_PARAM.c_str(), UlsrParamChangeCallback, nullptr);
+            POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, watcher remove ret: %{public}d", ret);
         }
         POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result is ready or wait timeout");
     }
     bool ulsrResult = IsUlsrSucceed();
     POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result: %{public}d", ulsrResult);
     TriggerUlsrWakeupCallback(ulsrResult);
+    g_ulsrResultWaitTaskStart = false;
 }
 
 bool PowerMgrService::IsUlsrSucceed()
@@ -2984,6 +3020,10 @@ PowerErrors PowerMgrService::RefreshActivity(
         POWER_HILOGI(FEATURE_ACTIVITY, "RefreshActivity failed, The caller does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(FEATURE_ACTIVITY, "Refresh device active is not supported");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_ACTIVITY,
@@ -2991,6 +3031,7 @@ PowerErrors PowerMgrService::RefreshActivity(
         pid, uid, type, refreshReason.c_str());
     return RefreshActivityInner(callTimeMs, type, true) ? PowerErrors::ERR_OK :
         PowerErrors::ERR_FREQUENT_FUNCTION_CALL;
+#endif
 }
 
 PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)

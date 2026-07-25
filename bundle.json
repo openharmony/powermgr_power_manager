@@ -58,6 +58,7 @@
             "power_manager_feature_lock_screen_support_multi_screen",
             "power_manager_feature_support_power_cli",
             "power_manager_feature_enable_long_time_dim",
+            "power_manager_feature_enable_screen_decoupling",
             "power_manager_feature_enable_suspend_mouse_debounce"
         ],
         "adapted_system_type": [
@@ -111,7 +112,8 @@
                 "bundle_framework",
                 "resource_schedule_service",
                 "selinux_adapter",
-                "api_metrics"
+                "api_metrics",
+                "taihe_ffi_gen"
             ]
         },
         "build": {

@@ -53,6 +53,7 @@ declare_args() {
   power_manager_feature_lock_screen_support_multi_screen = false
   power_manager_feature_support_power_cli = false
   power_manager_feature_enable_long_time_dim = false
+  power_manager_feature_enable_screen_decoupling = false
   power_manager_feature_enable_suspend_mouse_debounce = false
 }
 
@@ -84,6 +85,10 @@ if (power_manager_feature_support_filtering_proximity_event) {
 
 if (power_manager_feature_enable_monitor_running_lock_change) {
   defines += [ "POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE" ]
+}
+
+if (power_manager_feature_enable_screen_decoupling) {
+  defines += [ "POWER_MANAGER_ENABLE_SCREEN_DECOUPLING" ]
 }
 
 if (power_manager_feature_enable_long_time_dim) {

@@ -25,12 +25,19 @@ declare_args() {
 config("coverage_flags") {
   if (power_manager_feature_coverage) {
     cflags = [ "--coverage" ]
-    cflags_cc += [ "--coverage" ]
+    cflags_cc = [ "--coverage" ]
     ldflags = [ "--coverage" ]
   }
 }
 
 ohos_source_set("power_utils") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "native/src/power_utils.cpp",
     "native/src/power_xcollie.cpp",
@@ -43,6 +50,7 @@ ohos_source_set("power_utils") {
   public_configs = [ ":utils_config" ]
 
   external_deps = [
+    "ipc:ipc_single",
     "c_utils:utils",
     "hicollie:libhicollie",
     "hilog:libhilog",

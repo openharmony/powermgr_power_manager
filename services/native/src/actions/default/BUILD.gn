@@ -83,12 +83,17 @@ ohos_source_set("${powermgr_actions_default_target}") {
   }
 
   if (has_display_manager_part) {
-    sources += [ "display/device_state_action.cpp" ]
+    sources += [
+      "display/device_state_action.cpp",
+    ]
     public_configs += [ ":powermgr_display_actions_impl_public_config" ]
     external_deps += [
       "display_manager:displaymgr",
       "window_manager:libdm_lite",
     ]
+    if (power_manager_feature_enable_screen_decoupling) {
+      sources += [ "display/decoupled_device_state_action.cpp" ]
+    }
   } else {
     sources += [ "display/default_device_state_action.cpp" ]
   }

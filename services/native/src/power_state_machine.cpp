@@ -149,6 +149,9 @@ void PowerStateMachine::InitTransitMap()
     std::vector<PowerState> dim { PowerState::SLEEP };
     std::vector<PowerState> sleep { PowerState::DIM };
 
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    awake.push_back(PowerState::DIM);
+#endif
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
     forbidMap_.emplace(PowerState::DIM, std::set<PowerState>(dim.begin(), dim.end()));
@@ -156,7 +159,11 @@ void PowerStateMachine::InitTransitMap()
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(hibernate.begin(), hibernate.end()));
 #endif
+    InitAllowMapByReason();
+}
 
+void PowerStateMachine::InitAllowMapByReason()
+{
     allowMapByReason_.insert({
         {
             StateChangeReason::STATE_CHANGE_REASON_REFRESH,
@@ -278,6 +285,10 @@ void PowerStateMachine::StartSleepTimer(PowerState from)
 
 void PowerStateMachine::InitState()
 {
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
+    return;
+#endif
     POWER_HILOGI(FEATURE_POWER_STATE, "Init power state");
     if (IsScreenOn() ||
         switchAction_->HandleSwitchAction(SwitchActionType::IS_SCREEN_ON) == SwitchActionRet::IS_SCREEN_ON) {
@@ -769,9 +780,11 @@ void PowerStateMachine::RefreshActivityInner(
     // Check the screen state
     if (IsScreenOn() && !IsSettingState(PowerState::INACTIVE)) {
         if (stateAction_ != nullptr) {
+#ifndef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
             stateAction_->RefreshActivity(callTimeMs, type,
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
+#endif
         }
         if (GetState() == PowerState::DIM || IsSettingState(PowerState::DIM)) {
             // Inactive to Awake will be blocked for this reason in CanTransitTo()
@@ -1077,6 +1090,9 @@ bool PowerStateMachine::HibernateInner(bool clearMemory, const std::string& reas
 
 bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 {
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    return GetState() == PowerState::AWAKE;
+#endif
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     bool isScreenOn {false};
     // When there's external screen, the original way to get screen state is inaccurate,
@@ -1481,6 +1497,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 
 void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
 {
+#ifndef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
     // change the flag to notify the thread which is setting DIM
     int64_t expectedFlag = static_cast<int64_t>(PowerState::DIM);
     settingStateFlag_.compare_exchange_strong(
@@ -1502,6 +1519,7 @@ void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
     if (needPrintLog) {
         POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}" PRId64, displayOffTime);
     }
+#endif
 }
 
 void PowerStateMachine::PublishRefreshEvent()

@@ -26,6 +26,11 @@
 
 namespace OHOS {
 namespace PowerMgr {
+enum class UlsrCallbackStage : int32_t {
+    STAGE_DONE = 0, // init or WakeupNotify() is called
+    STAGE_ENTER,    // SyncUlsrNotify() was called but WakeupNotify() hasn't been called
+};
+
 class UlsrCallbackHolder : public IRemoteObject::DeathRecipient {
 public:
     struct UlsrCallbackRecord {
@@ -65,13 +70,9 @@ public:
     void RemoveCallback(const sptr<IUlsrCallback>& callback);
     bool SyncUlsrNotify();
     void WakeupNotify(bool ulsrResult = false);
+    UlsrCallbackStage GetCallbackState() const;
 
 private:
-    enum class UlsrCallbackStage : int32_t {
-        STAGE_DONE = 0, // init or WakeupNotify() is called
-        STAGE_ENTER,    // SyncUlsrNotify() was called but WakeupNotify() hasn't been called
-    };
-
     template<typename Func>
     void ForEachContainer(Func&& func)
     {

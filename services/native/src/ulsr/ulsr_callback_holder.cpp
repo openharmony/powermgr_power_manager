@@ -202,5 +202,12 @@ void UlsrCallbackHolder::WakeupNotify(bool ulsrResult)
     });
     POWER_HILOGI(FEATURE_WAKEUP, "ULSRcb WakeupNotify end");
 }
+
+UlsrCallbackStage UlsrCallbackHolder::GetCallbackState() const
+{
+    UlsrCallbackStage state = callbackState_.load();
+    POWER_HILOGI(FEATURE_WAKEUP, "ULSRcb GetCallbackState S=%{public}d", static_cast<int32_t>(state));
+    return state;
+}
 } // namespace PowerMgr
 } // namespace OHOS
