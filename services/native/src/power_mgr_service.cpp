@@ -1579,7 +1579,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     powerStateMachine_->ReportSuspendStart(
         uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
 #endif
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
     if (suspendController_) {
         int64_t now = GetTickCount();
         if (now > 0) {
