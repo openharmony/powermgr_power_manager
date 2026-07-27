@@ -58,7 +58,8 @@
             "power_manager_feature_lock_screen_support_multi_screen",
             "power_manager_feature_support_power_cli",
             "power_manager_feature_enable_long_time_dim",
-            "power_manager_feature_enable_screen_decoupling"
+            "power_manager_feature_enable_screen_decoupling",
+            "power_manager_feature_enable_mouse_debounce_after_suspend"
         ],
         "adapted_system_type": [
             "standard"

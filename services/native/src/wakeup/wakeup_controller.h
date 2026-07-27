@@ -129,6 +129,9 @@ private:
     bool isRemoteEvent(std::shared_ptr<InputEvent> event) const;
     bool isKeyboardKeycode(int32_t keyCode) const;
     WakeupDeviceType DetermineWakeupDeviceType(int32_t deviceType, int32_t sourceType) const;
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+    bool IsNeedMouseDebounceAfterSuspend(std::shared_ptr<PointerEvent> pointerEvent) const;
+#endif
 };
 #endif
 

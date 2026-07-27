@@ -107,6 +107,11 @@ public:
     void SetWakeupReasonConfigMatchedFlag(bool flag);
 #endif
     int32_t GetPowerkeyReleaseIdCache();
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+    void SetLastForceSuspendStartTime(int64_t time);
+    int64_t GetLastForceSuspendStartTime();
+    int64_t GetMouseDebounceTimeAfterSuspend();
+#endif
 
 private:
     void ControlListener(SuspendDeviceType reason, uint32_t action, uint32_t delay);
@@ -157,6 +162,10 @@ private:
     sptr<IPowerStateCallback> suspendPowerStateCallback_ {nullptr};
 #ifdef POWER_MANAGER_WAKEUP_ACTION
     std::atomic<bool> isWakeupReasonConfigMatched_ {false};
+#endif
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+    int64_t lastForceSuspendStartTime_ {0};
+    int64_t mouseDebounceTimeAfterSuspend_ {1000};
 #endif
 };
 

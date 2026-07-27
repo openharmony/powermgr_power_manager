@@ -1579,6 +1579,14 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     powerStateMachine_->ReportSuspendStart(
         uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
 #endif
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+    if (suspendController_) {
+        int64_t now = GetTickCount();
+        if (now > 0) {
+            suspendController_->SetLastForceSuspendStartTime(now);
+        }
+    }
+#endif
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Try to force suspend device, pid: %{public}d, uid: %{public}d", pid, uid);
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     if (suspendController_) {

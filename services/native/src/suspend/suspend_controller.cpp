@@ -257,6 +257,11 @@ void SuspendController::Init()
     }
     suspendPowerStateCallback_ = callback;
 
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+    mouseDebounceTimeAfterSuspend_ =
+        static_cast<int64_t>(system::GetIntParameter("const.power.mouse_debounce_time_after_suspend", 1000));
+#endif
+
     RegisterSettingsObserver();
 }
 
@@ -923,6 +928,23 @@ int32_t SuspendController::GetPowerkeyReleaseIdCache()
 {
     return g_powerkeyReleaseIdCache;
 }
+
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+void SuspendController::SetLastForceSuspendStartTime(int64_t time)
+{
+    lastForceSuspendStartTime_ = time;
+}
+ 	 
+int64_t SuspendController::GetLastForceSuspendStartTime()
+{
+    return lastForceSuspendStartTime_;
+}
+ 	 
+int64_t SuspendController::GetMouseDebounceTimeAfterSuspend()
+{
+    return mouseDebounceTimeAfterSuspend_;
+}
+#endif
 
 const std::shared_ptr<SuspendMonitor> SuspendMonitor::CreateMonitor(SuspendSource& source)
 {
