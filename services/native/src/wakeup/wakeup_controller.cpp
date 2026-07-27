@@ -771,8 +771,8 @@ WakeupDeviceType InputCallback::DetermineWakeupDeviceType(int32_t deviceType, in
     return wakeupType;
 }
 
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
-bool InputCallback::isNeedSuspendMouseDebounce(std::shared_ptr<PointerEvent> pointerEvent) const
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+bool InputCallback::IsNeedMouseDebounceAfterSuspend(std::shared_ptr<PointerEvent> pointerEvent) const
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
     if (pms == nullptr) {
@@ -786,9 +786,9 @@ bool InputCallback::isNeedSuspendMouseDebounce(std::shared_ptr<PointerEvent> poi
     }
     int64_t now = GetTickCount();
     int64_t lastForceSuspendStartTime = suspendController->GetLastForceSuspendStartTime();
-    int64_t suspendMouseDebounceTimeMs = suspendController->GetSuspendMouseDebounceTimeMs();
+    int64_t mouseDebounceTimeAfterSuspend = suspendController->GeMouseDebounceTimeAfterSuspend();
     if (lastForceSuspendStartTime > 0 && now >= lastForceSuspendStartTime &&
-        now - lastForceSuspendStartTime <= suspendMouseDebounceTimeMs &&
+        now - lastForceSuspendStartTime <= mouseDebounceTimeAfterSuspend &&
         pointerEvent->GetPointerAction() == PointerEvent::POINTER_ACTION_MOVE) {
         POWER_HILOGE(FEATURE_WAKEUP, "pointer move event in 1s after force suspend, ignore");
         return true;
@@ -816,8 +816,8 @@ void InputCallback::OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) con
         POWER_HILOGE(FEATURE_WAKEUP, "is remote event, ignore");
         return;
     }
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_MOUSE_DEBOUNCE
-    if (isNeedSuspendMouseDebounce(pointerEvent)) {
+#ifdef POWER_MANAGER_ENABLE_MOUSE_DEBOUNCE_AFTER_SUSPEND
+    if (IsNeedMouseDebounceAfterSuspend(pointerEvent)) {
         return;
     }
 #endif
