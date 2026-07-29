@@ -56,6 +56,7 @@ ohos_source_set("powermgr_proxy") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   output_values = get_target_outputs(":powermgr_interface")
   sources = filter_include(output_values, [ "*_proxy.cpp" ])
   configs = [
@@ -84,6 +85,7 @@ ohos_source_set("powermgr_stub") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   output_values = get_target_outputs(":powermgr_interface")
   sources = filter_include(output_values, [ "*_stub.cpp" ])
   sources += [
