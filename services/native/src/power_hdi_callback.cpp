@@ -31,35 +31,49 @@ int32_t PowerHdiCallback::OnSuspend()
 
 int32_t PowerHdiCallback::OnWakeup()
 {
-    POWER_HILOGD(FEATURE_WAKEUP, "OnSuspend");
+    POWER_HILOGD(FEATURE_WAKEUP, "OnWakeup");
     return HDF_SUCCESS;
 }
 
 int32_t PowerHdiCallbackExt::OnSuspendWithTag(const std::string& tag)
 {
     POWER_HILOGD(FEATURE_SUSPEND, "OnSuspendWithTag, tag:%{public}s", tag.c_str());
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    if (tag == "ulsr") {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "OnSuspendWithTag, pms nullptr");
+            return HDF_FAILURE;
+        }
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (stateMachine == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "OnSuspendWithTag, state machine nullptr");
+            return HDF_FAILURE;
+        }
+        POWER_HILOGI(FEATURE_SUSPEND, "OnSuspendWithTag, cancel ulsr sync callback timeout timer");
+        stateMachine->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    }
+#endif
     return HDF_SUCCESS;
 }
 
 int32_t PowerHdiCallbackExt::OnWakeupWithTag(const std::string& tag)
 {
     POWER_HILOGD(FEATURE_WAKEUP, "OnWakeupWithTag, tag:%{public}s", tag.c_str());
-#ifdef POWER_MANAGER_ENABLE_ULSR_PLUGIN
-    if (tag == "ulsr") {
-        int ret = HookMgrExecute(GetPowerHookMgr(), static_cast<int32_t>(PowerHookStage::POWER_HDI_CALLBACK_WAKEUP),
-            nullptr, nullptr);
-        POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, HookMgrExecute, stage: %{public}d, ret: %{public}d",
-            PowerHookStage::POWER_HDI_CALLBACK_WAKEUP, ret);
-    }
-#endif
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     if (tag == "ulsr") {
-        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms == nullptr) {
-            POWER_HILOGW(FEATURE_WAKEUP, "OnWakeupWithTag, pms null");
-            return HDF_FAILURE;
+        POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, TriggerUlsrWakeupCallbackWithResult");
+        DelayedSpSingleton<PowerMgrService>::GetInstance()->TriggerUlsrWakeupCallbackWithResult();
+#ifdef POWER_MANAGER_ENABLE_ULSR_PLUGIN
+        // Hook is called only when ULSR is successful
+        if (DelayedSpSingleton<PowerMgrService>::GetInstance()->IsUlsrSucceed()) {
+            POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, ULSR succeed, HookMgrExecute");
+            int ret = HookMgrExecute(GetPowerHookMgr(), static_cast<int32_t>(PowerHookStage::POWER_HDI_CALLBACK_WAKEUP),
+                nullptr, nullptr);
+            POWER_HILOGI(FEATURE_WAKEUP, "OnWakeupWithTag, HookMgrExecute end, stage: %{public}d, ret: %{public}d",
+                PowerHookStage::POWER_HDI_CALLBACK_WAKEUP, ret);
         }
-        pms->TriggerUlsrWakeupCallback();
+#endif
     }
 #endif
     return HDF_SUCCESS;

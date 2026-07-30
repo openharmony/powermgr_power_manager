@@ -23,6 +23,7 @@ namespace PowerMgr {
 class MockPowerRemoteObject : public IRemoteObject {
 public:
     static void SetRequestValue(int32_t value);
+    static int32_t GetRequestValue();
     explicit MockPowerRemoteObject(std::u16string descriptor = std::u16string());
     ~MockPowerRemoteObject();
 

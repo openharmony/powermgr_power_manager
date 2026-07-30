@@ -275,11 +275,11 @@ public:
     {
         return true;
     }
-    PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+    PowerErrors RegisterUlsrCallback(const sptr<IUlsrCallback>& callback, UlsrPriority priority)
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+    PowerErrors UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback)
     {
         return PowerErrors::ERR_OK;
     }

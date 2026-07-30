@@ -23,7 +23,7 @@
 #include "running_lock.h"
 #include "suspend/itake_over_suspend_callback.h"
 #include "isync_sleep_callback.h"
-#include "iasync_ulsr_callback.h"
+#include "iulsr_callback.h"
 #include "shutdown/iasync_shutdown_callback.h"
 
 namespace OHOS {
@@ -270,18 +270,22 @@ public:
     PowerErrors IsRunningLockEnabled(const RunningLockType type, bool& result);
 
     /**
-     * Register asynchronous callback, trigger when ulsr wakeup
-     * @param callback Asynchronous callback object
+     * Register ULSR callback.
+     *   OnSyncUlsr: triggered before entering ULSR (sync).
+     *   OnAsyncWakeup: triggered when device wakes up from ULSR (async).
+     * @param callback ULSR callback object
+     * @param priority Callback priority (default: DEFAULT)
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
-    PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback);
+    PowerErrors RegisterUlsrCallback(const sptr<IUlsrCallback>& callback,
+        UlsrPriority priority = UlsrPriority::DEFAULT);
 
     /**
-     * UnRegister asynchronous callback
-     * @param callback Asynchronous callback object
+     * UnRegister ULSR callback
+     * @param callback ULSR callback object
      * @return PowerErrors::ERR_OK if the call success, otherwise return error code
      */
-    PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback);
+    PowerErrors UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback);
     
     /**
      * Set the power key filtering strategy.

@@ -97,9 +97,14 @@ void PowerMgrServiceNativeTest::PowerRunningLockTestCallback::HandleRunningLockM
     POWER_HILOGI(LABEL_TEST, "PowerRunningLockTestCallback::HandleRunningLockMessage.");
 }
 
-void PowerMgrServiceNativeTest::AsyncUlsrCallback::OnAsyncWakeup()
+void PowerMgrServiceNativeTest::UlsrCallbackTest::OnSyncUlsr()
 {
-    POWER_HILOGI(LABEL_TEST, "AsyncUlsrCallback::OnAsyncWakeup.");
+    POWER_HILOGI(LABEL_TEST, "UlsrCallbackTest::OnSyncUlsr.");
+}
+
+void PowerMgrServiceNativeTest::UlsrCallbackTest::OnAsyncWakeup(bool ulsrResult)
+{
+    POWER_HILOGI(LABEL_TEST, "UlsrCallbackTest::OnAsyncWakeup.");
 }
 namespace {
 /**
@@ -1196,7 +1201,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest037, TestSize.Level
     sptr<IPowerModeCallback> modeCallback = new PowerModeTestCallback();
     sptr<IScreenOffPreCallback> screenOffPreCallback = new ScreenOffPreTestCallback();
     sptr<IPowerRunninglockCallback> RunninglockCallback = new PowerRunningLockTestCallback();
-    sptr<IAsyncUlsrCallback> ulsrCallback = new AsyncUlsrCallback();
+    sptr<IUlsrCallback> ulsrCallback = new UlsrCallbackTest();
 
     EXPECT_EQ(g_powerMgrServiceProxy->RegisterPowerStateCallbackIpc(stateCallback), ERR_OK);
     EXPECT_EQ(g_powerMgrServiceProxy->UnRegisterPowerStateCallbackIpc(stateCallback), ERR_OK);
