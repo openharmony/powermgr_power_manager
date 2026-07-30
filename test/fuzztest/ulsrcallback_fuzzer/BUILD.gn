@@ -17,10 +17,10 @@ import("../../../powermgr.gni")
 module_output_path = "power_manager/power_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("AsyncUlsrCallbackFuzzTest") {
+ohos_fuzztest("UlsrCallbackFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
-      "${powermgr_root_path}/test/fuzztest/asynculsrcallback_fuzzer"
+      "${powermgr_root_path}/test/fuzztest/ulsrcallback_fuzzer"
 
   include_dirs = [
     "${powermgr_service_path}/native/src/hibernate",
@@ -51,7 +51,7 @@ ohos_fuzztest("AsyncUlsrCallbackFuzzTest") {
   ]
   sources = [
     "../power_utils/power_fuzzer.cpp",
-    "./asyncshutdowncallback_fuzzer_test.cpp",
+    "./ulsrcallback_fuzzer_test.cpp",
   ]
   deps = [
     "${powermgr_inner_api}:powermgr_stub",

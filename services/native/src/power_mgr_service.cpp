@@ -60,6 +60,12 @@
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 #include "battery_srv_client.h"
 #endif
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+#include "syspara/parameter.h"
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#endif
 #ifdef MSDP_MOVEMENT_ENABLE
 #include <dlfcn.h>
 #endif
@@ -87,6 +93,32 @@ const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/
 static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 40000; // PREPARE_HIBERNATE_TIMEOUT_MS + 10000
+constexpr int32_t SET_SUSPEND_TAG_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+// Force trigger ULSR wakeup callback if ULSR has been blocked for more than 60s
+constexpr int32_t ULSR_TIMER_TIMEOUT_MS = 60000;
+constexpr int32_t ULSR_TIMER_EXPIRED_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
+const std::string ULSR_RESULT_PARAM = "persist.hdi_power.ulsr_result";
+constexpr int32_t ULSR_RESULT_WAIT_TIMEOUT_MS = 2000; // Maximum waiting time for the ULSR result to be ready
+constexpr int32_t ERR_PARAM_WATCHER_REPEAT_ADD = 110;
+// Global context for ULSR parameter watcher
+static std::mutex g_ulsrResultMutex;
+static std::condition_variable g_ulsrResultCv;
+static bool g_ulsrResultReady = false;
+static std::atomic_bool g_ulsrResultWaitTaskStart = false;
+// C-style callback for WatchParameter
+static void UlsrParamChangeCallback(const char* key, const char* value, void* context)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "UlsrParamChangeCallback, value: %{public}s", value);
+    if (value == nullptr || value[0] == '\0') {
+        POWER_HILOGI(FEATURE_WAKEUP, "UlsrParamChangeCallback, value is nullptr or empty, still not ready!");
+        return; // Ignore empty value changes
+    }
+    std::lock_guard lock(g_ulsrResultMutex);
+    g_ulsrResultReady = true;
+    g_ulsrResultCv.notify_all();
+}
+#endif
 constexpr int32_t COLLABORATION_REMOTE_DEVICE_ID = 0xAAAAAAFF;
 constexpr int32_t INPUT_TASK_TIMEOUT = 50000;
 constexpr uint64_t VIRTUAL_SCREEN_START_ID = 1000;
@@ -1181,7 +1213,37 @@ PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
     if (!Permission::IsSystem()) {
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
+    BackgroundRunningLock setTagRunningLock("setTagRunningLock", SET_SUSPEND_TAG_TIMEOUT_MS);
     POWER_HILOGI(FEATURE_SUSPEND, "pid: %{public}d, uid: %{public}d, tag: %{public}s", pid, uid, tag.c_str());
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    // Trigger ULSR callback and setup timer
+    if (tag == "ulsr") {
+        // Check state - only allow ULSR when power state is SLEEP state
+        PowerState state = GetState();
+        if (state != PowerState::SLEEP) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set suspend tag %{public}s failed, state %{public}d != SLEEP",
+                tag.c_str(), static_cast<int32_t>(state));
+            return PowerErrors::ERR_FAILURE;
+        }
+        // Trigger sync ULSR callback before set suspend tag
+        if (powerStateMachine_ == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "state machine is nullptr");
+            return PowerErrors::ERR_FAILURE;
+        }
+        powerStateMachine_->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+        if (!TriggerUlsrSyncCallback() || ffrtTimer_ == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "set suspend tag %{public}s failed, ULSR sync callback timeout or ffrt timer "
+                "nullptr, rollback", tag.c_str());
+            SystemSuspendController::GetInstance().SetSuspendTag("");
+            TriggerUlsrWakeupCallback(false);
+            return PowerErrors::ERR_FAILURE;
+        }
+        // Start FFRT timer to force trigger ULSR wakeup callback if ULSR has been blocked
+        POWER_HILOGI(FEATURE_SUSPEND, "Start ulsr ffrt timer");
+        powerStateMachine_->SetDelayTimer(ULSR_TIMER_TIMEOUT_MS,
+            PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    }
+#endif
     SystemSuspendController::GetInstance().SetSuspendTag(tag);
     return PowerErrors::ERR_OK;
 }
@@ -1848,7 +1910,7 @@ bool PowerMgrService::UnRegisterSyncHibernateCallback(const sptr<ISyncHibernateC
 #endif
 }
 
-PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IUlsrCallback>& callback, UlsrPriority priority)
 {
     if (!Permission::IsSystem()) {
         POWER_HILOGE(FEATURE_WAKEUP, "RegisterUlsrCallback failed, System permission intercept");
@@ -1857,12 +1919,13 @@ PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    POWER_HILOGI(FEATURE_WAKEUP, "RegisterUlsrCallback pid:%{public}d, uid:%{public}d", pid, uid);
+    POWER_HILOGI(FEATURE_WAKEUP, "RegisterUlsrCallback pid:%{public}d, uid:%{public}d, priority:%{public}d",
+        pid, uid, static_cast<int32_t>(priority));
     std::lock_guard lock(ulsrMutex_);
     if (ulsrCallbackHolder_ == nullptr) {
         ulsrCallbackHolder_ = new UlsrCallbackHolder();
     }
-    ulsrCallbackHolder_->AddCallback(callback, std::make_pair(pid, uid));
+    ulsrCallbackHolder_->AddCallback(callback, std::make_pair(pid, uid), priority);
     return PowerErrors::ERR_OK;
 #else
     POWER_HILOGW(FEATURE_WAKEUP, "RegisterUlsrCallback interface not supported.");
@@ -1870,7 +1933,7 @@ PowerErrors PowerMgrService::RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>
 #endif
 }
 
-PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback)
+PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback)
 {
     if (!Permission::IsSystem()) {
         POWER_HILOGE(FEATURE_WAKEUP, "UnRegisterUlsrCallback failed, System permission intercept");
@@ -1893,14 +1956,95 @@ PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallbac
 }
 
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-void PowerMgrService::TriggerUlsrWakeupCallback()
+bool PowerMgrService::TriggerUlsrSyncCallback()
 {
+    POWER_HILOGI(FEATURE_SUSPEND, "TriggerUlsrSyncCallback");
     std::lock_guard lock(ulsrMutex_);
     if (ulsrCallbackHolder_ == nullptr) {
-        POWER_HILOGW(FEATURE_WAKEUP, "ulsrCallbackHolder null");
+        POWER_HILOGW(FEATURE_SUSPEND, "ulsrCallbackHolder null, sync callback skip");
+        return false;
+    }
+    return ulsrCallbackHolder_->SyncUlsrNotify();
+}
+
+void PowerMgrService::TriggerUlsrWakeupCallback(bool ulsrResult)
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "TriggerUlsrWakeupCallback");
+    std::lock_guard lock(ulsrMutex_);
+    if (ulsrCallbackHolder_ == nullptr) {
+        POWER_HILOGW(FEATURE_WAKEUP, "ulsrCallbackHolder null, wakeup callback skip");
         return;
     }
-    ulsrCallbackHolder_->WakeupNotify();
+    ulsrCallbackHolder_->WakeupNotify(ulsrResult);
+}
+
+void PowerMgrService::TriggerUlsrWakeupCallbackWithResult()
+{
+    POWER_HILOGI(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult");
+    if (powerStateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, state machine is nullptr");
+        return;
+    }
+    powerStateMachine_->CancelDelayTimer(PowerStateMachine::CHECK_ULSR_SYNC_CALLBACK_TIMEOUT_MSG);
+    // Atomic CAS: only the first caller wins, others return early
+    bool expected = false;
+    if (!g_ulsrResultWaitTaskStart.compare_exchange_strong(expected, true)) {
+        POWER_HILOGW(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, wait for ulsr result task already started!");
+        return;
+    }
+    if (ulsrCallbackHolder_ == nullptr) {
+        POWER_HILOGW(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, ulsrCallbackHolder null, skip");
+        g_ulsrResultWaitTaskStart = false;
+        return;
+    }
+    // Anti-re-entry check: UlsrCallbackStage MUST be STAGE_ENTER when submitting the ffrt task
+    if (ulsrCallbackHolder_->GetCallbackState() != UlsrCallbackStage::STAGE_ENTER) {
+        POWER_HILOGW(FEATURE_WAKEUP, "TriggerUlsrWakeupCallbackWithResult, ulsr callback state != STAGE_ENTER, skip");
+        g_ulsrResultWaitTaskStart = false;
+        return;
+    }
+    // Wait + read + trigger run in an ffrt task to avoid blocking the caller
+    FFRTUtils::SubmitTask([this]() { WaitAndTriggerUlsrWakeup(); });
+}
+
+void PowerMgrService::WaitAndTriggerUlsrWakeup()
+{
+    g_ulsrResultWaitTaskStart = true;
+    // Wait (max 2s) for the ULSR result to be written if result is empty
+    if (OHOS::system::GetParameter(ULSR_RESULT_PARAM, "").empty()) {
+        POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result not ready, add parameter watcher");
+        std::unique_lock<std::mutex> lock(g_ulsrResultMutex);
+        g_ulsrResultReady = false;
+        int32_t ret = WatchParameter(ULSR_RESULT_PARAM.c_str(), UlsrParamChangeCallback, nullptr);
+        POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, watcher add ret: %{public}d", ret);
+        if (ret == 0 || ret == ERR_PARAM_WATCHER_REPEAT_ADD) { // ERR_REPEAT_ADD is non-fatal, callback still works
+            g_ulsrResultCv.wait_for(lock, std::chrono::milliseconds(ULSR_RESULT_WAIT_TIMEOUT_MS),
+                []() { return g_ulsrResultReady; });
+            ret = RemoveParameterWatcher(ULSR_RESULT_PARAM.c_str(), UlsrParamChangeCallback, nullptr);
+            POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, watcher remove ret: %{public}d", ret);
+        }
+        POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result is ready or wait timeout");
+    }
+    bool ulsrResult = IsUlsrSucceed();
+    POWER_HILOGI(FEATURE_WAKEUP, "WaitAndTriggerUlsrWakeup, ulsr result: %{public}d", ulsrResult);
+    TriggerUlsrWakeupCallback(ulsrResult);
+    g_ulsrResultWaitTaskStart = false;
+}
+
+bool PowerMgrService::IsUlsrSucceed()
+{
+    std::string result = OHOS::system::GetParameter(ULSR_RESULT_PARAM, "");
+    POWER_HILOGI(FEATURE_WAKEUP, "IsUlsrSucceed, result: %{public}s", result.c_str());
+    return result == "success";
+}
+
+void PowerMgrService::OnUlsrTimerExpired()
+{
+    BackgroundRunningLock ulsrTimerExpiredRunningLock("ulsrTimerExpiredRunningLock", ULSR_TIMER_EXPIRED_TIMEOUT_MS);
+    // trigger ULSR wakeup callback and clear suspend tag if ULSR being blocked for more than 60s
+    POWER_HILOGW(FEATURE_SUSPEND, "ULSR timer expired, clear suspend tag and trigger wakeup callback");
+    SystemSuspendController::GetInstance().SetSuspendTag("");
+    TriggerUlsrWakeupCallback(false);
 }
 #endif
 

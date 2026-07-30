@@ -21,7 +21,7 @@
 #include "power_state_callback_stub.h"
 #include "power_mode_callback_stub.h"
 #include "power_runninglock_callback_stub.h"
-#include "async_ulsr_callback_stub.h"
+#include "ulsr_callback_stub.h"
 
 namespace OHOS {
 namespace PowerMgr {
@@ -45,11 +45,12 @@ public:
         virtual ~PowerRunningLockTestCallback() {};
         virtual void HandleRunningLockMessage(std::string message) override;
     };
-    class AsyncUlsrTestCallback : public AsyncUlsrCallbackStub {
+    class UlsrTestCallback : public UlsrCallbackStub {
     public:
-        AsyncUlsrTestCallback() {};
-        virtual ~AsyncUlsrTestCallback() {};
-        virtual void OnAsyncWakeup() override;
+        UlsrTestCallback() {};
+        virtual ~UlsrTestCallback() {};
+        virtual void OnSyncUlsr() override;
+        virtual void OnAsyncWakeup(bool ulsrResult = false) override;
     };
 };
 } // namespace PowerMgr

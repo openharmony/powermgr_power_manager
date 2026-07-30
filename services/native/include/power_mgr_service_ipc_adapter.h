@@ -105,8 +105,9 @@ public:
     int32_t UnRegisterShutdownCallbackIpc(const sptr<IAsyncShutdownCallback>& callback) override;
     int32_t RegisterShutdownCallbackIpc(const sptr<ISyncShutdownCallback>& callback, int32_t priorityValue) override;
     int32_t UnRegisterShutdownCallbackIpc(const sptr<ISyncShutdownCallback>& callback) override;
-    virtual int32_t RegisterUlsrCallbackIpc(const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError) override;
-    virtual int32_t UnRegisterUlsrCallbackIpc(const sptr<IAsyncUlsrCallback>& callback, int32_t& powerError) override;
+    virtual int32_t RegisterUlsrCallbackIpc(const sptr<IUlsrCallback>& callback, int32_t priorityValue,
+        int32_t& powerError) override;
+    virtual int32_t UnRegisterUlsrCallbackIpc(const sptr<IUlsrCallback>& callback, int32_t& powerError) override;
     virtual int32_t RefreshActivityIpc(
         int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError) override;
     virtual int32_t SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError) override;
@@ -197,8 +198,8 @@ public:
         const sptr<ITakeOverSuspendCallback>& callback, TakeOverSuspendPriority priority) = 0;
     virtual bool UnRegisterSuspendTakeoverCallback(const sptr<ITakeOverSuspendCallback>& callback) = 0;
     
-    virtual PowerErrors RegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
-    virtual PowerErrors UnRegisterUlsrCallback(const sptr<IAsyncUlsrCallback>& callback) = 0;
+    virtual PowerErrors RegisterUlsrCallback(const sptr<IUlsrCallback>& callback, UlsrPriority priority) = 0;
+    virtual PowerErrors UnRegisterUlsrCallback(const sptr<IUlsrCallback>& callback) = 0;
 
     virtual PowerErrors RegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback,
         ShutdownPriority priority) = 0;

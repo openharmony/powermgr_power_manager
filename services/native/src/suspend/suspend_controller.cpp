@@ -131,6 +131,11 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
     if (isWakeup && onForceSleep) {
         onForceSleep = false;
     }
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    if (isWakeup) {
+        DelayedSpSingleton<PowerMgrService>::GetInstance()->TriggerUlsrWakeupCallbackWithResult();
+    }
+#endif
 }
 
 void SuspendController::TriggerSyncSleepCallbackInner(
