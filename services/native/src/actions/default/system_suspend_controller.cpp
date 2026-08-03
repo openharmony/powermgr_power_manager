@@ -137,6 +137,26 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface->SetSuspendTag(tag);
 }
 
+void SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
+{
+    std::lock_guard lock(mutex_);
+    sptr<V1_3::IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return;
+    }
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_FORCE_SUSPEND_IGNORING_WAKELOCK",
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TAG", tag);
+#endif
+    // TODO: 待驱动团队提供新的 HDI 接口后，替换为 powerInterface->ForceSuspendIgnoringWakelock(tag);
+    // 过渡期兼容：先设置 tag 再调用现有 ForceSuspend()
+    if (!tag.empty()) {
+        powerInterface->SetSuspendTag(tag);
+    }
+    powerInterface->ForceSuspend();
+}
+
 void SystemSuspendController::AllowAutoSleep()
 {
     allowSleepTask_ = true;

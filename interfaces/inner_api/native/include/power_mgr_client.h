@@ -157,6 +157,12 @@ public:
     PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
     /**
+     * Forcibly suspend the device ignoring wakelocks, and return the suspend result.
+     * @param suspendTag: "mem" for S3 sleep, "ulsr" for ULSR mode.
+     */
+    PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag);
+
+    /**
      * Check whether the type of running lock is supported
      */
     bool IsRunningLockTypeSupported(RunningLockType type);

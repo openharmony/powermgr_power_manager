@@ -1574,6 +1574,44 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     return PowerErrors::ERR_OK;
 }
 
+PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(
+    const std::string& suspendTag, const std::string& apiVersion)
+{
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!Permission::IsSystem()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    if (shutdownController_->IsShuttingDown()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, skip ForceSuspendDeviceIgnoringWakelock");
+        return PowerErrors::ERR_FAILURE;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "[UL_POWER] Try to force suspend ignoring wakelock, pid=%{public}d, uid=%{public}d, tag=%{public}s",
+        pid, uid, suspendTag.c_str());
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (suspendController_) {
+        suspendController_->StopSleep();
+    }
+#endif
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+    powerStateMachine_->ReportSuspendStart(
+        uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
+#endif
+    if (suspendController_ != nullptr) {
+        suspendController_->HandleForceSuspendIgnoringWakelock(
+            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, suspendTag);
+    }
+    return PowerErrors::ERR_OK;
+}
+
 PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate begin.");

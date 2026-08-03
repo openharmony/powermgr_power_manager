@@ -16,6 +16,8 @@
 #include "suspend_controller.h"
 #include <datetime_ex.h>
 #include <display_manager_lite.h>
+#include <future>
+#include <thread>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -870,6 +872,88 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     } else {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
+}
+
+void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
+        reason, tag.c_str());
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return;
+    }
+
+    auto promiseA = std::make_shared<std::promise<void>>();
+    auto futureA = promiseA->get_future();
+
+    FFRTTask task = [this, reason, tag, promiseA, futureA = std::move(futureA)]() mutable {
+        auto threadATask = [this, reason, tag, promiseA]() {
+            POWER_HILOGI(FEATURE_SUSPEND, "Thread A: start state transition and callbacks");
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+            SetForceSleepingFlag(true);
+#endif
+
+            bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
+                stateMachine_->GetReasonBySuspendType(reason), true);
+            if (!ret1) {
+                POWER_HILOGW(FEATURE_SUSPEND, "Thread A: SetState to INACTIVE failed");
+            }
+
+            bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
+                stateMachine_->GetReasonBySuspendType(reason), true);
+            if (!ret2) {
+                POWER_HILOGW(FEATURE_SUSPEND, "Thread A: SetState to SLEEP failed");
+            } else {
+                onForceSleep = true;
+            }
+
+            if (tag == "mem") {
+                TriggerSyncSleepCallback(false);
+            } else if (tag == "ulsr") {
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+                if (pms != nullptr) {
+                    pms->TriggerUlsrSyncCallback();
+                }
+#else
+                POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
+#endif
+            } else {
+                POWER_HILOGI(FEATURE_SUSPEND, "Unknown tag=%{public}s, skip callbacks", tag.c_str());
+            }
+
+            POWER_HILOGI(FEATURE_SUSPEND, "Thread A: state transition and callbacks done");
+            promiseA->set_value();
+        };
+
+        std::make_unique<std::thread>(std::move(threadATask))->detach();
+
+        POWER_HILOGI(FEATURE_SUSPEND, "Thread B: waiting for Thread A (max 5s)");
+
+        std::future_status waitStatus = std::future_status::timeout;
+        try {
+            waitStatus = futureA.wait_for(
+                std::chrono::milliseconds(FORCE_SUSPEND_IGNORING_WAKELOCK_TIMEOUT_MS));
+        } catch (const std::exception& e) {
+            POWER_HILOGE(FEATURE_SUSPEND, "Thread B: wait_for exception: %{public}s", e.what());
+        }
+        if (waitStatus == std::future_status::timeout) {
+            POWER_HILOGW(FEATURE_SUSPEND, "Thread B: wait for Thread A timeout (5s), proceed to HDI call");
+        } else {
+            POWER_HILOGI(FEATURE_SUSPEND, "Thread B: Thread A completed, proceed to HDI call");
+        }
+
+        if (stateMachine_->GetState() != PowerState::SLEEP) {
+            POWER_HILOGW(FEATURE_SUSPEND, "Thread B: state is not SLEEP, skip HDI call");
+            return;
+        }
+
+        POWER_HILOGI(FEATURE_SUSPEND, "Thread B: calling HDI ForceSuspendIgnoringWakelock, tag=%{public}s", tag.c_str());
+        SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+    };
+
+    FFRTUtils::SubmitTask(task);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)

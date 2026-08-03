@@ -118,6 +118,7 @@ private:
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
+    void HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -133,6 +134,7 @@ private:
         const std::string& priority, SuspendDeviceType type);
 #endif
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
+    static constexpr int32_t FORCE_SUSPEND_IGNORING_WAKELOCK_TIMEOUT_MS = 5000;
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void SuspendWhenStateSleep(SuspendDeviceType reason, uint32_t action);
     bool CheckDuringCall(const sptr<PowerMgrService>& pms, SuspendDeviceType reason);
