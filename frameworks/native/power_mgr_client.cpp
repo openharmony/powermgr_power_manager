@@ -50,7 +50,6 @@ std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
 std::mutex g_instanceMutex;
 constexpr int32_t MAX_VERSION_STRING_SIZE = 4;
-constexpr int32_t MAX_SUSPEND_TAG_LENGTH = 256;
 constexpr int32_t MAX_SCENE_NAME_STRING_SIZE = 128;
 constexpr int32_t MAX_CONFIG_VALUE_STRING_SIZE = 128;
 constexpr uint32_t PARAM_MAX_NUM = 10;
@@ -388,7 +387,10 @@ PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
-    RETURN_IF_WITH_RET(suspendTag.size() >= MAX_SUSPEND_TAG_LENGTH, PowerErrors::ERR_PARAM_INVALID);
+    if (suspendTag != "mem" && suspendTag != "ulsr") {
+        POWER_HILOGE(FEATURE_SUSPEND, "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
     std::string apiVersion = "-1";
     int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag, apiVersion, powerProxy);
     RETURN_IF_WITH_RET(result != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);

@@ -14,10 +14,9 @@
  */
 
 #include "suspend_controller.h"
+#include <atomic>
 #include <datetime_ex.h>
 #include <display_manager_lite.h>
-#include <future>
-#include <thread>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -883,77 +882,81 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return;
     }
 
-    auto promiseA = std::make_shared<std::promise<void>>();
-    auto futureA = promiseA->get_future();
+    // 原子标志：防止HDI被重复调用（回调完成路径 vs 5秒超时路径二选一）
+    auto hdiCalled = std::make_shared<std::atomic<bool>>(false);
 
-    FFRTTask task = [this, reason, tag, promiseA, futureA = std::move(futureA)]() mutable {
-        auto threadATask = [this, reason, tag, promiseA]() {
-            POWER_HILOGI(FEATURE_SUSPEND, "Thread A: start state transition and callbacks");
-
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-            SetForceSleepingFlag(true);
-#endif
-
-            bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
-                stateMachine_->GetReasonBySuspendType(reason), true);
-            if (!ret1) {
-                POWER_HILOGW(FEATURE_SUSPEND, "Thread A: SetState to INACTIVE failed");
-            }
-
-            bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
-                stateMachine_->GetReasonBySuspendType(reason), true);
-            if (!ret2) {
-                POWER_HILOGW(FEATURE_SUSPEND, "Thread A: SetState to SLEEP failed");
-            } else {
-                onForceSleep = true;
-            }
-
-            if (tag == "mem") {
-                TriggerSyncSleepCallback(false);
-            } else if (tag == "ulsr") {
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-                auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-                if (pms != nullptr) {
-                    pms->TriggerUlsrSyncCallback();
-                }
-#else
-                POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
-#endif
-            } else {
-                POWER_HILOGI(FEATURE_SUSPEND, "Unknown tag=%{public}s, skip callbacks", tag.c_str());
-            }
-
-            POWER_HILOGI(FEATURE_SUSPEND, "Thread A: state transition and callbacks done");
-            promiseA->set_value();
-        };
-
-        std::make_unique<std::thread>(std::move(threadATask))->detach();
-
-        POWER_HILOGI(FEATURE_SUSPEND, "Thread B: waiting for Thread A (max 5s)");
-
-        std::future_status waitStatus = std::future_status::timeout;
-        try {
-            waitStatus = futureA.wait_for(
-                std::chrono::milliseconds(FORCE_SUSPEND_IGNORING_WAKELOCK_TIMEOUT_MS));
-        } catch (const std::exception& e) {
-            POWER_HILOGE(FEATURE_SUSPEND, "Thread B: wait_for exception: %{public}s", e.what());
+    // HDI调用逻辑（两个路径复用）
+    auto callHdi = [this, tag, hdiCalled]() {
+        if (hdiCalled->exchange(true)) {
+            return; // 已被另一个路径调用过，防止重复
         }
-        if (waitStatus == std::future_status::timeout) {
-            POWER_HILOGW(FEATURE_SUSPEND, "Thread B: wait for Thread A timeout (5s), proceed to HDI call");
-        } else {
-            POWER_HILOGI(FEATURE_SUSPEND, "Thread B: Thread A completed, proceed to HDI call");
-        }
-
-        if (stateMachine_->GetState() != PowerState::SLEEP) {
-            POWER_HILOGW(FEATURE_SUSPEND, "Thread B: state is not SLEEP, skip HDI call");
+        if (stateMachine_ == nullptr || stateMachine_->GetState() != PowerState::SLEEP) {
+            POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip HDI call");
             return;
         }
-
-        POWER_HILOGI(FEATURE_SUSPEND, "Thread B: calling HDI ForceSuspendIgnoringWakelock, tag=%{public}s", tag.c_str());
+        POWER_HILOGI(FEATURE_SUSPEND, "Calling HDI ForceSuspendIgnoringWakelock, tag=%{public}s", tag.c_str());
         SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
     };
 
-    FFRTUtils::SubmitTask(task);
+    // 【路径1】5秒兜底定时器：超时后强制调用HDI（在锁内设置，回调在FFRT线程执行）
+    FFRTTask timeoutTask = [callHdi]() {
+        POWER_HILOGI(FEATURE_SUSPEND, "5s timeout reached, force call HDI");
+        callHdi();
+    };
+    if (ffrtTimer_ != nullptr) {
+        ffrtTimer_->SetTimer(TIMER_ID_FORCE_SUSPEND_IGNORING_WAKELOCK, timeoutTask,
+            FORCE_SUSPEND_IGNORING_WAKELOCK_TIMEOUT_MS);
+    }
+
+    // 【路径2】提交主任务到FFRT队列异步执行（避免在suspendMutex_锁内执行回调导致死锁）
+    // 注意：不能用SetTimer(delay=0)因为SetTimer会先CancelTimerInner取消同ID旧任务，会把路径1的timeoutTask取消掉
+    // 所以用FFRTUtils::SubmitTask直接提交，不占用timerId
+    FFRTTask mainTask = [this, reason, tag, callHdi]() {
+        POWER_HILOGI(FEATURE_SUSPEND, "Start state transition and callbacks, tag=%{public}s", tag.c_str());
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+        SetForceSleepingFlag(true);
+#endif
+
+        bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
+            stateMachine_->GetReasonBySuspendType(reason), true);
+        if (!ret1) {
+            POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
+        }
+
+        bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
+            stateMachine_->GetReasonBySuspendType(reason), true);
+        if (!ret2) {
+            POWER_HILOGW(FEATURE_SUSPEND, "SetState to SLEEP failed");
+            if (ffrtTimer_ != nullptr) {
+                ffrtTimer_->CancelTimer(TIMER_ID_FORCE_SUSPEND_IGNORING_WAKELOCK);
+            }
+            return;
+        }
+        onForceSleep = true;
+
+        if (tag == "mem") {
+            TriggerSyncSleepCallback(false);
+        } else if (tag == "ulsr") {
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms != nullptr) {
+                pms->TriggerUlsrSyncCallback();
+            }
+#else
+            POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
+#endif
+        }
+
+        POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI immediately");
+        // 回调完成，取消兜底定时器，立即调用HDI
+        if (ffrtTimer_ != nullptr) {
+            ffrtTimer_->CancelTimer(TIMER_ID_FORCE_SUSPEND_IGNORING_WAKELOCK);
+        }
+        callHdi();
+    };
+
+    FFRTUtils::SubmitTask(mainTask);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)

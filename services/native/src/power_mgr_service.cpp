@@ -1593,6 +1593,10 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, skip ForceSuspendDeviceIgnoringWakelock");
         return PowerErrors::ERR_FAILURE;
     }
+    if (suspendTag != "mem" && suspendTag != "ulsr") {
+        POWER_HILOGE(FEATURE_SUSPEND, "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
     POWER_HILOGI(FEATURE_SUSPEND,
         "[UL_POWER] Try to force suspend ignoring wakelock, pid=%{public}d, uid=%{public}d, tag=%{public}s",
         pid, uid, suspendTag.c_str());
