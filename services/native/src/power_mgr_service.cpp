@@ -1434,7 +1434,8 @@ bool PowerMgrService::RefreshActivity(int64_t callTimeMs, UserActivityType type,
 bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight)
 {
     std::lock_guard lock(screenMutex_);
-    if (powerStateMachine_->CheckRefreshTime()) {
+    // reuse the deprecated/unused variable to label a refresh action which explicitly ignores throttling period.
+    if (callTimeMs != 0 && powerStateMachine_->CheckRefreshTime()) {
         return false;
     }
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -2484,9 +2485,9 @@ PowerErrors PowerMgrService::SetForceTimingOut(bool enabled, const sptr<IRemoteO
     localMutex.lock();
     if (token && token->IsProxyObject() && token != thisInterfaceInvoker) {
         // The localMutex only ensures that the "remove, assign, add" actions for THIS drt are thread safe.
-        // AddDeathRecipient/RemoveDeathRecipient are thread safe theirselves.
-        // Different remote objects(invokers) do not interfere wich each other
-        // Different DeathRecipients for the same invoker do not interfere wich each other
+        // AddDeathRecipient/RemoveDeathRecipient are thread safe themselves.
+        // Different remote objects(invokers) do not interfere with each other
+        // Different DeathRecipients for the same invoker do not interfere with each other
         // Only one RemoteObject may hold the death recipient defined in this method and only once.
         if (thisInterfaceInvoker) {
             thisInterfaceInvoker->RemoveDeathRecipient(drt);
@@ -2766,7 +2767,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
     if (isSwitchOpen && isScreenOn) {
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (!isSwitchOpen && isScreenOn) {
-        // When there's no external screen, we should suspend the device, oterwise do nothing
+        // When there's no external screen, we should suspend the device, otherwise do nothing
         if (curExternalScreenNum == 0) {
             POWER_HILOGI(
                 FEATURE_SUSPEND, "[UL_POWER] Suspend device when external screen is disconnected and switch is closed");
