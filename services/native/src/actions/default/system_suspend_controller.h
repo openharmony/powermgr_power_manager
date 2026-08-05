@@ -26,7 +26,7 @@
 #include "suspend/irunning_lock_hub.h"
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
-#include "v1_3/ipower_interface.h"
+#include "v1_4/ipower_interface.h"
 #include "ffrt_utils.h"
 
 namespace OHOS {
@@ -67,11 +67,11 @@ private:
         std::function<void()> onWakeup_;
     };
     OHOS::HDI::Power::V1_2::RunningLockInfo FillRunningLockInfo(const RunningLockParam& param);
-    sptr<V1_3::IPowerInterface> GetPowerInterface();
+    sptr<V1_4::IPowerInterface> GetPowerInterface();
     ffrt::mutex mutex_;
     ffrt::mutex interfaceMutex_;
     std::shared_ptr<Suspend::ISuspendController> sc_;
-    sptr<V1_3::IPowerInterface> powerInterface_ { nullptr };
+    sptr<V1_4::IPowerInterface> powerInterface_ { nullptr };
     sptr<V1_3::IPowerHdiCallbackExt> powerCallbackExt_ { nullptr };
     sptr<OHOS::HDI::ServiceManager::V1_0::IServiceManager> hdiServiceMgr_ { nullptr };
     sptr<HdiServiceStatusListener::IServStatListener> hdiServStatListener_ { nullptr };
