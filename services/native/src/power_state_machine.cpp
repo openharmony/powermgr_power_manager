@@ -659,7 +659,7 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
             PowerUtils::GetReasonTypeString(reason).c_str());
         CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
     }
-    SetState(PowerState::AWAKE, reason, true);
+    bool ret = SetState(PowerState::AWAKE, reason, true);
 
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT: {
@@ -667,7 +667,7 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
         }
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS: // fall through
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
-            if (suspendController != nullptr) {
+            if (suspendController != nullptr && ret) {
                 POWER_HILOGD(FEATURE_WAKEUP, "HandlePreBrightWakeUp. TriggerSyncSleepCallback start.");
                 suspendController->TriggerSyncSleepCallback(true);
             } else {
@@ -2126,6 +2126,7 @@ bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChange
         } else {
             POWER_HILOGW(
                 FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
+            SetAutoSuspend(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, 0);
         }
     } else {
         if (targetState != PowerState::SLEEP && curState == PowerStateMachine::PRE_BRIGHT_STARTED) {
