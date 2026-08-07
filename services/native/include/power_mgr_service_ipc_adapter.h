@@ -153,6 +153,8 @@ public:
     virtual bool IsCollaborationScreenOn() = 0;
     virtual bool IsForceSleeping() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") = 0;
+    virtual PowerErrors ForceSuspendDeviceIgnoringWakelock(
+        const std::string& suspendTag, const std::string& apiVersion = "-1") = 0;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") = 0;
     virtual PowerErrors CreateRunningLock(

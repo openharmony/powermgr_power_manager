@@ -59,6 +59,7 @@ public:
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
+    void HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
     void RecordPowerKeyDown(bool interrupting = false);
     bool GetPowerkeyDownWhenScreenOff();
 
@@ -118,7 +119,6 @@ private:
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
-    void HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
