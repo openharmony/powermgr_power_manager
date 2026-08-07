@@ -55,7 +55,6 @@ deps_ex = [
   "hilog:libhilog",
   "ipc:ipc_core",
   "libxml2:libxml2",
-  "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
@@ -110,6 +109,8 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
     "${powermgr_utils_path}:power_utils",
     "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_utils_path}/setting:power_setting",
   ]
 
   if (has_display_manager_part) {
@@ -153,6 +154,8 @@ ohos_unittest("test_proximity_running_lock") {
     "${powermgr_utils_path}/hookmgr:power_hookmgr",
     "${powermgr_utils_path}:power_utils",
     "${powermgr_inner_api}:powermgr_client",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_utils_path}/setting:power_setting",
   ]
 
   if (has_display_manager_part) {

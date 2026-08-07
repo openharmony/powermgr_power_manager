@@ -20,5 +20,5 @@ if (system_type == powermgr_actions_default) {
 }
 
 group("powermgr_actions") {
-  public_deps = [ "${system_type}:${actions_target}" ]
+  deps = [ "${system_type}:${actions_target}" ]
 }
