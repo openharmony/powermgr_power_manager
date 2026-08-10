@@ -563,7 +563,7 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         stateMachine_->SetSwitchAction(action);
     }
     bool isScreenOn = stateMachine_->IsScreenOn();
-    if (!isScreenOn) {
+    if (!isScreenOn && !stateMachine_->IsStateTurningAwake()) {
         SuspendWhenScreenOff(reason, action, delay);
         return;
     }
