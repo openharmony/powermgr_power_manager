@@ -137,7 +137,11 @@ ohos_unittest("test_proximity_running_lock_abnormal") {
 
 ohos_unittest("test_proximity_running_lock") {
   module_out_path = module_output_path
-
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "proximity_controller_base_test.cpp",
     "proximity_running_lock_test.cpp",
