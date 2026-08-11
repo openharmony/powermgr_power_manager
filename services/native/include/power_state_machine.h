@@ -139,6 +139,7 @@ public:
     void ReceiveScreenEvent(bool isScreenOn);
     bool IsScreenOn(bool needPrintLog = true);
     bool IsScreenOnAcqLock();
+    bool IsStateTurningAwake() const;
     bool IsFoldScreenOn();
     bool IsCollaborationScreenOn();
     bool CheckFFRTTaskAvailability(PowerState state, StateChangeReason reason) const;

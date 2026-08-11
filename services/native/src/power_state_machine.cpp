@@ -1123,6 +1123,11 @@ bool PowerStateMachine::IsScreenOnAcqLock()
     return isScreenOn;
 }
 
+bool PowerStateMachine::IsStateTurningAwake() const
+{
+    return settingOnStateFlag_;
+}
+
 bool PowerStateMachine::IsFoldScreenOn()
 {
     POWER_HILOGI(FEATURE_POWER_STATE,
