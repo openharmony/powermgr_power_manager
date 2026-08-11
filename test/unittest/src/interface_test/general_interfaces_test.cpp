@@ -371,5 +371,48 @@ HWTEST_F(GeneralInterfacesTest, LockScreenAfterTimingOutTestWithAppid002, TestSi
     EXPECT_EQ(stateMachine->enabledScreenOffEvent_, true);
     POWER_HILOGI(LABEL_TEST, "LockScreenAfterTimingOutTest002 function end!");
 }
+
+// cover some pre-bright bright branches
+HWTEST_F(GeneralInterfacesTest, PreBrightTest, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PreBrightTest start!");
+    // make call from proxy side, it doesn't matter but let's cover more branches.
+    SetProxyMockState(true);
+    // maybe reset the proxy at SetUP/TearDown
+    mockProxy_ = sptr<NiceMock<MockProxy>>::MakeSptr(stub_);
+    stub_->SuspendControllerInit();
+    ASSERT_TRUE(stub_->suspendController_ != nullptr);
+    ASSERT_TRUE(mockProxy_ != nullptr);
+    ASSERT_TRUE(stateActionMock != nullptr);
+    ASSERT_TRUE(stub_->powerStateMachine_ != nullptr);
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    // normal branch
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, _)).Times(1);
+    auto err = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, _)).Times(1);
+    err = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
+    POWER_HILOGI(LABEL_TEST, "err = %{public}d", err);
+    // fail branch
+    EXPECT_CALL(*stateActionMock, SetDisplayState(_, _)).Times(0);
+    err = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
+    POWER_HILOGI(LABEL_TEST, "err = %{public}d", err);
+
+    // nullptr branch
+    stub_->ffrtTimer_->Clear();
+    stub_->suspendController_ = nullptr;
+    // somehow even if the first argument before "OR" is false still 2 branches count depending on the second argument
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, _)).Times(1);
+    err = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright");
+    POWER_HILOGI(LABEL_TEST, "err = %{public}d", err);
+    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, _)).Times(1);
+    err = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
+    POWER_HILOGI(LABEL_TEST, "err = %{public}d", err);
+
+    EXPECT_CALL(*stateActionMock, SetDisplayState(_, _)).Times(0);
+    err = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "pre_bright_auth_success");
+    POWER_HILOGI(LABEL_TEST, "err = %{public}d", err);
+    SetProxyMockState(false);
+    POWER_HILOGI(LABEL_TEST, "PreBrightTest end!");
+}
 } // namespace
 } // namespace OHOS::PowerMgr
