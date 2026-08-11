@@ -63,7 +63,6 @@ deps_ex = [
   "googletest:gmock_main",
   "googletest:gtest_main",
   "libxml2:libxml2",
-  "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
@@ -90,6 +89,7 @@ ohos_unittest("takeover_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
   module_out_path = module_output_path
@@ -105,6 +105,7 @@ ohos_unittest("async_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
   module_out_path = module_output_path
@@ -120,6 +121,7 @@ ohos_unittest("sync_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
   module_out_path = module_output_path
@@ -135,6 +137,7 @@ ohos_unittest("shutdown_controller_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
   external_deps = deps_ex
   if (has_hiviewdfx_hisysevent_part) {

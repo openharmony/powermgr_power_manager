@@ -57,6 +57,7 @@ ohos_fuzztest("SetPowerConfigFuzzTest") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
     "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
   external_deps = [

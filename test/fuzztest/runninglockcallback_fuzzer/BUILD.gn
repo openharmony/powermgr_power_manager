@@ -57,6 +57,8 @@ ohos_fuzztest("RunningLockCallbackFuzzTest") {
     "${powermgr_inner_api}:powermgr_stub",
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_service_path}/native/src/actions:powermgr_actions",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
   external_deps = [
@@ -68,7 +70,6 @@ ohos_fuzztest("RunningLockCallbackFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "libxml2:libxml2",
-    "power_manager:power_ffrt",
     "safwk:system_ability_fwk",
   ]
 
