@@ -882,81 +882,45 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return;
     }
 
-    // 原子标志：防止HDI被重复调用（回调完成路径 vs 5秒超时路径二选一）
-    auto hdiCalled = std::make_shared<std::atomic<bool>>(false);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    SetForceSleepingFlag(true);
+#endif
 
-    // HDI调用逻辑（两个路径复用）
-    auto callHdi = [this, tag, hdiCalled]() {
-        if (hdiCalled->exchange(true)) {
-            return; // 已被另一个路径调用过，防止重复
-        }
-        if (stateMachine_ == nullptr || stateMachine_->GetState() != PowerState::SLEEP) {
-            POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip HDI call");
-            return;
-        }
-        POWER_HILOGI(FEATURE_SUSPEND, "Calling HDI ForceSuspendIgnoringWakelock, tag=%{public}s", tag.c_str());
-        SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
-    };
-
-    // 【路径1】5秒兜底定时器：超时后强制调用HDI（在锁内设置，回调在FFRT线程执行）
-    FFRTTask timeoutTask = [callHdi]() {
-        POWER_HILOGI(FEATURE_SUSPEND, "5s timeout reached, force call HDI");
-        callHdi();
-    };
-    if (ffrtTimer_ != nullptr) {
-        ffrtTimer_->SetTimer(TIMER_ID_FORCE_SUSPEND_IGNORING_WAKELOCK, timeoutTask,
-            FORCE_SUSPEND_IGNORING_WAKELOCK_TIMEOUT_MS);
+    bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
+        stateMachine_->GetReasonBySuspendType(reason), true);
+    if (!ret1) {
+        POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
+        return;
     }
 
-    // 【路径2】提交主任务到FFRT队列异步执行（避免在suspendMutex_锁内执行回调导致死锁）
-    // 注意：不能用SetTimer(delay=0)因为SetTimer会先CancelTimerInner取消同ID旧任务，会把路径1的timeoutTask取消掉
-    // 所以用FFRTUtils::SubmitTask直接提交，不占用timerId
-    FFRTTask mainTask = [this, reason, tag, callHdi]() {
-        POWER_HILOGI(FEATURE_SUSPEND, "Start state transition and callbacks, tag=%{public}s", tag.c_str());
+    bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
+        stateMachine_->GetReasonBySuspendType(reason), true);
+    if (!ret2) {
+        POWER_HILOGW(FEATURE_SUSPEND, "SetState to SLEEP failed");
+        return;
+    }
+    onForceSleep = true;
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-        SetForceSleepingFlag(true);
-#endif
+    if (stateMachine_->GetState() != PowerState::SLEEP) {
+        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip HDI call");
+        return;
+    }
 
-        bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
-            stateMachine_->GetReasonBySuspendType(reason), true);
-        if (!ret1) {
-            POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
-        }
-
-        bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
-            stateMachine_->GetReasonBySuspendType(reason), true);
-        if (!ret2) {
-            POWER_HILOGW(FEATURE_SUSPEND, "SetState to SLEEP failed");
-            if (ffrtTimer_ != nullptr) {
-                ffrtTimer_->CancelTimer(TIMER_ID_FORCE_SUSPEND_IGNORING_WAKELOCK);
-            }
-            return;
-        }
-        onForceSleep = true;
-
-        if (tag == "mem") {
-            TriggerSyncSleepCallback(false);
-        } else if (tag == "ulsr") {
+    if (tag == "mem") {
+        TriggerSyncSleepCallback(false);
+    } else if (tag == "ulsr") {
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-            if (pms != nullptr) {
-                pms->TriggerUlsrSyncCallback();
-            }
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms != nullptr) {
+            pms->TriggerUlsrSyncCallback();
+        }
 #else
-            POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
+        POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
+        return;
 #endif
-        }
-
-        POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI immediately");
-        // 回调完成，取消兜底定时器，立即调用HDI
-        if (ffrtTimer_ != nullptr) {
-            ffrtTimer_->CancelTimer(TIMER_ID_FORCE_SUSPEND_IGNORING_WAKELOCK);
-        }
-        callHdi();
-    };
-
-    FFRTUtils::SubmitTask(mainTask);
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI immediately, tag=%{public}s", tag.c_str());
+    SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)

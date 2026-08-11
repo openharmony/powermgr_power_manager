@@ -28,7 +28,11 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 5000; // Maximum execution time for cockpit mode.
+#else
 constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 30000; // Maximum total execution time for all ULSR sync callbacks
+#endif
 }
 
 void UlsrCallbackHolder::OnRemoteDied(const wptr<IRemoteObject>& object)

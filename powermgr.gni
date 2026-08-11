@@ -53,6 +53,7 @@ declare_args() {
   power_manager_feature_lock_screen_support_multi_screen = false
   power_manager_feature_support_power_cli = false
   power_manager_feature_enable_long_time_dim = false
+  power_manager_feature_cockpit_mode = false
 }
 
 defines = []
@@ -63,6 +64,10 @@ if (power_manager_feature_enable_s4) {
 
 if (power_manager_feature_enable_suspend_with_tag) {
   defines += [ "POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG" ]
+}
+
+if (power_manager_feature_cockpit_mode) {
+  defines += [ "POWER_MANAGER_ENABLE_COCKPIT_MODE" ]
 }
 
 if (power_manager_feature_audio_lock_unproxy) {

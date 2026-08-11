@@ -243,6 +243,10 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "init:libbeget_proxy" ]
   }
 
+  if (power_manager_feature_cockpit_mode) {
+    defines += [ "POWER_MANAGER_ENABLE_COCKPIT_MODE" ]
+  }
+
   if (power_manager_feature_force_sleep_broadcast) {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
