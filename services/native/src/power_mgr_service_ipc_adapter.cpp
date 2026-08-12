@@ -160,15 +160,10 @@ int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIpc(
 }
 
 int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIgnoringWakelockIpc(
-    const std::string& suspendTag, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy)
+    const std::string& suspendTag, const std::string& apiVersion)
 {
-    if (!powerProxy) {
-        POWER_HILOGE(FEATURE_SUSPEND, "the powerProxy is null");
-        return INIT_VALUE;
-    }
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::ForceSuspendDeviceIgnoringWakelock", false);
     int32_t result = static_cast<int32_t>(ForceSuspendDeviceIgnoringWakelock(suspendTag, apiVersion));
-    powerProxy->SendAsyncReply(result);
     return result;
 }
 

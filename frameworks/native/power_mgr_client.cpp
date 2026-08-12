@@ -381,23 +381,18 @@ PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
     return ret;
 }
 
-PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag)
+PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag, const std::string& apiVersion)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
-    sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
     if (suspendTag != "mem" && suspendTag != "ulsr") {
         POWER_HILOGE(FEATURE_SUSPEND, "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    std::string apiVersion = "-1";
-    int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag, apiVersion, powerProxy);
-    RETURN_IF_WITH_RET(result != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
-    // Wait for the asynchronous callback to return, with a timeout of 100 milliseconds
-    PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(100));
+    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
+    int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag, apiVersion);
     POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceIgnoringWakelock Success");
-    return ret;
+    return static_cast<PowerErrors>(result);
 }
 
 bool PowerMgrClient::IsScreenOn(bool needPrintLog)

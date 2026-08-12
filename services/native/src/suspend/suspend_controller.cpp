@@ -883,7 +883,13 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    SetForceSleepingFlag(true);
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms != nullptr && pms->GetSuspendController() != nullptr) {
+        pms->GetSuspendController()->SetForceSleepingFlag(true);
+        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
+    }
 #endif
 
     bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
@@ -902,7 +908,7 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     onForceSleep = true;
 
     if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip HDI call");
+        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock HDI call");
         return;
     }
 
@@ -919,7 +925,7 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return;
 #endif
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI immediately, tag=%{public}s", tag.c_str());
+    POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI force suspend ignoring wakelock, tag=%{public}s", tag.c_str());
     SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
 }
 
