@@ -716,6 +716,16 @@ void PowerMgrService::SwitchSubscriberInit()
         HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "ABNORMAL_FAULT",
             HiviewDFX::HiSysEvent::EventType::FAULT, "TYPE", "SCREEN_ON_OFF", "REASON", eventReason);
 #endif
+    } else {
+        // Compensation: re-report the real switch state to DMS once the subscription
+        // succeeds. This recovers from a switch event (e.g. lid open) that happened in
+        // the window between OnAddSystemAbility(REPORT_SWITCH_STATE) and here, where the
+        // event had no listener and was lost. DoReportSwitchState queries the real
+        // lid/fold state via HDI and notifies DMS, which then lights up the inner screen.
+        auto switchAction = powerStateMachine_->GetSwitchActionPtr();
+        if (switchAction != nullptr) {
+            switchAction->HandleSwitchAction(SwitchActionType::REPORT_SWITCH_STATE);
+        }
     }
 #endif
 }
