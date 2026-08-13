@@ -123,6 +123,7 @@ ohos_source_set("powermgr_stub") {
 
 ohos_shared_library("powermgr_client") {
   branch_protector_ret = "pac_ret"
+  branch_protector_frt = "bti"
 
   sources = [
     "${powermgr_framework_native}/client_lifecycle.cpp",
