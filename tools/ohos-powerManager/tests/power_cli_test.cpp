@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <sstream>
 #include <string>
 #include <cstdio>
