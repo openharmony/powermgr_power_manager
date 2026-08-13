@@ -91,7 +91,6 @@ const std::string VENDOR_POWER_VIBRATOR_CONFIG_FILE = "/vendor/etc/power_config/
 const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/power_vibrator.json";
 static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
-constexpr int32_t HIBERNATE_GUARD_TIMEOUT_MS = 40000; // PREPARE_HIBERNATE_TIMEOUT_MS + 10000
 constexpr int32_t SET_SUSPEND_TAG_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
 // Force trigger ULSR wakeup callback if ULSR has been blocked for more than 60s
@@ -1613,8 +1612,7 @@ PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reas
         suspendController_->StopSleep();
     }
 #endif
-    BackgroundRunningLock hibernateGuard(
-        "hibernateGuard", HIBERNATE_GUARD_TIMEOUT_MS); // avoid hibernate breaked by S3/ULSR
+    BackgroundRunningLock hibernateGuard("hibernateGuard", -1); // avoid hibernate breaked by S3/ULSR
     HibernateControllerInit();
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     powerStateMachine_->ReportHibernateStart(
