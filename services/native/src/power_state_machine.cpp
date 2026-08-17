@@ -932,6 +932,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     hibernateController->PreHibernate();
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate sync callback end.");
 
+    SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
