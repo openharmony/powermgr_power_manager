@@ -391,7 +391,11 @@ PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string
     }
     RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
     int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag, apiVersion);
-    POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceIgnoringWakelock Success");
+    if (result != static_cast<int32_t>(PowerErrors::ERR_OK)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, result=%{public}d", result);
+    } else {
+        POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceIgnoringWakelock Success");
+    }
     return static_cast<PowerErrors>(result);
 }
 

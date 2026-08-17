@@ -1605,11 +1605,13 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(
     powerStateMachine_->ReportSuspendStart(
         uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
 #endif
-    if (suspendController_ != nullptr) {
-        suspendController_->HandleForceSuspendIgnoringWakelock(
-            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, suspendTag);
+    if (suspendController_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "SuspendController is null");
+        return PowerErrors::ERR_FAILURE;
     }
-    return PowerErrors::ERR_OK;
+    bool ret = suspendController_->HandleForceSuspendIgnoringWakelock(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, suspendTag);
+    return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
 }
 
 PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)

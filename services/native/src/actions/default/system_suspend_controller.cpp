@@ -137,19 +137,24 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface->SetSuspendTag(tag);
 }
 
-void SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
+bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
 {
     std::lock_guard lock(mutex_);
     sptr<V1_4::IPowerInterface> powerInterface = GetPowerInterface();
     if (powerInterface == nullptr) {
         POWER_HILOGE(COMP_SVC, "The hdf interface is null");
-        return;
+        return false;
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "DO_FORCE_SUSPEND_IGNORING_WAKELOCK",
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "TAG", tag);
 #endif
-    powerInterface->ForceSuspendIgnoringWakelock(tag);
+    int32_t ret = powerInterface->ForceSuspendIgnoringWakelock(tag);
+    if (ret != HDF_SUCCESS) {
+        POWER_HILOGE(COMP_SVC, "ForceSuspendIgnoringWakelock failed, ret=%{public}d", ret);
+        return false;
+    }
+    return true;
 }
 
 void SystemSuspendController::AllowAutoSleep()

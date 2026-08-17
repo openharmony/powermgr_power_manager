@@ -873,13 +873,13 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     }
 }
 
-void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
+bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
         reason, tag.c_str());
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return;
+        return false;
     }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -896,20 +896,20 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         stateMachine_->GetReasonBySuspendType(reason), true);
     if (!ret1) {
         POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
-        return;
+        return false;
     }
 
     bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasonBySuspendType(reason), true);
     if (!ret2) {
         POWER_HILOGW(FEATURE_SUSPEND, "SetState to SLEEP failed");
-        return;
+        return false;
     }
     onForceSleep = true;
 
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock HDI call");
-        return;
+        return false;
     }
 
     if (tag == "mem") {
@@ -922,11 +922,11 @@ void SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         }
 #else
         POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
-        return;
+        return false;
 #endif
     }
     POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI force suspend ignoring wakelock, tag=%{public}s", tag.c_str());
-    SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+    return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
