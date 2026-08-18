@@ -575,7 +575,11 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
     }
 #endif
     bool isScreenOn = stateMachine_->IsScreenOn();
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     if (!isScreenOn && !stateMachine_->IsStateTurningAwake()) {
+#else
+    if (!isScreenOn) {
+#endif
         SuspendWhenScreenOff(reason, action, delay);
         return;
     }
