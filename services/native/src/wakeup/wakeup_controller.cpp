@@ -560,6 +560,12 @@ void WakeupController::ProcessWakeupReason()
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupActionController is nullptr");
         return;
     }
+    std::string wakeupReason;
+    wakeupActionController->GetWakeupReason(wakeupReason);
+    if (wakeupActionController->GetWakeupAction(wakeupReason) == WakeupAction::ACTION_NONE) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] WakeupAction is NONE, skip Wakeup and TriggerSyncSleepCallback.");
+        return;
+    }
     SleepGuard sleepGuard(pms);
     Wakeup();
     auto suspendController = pms->GetSuspendController();
@@ -567,7 +573,7 @@ void WakeupController::ProcessWakeupReason()
         POWER_HILOGI(FEATURE_WAKEUP, "ControlListener TriggerSyncSleepCallback start.");
         suspendController->TriggerSyncSleepCallback(true);
     }
-    wakeupActionController->ExecuteByGetReason();
+    wakeupActionController->ExecuteByGetReason(wakeupReason);
 }
 #endif
 
