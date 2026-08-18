@@ -1142,6 +1142,9 @@ void PowerkeyWakeupMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::K
     }
     // sync with the end of powerkey screen off task
     ffrt::wait({&PowerKeySuspendMonitor::powerkeyScreenOff_});
+    if (poweroffInterrupted) {
+        pms->RefreshActivityInner(0, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    }
     suspendController->RecordPowerKeyDown(poweroffInterrupted);
     Notify();
 }

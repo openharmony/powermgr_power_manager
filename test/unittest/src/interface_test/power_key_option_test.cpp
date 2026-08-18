@@ -106,13 +106,11 @@ void PowerKeyOptionTest::MockDisplayAction()
             g_displayState = state;
             return ActionResult::SUCCESS;
         });
-    EXPECT_CALL(*stateActionMock, GetDisplayState())
-        .WillRepeatedly([]() {
-            POWER_HILOGI(LABEL_TEST,
-                "PowerKeyOptionTest GetDisplayState state:%{public}d", static_cast<int32_t>(g_displayState));
-            return g_displayState;
-        });
-    ::testing::Mock::AllowLeak(stateActionMock);
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillRepeatedly([]() {
+        POWER_HILOGI(
+            LABEL_TEST, "PowerKeyOptionTest GetDisplayState state:%{public}d", static_cast<int32_t>(g_displayState));
+        return g_displayState;
+    });
 }
 
 void PowerKeyOptionTest::SetUp() {}
@@ -120,6 +118,19 @@ void PowerKeyOptionTest::SetUp() {}
 void PowerKeyOptionTest::TearDown()
 {
     g_killProcsee = false;
+    PowerKeySuspendMonitor::powerkeyScreenOff_.store(false);
+    auto suspendController = g_service->GetSuspendController();
+    if (suspendController) {
+        suspendController->powerkeyDownWhenScreenOff_ = false;
+    }
+    auto stateMachine = g_service->GetPowerStateMachine();
+    if (stateMachine) {
+        if (stateMachine->ffrtTimer_) {
+            stateMachine->ffrtTimer_->CancelAllTimer();
+        }
+        ffrt::wait();
+        stateMachine->stateAction_.reset();
+    }
 }
 
 #ifdef HAS_MULTIMODALINPUT_INPUT_PART
@@ -317,6 +328,159 @@ HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest005, TestSize.Level0)
     EXPECT_TRUE(powerkeySuspendMonitor->Init());
     GTEST_LOG_(INFO) << "PowerKeyOptionTest005: end";
     POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest005 function end!");
+}
+#endif
+
+#ifdef HAS_MULTIMODALINPUT_INPUT_PART
+/**
+ * @tc.name: PowerKeyOptionTest007
+ * @tc.desc: test poweroffInterrupted=true branch in ReceivePowerkeyCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest007, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest007 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest007: start";
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
+    MockDisplayAction();
+    g_service->SuspendDevice(
+        static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_FALSE(g_service->IsScreenOn());
+
+    auto stateMachine = g_service->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    auto* mockAction = static_cast<::testing::NiceMock<MockStateAction>*>(stateMachine->stateAction_.get());
+    ASSERT_NE(mockAction, nullptr);
+    EXPECT_CALL(*mockAction, TryToCancelScreenOff()).WillOnce([]() {
+        g_displayState = DisplayState::DISPLAY_ON;
+        return true;
+    });
+    EXPECT_CALL(*mockAction, RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, ::testing::_))
+        .Times(::testing::AtLeast(1));
+
+    PowerKeySuspendMonitor::powerkeyScreenOff_.store(true);
+
+    if (callbackPowerWake_ != nullptr) {
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+        keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+        keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        callbackPowerWake_(keyEventPowerkeyDown);
+    }
+
+    auto suspendController = g_service->GetSuspendController();
+    ASSERT_NE(suspendController, nullptr);
+    EXPECT_TRUE(suspendController->powerkeyDownWhenScreenOff_);
+
+    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+    EXPECT_NE(wakeupController, nullptr);
+    if (wakeupController) {
+        wakeupController->monitorMap_.clear();
+    }
+    if (suspendController) {
+        suspendController->monitorMap_.clear();
+    }
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest007: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest007 function end!");
+}
+
+/**
+ * @tc.name: PowerKeyOptionTest008
+ * @tc.desc: test poweroffInterrupted=false branch in ReceivePowerkeyCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest008, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest008 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest008: start";
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
+    MockDisplayAction();
+    g_service->SuspendDevice(
+        static_cast<int64_t>(time(nullptr)), SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_FALSE(g_service->IsScreenOn());
+
+    auto stateMachine = g_service->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    auto* mockAction = static_cast<::testing::NiceMock<MockStateAction>*>(stateMachine->stateAction_.get());
+    ASSERT_NE(mockAction, nullptr);
+    EXPECT_CALL(*mockAction, TryToCancelScreenOff()).WillOnce(::testing::Return(false));
+    EXPECT_CALL(*mockAction, RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, ::testing::_)).Times(0);
+
+    PowerKeySuspendMonitor::powerkeyScreenOff_.store(true);
+
+    if (callbackPowerWake_ != nullptr) {
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+        keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+        keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        callbackPowerWake_(keyEventPowerkeyDown);
+    }
+
+    auto suspendController = g_service->GetSuspendController();
+    ASSERT_NE(suspendController, nullptr);
+    EXPECT_TRUE(suspendController->powerkeyDownWhenScreenOff_);
+
+    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+    EXPECT_NE(wakeupController, nullptr);
+    if (wakeupController) {
+        wakeupController->monitorMap_.clear();
+    }
+    if (suspendController) {
+        suspendController->monitorMap_.clear();
+    }
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest008: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest008 function end!");
+}
+
+/**
+ * @tc.name: PowerKeyOptionTest009
+ * @tc.desc: test powerkeyScreenOff_=false path (outer if-guard not entered)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerKeyOptionTest, PowerKeyOptionTest009, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest009 function start!");
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest009: start";
+    g_service->WakeupControllerInit();
+    g_service->SuspendControllerInit();
+    MockDisplayAction();
+    g_service->WakeupDevice(
+        static_cast<int64_t>(time(nullptr)), WakeupDeviceType::WAKEUP_DEVICE_PLUG_CHANGE, "plug change");
+    EXPECT_TRUE(g_service->IsScreenOn());
+
+    auto stateMachine = g_service->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    auto* mockAction = static_cast<::testing::NiceMock<MockStateAction>*>(stateMachine->stateAction_.get());
+    ASSERT_NE(mockAction, nullptr);
+    EXPECT_CALL(*mockAction, TryToCancelScreenOff()).Times(0);
+    EXPECT_CALL(
+        *mockAction, RefreshActivity(::testing::Ne(0), UserActivityType::USER_ACTIVITY_TYPE_BUTTON, ::testing::_))
+        .Times(::testing::AtLeast(1));
+    EXPECT_CALL(*mockAction, RefreshActivity(0, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, ::testing::_)).Times(0);
+
+    EXPECT_FALSE(PowerKeySuspendMonitor::powerkeyScreenOff_.load());
+
+    if (callbackPowerWake_ != nullptr) {
+        std::shared_ptr<MMI::KeyEvent> keyEventPowerkeyDown = MMI::KeyEvent::Create();
+        keyEventPowerkeyDown->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+        keyEventPowerkeyDown->SetKeyCode(MMI::KeyEvent::KEYCODE_POWER);
+        callbackPowerWake_(keyEventPowerkeyDown);
+    }
+
+    auto suspendController = g_service->GetSuspendController();
+    ASSERT_NE(suspendController, nullptr);
+    EXPECT_FALSE(suspendController->powerkeyDownWhenScreenOff_);
+
+    std::shared_ptr<WakeupController> wakeupController = g_service->GetWakeupController();
+    EXPECT_NE(wakeupController, nullptr);
+    if (wakeupController) {
+        wakeupController->monitorMap_.clear();
+    }
+    if (suspendController) {
+        suspendController->monitorMap_.clear();
+    }
+    GTEST_LOG_(INFO) << "PowerKeyOptionTest009: end";
+    POWER_HILOGI(LABEL_TEST, "PowerKeyOptionTest009 function end!");
 }
 #endif
 } // namespace
