@@ -79,6 +79,11 @@ if (power_manager_feature_report_screenoff_invalid) {
   defines += [ "POWER_MANAGER_REPORT_SCREENOFF_INVALID" ]
 }
 
+screen_saver_deps = []
+if (power_manager_feature_screen_saver) {
+  screen_saver_deps += [ "${powermgr_utils_path}/setting:power_setting" ]
+}
+
 ohos_unittest("takeover_shutdown_callback_test") {
   sources = [ "takeover_shutdown_callback_test.cpp" ]
   configs = [
@@ -91,6 +96,7 @@ ohos_unittest("takeover_shutdown_callback_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   module_out_path = module_output_path
 }
@@ -107,6 +113,7 @@ ohos_unittest("async_shutdown_callback_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   module_out_path = module_output_path
 }
@@ -123,6 +130,7 @@ ohos_unittest("sync_shutdown_callback_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   module_out_path = module_output_path
 }
@@ -139,6 +147,7 @@ ohos_unittest("shutdown_controller_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   if (has_hiviewdfx_hisysevent_part) {
     external_deps += [ "hisysevent:libhisysevent" ]

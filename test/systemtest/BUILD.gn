@@ -77,6 +77,11 @@ if (power_manager_feature_report_screenoff_invalid) {
   defines += [ "POWER_MANAGER_REPORT_SCREENOFF_INVALID" ]
 }
 
+screen_saver_deps = []
+if (power_manager_feature_screen_saver) {
+  screen_saver_deps += [ "${powermgr_utils_path}/setting:power_setting" ]
+}
+
 ##############################systemtest##########################################
 
 ohos_systemtest("ces_system") {
@@ -106,6 +111,7 @@ ohos_systemtest("ces_system") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -138,6 +144,7 @@ ohos_systemtest("test_power_mgr_mock_system") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -170,6 +177,7 @@ ohos_systemtest("test_power_mgr_powersavemode") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -202,6 +210,7 @@ ohos_systemtest("test_power_mgr_powersetdevicemode") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -237,6 +246,7 @@ ohos_systemtest("test_power_mgr_system") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -269,6 +279,7 @@ ohos_systemtest("test_power_mgr_shutdown_fast") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -301,6 +312,7 @@ ohos_systemtest("test_power_level_event_system_test_off") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -333,6 +345,7 @@ ohos_systemtest("test_power_level_event_system_test_on") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -364,6 +377,7 @@ ohos_systemtest("test_power_st_mgr_mock") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
@@ -395,6 +409,7 @@ ohos_systemtest("test_power_st_mgr_mock_suspend") {
     "${powermgr_service_path}/native/src/actions/default:powermgr_actions_default_impl",
   ]
 
+  deps += screen_saver_deps
   external_deps = deps_ex
 }
 
