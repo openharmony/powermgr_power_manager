@@ -1997,6 +1997,12 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient068, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
+#ifndef POWER_MANAGER_ENABLE_COCKPIT_MODE
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem"),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr"),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
     PowerErrors ret = powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem");
     EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
     EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
@@ -2004,6 +2010,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
     EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
     EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
     powerMgrClient.WakeupDevice();
+#endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function end!");
 }
 } // namespace

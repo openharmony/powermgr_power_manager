@@ -732,6 +732,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Lev
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem"));
     g_service->suspendController_->stateMachine_ = backup;
 
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
     bool ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem");
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
@@ -742,6 +743,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Lev
     EXPECT_FALSE(ret);
 #else
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
+#endif
 #endif
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function end!");

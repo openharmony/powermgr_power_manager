@@ -1467,12 +1467,14 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
+#ifndef POWER_MANAGER_ENABLE_COCKPIT_MODE
     ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem", "-1");
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem", "-1");
     EXPECT_NE(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
     EXPECT_NE(ret, PowerErrors::ERR_PERMISSION_DENIED);
-#else
-    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    PowerMgrClient::GetInstance().WakeupDevice();
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService041 function end!");
 }
