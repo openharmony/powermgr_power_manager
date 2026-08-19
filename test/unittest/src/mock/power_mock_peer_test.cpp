@@ -72,6 +72,7 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
     EXPECT_EQ(powerMgrClient.ForceSuspendDevice("-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(powerMgrClient.Hibernate(true, "", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerClientMockPeerTest001 function end!");
 }
@@ -97,6 +98,7 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest002, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
     EXPECT_EQ(powerMgrClient.ForceSuspendDevice("-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(powerMgrClient.Hibernate(true, "", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerClientMockPeerTest002 function end!");
 }
@@ -222,6 +224,8 @@ HWTEST_F(MockPeerTest, MockPeerTest003, TestSize.Level2)
     ret = sptrProxy->ShutDownDeviceIpc(" ", powerError);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem", apiVersion);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");

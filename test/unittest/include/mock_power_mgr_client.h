@@ -56,6 +56,12 @@ public:
         return ret;
     }
 
+    PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag)
+    {
+        state_ = false;
+        return PowerMgrClient::GetInstance().ForceSuspendDeviceIgnoringWakelock(suspendTag);
+    }
+
     PowerErrors SuspendDevice()
     {
         state_ = false;

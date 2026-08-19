@@ -170,6 +170,8 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest003, TestSize.Level2)
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
+    ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem", apiVersion);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     static std::vector<std::string> dumpArgs;
     dumpArgs.push_back("-a");
     std::string errorCode;

@@ -713,4 +713,37 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest022 function end!");
 }
 #endif
+
+/**
+ * @tc.name: PowerSuspendControllerTest023
+ * @tc.desc: test HandleForceSuspendIgnoringWakelock
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: start";
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+
+    auto backup = g_service->suspendController_->stateMachine_;
+    g_service->suspendController_->stateMachine_ = nullptr;
+    EXPECT_FALSE(g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem"));
+    g_service->suspendController_->stateMachine_ = backup;
+
+    bool ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem");
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
+
+    ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "ulsr");
+#ifndef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    EXPECT_FALSE(ret);
+#else
+    EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
+#endif
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function end!");
+}
 } // namespace

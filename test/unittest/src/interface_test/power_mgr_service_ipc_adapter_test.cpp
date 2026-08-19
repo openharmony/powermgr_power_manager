@@ -98,6 +98,11 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
+    PowerErrors ForceSuspendDeviceIgnoringWakelock(
+        const std::string& suspendTag, const std::string& apiVersion = "-1")
+    {
+        return PowerErrors::ERR_OK;
+    }
     PowerErrors Hibernate(bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1")
     {
         return PowerErrors::ERR_OK;
@@ -567,5 +572,21 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter013, TestSize.L
     ret = adapter->UnRegisterSyncHibernateCallbackIpc(callback);
     EXPECT_EQ(ret, ERR_OK);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter013 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceIpcAdapter014
+ * @tc.desc: test PowerMgrServiceIpcAdapter.ForceSuspendDeviceIgnoringWakelockIpc
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter014, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter014 function start!");
+    auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
+    std::string apiVersion = "-1";
+    int32_t result = adapter->ForceSuspendDeviceIgnoringWakelockIpc("mem", apiVersion);
+    EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
+    result = adapter->ForceSuspendDeviceIgnoringWakelockIpc("ulsr", apiVersion);
+    EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter014 function end!");
 }
 }

@@ -1444,4 +1444,59 @@ HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutAbnormal001, TestSize.Leve
     pmsTest_->LockScreenAfterTimingOut(true, false, true, testProxy); // reset to default
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTestAbnormal001 end!");
 }
+
+/**
+ * @tc.name: PowerMgrService041
+ * @tc.desc: Test ForceSuspendDeviceIgnoringWakelock permission and capability
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService041 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem", "-1");
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem", "19");
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
+
+    g_isPermissionGranted = true;
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem", "-1");
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+    EXPECT_NE(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+    EXPECT_NE(ret, PowerErrors::ERR_PERMISSION_DENIED);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService041 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService042
+ * @tc.desc: Test ForceSuspendDeviceIgnoringWakelock when suspend controller is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService042 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto backup = pmsTest_->suspendController_;
+    pmsTest_->suspendController_ = nullptr;
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    PowerErrors ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem", "-1");
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+    EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
+    pmsTest_->suspendController_ = backup;
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService042 function end!");
+}
 }
