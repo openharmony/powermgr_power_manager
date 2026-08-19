@@ -2633,8 +2633,12 @@ void PowerMgrService::ExternalScreenInit()
         POWER_HILOGE(COMP_SVC, "Failed to get physical screen ids");
         return;
     }
-    POWER_HILOGI(COMP_SVC, "Number of current physical screen is %{public}u", static_cast<uint32_t>(screenIds.size()));
-    if (screenIds.size() <= 1) { // there's at least a main screen, we only care about external screen
+
+    bool isDesktopPc = system::GetIntParameter("const.product.has_buildin_screen", 1) == 0;
+    POWER_HILOGI(COMP_SVC, "Number of current physical screen is %{public}u, isDesktopPc is %{public}d",
+        static_cast<uint32_t>(screenIds.size()), isDesktopPc);
+    if ((!isDesktopPc && screenIds.size() <= 1) ||  // at least one main screen in laptop pc
+        (isDesktopPc && screenIds.size() < 1)) {    // no buildin screen in desktop pc
         return;
     }
 
