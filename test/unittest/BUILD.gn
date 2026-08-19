@@ -54,7 +54,10 @@ config("module_private_config") {
   }
 
   if (power_manager_feature_screen_saver) {
-    include_dirs += [ "native/src/power_screen_saver" ]
+    include_dirs += [
+      "native/src/power_screen_saver",
+      "${powermgr_utils_path}/setting/include",
+    ]
   }
 }
 
@@ -1080,6 +1083,7 @@ ohos_unittest("test_power_mgr_service_decoupled") {
     "${powermgr_utils_path}:power_utils",
     "${powermgr_utils_path}/permission:power_permission",
     "${powermgr_utils_path}/ffrt:power_ffrt",
+    "${powermgr_utils_path}/setting:power_setting",
   ]
 
   external_deps = deps_ex

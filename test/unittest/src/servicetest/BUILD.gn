@@ -91,6 +91,11 @@ if (power_manager_feature_report_screenoff_invalid) {
   defines += [ "POWER_MANAGER_REPORT_SCREENOFF_INVALID" ]
 }
 
+screen_saver_deps = []
+if (power_manager_feature_screen_saver) {
+  screen_saver_deps += [ "${powermgr_utils_path}/setting:power_setting" ]
+}
+
 ##############################native_test##########################################
 ohos_unittest("powermgr_native_test") {
   sanitize = {
@@ -119,6 +124,7 @@ ohos_unittest("powermgr_native_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
 
   external_deps = [ "image_framework:image_native" ]
   external_deps += deps_ex
@@ -160,6 +166,7 @@ ohos_unittest("powermgr_native_mock_parcel_test") {
     "${powermgr_service_path}:powermgrservice",
     "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
 
   external_deps = deps_ex
 }
