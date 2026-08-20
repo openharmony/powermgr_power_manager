@@ -692,4 +692,134 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine018, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine018 function end!");
 }
 
+/**
+ * @tc.name: NativePowerStateMachine019
+ * @tc.desc: test OverrideScreenOffTimeInner keeps override value when SetDisplayOffTime is called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine019, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine019 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+
+    constexpr int64_t ORIGINAL_TIME = 30000;
+    constexpr int64_t OVERRIDE_TIME = 600000;
+    constexpr int64_t NEW_SETTING_TIME = 120000;
+
+    stateMachine->SetDisplayOffTime(ORIGINAL_TIME, false);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), ORIGINAL_TIME);
+    EXPECT_FALSE(stateMachine->isScreenOffTimeOverride_);
+
+    // Override screen off time
+    stateMachine->OverrideScreenOffTimeInner(OVERRIDE_TIME);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), OVERRIDE_TIME);
+    EXPECT_TRUE(stateMachine->isScreenOffTimeOverride_);
+
+    stateMachine->SetDisplayOffTime(NEW_SETTING_TIME, false);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), NEW_SETTING_TIME);
+
+    stateMachine->RestoreScreenOffTimeInner();
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), ORIGINAL_TIME);
+    EXPECT_FALSE(stateMachine->isScreenOffTimeOverride_);
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine019 function end!");
+}
+
+/**
+ * @tc.name: NativePowerStateMachine020
+ * @tc.desc: test RestoreScreenOffTimeInner restores correct time after override
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine020, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine020 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+
+    constexpr int64_t ORIGINAL_TIME = 30000;
+    constexpr int64_t OVERRIDE_TIME = 600000;
+
+    stateMachine->SetDisplayOffTime(ORIGINAL_TIME, false);
+
+    stateMachine->OverrideScreenOffTimeInner(OVERRIDE_TIME);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), OVERRIDE_TIME);
+    EXPECT_TRUE(stateMachine->isScreenOffTimeOverride_);
+
+    stateMachine->OverrideScreenOffTimeInner(OVERRIDE_TIME * 2);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), OVERRIDE_TIME * 2);
+    EXPECT_TRUE(stateMachine->isScreenOffTimeOverride_);
+
+    stateMachine->RestoreScreenOffTimeInner();
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), ORIGINAL_TIME);
+    EXPECT_FALSE(stateMachine->isScreenOffTimeOverride_);
+
+    EXPECT_FALSE(stateMachine->RestoreScreenOffTimeInner());
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine020 function end!");
+}
+
+/**
+ * @tc.name: NativePowerStateMachine021
+ * @tc.desc: test no-override AC/DC switch behavior unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine021, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine021 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+
+    constexpr int64_t ORIGINAL_TIME = 30000;
+    constexpr int64_t NEW_SETTING_TIME = 120000;
+
+    stateMachine->SetDisplayOffTime(ORIGINAL_TIME, false);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), ORIGINAL_TIME);
+    EXPECT_FALSE(stateMachine->isScreenOffTimeOverride_);
+
+    stateMachine->SetDisplayOffTime(NEW_SETTING_TIME, false);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), NEW_SETTING_TIME);
+    EXPECT_FALSE(stateMachine->isScreenOffTimeOverride_);
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine021 function end!");
+}
+
+/**
+ * @tc.name: NativePowerStateMachine022
+ * @tc.desc: test Override then Restore after display off time change via SetDisplayOffTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine022, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine022 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+
+    constexpr int64_t ORIGINAL_TIME = 30000;
+    constexpr int64_t OVERRIDE_TIME = 600000;
+
+    stateMachine->SetDisplayOffTime(ORIGINAL_TIME, false);
+
+    stateMachine->OverrideScreenOffTimeInner(OVERRIDE_TIME);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), OVERRIDE_TIME);
+    EXPECT_TRUE(stateMachine->isScreenOffTimeOverride_);
+
+    stateMachine->RestoreScreenOffTimeInner();
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), ORIGINAL_TIME);
+    EXPECT_FALSE(stateMachine->isScreenOffTimeOverride_);
+
+    constexpr int64_t ANOTHER_TIME = 45000;
+    stateMachine->SetDisplayOffTime(ANOTHER_TIME, false);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), ANOTHER_TIME);
+
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine022 function end!");
+}
 } // namespace

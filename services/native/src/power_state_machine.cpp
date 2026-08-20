@@ -1872,6 +1872,14 @@ void PowerStateMachine::DisplayOffTimeUpdateFunc()
 
     int64_t systemTime = stateMachine->GetDisplayOffTime();
     int64_t settingTime = pms->GetSettingDisplayOffTime(systemTime);
+    if (stateMachine->isScreenOffTimeOverride_) {
+        POWER_HILOGI(FEATURE_POWER_STATE,
+            "setting update display off time skipped during override, "
+            "%{public}" PRId64 " -> %{public}" PRId64 ", effective=%{public}" PRId64 "",
+            g_beforeOverrideTime, settingTime, systemTime);
+        g_beforeOverrideTime = settingTime;
+        return;
+    }
     if (settingTime == systemTime) {
         POWER_HILOGI(FEATURE_POWER_STATE, "setting display off time %{public}" PRId64 " already worked", settingTime);
         return;
