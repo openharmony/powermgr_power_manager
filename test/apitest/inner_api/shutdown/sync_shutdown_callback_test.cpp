@@ -35,6 +35,8 @@ MockStateAction* g_mockStateAction = nullptr;
 bool g_isHighPriority = false;
 bool g_isDefaultPriority = false;
 bool g_isLowPriority = false;
+bool g_isHighestPriority = false;
+bool g_isLowestPriority = false;
 }
 using namespace testing::ext;
 
@@ -56,6 +58,8 @@ void SyncShutdownCallbackTest::SetUp()
     g_isHighPriority = false;
     g_isDefaultPriority = false;
     g_isLowPriority = false;
+    g_isHighestPriority = false;
+    g_isLowestPriority = false;
     g_mockPowerAction = new MockPowerAction();
     g_mockStateAction = new MockStateAction();
     auto shutdownController = g_service->GetShutdownController();
@@ -75,9 +79,19 @@ void SyncShutdownCallbackTest::HighPrioritySyncShutdownCallback::OnSyncShutdown(
     g_isHighPriority = true;
 }
 
+void SyncShutdownCallbackTest::HighestPrioritySyncShutdownCallback::OnSyncShutdown()
+{
+    g_isHighestPriority = true;
+}
+
 void SyncShutdownCallbackTest::LowPrioritySyncShutdownCallback::OnSyncShutdown()
 {
     g_isLowPriority = true;
+}
+
+void SyncShutdownCallbackTest::LowestPrioritySyncShutdownCallback::OnSyncShutdown()
+{
+    g_isLowestPriority = true;
 }
 
 void SyncShutdownCallbackTest::NotSyncShutdownCallback::OnSyncShutdown()
@@ -94,9 +108,19 @@ void SyncShutdownCallbackTest::HighPrioritySyncShutdownOrRebootCallback::OnSyncS
     g_isHighPriority = true;
 }
 
+void SyncShutdownCallbackTest::HighestPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isHighestPriority = true;
+}
+
 void SyncShutdownCallbackTest::LowPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
 {
     g_isLowPriority = true;
+}
+
+void SyncShutdownCallbackTest::LowestPrioritySyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
+{
+    g_isLowestPriority = true;
 }
 
 void SyncShutdownCallbackTest::NotSyncShutdownOrRebootCallback::OnSyncShutdownOrReboot(bool isReboot)
@@ -199,6 +223,25 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level1)
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(::testing::AtLeast(1));
     g_service->ShutDownDevice("test_case");
     POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback005 function end!");
+}
+
+/**
+ * @tc.name: SyncShutdownCallback006
+ * @tc.desc: Test the highest and lowest priority of synchronous shutdown callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback006, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback006 function start!");
+    auto highestPriorityCallback = new HighestPrioritySyncShutdownCallback();
+    g_service->RegisterShutdownCallback(highestPriorityCallback, ShutdownPriority::HIGHEST);
+    auto lowestPriorityCallback = new LowestPrioritySyncShutdownCallback();
+    g_service->RegisterShutdownCallback(lowestPriorityCallback, ShutdownPriority::LOWEST);
+
+    g_service->ShutDownDevice("test_case");
+    EXPECT_TRUE(g_isHighestPriority);
+    EXPECT_TRUE(g_isLowestPriority);
+    POWER_HILOGI(LABEL_TEST, "SyncShutdownCallback006 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr

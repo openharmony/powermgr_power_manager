@@ -51,6 +51,20 @@ void ShutdownCallbackHolder::AddCallback(const sptr<IRemoteObject>& callback, Sh
             }
             break;
         }
+        case ShutdownPriority::HIGHEST: {
+            auto iter = highestPriorityCallbacks_.insert(callback);
+            if (iter.second) {
+                callback->AddDeathRecipient(this);
+            }
+            break;
+        }
+        case ShutdownPriority::LOWEST: {
+            auto iter = lowestPriorityCallbacks_.insert(callback);
+            if (iter.second) {
+                callback->AddDeathRecipient(this);
+            }
+            break;
+        }
         default: {
             break;
         }
@@ -63,6 +77,12 @@ void ShutdownCallbackHolder::AddCallbackPidUid(const sptr<IRemoteObject>& callba
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto uid = IPCSkeleton::GetCallingUid();
     cachedRegister_.emplace(callback, std::make_pair(pid, uid));
+}
+
+std::set<sptr<IRemoteObject>> ShutdownCallbackHolder::GetHighestPriorityCallbacks()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    return highestPriorityCallbacks_;
 }
 
 std::set<sptr<IRemoteObject>> ShutdownCallbackHolder::GetHighPriorityCallbacks()
@@ -83,12 +103,20 @@ std::set<sptr<IRemoteObject>> ShutdownCallbackHolder::GetLowPriorityCallbacks()
     return lowPriorityCallbacks_;
 }
 
+std::set<sptr<IRemoteObject>> ShutdownCallbackHolder::GetLowestPriorityCallbacks()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    return lowestPriorityCallbacks_;
+}
+
 void ShutdownCallbackHolder::RemoveCallback(const sptr<IRemoteObject>& callback)
 {
     std::unique_lock<std::mutex> lock(mutex_);
+    RemoveCallback(lowestPriorityCallbacks_, callback);
     RemoveCallback(lowPriorityCallbacks_, callback);
     RemoveCallback(defaultPriorityCallbacks_, callback);
     RemoveCallback(highPriorityCallbacks_, callback);
+    RemoveCallback(highestPriorityCallbacks_, callback);
     RemoveCallbackPidUid(callback);
 }
 

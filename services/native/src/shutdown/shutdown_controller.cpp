@@ -290,6 +290,9 @@ void ShutdownController::RemoveCallback(const sptr<ISyncShutdownCallback>& callb
 bool ShutdownController::TriggerTakeOverShutdownCallback(const TakeOverInfo& info)
 {
     bool isTakeover = false;
+    auto highestPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighestPriorityCallbacks();
+    isTakeover = TriggerTakeOverShutdownCallbackInner(highestPriorityCallbacks, info);
+    RETURN_IF_WITH_RET(isTakeover, true);
     auto highPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighPriorityCallbacks();
     isTakeover = TriggerTakeOverShutdownCallbackInner(highPriorityCallbacks, info);
     RETURN_IF_WITH_RET(isTakeover, true);
@@ -298,12 +301,18 @@ bool ShutdownController::TriggerTakeOverShutdownCallback(const TakeOverInfo& inf
     RETURN_IF_WITH_RET(isTakeover, true);
     auto lowPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowPriorityCallbacks();
     isTakeover = TriggerTakeOverShutdownCallbackInner(lowPriorityCallbacks, info);
+    RETURN_IF_WITH_RET(isTakeover, true);
+    auto lowestPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowestPriorityCallbacks();
+    isTakeover = TriggerTakeOverShutdownCallbackInner(lowestPriorityCallbacks, info);
     return isTakeover;
 }
 
 bool ShutdownController::TriggerTakeOverHibernateCallback(const TakeOverInfo& info)
 {
     bool isTakeover = false;
+    auto highestPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighestPriorityCallbacks();
+    isTakeover = TriggerTakeOverHibernateCallbackInner(highestPriorityCallbacks, info);
+    RETURN_IF_WITH_RET(isTakeover, true);
     auto highPriorityCallbacks = takeoverShutdownCallbackHolder_->GetHighPriorityCallbacks();
     isTakeover = TriggerTakeOverHibernateCallbackInner(highPriorityCallbacks, info);
     RETURN_IF_WITH_RET(isTakeover, true);
@@ -312,6 +321,9 @@ bool ShutdownController::TriggerTakeOverHibernateCallback(const TakeOverInfo& in
     RETURN_IF_WITH_RET(isTakeover, true);
     auto lowPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowPriorityCallbacks();
     isTakeover = TriggerTakeOverHibernateCallbackInner(lowPriorityCallbacks, info);
+    RETURN_IF_WITH_RET(isTakeover, true);
+    auto lowestPriorityCallbacks = takeoverShutdownCallbackHolder_->GetLowestPriorityCallbacks();
+    isTakeover = TriggerTakeOverHibernateCallbackInner(lowestPriorityCallbacks, info);
     return isTakeover;
 }
 
@@ -375,12 +387,16 @@ bool ShutdownController::TriggerTakeOverHibernateCallbackInner(
 
 void ShutdownController::TriggerAsyncShutdownCallback(bool isReboot)
 {
+    auto highestPriorityCallbacks = asyncShutdownCallbackHolder_->GetHighestPriorityCallbacks();
+    TriggerAsyncShutdownCallbackInner(highestPriorityCallbacks, isReboot);
     auto highPriorityCallbacks = asyncShutdownCallbackHolder_->GetHighPriorityCallbacks();
     TriggerAsyncShutdownCallbackInner(highPriorityCallbacks, isReboot);
     auto defaultPriorityCallbacks = asyncShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
     TriggerAsyncShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
     auto lowPriorityCallbacks = asyncShutdownCallbackHolder_->GetLowPriorityCallbacks();
     TriggerAsyncShutdownCallbackInner(lowPriorityCallbacks, isReboot);
+    auto lowestPriorityCallbacks = asyncShutdownCallbackHolder_->GetLowestPriorityCallbacks();
+    TriggerAsyncShutdownCallbackInner(lowestPriorityCallbacks, isReboot);
 }
 
 void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)
@@ -402,12 +418,16 @@ void ShutdownController::TriggerAsyncShutdownCallbackInner(std::set<sptr<IRemote
 
 void ShutdownController::TriggerSyncShutdownCallback(bool isReboot)
 {
+    auto highestPriorityCallbacks = syncShutdownCallbackHolder_->GetHighestPriorityCallbacks();
+    TriggerSyncShutdownCallbackInner(highestPriorityCallbacks, isReboot);
     auto highPriorityCallbacks = syncShutdownCallbackHolder_->GetHighPriorityCallbacks();
     TriggerSyncShutdownCallbackInner(highPriorityCallbacks, isReboot);
     auto defaultPriorityCallbacks = syncShutdownCallbackHolder_->GetDefaultPriorityCallbacks();
     TriggerSyncShutdownCallbackInner(defaultPriorityCallbacks, isReboot);
     auto lowPriorityCallbacks = syncShutdownCallbackHolder_->GetLowPriorityCallbacks();
     TriggerSyncShutdownCallbackInner(lowPriorityCallbacks, isReboot);
+    auto lowestPriorityCallbacks = syncShutdownCallbackHolder_->GetLowestPriorityCallbacks();
+    TriggerSyncShutdownCallbackInner(lowestPriorityCallbacks, isReboot);
 }
 
 void ShutdownController::TriggerSyncShutdownCallbackInner(std::set<sptr<IRemoteObject>>& callbacks, bool isReboot)

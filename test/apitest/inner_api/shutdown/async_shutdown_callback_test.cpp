@@ -38,6 +38,8 @@ std::mutex g_mtx;
 bool g_isHighPriority = false;
 bool g_isDefaultPriority = false;
 bool g_isLowPriority = false;
+bool g_isHighestPriority = false;
+bool g_isLowestPriority = false;
 const int32_t TIMEOUT_SEC = 5;
 }
 using namespace testing::ext;
@@ -60,6 +62,8 @@ void AsyncShutdownCallbackTest::SetUp()
     g_isHighPriority = false;
     g_isDefaultPriority = false;
     g_isLowPriority = false;
+    g_isHighestPriority = false;
+    g_isLowestPriority = false;
     g_mockPowerAction = new MockPowerAction();
     g_mockStateAction = new MockStateAction();
     auto shutdownController = g_service->GetShutdownController();
@@ -85,9 +89,21 @@ void AsyncShutdownCallbackTest::HighPriorityAsyncShutdownCallback::OnAsyncShutdo
     g_cv.notify_one();
 }
 
+void AsyncShutdownCallbackTest::HighestPriorityAsyncShutdownCallback::OnAsyncShutdown()
+{
+    g_isHighestPriority = true;
+    g_cv.notify_one();
+}
+
 void AsyncShutdownCallbackTest::LowPriorityAsyncShutdownCallback::OnAsyncShutdown()
 {
     g_isLowPriority = true;
+    g_cv.notify_one();
+}
+
+void AsyncShutdownCallbackTest::LowestPriorityAsyncShutdownCallback::OnAsyncShutdown()
+{
+    g_isLowestPriority = true;
     g_cv.notify_one();
 }
 
@@ -107,9 +123,21 @@ void AsyncShutdownCallbackTest::HighPriorityAsyncShutdownOrRebootCallback::OnAsy
     g_cv.notify_one();
 }
 
+void AsyncShutdownCallbackTest::HighestPriorityAsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
+{
+    g_isHighestPriority = true;
+    g_cv.notify_one();
+}
+
 void AsyncShutdownCallbackTest::LowPriorityAsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
 {
     g_isLowPriority = true;
+    g_cv.notify_one();
+}
+
+void AsyncShutdownCallbackTest::LowestPriorityAsyncShutdownOrRebootCallback::OnAsyncShutdownOrReboot(bool isReboot)
+{
+    g_isLowestPriority = true;
     g_cv.notify_one();
 }
 
@@ -234,6 +262,25 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level1)
     // wait for detached threads to finish
     sleep(1);
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 function end!");
+}
+
+/**
+ * @tc.name: AsyncShutdownCallback006
+ * @tc.desc: Test the highest and lowest priority of asynchronous shutdown callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback006, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback006 function start!");
+    auto highestPriorityCallback = new HighestPriorityAsyncShutdownCallback();
+    g_service->RegisterShutdownCallback(highestPriorityCallback, ShutdownPriority::HIGHEST);
+    auto lowestPriorityCallback = new LowestPriorityAsyncShutdownCallback();
+    g_service->RegisterShutdownCallback(lowestPriorityCallback, ShutdownPriority::LOWEST);
+
+    g_service->ShutDownDevice("test_case");
+    EXPECT_TRUE(WaitingCallback(g_isHighestPriority));
+    EXPECT_TRUE(WaitingCallback(g_isLowestPriority));
+    POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback006 function end!");
 }
 } // namespace UnitTest
 } // namespace PowerMgr
