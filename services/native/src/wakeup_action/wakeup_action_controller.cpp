@@ -45,16 +45,35 @@ void WakeupActionController::Init()
     }
 }
 
-bool WakeupActionController::IsWakeupReasonConfigMatched()
+void WakeupActionController::GetWakeupReason(std::string& reason)
 {
-    std::string reason;
     SystemSuspendController::GetInstance().GetWakeupReason(reason);
     if (reason.empty()) {
         POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason is empty");
-        return false;
+        return;
     }
     reason.erase(reason.end() - 1);
     POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason %{public}s", reason.c_str());
+}
+
+WakeupAction WakeupActionController::GetWakeupAction(const std::string& reason) const
+{
+    auto it = sourceMap_.find(reason);
+    if (it == sourceMap_.end()) {
+        return WakeupAction::ACTION_INVALID;
+    }
+    auto action = it->second->GetAction();
+    POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason %{public}s, action %{public}d", reason.c_str(), action);
+    return static_cast<WakeupAction>(action);
+}
+
+bool WakeupActionController::IsWakeupReasonConfigMatched()
+{
+    std::string reason;
+    GetWakeupReason(reason);
+    if (reason.empty()) {
+        return false;
+    }
     if (sourceMap_.find(reason) != sourceMap_.end()) {
         return true;
     }
@@ -62,33 +81,24 @@ bool WakeupActionController::IsWakeupReasonConfigMatched()
     return false;
 }
 
-bool WakeupActionController::ExecuteByGetReason()
+bool WakeupActionController::ExecuteByGetReason(const std::string& reason)
 {
-    std::string reason;
-    SystemSuspendController::GetInstance().GetWakeupReason(reason);
-    if (reason.empty()) {
-        POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason is empty");
+    if (sourceMap_.find(reason) == sourceMap_.end()) {
+        POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason %{public}s doesn't exist", reason.c_str());
         return false;
     }
-    reason.erase(reason.end() - 1);
-    POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason %{public}s", reason.c_str());
-    if (sourceMap_.find(reason) != sourceMap_.end()) {
-        pid_t pid = IPCSkeleton::GetCallingPid();
-        auto uid = IPCSkeleton::GetCallingUid();
-        POWER_HILOGI(FEATURE_WAKEUP_ACTION,
-            "WakeupAction device, pid=%{public}d, uid=%{public}d, reason=%{public}s, scene=%{public}s, "
-            "action=%{public}u",
-            pid, uid, reason.c_str(), sourceMap_[reason]->GetScene().c_str(), sourceMap_[reason]->GetAction());
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(FEATURE_WAKEUP_ACTION,
+        "WakeupAction device, pid=%{public}d, uid=%{public}d, reason=%{public}s, scene=%{public}s, action=%{public}u",
+        pid, uid, reason.c_str(), sourceMap_[reason]->GetScene().c_str(), sourceMap_[reason]->GetAction());
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-        std::string str = reason + ":" + std::to_string(sourceMap_[reason]->GetAction());
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "WAKEUP_STATISTIC",
-            HiviewDFX::HiSysEvent::EventType::STATISTIC, "WAKEUP_REASON", str.c_str());
+    std::string str = reason + ":" + std::to_string(sourceMap_[reason]->GetAction());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "WAKEUP_STATISTIC",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "WAKEUP_REASON", str.c_str());
 #endif
-        HandleAction(reason);
-        return true;
-    }
-    POWER_HILOGI(FEATURE_WAKEUP_ACTION, "WakeupAction reason %{public}s doesn't exist", reason.c_str());
-    return false;
+    HandleAction(reason);
+    return true;
 }
 
 void WakeupActionController::HandleAction(const std::string& reason)
