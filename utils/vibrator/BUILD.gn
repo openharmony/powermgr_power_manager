@@ -42,6 +42,7 @@ ohos_shared_library("power_vibrator") {
   public_configs = [ ":public_config" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
     "config_policy:configpolicy_util",
