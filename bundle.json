@@ -76,6 +76,7 @@
                 "ability_runtime",
                 "access_token",
                 "battery_manager",
+                "bounds_checking_function",
                 "cJSON",
                 "common_event_service",
                 "config_policy",
