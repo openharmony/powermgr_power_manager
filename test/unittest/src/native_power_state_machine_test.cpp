@@ -692,6 +692,7 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine018, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine018 function end!");
 }
 
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 /**
  * @tc.name: NativePowerStateMachine019
  * @tc.desc: test DisplayOffTimeUpdateFunc keeps override value and updates g_beforeOverrideTime
@@ -801,4 +802,5 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine022, TestSize.Level
 
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine022 function end!");
 }
+#endif // POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
 } // namespace
