@@ -686,5 +686,47 @@ HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest017, TestSize.Lev
     EXPECT_EQ(shutdownCallbackHolder->cachedRegister_.size(), 0);
     POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest017 function end!");
 }
+
+/**
+ * @tc.name: ShutdownCallbackHolderTest018
+ * @tc.desc: Test duplicate insert of HIGHEST priority callback does not add twice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest018, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest018 function start!");
+    sptr<ShutdownCallbackHolder> shutdownCallbackHolder = new ShutdownCallbackHolder();
+    sptr<TestAsyncShutdownCallback> callback = new TestAsyncShutdownCallback();
+
+    shutdownCallbackHolder->AddCallback(callback->AsObject(), ShutdownPriority::HIGHEST);
+    EXPECT_EQ(shutdownCallbackHolder->GetHighestPriorityCallbacks().size(), 1);
+    shutdownCallbackHolder->AddCallback(callback->AsObject(), ShutdownPriority::HIGHEST);
+    EXPECT_EQ(shutdownCallbackHolder->GetHighestPriorityCallbacks().size(), 1);
+
+    shutdownCallbackHolder->RemoveCallback(callback->AsObject());
+    EXPECT_EQ(shutdownCallbackHolder->GetHighestPriorityCallbacks().size(), 0);
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest018 function end!");
+}
+
+/**
+ * @tc.name: ShutdownCallbackHolderTest019
+ * @tc.desc: Test duplicate insert of LOWEST priority callback does not add twice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutdownCallbackHolderTest, ShutdownCallbackHolderTest019, TestSize.Level2)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest019 function start!");
+    sptr<ShutdownCallbackHolder> shutdownCallbackHolder = new ShutdownCallbackHolder();
+    sptr<TestSyncShutdownCallback> callback = new TestSyncShutdownCallback();
+
+    shutdownCallbackHolder->AddCallback(callback->AsObject(), ShutdownPriority::LOWEST);
+    EXPECT_EQ(shutdownCallbackHolder->GetLowestPriorityCallbacks().size(), 1);
+    shutdownCallbackHolder->AddCallback(callback->AsObject(), ShutdownPriority::LOWEST);
+    EXPECT_EQ(shutdownCallbackHolder->GetLowestPriorityCallbacks().size(), 1);
+
+    shutdownCallbackHolder->RemoveCallback(callback->AsObject());
+    EXPECT_EQ(shutdownCallbackHolder->GetLowestPriorityCallbacks().size(), 0);
+    POWER_HILOGI(LABEL_TEST, "ShutdownCallbackHolderTest019 function end!");
+}
 } // namespace PowerMgr
 } // namespace OHOS

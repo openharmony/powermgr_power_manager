@@ -16,10 +16,13 @@
 #include "sync_shutdown_callback_test.h"
 
 #include <condition_variable>
+#include <thread>
 
 #include "power_log.h"
 #include "power_mgr_client.h"
+#define private public
 #include "power_mgr_service.h"
+#undef private
 #include "shutdown/shutdown_client.h"
 
 #include "mock_power_action.h"
@@ -67,7 +70,13 @@ void SyncShutdownCallbackTest::SetUp()
 }
 
 void SyncShutdownCallbackTest::TearDown()
-{}
+{
+    auto shutdownController = g_service->GetShutdownController();
+    while (shutdownController->started_) {
+        std::this_thread::yield();
+    }
+    shutdownController->EnableMock(nullptr, nullptr);
+}
 
 void SyncShutdownCallbackTest::SyncShutdownCallback::OnSyncShutdown()
 {
@@ -219,6 +228,12 @@ HWTEST_F(SyncShutdownCallbackTest, SyncShutdownCallback005, TestSize.Level1)
 
     EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_case"))).Times(::testing::AtLeast(1));
     g_service->RebootDevice("test_case");
+
+    // Make sure the last detached task is done
+    auto shutdownController = g_service->GetShutdownController();
+    while (shutdownController->started_) {
+        std::this_thread::yield();
+    }
 
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(::testing::AtLeast(1));
     g_service->ShutDownDevice("test_case");

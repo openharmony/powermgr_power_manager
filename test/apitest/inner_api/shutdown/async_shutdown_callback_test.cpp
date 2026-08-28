@@ -18,6 +18,7 @@
 #include <condition_variable>
 #include <future>
 #include <mutex>
+#include <thread>
 #include "power_log.h"
 #include "power_mgr_client.h"
 #include "power_mgr_service.h"
@@ -67,15 +68,20 @@ void AsyncShutdownCallbackTest::SetUp()
     g_mockPowerAction = new MockPowerAction();
     g_mockStateAction = new MockStateAction();
     auto shutdownController = g_service->GetShutdownController();
-    if (shutdownController->IsShuttingDown()) {
-        // wait for detached threads to finish before next testcase
-        sleep(1);
+    while (shutdownController->IsShuttingDown()) {
+        std::this_thread::yield();
     }
     shutdownController->EnableMock(g_mockPowerAction, g_mockStateAction);
 }
 
 void AsyncShutdownCallbackTest::TearDown()
-{}
+{
+    auto shutdownController = g_service->GetShutdownController();
+    while (shutdownController->IsShuttingDown()) {
+        std::this_thread::yield();
+    }
+    shutdownController->EnableMock(nullptr, nullptr);
+}
 
 void AsyncShutdownCallbackTest::AsyncShutdownCallback::OnAsyncShutdown()
 {
@@ -256,11 +262,18 @@ HWTEST_F(AsyncShutdownCallbackTest, AsyncShutdownCallback005, TestSize.Level1)
     EXPECT_CALL(*g_mockPowerAction, Reboot(std::string("test_case"))).Times(1);
     g_service->RebootDevice("test_case");
 
+    auto shutdownController = g_service->GetShutdownController();
+    while (shutdownController->IsShuttingDown()) {
+        std::this_thread::yield();
+    }
+
     EXPECT_CALL(*g_mockPowerAction, Shutdown(std::string("test_case"))).Times(1);
     g_service->ShutDownDevice("test_case");
+    while (shutdownController->IsShuttingDown()) {
+        std::this_thread::yield();
+    }
 
-    // wait for detached threads to finish
-    sleep(1);
+    g_service->UnRegisterShutdownCallback(notAsyncCallback);
     POWER_HILOGI(LABEL_TEST, "AsyncShutdownCallback005 function end!");
 }
 

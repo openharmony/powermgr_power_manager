@@ -86,6 +86,7 @@ if (power_manager_feature_screen_saver) {
 
 ohos_unittest("takeover_shutdown_callback_test") {
   sources = [ "takeover_shutdown_callback_test.cpp" ]
+  include_dirs = [ "${powermgr_framework_native}" ]
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
