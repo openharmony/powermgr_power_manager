@@ -239,6 +239,12 @@ sptr<IPowerMgr> ClientLifeCycle::GetProxy()
     }
 }
 
+// Redefine this so that the callback from settings observer won't execute.
+// The SuspendController codes have multithreading issues, where its members is referenced in callback
+// without considering its own lifecycle.
+// I don't want to touch production codes since this can only happen in unit tests (for now)
+void SuspendController::RegisterSettingsObserver() {}
+
 // test cases below
 namespace {
 // cover branches of client side call
@@ -398,6 +404,10 @@ HWTEST_F(GeneralInterfacesTest, PreBrightTest, TestSize.Level0)
     POWER_HILOGI(LABEL_TEST, "err = %{public}d", err);
 
     // nullptr branch
+    // Clear all pending ffrt tasks. ffrt::wait should be called before clearing ffrtTimer
+    // since non-queued tasks (monitor execution) may push queued tasks (StartSleepTimer)
+    // Dirty and time consuming, but I can't find a better way since the production code is a mess.
+    ffrt::wait();
     stub_->ffrtTimer_->Clear();
     stub_->suspendController_ = nullptr;
     // somehow even if the first argument before "OR" is false still 2 branches count depending on the second argument
