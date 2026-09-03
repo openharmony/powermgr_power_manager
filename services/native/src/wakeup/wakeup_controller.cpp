@@ -589,7 +589,7 @@ void WakeupController::HandleOnlySecondScreenWhenWakeup(const sptr<PowerMgrServi
         isNeedEnterOnlySecondScreen = hasExternalScreen && reason != WakeupDeviceType::WAKEUP_DEVICE_LID &&
             PowerMgrService::isInLidMode_;
     } else {
-        isNeedEnterOnlySecondScreen = reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH &&
+        isNeedEnterOnlySecondScreen = hasExternalScreen && reason != WakeupDeviceType::WAKEUP_DEVICE_SWITCH &&
             !stateMachine_->IsSwitchOpenByPath();
     }
     auto suspendController = pms->GetSuspendController();
