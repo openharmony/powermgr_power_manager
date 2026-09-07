@@ -1984,8 +1984,6 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient068, TestSize.Level0) {
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock(""), PowerErrors::ERR_PARAM_INVALID);
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("invalid"), PowerErrors::ERR_PARAM_INVALID);
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("MEM"), PowerErrors::ERR_PARAM_INVALID);
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem", "12345"), PowerErrors::ERR_PARAM_INVALID);
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr", "12345"), PowerErrors::ERR_PARAM_INVALID);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient068 function end!");
 }
 

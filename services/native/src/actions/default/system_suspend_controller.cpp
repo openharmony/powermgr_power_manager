@@ -81,10 +81,7 @@ sptr<V1_3::IPowerInterface> SystemSuspendController::GetPowerInterface()
 {
     std::lock_guard lock(interfaceMutex_);
     if (powerInterface_ == nullptr) {
-        powerInterface_ = V1_4::IPowerInterface::Get();
-        if (powerInterface_ == nullptr) {
-            powerInterface_ = V1_3::IPowerInterface::Get();
-        }
+        powerInterface_ = V1_3::IPowerInterface::Get();
         RETURN_IF_WITH_RET(powerInterface_ == nullptr, nullptr);
     }
     return powerInterface_;
@@ -142,13 +139,9 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
 
 bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
 {
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
     std::lock_guard lock(mutex_);
-    sptr<V1_3::IPowerInterface> powerInterface = GetPowerInterface();
-    if (powerInterface == nullptr) {
-        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
-        return false;
-    }
-    auto v1_4_iface = V1_4::IPowerInterface::CastFrom(powerInterface);
+    auto v1_4_iface = V1_4::IPowerInterface::Get();
     if (v1_4_iface == nullptr) {
         POWER_HILOGE(COMP_SVC, "v1_4 interface is not supported, cannot force suspend ignore wakelock");
         return false;
@@ -159,6 +152,11 @@ bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& ta
         return false;
     }
     return true;
+#else
+    (void)tag;
+    POWER_HILOGE(COMP_SVC, "ForceSuspendIgnoringWakelock is only supported in cockpit mode");
+    return false;
+#endif
 }
 
 void SystemSuspendController::AllowAutoSleep()

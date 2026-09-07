@@ -67,7 +67,7 @@ interface OHOS.PowerMgr.IPowerMgr {
     void IsFoldScreenOnIpc([out] boolean screenOn);
     void IsCollaborationScreenOnIpc([out] boolean collaborationScreenOn);
     [oneway] void ForceSuspendDeviceIpc([in] long callTimeMs, [in] String apiVersion, [in] IPowerMgrAsync powerProxy);
-    void ForceSuspendDeviceIgnoringWakelockIpc([in] String suspendTag, [in] String apiVersion);
+    void ForceSuspendDeviceIgnoringWakelockIpc([in] String suspendTag);
     void RegisterPowerStateCallbackIpc([in] IPowerStateCallback powerCallback, [in] boolean isSync);
     void UnRegisterPowerStateCallbackIpc([in] IPowerStateCallback powerCallback);
 

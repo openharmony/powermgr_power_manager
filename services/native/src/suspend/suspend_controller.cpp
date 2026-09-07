@@ -831,12 +831,11 @@ void SuspendController::SetAutoSleep(SuspendDeviceType reason)
     }
 }
 
-void SuspendController::HandleForceSleep(SuspendDeviceType reason)
+bool SuspendController::PrepareForceSleep(SuspendDeviceType reason)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return;
+        return false;
     }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -850,31 +849,52 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 #endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasonBySuspendType(reason), true);
-    if (ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-        onForceSleep = true;
-        TriggerSyncSleepCallback(false);
-
-        FFRTTask task = [this, reason] {
-            if (stateMachine_->GetState() == PowerState::SLEEP) {
-                SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
-            } else {
-                POWER_HILOGE(FEATURE_SUSPEND, "Don't suspend, power state is not sleep");
-            }
-        };
-        if (ffrtTimer_ != nullptr) {
-            ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
-        } else {
-            POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
-                __func__, FORCE_SLEEP_DELAY_MS);
-        }
-    } else {
+    if (!ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
+        return false;
     }
+    onForceSleep = true;
+    return true;
+}
+
+bool SuspendController::ScheduleForceSleepTask(const FFRTTask& task)
+{
+    if (ffrtTimer_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
+            __func__, FORCE_SLEEP_DELAY_MS);
+        return false;
+    }
+    ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
+    return true;
+}
+
+void SuspendController::HandleForceSleep(SuspendDeviceType reason)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
+    if (!PrepareForceSleep(reason)) {
+        return;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
+    TriggerSyncSleepCallback(false);
+
+    FFRTTask task = [this] {
+        if (stateMachine_->GetState() == PowerState::SLEEP) {
+            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+        } else {
+            POWER_HILOGE(FEATURE_SUSPEND, "Don't suspend, power state is not sleep");
+        }
+    };
+    ScheduleForceSleepTask(task);
 }
 
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
+#ifndef POWER_MANAGER_ENABLE_COCKPIT_MODE
+    (void)reason;
+    (void)tag;
+    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock is only supported in cockpit mode");
+    return false;
+#else
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
         reason, tag.c_str());
     if (stateMachine_ == nullptr) {
@@ -882,51 +902,47 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return false;
     }
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pms != nullptr && pms->GetSuspendController() != nullptr) {
-        pms->GetSuspendController()->SetForceSleepingFlag(true);
-        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
-    } else {
-        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
-    }
-#endif
-
-    bool ret1 = stateMachine_->SetState(PowerState::INACTIVE,
+    bool retInactive = stateMachine_->SetState(PowerState::INACTIVE,
         stateMachine_->GetReasonBySuspendType(reason), true);
-    if (!ret1) {
+    if (!retInactive) {
         POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
         return false;
     }
-
-    bool ret2 = stateMachine_->SetState(PowerState::SLEEP,
-        stateMachine_->GetReasonBySuspendType(reason), true);
-    if (!ret2) {
-        POWER_HILOGW(FEATURE_SUSPEND, "SetState to SLEEP failed");
+    if (!PrepareForceSleep(reason)) {
         return false;
     }
-    onForceSleep = true;
-
     if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock HDI call");
+        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock");
         return false;
     }
 
-    if (tag == "mem") {
-        TriggerSyncSleepCallback(false);
-    } else if (tag == "ulsr") {
+    if (tag == "ulsr") {
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms != nullptr) {
-            pms->TriggerUlsrSyncCallback();
+        if (pms == nullptr || !pms->TriggerUlsrSyncCallback()) {
+            POWER_HILOGE(FEATURE_SUSPEND, "ULSR sync callback timeout or failed, skip force suspend");
+            return false;
         }
 #else
-        POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip callback");
+        POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip force suspend");
         return false;
 #endif
+    } else {
+        TriggerSyncSleepCallback(false);
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI force suspend ignoring wakelock, tag=%{public}s", tag.c_str());
-    return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "State changed, schedule force suspend ignoring wakelock, tag=%{public}s, delay=%{public}d",
+        tag.c_str(), FORCE_SLEEP_DELAY_MS);
+    FFRTTask task = [this, tag] {
+        if (stateMachine_ != nullptr && stateMachine_->GetState() == PowerState::SLEEP) {
+            SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+        } else {
+            POWER_HILOGE(FEATURE_SUSPEND, "Don't force suspend ignoring wakelock, power state is not sleep");
+        }
+    };
+    return ScheduleForceSleepTask(task);
+#endif
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)

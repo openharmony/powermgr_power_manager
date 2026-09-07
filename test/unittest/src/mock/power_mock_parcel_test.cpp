@@ -236,7 +236,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     sptrProxy->RebootDeviceIpc(" ", powerError);
     sptrProxy->ShutDownDeviceIpc(" ", powerError);
     sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
-    sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem", apiVersion);
+    sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem");
     int waitTime = 100;
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(waitTime));
     static std::vector<std::string> dumpArgs;

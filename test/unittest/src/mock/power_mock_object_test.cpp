@@ -224,7 +224,7 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
     sptrProxy->ShutDownDeviceIpc(" ", powerError);
     int32_t ret = sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
     EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
-    ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem", apiVersion);
+    ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem");
     EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
     POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest004 function end!");
 }

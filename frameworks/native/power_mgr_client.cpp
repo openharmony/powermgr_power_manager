@@ -381,7 +381,7 @@ PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
     return ret;
 }
 
-PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag, const std::string& apiVersion)
+PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -389,8 +389,7 @@ PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string
         POWER_HILOGE(FEATURE_SUSPEND, "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag, apiVersion);
+    int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag);
     if (result != static_cast<int32_t>(PowerErrors::ERR_OK)) {
         POWER_HILOGE(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, result=%{public}d", result);
     } else {

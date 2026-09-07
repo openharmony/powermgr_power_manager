@@ -53,6 +53,8 @@ declare_args() {
   power_manager_feature_lock_screen_support_multi_screen = false
   power_manager_feature_support_power_cli = false
   power_manager_feature_enable_long_time_dim = false
+  # Vehicle cockpit power policy: disable screen-coupled SuspendDevice/ForceSuspendDevice
+  # and enable ForceSuspendDeviceIgnoringWakelock (HDI V1_4, ignore running locks).
   power_manager_feature_cockpit_mode = false
 }
 

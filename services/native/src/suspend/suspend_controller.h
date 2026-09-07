@@ -118,6 +118,8 @@ private:
 #endif
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
+    bool PrepareForceSleep(SuspendDeviceType reason);
+    bool ScheduleForceSleepTask(const FFRTTask& task);
     void HandleForceSleep(SuspendDeviceType reason);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);

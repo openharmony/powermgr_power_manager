@@ -1581,25 +1581,25 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(
-    const std::string& suspendTag, const std::string& apiVersion)
+PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag)
 {
-    std::lock_guard lock(suspendMutex_);
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
     if (!Permission::IsSystem()) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
-    if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
 #ifndef POWER_MANAGER_ENABLE_COCKPIT_MODE
-    POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, this function is only supported in cockpit mode");
+    (void)suspendTag;
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "ForceSuspendDeviceIgnoringWakelock failed, this function is only supported in cockpit mode");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
-#endif
+#else
+    std::lock_guard lock(suspendMutex_);
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
     if (shutdownController_->IsShuttingDown()) {
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, skip ForceSuspendDeviceIgnoringWakelock");
         return PowerErrors::ERR_FAILURE;
@@ -1623,6 +1623,7 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(
     bool ret = suspendController_->HandleForceSuspendIgnoringWakelock(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, suspendTag);
     return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
+#endif
 }
 
 PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
