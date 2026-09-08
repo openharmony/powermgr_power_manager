@@ -2778,27 +2778,24 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
         "%{public}d, isScreenOn: %{public}d",
         static_cast<uint32_t>(screenId), curExternalScreenNum, isSwitchOpen, isScreenOn);
 
-    bool isUserUsingScreen = false;
-    if (isScreenOn) {
-        if (isSwitchOpen) {
-            isUserUsingScreen = true;
-        } else if (!isSwitchOpen && curExternalScreenNum > 0) {
-            isUserUsingScreen = true;
-        }
-    }
-    bool isNeedSuspend = false;
-    if (!isSwitchOpen && curExternalScreenNum == 0) {
-        // When switch is close and there's no external screen, we should suspend device
-        isNeedSuspend = true;
-    }
-    if (!isUserUsingScreen && isNeedSuspend) {
-        POWER_HILOGI(
-            FEATURE_SUSPEND, "[UL_POWER] Suspend device when user is not using screen");
-        suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
-    } else {
-        POWER_HILOGI(
-            FEATURE_SUSPEND, "[UL_POWER] Refresh device rather than suspend device when user is using screen");
+    if (isSwitchOpen && isScreenOn) {
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
+    } else if (!isSwitchOpen && isScreenOn) {
+        // When there's no external screen, we should suspend the device
+        if (curExternalScreenNum == 0) {
+            POWER_HILOGI(
+                FEATURE_SUSPEND, "[UL_POWER] Suspend device when external screen is disconnected and switch is closed");
+            suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
+        } else {
+            POWER_HILOGI(FEATURE_SUSPEND,
+                "[UL_POWER] Refresh device rather than suspend device when there's still external screen");
+            pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
+        }
+    } else{
+        // When screen is off, we should suspend the device
+        POWER_HILOGI(
+            FEATURE_SUSPEND, "[UL_POWER] Suspend device when screen is off");
+        suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     }
 }
 
