@@ -185,6 +185,8 @@ ohos_shared_library("powermgr_client") {
     "samgr:samgr_proxy",
   ]
 
+  version_script = "libpowermgr_client.map"
+
   subsystem_name = "powermgr"
   innerapi_tags = [
     "platformsdk",

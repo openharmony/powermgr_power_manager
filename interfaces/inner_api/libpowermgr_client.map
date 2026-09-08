@@ -1,0 +1,156 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ {
+    global:
+        extern "C++" {
+            OHOS::PowerMgr::PowerMgrClient::*;
+            OHOS::PowerMgr::ShutdownClient::*;
+            OHOS::PowerMgr::ClientLifeCycle::*;
+            OHOS::PowerMgr::RunningLock::*;
+            OHOS::PowerMgr::RunningLockInfo::*;
+            OHOS::PowerMgr::TakeOverInfo::*;
+            OHOS::PowerMgr::VectorPair::*;
+            OHOS::PowerMgr::PowerMgrClient::PowerMgrDeathRecipient::*;
+            OHOS::PowerMgr::ClientLifeCycle::LifeCycleRecipient::*;
+            # PowerMgrProxy: explicit methods (excluding delegator_)
+            OHOS::PowerMgr::PowerMgrProxy::PowerMgrProxy*;
+            OHOS::PowerMgr::PowerMgrProxy::~PowerMgrProxy*;
+            OHOS::PowerMgr::PowerMgrProxy::CreateRunningLockIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ForceRebootDeviceIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ForceSuspendDeviceIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::GetDeviceModeIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::GetPowerConfigIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::GetShutdownReasonIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::GetStateIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::HibernateIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsCollaborationScreenOnIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsFoldScreenOnIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsForceSleepingIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsRunningLockEnabledIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsRunningLockTypeSupportedIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsScreenOnIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsStandbyIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::IsUsedIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::LockIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::LockScreenAfterTimingOutIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::LockScreenAfterTimingOutWithAppidIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::OverrideScreenOffTimeIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ProxyRunningLockIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ProxyRunningLocksIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::QueryRunningLockListsIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RebootDeviceForDeprecatedIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RebootDeviceIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RefreshActivityIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterAsyncShutdownCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterPowerModeCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterPowerStateCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterRunningLockCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterRunningLockChangedCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterScreenStateCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterShutdownCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterSuspendTakeoverCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterSyncHibernateCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterSyncSleepCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RegisterUlsrCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ReleaseRunningLockIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ResetRunningLocksIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::RestoreScreenOffTimeIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetDeviceModeIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetDisplaySuspendIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetForceTimingOutIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetPowerConfigIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetPowerKeyFilteringStrategyIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetProxFilteringStrategyIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetSuspendTagIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ShellDumpIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ShutDownDeviceIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SuspendDeviceIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnLockIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterAsyncShutdownCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterPowerModeCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterPowerStateCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterRunningLockCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterRunningLockChangedCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterScreenStateCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterShutdownCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterSuspendTakeoverCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterSyncHibernateCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterSyncSleepCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UnRegisterUlsrCallbackIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::UpdateWorkSourceIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::WakeupDeviceAsyncIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::WakeupDeviceIpc*;
+            # PowerMgrProxyAsync: explicit methods (excluding delegator_)
+            OHOS::PowerMgr::PowerMgrProxyAsync::PowerMgrProxyAsync*;
+            OHOS::PowerMgr::PowerMgrProxyAsync::~PowerMgrProxyAsync*;
+            OHOS::PowerMgr::PowerMgrProxyAsync::SendAsyncReply*;
+            OHOS::PowerMgr::PowerMgrStubAsync::OnRemoteRequest*;
+            OHOS::PowerMgr::PowerMgrStubAsync::SendAsyncReply*;
+            OHOS::PowerMgr::PowerMgrStubAsync::WaitForAsyncReply*;
+            non-virtual?thunk?to?OHOS::PowerMgr::PowerMgrStubAsync::SendAsyncReply*;
+            # Callback Stub/Proxy: explicit methods (excluding delegator_)
+            OHOS::PowerMgr::UlsrCallbackStub::*;
+            OHOS::PowerMgr::UlsrCallbackProxy::OnAsyncWakeup*;
+            OHOS::PowerMgr::UlsrCallbackProxy::OnSyncUlsr*;
+            OHOS::PowerMgr::PowerModeCallbackStub::*;
+            OHOS::PowerMgr::PowerModeCallbackProxy::OnPowerModeChanged*;
+            OHOS::PowerMgr::SyncSleepCallbackStub::*;
+            OHOS::PowerMgr::SyncSleepCallbackProxy::OnSyncSleep*;
+            OHOS::PowerMgr::SyncSleepCallbackProxy::OnSyncWakeup*;
+            OHOS::PowerMgr::PowerStateCallbackStub::*;
+            OHOS::PowerMgr::PowerStateCallbackProxy::OnAsyncPowerStateChanged*;
+            OHOS::PowerMgr::PowerStateCallbackProxy::OnPowerStateChanged*;
+            OHOS::PowerMgr::ScreenOffPreCallbackStub::*;
+            OHOS::PowerMgr::ScreenOffPreCallbackProxy::OnScreenStateChanged*;
+            OHOS::PowerMgr::SyncShutdownCallbackStub::*;
+            OHOS::PowerMgr::SyncShutdownCallbackProxy::OnSyncShutdown*;
+            OHOS::PowerMgr::SyncShutdownCallbackProxy::OnSyncShutdownOrReboot*;
+            OHOS::PowerMgr::AsyncShutdownCallbackStub::*;
+            OHOS::PowerMgr::AsyncShutdownCallbackProxy::OnAsyncShutdown*;
+            OHOS::PowerMgr::AsyncShutdownCallbackProxy::OnAsyncShutdownOrReboot*;
+            OHOS::PowerMgr::SyncHibernateCallbackStub::*;
+            OHOS::PowerMgr::SyncHibernateCallbackProxy::OnSyncHibernate*;
+            OHOS::PowerMgr::SyncHibernateCallbackProxy::OnSyncWakeup*;
+            OHOS::PowerMgr::TakeOverSuspendCallbackStub::*;
+            OHOS::PowerMgr::TakeOverSuspendCallbackProxy::OnTakeOverSuspend*;
+            OHOS::PowerMgr::TakeOverShutdownCallbackStub::*;
+            OHOS::PowerMgr::TakeOverShutdownCallbackProxy::OnTakeOverHibernate*;
+            OHOS::PowerMgr::TakeOverShutdownCallbackProxy::OnTakeOverShutdown*;
+            OHOS::PowerMgr::PowerRunningLockCallbackStub::*;
+            OHOS::PowerMgr::PowerRunningLockCallbackProxy::HandleRunningLockMessage*;
+            OHOS::PowerMgr::RunningLockChangedCallbackStub::*;
+            OHOS::PowerMgr::RunningLockChangedCallbackProxy::OnAsyncScreenRunningLockChanged*;
+            OHOS::PowerMgr::RunningLockTokenStub::*;
+            OHOS::PowerMgr::RunningLockTokenProxy::RunningLockTokenProxy*;
+            OHOS::PowerMgr::RunningLockTokenProxy::~RunningLockTokenProxy*;
+            # vtable/VTT/construction vtable (RC02, keep exported)
+            vtable?for?OHOS::PowerMgr::*;
+            vtable?for?OHOS::BrokerDelegator*PowerMgr*;
+            vtable?for?OHOS::BrokerDelegatorBase;
+            vtable?for?OHOS::IRemoteStub*PowerMgr*;
+            vtable?for?std::__h::__function::__func*BrokerCreator*PowerMgr*;
+            vtable?for?std::__h::__shared_ptr_emplace*RunningLock*;
+            VTT?for?OHOS::PowerMgr::*;
+            construction?vtable?for?OHOS::PowerMgr::*;
+            construction?vtable?for?OHOS::IRemoteStub*PowerMgr*;
+            construction?vtable?for?OHOS::IRemoteObject*PowerMgr*;
+            construction?vtable?for?OHOS::Parcelable*PowerMgr*;
+            construction?vtable?for?OHOS::IRemoteProxy*PowerMgr*;
+            construction?vtable?for?OHOS::IPCObjectStub*PowerMgr*;
+        };
+    local:
+        *;
+};
