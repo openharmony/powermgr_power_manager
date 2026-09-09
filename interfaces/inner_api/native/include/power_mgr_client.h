@@ -159,7 +159,7 @@ public:
     /**
      * Forcibly suspend the device ignoring running locks. Cockpit-only inner API.
      * Constraints:
-     * - Only available when POWER_MANAGER_ENABLE_COCKPIT_MODE is enabled;
+     * - Only available when POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND is enabled;
      *   otherwise returns ERR_CAPABILITY_NOT_SUPPORTED.
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.
      * - suspendTag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.

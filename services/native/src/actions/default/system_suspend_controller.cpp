@@ -139,7 +139,7 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
 
 bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
 {
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
     std::lock_guard lock(mutex_);
     auto v1_4_iface = V1_4::IPowerInterface::Get();
     if (v1_4_iface == nullptr) {

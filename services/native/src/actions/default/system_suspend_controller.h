@@ -27,7 +27,7 @@
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
 #include "v1_3/ipower_interface.h"
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
 #include "v1_4/ipower_interface.h"
 #endif
 #include "ffrt_utils.h"

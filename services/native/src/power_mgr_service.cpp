@@ -1365,7 +1365,7 @@ PowerErrors PowerMgrService::SuspendDevice(
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
     POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, this function is not supported in cockpit mode");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
 #endif
@@ -1559,7 +1559,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
     POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, this function is not supported in cockpit mode");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
 #endif
@@ -1591,7 +1591,7 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::strin
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifndef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifndef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
     (void)suspendTag;
     POWER_HILOGI(FEATURE_SUSPEND,
         "ForceSuspendDeviceIgnoringWakelock failed, this function is only supported in cockpit mode");

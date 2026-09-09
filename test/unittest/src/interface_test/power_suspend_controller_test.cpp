@@ -732,7 +732,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Lev
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem"));
     g_service->suspendController_->stateMachine_ = backup;
 
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
     bool ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem");
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);

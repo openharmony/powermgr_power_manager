@@ -889,7 +889,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
-#ifndef POWER_MANAGER_ENABLE_COCKPIT_MODE
+#ifndef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
     (void)reason;
     (void)tag;
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock is only supported in cockpit mode");
