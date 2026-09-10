@@ -2791,7 +2791,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
                 "[UL_POWER] Refresh device rather than suspend device when there's still external screen");
             pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
         }
-    } else{
+    } else {
         // When screen is off, we should suspend the device
         POWER_HILOGI(
             FEATURE_SUSPEND, "[UL_POWER] Suspend device when screen is off");
