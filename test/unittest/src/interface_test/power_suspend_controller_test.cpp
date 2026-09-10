@@ -739,11 +739,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Lev
 
     ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "ulsr");
-#ifndef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    EXPECT_FALSE(ret);
-#else
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
-#endif
 #endif
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function end!");

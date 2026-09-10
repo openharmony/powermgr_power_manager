@@ -924,16 +924,11 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     if (tag == "ulsr") {
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms == nullptr) {
-            POWER_HILOGE(FEATURE_SUSPEND, "PowerMgrService is null, skip force suspend");
-            return false;
-        }
-        if (!pms->TriggerUlsrSyncCallback()) {
+        if (pms != nullptr && !pms->TriggerUlsrSyncCallback()) {
             POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout, continue force suspend");
         }
 #else
-        POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip force suspend");
-        return false;
+        POWER_HILOGI(FEATURE_SUSPEND, "ULSR callbacks not configured, continue force suspend");
 #endif
     } else {
         std::packaged_task<void()> callbackTask([this] { TriggerSyncSleepCallback(false); });
