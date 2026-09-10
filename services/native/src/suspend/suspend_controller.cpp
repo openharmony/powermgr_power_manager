@@ -15,6 +15,9 @@
 
 #include "suspend_controller.h"
 #include <atomic>
+#include <chrono>
+#include <future>
+#include <thread>
 #include <datetime_ex.h>
 #include <display_manager_lite.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
@@ -916,32 +919,39 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return false;
     }
 
+    // Wait for callbacks to finish, at most 5s; proceed immediately when they return.
+    constexpr int32_t FORCE_SUSPEND_CALLBACK_TIMEOUT_MS = 5000;
     if (tag == "ulsr") {
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms == nullptr || !pms->TriggerUlsrSyncCallback()) {
-            POWER_HILOGE(FEATURE_SUSPEND, "ULSR sync callback timeout or failed, skip force suspend");
+        if (pms == nullptr) {
+            POWER_HILOGE(FEATURE_SUSPEND, "PowerMgrService is null, skip force suspend");
             return false;
+        }
+        if (!pms->TriggerUlsrSyncCallback()) {
+            POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout, continue force suspend");
         }
 #else
         POWER_HILOGI(FEATURE_SUSPEND, "ULSR not supported, skip force suspend");
         return false;
 #endif
     } else {
-        TriggerSyncSleepCallback(false);
+        std::packaged_task<void()> callbackTask([this] { TriggerSyncSleepCallback(false); });
+        std::future<void> fut = callbackTask.get_future();
+        std::make_unique<std::thread>(std::move(callbackTask))->detach();
+        auto status = fut.wait_for(std::chrono::milliseconds(FORCE_SUSPEND_CALLBACK_TIMEOUT_MS));
+        if (status == std::future_status::timeout) {
+            POWER_HILOGW(FEATURE_SUSPEND, "Sync sleep callback timeout, continue force suspend");
+        }
     }
 
-    POWER_HILOGI(FEATURE_SUSPEND,
-        "State changed, schedule force suspend ignoring wakelock, tag=%{public}s, delay=%{public}d",
-        tag.c_str(), FORCE_SLEEP_DELAY_MS);
-    FFRTTask task = [this, tag] {
-        if (stateMachine_ != nullptr && stateMachine_->GetState() == PowerState::SLEEP) {
-            SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
-        } else {
-            POWER_HILOGE(FEATURE_SUSPEND, "Don't force suspend ignoring wakelock, power state is not sleep");
-        }
-    };
-    return ScheduleForceSleepTask(task);
+    if (stateMachine_->GetState() != PowerState::SLEEP) {
+        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI force suspend ignoring wakelock immediately, tag=%{public}s",
+        tag.c_str());
+    return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
 #endif
 }
 
