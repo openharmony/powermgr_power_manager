@@ -1467,8 +1467,10 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
-#ifndef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
+#if !defined(POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("ulsr");
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
 #else
     ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
@@ -1493,7 +1495,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
     g_isSystem = true;
     g_isPermissionGranted = true;
     PowerErrors ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
+#if defined(POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
 #else
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);

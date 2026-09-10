@@ -159,11 +159,11 @@ public:
     /**
      * Forcibly suspend the device ignoring running locks. Cockpit-only inner API.
      * Constraints:
-     * - Only available when POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND is enabled;
+     * - Only available when POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND and
+     *   POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG are both enabled;
      *   otherwise returns ERR_CAPABILITY_NOT_SUPPORTED.
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.
      * - suspendTag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.
-     *   This API does not require POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG.
      * - Running locks do not block this call.
      * - Requires Power HDI V1_4 ForceSuspendIgnoringWakelock; older HDI returns ERR_FAILURE.
      * - Do not use together with ForceSuspendDevice (that API returns 801 in cockpit).

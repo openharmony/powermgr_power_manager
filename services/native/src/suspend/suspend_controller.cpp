@@ -16,7 +16,6 @@
 #include "suspend_controller.h"
 #include <atomic>
 #include <chrono>
-#include <future>
 #include <thread>
 #include <datetime_ex.h>
 #include <display_manager_lite.h>
@@ -892,10 +891,9 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
-#ifndef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
+#ifndef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     (void)reason;
     (void)tag;
-    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock is only supported in cockpit mode");
     return false;
 #else
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
@@ -919,25 +917,13 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return false;
     }
 
-    // Wait for callbacks to finish, at most 5s; proceed immediately when they return.
-    constexpr int32_t FORCE_SUSPEND_CALLBACK_TIMEOUT_MS = 5000;
     if (tag == "ulsr") {
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms != nullptr && !pms->TriggerUlsrSyncCallback()) {
             POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout, continue force suspend");
         }
-#else
-        POWER_HILOGI(FEATURE_SUSPEND, "ULSR callbacks not configured, continue force suspend");
-#endif
     } else {
-        std::packaged_task<void()> callbackTask([this] { TriggerSyncSleepCallback(false); });
-        std::future<void> fut = callbackTask.get_future();
-        std::make_unique<std::thread>(std::move(callbackTask))->detach();
-        auto status = fut.wait_for(std::chrono::milliseconds(FORCE_SUSPEND_CALLBACK_TIMEOUT_MS));
-        if (status == std::future_status::timeout) {
-            POWER_HILOGW(FEATURE_SUSPEND, "Sync sleep callback timeout, continue force suspend");
-        }
+        TriggerSyncSleepCallback(false);
     }
 
     if (stateMachine_->GetState() != PowerState::SLEEP) {

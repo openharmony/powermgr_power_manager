@@ -1591,10 +1591,10 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::strin
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifndef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
+#if !defined(POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     (void)suspendTag;
     POWER_HILOGI(FEATURE_SUSPEND,
-        "ForceSuspendDeviceIgnoringWakelock failed, this function is only supported in cockpit mode");
+        "ForceSuspendDeviceIgnoringWakelock failed, cockpit force suspend or suspend-with-tag is not enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
 #else
     std::lock_guard lock(suspendMutex_);
