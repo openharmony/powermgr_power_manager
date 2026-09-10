@@ -891,11 +891,6 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
-#ifndef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    (void)reason;
-    (void)tag;
-    return false;
-#else
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
         reason, tag.c_str());
     if (stateMachine_ == nullptr) {
@@ -918,10 +913,12 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     }
 
     if (tag == "ulsr") {
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms != nullptr && !pms->TriggerUlsrSyncCallback()) {
             POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout, continue force suspend");
         }
+#endif
     } else {
         TriggerSyncSleepCallback(false);
     }
@@ -933,7 +930,6 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI force suspend ignoring wakelock immediately, tag=%{public}s",
         tag.c_str());
     return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
-#endif
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
