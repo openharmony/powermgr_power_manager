@@ -2794,7 +2794,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
     } else if (!isSwitchOpen && !isScreenOn && curExternalScreenNum == 0) {
         // When there's no external screen and switch is close, we should suspend the device, otherwise do nothing
         POWER_HILOGI(
-            FEATURE_SUSPEND, "[UL_POWER] Suspend device when screen is off");
+            FEATURE_SUSPEND, "[UL_POWER] Suspend device when external screen is disconnected, switch is closed and screen is off");
         suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
     }
 }
