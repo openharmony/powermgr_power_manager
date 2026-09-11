@@ -2781,7 +2781,7 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
     if (isSwitchOpen && isScreenOn) {
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
     } else if (!isSwitchOpen && isScreenOn) {
-        // When there's no external screen, we should suspend the device
+        // When there's no external screen and switch is close, we should suspend the device, otherwise do nothing
         if (curExternalScreenNum == 0) {
             POWER_HILOGI(
                 FEATURE_SUSPEND, "[UL_POWER] Suspend device when external screen is disconnected and switch is closed");
@@ -2791,8 +2791,8 @@ void PowerMgrService::ExternalScreenListener::OnDisconnect(uint64_t screenId)
                 "[UL_POWER] Refresh device rather than suspend device when there's still external screen");
             pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_CABLE, false);
         }
-    } else {
-        // When screen is off, we should suspend the device
+    } else if (!isSwitchOpen && !isScreenOn && curExternalScreenNum == 0) {
+        // When there's no external screen and switch is close, we should suspend the device, otherwise do nothing
         POWER_HILOGI(
             FEATURE_SUSPEND, "[UL_POWER] Suspend device when screen is off");
         suspendController->ExecSuspendMonitorByReason(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH);
