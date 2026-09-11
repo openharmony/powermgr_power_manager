@@ -833,11 +833,12 @@ void SuspendController::SetAutoSleep(SuspendDeviceType reason)
     }
 }
 
-bool SuspendController::PrepareForceSleep(SuspendDeviceType reason)
+void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 {
+    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
-        return false;
+        return;
     }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -851,42 +852,27 @@ bool SuspendController::PrepareForceSleep(SuspendDeviceType reason)
 #endif
     bool ret = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasonBySuspendType(reason), true);
-    if (!ret) {
-        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
-        return false;
-    }
-    onForceSleep = true;
-    return true;
-}
+    if (ret) {
+        POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
+        onForceSleep = true;
+        TriggerSyncSleepCallback(false);
 
-bool SuspendController::ScheduleForceSleepTask(const FFRTTask& task)
-{
-    if (ffrtTimer_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
-            __func__, FORCE_SLEEP_DELAY_MS);
-        return false;
-    }
-    ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
-    return true;
-}
-
-void SuspendController::HandleForceSleep(SuspendDeviceType reason)
-{
-    POWER_HILOGI(FEATURE_SUSPEND, "force suspend by reason=%{public}d", reason);
-    if (!PrepareForceSleep(reason)) {
-        return;
-    }
-    POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-    TriggerSyncSleepCallback(false);
-
-    FFRTTask task = [this] {
-        if (stateMachine_->GetState() == PowerState::SLEEP) {
-            SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+        FFRTTask task = [this, reason] {
+            if (stateMachine_->GetState() == PowerState::SLEEP) {
+                SystemSuspendController::GetInstance().Suspend([]() {}, []() {}, true);
+            } else {
+                POWER_HILOGE(FEATURE_SUSPEND, "Don't suspend, power state is not sleep");
+            }
+        };
+        if (ffrtTimer_ != nullptr) {
+            ffrtTimer_->SetTimer(TIMER_ID_SLEEP, task, FORCE_SLEEP_DELAY_MS);
         } else {
-            POWER_HILOGE(FEATURE_SUSPEND, "Don't suspend, power state is not sleep");
+            POWER_HILOGE(FEATURE_SUSPEND, "%{public}s: SetTimer(%{public}d) failed, timer is null",
+                __func__, FORCE_SLEEP_DELAY_MS);
         }
-    };
-    ScheduleForceSleepTask(task);
+    } else {
+        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
+    }
 }
 
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
@@ -904,9 +890,22 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
         return false;
     }
-    if (!PrepareForceSleep(reason)) {
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    auto pmsForceSleep = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pmsForceSleep != nullptr && pmsForceSleep->GetSuspendController() != nullptr) {
+        pmsForceSleep->GetSuspendController()->SetForceSleepingFlag(true);
+        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
+    } else {
+        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
+    }
+#endif
+    bool retSleep = stateMachine_->SetState(PowerState::SLEEP,
+        stateMachine_->GetReasonBySuspendType(reason), true);
+    if (!retSleep) {
+        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
         return false;
     }
+    onForceSleep = true;
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock");
         return false;
