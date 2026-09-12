@@ -76,7 +76,6 @@ public:
      * Suspend device and set screen off.
      *
      * @param reason The reason why will you suspend the device, such as timeout/powerkey/forcesuspend and so on.
-     * Returns ERR_CAPABILITY_NOT_SUPPORTED when force suspend ignoring wakelock is enabled.
      */
     PowerErrors SuspendDevice(SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION,
         bool suspendImmed = false, const std::string& apiVersion = "-1");
@@ -85,7 +84,6 @@ public:
      * Wake up the device and set the screen on.
      *
      * @param reason The reason for waking up the device, such as powerkey/plugin/application.
-     * Returns ERR_CAPABILITY_NOT_SUPPORTED when force suspend ignoring wakelock is enabled.
      */
     PowerErrors WakeupDevice(WakeupDeviceType reason = WakeupDeviceType::WAKEUP_DEVICE_APPLICATION,
         const std::string& detail = std::string("app call"), const std::string& apiVersion = "-1");
@@ -155,7 +153,6 @@ public:
 
     /**
      * Forcibly suspend the device into deepsleep, and return the suspend result.
-     * Returns ERR_CAPABILITY_NOT_SUPPORTED when force suspend ignoring wakelock is enabled.
      */
     PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
@@ -169,8 +166,7 @@ public:
      * - suspendTag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.
      * - Running locks do not block this call.
      * - Requires Power HDI V1_4 ForceSuspendIgnoringWakelock; older HDI returns ERR_FAILURE.
-     * - Do not use together with SuspendDevice/ForceSuspendDevice/WakeupDevice
-     *   (those APIs return 801 when this feature is on).
+     * - Do not use together with ForceSuspendDevice (that API returns 801 when this feature is on).
      */
     PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag);
 

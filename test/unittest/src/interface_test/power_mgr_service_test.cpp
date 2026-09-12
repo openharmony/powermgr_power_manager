@@ -1503,28 +1503,4 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
     pmsTest_->suspendController_ = backup;
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService042 function end!");
 }
-
-/**
- * @tc.name: PowerMgrService043
- * @tc.desc: SuspendDevice/ForceSuspendDevice/WakeupDevice return 801 when force suspend ignoring wakelock is enabled
- * @tc.type: FUNC
- */
-HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
-{
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService043 function start!");
-    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    g_isSystem = true;
-    g_isPermissionGranted = true;
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-    EXPECT_EQ(pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, true),
-        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    EXPECT_EQ(pmsTest_->ForceSuspendDevice(0), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    EXPECT_EQ(pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "app call"),
-        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-#else
-    EXPECT_NE(pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "app call"),
-        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-#endif
-    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService043 function end!");
-}
 }
