@@ -22,7 +22,7 @@ ohos_source_set("${powermgr_actions_target}") {
   }
   branch_protector_ret = "pac_ret"
 
-  public_deps =
+  deps =
       [ "${powermgr_actions_default_path}:${powermgr_actions_default_target}" ]
   subsystem_name = "powermgr"
   part_name = "${powermgr_part_name}"

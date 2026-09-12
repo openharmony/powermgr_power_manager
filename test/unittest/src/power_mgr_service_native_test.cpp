@@ -89,6 +89,13 @@ void PowerMgrServiceNativeTest::SetUp()
 void PowerMgrServiceNativeTest::TearDown()
 {
     g_pmsTest->OnStop();
+    auto stateMachine = g_pmsTest->GetPowerStateMachine();
+    if (stateMachine) {
+        if (stateMachine->ffrtTimer_) {
+            stateMachine->ffrtTimer_->CancelAllTimer();
+        }
+        ffrt::wait();
+    }
 }
 
 void PowerStateTestCallback::OnPowerStateChanged(PowerState state)
@@ -1264,5 +1271,59 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative042, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative042 end!");
 }
 #endif // POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+
+/**
+ * @tc.name: PowerMgrServiceNative043
+ * @tc.desc: Test RefreshActivityInner with callTimeMs!=0 is throttled within 100ms
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative043, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative043 start!");
+    auto stateMachine = g_pmsTest->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
+    EXPECT_CALL(*stateActionMock, SetDisplayState(::testing::_, ::testing::_))
+        .WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
+    stateMachine->mDeviceState_.lastRefreshActivityTime = 0;
+
+    bool ret1 = g_pmsTest->RefreshActivityInner(CALLTIMEMS, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    EXPECT_TRUE(ret1);
+
+    bool ret2 = g_pmsTest->RefreshActivityInner(CALLTIMEMS, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    EXPECT_FALSE(ret2);
+
+    stateMachine->stateAction_.reset();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative043 end!");
+}
+
+/**
+ * @tc.name: PowerMgrServiceNative044
+ * @tc.desc: Test RefreshActivityInner with callTimeMs==0 bypasses throttle
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative044, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative044 start!");
+    auto stateMachine = g_pmsTest->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
+    stateMachine->EnableMock(stateActionMock);
+    EXPECT_CALL(*stateActionMock, GetDisplayState()).WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
+    EXPECT_CALL(*stateActionMock, SetDisplayState(::testing::_, ::testing::_))
+        .WillRepeatedly(::testing::Return(ActionResult::SUCCESS));
+    stateMachine->mDeviceState_.lastRefreshActivityTime = 0;
+
+    bool ret1 = g_pmsTest->RefreshActivityInner(CALLTIMEMS, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    EXPECT_TRUE(ret1);
+
+    bool ret2 = g_pmsTest->RefreshActivityInner(0, UserActivityType::USER_ACTIVITY_TYPE_BUTTON, false);
+    EXPECT_TRUE(ret2);
+
+    stateMachine->stateAction_.reset();
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNative044 end!");
+}
 
 } // namespace

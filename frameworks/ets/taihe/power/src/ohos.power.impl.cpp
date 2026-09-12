@@ -183,6 +183,7 @@ void SetScreenOffTime(int64_t timeout)
         POWER_HILOGE(FEATURE_WAKEUP, "timeout is not right.");
         taihe::set_business_error(
             static_cast<int32_t>(PowerErrors::ERR_PARAM_INVALID), GetErrorMessage(PowerErrors::ERR_PARAM_INVALID));
+        return;
     }
 
     PowerErrors code;

@@ -77,6 +77,10 @@ void PowerMgrNotify::PublishEvents(int64_t eventTime, sptr<IntentWant> want)
 
 void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime, const std::string& reason)
 {
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(FEATURE_SUSPEND, "PublishScreenOffEvents is not supported under screen decoupling");
+    return;
+#else
     if (screenOffWant_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
@@ -87,10 +91,15 @@ void PowerMgrNotify::PublishScreenOffEvents(int64_t eventTime, const std::string
     screenOffWant_->SetParam("reason", reason);
     PublishEvents(eventTime, screenOffWant_);
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Publish event %{public}s done", screenOffWant_->GetAction().c_str());
+#endif
 }
 
 void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime, const std::string& reason)
 {
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    POWER_HILOGI(FEATURE_WAKEUP, "PublishScreenOnEvents is not supported under screen decoupling");
+    return;
+#else
     if (screenOnWant_ == nullptr) {
         POWER_HILOGE(COMP_SVC, "%{public}s: Invalid parameter", __func__);
         return;
@@ -101,6 +110,7 @@ void PowerMgrNotify::PublishScreenOnEvents(int64_t eventTime, const std::string&
     screenOnWant_->SetParam("reason", reason);
     PublishEvents(eventTime, screenOnWant_);
     POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Publish event %{public}s done", screenOnWant_->GetAction().c_str());
+#endif
 }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST

@@ -222,6 +222,8 @@ std::string PowerCliCommand::PowerErrorsToErrCode(PowerErrors err)
             return "ERR_USER_PARAM_INVALID";
         case PowerErrors::ERR_WRITE_OPERATION_FAILED:
             return "ERR_WRITE_OPERATION_FAILED";
+        case PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED:
+            return "ERR_CAPABILITY_NOT_SUPPORTED";
         default:
             return "ERR_UNKNOWN";
     }
@@ -254,6 +256,8 @@ std::string PowerCliCommand::PowerErrorsToString(PowerErrors err)
             return "User parameter value invalid";
         case PowerErrors::ERR_WRITE_OPERATION_FAILED:
             return "Write operation failed";
+        case PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED:
+            return "Capability not supported";
         default:
             return "Unknown error";
     }
@@ -277,6 +281,8 @@ std::string PowerCliCommand::GetSuggestion(PowerErrors err)
             return "Check the input parameters and refer to 'ohos-powerManager --help'";
         case PowerErrors::ERR_USER_PARAM_INVALID:
             return "Ensure parameter values are within the expected range";
+        case PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED:
+            return "Ensure this capability is supported on the current device";
         default:
             return "Run 'ohos-powerManager --help' for usage information";
     }

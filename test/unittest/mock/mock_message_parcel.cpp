@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "mock_parcel.h"
 #include "message_parcel.h"
 
 #include <sys/mman.h>
@@ -22,7 +23,21 @@
 
 namespace {
 static std::u16string g_interfaceTokenName {};
+static bool g_mockTokenResult = true;
+static bool g_useRuntimeToken = false;
 } // namespace
+
+void MockWriteInterfaceToken(bool result)
+{
+    g_mockTokenResult = result;
+    g_useRuntimeToken = true;
+}
+
+void ResetMockMessageParcel()
+{
+    g_useRuntimeToken = false;
+    g_interfaceTokenName.clear();
+}
 
 namespace OHOS {
 MessageParcel::MessageParcel()
@@ -106,6 +121,12 @@ bool MessageParcel::ContainFileDescriptors() const
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
 {
+    if (g_useRuntimeToken) {
+        if (g_mockTokenResult) {
+            g_interfaceTokenName = name;
+        }
+        return g_mockTokenResult;
+    }
 #ifdef MOCK_WRITE_INTERFACE_TOKEN_RETURN_TRUE
     g_interfaceTokenName = name;
     return true;

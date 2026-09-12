@@ -35,7 +35,9 @@ public:
         std::shared_ptr<ShutdownController>& shutdownController, std::shared_ptr<PowerStateMachine>& stateMachine);
     ~WakeupActionController();
     void Init();
-    bool ExecuteByGetReason();
+    void GetWakeupReason(std::string& reason);
+    WakeupAction GetWakeupAction(const std::string& reason) const;
+    bool ExecuteByGetReason(const std::string& reason);
     bool IsWakeupReasonConfigMatched();
 
 private:

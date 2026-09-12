@@ -36,6 +36,7 @@ enum class PowerErrors : int32_t {
     /** Input parameter value is not within expected range or valid values (value validation) */
     ERR_USER_PARAM_INVALID = 4900400,
     ERR_WRITE_OPERATION_FAILED = 4900601,
+    /** Capability not supported */
     ERR_CAPABILITY_NOT_SUPPORTED = 801,
 };
 

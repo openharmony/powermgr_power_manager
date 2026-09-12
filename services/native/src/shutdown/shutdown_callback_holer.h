@@ -31,9 +31,11 @@ public:
     void AddCallback(const sptr<IRemoteObject>& callback, ShutdownPriority priority);
     void RemoveCallback(const sptr<IRemoteObject>& callback);
 
+    std::set<sptr<IRemoteObject>> GetHighestPriorityCallbacks();
     std::set<sptr<IRemoteObject>> GetHighPriorityCallbacks();
     std::set<sptr<IRemoteObject>> GetDefaultPriorityCallbacks();
     std::set<sptr<IRemoteObject>> GetLowPriorityCallbacks();
+    std::set<sptr<IRemoteObject>> GetLowestPriorityCallbacks();
     std::pair<int32_t, int32_t> FindCallbackPidUid(const sptr<IRemoteObject>& callback);
 
 private:
@@ -42,9 +44,11 @@ private:
     void RemoveCallbackPidUid(const sptr<IRemoteObject>& callback);
 
     std::mutex mutex_;
+    std::set<sptr<IRemoteObject>> highestPriorityCallbacks_;
     std::set<sptr<IRemoteObject>> highPriorityCallbacks_;
     std::set<sptr<IRemoteObject>> defaultPriorityCallbacks_;
     std::set<sptr<IRemoteObject>> lowPriorityCallbacks_;
+    std::set<sptr<IRemoteObject>> lowestPriorityCallbacks_;
     std::map<sptr<IRemoteObject>, std::pair<int32_t, int32_t>> cachedRegister_;
 };
 } // namespace PowerMgr

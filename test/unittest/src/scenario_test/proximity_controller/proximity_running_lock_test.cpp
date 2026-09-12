@@ -149,6 +149,10 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest002, TestSize.Level1)
     auto stateMachine = g_pmsTest->GetPowerStateMachine();
     ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
     stateMachine->EnableMock(stateActionMock);
+    // restrict the order and let GetDisplayState return DISPLAY_ON before setting-off
+    ::testing::InSequence seq;
+    EXPECT_CALL(*stateActionMock, GetDisplayState())
+        .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
         .WillOnce(::testing::Return(ActionResult::SUCCESS));
     HoldProximityLock();
@@ -160,7 +164,13 @@ HWTEST_F(ProximityRunningLockTest, ProximityRunningLockTest002, TestSize.Level1)
     EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_ON, ::testing::_))
         .WillOnce(::testing::Return(ActionResult::FAILED));
     UnholdProximityLock();
-    ::testing::Mock::AllowLeak(stateActionMock);
+    // wait for all ffrt tasks to be done
+    if (stateMachine->ffrtTimer_) {
+        stateMachine->ffrtTimer_->CancelAllTimer();
+    }
+    ffrt::wait();
+    // then destruct the mock object
+    stateMachine->stateAction_.reset();
     POWER_HILOGI(LABEL_TEST, "ProximityRunningLockTest002 function end!");
 }
 } // namespace

@@ -56,6 +56,7 @@ ohos_source_set("powermgr_proxy") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   output_values = get_target_outputs(":powermgr_interface")
   sources = filter_include(output_values, [ "*_proxy.cpp" ])
   configs = [
@@ -84,6 +85,7 @@ ohos_source_set("powermgr_stub") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   output_values = get_target_outputs(":powermgr_interface")
   sources = filter_include(output_values, [ "*_stub.cpp" ])
   sources += [
@@ -121,6 +123,7 @@ ohos_source_set("powermgr_stub") {
 
 ohos_shared_library("powermgr_client") {
   branch_protector_ret = "pac_ret"
+  branch_protector_frt = "bti"
 
   sources = [
     "${powermgr_framework_native}/client_lifecycle.cpp",
@@ -181,6 +184,8 @@ ohos_shared_library("powermgr_client") {
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+
+  version_script = "libpowermgr_client.map"
 
   subsystem_name = "powermgr"
   innerapi_tags = [

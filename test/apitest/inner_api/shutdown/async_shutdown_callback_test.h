@@ -31,6 +31,12 @@ public:
         void OnAsyncShutdown() override;
     };
 
+    class HighestPriorityAsyncShutdownCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~HighestPriorityAsyncShutdownCallback() override = default;
+        void OnAsyncShutdown() override;
+    };
+
     class HighPriorityAsyncShutdownCallback : public AsyncShutdownCallbackStub {
     public:
         ~HighPriorityAsyncShutdownCallback() override = default;
@@ -40,6 +46,12 @@ public:
     class LowPriorityAsyncShutdownCallback : public AsyncShutdownCallbackStub {
     public:
         ~LowPriorityAsyncShutdownCallback() override = default;
+        void OnAsyncShutdown() override;
+    };
+
+    class LowestPriorityAsyncShutdownCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~LowestPriorityAsyncShutdownCallback() override = default;
         void OnAsyncShutdown() override;
     };
 
@@ -54,6 +66,12 @@ public:
         void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
 
+    class HighestPriorityAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~HighestPriorityAsyncShutdownOrRebootCallback() override = default;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
+    };
+
     class HighPriorityAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
     public:
         ~HighPriorityAsyncShutdownOrRebootCallback() override = default;
@@ -63,6 +81,12 @@ public:
     class LowPriorityAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
     public:
         ~LowPriorityAsyncShutdownOrRebootCallback() override = default;
+        void OnAsyncShutdownOrReboot(bool isReboot) override;
+    };
+
+    class LowestPriorityAsyncShutdownOrRebootCallback : public AsyncShutdownCallbackStub {
+    public:
+        ~LowestPriorityAsyncShutdownOrRebootCallback() override = default;
         void OnAsyncShutdownOrReboot(bool isReboot) override;
     };
 

@@ -149,6 +149,9 @@ void PowerStateMachine::InitTransitMap()
     std::vector<PowerState> dim { PowerState::SLEEP };
     std::vector<PowerState> sleep { PowerState::DIM };
 
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    awake.push_back(PowerState::DIM);
+#endif
     forbidMap_.emplace(PowerState::AWAKE, std::set<PowerState>(awake.begin(), awake.end()));
     forbidMap_.emplace(PowerState::INACTIVE, std::set<PowerState>(inactive.begin(), inactive.end()));
     forbidMap_.emplace(PowerState::DIM, std::set<PowerState>(dim.begin(), dim.end()));
@@ -156,7 +159,11 @@ void PowerStateMachine::InitTransitMap()
 #ifdef POWER_MANAGER_POWER_ENABLE_S4
     forbidMap_.emplace(PowerState::HIBERNATE, std::set<PowerState>(hibernate.begin(), hibernate.end()));
 #endif
+    InitAllowMapByReason();
+}
 
+void PowerStateMachine::InitAllowMapByReason()
+{
     allowMapByReason_.insert({
         {
             StateChangeReason::STATE_CHANGE_REASON_REFRESH,
@@ -278,6 +285,10 @@ void PowerStateMachine::StartSleepTimer(PowerState from)
 
 void PowerStateMachine::InitState()
 {
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_INIT, true);
+    return;
+#endif
     POWER_HILOGI(FEATURE_POWER_STATE, "Init power state");
     if (IsScreenOn() ||
         switchAction_->HandleSwitchAction(SwitchActionType::IS_SCREEN_ON) == SwitchActionRet::IS_SCREEN_ON) {
@@ -648,7 +659,7 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
             PowerUtils::GetReasonTypeString(reason).c_str());
         CancelDelayTimer(PowerStateMachine::CHECK_PRE_BRIGHT_AUTH_TIMEOUT_MSG);
     }
-    SetState(PowerState::AWAKE, reason, true);
+    bool ret = SetState(PowerState::AWAKE, reason, true);
 
     switch (type) {
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT: {
@@ -656,7 +667,7 @@ void PowerStateMachine::HandlePreBrightWakeUp(int64_t callTimeMs, WakeupDeviceTy
         }
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_SUCCESS: // fall through
         case WakeupDeviceType::WAKEUP_DEVICE_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON:
-            if (suspendController != nullptr) {
+            if (suspendController != nullptr && ret) {
                 POWER_HILOGD(FEATURE_WAKEUP, "HandlePreBrightWakeUp. TriggerSyncSleepCallback start.");
                 suspendController->TriggerSyncSleepCallback(true);
             } else {
@@ -769,9 +780,11 @@ void PowerStateMachine::RefreshActivityInner(
     // Check the screen state
     if (IsScreenOn() && !IsSettingState(PowerState::INACTIVE)) {
         if (stateAction_ != nullptr) {
+#ifndef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
             stateAction_->RefreshActivity(callTimeMs, type,
                 needChangeBacklight ? REFRESH_ACTIVITY_NEED_CHANGE_LIGHTS : REFRESH_ACTIVITY_NO_CHANGE_LIGHTS);
             mDeviceState_.screenState.lastOnTime = GetTickCount();
+#endif
         }
         if (GetState() == PowerState::DIM || IsSettingState(PowerState::DIM)) {
             // Inactive to Awake will be blocked for this reason in CanTransitTo()
@@ -919,6 +932,7 @@ bool PowerStateMachine::PrepareHibernate(bool clearMemory)
     hibernateController->PreHibernate();
     POWER_HILOGI(FEATURE_SUSPEND, "Hibernate sync callback end.");
 
+    SystemSuspendController::GetInstance().Wakeup(); // stop suspend loop
     if (!SetState(PowerState::HIBERNATE, StateChangeReason::STATE_CHANGE_REASON_SYSTEM, true)) {
         POWER_HILOGE(FEATURE_POWER_STATE, "failed to set state to hibernate.");
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
@@ -1077,6 +1091,9 @@ bool PowerStateMachine::HibernateInner(bool clearMemory, const std::string& reas
 
 bool PowerStateMachine::IsScreenOn(bool needPrintLog)
 {
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    return GetState() == PowerState::AWAKE;
+#endif
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
     bool isScreenOn {false};
     // When there's external screen, the original way to get screen state is inaccurate,
@@ -1105,6 +1122,11 @@ bool PowerStateMachine::IsScreenOnAcqLock()
     DisplayState state = stateAction_->GetDisplayState();
     bool isScreenOn = (state == DisplayState::DISPLAY_ON) || (state == DisplayState::DISPLAY_DIM);
     return isScreenOn;
+}
+
+bool PowerStateMachine::IsStateTurningAwake() const
+{
+    return settingOnStateFlag_;
 }
 
 bool PowerStateMachine::IsFoldScreenOn()
@@ -1481,6 +1503,7 @@ void PowerStateMachine::CancelDelayTimer(int32_t event)
 
 void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
 {
+#ifndef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
     // change the flag to notify the thread which is setting DIM
     int64_t expectedFlag = static_cast<int64_t>(PowerState::DIM);
     settingStateFlag_.compare_exchange_strong(
@@ -1502,6 +1525,7 @@ void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
     if (needPrintLog) {
         POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}" PRId64, displayOffTime);
     }
+#endif
 }
 
 void PowerStateMachine::PublishRefreshEvent()
@@ -1848,6 +1872,16 @@ void PowerStateMachine::DisplayOffTimeUpdateFunc()
 
     int64_t systemTime = stateMachine->GetDisplayOffTime();
     int64_t settingTime = pms->GetSettingDisplayOffTime(systemTime);
+#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+    if (stateMachine->isScreenOffTimeOverride_) {
+        POWER_HILOGI(FEATURE_POWER_STATE,
+            "setting update display off time skipped during override, "
+            "%{public}" PRId64 " -> %{public}" PRId64 ", effective=%{public}" PRId64 "",
+            g_beforeOverrideTime, settingTime, systemTime);
+        g_beforeOverrideTime = settingTime;
+        return;
+    }
+#endif
     if (settingTime == systemTime) {
         POWER_HILOGI(FEATURE_POWER_STATE, "setting display off time %{public}" PRId64 " already worked", settingTime);
         return;
@@ -2108,6 +2142,7 @@ bool PowerStateMachine::HandlePreBrightState(PowerState targetState, StateChange
         } else {
             POWER_HILOGW(
                 FEATURE_POWER_STATE, "prebright first stage is not triggered, skip handling prebright auth result");
+            SetAutoSuspend(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, 0);
         }
     } else {
         if (targetState != PowerState::SLEEP && curState == PowerStateMachine::PRE_BRIGHT_STARTED) {

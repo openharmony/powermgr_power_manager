@@ -20,6 +20,14 @@ namespace OHOS {
 namespace PowerMgr {
 /**
  * Shutdown or reboot priority.
+ *
+ * Callbacks are triggered from highest to lowest priority.
+ *
+ * NOTE: HIGHEST and LOWEST are reserved for system-critical internal users
+ * only. Normal users MUST use LOW / DEFAULT / HIGH. The reserved priorities
+ * exist so that platform-level bookkeeping (e.g. last-resort persistence,
+ * final teardown) can be ordered strictly before/after all user callbacks
+ * without overloading the existing three buckets.
  */
 enum class ShutdownPriority : uint32_t {
     /** Low priority */
@@ -28,6 +36,16 @@ enum class ShutdownPriority : uint32_t {
     DEFAULT,
     /** High priority */
     HIGH,
+    /**
+     * Highest priority. Runs before HIGH.
+     * Reserved for internal/system-critical use only. NOT for normal users.
+     */
+    HIGHEST,
+    /**
+     * Lowest priority. Runs after LOW.
+     * Reserved for internal/system-critical use only. NOT for normal users.
+     */
+    LOWEST,
 };
 } // namespace PowerMgr
 } // namespace OHOS

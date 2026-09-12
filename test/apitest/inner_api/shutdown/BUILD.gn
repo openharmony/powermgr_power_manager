@@ -63,7 +63,6 @@ deps_ex = [
   "googletest:gmock_main",
   "googletest:gtest_main",
   "libxml2:libxml2",
-  "power_manager:power_ffrt",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
@@ -80,8 +79,14 @@ if (power_manager_feature_report_screenoff_invalid) {
   defines += [ "POWER_MANAGER_REPORT_SCREENOFF_INVALID" ]
 }
 
+screen_saver_deps = []
+if (power_manager_feature_screen_saver) {
+  screen_saver_deps += [ "${powermgr_utils_path}/setting:power_setting" ]
+}
+
 ohos_unittest("takeover_shutdown_callback_test") {
   sources = [ "takeover_shutdown_callback_test.cpp" ]
+  include_dirs = [ "${powermgr_framework_native}" ]
   configs = [
     "${powermgr_utils_path}:utils_config",
     ":module_private_config",
@@ -90,7 +95,9 @@ ohos_unittest("takeover_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   module_out_path = module_output_path
 }
@@ -105,7 +112,9 @@ ohos_unittest("async_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   module_out_path = module_output_path
 }
@@ -120,7 +129,9 @@ ohos_unittest("sync_shutdown_callback_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   module_out_path = module_output_path
 }
@@ -135,7 +146,9 @@ ohos_unittest("shutdown_controller_test") {
   deps = [
     "${powermgr_inner_api}:powermgr_client",
     "${powermgr_service_path}:powermgrservice",
+    "${powermgr_utils_path}/ffrt:power_ffrt",
   ]
+  deps += screen_saver_deps
   external_deps = deps_ex
   if (has_hiviewdfx_hisysevent_part) {
     external_deps += [ "hisysevent:libhisysevent" ]

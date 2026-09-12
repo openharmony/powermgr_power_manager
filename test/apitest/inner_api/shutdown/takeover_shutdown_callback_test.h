@@ -31,6 +31,12 @@ public:
         bool OnTakeOverShutdown(const TakeOverInfo& info) override;
     };
 
+    class HighestPriorityTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
+    public:
+        ~HighestPriorityTakeOverShutdownCallback() override = default;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
+    };
+
     class HighPriorityTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
         ~HighPriorityTakeOverShutdownCallback() override = default;
@@ -40,6 +46,12 @@ public:
     class LowPriorityTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
     public:
         ~LowPriorityTakeOverShutdownCallback() override = default;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override;
+    };
+
+    class LowestPriorityTakeOverShutdownCallback : public TakeOverShutdownCallbackStub {
+    public:
+        ~LowestPriorityTakeOverShutdownCallback() override = default;
         bool OnTakeOverShutdown(const TakeOverInfo& info) override;
     };
 

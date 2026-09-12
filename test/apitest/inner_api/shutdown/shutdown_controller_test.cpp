@@ -63,6 +63,30 @@ public:
             return true;
         }
     };
+    class AlwaysTakeOverCallback : public TakeOverShutdownCallbackStub {
+    public:
+        ~AlwaysTakeOverCallback() override = default;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override
+        {
+            return true;
+        }
+        bool OnTakeOverHibernate(const TakeOverInfo& info) override
+        {
+            return true;
+        }
+    };
+    class NeverTakeOverCallback : public TakeOverShutdownCallbackStub {
+    public:
+        ~NeverTakeOverCallback() override = default;
+        bool OnTakeOverShutdown(const TakeOverInfo& info) override
+        {
+            return false;
+        }
+        bool OnTakeOverHibernate(const TakeOverInfo& info) override
+        {
+            return false;
+        }
+    };
 };
 
 namespace {
@@ -159,6 +183,106 @@ HWTEST_F(ShutDownControllerTest, ShutDownControllerTest004, TestSize.Level0)
     EXPECT_TRUE(getReasonSecond ==
         "reasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonfirstreasonf");
     POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest004 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest005
+ * @tc.desc: Test HIGHEST priority takes over in shutdown path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest005, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest005 function start!");
+    sptr<ITakeOverShutdownCallback> callback = sptr<AlwaysTakeOverCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(callback, ShutdownPriority::HIGHEST);
+    bool ret = controller.TriggerTakeOverShutdownCallback(TakeOverInfo("test", true));
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest005 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest006
+ * @tc.desc: Test LOWEST priority takes over in shutdown path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest006, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest006 function start!");
+    sptr<ITakeOverShutdownCallback> callback = sptr<AlwaysTakeOverCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(callback, ShutdownPriority::LOWEST);
+    bool ret = controller.TriggerTakeOverShutdownCallback(TakeOverInfo("test", true));
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest006 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest007
+ * @tc.desc: Test HIGHEST does not take over, HIGH takes over in shutdown path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest007, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest007 function start!");
+    sptr<ITakeOverShutdownCallback> highestCb = sptr<NeverTakeOverCallback>::MakeSptr();
+    sptr<ITakeOverShutdownCallback> highCb = sptr<AlwaysTakeOverCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(highestCb, ShutdownPriority::HIGHEST);
+    controller.AddCallback(highCb, ShutdownPriority::HIGH);
+    bool ret = controller.TriggerTakeOverShutdownCallback(TakeOverInfo("test", true));
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest007 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest008
+ * @tc.desc: Test HIGHEST priority takes over in hibernate path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest008, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest008 function start!");
+    sptr<ITakeOverShutdownCallback> callback = sptr<AlwaysTakeOverCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(callback, ShutdownPriority::HIGHEST);
+    bool ret = controller.TriggerTakeOverHibernateCallback(TakeOverInfo("test", true));
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest008 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest009
+ * @tc.desc: Test LOWEST priority takes over in hibernate path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest009, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest009 function start!");
+    sptr<ITakeOverShutdownCallback> callback = sptr<AlwaysTakeOverCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(callback, ShutdownPriority::LOWEST);
+    bool ret = controller.TriggerTakeOverHibernateCallback(TakeOverInfo("test", true));
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest009 function end!");
+}
+
+/**
+ * @tc.name: ShutDownControllerTest010
+ * @tc.desc: Test HIGHEST does not take over, HIGH takes over in hibernate path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShutDownControllerTest, ShutDownControllerTest010, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest010 function start!");
+    sptr<ITakeOverShutdownCallback> highestCb = sptr<NeverTakeOverCallback>::MakeSptr();
+    sptr<ITakeOverShutdownCallback> highCb = sptr<AlwaysTakeOverCallback>::MakeSptr();
+    ShutdownController controller;
+    controller.AddCallback(highestCb, ShutdownPriority::HIGHEST);
+    controller.AddCallback(highCb, ShutdownPriority::HIGH);
+    bool ret = controller.TriggerTakeOverHibernateCallback(TakeOverInfo("test", true));
+    EXPECT_TRUE(ret);
+    POWER_HILOGI(LABEL_TEST, "ShutDownControllerTest010 function end!");
 }
 } // namespace
 } // namespace OHOS::PowerMgr

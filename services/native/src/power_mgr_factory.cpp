@@ -18,6 +18,9 @@
 #include "device_power_action.h"
 #ifdef HAS_DISPLAY_MANAGER_PART
 #include "display/device_state_action.h"
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+#include "display/decoupled_device_state_action.h"
+#endif
 #else
 #include "display/default_device_state_action.h"
 #endif
@@ -34,7 +37,9 @@ unique_ptr<IDevicePowerAction> PowerMgrFactory::GetDevicePowerAction()
 
 shared_ptr<IDeviceStateAction> PowerMgrFactory::GetDeviceStateAction()
 {
-#ifdef HAS_DISPLAY_MANAGER_PART
+#ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
+    return make_shared<DecoupledDeviceStateAction>();
+#elif defined(HAS_DISPLAY_MANAGER_PART)
     return make_shared<DeviceStateAction>();
 #else
     return make_shared<DefaultDeviceStateAction>();
