@@ -63,7 +63,6 @@ ohos_source_set("${powermgr_actions_default_target}") {
     "c_utils:utils",
     "drivers_interface_power:libpower_proxy_1.2",
     "drivers_interface_power:libpower_proxy_1.3",
-    "drivers_interface_power:libpower_proxy_1.4",
     "ffrt:libffrt",
     "hdf_core:libhdf_utils",
     "hdf_core:libhdi",
@@ -76,6 +75,10 @@ ohos_source_set("${powermgr_actions_default_target}") {
 
   if (has_hiviewdfx_hisysevent_part) {
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (power_manager_feature_enable_cockpit_force_suspend) {
+    external_deps += [ "drivers_interface_power:libpower_proxy_1.4" ]
   }
 
   if (power_manager_feature_poweroff_charge && defined(global_parts_info) &&
