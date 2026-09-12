@@ -1358,10 +1358,7 @@ PowerErrors PowerMgrService::SuspendDevice(
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
-    POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, this function is not supported in cockpit mode");
-    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
-#endif
+
 #ifdef POWER_MANAGER_ENABLE_WATCH_BOOT_COMPLETED
     if (isBootCompleted_ == false) {
         POWER_HILOGE(FEATURE_SUSPEND, "SuspendDevice failed, not boot completed, pid: %{public}d, uid: %{public}d",
@@ -1370,9 +1367,9 @@ PowerErrors PowerMgrService::SuspendDevice(
     }
 #endif
 
-    if (shutdownController_->IsShuttingDown()) {
+    if (IsCockpitLegacySuspendDenied() || shutdownController_->IsShuttingDown()) {
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
-        return PowerErrors::ERR_OK;
+        return IsCockpitLegacySuspendDenied() ? PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED : PowerErrors::ERR_OK;
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     powerStateMachine_->ReportSuspendStart(uid, static_cast<int32_t>(reason), false);
@@ -1568,13 +1565,9 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
-    POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, this function is not supported in cockpit mode");
-    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
-#endif
-    if (shutdownController_->IsShuttingDown()) {
+    if (IsCockpitLegacySuspendDenied() || shutdownController_->IsShuttingDown()) {
         POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, can't force suspend");
-        return PowerErrors::ERR_FAILURE;
+        return IsCockpitLegacySuspendDenied() ? PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED : PowerErrors::ERR_FAILURE;
     }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     powerStateMachine_->ReportSuspendStart(
@@ -1596,51 +1589,6 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
 #endif
     powerStateMachine_->ForceSuspendDeviceInner(pid, callTimeMs);
     return PowerErrors::ERR_OK;
-}
-
-PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag)
-{
-    if (!Permission::IsSystem()) {
-        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, System permission intercept");
-        return PowerErrors::ERR_SYSTEM_API_DENIED;
-    }
-    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
-        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
-        return PowerErrors::ERR_PERMISSION_DENIED;
-    }
-#if !defined(POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
-    (void)suspendTag;
-    POWER_HILOGI(FEATURE_SUSPEND,
-        "ForceSuspendDeviceIgnoringWakelock failed, cockpit force suspend or suspend-with-tag is not enabled");
-    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
-#else
-    std::lock_guard lock(suspendMutex_);
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (shutdownController_->IsShuttingDown()) {
-        POWER_HILOGI(FEATURE_SUSPEND, "System is shutting down, skip ForceSuspendDeviceIgnoringWakelock");
-        return PowerErrors::ERR_FAILURE;
-    }
-    POWER_HILOGI(FEATURE_SUSPEND,
-        "[UL_POWER] Try to force suspend ignoring wakelock, pid=%{public}d, uid=%{public}d, tag=%{public}s",
-        pid, uid, suspendTag.c_str());
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    if (suspendController_) {
-        suspendController_->StopSleep();
-    }
-#endif
-#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
-    powerStateMachine_->ReportSuspendStart(
-        uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
-#endif
-    if (suspendController_ == nullptr) {
-        POWER_HILOGE(FEATURE_SUSPEND, "SuspendController is null");
-        return PowerErrors::ERR_FAILURE;
-    }
-    bool ret = suspendController_->HandleForceSuspendIgnoringWakelock(
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, suspendTag);
-    return ret ? PowerErrors::ERR_OK : PowerErrors::ERR_FAILURE;
-#endif
 }
 
 PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)

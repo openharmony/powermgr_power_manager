@@ -62,6 +62,7 @@ ohos_shared_library("powermgrservice") {
     "native/src/power_mgr_factory.cpp",
     "native/src/power_mgr_notify.cpp",
     "native/src/power_mgr_service.cpp",
+    "native/src/power_mgr_service_force_suspend.cpp",
     "native/src/power_mgr_service_ipc_adapter.cpp",
     "native/src/power_mode_module.cpp",
     "native/src/power_mode_policy.cpp",

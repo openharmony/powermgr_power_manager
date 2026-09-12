@@ -411,6 +411,7 @@ private:
     };
 
     bool Init();
+    bool IsCockpitLegacySuspendDenied() const;
     bool PowerStateMachineInit();
     void OnAddSystemAbilityInner(int32_t systemAbilityId, const std::string& deviceId);
     std::string GetBundleNameByUid(const int32_t uid);
