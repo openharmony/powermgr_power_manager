@@ -49,6 +49,7 @@
 #ifdef POWER_MANAGER_SCREEN_SAVER
 #include "power_screen_saver.h"
 #endif
+#include "param_cacher.h"
 
 namespace OHOS {
 namespace PowerMgr {

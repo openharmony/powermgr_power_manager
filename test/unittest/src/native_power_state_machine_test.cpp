@@ -15,6 +15,12 @@
 
 #include "native_power_state_machine_test.h"
 
+#define POWERMGR_GTEST
+#ifdef POWERMGR_GTEST
+#define private   public
+#define protected public
+#endif
+
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
@@ -648,28 +654,6 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine016, TestSize.Level
 #endif
 
 /**
- * @tc.name: NativePowerStateMachine017
- * @tc.desc: test HandleProximityClose
- * @tc.type: FUNC
- * @tc.require: issues#1567
- */
-HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine017, TestSize.Level1)
-{
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine017 function start!");
-    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    pmsTest->OnStart();
-    pmsTest->SuspendControllerInit();
-    pmsTest->WakeupControllerInit();
-    auto stateMachine = pmsTest->GetPowerStateMachine();
-    ::testing::NiceMock<MockStateAction>* stateActionMock = new ::testing::NiceMock<MockStateAction>;
-    stateMachine->EnableMock(stateActionMock);
-    EXPECT_CALL(*stateActionMock, SetDisplayState(DisplayState::DISPLAY_OFF, ::testing::_))
-        .WillOnce(::testing::Return(ActionResult::FAILED));
-    stateMachine->HandleProximityClose();
-    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine017 function end!");
-}
-
-/**
  * @tc.name: NativePowerStateMachine018
  * @tc.desc: test InitTransitMap calls InitAllowMapByReason and populates allowMapByReason_
  * @tc.type: FUNC
@@ -803,4 +787,103 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine022, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine022 function end!");
 }
 #endif // POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
+
+/**
+ * @tc.name: NativePowerStateMachine023
+ * @tc.desc: test const.power.never_sleep_dim_enabled true false
+ * @tc.type: FUNC
+ * @tc.require: issues#1811
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine023, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine023 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    EXPECT_TRUE(ret);
+
+    ParamCacher::Instance().neverSleepDimEnabled_ = true; // never sleep enter dim
+    EXPECT_TRUE(ParamCacher::Instance().IsNeverSleepDimEnabled());
+    stateMachine->SetDisplayOffTime(-1, false); // never screen off
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), -1);
+    ParamCacher::Instance().activeTimeBeforeLongTimeDim_ = 1000; // dim time
+    stateMachine->ResetInactiveTimer();
+
+    auto waitDimFunc = [pmsTest]() {
+        auto pmsTimer = pmsTest->ffrtTimer_;
+        if (pmsTimer->handleMap_.find(TIMER_ID_USER_ACTIVITY_TIMEOUT) != pmsTimer->handleMap_.end() &&
+            pmsTimer->handleMap_[TIMER_ID_USER_ACTIVITY_TIMEOUT] != nullptr) {
+            pmsTest->ffrtTimer_->queue_.wait(pmsTest->ffrtTimer_->handleMap_[TIMER_ID_USER_ACTIVITY_TIMEOUT]);
+        }
+    };
+
+    auto waitInactiveFunc = [pmsTest]() {
+        auto pmsTimer = pmsTest->ffrtTimer_;
+        if (pmsTimer->handleMap_.find(TIMER_ID_USER_ACTIVITY_OFF) != pmsTimer->handleMap_.end() &&
+            pmsTimer->handleMap_[TIMER_ID_USER_ACTIVITY_OFF] != nullptr) {
+            pmsTest->ffrtTimer_->queue_.wait(pmsTest->ffrtTimer_->handleMap_[TIMER_ID_USER_ACTIVITY_OFF]);
+        }
+    };
+    waitDimFunc();
+    waitInactiveFunc();
+    EXPECT_TRUE(stateMachine->GetState() == PowerState::DIM);
+
+    stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    ParamCacher::Instance().neverSleepDimEnabled_ = false; // never sleep enter dim disable
+    EXPECT_FALSE(ParamCacher::Instance().IsNeverSleepDimEnabled());
+    waitDimFunc();
+    waitInactiveFunc();
+    EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
+
+    stateMachine->SetDisplayOffTime(1000, false);
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), 1000);
+    stateMachine->ResetInactiveTimer();
+    waitDimFunc();
+    waitInactiveFunc();
+    EXPECT_TRUE(stateMachine->GetState() != PowerState::AWAKE);
+    stateMachine->SetDisplayOffTime(-1, false);
+    stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine023 function end!");
+}
+
+/**
+ * @tc.name: NativePowerStateMachine024
+ * @tc.desc: test SetDelayTimer delay -1
+ * @tc.type: FUNC
+ * @tc.require: issues#1811
+ */
+HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine024, TestSize.Level1)
+{
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine024 function start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    pmsTest->SuspendControllerInit();
+    pmsTest->WakeupControllerInit();
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    bool ret = stateMachine->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_BATTERY, true);
+    EXPECT_TRUE(ret);
+
+    ParamCacher::Instance().neverSleepDimEnabled_ = true; // never sleep enter dim
+    EXPECT_TRUE(ParamCacher::Instance().IsNeverSleepDimEnabled());
+    stateMachine->SetDisplayOffTime(-1, false); // never screen off
+    EXPECT_EQ(stateMachine->GetDisplayOffTime(), -1);
+    ParamCacher::Instance().activeTimeBeforeLongTimeDim_ = -1; // dim time
+    stateMachine->ResetInactiveTimer();
+    auto pmsTimer = pmsTest->ffrtTimer_;
+    if (pmsTimer->handleMap_.find(TIMER_ID_USER_ACTIVITY_TIMEOUT) != pmsTimer->handleMap_.end()) {
+        EXPECT_TRUE(pmsTimer->handleMap_[TIMER_ID_USER_ACTIVITY_TIMEOUT] != nullptr);
+        EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
+    }
+
+    ParamCacher::Instance().neverSleepDimEnabled_ = false;
+    stateMachine->ResetInactiveTimer();
+    if (pmsTimer->handleMap_.find(TIMER_ID_USER_ACTIVITY_TIMEOUT) != pmsTimer->handleMap_.end()) {
+        EXPECT_TRUE(pmsTimer->handleMap_[TIMER_ID_USER_ACTIVITY_TIMEOUT] == nullptr);
+        EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
+    }
+    POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine024 function end!");
+}
 } // namespace

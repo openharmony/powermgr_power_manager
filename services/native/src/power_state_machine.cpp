@@ -131,8 +131,6 @@ bool PowerStateMachine::Init()
     if (powerStateCBDeathRecipient_ == nullptr) {
         powerStateCBDeathRecipient_ = new PowerStateCallbackDeathRecipient();
     }
-    activeTimeBeforeLongTimeDim_ =
-        static_cast<int64_t>(system::GetIntParameter("const.power.active_time_before_long_time_dim", -1));
     POWER_HILOGD(FEATURE_POWER_STATE, "Init success");
     return true;
 }
@@ -481,7 +479,7 @@ void PowerStateMachine::EmplaceDim()
     controllerMap_.emplace(PowerState::DIM,
         std::make_shared<StateController>(PowerState::DIM, shared_from_this(), [this](StateChangeReason reason) {
             POWER_HILOGD(FEATURE_POWER_STATE, "[UL_POWER] StateController_DIM lambda start");
-            if (GetDisplayOffTime() < 0) {
+            if (!ParamCacher::Instance().IsNeverSleepDimEnabled() && GetDisplayOffTime() < 0) {
                 POWER_HILOGD(FEATURE_ACTIVITY, "Auto display off is disabled");
                 return TransitResult::OTHER_ERR;
             }
@@ -501,7 +499,8 @@ void PowerStateMachine::EmplaceDim()
             CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             // Set a timer without checking runninglock, but the actual timeout event can still be blocked.
             // Theoretically, this timer is always cancelable before the current task is finished.
-            SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
+            GetDisplayOffTime() < 0 ? POWER_HILOGI(FEATURE_ACTIVITY, "Keep dim state.")
+                : SetDelayTimer(dimTime, PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
             // in case a refresh action occurs, change display state back to on
             if (settingStateFlag_.load() ==
                 static_cast<int64_t>(SettingStateFlag::StateFlag::SETTING_DIM_INTERRUPTED)) {
@@ -1511,17 +1510,28 @@ void PowerStateMachine::ResetInactiveTimer(bool needPrintLog)
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
     CancelDelayTimer(PowerStateMachine::CHECK_USER_ACTIVITY_OFF_TIMEOUT_MSG);
     PublishRefreshEvent();
-    if (this->GetDisplayOffTime() < 0) {
+
+    int64_t displayOffTime = GetDisplayOffTime();
+    if (displayOffTime < 0) {
+        int64_t activeTime = ParamCacher::Instance().GetActiveTimeBeforeLongTimeDim();
+        if (ParamCacher::Instance().IsNeverSleepDimEnabled()) {
+            constexpr int64_t undefinedActiveTime = -1;
+            constexpr int64_t defaultActiveTimeMs = 600000; // 10min
+            activeTime = activeTime == undefinedActiveTime ? defaultActiveTimeMs : activeTime;
+            this->SetDelayTimer(activeTime, PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+        }
         if (needPrintLog) {
-            POWER_HILOGI(FEATURE_ACTIVITY, "Auto display off is disabled");
+            POWER_HILOGI(FEATURE_ACTIVITY,
+                "reset inactive timer: %{public}" PRId64 ", dim: %{public}" PRId64 ", enabled: %{public}d",
+                displayOffTime, activeTime, ParamCacher::Instance().IsNeverSleepDimEnabled());
         }
         return;
     }
 
-    int64_t displayOffTime = this->GetDisplayOffTime();
     ResetScreenOffPreTimeForSwing(displayOffTime);
     this->SetDelayTimer(
         displayOffTime - this->GetDimTime(displayOffTime), PowerStateMachine::CHECK_USER_ACTIVITY_TIMEOUT_MSG);
+
     if (needPrintLog) {
         POWER_HILOGI(FEATURE_ACTIVITY, "reset inactive timer: %{public}" PRId64, displayOffTime);
     }
@@ -1960,7 +1970,7 @@ int64_t PowerStateMachine::GetDimTime(int64_t displayOffTime)
     int64_t dimTime = displayOffTime / OFF_TIMEOUT_FACTOR;
 #ifdef POWER_MANAGER_ENABLE_LONG_TIME_DIM
     constexpr int64_t DEFAULT_ACTIVE_TIME_MS = 600000; //10min
-    int64_t maxActiveTime = activeTimeBeforeLongTimeDim_;
+    int64_t maxActiveTime = ParamCacher::Instance().GetActiveTimeBeforeLongTimeDim();
     if (displayOffTime > 0 && maxActiveTime >= DEFAULT_ACTIVE_TIME_MS && displayOffTime > maxActiveTime) {
         dimTime = displayOffTime - maxActiveTime;
         POWER_HILOGD(FEATURE_POWER_STATE,
