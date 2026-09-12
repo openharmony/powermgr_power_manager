@@ -77,7 +77,7 @@ ohos_source_set("${powermgr_actions_default_target}") {
     external_deps += [ "hisysevent:libhisysevent" ]
   }
 
-  if (power_manager_feature_enable_cockpit_force_suspend) {
+  if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
     external_deps += [ "drivers_interface_power:libpower_proxy_1.4" ]
   }
 

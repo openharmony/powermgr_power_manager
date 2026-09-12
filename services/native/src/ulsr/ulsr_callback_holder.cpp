@@ -28,8 +28,8 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
-constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 5000; // Maximum execution time for cockpit mode.
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 5000; // Maximum execution time when force suspend ignoring wakelock is enabled.
 #else
 constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 30000; // Maximum total execution time for all ULSR sync callbacks
 #endif

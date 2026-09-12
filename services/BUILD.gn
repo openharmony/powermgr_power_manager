@@ -244,8 +244,8 @@ ohos_shared_library("powermgrservice") {
     external_deps += [ "init:libbeget_proxy" ]
   }
 
-  if (power_manager_feature_enable_cockpit_force_suspend) {
-    defines += [ "POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND" ]
+  if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK" ]
   }
 
   if (power_manager_feature_force_sleep_broadcast) {

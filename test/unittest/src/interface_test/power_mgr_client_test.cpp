@@ -1995,7 +1995,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient068, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-#if !defined(POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem"),
         PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr"),

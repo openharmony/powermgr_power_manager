@@ -25,8 +25,8 @@ namespace OHOS {
 namespace PowerMgr {
 bool PowerMgrService::IsCockpitLegacySuspendDenied() const
 {
-#ifdef POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND
-    POWER_HILOGI(FEATURE_SUSPEND, "this function is not supported in cockpit mode");
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    POWER_HILOGI(FEATURE_SUSPEND, "this function is not supported when force suspend ignoring wakelock is enabled");
     return true;
 #else
     return false;
@@ -43,10 +43,10 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::strin
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#if !defined(POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     (void)suspendTag;
     POWER_HILOGI(FEATURE_SUSPEND,
-        "ForceSuspendDeviceIgnoringWakelock failed, cockpit force suspend or suspend-with-tag is not enabled");
+        "ForceSuspendDeviceIgnoringWakelock failed, force suspend ignoring wakelock or suspend-with-tag is not enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
 #else
     std::lock_guard lock(suspendMutex_);

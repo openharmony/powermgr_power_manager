@@ -253,8 +253,8 @@ ohos_unittest("test_power_mgr_client") {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
-  if (power_manager_feature_enable_cockpit_force_suspend) {
-    defines += [ "POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND" ]
+  if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK" ]
   }
 }
 
@@ -509,8 +509,8 @@ ohos_unittest("test_power_mgr_service") {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
-  if (power_manager_feature_enable_cockpit_force_suspend) {
-    defines += [ "POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND" ]
+  if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK" ]
   }
 
   configs = [
@@ -1508,8 +1508,8 @@ ohos_unittest("test_power_suspend_controller") {
     defines += [ "POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST" ]
   }
 
-  if (power_manager_feature_enable_cockpit_force_suspend) {
-    defines += [ "POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND" ]
+  if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
+    defines += [ "POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK" ]
   }
 }
 

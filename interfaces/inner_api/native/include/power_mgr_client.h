@@ -157,16 +157,16 @@ public:
     PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
     /**
-     * Forcibly suspend the device ignoring running locks. Cockpit-only inner API.
+     * Forcibly suspend the device ignoring running locks.
      * Constraints:
-     * - Only available when POWER_MANAGER_ENABLE_COCKPIT_FORCE_SUSPEND and
+     * - Only available when POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK and
      *   POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG are both enabled;
      *   otherwise returns ERR_CAPABILITY_NOT_SUPPORTED.
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.
      * - suspendTag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.
      * - Running locks do not block this call.
      * - Requires Power HDI V1_4 ForceSuspendIgnoringWakelock; older HDI returns ERR_FAILURE.
-     * - Do not use together with ForceSuspendDevice (that API returns 801 in cockpit).
+     * - Do not use together with ForceSuspendDevice (that API returns 801 when this feature is on).
      */
     PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag);
 
