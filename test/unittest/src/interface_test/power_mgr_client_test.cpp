@@ -2029,4 +2029,23 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient070, TestSize.Level0) {
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient070 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient071
+ * @tc.desc: test InterruptForceSuspend capability
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient071, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient071 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
+    !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    EXPECT_EQ(powerMgrClient.InterruptForceSuspend(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    PowerErrors ret = powerMgrClient.InterruptForceSuspend();
+    EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient071 function end!");
+}
 } // namespace

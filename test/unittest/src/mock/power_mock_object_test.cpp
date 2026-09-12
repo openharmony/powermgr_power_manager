@@ -226,6 +226,8 @@ HWTEST_F(PowerMockObjectTest, PowerMockObjectTest004, TestSize.Level2)
     EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
     ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem");
     EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
+    ret = sptrProxy->InterruptForceSuspendIpc();
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
     POWER_HILOGI(LABEL_TEST, "PowerMockObjectTest004 function end!");
 }
 } // namespace

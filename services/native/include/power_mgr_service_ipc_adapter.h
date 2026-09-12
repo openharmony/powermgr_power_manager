@@ -49,6 +49,7 @@ public:
     virtual int32_t ForceSuspendDeviceIpc(
         int64_t callTimeMs, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
     virtual int32_t ForceSuspendDeviceIgnoringWakelockIpc(const std::string& suspendTag) override;
+    virtual int32_t InterruptForceSuspendIpc() override;
     virtual int32_t HibernateIpc(bool clearMemory, const std::string& reason,
         const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
     virtual int32_t CreateRunningLockIpc(
@@ -153,6 +154,7 @@ public:
     virtual bool IsForceSleeping() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") = 0;
     virtual PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag) = 0;
+    virtual PowerErrors InterruptForceSuspend() = 0;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") = 0;
     virtual PowerErrors CreateRunningLock(

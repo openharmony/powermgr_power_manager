@@ -915,7 +915,14 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return false;
     }
 
+    BeginForceSuspendCallback();
     TriggerForceSuspendCallbacks(tag);
+    bool aborted = EndForceSuspendCallback();
+    if (aborted) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Force suspend interrupted during callbacks, skip HDI");
+        RollbackInterruptedForceSuspend(tag);
+        return false;
+    }
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
         return false;
@@ -925,18 +932,99 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
 }
 
+void SuspendController::BeginForceSuspendCallback()
+{
+    std::lock_guard lock(forceSuspendCbMutex_);
+    forceSuspendAbortRequested_.store(false);
+    forceSuspendCallbackPending_ = true;
+}
+
+bool SuspendController::EndForceSuspendCallback()
+{
+    std::lock_guard lock(forceSuspendCbMutex_);
+    forceSuspendCallbackPending_ = false;
+    return forceSuspendAbortRequested_.exchange(false);
+}
+
+bool SuspendController::InterruptForceSuspendCallback()
+{
+    std::lock_guard lock(forceSuspendCbMutex_);
+    if (!forceSuspendCallbackPending_) {
+        return false;
+    }
+    forceSuspendAbortRequested_.store(true);
+    return true;
+}
+
+bool SuspendController::IsForceSuspendAborted() const
+{
+    return forceSuspendAbortRequested_.load();
+}
+
 void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
 {
     if (tag == "ulsr") {
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms != nullptr && !pms->TriggerUlsrSyncCallback()) {
-            POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout, continue force suspend");
+        if (pms != nullptr && !pms->TriggerUlsrSyncCallback(&forceSuspendAbortRequested_)) {
+            POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout or aborted");
         }
 #endif
         return;
     }
-    TriggerSyncSleepCallback(false);
+    TriggerForceSuspendSleepCallbacks();
+}
+
+void SuspendController::TriggerForceSuspendSleepCallbacks()
+{
+    std::lock_guard lock(sleepCbMutex_);
+    auto trigger = [this](SleepCallbackHolder::SleepCallbackContainerType& callbacks, const std::string& priority) {
+        uint32_t id = 0;
+        for (auto &callback : callbacks) {
+            if (forceSuspendAbortRequested_.load()) {
+                POWER_HILOGI(FEATURE_SUSPEND, "Force suspend sleep callback aborted, skip remaining");
+                return;
+            }
+            auto pidUid = SleepCallbackHolder::GetInstance().FindCallbackPidUid(callback);
+            if (callback == nullptr) {
+                continue;
+            }
+            int64_t start = GetTickCount();
+            POWER_HILOGI(FEATURE_SUSPEND, "Force suspend Sync Sleep Callback, pid=%{public}d", pidUid.first);
+            callback->OnSyncSleep(g_onForceSleep);
+            int64_t cost = GetTickCount() - start;
+            POWER_HILOGI(FEATURE_SUSPEND,
+                "Trigger %{public}s SyncSleepCb[%{public}u] success,P=%{public}dU=%{public}dT=%{public}" PRId64,
+                priority.c_str(), ++id, pidUid.first, pidUid.second, cost);
+        }
+    };
+    auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
+    trigger(highPriorityCallbacks, "High");
+    auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
+    trigger(defaultPriorityCallbacks, "Default");
+    auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
+    trigger(lowPriorityCallbacks, "Low");
+}
+
+void SuspendController::RollbackInterruptedForceSuspend(const std::string& tag)
+{
+    g_onForceSleep = false;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    SetForceSleepingFlag(false);
+#endif
+    if (stateMachine_ != nullptr) {
+        stateMachine_->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION, true);
+    }
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+    if (tag == "ulsr") {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms != nullptr) {
+            pms->TriggerUlsrWakeupCallback(false);
+        }
+    }
+#else
+    (void)tag;
+#endif
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)

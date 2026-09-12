@@ -1527,4 +1527,43 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService043 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrService044
+ * @tc.desc: Test InterruptForceSuspend permission, capability and callback window
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService044, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService044 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
+
+    g_isPermissionGranted = true;
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
+    !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    pmsTest_->SuspendControllerInit();
+    ASSERT_NE(pmsTest_->suspendController_, nullptr);
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
+    pmsTest_->suspendController_->BeginForceSuspendCallback();
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_OK);
+    EXPECT_TRUE(pmsTest_->suspendController_->EndForceSuspendCallback());
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService044 function end!");
+}
 }

@@ -130,6 +130,8 @@ public:
                 break;
         }
     }
+
+    using UlsrCallbackHolder::SyncUlsrNotifyInner;
 };
 
 // RAII guard to save and restore MockPowerRemoteObject static state for test isolation

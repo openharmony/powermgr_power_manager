@@ -166,6 +166,12 @@ int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIgnoringWakelockIpc(const std:
     return result;
 }
 
+int32_t PowerMgrServiceAdapter::InterruptForceSuspendIpc()
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::InterruptForceSuspend", false);
+    return static_cast<int32_t>(InterruptForceSuspend());
+}
+
 int32_t PowerMgrServiceAdapter::HibernateIpc(bool clearMemory, const std::string& reason,
     const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy)
 {

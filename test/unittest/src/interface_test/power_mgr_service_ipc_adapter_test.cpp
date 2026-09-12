@@ -102,6 +102,10 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
+    PowerErrors InterruptForceSuspend()
+    {
+        return PowerErrors::ERR_OK;
+    }
     PowerErrors Hibernate(bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1")
     {
         return PowerErrors::ERR_OK;
@@ -584,6 +588,8 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter014, TestSize.L
     int32_t result = adapter->ForceSuspendDeviceIgnoringWakelockIpc("mem");
     EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
     result = adapter->ForceSuspendDeviceIgnoringWakelockIpc("ulsr");
+    EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
+    result = adapter->InterruptForceSuspendIpc();
     EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter014 function end!");
 }

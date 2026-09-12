@@ -171,6 +171,11 @@ public:
     PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag);
 
     /**
+     * Interrupt ForceSuspendDeviceIgnoringWakelock while its callbacks are running.
+     */
+    PowerErrors InterruptForceSuspend();
+
+    /**
      * Check whether the type of running lock is supported
      */
     bool IsRunningLockTypeSupported(RunningLockType type);

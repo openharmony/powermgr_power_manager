@@ -1652,6 +1652,42 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::strin
 #endif
 }
 
+PowerErrors PowerMgrService::InterruptForceSuspend()
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, no POWER_MANAGER permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
+    !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, feature or suspend-with-tag is not enabled");
+    return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
+#else
+    if (suspendController_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "InterruptForceSuspend failed, SuspendController is null");
+        return PowerErrors::ERR_FAILURE;
+    }
+    if (!suspendController_->InterruptForceSuspendCallback()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, no force suspend callback in progress");
+        return PowerErrors::ERR_FAILURE;
+    }
+    sptr<UlsrCallbackHolder> holder;
+    {
+        std::lock_guard lock(ulsrMutex_);
+        holder = ulsrCallbackHolder_;
+    }
+    if (holder != nullptr) {
+        holder->NotifyWaiters();
+    }
+    POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend requested");
+    return PowerErrors::ERR_OK;
+#endif
+}
+
 PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate begin.");
@@ -2143,15 +2179,19 @@ PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IUlsrCallback>& c
 }
 
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-bool PowerMgrService::TriggerUlsrSyncCallback()
+bool PowerMgrService::TriggerUlsrSyncCallback(std::atomic<bool>* abort)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "TriggerUlsrSyncCallback");
-    std::lock_guard lock(ulsrMutex_);
-    if (ulsrCallbackHolder_ == nullptr) {
+    sptr<UlsrCallbackHolder> holder;
+    {
+        std::lock_guard lock(ulsrMutex_);
+        holder = ulsrCallbackHolder_;
+    }
+    if (holder == nullptr) {
         POWER_HILOGW(FEATURE_SUSPEND, "ulsrCallbackHolder null, sync callback skip");
         return false;
     }
-    return ulsrCallbackHolder_->SyncUlsrNotify();
+    return holder->SyncUlsrNotify(abort);
 }
 
 void PowerMgrService::TriggerUlsrWakeupCallback(bool ulsrResult)

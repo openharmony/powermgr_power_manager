@@ -15,8 +15,9 @@
 
 #include "ulsr_callback_holder.h"
 
+#include <chrono>
 #include <datetime_ex.h>
-#include <future>
+#include <thread>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -28,11 +29,7 @@
 namespace OHOS {
 namespace PowerMgr {
 namespace {
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 5000; // Maximum execution time when force suspend ignoring wakelock is enabled.
-#else
 constexpr int32_t ULSR_SYNC_CALLBACK_TIMEOUT_MS = 30000; // Maximum total execution time for all ULSR sync callbacks
-#endif
 }
 
 void UlsrCallbackHolder::OnRemoteDied(const wptr<IRemoteObject>& object)
@@ -92,7 +89,12 @@ void UlsrCallbackHolder::RemoveCallback(const sptr<IUlsrCallback>& callback)
     POWER_HILOGI(FEATURE_WAKEUP, "ULSRcb remove end");
 }
 
-bool UlsrCallbackHolder::SyncUlsrNotify()
+void UlsrCallbackHolder::NotifyWaiters()
+{
+    waitCv_.notify_all();
+}
+
+bool UlsrCallbackHolder::SyncUlsrNotify(std::atomic<bool>* abort)
 {
     // Anti-re-entry check: UlsrCallbackStage MUST be STAGE_DONE when calling OnSyncUlsr
     UlsrCallbackStage expected = UlsrCallbackStage::STAGE_DONE;
@@ -113,19 +115,25 @@ bool UlsrCallbackHolder::SyncUlsrNotify()
     });
 
     int64_t beginTimeMs = GetTickCount();
-    auto notifyInnerTask = [this] () {
-        SyncUlsrNotifyInner(ULSR_SYNC_CALLBACK_TIMEOUT_MS);
-    };
-    std::packaged_task<void()> callbackTask(notifyInnerTask);
-    std::future<void> fut = callbackTask.get_future();
-    std::make_unique<std::thread>(std::move(callbackTask))->detach();
-    std::future_status status = fut.wait_for(std::chrono::milliseconds(ULSR_SYNC_CALLBACK_TIMEOUT_MS));
-    bool isTimeout = status == std::future_status::timeout;
+    waitFinished_.store(false);
+    std::thread([this, abort]() {
+        SyncUlsrNotifyInner(ULSR_SYNC_CALLBACK_TIMEOUT_MS, abort);
+        waitFinished_.store(true);
+        waitCv_.notify_all();
+    }).detach();
+    std::unique_lock<std::mutex> waitLock(waitMutex_);
+    bool signaled = waitCv_.wait_for(waitLock, std::chrono::milliseconds(ULSR_SYNC_CALLBACK_TIMEOUT_MS),
+        [this, abort]() {
+            return waitFinished_.load() || (abort != nullptr && abort->load());
+        });
+    bool isAborted = abort != nullptr && abort->load() && !waitFinished_.load();
+    bool isTimeout = !signaled && !waitFinished_.load() && !isAborted;
     int64_t endTimeMs = GetTickCount();
 
     ReportSyncUlsrResult(endTimeMs - beginTimeMs, isTimeout);
-    POWER_HILOGI(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotify end, isTimeout: %{public}d", isTimeout);
-    return !isTimeout;
+    POWER_HILOGI(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotify end, isTimeout: %{public}d, isAborted: %{public}d",
+        isTimeout, isAborted);
+    return !isTimeout && !isAborted;
 }
 
 void UlsrCallbackHolder::ReportSyncUlsrResult(int64_t elapsedTimeMs, bool isTimeout)
@@ -154,13 +162,17 @@ void UlsrCallbackHolder::ReportSyncUlsrResult(int64_t elapsedTimeMs, bool isTime
     }
 }
 
-int64_t UlsrCallbackHolder::SyncUlsrNotifyInner(int64_t timeoutMs)
+int64_t UlsrCallbackHolder::SyncUlsrNotifyInner(int64_t timeoutMs, std::atomic<bool>* abort)
 {
-    ForEachContainer([&timeoutMs](auto& container) {
+    ForEachContainer([&timeoutMs, abort](auto& container) {
         if (timeoutMs <= 0) {
             return;
         }
         for (auto& [cb, record] : container) {
+            if (abort != nullptr && abort->load()) {
+                POWER_HILOGI(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotifyInner aborted, skip remaining");
+                return;
+            }
             if (cb == nullptr) {
                 POWER_HILOGE(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotifyInner callback is nullptr, skip");
                 continue;

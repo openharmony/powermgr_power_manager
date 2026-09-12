@@ -16,6 +16,7 @@
 #ifndef POWERMGR_POWER_MGR_SERVICE_H
 #define POWERMGR_POWER_MGR_SERVICE_H
 
+#include <atomic>
 #include <common_event_subscriber.h>
 #include <iremote_object.h>
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -107,6 +108,7 @@ public:
     virtual bool IsForceSleeping() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") override;
     virtual PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag) override;
+    virtual PowerErrors InterruptForceSuspend() override;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") override;
     virtual PowerErrors CreateRunningLock(
@@ -234,7 +236,7 @@ public:
     void UpdateSettingInvalidDisplayOffTime();
 #endif
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    bool TriggerUlsrSyncCallback();
+    bool TriggerUlsrSyncCallback(std::atomic<bool>* abort = nullptr);
     void TriggerUlsrWakeupCallback(bool ulsrResult);
     void TriggerUlsrWakeupCallbackWithResult();
     void WaitAndTriggerUlsrWakeup();

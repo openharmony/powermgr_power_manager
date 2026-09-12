@@ -399,6 +399,19 @@ PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string
     return static_cast<PowerErrors>(result);
 }
 
+PowerErrors PowerMgrClient::InterruptForceSuspend()
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    int32_t result = proxy->InterruptForceSuspendIpc();
+    if (result != static_cast<int32_t>(PowerErrors::ERR_OK)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "InterruptForceSuspend failed, result=%{public}d", result);
+    } else {
+        POWER_HILOGD(FEATURE_SUSPEND, "Calling InterruptForceSuspend Success");
+    }
+    return static_cast<PowerErrors>(result);
+}
+
 bool PowerMgrClient::IsScreenOn(bool needPrintLog)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
