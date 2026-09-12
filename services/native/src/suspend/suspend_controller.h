@@ -124,6 +124,7 @@ private:
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
+    void TriggerForceSuspendCallbacks(const std::string& tag);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT

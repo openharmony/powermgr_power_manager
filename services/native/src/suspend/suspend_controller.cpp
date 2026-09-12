@@ -58,7 +58,7 @@ constexpr int32_t RETRY_INTERVAL_MS = 100;
 int32_t g_powerkeyReleaseIdCache = 3301; // SA_ID
 } // namespace
 
-std::atomic_bool onForceSleep = false;
+std::atomic_bool g_onForceSleep = false;
 
 /** SuspendController Implement */
 SuspendController::SuspendController(const std::shared_ptr<ShutdownController>& shutdownController,
@@ -122,8 +122,8 @@ void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& cal
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
     std::lock_guard lock(sleepCbMutex_);
-    POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d", isWakeup,
-        onForceSleep == true);
+    POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, g_onForceSleep=%{public}d", isWakeup,
+        g_onForceSleep == true);
     auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
     TriggerSyncSleepCallbackInner(highPriorityCallbacks, "High", isWakeup);
     auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
@@ -131,8 +131,8 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
     auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
     TriggerSyncSleepCallbackInner(lowPriorityCallbacks, "Low", isWakeup);
 
-    if (isWakeup && onForceSleep) {
-        onForceSleep = false;
+    if (isWakeup && g_onForceSleep) {
+        g_onForceSleep = false;
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     if (isWakeup) {
@@ -150,7 +150,7 @@ void SuspendController::TriggerSyncSleepCallbackInner(
         if (callback != nullptr) {
             int64_t start = GetTickCount();
             POWER_HILOGI(FEATURE_SUSPEND, "Sync Sleep Callback, pid=%{public}d", pidUid.first);
-            isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
+            isWakeup ? callback->OnSyncWakeup(g_onForceSleep) : callback->OnSyncSleep(g_onForceSleep);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,
                 "Trigger %{public}s SyncSleepCb[%{public}u] success,P=%{public}dU=%{public}dT=%{public}" PRId64,
@@ -863,7 +863,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         stateMachine_->GetReasonBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-        onForceSleep = true;
+        g_onForceSleep = true;
         TriggerSyncSleepCallback(false);
 
         FFRTTask task = [this, reason] {
@@ -900,13 +900,8 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return false;
     }
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
-    auto pmsForceSleep = DelayedSpSingleton<PowerMgrService>::GetInstance();
-    if (pmsForceSleep != nullptr && pmsForceSleep->GetSuspendController() != nullptr) {
-        pmsForceSleep->GetSuspendController()->SetForceSleepingFlag(true);
-        POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
-    } else {
-        POWER_HILOGE(FEATURE_SUSPEND, "Failed to set flag of force sleeping, pms or suspendController is nullptr");
-    }
+    SetForceSleepingFlag(true);
+    POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
 #endif
     bool retSleep = stateMachine_->SetState(PowerState::SLEEP,
         stateMachine_->GetReasonBySuspendType(reason), true);
@@ -914,12 +909,24 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
         return false;
     }
-    onForceSleep = true;
+    g_onForceSleep = true;
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock");
         return false;
     }
 
+    TriggerForceSuspendCallbacks(tag);
+    if (stateMachine_->GetState() != PowerState::SLEEP) {
+        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
+        return false;
+    }
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "Callbacks done, call HDI force suspend ignoring wakelock, tag=%{public}s", tag.c_str());
+    return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+}
+
+void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
+{
     if (tag == "ulsr") {
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -927,17 +934,9 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
             POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout, continue force suspend");
         }
 #endif
-    } else {
-        TriggerSyncSleepCallback(false);
+        return;
     }
-
-    if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
-        return false;
-    }
-    POWER_HILOGI(FEATURE_SUSPEND, "Callbacks done, call HDI force suspend ignoring wakelock immediately, tag=%{public}s",
-        tag.c_str());
-    return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+    TriggerSyncSleepCallback(false);
 }
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)

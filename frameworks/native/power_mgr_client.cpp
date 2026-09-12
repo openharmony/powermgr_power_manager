@@ -386,7 +386,8 @@ PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     if (suspendTag != "mem" && suspendTag != "ulsr") {
-        POWER_HILOGE(FEATURE_SUSPEND, "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
+        POWER_HILOGE(FEATURE_SUSPEND,
+            "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
         return PowerErrors::ERR_PARAM_INVALID;
     }
     int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag);
