@@ -16,7 +16,8 @@
         "name": "power_manager",
         "subsystem": "powermgr",
         "syscap": [
-            "SystemCapability.PowerManager.PowerManager.Core"
+            "SystemCapability.PowerManager.PowerManager.Core",
+            "SystemCapability.PowerManager.PowerManager.Extension"
         ],
         "features": [
             "power_manager_feature_allow_interrupting_powerkey_off",
