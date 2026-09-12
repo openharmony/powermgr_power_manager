@@ -2011,4 +2011,22 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient070
+ * @tc.desc: SuspendDevice/ForceSuspendDevice/WakeupDevice return 801 when force suspend ignoring wakelock is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient070, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient070 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    EXPECT_EQ(powerMgrClient.SuspendDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.WakeupDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    EXPECT_NE(powerMgrClient.WakeupDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient070 function end!");
+}
 } // namespace
