@@ -1530,7 +1530,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrService044
- * @tc.desc: Test InterruptForceSuspend permission, capability and callback window
+ * @tc.desc: Test InterruptForceSuspend permission, capability and skip-HDI window
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService044, TestSize.Level0)

@@ -89,12 +89,7 @@ void UlsrCallbackHolder::RemoveCallback(const sptr<IUlsrCallback>& callback)
     POWER_HILOGI(FEATURE_WAKEUP, "ULSRcb remove end");
 }
 
-void UlsrCallbackHolder::NotifyWaiters()
-{
-    waitCv_.notify_all();
-}
-
-bool UlsrCallbackHolder::SyncUlsrNotify(std::atomic<bool>* abort)
+bool UlsrCallbackHolder::SyncUlsrNotify()
 {
     // Anti-re-entry check: UlsrCallbackStage MUST be STAGE_DONE when calling OnSyncUlsr
     UlsrCallbackStage expected = UlsrCallbackStage::STAGE_DONE;
@@ -116,24 +111,20 @@ bool UlsrCallbackHolder::SyncUlsrNotify(std::atomic<bool>* abort)
 
     int64_t beginTimeMs = GetTickCount();
     waitFinished_.store(false);
-    std::thread([this, abort]() {
-        SyncUlsrNotifyInner(ULSR_SYNC_CALLBACK_TIMEOUT_MS, abort);
+    std::thread([this]() {
+        SyncUlsrNotifyInner(ULSR_SYNC_CALLBACK_TIMEOUT_MS);
         waitFinished_.store(true);
         waitCv_.notify_all();
     }).detach();
     std::unique_lock<std::mutex> waitLock(waitMutex_);
     bool signaled = waitCv_.wait_for(waitLock, std::chrono::milliseconds(ULSR_SYNC_CALLBACK_TIMEOUT_MS),
-        [this, abort]() {
-            return waitFinished_.load() || (abort != nullptr && abort->load());
-        });
-    bool isAborted = abort != nullptr && abort->load() && !waitFinished_.load();
-    bool isTimeout = !signaled && !waitFinished_.load() && !isAborted;
+        [this]() { return waitFinished_.load(); });
+    bool isTimeout = !signaled && !waitFinished_.load();
     int64_t endTimeMs = GetTickCount();
 
     ReportSyncUlsrResult(endTimeMs - beginTimeMs, isTimeout);
-    POWER_HILOGI(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotify end, isTimeout: %{public}d, isAborted: %{public}d",
-        isTimeout, isAborted);
-    return !isTimeout && !isAborted;
+    POWER_HILOGI(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotify end, isTimeout: %{public}d", isTimeout);
+    return !isTimeout;
 }
 
 void UlsrCallbackHolder::ReportSyncUlsrResult(int64_t elapsedTimeMs, bool isTimeout)
@@ -162,17 +153,13 @@ void UlsrCallbackHolder::ReportSyncUlsrResult(int64_t elapsedTimeMs, bool isTime
     }
 }
 
-int64_t UlsrCallbackHolder::SyncUlsrNotifyInner(int64_t timeoutMs, std::atomic<bool>* abort)
+int64_t UlsrCallbackHolder::SyncUlsrNotifyInner(int64_t timeoutMs)
 {
-    ForEachContainer([&timeoutMs, abort](auto& container) {
+    ForEachContainer([&timeoutMs](auto& container) {
         if (timeoutMs <= 0) {
             return;
         }
         for (auto& [cb, record] : container) {
-            if (abort != nullptr && abort->load()) {
-                POWER_HILOGI(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotifyInner aborted, skip remaining");
-                return;
-            }
             if (cb == nullptr) {
                 POWER_HILOGE(FEATURE_SUSPEND, "ULSRcb SyncUlsrNotifyInner callback is nullptr, skip");
                 continue;

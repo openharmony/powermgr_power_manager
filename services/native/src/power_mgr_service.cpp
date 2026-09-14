@@ -1675,15 +1675,7 @@ PowerErrors PowerMgrService::InterruptForceSuspend()
         POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, no force suspend callback in progress");
         return PowerErrors::ERR_FAILURE;
     }
-    sptr<UlsrCallbackHolder> holder;
-    {
-        std::lock_guard lock(ulsrMutex_);
-        holder = ulsrCallbackHolder_;
-    }
-    if (holder != nullptr) {
-        holder->NotifyWaiters();
-    }
-    POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend requested");
+    POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend requested, skip HDI after callbacks");
     return PowerErrors::ERR_OK;
 #endif
 }
@@ -2179,7 +2171,7 @@ PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IUlsrCallback>& c
 }
 
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-bool PowerMgrService::TriggerUlsrSyncCallback(std::atomic<bool>* abort)
+bool PowerMgrService::TriggerUlsrSyncCallback()
 {
     POWER_HILOGI(FEATURE_SUSPEND, "TriggerUlsrSyncCallback");
     sptr<UlsrCallbackHolder> holder;
@@ -2191,7 +2183,7 @@ bool PowerMgrService::TriggerUlsrSyncCallback(std::atomic<bool>* abort)
         POWER_HILOGW(FEATURE_SUSPEND, "ulsrCallbackHolder null, sync callback skip");
         return false;
     }
-    return holder->SyncUlsrNotify(abort);
+    return holder->SyncUlsrNotify();
 }
 
 void PowerMgrService::TriggerUlsrWakeupCallback(bool ulsrResult)

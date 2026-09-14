@@ -236,7 +236,7 @@ public:
     void UpdateSettingInvalidDisplayOffTime();
 #endif
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    bool TriggerUlsrSyncCallback(std::atomic<bool>* abort = nullptr);
+    bool TriggerUlsrSyncCallback();
     void TriggerUlsrWakeupCallback(bool ulsrResult);
     void TriggerUlsrWakeupCallbackWithResult();
     void WaitAndTriggerUlsrWakeup();

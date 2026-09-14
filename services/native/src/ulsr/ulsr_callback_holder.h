@@ -70,13 +70,12 @@ public:
     void AddCallback(const sptr<IUlsrCallback>& callback, const std::pair<int32_t, int32_t>& pidUid,
         UlsrPriority priority = UlsrPriority::DEFAULT);
     void RemoveCallback(const sptr<IUlsrCallback>& callback);
-    bool SyncUlsrNotify(std::atomic<bool>* abort = nullptr);
-    void NotifyWaiters();
+    bool SyncUlsrNotify();
     void WakeupNotify(bool ulsrResult = false);
     UlsrCallbackStage GetCallbackState() const;
 
 protected:
-    int64_t SyncUlsrNotifyInner(int64_t timeoutMs, std::atomic<bool>* abort = nullptr);
+    int64_t SyncUlsrNotifyInner(int64_t timeoutMs);
 
 private:
     template<typename Func>

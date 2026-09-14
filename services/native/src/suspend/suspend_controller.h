@@ -65,7 +65,6 @@ public:
     void BeginForceSuspendCallback();
     bool EndForceSuspendCallback();
     bool InterruptForceSuspendCallback();
-    bool IsForceSuspendAborted() const;
     void RecordPowerKeyDown(bool interrupting = false);
     bool GetPowerkeyDownWhenScreenOff();
 
@@ -131,7 +130,6 @@ private:
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
     void TriggerForceSuspendCallbacks(const std::string& tag);
-    void TriggerForceSuspendSleepCallbacks();
     void RollbackInterruptedForceSuspend(const std::string& tag);
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
@@ -166,7 +164,7 @@ private:
     ffrt::mutex suspendMutex_;
     std::mutex forceSuspendCbMutex_;
     bool forceSuspendCallbackPending_ {false};
-    std::atomic<bool> forceSuspendAbortRequested_ {false};
+    std::atomic<bool> forceSuspendSkipHdi_ {false};
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
