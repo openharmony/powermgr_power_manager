@@ -137,9 +137,9 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface->SetSuspendTag(tag);
 }
 
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
 {
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     std::lock_guard lock(mutex_);
     auto v1_4_iface = V1_4::IPowerInterface::Get();
     if (v1_4_iface == nullptr) {
@@ -152,12 +152,8 @@ bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& ta
         return false;
     }
     return true;
-#else
-    (void)tag;
-    POWER_HILOGE(COMP_SVC, "ForceSuspendIgnoringWakelock is not enabled");
-    return false;
-#endif
 }
+#endif
 
 void SystemSuspendController::AllowAutoSleep()
 {

@@ -15,9 +15,8 @@
 
 #include "ulsr_callback_holder.h"
 
-#include <chrono>
 #include <datetime_ex.h>
-#include <thread>
+#include <future>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
 #endif
@@ -110,16 +109,14 @@ bool UlsrCallbackHolder::SyncUlsrNotify()
     });
 
     int64_t beginTimeMs = GetTickCount();
-    waitFinished_.store(false);
-    std::thread([this]() {
+    auto notifyInnerTask = [this] () {
         SyncUlsrNotifyInner(ULSR_SYNC_CALLBACK_TIMEOUT_MS);
-        waitFinished_.store(true);
-        waitCv_.notify_all();
-    }).detach();
-    std::unique_lock<std::mutex> waitLock(waitMutex_);
-    bool signaled = waitCv_.wait_for(waitLock, std::chrono::milliseconds(ULSR_SYNC_CALLBACK_TIMEOUT_MS),
-        [this]() { return waitFinished_.load(); });
-    bool isTimeout = !signaled && !waitFinished_.load();
+    };
+    std::packaged_task<void()> callbackTask(notifyInnerTask);
+    std::future<void> fut = callbackTask.get_future();
+    std::make_unique<std::thread>(std::move(callbackTask))->detach();
+    std::future_status status = fut.wait_for(std::chrono::milliseconds(ULSR_SYNC_CALLBACK_TIMEOUT_MS));
+    bool isTimeout = status == std::future_status::timeout;
     int64_t endTimeMs = GetTickCount();
 
     ReportSyncUlsrResult(endTimeMs - beginTimeMs, isTimeout);

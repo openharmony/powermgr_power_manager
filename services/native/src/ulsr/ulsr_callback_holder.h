@@ -16,8 +16,6 @@
 #ifndef ULSR_CALLBACK_HOLDER_H
 #define ULSR_CALLBACK_HOLDER_H
 
-#include <atomic>
-#include <condition_variable>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -74,9 +72,6 @@ public:
     void WakeupNotify(bool ulsrResult = false);
     UlsrCallbackStage GetCallbackState() const;
 
-protected:
-    int64_t SyncUlsrNotifyInner(int64_t timeoutMs);
-
 private:
     template<typename Func>
     void ForEachContainer(Func&& func)
@@ -86,12 +81,10 @@ private:
         func(lowPriorityCallbacks_);
     };
 
+    int64_t SyncUlsrNotifyInner(int64_t timeoutMs);
     void ReportSyncUlsrResult(int64_t elapsedTimeMs, bool isTimeout);
 
     std::mutex callbacksMutex_;
-    std::mutex waitMutex_;
-    std::condition_variable waitCv_;
-    std::atomic<bool> waitFinished_ {false};
     std::atomic<UlsrCallbackStage> callbackState_{UlsrCallbackStage::STAGE_DONE};
     UlsrCallbackContainerType highPriorityCallbacks_;
     UlsrCallbackContainerType defaultPriorityCallbacks_;

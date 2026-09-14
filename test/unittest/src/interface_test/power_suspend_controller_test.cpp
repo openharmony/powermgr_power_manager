@@ -714,6 +714,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
 }
 #endif
 
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 /**
  * @tc.name: PowerSuspendControllerTest023
  * @tc.desc: test HandleForceSuspendIgnoringWakelock
@@ -742,4 +743,5 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Lev
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function end!");
 }
+#endif
 } // namespace

@@ -16,7 +16,6 @@
 #ifndef POWERMGR_POWER_MGR_SERVICE_H
 #define POWERMGR_POWER_MGR_SERVICE_H
 
-#include <atomic>
 #include <common_event_subscriber.h>
 #include <iremote_object.h>
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT

@@ -14,9 +14,6 @@
  */
 
 #include "suspend_controller.h"
-#include <atomic>
-#include <chrono>
-#include <thread>
 #include <datetime_ex.h>
 #include <display_manager_lite.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
@@ -58,7 +55,7 @@ constexpr int32_t RETRY_INTERVAL_MS = 100;
 int32_t g_powerkeyReleaseIdCache = 3301; // SA_ID
 } // namespace
 
-std::atomic_bool g_onForceSleep = false;
+std::atomic_bool onForceSleep = false;
 
 /** SuspendController Implement */
 SuspendController::SuspendController(const std::shared_ptr<ShutdownController>& shutdownController,
@@ -122,8 +119,8 @@ void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& cal
 void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
     std::lock_guard lock(sleepCbMutex_);
-    POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, g_onForceSleep=%{public}d", isWakeup,
-        g_onForceSleep == true);
+    POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d", isWakeup,
+        onForceSleep == true);
     auto highPriorityCallbacks = SleepCallbackHolder::GetInstance().GetHighPriorityCallbacks();
     TriggerSyncSleepCallbackInner(highPriorityCallbacks, "High", isWakeup);
     auto defaultPriorityCallbacks = SleepCallbackHolder::GetInstance().GetDefaultPriorityCallbacks();
@@ -131,8 +128,8 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
     auto lowPriorityCallbacks = SleepCallbackHolder::GetInstance().GetLowPriorityCallbacks();
     TriggerSyncSleepCallbackInner(lowPriorityCallbacks, "Low", isWakeup);
 
-    if (isWakeup && g_onForceSleep) {
-        g_onForceSleep = false;
+    if (isWakeup && onForceSleep) {
+        onForceSleep = false;
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     if (isWakeup) {
@@ -150,7 +147,7 @@ void SuspendController::TriggerSyncSleepCallbackInner(
         if (callback != nullptr) {
             int64_t start = GetTickCount();
             POWER_HILOGI(FEATURE_SUSPEND, "Sync Sleep Callback, pid=%{public}d", pidUid.first);
-            isWakeup ? callback->OnSyncWakeup(g_onForceSleep) : callback->OnSyncSleep(g_onForceSleep);
+            isWakeup ? callback->OnSyncWakeup(onForceSleep) : callback->OnSyncSleep(onForceSleep);
             int64_t cost = GetTickCount() - start;
             POWER_HILOGI(FEATURE_SUSPEND,
                 "Trigger %{public}s SyncSleepCb[%{public}u] success,P=%{public}dU=%{public}dT=%{public}" PRId64,
@@ -863,7 +860,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         stateMachine_->GetReasonBySuspendType(reason), true);
     if (ret) {
         POWER_HILOGI(FEATURE_SUSPEND, "State changed, system suspend");
-        g_onForceSleep = true;
+        onForceSleep = true;
         TriggerSyncSleepCallback(false);
 
         FFRTTask task = [this, reason] {
@@ -884,6 +881,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     }
 }
 
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
@@ -909,15 +907,24 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
         return false;
     }
-    g_onForceSleep = true;
+    onForceSleep = true;
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock");
         return false;
     }
 
-    BeginForceSuspendCallback();
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        forceSuspendSkipHdi_.store(false);
+        forceSuspendCallbackPending_ = true;
+    }
     TriggerForceSuspendCallbacks(tag);
-    bool skipHdi = EndForceSuspendCallback();
+    bool skipHdi = false;
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        forceSuspendCallbackPending_ = false;
+        skipHdi = forceSuspendSkipHdi_.exchange(false);
+    }
     if (skipHdi) {
         POWER_HILOGI(FEATURE_SUSPEND, "Force suspend skip HDI after callbacks");
         RollbackInterruptedForceSuspend(tag);
@@ -930,20 +937,6 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     POWER_HILOGI(FEATURE_SUSPEND,
         "Callbacks done, call HDI force suspend ignoring wakelock, tag=%{public}s", tag.c_str());
     return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
-}
-
-void SuspendController::BeginForceSuspendCallback()
-{
-    std::lock_guard lock(forceSuspendCbMutex_);
-    forceSuspendSkipHdi_.store(false);
-    forceSuspendCallbackPending_ = true;
-}
-
-bool SuspendController::EndForceSuspendCallback()
-{
-    std::lock_guard lock(forceSuspendCbMutex_);
-    forceSuspendCallbackPending_ = false;
-    return forceSuspendSkipHdi_.exchange(false);
 }
 
 bool SuspendController::InterruptForceSuspendCallback()
@@ -972,7 +965,7 @@ void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
 
 void SuspendController::RollbackInterruptedForceSuspend(const std::string& tag)
 {
-    g_onForceSleep = false;
+    onForceSleep = false;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     SetForceSleepingFlag(false);
 #endif
@@ -990,6 +983,7 @@ void SuspendController::RollbackInterruptedForceSuspend(const std::string& tag)
     (void)tag;
 #endif
 }
+#endif
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {

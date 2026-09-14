@@ -50,7 +50,9 @@ public:
     void AllowAutoSleep();
     void DisallowAutoSleep();
     void SetSuspendTag(const std::string& tag);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     bool ForceSuspendIgnoringWakelock(const std::string& tag);
+#endif
     int32_t SetPowerConfig(const std::string& sceneName, const std::string& value);
     int32_t GetPowerConfig(const std::string& sceneName, std::string& value);
     

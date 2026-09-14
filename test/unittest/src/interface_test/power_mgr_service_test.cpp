@@ -1559,10 +1559,6 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService044, TestSize.Level0)
     ASSERT_NE(pmsTest_->suspendController_, nullptr);
     ret = pmsTest_->InterruptForceSuspend();
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
-    pmsTest_->suspendController_->BeginForceSuspendCallback();
-    ret = pmsTest_->InterruptForceSuspend();
-    EXPECT_EQ(ret, PowerErrors::ERR_OK);
-    EXPECT_TRUE(pmsTest_->suspendController_->EndForceSuspendCallback());
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService044 function end!");
 }

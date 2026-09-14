@@ -16,11 +16,13 @@
 #ifndef POWERMGR_SUSPEND_CONTROLLER_H
 #define POWERMGR_SUSPEND_CONTROLLER_H
 
-#include <atomic>
 #include <cinttypes>
 #include <functional>
 #include <memory>
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#include <atomic>
 #include <mutex>
+#endif
 #include <vector>
 
 #include "event_handler.h"
@@ -61,10 +63,10 @@ public:
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     bool HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
-    void BeginForceSuspendCallback();
-    bool EndForceSuspendCallback();
     bool InterruptForceSuspendCallback();
+#endif
     void RecordPowerKeyDown(bool interrupting = false);
     bool GetPowerkeyDownWhenScreenOff();
 
@@ -129,8 +131,10 @@ private:
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     void TriggerForceSuspendCallbacks(const std::string& tag);
     void RollbackInterruptedForceSuspend(const std::string& tag);
+#endif
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -162,9 +166,11 @@ private:
     ffrt::mutex mutex_;
     ffrt::mutex sleepCbMutex_;
     ffrt::mutex suspendMutex_;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     std::mutex forceSuspendCbMutex_;
     bool forceSuspendCallbackPending_ {false};
     std::atomic<bool> forceSuspendSkipHdi_ {false};
+#endif
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST

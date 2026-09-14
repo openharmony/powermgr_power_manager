@@ -2174,16 +2174,12 @@ PowerErrors PowerMgrService::UnRegisterUlsrCallback(const sptr<IUlsrCallback>& c
 bool PowerMgrService::TriggerUlsrSyncCallback()
 {
     POWER_HILOGI(FEATURE_SUSPEND, "TriggerUlsrSyncCallback");
-    sptr<UlsrCallbackHolder> holder;
-    {
-        std::lock_guard lock(ulsrMutex_);
-        holder = ulsrCallbackHolder_;
-    }
-    if (holder == nullptr) {
+    std::lock_guard lock(ulsrMutex_);
+    if (ulsrCallbackHolder_ == nullptr) {
         POWER_HILOGW(FEATURE_SUSPEND, "ulsrCallbackHolder null, sync callback skip");
         return false;
     }
-    return holder->SyncUlsrNotify();
+    return ulsrCallbackHolder_->SyncUlsrNotify();
 }
 
 void PowerMgrService::TriggerUlsrWakeupCallback(bool ulsrResult)
