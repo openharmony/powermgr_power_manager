@@ -1675,7 +1675,7 @@ PowerErrors PowerMgrService::InterruptForceSuspend()
         POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, no force suspend callback in progress");
         return PowerErrors::ERR_FAILURE;
     }
-    POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend requested, skip HDI after callbacks");
+    POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend requested, wake waiter and rollback state");
     return PowerErrors::ERR_OK;
 #endif
 }

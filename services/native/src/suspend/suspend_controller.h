@@ -21,7 +21,9 @@
 #include <memory>
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
+#include <string>
 #endif
 #include <vector>
 
@@ -133,7 +135,8 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     void TriggerForceSuspendCallbacks(const std::string& tag);
-    void RollbackInterruptedForceSuspend(const std::string& tag);
+    void RollbackForceSuspendState();
+    void ScheduleUlsrWakeupAfterInterrupt();
 #endif
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
@@ -168,8 +171,11 @@ private:
     ffrt::mutex suspendMutex_;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     std::mutex forceSuspendCbMutex_;
+    std::condition_variable forceSuspendWaitCv_;
     bool forceSuspendCallbackPending_ {false};
+    bool forceSuspendCallbackFinished_ {false};
     std::atomic<bool> forceSuspendSkipHdi_ {false};
+    std::string forceSuspendTag_;
 #endif
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;

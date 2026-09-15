@@ -171,9 +171,10 @@ public:
     PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag);
 
     /**
-     * Request to skip HDI after ForceSuspendDeviceIgnoringWakelock callbacks finish.
-     * Does not abort in-flight mem/ulsr callbacks. Succeeds only while those callbacks
-     * are still running; otherwise returns ERR_FAILURE.
+     * Request to skip HDI of an in-progress ForceSuspendDeviceIgnoringWakelock.
+     * The blocking ForceSuspend call returns immediately. In-flight mem/ulsr callbacks
+     * keep running; ULSR OnAsyncWakeup is posted after they finish.
+     * Succeeds only while those callbacks are still running; otherwise returns ERR_FAILURE.
      */
     PowerErrors InterruptForceSuspend();
 

@@ -15,6 +15,9 @@
 
 #include "suspend_controller.h"
 #include <datetime_ex.h>
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#include <thread>
+#endif
 #include <display_manager_lite.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
@@ -917,17 +920,31 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         std::lock_guard lock(forceSuspendCbMutex_);
         forceSuspendSkipHdi_.store(false);
         forceSuspendCallbackPending_ = true;
+        forceSuspendCallbackFinished_ = false;
+        forceSuspendTag_ = tag;
     }
-    TriggerForceSuspendCallbacks(tag);
+
+    auto self = shared_from_this();
+    std::thread([self, tag] {
+        self->TriggerForceSuspendCallbacks(tag);
+        {
+            std::lock_guard lock(self->forceSuspendCbMutex_);
+            self->forceSuspendCallbackFinished_ = true;
+        }
+        self->forceSuspendWaitCv_.notify_all();
+    }).detach();
+
     bool skipHdi = false;
     {
-        std::lock_guard lock(forceSuspendCbMutex_);
+        std::unique_lock lock(forceSuspendCbMutex_);
+        forceSuspendWaitCv_.wait(lock, [this] {
+            return forceSuspendSkipHdi_.load() || forceSuspendCallbackFinished_;
+        });
         forceSuspendCallbackPending_ = false;
         skipHdi = forceSuspendSkipHdi_.exchange(false);
     }
     if (skipHdi) {
-        POWER_HILOGI(FEATURE_SUSPEND, "Force suspend skip HDI after callbacks");
-        RollbackInterruptedForceSuspend(tag);
+        POWER_HILOGI(FEATURE_SUSPEND, "Force suspend interrupted, return without waiting remaining callbacks");
         return false;
     }
     if (stateMachine_->GetState() != PowerState::SLEEP) {
@@ -941,11 +958,16 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
 
 bool SuspendController::InterruptForceSuspendCallback()
 {
-    std::lock_guard lock(forceSuspendCbMutex_);
-    if (!forceSuspendCallbackPending_) {
-        return false;
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        if (!forceSuspendCallbackPending_) {
+            return false;
+        }
+        forceSuspendSkipHdi_.store(true);
+        forceSuspendWaitCv_.notify_all();
     }
-    forceSuspendSkipHdi_.store(true);
+    RollbackForceSuspendState();
+    ScheduleUlsrWakeupAfterInterrupt();
     return true;
 }
 
@@ -963,7 +985,7 @@ void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
     TriggerSyncSleepCallback(false);
 }
 
-void SuspendController::RollbackInterruptedForceSuspend(const std::string& tag)
+void SuspendController::RollbackForceSuspendState()
 {
     onForceSleep = false;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -972,15 +994,27 @@ void SuspendController::RollbackInterruptedForceSuspend(const std::string& tag)
     if (stateMachine_ != nullptr) {
         stateMachine_->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION, true);
     }
+}
+
+void SuspendController::ScheduleUlsrWakeupAfterInterrupt()
+{
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    if (tag == "ulsr") {
+    std::string tag;
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        tag = forceSuspendTag_;
+    }
+    if (tag != "ulsr") {
+        return;
+    }
+    auto self = shared_from_this();
+    FFRTUtils::SubmitTask([self] {
+        NoCoroutineSwitchGuard guard;
         auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
         if (pms != nullptr) {
             pms->TriggerUlsrWakeupCallback(false);
         }
-    }
-#else
-    (void)tag;
+    });
 #endif
 }
 #endif
