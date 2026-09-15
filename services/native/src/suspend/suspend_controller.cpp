@@ -15,9 +15,6 @@
 
 #include "suspend_controller.h"
 #include <datetime_ex.h>
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-#include <thread>
-#endif
 #include <display_manager_lite.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
@@ -925,14 +922,15 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     }
 
     auto self = shared_from_this();
-    std::thread([self, tag] {
+    FFRTUtils::SubmitTask([self, tag] {
+        NoCoroutineSwitchGuard guard;
         self->TriggerForceSuspendCallbacks(tag);
         {
             std::lock_guard lock(self->forceSuspendCbMutex_);
             self->forceSuspendCallbackFinished_ = true;
         }
         self->forceSuspendWaitCv_.notify_all();
-    }).detach();
+    });
 
     bool skipHdi = false;
     {
