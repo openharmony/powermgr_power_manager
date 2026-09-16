@@ -24,7 +24,7 @@ group("fuzztest") {
     "ulsrcallback_fuzzer:UlsrCallbackFuzzTest",
     "createrunninglock_fuzzer:CreateRunningLockFuzzTest",
     "forcesuspenddevice_fuzzer:ForceSuspendDeviceFuzzTest",
-    "forcesuspendignoringwakelock_fuzzer:ForceSuspendIgnoringWakelockFuzzTest",
+    "forcesuspendignoringwakelock_fuzzer:ForceSuspendExFuzzTest",
     "getsetdevicemode_fuzzer:GetSetDeviceModeFuzzTest",
     "getpowerconfig_fuzzer:GetPowerConfigFuzzTest",
     "getshutdownreason_fuzzer:GetShutdownReasonFuzzTest",

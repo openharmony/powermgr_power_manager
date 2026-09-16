@@ -1447,7 +1447,7 @@ HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutAbnormal001, TestSize.Leve
 
 /**
  * @tc.name: PowerMgrService041
- * @tc.desc: Test ForceSuspendDeviceIgnoringWakelock permission and capability
+ * @tc.desc: Test ForceSuspendDeviceEx permission and capability
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
@@ -1458,22 +1458,26 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
 
     g_isSystem = false;
     g_isPermissionGranted = true;
-    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
 
     g_isSystem = true;
     g_isPermissionGranted = false;
-    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
-    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("ulsr");
+    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "ulsr");
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    ret = pmsTest_->ForceSuspendDeviceEx("auto", "");
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
 #else
-    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("auto", "");
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
     EXPECT_NE(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
     EXPECT_NE(ret, PowerErrors::ERR_PERMISSION_DENIED);
     PowerMgrClient::GetInstance().WakeupDevice();
@@ -1483,7 +1487,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrService042
- * @tc.desc: Test ForceSuspendDeviceIgnoringWakelock when suspend controller is null
+ * @tc.desc: Test ForceSuspendDeviceEx when suspend controller is null
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
@@ -1494,8 +1498,8 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
     pmsTest_->suspendController_ = nullptr;
     g_isSystem = true;
     g_isPermissionGranted = true;
-    PowerErrors ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
-#if defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    PowerErrors ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
+#if defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
 #else
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
@@ -1506,7 +1510,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
 
 /**
  * @tc.name: PowerMgrService043
- * @tc.desc: SuspendDevice/ForceSuspendDevice/WakeupDevice return 801 when force suspend ignoring wakelock is enabled
+ * @tc.desc: SuspendDevice/ForceSuspendDevice/WakeupDevice return 801 when ForceSuspendDeviceEx is enabled
  * @tc.type: FUNC
  */
 HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
@@ -1515,7 +1519,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_isSystem = true;
     g_isPermissionGranted = true;
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
     EXPECT_EQ(pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, true),
         PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     EXPECT_EQ(pmsTest_->ForceSuspendDevice(0), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
@@ -1550,7 +1554,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService044, TestSize.Level0)
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || \
     !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     ret = pmsTest_->InterruptForceSuspend();
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);

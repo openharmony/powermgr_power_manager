@@ -159,10 +159,10 @@ int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIpc(
     return result;
 }
 
-int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIgnoringWakelockIpc(const std::string& suspendTag)
+int32_t PowerMgrServiceAdapter::ForceSuspendDeviceExIpc(const std::string& mode, const std::string& tag)
 {
-    PowerXCollie powerXCollie("PowerMgrServiceAdapter::ForceSuspendDeviceIgnoringWakelock", false);
-    int32_t result = static_cast<int32_t>(ForceSuspendDeviceIgnoringWakelock(suspendTag));
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::ForceSuspendDeviceEx", false);
+    int32_t result = static_cast<int32_t>(ForceSuspendDeviceEx(mode, tag));
     return result;
 }
 

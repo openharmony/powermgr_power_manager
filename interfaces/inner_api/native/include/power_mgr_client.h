@@ -157,21 +157,24 @@ public:
     PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
     /**
-     * Forcibly suspend the device ignoring running locks.
+     * Extended force suspend.
      * Constraints:
-     * - Only available when POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK and
+     * - Only available when POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX and
      *   POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG are both enabled;
      *   otherwise returns ERR_CAPABILITY_NOT_SUPPORTED.
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.
-     * - suspendTag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.
-     * - Running locks do not block this call.
-     * - Requires Power HDI V1_4 ForceSuspendIgnoringWakelock; older HDI returns ERR_FAILURE.
+     * - mode: "auto" is reserved and returns ERR_CAPABILITY_NOT_SUPPORTED this round;
+     *   "ignore_wakelock" ignores running locks. Other modes return ERR_PARAM_INVALID.
+     * - tag: used when mode is "ignore_wakelock"; "mem" for S3 sleep, "ulsr" for ULSR;
+     *   others return ERR_PARAM_INVALID.
+     * - Running locks do not block this call when mode is "ignore_wakelock".
+     * - Requires Power HDI V1_4 ForceSuspendEx; older HDI returns ERR_FAILURE.
      * - Do not use together with ForceSuspendDevice (that API returns 801 when this feature is on).
      */
-    PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag);
+    PowerErrors ForceSuspendDeviceEx(const std::string& mode, const std::string& tag);
 
     /**
-     * Request to skip HDI of an in-progress ForceSuspendDeviceIgnoringWakelock.
+     * Request to skip HDI of an in-progress ForceSuspendDeviceEx.
      * The blocking ForceSuspend call returns immediately. In-flight mem/ulsr callbacks
      * keep running; ULSR OnAsyncWakeup is posted after they finish.
      * Succeeds only while those callbacks are still running; otherwise returns ERR_FAILURE.

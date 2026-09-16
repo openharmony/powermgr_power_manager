@@ -714,10 +714,10 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
 }
 #endif
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
 /**
  * @tc.name: PowerSuspendControllerTest023
- * @tc.desc: test HandleForceSuspendIgnoringWakelock
+ * @tc.desc: test HandleForceSuspendEx
  * @tc.type: FUNC
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Level0)
@@ -729,15 +729,15 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Lev
 
     auto backup = g_service->suspendController_->stateMachine_;
     g_service->suspendController_->stateMachine_ = nullptr;
-    EXPECT_FALSE(g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
+    EXPECT_FALSE(g_service->suspendController_->HandleForceSuspendEx(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem"));
     g_service->suspendController_->stateMachine_ = backup;
 
-    bool ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
+    bool ret = g_service->suspendController_->HandleForceSuspendEx(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "mem");
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
 
-    ret = g_service->suspendController_->HandleForceSuspendIgnoringWakelock(
+    ret = g_service->suspendController_->HandleForceSuspendEx(
         SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, "ulsr");
     EXPECT_TRUE(g_service->suspendController_->stateMachine_->GetState() == PowerState::SLEEP || !ret);
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest023: end";

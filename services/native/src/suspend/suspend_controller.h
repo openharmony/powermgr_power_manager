@@ -19,7 +19,7 @@
 #include <cinttypes>
 #include <functional>
 #include <memory>
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
@@ -65,8 +65,8 @@ public:
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-    bool HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+    bool HandleForceSuspendEx(SuspendDeviceType reason, const std::string& tag);
     bool InterruptForceSuspendCallback();
 #endif
     void RecordPowerKeyDown(bool interrupting = false);
@@ -133,7 +133,7 @@ private:
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
     void TriggerForceSuspendCallbacks(const std::string& tag);
     void RollbackForceSuspendState();
     void ScheduleUlsrWakeupAfterInterrupt();
@@ -169,7 +169,7 @@ private:
     ffrt::mutex mutex_;
     ffrt::mutex sleepCbMutex_;
     ffrt::mutex suspendMutex_;
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
     std::mutex forceSuspendCbMutex_;
     std::condition_variable forceSuspendWaitCv_;
     bool forceSuspendCallbackPending_ {false};

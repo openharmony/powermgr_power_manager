@@ -137,18 +137,18 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface->SetSuspendTag(tag);
 }
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-bool SystemSuspendController::ForceSuspendIgnoringWakelock(const std::string& tag)
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+bool SystemSuspendController::ForceSuspendEx(const std::string& mode, const std::string& tag)
 {
     std::lock_guard lock(mutex_);
     auto v1_4_iface = V1_4::IPowerInterface::Get();
     if (v1_4_iface == nullptr) {
-        POWER_HILOGE(COMP_SVC, "v1_4 interface is not supported, cannot force suspend ignore wakelock");
+        POWER_HILOGE(COMP_SVC, "v1_4 interface is not supported, cannot ForceSuspendEx");
         return false;
     }
-    int32_t ret = v1_4_iface->ForceSuspendIgnoringWakelock(tag);
+    int32_t ret = v1_4_iface->ForceSuspendEx(mode, tag);
     if (ret != HDF_SUCCESS) {
-        POWER_HILOGE(COMP_SVC, "ForceSuspendIgnoringWakelock failed, ret=%{public}d", ret);
+        POWER_HILOGE(COMP_SVC, "ForceSuspendEx failed, ret=%{public}d", ret);
         return false;
     }
     return true;

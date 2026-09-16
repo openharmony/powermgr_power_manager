@@ -881,10 +881,10 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     }
 }
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+bool SuspendController::HandleForceSuspendEx(SuspendDeviceType reason, const std::string& tag)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
+    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ex, reason=%{public}d, tag=%{public}s",
         reason, tag.c_str());
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
@@ -909,7 +909,7 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     }
     onForceSleep = true;
     if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendIgnoringWakelock");
+        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendEx");
         return false;
     }
 
@@ -950,8 +950,8 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         return false;
     }
     POWER_HILOGI(FEATURE_SUSPEND,
-        "Callbacks done, call HDI force suspend ignoring wakelock, tag=%{public}s", tag.c_str());
-    return SystemSuspendController::GetInstance().ForceSuspendIgnoringWakelock(tag);
+        "Callbacks done, call HDI ForceSuspendEx, tag=%{public}s", tag.c_str());
+    return SystemSuspendController::GetInstance().ForceSuspendEx("ignore_wakelock", tag);
 }
 
 bool SuspendController::InterruptForceSuspendCallback()

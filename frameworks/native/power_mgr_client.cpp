@@ -381,20 +381,25 @@ PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
     return ret;
 }
 
-PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string& suspendTag)
+PowerErrors PowerMgrClient::ForceSuspendDeviceEx(const std::string& mode, const std::string& tag)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
-    if (suspendTag != "mem" && suspendTag != "ulsr") {
+    if (mode != "auto" && mode != "ignore_wakelock") {
         POWER_HILOGE(FEATURE_SUSPEND,
-            "Invalid suspendTag: %{public}s, must be \"mem\" or \"ulsr\"", suspendTag.c_str());
+            "Invalid mode: %{public}s, must be \"auto\" or \"ignore_wakelock\"", mode.c_str());
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(suspendTag);
+    if (mode == "ignore_wakelock" && tag != "mem" && tag != "ulsr") {
+        POWER_HILOGE(FEATURE_SUSPEND,
+            "Invalid tag: %{public}s, must be \"mem\" or \"ulsr\"", tag.c_str());
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
+    int32_t result = proxy->ForceSuspendDeviceExIpc(mode, tag);
     if (result != static_cast<int32_t>(PowerErrors::ERR_OK)) {
-        POWER_HILOGE(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, result=%{public}d", result);
+        POWER_HILOGE(FEATURE_SUSPEND, "ForceSuspendDeviceEx failed, result=%{public}d", result);
     } else {
-        POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceIgnoringWakelock Success");
+        POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceEx Success");
     }
     return static_cast<PowerErrors>(result);
 }

@@ -56,8 +56,8 @@ declare_args() {
   power_manager_feature_enable_screen_decoupling = false
   power_manager_feature_enable_mouse_debounce_after_suspend = false
   # Disable screen-coupled SuspendDevice/ForceSuspendDevice
-  # and enable ForceSuspendDeviceIgnoringWakelock (HDI V1_4, ignore running locks).
-  power_manager_feature_enable_force_suspend_ignoring_wakelock = false
+  # and enable ForceSuspendDeviceEx (HDI V1_4, ignore running locks).
+  power_manager_feature_enable_force_suspend_ex = false
 }
 
 defines = []
@@ -70,8 +70,8 @@ if (power_manager_feature_enable_suspend_with_tag) {
   defines += [ "POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG" ]
 }
 
-if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
-  defines += [ "POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK" ]
+if (power_manager_feature_enable_force_suspend_ex) {
+  defines += [ "POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX" ]
 }
 
 if (power_manager_feature_audio_lock_unproxy) {

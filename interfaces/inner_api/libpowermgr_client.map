@@ -31,7 +31,7 @@
             OHOS::PowerMgr::PowerMgrProxy::CreateRunningLockIpc*;
             OHOS::PowerMgr::PowerMgrProxy::ForceRebootDeviceIpc*;
             OHOS::PowerMgr::PowerMgrProxy::ForceSuspendDeviceIpc*;
-            OHOS::PowerMgr::PowerMgrProxy::ForceSuspendDeviceIgnoringWakelockIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::ForceSuspendDeviceExIpc*;
             OHOS::PowerMgr::PowerMgrProxy::InterruptForceSuspendIpc*;
             OHOS::PowerMgr::PowerMgrProxy::GetDeviceModeIpc*;
             OHOS::PowerMgr::PowerMgrProxy::GetPowerConfigIpc*;
