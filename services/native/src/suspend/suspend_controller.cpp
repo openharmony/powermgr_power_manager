@@ -119,7 +119,7 @@ void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& cal
 }
 #endif
 
-void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
+void SuspendController::TriggerSyncSleepCallback(bool isWakeup, bool notifyUlsrOnWakeup)
 {
     std::lock_guard lock(sleepCbMutex_);
     POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d", isWakeup,
@@ -135,7 +135,7 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
         onForceSleep = false;
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    if (isWakeup) {
+    if (isWakeup && notifyUlsrOnWakeup) {
         DelayedSpSingleton<PowerMgrService>::GetInstance()->TriggerUlsrWakeupCallbackWithResult();
     }
 #endif
@@ -968,7 +968,7 @@ bool SuspendController::InterruptForceSuspendCallback()
         forceSuspendWaitCv_.notify_all();
     }
     RollbackForceSuspendState();
-    ScheduleUlsrWakeupAfterInterrupt();
+    ScheduleWakeupAfterInterrupt();
     return true;
 }
 
@@ -982,13 +982,13 @@ void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
         }
 #endif
     }
-    TriggerForceSuspendMemCallbacks();
+    TriggerForceSuspendMemCallbacks(false);
 }
 
-void SuspendController::TriggerForceSuspendMemCallbacks()
+void SuspendController::TriggerForceSuspendMemCallbacks(bool isWakeup)
 {
-    auto notifyInnerTask = [this]() {
-        TriggerSyncSleepCallback(false);
+    auto notifyInnerTask = [this, isWakeup]() {
+        TriggerSyncSleepCallback(isWakeup, false);
     };
     std::packaged_task<void()> callbackTask(notifyInnerTask);
     std::future<void> fut = callbackTask.get_future();
@@ -996,13 +996,13 @@ void SuspendController::TriggerForceSuspendMemCallbacks()
     std::future_status status = fut.wait_for(
         std::chrono::milliseconds(FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS));
     if (status == std::future_status::timeout) {
-        POWER_HILOGW(FEATURE_SUSPEND, "Force suspend mem callback timeout");
+        POWER_HILOGW(FEATURE_SUSPEND, "Force suspend mem %{public}s callback timeout",
+            isWakeup ? "wakeup" : "sleep");
     }
 }
 
 void SuspendController::RollbackForceSuspendState()
 {
-    onForceSleep = false;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
     SetForceSleepingFlag(false);
 #endif
@@ -1011,26 +1011,26 @@ void SuspendController::RollbackForceSuspendState()
     }
 }
 
-void SuspendController::ScheduleUlsrWakeupAfterInterrupt()
+void SuspendController::ScheduleWakeupAfterInterrupt()
 {
-#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
     std::string tag;
     {
         std::lock_guard lock(forceSuspendCbMutex_);
         tag = forceSuspendTag_;
     }
-    if (tag != "ulsr") {
-        return;
-    }
     auto self = shared_from_this();
-    FFRTUtils::SubmitTask([self] {
+    FFRTUtils::SubmitTask([self, tag] {
         NoCoroutineSwitchGuard guard;
-        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
-        if (pms != nullptr) {
-            pms->TriggerUlsrWakeupCallback(false);
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+        if (tag == "ulsr") {
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms != nullptr) {
+                pms->TriggerUlsrWakeupCallback(false);
+            }
         }
-    });
 #endif
+        self->TriggerForceSuspendMemCallbacks(true);
+    });
 }
 #endif
 

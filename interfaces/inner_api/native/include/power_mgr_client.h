@@ -166,8 +166,8 @@ public:
      * - mode: "auto" is reserved and returns ERR_CAPABILITY_NOT_SUPPORTED this round;
      *   "ignore_wakelock" ignores running locks. Other modes return ERR_PARAM_INVALID.
      * - tag: used when mode is "ignore_wakelock"; "mem" for S3 sleep, "ulsr" for ULSR;
-     *   others return ERR_PARAM_INVALID. "ulsr" runs OnSyncUlsr then OnSyncSleep;
-     *   "mem" runs OnSyncSleep. OnSyncSleep waits at most 5s.
+     *   others return ERR_PARAM_INVALID. "mem" runs OnSyncSleep only;
+     *   "ulsr" runs OnSyncUlsr then OnSyncSleep. OnSyncSleep waits at most 5s.
      * - Running locks do not block this call when mode is "ignore_wakelock".
      * - Requires Power HDI V1_4 ForceSuspendEx; older HDI returns ERR_FAILURE.
      * - Do not use together with ForceSuspendDevice (that API returns 801 when this feature is on).
@@ -176,8 +176,9 @@ public:
 
     /**
      * Request to skip HDI of an in-progress ForceSuspendDeviceEx.
-     * The blocking ForceSuspend call returns immediately. In-flight mem/ulsr callbacks
-     * keep running; ULSR OnAsyncWakeup is posted after they finish.
+     * The blocking ForceSuspend call returns immediately. In-flight callbacks keep running.
+     * After they finish, wakeup is posted by tag: "mem" rolls back OnSyncWakeup only;
+     * "ulsr" posts OnAsyncWakeup and OnSyncWakeup.
      * Succeeds only while those callbacks are still running; otherwise returns ERR_FAILURE.
      */
     PowerErrors InterruptForceSuspend();

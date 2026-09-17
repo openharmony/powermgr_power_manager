@@ -79,7 +79,7 @@ public:
     bool TriggerTakeOverSuspendCallback(SuspendDeviceType type);
 #endif
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
-    void TriggerSyncSleepCallback(bool isWakeup);
+    void TriggerSyncSleepCallback(bool isWakeup, bool notifyUlsrOnWakeup = true);
     void UpdateSuspendSources();
 
     std::shared_ptr<PowerStateMachine> GetStateMachine() const
@@ -135,9 +135,9 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
     void TriggerForceSuspendCallbacks(const std::string& tag);
-    void TriggerForceSuspendMemCallbacks();
+    void TriggerForceSuspendMemCallbacks(bool isWakeup);
     void RollbackForceSuspendState();
-    void ScheduleUlsrWakeupAfterInterrupt();
+    void ScheduleWakeupAfterInterrupt();
 #endif
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
