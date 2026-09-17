@@ -14,7 +14,10 @@
  */
 
 #include "suspend_controller.h"
+#include <chrono>
 #include <datetime_ex.h>
+#include <future>
+#include <thread>
 #include <display_manager_lite.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
@@ -978,9 +981,23 @@ void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
             POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout");
         }
 #endif
-        return;
     }
-    TriggerSyncSleepCallback(false);
+    TriggerForceSuspendMemCallbacks();
+}
+
+void SuspendController::TriggerForceSuspendMemCallbacks()
+{
+    auto notifyInnerTask = [this]() {
+        TriggerSyncSleepCallback(false);
+    };
+    std::packaged_task<void()> callbackTask(notifyInnerTask);
+    std::future<void> fut = callbackTask.get_future();
+    std::make_unique<std::thread>(std::move(callbackTask))->detach();
+    std::future_status status = fut.wait_for(
+        std::chrono::milliseconds(FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS));
+    if (status == std::future_status::timeout) {
+        POWER_HILOGW(FEATURE_SUSPEND, "Force suspend mem callback timeout");
+    }
 }
 
 void SuspendController::RollbackForceSuspendState()

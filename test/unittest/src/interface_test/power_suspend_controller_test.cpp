@@ -717,7 +717,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
 /**
  * @tc.name: PowerSuspendControllerTest023
- * @tc.desc: test HandleForceSuspendEx
+ * @tc.desc: test HandleForceSuspendEx for mem and ulsr tags
  * @tc.type: FUNC
  */
 HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Level0)

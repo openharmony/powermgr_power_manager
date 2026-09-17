@@ -135,6 +135,7 @@ private:
     void HandleForceSleep(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
     void TriggerForceSuspendCallbacks(const std::string& tag);
+    void TriggerForceSuspendMemCallbacks();
     void RollbackForceSuspendState();
     void ScheduleUlsrWakeupAfterInterrupt();
 #endif
@@ -153,6 +154,9 @@ private:
         const std::string& priority, SuspendDeviceType type);
 #endif
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+    static constexpr int32_t FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS = 5000;
+#endif
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void SuspendWhenStateSleep(SuspendDeviceType reason, uint32_t action);
     bool CheckDuringCall(const sptr<PowerMgrService>& pms, SuspendDeviceType reason);
