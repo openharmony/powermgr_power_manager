@@ -159,10 +159,10 @@ int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIpc(
     return result;
 }
 
-int32_t PowerMgrServiceAdapter::ForceSuspendDeviceExIpc(const std::string& mode, const std::string& tag)
+int32_t PowerMgrServiceAdapter::ForceSuspendDeviceExIpc(const std::string& tag)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::ForceSuspendDeviceEx", false);
-    int32_t result = static_cast<int32_t>(ForceSuspendDeviceEx(mode, tag));
+    int32_t result = static_cast<int32_t>(ForceSuspendDeviceEx(tag));
     return result;
 }
 

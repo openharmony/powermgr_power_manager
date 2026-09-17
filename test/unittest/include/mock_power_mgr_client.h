@@ -56,10 +56,10 @@ public:
         return ret;
     }
 
-    PowerErrors ForceSuspendDeviceEx(const std::string& mode, const std::string& tag)
+    PowerErrors ForceSuspendDeviceEx(const std::string& tag)
     {
         state_ = false;
-        return PowerMgrClient::GetInstance().ForceSuspendDeviceEx(mode, tag);
+        return PowerMgrClient::GetInstance().ForceSuspendDeviceEx(tag);
     }
 
     PowerErrors SuspendDevice()

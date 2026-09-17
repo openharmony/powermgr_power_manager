@@ -1458,26 +1458,24 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
 
     g_isSystem = false;
     g_isPermissionGranted = true;
-    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("mem");
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
 
     g_isSystem = true;
     g_isPermissionGranted = false;
-    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("mem");
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
 #if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
-    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("mem");
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "ulsr");
-    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    ret = pmsTest_->ForceSuspendDeviceEx("auto", "");
+    ret = pmsTest_->ForceSuspendDeviceEx("ulsr");
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
 #else
-    ret = pmsTest_->ForceSuspendDeviceEx("auto", "");
-    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
+    ret = pmsTest_->ForceSuspendDeviceEx("auto");
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+    ret = pmsTest_->ForceSuspendDeviceEx("mem");
     EXPECT_NE(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
     EXPECT_NE(ret, PowerErrors::ERR_PERMISSION_DENIED);
     PowerMgrClient::GetInstance().WakeupDevice();
@@ -1498,7 +1496,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
     pmsTest_->suspendController_ = nullptr;
     g_isSystem = true;
     g_isPermissionGranted = true;
-    PowerErrors ret = pmsTest_->ForceSuspendDeviceEx("ignore_wakelock", "mem");
+    PowerErrors ret = pmsTest_->ForceSuspendDeviceEx("mem");
 #if defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
 #else

@@ -1981,10 +1981,9 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient064, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient068, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient068 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("", "mem"), PowerErrors::ERR_PARAM_INVALID);
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("invalid", "mem"), PowerErrors::ERR_PARAM_INVALID);
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("ignore_wakelock", "MEM"), PowerErrors::ERR_PARAM_INVALID);
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("ignore_wakelock", ""), PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("MEM"), PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx(""), PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("invalid"), PowerErrors::ERR_PARAM_INVALID);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient068 function end!");
 }
 
@@ -1997,20 +1996,20 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
 #if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("ignore_wakelock", "mem"),
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("mem"),
         PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("ignore_wakelock", "ulsr"),
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("ulsr"),
         PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
 #else
-    PowerErrors ret = powerMgrClient.ForceSuspendDeviceEx("ignore_wakelock", "mem");
+    PowerErrors ret = powerMgrClient.ForceSuspendDeviceEx("mem");
     EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
     EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
-    ret = powerMgrClient.ForceSuspendDeviceEx("ignore_wakelock", "ulsr");
+    ret = powerMgrClient.ForceSuspendDeviceEx("ulsr");
     EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
     EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
     powerMgrClient.WakeupDevice();
 #endif
-    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("auto", ""), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceEx("auto"), PowerErrors::ERR_PARAM_INVALID);
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function end!");
 }
 

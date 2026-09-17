@@ -163,16 +163,15 @@ public:
      *   POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG are both enabled;
      *   otherwise returns ERR_CAPABILITY_NOT_SUPPORTED.
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.
-     * - mode: "auto" is reserved and returns ERR_CAPABILITY_NOT_SUPPORTED this round;
-     *   "ignore_wakelock" ignores running locks. Other modes return ERR_PARAM_INVALID.
-     * - tag: used when mode is "ignore_wakelock"; "mem" for S3 sleep, "ulsr" for ULSR;
-     *   others return ERR_PARAM_INVALID. "mem" runs OnSyncSleep only;
-     *   "ulsr" runs OnSyncUlsr then OnSyncSleep. OnSyncSleep waits at most 5s.
-     * - Running locks do not block this call when mode is "ignore_wakelock".
+     * - tag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.
+     *   "mem" runs OnSyncSleep only; "ulsr" runs OnSyncUlsr then OnSyncSleep.
+     *   OnSyncSleep waits at most 5s.
+     * - Running locks do not block this call.
+     * - HDI ForceSuspendEx mode is chosen by Power Manager (currently "ignore_wakelock").
      * - Requires Power HDI V1_4 ForceSuspendEx; older HDI returns ERR_FAILURE.
      * - Do not use together with ForceSuspendDevice (that API returns 801 when this feature is on).
      */
-    PowerErrors ForceSuspendDeviceEx(const std::string& mode, const std::string& tag);
+    PowerErrors ForceSuspendDeviceEx(const std::string& tag);
 
     /**
      * Request to skip HDI of an in-progress ForceSuspendDeviceEx.

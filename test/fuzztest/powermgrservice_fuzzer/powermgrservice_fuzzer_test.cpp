@@ -85,7 +85,7 @@ void PowerServiceFuzzTest()
     g_service->WakeupDeviceAsyncIpc(callTimeMs, reasonValue, "", apiVersion);
 
     g_service->ForceSuspendDeviceIpc(callTimeMs, apiVersion, powerProxy);
-    g_service->ForceSuspendDeviceExIpc("ignore_wakelock", "ulsr");
+    g_service->ForceSuspendDeviceExIpc("ulsr");
     g_service->InterruptForceSuspendIpc();
     g_service->HibernateIpc(clearMemory, "", apiVersion, powerProxy);
     g_service->CreateRunningLockIpc(remoteObj, runningLockInfo, powerError);

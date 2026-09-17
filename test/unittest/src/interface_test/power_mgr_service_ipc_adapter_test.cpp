@@ -98,7 +98,7 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors ForceSuspendDeviceEx(const std::string& mode, const std::string& tag)
+    PowerErrors ForceSuspendDeviceEx(const std::string& tag)
     {
         return PowerErrors::ERR_OK;
     }
@@ -585,9 +585,9 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter013, TestSize.L
 HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter014, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter014 function start!");
     auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
-    int32_t result = adapter->ForceSuspendDeviceExIpc("ignore_wakelock", "mem");
+    int32_t result = adapter->ForceSuspendDeviceExIpc("mem");
     EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
-    result = adapter->ForceSuspendDeviceExIpc("ignore_wakelock", "ulsr");
+    result = adapter->ForceSuspendDeviceExIpc("ulsr");
     EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));
     result = adapter->InterruptForceSuspendIpc();
     EXPECT_EQ(result, static_cast<int32_t>(PowerErrors::ERR_OK));

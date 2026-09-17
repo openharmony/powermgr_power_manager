@@ -1606,7 +1606,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::ForceSuspendDeviceEx(const std::string& mode, const std::string& tag)
+PowerErrors PowerMgrService::ForceSuspendDeviceEx(const std::string& tag)
 {
     if (!Permission::IsSystem()) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceEx failed, System permission intercept");
@@ -1618,20 +1618,11 @@ PowerErrors PowerMgrService::ForceSuspendDeviceEx(const std::string& mode, const
     }
 #if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || \
     !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
-    (void)mode;
     (void)tag;
     POWER_HILOGI(FEATURE_SUSPEND,
         "ForceSuspendDeviceEx failed, feature or suspend-with-tag is not enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
 #else
-    if (mode == "auto") {
-        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceEx mode auto is not supported");
-        return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
-    }
-    if (mode != "ignore_wakelock") {
-        POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceEx invalid mode: %{public}s", mode.c_str());
-        return PowerErrors::ERR_PARAM_INVALID;
-    }
     if (tag != "mem" && tag != "ulsr") {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceEx invalid tag: %{public}s", tag.c_str());
         return PowerErrors::ERR_PARAM_INVALID;
@@ -1644,8 +1635,8 @@ PowerErrors PowerMgrService::ForceSuspendDeviceEx(const std::string& mode, const
         return PowerErrors::ERR_FAILURE;
     }
     POWER_HILOGI(FEATURE_SUSPEND,
-        "[UL_POWER] Try to force suspend ex, pid=%{public}d, uid=%{public}d, mode=%{public}s, tag=%{public}s",
-        pid, uid, mode.c_str(), tag.c_str());
+        "[UL_POWER] Try to force suspend ex, pid=%{public}d, uid=%{public}d, tag=%{public}s",
+        pid, uid, tag.c_str());
 #ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
     if (suspendController_) {
         suspendController_->StopSleep();
