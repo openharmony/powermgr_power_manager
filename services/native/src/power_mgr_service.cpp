@@ -1635,13 +1635,8 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::strin
         return PowerErrors::ERR_FAILURE;
     }
     POWER_HILOGI(FEATURE_SUSPEND,
-        "[UL_POWER] Try to force suspend ex, pid=%{public}d, uid=%{public}d, tag=%{public}s",
+        "[UL_POWER] Try to force suspend ignoring wakelock, pid=%{public}d, uid=%{public}d, tag=%{public}s",
         pid, uid, tag.c_str());
-#ifdef POWER_MANAGER_ENABLE_CHARGING_TYPE_SETTING
-    if (suspendController_) {
-        suspendController_->StopSleep();
-    }
-#endif
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     powerStateMachine_->ReportSuspendStart(
         uid, static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION), true);
