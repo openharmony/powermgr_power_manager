@@ -48,7 +48,7 @@ public:
     virtual int32_t IsForceSleepingIpc(bool& isForceSleeping) override;
     virtual int32_t ForceSuspendDeviceIpc(
         int64_t callTimeMs, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
-    virtual int32_t ForceSuspendDeviceExIpc(const std::string& tag) override;
+    virtual int32_t ForceSuspendDeviceIgnoringWakelockIpc(const std::string& tag) override;
     virtual int32_t InterruptForceSuspendIpc() override;
     virtual int32_t HibernateIpc(bool clearMemory, const std::string& reason,
         const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
@@ -153,7 +153,7 @@ public:
     virtual bool IsCollaborationScreenOn() = 0;
     virtual bool IsForceSleeping() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") = 0;
-    virtual PowerErrors ForceSuspendDeviceEx(const std::string& tag) = 0;
+    virtual PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& tag) = 0;
     virtual PowerErrors InterruptForceSuspend() = 0;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") = 0;

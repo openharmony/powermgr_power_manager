@@ -157,7 +157,7 @@ public:
     PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
     /**
-     * Extended force suspend.
+     * Forcibly suspend the device ignoring running locks.
      * Constraints:
      * - Only available when POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX and
      *   POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG are both enabled;
@@ -171,10 +171,10 @@ public:
      * - Requires Power HDI V1_4 ForceSuspendEx; older HDI returns ERR_FAILURE.
      * - Do not use together with ForceSuspendDevice (that API returns 801 when this feature is on).
      */
-    PowerErrors ForceSuspendDeviceEx(const std::string& tag);
+    PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& tag);
 
     /**
-     * Request to skip HDI of an in-progress ForceSuspendDeviceEx.
+     * Request to skip HDI of an in-progress ForceSuspendDeviceIgnoringWakelock.
      * The blocking ForceSuspend call returns immediately. In-flight callbacks keep running.
      * After they finish, wakeup is posted by tag: "mem" rolls back OnSyncWakeup only;
      * "ulsr" posts OnAsyncWakeup and OnSyncWakeup.

@@ -66,7 +66,7 @@ public:
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
-    bool HandleForceSuspendEx(SuspendDeviceType reason, const std::string& tag);
+    bool HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
     bool InterruptForceSuspendCallback();
 #endif
     void RecordPowerKeyDown(bool interrupting = false);

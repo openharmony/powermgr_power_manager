@@ -56,7 +56,7 @@ declare_args() {
   power_manager_feature_enable_screen_decoupling = false
   power_manager_feature_enable_mouse_debounce_after_suspend = false
   # Disable screen-coupled SuspendDevice/ForceSuspendDevice
-  # and enable ForceSuspendDeviceEx (HDI V1_4, ignore running locks).
+  # and enable ForceSuspendDeviceIgnoringWakelock (HDI V1_4, ignore running locks).
   power_manager_feature_enable_force_suspend_ex = false
 }
 

@@ -170,7 +170,7 @@ HWTEST_F(PowerMockProxyTest, PowerMockProxyTest003, TestSize.Level2)
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
-    ret = sptrProxy->ForceSuspendDeviceExIpc("mem");
+    ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem");
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->InterruptForceSuspendIpc();
     EXPECT_EQ(ret, ERR_INVALID_DATA);

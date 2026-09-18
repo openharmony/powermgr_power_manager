@@ -381,7 +381,7 @@ PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
     return ret;
 }
 
-PowerErrors PowerMgrClient::ForceSuspendDeviceEx(const std::string& tag)
+PowerErrors PowerMgrClient::ForceSuspendDeviceIgnoringWakelock(const std::string& tag)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
@@ -390,11 +390,11 @@ PowerErrors PowerMgrClient::ForceSuspendDeviceEx(const std::string& tag)
             "Invalid tag: %{public}s, must be \"mem\" or \"ulsr\"", tag.c_str());
         return PowerErrors::ERR_PARAM_INVALID;
     }
-    int32_t result = proxy->ForceSuspendDeviceExIpc(tag);
+    int32_t result = proxy->ForceSuspendDeviceIgnoringWakelockIpc(tag);
     if (result != static_cast<int32_t>(PowerErrors::ERR_OK)) {
-        POWER_HILOGE(FEATURE_SUSPEND, "ForceSuspendDeviceEx failed, result=%{public}d", result);
+        POWER_HILOGE(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, result=%{public}d", result);
     } else {
-        POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceEx Success");
+        POWER_HILOGD(FEATURE_SUSPEND, "Calling ForceSuspendDeviceIgnoringWakelock Success");
     }
     return static_cast<PowerErrors>(result);
 }

@@ -885,9 +885,9 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
 }
 
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
-bool SuspendController::HandleForceSuspendEx(SuspendDeviceType reason, const std::string& tag)
+bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
-    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ex, reason=%{public}d, tag=%{public}s",
+    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
         reason, tag.c_str());
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
