@@ -92,6 +92,8 @@ const std::string SYSTEM_POWER_VIBRATOR_CONFIG_FILE = "/system/etc/power_config/
 static const char* POWER_MANAGER_EXT_PATH = "libpower_manager_ext.z.so";
 constexpr int32_t WAKEUP_LOCK_TIMEOUT_MS = 5000;
 constexpr int32_t SET_SUSPEND_TAG_TIMEOUT_MS = 40000; // ULSR_SYNC_CALLBACK_TIMEOUT_MS + 10000
+// POWERKEY_BLOCKED_FOLD_MODE_NONE(-1) means not configured / feature disabled.
+static constexpr int32_t POWERKEY_BLOCKED_FOLD_MODE_NONE = -1;
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
 // Force trigger ULSR wakeup callback if ULSR has been blocked for more than 60s
 constexpr int32_t ULSR_TIMER_TIMEOUT_MS = 60000;
@@ -225,6 +227,8 @@ bool PowerMgrService::Init()
     isHibernateEnable_ = system::GetBoolParameter("const.power.enable_s4", true);
 #endif
     isExternalScreenWakeup_ = system::GetBoolParameter("const.power.external_screen_wakeup", false);
+    powerkeyBlockedFoldMode_ =
+        system::GetIntParameter("const.power.powerkey_blocked_fold_mode", POWERKEY_BLOCKED_FOLD_MODE_NONE);
     POWER_HILOGI(COMP_SVC, "powermgr service init success, duringCallStateEnable: %{public}d",\
         isDuringCallStateEnable_);
     return true;

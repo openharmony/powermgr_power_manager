@@ -27,6 +27,7 @@
 #include <input_manager.h>
 #endif
 #include <securec.h>
+#include <display_manager_lite.h>
 
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
@@ -41,6 +42,17 @@ using namespace testing::ext;
 using namespace OHOS::PowerMgr;
 using namespace OHOS;
 using namespace std;
+
+namespace {
+OHOS::Rosen::FoldDisplayMode g_foldDisplayMode = OHOS::Rosen::FoldDisplayMode::MAIN;
+} // namespace
+namespace OHOS::Rosen {
+FoldDisplayMode DisplayManagerLite::GetFoldDisplayMode()
+{
+    return g_foldDisplayMode;
+}
+} // namespace OHOS::Rosen
+
 static sptr<PowerMgrService> g_service;
 static constexpr int SLEEP_WAIT_TIME_S = 2;
 static constexpr int NEXT_WAIT_TIME_S = 1;
@@ -713,4 +725,41 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest022 function end!");
 }
 #endif
+
+/**
+ * @tc.name: PowerSuspendControllerTest023
+ * @tc.desc: test IsPowerkeyScreenOffBlocked returns false when blocked mode is -1 (default, no block)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function start!");
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+    g_service->powerkeyBlockedFoldMode_ = -1;
+    EXPECT_FALSE(g_service->suspendController_->IsPowerkeyScreenOffBlocked());
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest023_1
+ * @tc.desc: test IsPowerkeyScreenOffBlocked blocks only when current fold mode equals the configured mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest023_1, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023_1 function start!");
+    g_service->SuspendControllerInit();
+    ASSERT_NE(g_service->suspendController_, nullptr);
+    constexpr int32_t V_MAIN_MODE = static_cast<int32_t>(Rosen::FoldDisplayMode::V_MAIN);
+    g_service->powerkeyBlockedFoldMode_ = V_MAIN_MODE;
+    g_foldDisplayMode = Rosen::FoldDisplayMode::V_MAIN;
+    EXPECT_TRUE(g_service->suspendController_->IsPowerkeyScreenOffBlocked());
+    g_foldDisplayMode = Rosen::FoldDisplayMode::MAIN;
+    EXPECT_FALSE(g_service->suspendController_->IsPowerkeyScreenOffBlocked());
+    g_service->powerkeyBlockedFoldMode_ = -1;
+    g_foldDisplayMode = Rosen::FoldDisplayMode::MAIN;
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest023_1 function end!");
+}
+
 } // namespace
