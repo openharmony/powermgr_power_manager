@@ -137,6 +137,7 @@ private:
     void TriggerForceSuspendCallbacks(const std::string& tag);
     void TriggerForceSuspendMemCallbacks(bool isWakeup);
     void RollbackForceSuspendState();
+    void RollbackForceSuspendAfterCallbacks();
     void ScheduleWakeupAfterInterrupt();
 #endif
     void HandleHibernate(SuspendDeviceType reason);

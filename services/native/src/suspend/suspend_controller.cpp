@@ -908,11 +908,14 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         stateMachine_->GetReasonBySuspendType(reason), true);
     if (!retSleep) {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
+        RollbackForceSuspendState();
         return false;
     }
     onForceSleep = true;
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendEx");
+        onForceSleep = false;
+        RollbackForceSuspendState();
         return false;
     }
 
@@ -950,11 +953,17 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     }
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
+        RollbackForceSuspendAfterCallbacks();
         return false;
     }
     POWER_HILOGI(FEATURE_SUSPEND,
         "Callbacks done, call HDI ForceSuspendEx, tag=%{public}s", tag.c_str());
-    return SystemSuspendController::GetInstance().ForceSuspendEx("ignore_wakelock", tag);
+    if (!SystemSuspendController::GetInstance().ForceSuspendEx("ignore_wakelock", tag)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "HDI ForceSuspendEx failed, rollback state and wakeup callbacks");
+        RollbackForceSuspendAfterCallbacks();
+        return false;
+    }
+    return true;
 }
 
 bool SuspendController::InterruptForceSuspendCallback()
@@ -1009,6 +1018,12 @@ void SuspendController::RollbackForceSuspendState()
     if (stateMachine_ != nullptr) {
         stateMachine_->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION, true);
     }
+}
+
+void SuspendController::RollbackForceSuspendAfterCallbacks()
+{
+    RollbackForceSuspendState();
+    ScheduleWakeupAfterInterrupt();
 }
 
 void SuspendController::ScheduleWakeupAfterInterrupt()

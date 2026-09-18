@@ -48,8 +48,6 @@ public:
     virtual int32_t IsForceSleepingIpc(bool& isForceSleeping) override;
     virtual int32_t ForceSuspendDeviceIpc(
         int64_t callTimeMs, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
-    virtual int32_t ForceSuspendDeviceIgnoringWakelockIpc(const std::string& tag) override;
-    virtual int32_t InterruptForceSuspendIpc() override;
     virtual int32_t HibernateIpc(bool clearMemory, const std::string& reason,
         const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
     virtual int32_t CreateRunningLockIpc(
@@ -133,6 +131,8 @@ public:
         const std::string& sceneName, std::string& configVal, int32_t& powerError) override;
     virtual int32_t SetPowerConfigIpc(
         const std::string& sceneName, const std::string& configVal, int32_t& powerError) override;
+    virtual int32_t ForceSuspendDeviceIgnoringWakelockIpc(const std::string& tag) override;
+    virtual int32_t InterruptForceSuspendIpc() override;
 
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason, bool force = false) = 0;
