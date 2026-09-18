@@ -488,6 +488,24 @@ bool SuspendController::GetPowerkeyDownWhenScreenOff()
     return powerKeyDown;
 }
 
+bool SuspendController::IsPowerkeyScreenOffBlocked() const
+{
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    if (pms == nullptr) {
+        POWER_HILOGW(FEATURE_SUSPEND, "[UL_POWER] pms is nullptr");
+        return false;
+    }
+    int32_t blockedMode = pms->GetPowerkeyBlockedFoldMode();
+    // POWERKEY_BLOCKED_FOLD_MODE_NONE(-1) or any invalid negative means not configured: do not block.
+    if (blockedMode < 0) {
+        return false;
+    }
+    auto curMode = Rosen::DisplayManagerLite::GetInstance().GetFoldDisplayMode();
+    POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] powerkey screen off check, blockedMode=%{public}d, curMode=%{public}u",
+        blockedMode, static_cast<uint32_t>(curMode));
+    return curMode == static_cast<Rosen::FoldDisplayMode>(blockedMode);
+}
+
 void SuspendController::SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay)
 {
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -1033,6 +1051,19 @@ bool PowerKeySuspendMonitor::Init()
 #endif
 }
 
+bool PowerKeySuspendMonitor::IsPowerkeyUpTooFrequent() const
+{
+    static int64_t lastPowerkeyUpTime = 0;
+    int64_t currTime = GetTickCount();
+    if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
+        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within %{public}" PRId64 "ms, skip. "
+            "%{public}" PRId64 ", %{public}" PRId64, POWERKEY_MIN_INTERVAL, currTime, lastPowerkeyUpTime);
+        return true;
+    }
+    lastPowerkeyUpTime = currTime;
+    return false;
+}
+
 void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const
 {
     POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] Received powerkey up");
@@ -1052,6 +1083,10 @@ void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::
         POWER_HILOGE(FEATURE_WAKEUP, "[UL_POWER] wakeupController is nullptr");
         return;
     }
+    if (suspendController->IsPowerkeyScreenOffBlocked()) {
+        POWER_HILOGI(FEATURE_SUSPEND, "[UL_POWER] powerkey screen off blocked in current fold mode, skip.");
+        return;
+    }
 
 #if POWER_MANAGER_WAKEUP_ACTION
     bool isWakeupReasonConfigMatched = suspendController->GetWakeupReasonConfigMatchedFlag();
@@ -1063,15 +1098,9 @@ void PowerKeySuspendMonitor::ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::
     }
 #endif
 
-    static int64_t lastPowerkeyUpTime = 0;
-    int64_t currTime = GetTickCount();
-    if (lastPowerkeyUpTime != 0 && currTime - lastPowerkeyUpTime < POWERKEY_MIN_INTERVAL) {
-        POWER_HILOGI(FEATURE_WAKEUP, "[UL_POWER] Last powerkey up within %{public}" PRId64 "ms, skip. "
-            "%{public}" PRId64 ", %{public}" PRId64, POWERKEY_MIN_INTERVAL, currTime, lastPowerkeyUpTime);
+    if (IsPowerkeyUpTooFrequent()) {
         return;
     }
-    lastPowerkeyUpTime = currTime;
-
     if (suspendController->GetPowerkeyDownWhenScreenOff()) {
         POWER_HILOGI(FEATURE_SUSPEND,
             "[UL_POWER] The powerkey was pressed when screenoff, ignore this powerkey up event.");

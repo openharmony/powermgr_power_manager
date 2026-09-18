@@ -349,6 +349,11 @@ public:
     {
         return isExternalScreenWakeup_;
     }
+    // The fold display mode in which powerkey screen-off should be intercepted.
+    int32_t GetPowerkeyBlockedFoldMode() const
+    {
+        return powerkeyBlockedFoldMode_;
+    }
 #ifdef HAS_SENSORS_SENSOR_PART
     static std::atomic_bool isInLidMode_;
 #endif
@@ -435,6 +440,7 @@ private:
     bool isDuringCallStateEnable_ {false};
     bool isLidCheckEnable_ {false};
     bool isExternalScreenWakeup_ {false};
+    int32_t powerkeyBlockedFoldMode_ {-1};
     static std::atomic_bool foldScreenFlag_;
     ffrt::mutex wakeupMutex_;
     ffrt::mutex suspendMutex_;
