@@ -159,7 +159,7 @@ public:
     /**
      * Forcibly suspend the device ignoring running locks.
      * Constraints:
-     * - Only available when POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX and
+     * - Only available when POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK and
      *   POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG are both enabled;
      *   otherwise returns ERR_CAPABILITY_NOT_SUPPORTED.
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.

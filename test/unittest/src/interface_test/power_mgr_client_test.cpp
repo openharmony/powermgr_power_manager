@@ -1995,7 +1995,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient068, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem"),
         PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr"),
@@ -2021,7 +2021,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient070, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient070 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     EXPECT_EQ(powerMgrClient.SuspendDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     EXPECT_EQ(powerMgrClient.ForceSuspendDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     EXPECT_EQ(powerMgrClient.WakeupDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
@@ -2039,7 +2039,7 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient070, TestSize.Level0) {
 HWTEST_F(PowerMgrClientTest, PowerMgrClient071, TestSize.Level0) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient071 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || \
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
     !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(powerMgrClient.InterruptForceSuspend(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
 #else

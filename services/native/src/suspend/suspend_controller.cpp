@@ -884,7 +884,7 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
     }
 }
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",

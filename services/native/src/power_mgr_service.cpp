@@ -1366,7 +1366,7 @@ PowerErrors PowerMgrService::SuspendDevice(
         return PowerErrors::ERR_FAILURE;
     }
 #endif
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     POWER_HILOGI(FEATURE_SUSPEND,
         "SuspendDevice is not supported when ForceSuspendDeviceIgnoringWakelock is enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
@@ -1407,7 +1407,7 @@ PowerErrors PowerMgrService::WakeupDevice(
         return PowerErrors::ERR_FAILURE;
     }
 #endif
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     POWER_HILOGI(FEATURE_WAKEUP,
         "WakeupDevice is not supported when ForceSuspendDeviceIgnoringWakelock is enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
@@ -1575,7 +1575,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     POWER_HILOGI(FEATURE_SUSPEND,
         "ForceSuspendDevice is not supported when ForceSuspendDeviceIgnoringWakelock is enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;
@@ -1616,7 +1616,7 @@ PowerErrors PowerMgrService::ForceSuspendDeviceIgnoringWakelock(const std::strin
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDeviceIgnoringWakelock failed, no POWER_MANAGER permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || \
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
     !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     (void)tag;
     POWER_HILOGI(FEATURE_SUSPEND,
@@ -1666,7 +1666,7 @@ PowerErrors PowerMgrService::InterruptForceSuspend()
         POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, no POWER_MANAGER permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
     }
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || \
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
     !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     POWER_HILOGI(FEATURE_SUSPEND, "InterruptForceSuspend failed, feature or suspend-with-tag is not enabled");
     return PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED;

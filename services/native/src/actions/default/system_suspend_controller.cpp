@@ -137,7 +137,7 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface->SetSuspendTag(tag);
 }
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 bool SystemSuspendController::ForceSuspendEx(const std::string& mode, const std::string& tag)
 {
     std::lock_guard lock(mutex_);

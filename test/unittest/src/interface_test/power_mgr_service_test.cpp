@@ -1467,7 +1467,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("ulsr");
@@ -1497,7 +1497,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
     g_isSystem = true;
     g_isPermissionGranted = true;
     PowerErrors ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
-#if defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+#if defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
 #else
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
@@ -1517,7 +1517,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
     auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
     g_isSystem = true;
     g_isPermissionGranted = true;
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
     EXPECT_EQ(pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, true),
         PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
     EXPECT_EQ(pmsTest_->ForceSuspendDevice(0), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
@@ -1552,7 +1552,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService044, TestSize.Level0)
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
 
     g_isPermissionGranted = true;
-#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX) || \
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
     !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
     ret = pmsTest_->InterruptForceSuspend();
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);

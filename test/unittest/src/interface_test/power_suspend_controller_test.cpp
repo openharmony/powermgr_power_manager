@@ -714,7 +714,7 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest022, TestSize.Lev
 }
 #endif
 
-#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_EX
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
 /**
  * @tc.name: PowerSuspendControllerTest023
  * @tc.desc: test HandleForceSuspendIgnoringWakelock for mem and ulsr tags
