@@ -212,7 +212,7 @@ OHOS::HDI::Power::V1_2::RunningLockInfo SystemSuspendController::FillRunningLock
 {
     OHOS::HDI::Power::V1_2::RunningLockInfo filledInfo {};
     filledInfo.name = param.name;
-    filledInfo.type = static_cast<OHOS::HDI::Power::V1_2::RunningLockType>(param.type);
+    filledInfo.type = static_cast<OHOS::HDI::Power::V1_2::RunningLockType>(param.typeHdi);
     filledInfo.timeoutMs = param.timeoutMs;
     filledInfo.uid = param.uid;
     filledInfo.pid = param.pid;
