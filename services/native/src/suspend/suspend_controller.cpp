@@ -983,11 +983,6 @@ bool SuspendController::WaitForceSuspendCallbacks()
 
 bool SuspendController::DoHdiForceSuspendEx(const std::string& tag)
 {
-    if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
-        RollbackForceSuspendAfterCallbacks();
-        return false;
-    }
     POWER_HILOGI(FEATURE_SUSPEND,
         "Callbacks done, call HDI ForceSuspendEx, tag=%{public}s", tag.c_str());
     if (!SystemSuspendController::GetInstance().ForceSuspendEx("ignore_wakelock", tag)) {
