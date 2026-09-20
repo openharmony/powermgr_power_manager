@@ -1014,6 +1014,7 @@ void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
 
 void SuspendController::TriggerForceSuspendMemCallbacks(bool isWakeup)
 {
+    int64_t beginTimeMs = GetTickCount();
     auto notifyInnerTask = [this, isWakeup]() {
         TriggerSyncSleepCallback(isWakeup, false);
     };
@@ -1023,8 +1024,17 @@ void SuspendController::TriggerForceSuspendMemCallbacks(bool isWakeup)
     std::future_status status = fut.wait_for(
         std::chrono::milliseconds(FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS));
     if (status == std::future_status::timeout) {
+        int32_t elapsedMs = static_cast<int32_t>(GetTickCount() - beginTimeMs);
         POWER_HILOGW(FEATURE_SUSPEND, "Force suspend mem %{public}s callback timeout",
             isWakeup ? "wakeup" : "sleep");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        pid_t pid = IPCSkeleton::GetCallingPid();
+        auto uid = IPCSkeleton::GetCallingUid();
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid,
+            "TYPE", static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_SYNC_SLEEP_CALLBACK),
+            "REASON", isWakeup ? "wakeup" : "sleep", "TIME", elapsedMs);
+#endif
     }
 }
 
