@@ -71,6 +71,7 @@ public:
 #endif
     void RecordPowerKeyDown(bool interrupting = false);
     bool GetPowerkeyDownWhenScreenOff();
+    bool IsPowerkeyScreenOffBlocked() const;
 
     void AddCallback(const sptr<ISyncSleepCallback>& callback, SleepPriority priority);
 #ifdef POWER_MANAGER_TAKEOVER_SUSPEND
@@ -257,6 +258,7 @@ private:
     void BeginPowerkeyScreenOff() const;
     void EndPowerkeyScreenOff() const;
     void ReceivePowerkeyCallback(std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent) const;
+    bool IsPowerkeyUpTooFrequent() const;
     static constexpr int32_t LONG_PRESS_DELAY_MS = 3000;
     static constexpr int32_t POWER_KEY_PRESS_DELAY_MS = 10000;
     int32_t powerkeyReleaseId_ {-1};
