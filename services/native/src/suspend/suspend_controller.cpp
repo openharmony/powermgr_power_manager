@@ -119,7 +119,7 @@ void SuspendController::RemoveCallback(const sptr<ITakeOverSuspendCallback>& cal
 }
 #endif
 
-void SuspendController::TriggerSyncSleepCallback(bool isWakeup, bool notifyUlsrOnWakeup)
+void SuspendController::TriggerSyncSleepCallback(bool isWakeup)
 {
     std::lock_guard lock(sleepCbMutex_);
     POWER_HILOGI(FEATURE_SUSPEND, "TriggerSyncSleepCallback, isWakeup=%{public}d, onForceSleep=%{public}d", isWakeup,
@@ -135,7 +135,7 @@ void SuspendController::TriggerSyncSleepCallback(bool isWakeup, bool notifyUlsrO
         onForceSleep = false;
     }
 #ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
-    if (isWakeup && notifyUlsrOnWakeup) {
+    if (isWakeup) {
         DelayedSpSingleton<PowerMgrService>::GetInstance()->TriggerUlsrWakeupCallbackWithResult();
     }
 #endif
@@ -1030,7 +1030,7 @@ void SuspendController::TriggerForceSuspendMemCallbacks(bool isWakeup)
 {
     int64_t beginTimeMs = GetTickCount();
     auto notifyInnerTask = [this, isWakeup]() {
-        TriggerSyncSleepCallback(isWakeup, false);
+        TriggerSyncSleepCallback(isWakeup);
     };
     std::packaged_task<void()> callbackTask(notifyInnerTask);
     std::future<void> fut = callbackTask.get_future();

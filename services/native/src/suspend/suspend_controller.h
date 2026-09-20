@@ -80,7 +80,7 @@ public:
     bool TriggerTakeOverSuspendCallback(SuspendDeviceType type);
 #endif
     void RemoveCallback(const sptr<ISyncSleepCallback>& callback);
-    void TriggerSyncSleepCallback(bool isWakeup, bool notifyUlsrOnWakeup = true);
+    void TriggerSyncSleepCallback(bool isWakeup);
     void UpdateSuspendSources();
 
     std::shared_ptr<PowerStateMachine> GetStateMachine() const
