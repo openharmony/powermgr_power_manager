@@ -135,6 +135,10 @@ private:
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    bool EnterForceSuspendSleepState(SuspendDeviceType reason);
+    void StartForceSuspendCallbacks(const std::string& tag);
+    bool WaitForceSuspendCallbacks();
+    bool DoHdiForceSuspendEx(const std::string& tag);
     void TriggerForceSuspendCallbacks(const std::string& tag);
     void TriggerForceSuspendMemCallbacks(bool isWakeup);
     void RollbackForceSuspendState();
@@ -157,7 +161,7 @@ private:
 #endif
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
-    static constexpr int32_t FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS = 5000;
+    static constexpr int32_t FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS = 30000;
 #endif
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void SuspendWhenStateSleep(SuspendDeviceType reason, uint32_t action);

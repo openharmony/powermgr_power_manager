@@ -907,14 +907,24 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
 {
     POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
         reason, tag.c_str());
+    if (!EnterForceSuspendSleepState(reason)) {
+        return false;
+    }
+    StartForceSuspendCallbacks(tag);
+    if (!WaitForceSuspendCallbacks()) {
+        return false;
+    }
+    return DoHdiForceSuspendEx(tag);
+}
+
+bool SuspendController::EnterForceSuspendSleepState(SuspendDeviceType reason)
+{
     if (stateMachine_ == nullptr) {
         POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
         return false;
     }
-
-    bool retInactive = stateMachine_->SetState(PowerState::INACTIVE,
-        stateMachine_->GetReasonBySuspendType(reason), true);
-    if (!retInactive) {
+    if (!stateMachine_->SetState(PowerState::INACTIVE,
+        stateMachine_->GetReasonBySuspendType(reason), true)) {
         POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
         return false;
     }
@@ -922,21 +932,18 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
     SetForceSleepingFlag(true);
     POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
 #endif
-    bool retSleep = stateMachine_->SetState(PowerState::SLEEP,
-        stateMachine_->GetReasonBySuspendType(reason), true);
-    if (!retSleep) {
+    if (!stateMachine_->SetState(PowerState::SLEEP,
+        stateMachine_->GetReasonBySuspendType(reason), true)) {
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
         RollbackForceSuspendState();
         return false;
     }
     onForceSleep = true;
-    if (stateMachine_->GetState() != PowerState::SLEEP) {
-        POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP, skip ForceSuspendEx");
-        onForceSleep = false;
-        RollbackForceSuspendState();
-        return false;
-    }
+    return true;
+}
 
+void SuspendController::StartForceSuspendCallbacks(const std::string& tag)
+{
     {
         std::lock_guard lock(forceSuspendCbMutex_);
         forceSuspendSkipHdi_.store(false);
@@ -944,7 +951,6 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         forceSuspendCallbackFinished_ = false;
         forceSuspendTag_ = tag;
     }
-
     auto self = shared_from_this();
     FFRTUtils::SubmitTask([self, tag] {
         NoCoroutineSwitchGuard guard;
@@ -955,7 +961,10 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         }
         self->forceSuspendWaitCv_.notify_all();
     });
+}
 
+bool SuspendController::WaitForceSuspendCallbacks()
+{
     bool skipHdi = false;
     {
         std::unique_lock lock(forceSuspendCbMutex_);
@@ -969,6 +978,11 @@ bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType rea
         POWER_HILOGI(FEATURE_SUSPEND, "Force suspend interrupted, return without waiting remaining callbacks");
         return false;
     }
+    return true;
+}
+
+bool SuspendController::DoHdiForceSuspendEx(const std::string& tag)
+{
     if (stateMachine_->GetState() != PowerState::SLEEP) {
         POWER_HILOGW(FEATURE_SUSPEND, "State is not SLEEP after callbacks, skip HDI force suspend");
         RollbackForceSuspendAfterCallbacks();

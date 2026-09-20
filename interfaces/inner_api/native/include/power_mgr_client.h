@@ -165,7 +165,7 @@ public:
      * - Caller must be a system application with ohos.permission.POWER_MANAGER.
      * - tag: "mem" for S3 sleep, "ulsr" for ULSR; others return ERR_PARAM_INVALID.
      *   "mem" runs OnSyncSleep only; "ulsr" runs OnSyncUlsr then OnSyncSleep.
-     *   OnSyncSleep waits at most 5s.
+     *   OnSyncSleep waits at most 30s.
      * - Running locks do not block this call.
      * - HDI ForceSuspendEx mode is chosen by Power Manager (currently "ignore_wakelock").
      * - Requires Power HDI V1_4 ForceSuspendEx; older HDI returns ERR_FAILURE.
