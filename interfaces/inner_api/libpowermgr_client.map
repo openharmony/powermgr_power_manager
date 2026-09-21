@@ -74,6 +74,8 @@
             OHOS::PowerMgr::PowerMgrProxy::SetPowerConfigIpc*;
             OHOS::PowerMgr::PowerMgrProxy::SetPowerKeyFilteringStrategyIpc*;
             OHOS::PowerMgr::PowerMgrProxy::SetProxFilteringStrategyIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetLidFilteringStrategyIpc*;
+            OHOS::PowerMgr::PowerMgrProxy::SetInterfaceCallFilteringStrategyIpc*;
             OHOS::PowerMgr::PowerMgrProxy::SetSuspendTagIpc*;
             OHOS::PowerMgr::PowerMgrProxy::ShellDumpIpc*;
             OHOS::PowerMgr::PowerMgrProxy::ShutDownDeviceIpc*;

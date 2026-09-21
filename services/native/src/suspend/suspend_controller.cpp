@@ -564,6 +564,14 @@ void SuspendController::ControlListener(SuspendDeviceType reason, uint32_t actio
         return;
     }
 
+    auto blockType = PowerStateMachine::MapReasonToBlockType(reason);
+    if (blockType != PowerStateMachine::ScreenOffBlockType::NONE &&
+        stateMachine_->IsScreenOffBlocked(blockType)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "ControlListener screen-off blocked, reason=%{public}d",
+            static_cast<int32_t>(reason));
+        return;
+    }
+
     if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
         stateMachine_->SetSwitchAction(action);
     }

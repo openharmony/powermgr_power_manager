@@ -232,7 +232,17 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)
+    PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy, const sptr<IRemoteObject>& token)
+    {
+        return PowerErrors::ERR_OK;
+    }
+    PowerErrors SetLidFilteringStrategy(
+        LidFilteringStrategy strategy, const sptr<IRemoteObject>& token)
+    {
+        return PowerErrors::ERR_OK;
+    }
+    PowerErrors SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy strategy, const sptr<IRemoteObject>& token)
     {
         return PowerErrors::ERR_OK;
     }

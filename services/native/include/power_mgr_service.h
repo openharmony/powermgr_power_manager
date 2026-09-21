@@ -166,13 +166,18 @@ public:
         const RunningLockType type, bool& result, uint64_t displayId = UINT64_MAX) override;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) override;
-    virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) override;
+    virtual PowerErrors SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy strategy, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors GetShutdownReason(std::string& reason) override;
     virtual PowerErrors RegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback,
         ShutdownPriority priority) override;
     virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) override;
     virtual PowerErrors SetProxFilteringStrategy(
         ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token) override;
+    virtual PowerErrors SetLidFilteringStrategy(
+        LidFilteringStrategy strategy, const sptr<IRemoteObject>& token) override;
+    virtual PowerErrors SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy strategy, const sptr<IRemoteObject>& token) override;
     virtual PowerErrors GetPowerConfig(const std::string& sceneName, std::string& configVal) override;
     virtual PowerErrors SetPowerConfig(const std::string& sceneName, const std::string& configVal) override;
 

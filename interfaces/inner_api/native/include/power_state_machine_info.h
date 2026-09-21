@@ -271,6 +271,8 @@ enum class StateChangeReason : uint32_t {
 enum class PowerKeyFilteringStrategy : uint32_t {
     DISABLE_LONG_PRESS_FILTERING = 0, // not filtering
     LONG_PRESS_FILTERING_ONCE = 1,    // only filtering the current long press, the next not filtering
+    POWER_KEY_UP_SHORT_PRESS_FILTERING = 2,           // filter power key up short press event to block screen-off
+    POWER_KEY_UP_SHORT_PRESS_NOT_FILTERING = 3,      // allow power key up short press event for screen-off
     STRATEGY_MAX
 };
 
@@ -278,6 +280,23 @@ enum class ProxFilteringStrategy : uint32_t {
     NOT_FILTERING = 0, // default strategy
     FILTERING_CLOSE = 1,
     MAX,
+};
+
+// Screen-off block filtering strategies, used to register/unregister
+// screen-off block per scene (power key, lid, interface call)
+// Lid Filtering Strategy — filter screen-off triggered by lid (hall sensor close)
+enum class LidFilteringStrategy : uint32_t {
+    LID_CLOSE_NOT_FILTERING = 0, // default, lid screen-off allowed
+    LID_CLOSE_FILTERING = 1,     // filter lid-close-triggered screen-off
+    STRATEGY_MAX
+};
+
+// Interface Call Filtering Strategy — filter screen-off triggered by
+// external SuspendDevice interface call
+enum class InterfaceCallFilteringStrategy : uint32_t {
+    SUSPEND_DEVICE_NOT_FILTERING = 0, // default, suspend device screen-off allowed
+    SUSPEND_DEVICE_FILTERING = 1,     // filter suspend-device-triggered screen-off
+    STRATEGY_MAX
 };
 } // namespace PowerMgr
 } // namespace OHOS

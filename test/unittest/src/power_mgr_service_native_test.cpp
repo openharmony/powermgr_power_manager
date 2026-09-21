@@ -766,6 +766,139 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNative024, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest::PowerMgrServiceNative024 end!");
 }
 
+/**
+ * @tc.name: ScreenOffBlockService001
+ * @tc.desc: Register a screen-off block for APPLICATION via the real
+ *           PowerMgrService::SetInterfaceCallFilteringStrategy entry, then call the real
+ *           PowerMgrService::SuspendDevice entry and assert it returns
+ *           ERR_SCREEN_OFF_BLOCKED (4900701). After cancelling the block SuspendDevice resumes normally.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerMgrServiceNativeTest, ScreenOffBlockService001, TestSize.Level1) {
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService001 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    sptr<IRemoteObject> token = sptr<IPCObjectProxy>::MakeSptr(0, u"ScreenOffBlockService001");
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    // Real entry: SetInterfaceCallFilteringStrategy writes the shared block map
+    EXPECT_EQ(pmsTest->SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_FILTERING, token),
+        PowerErrors::ERR_OK);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    // Real entry: SuspendDevice must return ERR_SCREEN_OFF_BLOCKED before HDI suspend
+    PowerErrors ret = pmsTest->SuspendDevice(
+        CALLTIMEMS, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
+    EXPECT_EQ(ret, PowerErrors::ERR_SCREEN_OFF_BLOCKED);
+    EXPECT_EQ(static_cast<int32_t>(ret), 4900701);
+    // Cancel via the real entry; afterwards SuspendDevice is no longer blocked
+    EXPECT_EQ(pmsTest->SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_NOT_FILTERING, token),
+        PowerErrors::ERR_OK);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService001 end!");
+}
+
+/**
+ * @tc.name: ScreenOffBlockService002
+ * @tc.desc: Test SetInterfaceCallFilteringStrategy permission and parameter validation:
+ *           no system permission, no POWER_MANAGER permission, and invalid strategy are rejected.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerMgrServiceNativeTest, ScreenOffBlockService002, TestSize.Level2) {
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService002 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    sptr<IRemoteObject> token = sptr<IPCObjectProxy>::MakeSptr(0, u"ScreenOffBlockService002");
+    // No system permission
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    EXPECT_EQ(pmsTest->SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_FILTERING, token),
+        PowerErrors::ERR_SYSTEM_API_DENIED);
+    // System permission but no POWER_MANAGER permission
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    EXPECT_EQ(pmsTest->SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_FILTERING, token),
+        PowerErrors::ERR_PERMISSION_DENIED);
+    // Invalid strategy (out of range)
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    EXPECT_EQ(pmsTest->SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::STRATEGY_MAX, token),
+        PowerErrors::ERR_PARAM_INVALID);
+    g_isPermissionGranted = true;
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService002 end!");
+}
+
+/**
+ * @tc.name: ScreenOffBlockService003
+ * @tc.desc: Test the real PowerMgrService::SetPowerKeyFilteringStrategy entry with the new
+ *           POWER_KEY_UP_SHORT_PRESS_FILTERING / POWER_KEY_UP_SHORT_PRESS_NOT_FILTERING
+ *           enum values: registration blocks the POWER_KEY reason and the death recipient is wired.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerMgrServiceNativeTest, ScreenOffBlockService003, TestSize.Level1) {
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService003 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    sptr<IRemoteObject> token = sptr<IPCObjectProxy>::MakeSptr(0, u"ScreenOffBlockService003");
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    // Real entry: PowerMgrService::SetPowerKeyFilteringStrategy with FILTERING
+    EXPECT_EQ(pmsTest->SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::POWER_KEY_UP_SHORT_PRESS_FILTERING, token),
+        PowerErrors::ERR_OK);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    // Real entry: cancel via NOT_FILTERING
+    EXPECT_EQ(pmsTest->SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::POWER_KEY_UP_SHORT_PRESS_NOT_FILTERING, token),
+        PowerErrors::ERR_OK);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    wptr<IRemoteObject> tokenWeak = token;
+    DeathRecipientManager::GetInstance().OnRemoteDied(tokenWeak);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService003 end!");
+}
+
+/**
+ * @tc.name: ScreenOffBlockService004
+ * @tc.desc: Test SA-death auto-reset: after registering a screen-off block, trigger the real
+ *           DeathRecipientManager::OnRemoteDied callback and assert the block is cleared.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerMgrServiceNativeTest, ScreenOffBlockService004, TestSize.Level1) {
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService004 start!");
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    sptr<IRemoteObject> token = sptr<IPCObjectProxy>::MakeSptr(0, u"ScreenOffBlockService004");
+    auto stateMachine = pmsTest->GetPowerStateMachine();
+    ASSERT_TRUE(stateMachine != nullptr);
+    EXPECT_EQ(pmsTest->SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_FILTERING, token),
+        PowerErrors::ERR_OK);
+    EXPECT_EQ(pmsTest->SetLidFilteringStrategy(
+        LidFilteringStrategy::LID_CLOSE_FILTERING, token),
+        PowerErrors::ERR_OK);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    // Real entry: DeathRecipientManager::OnRemoteDied fires the token-level cleanup callback
+    wptr<IRemoteObject> tokenWeak = token;
+    DeathRecipientManager::GetInstance().OnRemoteDied(tokenWeak);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    POWER_HILOGI(LABEL_TEST, "ScreenOffBlockService004 end!");
+}
+
 #ifdef POWER_MANAGER_ENABLE_MONITOR_RUNNING_LOCK_CHANGE
 /**
  * @tc.name: PowerMgrServiceNative025

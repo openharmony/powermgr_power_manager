@@ -28,6 +28,7 @@
 #endif
 #include <securec.h>
 
+#include "ipc_object_stub.h"
 #include "power_mgr_service.h"
 #include "power_state_callback_stub.h"
 #include "power_state_machine.h"
@@ -297,6 +298,67 @@ HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009, TestSize.Lev
 
     GTEST_LOG_(INFO) << "PowerSuspendControllerTest009: end";
     POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009 function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest009ScreenOffBlock
+ * @tc.desc: Test that a registered screen-off block prevents ControlListener from reaching
+ *           ControlListenerInner (no screen-off). Real entry: SuspendController::ControlListener.
+ *           The block check runs before the isScreenOn gate, so when blocked the state is
+ *           unchanged because SetState(INACTIVE) is never reached.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009ScreenOffBlock, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009ScreenOffBlock function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest009ScreenOffBlock: start";
+    g_service->SuspendControllerInit();
+    auto stateMachine = g_service->suspendController_->stateMachine_;
+    ASSERT_TRUE(stateMachine != nullptr);
+    PowerState stateBefore = stateMachine->GetState();
+
+    sptr<IRemoteObject> token = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlockControlListener");
+    // Real entry: register a screen-off block for POWER_KEY on the shared block map
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::POWER_KEY, token);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    // Real entry: SuspendController::ControlListener — blocked path returns before ControlListenerInner,
+    // so SetState(INACTIVE) is never called and the state is unchanged.
+    g_service->suspendController_->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY, 1, 0);
+    EXPECT_EQ(stateMachine->GetState(), stateBefore);
+
+    // Cancel the block; afterwards IsScreenOffBlocked reports false
+    stateMachine->RemoveScreenOffBlock(PowerStateMachine::ScreenOffBlockType::POWER_KEY);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest009ScreenOffBlock: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009ScreenOffBlock function end!");
+}
+
+/**
+ * @tc.name: PowerSuspendControllerTest009ScreenOffBlockLid
+ * @tc.desc: Test that a registered screen-off block for LID also prevents ControlListener screen-off.
+ *           Real entry: SuspendController::ControlListener with LID reason.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerSuspendControllerTest, PowerSuspendControllerTest009ScreenOffBlockLid, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009ScreenOffBlockLid function start!");
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest009ScreenOffBlockLid: start";
+    g_service->SuspendControllerInit();
+    auto stateMachine = g_service->suspendController_->stateMachine_;
+    ASSERT_TRUE(stateMachine != nullptr);
+    PowerState stateBefore = stateMachine->GetState();
+
+    sptr<IRemoteObject> token = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlockControlListenerLid");
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::LID, token);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    g_service->suspendController_->ControlListener(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID, 1, 0);
+    EXPECT_EQ(stateMachine->GetState(), stateBefore);
+    stateMachine->RemoveScreenOffBlock(PowerStateMachine::ScreenOffBlockType::LID);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    GTEST_LOG_(INFO) << "PowerSuspendControllerTest009ScreenOffBlockLid: end";
+    POWER_HILOGI(LABEL_TEST, "PowerSuspendControllerTest009ScreenOffBlockLid function end!");
 }
 
 /**
