@@ -31,6 +31,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     PowerFuzzerTest g_serviceTest;
     g_serviceTest.TestPowerServiceStub(
-        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_FORCE_SUSPEND_DEVICE_EX_IPC), data, size);
+        static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_FORCE_SUSPEND_DEVICE_IGNORING_WAKELOCK_IPC), data, size);
     return 0;
 }
