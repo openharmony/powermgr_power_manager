@@ -158,13 +158,15 @@ public:
 
     /**
      * Forcibly suspend the device into deepsleep, ignoring running locks.
+     * Only "mem" (S3) and "ulsr" (ULSR) are supported.
      *
-     * @param tag Suspend tag. "mem" for S3 sleep, "ulsr" for ULSR.
+     * @param tag Suspend tag. "mem" or "ulsr".
      */
     PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& tag);
 
     /**
      * Interrupt an in-progress ForceSuspendDeviceIgnoringWakelock.
+     * Returns immediately without HDI.
      */
     PowerErrors InterruptForceSuspend();
 
