@@ -24,6 +24,7 @@
 #include <ipc_skeleton.h>
 
 #include "actions/irunning_lock_action.h"
+#include "ipc_object_stub.h"
 #include "mock_state_action.h"
 
 using namespace testing::ext;
@@ -885,5 +886,125 @@ HWTEST_F(NativePowerStateMachineTest, NativePowerStateMachine024, TestSize.Level
         EXPECT_TRUE(stateMachine->GetState() == PowerState::AWAKE);
     }
     POWER_HILOGI(LABEL_TEST, "NativePowerStateMachine024 function end!");
+}
+
+/**
+ * @tc.name: ScreenOffBlock001
+ * @tc.desc: Test UpdateScreenOffBlock blocks and unblocks the APPLICATION reason through the real
+ *           PowerStateMachine entry, and IsScreenOffBlocked reflects the registration.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(NativePowerStateMachineTest, ScreenOffBlock001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenOffBlock001: start.";
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    stateMachine->InitState();
+    sptr<IRemoteObject> token = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlock001");
+    // Before registration no reason is blocked (real entry: PowerStateMachine::IsScreenOffBlocked)
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    // Real entry: PowerStateMachine::UpdateScreenOffBlock writes the shared block map
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE, token);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    // Other reasons remain unblocked (strict map lookup, no false positives)
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::NONE));
+    // Unregister via the same real entry
+    stateMachine->RemoveScreenOffBlock(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    GTEST_LOG_(INFO) << "ScreenOffBlock001: end.";
+}
+
+/**
+ * @tc.name: ScreenOffBlock002
+ * @tc.desc: Test per-scene isolation: blocking LID does not block APPLICATION or POWER_KEY.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(NativePowerStateMachineTest, ScreenOffBlock002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenOffBlock002: start.";
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    stateMachine->InitState();
+    sptr<IRemoteObject> token = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlock002");
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::LID, token);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    stateMachine->RemoveScreenOffBlock(PowerStateMachine::ScreenOffBlockType::LID);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    GTEST_LOG_(INFO) << "ScreenOffBlock002: end.";
+}
+
+/**
+ * @tc.name: ScreenOffBlock003
+ * @tc.desc: Test RemoveScreenOffBlock clears every type registered with the same token
+ *           (mirrors the SA-death auto-reset callback).
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(NativePowerStateMachineTest, ScreenOffBlock003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenOffBlock003: start.";
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    stateMachine->InitState();
+    sptr<IRemoteObject> token = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlock003");
+    // Register multiple types with the same token (power key via SetPowerKeyFilteringStrategy path,
+    // lid/interface call via SetLidFilteringStrategy/SetInterfaceCallFilteringStrategy
+    // — all share the same screenOffBlockMap_
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::POWER_KEY, token);
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::LID, token);
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE, token);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    // Real entry: per-type cleanup used by the death callback
+    stateMachine->RemoveScreenOffBlock(
+        PowerStateMachine::ScreenOffBlockType::POWER_KEY);
+    stateMachine->RemoveScreenOffBlock(
+        PowerStateMachine::ScreenOffBlockType::LID);
+    stateMachine->RemoveScreenOffBlock(
+        PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::POWER_KEY));
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::LID));
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    GTEST_LOG_(INFO) << "ScreenOffBlock003: end.";
+}
+
+/**
+ * @tc.name: ScreenOffBlock004
+ * @tc.desc: Test re-registration overwrites the previous token for the same type
+ *           (new token wins), and RemoveScreenOffBlock clears the block.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(NativePowerStateMachineTest, ScreenOffBlock004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenOffBlock004: start.";
+    auto pmsTest = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    pmsTest->OnStart();
+    auto stateMachine = std::make_shared<PowerStateMachine>(pmsTest);
+    EXPECT_TRUE(stateMachine->Init());
+    stateMachine->InitState();
+    sptr<IRemoteObject> tokenA = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlock004A");
+    sptr<IRemoteObject> tokenB = sptr<IPCObjectStub>::MakeSptr(u"ScreenOffBlock004B");
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE, tokenA);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    // Re-register with a new token: the new token overwrites the old one
+    stateMachine->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE, tokenB);
+    EXPECT_TRUE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    stateMachine->RemoveScreenOffBlock(
+        PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE);
+    EXPECT_FALSE(stateMachine->IsScreenOffBlocked(PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE));
+    GTEST_LOG_(INFO) << "ScreenOffBlock004: end.";
 }
 } // namespace

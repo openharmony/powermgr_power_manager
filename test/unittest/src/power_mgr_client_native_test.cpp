@@ -142,4 +142,74 @@ HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative002, TestSize.Level2)
     POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative002 function end!");
     GTEST_LOG_(INFO) << "PowerMgrClientNative002 function end!";
 }
+
+/**
+ * @tc.name: PowerMgrClientNative003
+ * @tc.desc: Test the real PowerMgrClient::SetPowerKeyFilteringStrategy entry with the new
+ *           POWER_KEY_UP_SHORT_PRESS_FILTERING / POWER_KEY_UP_SHORT_PRESS_NOT_FILTERING
+ *           enum values. The client internally passes its aliveness token_ through the IPC.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative003, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerMgrClientNative003 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative003 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    // Real entry: PowerMgrClient::SetPowerKeyFilteringStrategy — token_ is passed internally
+    PowerErrors ret = powerMgrClient.SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::POWER_KEY_UP_SHORT_PRESS_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetPowerKeyFilteringStrategy(FILTERING) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    ret = powerMgrClient.SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::POWER_KEY_UP_SHORT_PRESS_NOT_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetPowerKeyFilteringStrategy(NOT_FILTERING) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    // Restore default long-press filtering state
+    ret = powerMgrClient.SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetPowerKeyFilteringStrategy(DISABLE) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative003 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrClientNative003 function end!";
+}
+
+/**
+ * @tc.name: PowerMgrClientNative004
+ * @tc.desc: Test the real PowerMgrClient::SetInterfaceCallFilteringStrategy and
+ *           SetLidFilteringStrategy entries. The client internally passes its
+ *           aliveness token_ through the IPC.
+ * @tc.type: FUNC
+ * @tc.require: issueI7ZB4
+ */
+HWTEST_F(PowerMgrClientNativeTest, PowerMgrClientNative004, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "PowerMgrClientNative004 function start!";
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative004 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    // Real entry: SetInterfaceCallFilteringStrategy — token_ is passed internally
+    PowerErrors ret = powerMgrClient.SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetInterfaceCallFilteringStrategy(FILTERING) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    ret = powerMgrClient.SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::SUSPEND_DEVICE_NOT_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetInterfaceCallFilteringStrategy(DISABLE) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    // Real entry: SetLidFilteringStrategy
+    ret = powerMgrClient.SetLidFilteringStrategy(
+        LidFilteringStrategy::LID_CLOSE_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetLidFilteringStrategy(FILTERING) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    ret = powerMgrClient.SetLidFilteringStrategy(
+        LidFilteringStrategy::LID_CLOSE_NOT_FILTERING);
+    POWER_HILOGI(LABEL_TEST, "SetLidFilteringStrategy(DISABLE) ret = %{public}d",
+        static_cast<int32_t>(ret));
+    // Invalid strategy is rejected at the client entry
+    ret = powerMgrClient.SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy::STRATEGY_MAX);
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClientNative004 function end!");
+    GTEST_LOG_(INFO) << "PowerMgrClientNative004 function end!";
+}
 }

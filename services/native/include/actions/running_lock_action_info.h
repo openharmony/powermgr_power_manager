@@ -55,6 +55,10 @@ struct RunningLockParam {
     int32_t pid = 0;
     int32_t uid = 0;
     uint64_t displayId = RUNNINGLOCK_DISPLAY_ID_ALL;
+    // Type used when notifying the HDI layer. The original `type` is kept for
+    // runninglock changed callbacks so that observers still see the logical
+    // runninglock type registered by the caller.
+    RunningLockType typeHdi = RunningLockType::RUNNINGLOCK_BUTT;
 };
 } // namespace PowerMgr
 } // namespace OHOS

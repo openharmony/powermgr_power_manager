@@ -274,6 +274,35 @@ public:
     }
     void SetProxFilteringStrategy(ProxFilteringStrategy strategy);
 
+    // Screen-off block type — decoupled from SuspendDeviceType for clear semantics.
+    enum class ScreenOffBlockType : uint32_t {
+        NONE = 0,
+        POWER_KEY = 1,
+        LID = 2,
+        SUSPEND_DEVICE_INTERFACE = 3,
+    };
+    // Maps a SuspendDeviceType to the corresponding ScreenOffBlockType.
+    // Only POWER_KEY and LID have a mapping; other reasons return NONE.
+    static ScreenOffBlockType MapReasonToBlockType(SuspendDeviceType reason)
+    {
+        switch (reason) {
+            case SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY:
+                return ScreenOffBlockType::POWER_KEY;
+            case SuspendDeviceType::SUSPEND_DEVICE_REASON_LID:
+                return ScreenOffBlockType::LID;
+            default:
+                return ScreenOffBlockType::NONE;
+        }
+    }
+
+    // Screen-off block: per-scene registration of screen-off block type.
+    // Returns true when the given block type is currently blocked by a registered strategy.
+    bool IsScreenOffBlocked(ScreenOffBlockType type);
+    // Registers or overwrites the screen-off block for the given type with the caller token.
+    void UpdateScreenOffBlock(ScreenOffBlockType type, const sptr<IRemoteObject>& token);
+    // Unregisters the screen-off block for the given type.
+    void RemoveScreenOffBlock(ScreenOffBlockType type);
+
     void DumpInfo(std::string& result);
     void EnableMock(IDeviceStateAction* mockAction);
     int64_t GetDisplayOffTime();
@@ -501,6 +530,11 @@ private:
 #endif
     std::atomic<bool> isDuringCall_ {false};
     std::atomic<bool> isProximityCloseEventFiltered_ {false};
+    // Screen-off block: maps a block type to the SA token that registered the block.
+    // Guarded by screenOffBlockMutex_. A type is considered blocked when an entry exists
+    // in the map with a non-null token.
+    ffrt::mutex screenOffBlockMutex_;
+    std::map<ScreenOffBlockType, sptr<IRemoteObject>> screenOffBlockMap_;
     bool SetDreamingState(StateChangeReason reason);
 #ifdef POWER_MANAGER_ENABLE_WATCH_CUSTOMIZED_SCREEN_COMMON_EVENT_RULES
     bool SetScreenCommonEventRules(StateChangeReason reason);

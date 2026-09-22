@@ -1115,29 +1115,31 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService039, TestSize.Level2) {
     // Test case 1: No system permission
     g_isSystem = false;
     g_isPermissionGranted = true;
-    ret = pmsTest_->SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING, nullptr);
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
 
     // Test case 2: No POWER_MANAGER permission
     g_isSystem = true;
     g_isPermissionGranted = false;
-    ret = pmsTest_->SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING);
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING, nullptr);
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED) << "Test case 2 failed";
 
     // Test case 3: Valid strategy DISABLE_LONG_PRESS_FILTERING
     g_isPermissionGranted = true;
     strategy = PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING;
-    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy);
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy, nullptr);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 3 failed";
 
     // Test case 4: Valid strategy LONG_PRESS_FILTERING_ONCE
     strategy = PowerKeyFilteringStrategy::LONG_PRESS_FILTERING_ONCE;
-    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy);
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy, nullptr);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 4 failed";
 
     // Test case 5: Invalid strategy
     strategy = static_cast<PowerKeyFilteringStrategy>(PowerKeyFilteringStrategy::STRATEGY_MAX);
-    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy);
+    ret = pmsTest_->SetPowerKeyFilteringStrategy(strategy, nullptr);
     EXPECT_EQ(ret, PowerErrors::ERR_OK) << "Test case 5 failed";
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService039 end!");

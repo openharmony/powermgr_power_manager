@@ -36,6 +36,8 @@ enum class PowerErrors : int32_t {
     /** Input parameter value is not within expected range or valid values (value validation) */
     ERR_USER_PARAM_INVALID = 4900400,
     ERR_WRITE_OPERATION_FAILED = 4900601,
+    /** Screen-off is blocked by a registered screen-off block strategy */
+    ERR_SCREEN_OFF_BLOCKED = 4900701,
     /** Capability not supported */
     ERR_CAPABILITY_NOT_SUPPORTED = 801,
 };
@@ -52,6 +54,7 @@ inline std::string GetErrorMessage(PowerErrors code)
         {PowerErrors::ERR_READ_OPERATION_FAILED,     "Read operation failed."},
         {PowerErrors::ERR_USER_PARAM_INVALID,        "Invalid parameter"},
         {PowerErrors::ERR_WRITE_OPERATION_FAILED,    "Write operation failed."},
+        {PowerErrors::ERR_SCREEN_OFF_BLOCKED,        "Screen-off is blocked by a registered strategy."},
         {PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED,  "Capability not supported."},
     };
     auto it = errorTable.find(code);
