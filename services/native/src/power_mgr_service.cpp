@@ -1676,6 +1676,7 @@ RunningLockParam PowerMgrService::FillRunningLockParam(
     if (filledParam.type == RunningLockType::RUNNINGLOCK_BACKGROUND) {
         filledParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
     }
+    filledParam.typeHdi = filledParam.type;
     filledParam.timeoutMs = timeOutMS;
     filledParam.pid = IPCSkeleton::GetCallingPid();
     filledParam.uid = IPCSkeleton::GetCallingUid();

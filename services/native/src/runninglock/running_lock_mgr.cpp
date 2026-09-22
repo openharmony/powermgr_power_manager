@@ -172,10 +172,11 @@ void RunningLockMgr::InitLocksTypeBackgroundUserIdle()
                 struct RunningLockParam backgroundLockParam = lockInnerParam;
                 backgroundLockParam.name =
                     PowerUtils::GetRunningLockTypeString(RunningLockType::RUNNINGLOCK_BACKGROUND_USER_IDLE);
-                backgroundLockParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
-                auto iterator = lockCounters_.find(backgroundLockParam.type);
+                backgroundLockParam.typeHdi = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+                auto iterator = lockCounters_.find(backgroundLockParam.typeHdi);
                 if (iterator == lockCounters_.end()) {
-                    POWER_HILOGE(FEATURE_RUNNING_LOCK, "unsupported type, type=%{public}d", backgroundLockParam.type);
+                    POWER_HILOGE(FEATURE_RUNNING_LOCK,
+                        "unsupported type, type=%{public}d", backgroundLockParam.typeHdi);
                     return RUNNINGLOCK_NOT_SUPPORT;
                 }
                 std::shared_ptr<LockCounter> counter = iterator->second;
@@ -308,10 +309,10 @@ void RunningLockMgr::InitLocksTypeCoordination()
                 active, stateMachine->GetState());
             struct RunningLockParam backgroundLockParam = runningLockParam;
             backgroundLockParam.name = PowerUtils::GetRunningLockTypeString(RunningLockType::RUNNINGLOCK_COORDINATION),
-            backgroundLockParam.type = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
-            auto iterator = lockCounters_.find(backgroundLockParam.type);
+            backgroundLockParam.typeHdi = RunningLockType::RUNNINGLOCK_BACKGROUND_TASK;
+            auto iterator = lockCounters_.find(backgroundLockParam.typeHdi);
             if (iterator == lockCounters_.end()) {
-                POWER_HILOGE(FEATURE_RUNNING_LOCK, "unsupported type, type=%{public}d", backgroundLockParam.type);
+                POWER_HILOGE(FEATURE_RUNNING_LOCK, "unsupported type, type=%{public}d", backgroundLockParam.typeHdi);
                 return RUNNINGLOCK_NOT_SUPPORT;
             }
             std::shared_ptr<LockCounter> counter = iterator->second;
