@@ -116,7 +116,7 @@ interface OHOS.PowerMgr.IPowerMgr {
     void RefreshActivityIpc([in] long callTimeMs, [in] int activityType, [in] String refreshReason,
         [out] int powerError);
 
-    void SetPowerKeyFilteringStrategyIpc([in] int strategy, [out] int powerError);
+    void SetPowerKeyFilteringStrategyIpc([in] int strategy, [in] IRemoteObject token, [out] int powerError);
     void GetShutdownReasonIpc([out] String reason, [out] int powerError);
 
     void RegisterUlsrCallbackIpc([in] IUlsrCallback ulsrCallback, [in] int priorityValue, [out] int powerError);
@@ -131,4 +131,9 @@ interface OHOS.PowerMgr.IPowerMgr {
         [in] unsigned long displayId, [out] int powerError);
     void UnRegisterRunningLockChangedCallbackIpc([in] IRunningLockChangedCallback powerCallback,
         [in] unsigned long displayId, [out] int powerError);
+
+    void SetLidFilteringStrategyIpc([in] int strategy, [in] IRemoteObject token,
+        [out] int powerError);
+    void SetInterfaceCallFilteringStrategyIpc([in] int strategy, [in] IRemoteObject token,
+        [out] int powerError);
 }

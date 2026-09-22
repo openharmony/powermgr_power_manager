@@ -573,11 +573,12 @@ int32_t PowerMgrServiceAdapter::RefreshActivityIpc(
     return ERR_OK;
 }
 
-int32_t PowerMgrServiceAdapter::SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError)
+int32_t PowerMgrServiceAdapter::SetPowerKeyFilteringStrategyIpc(
+    int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetPowerKeyFilteringStrategy", false);
     PowerKeyFilteringStrategy filteringStrategy = static_cast<PowerKeyFilteringStrategy>(strategy);
-    powerError = static_cast<int32_t>(SetPowerKeyFilteringStrategy(filteringStrategy));
+    powerError = static_cast<int32_t>(SetPowerKeyFilteringStrategy(filteringStrategy, token));
     return ERR_OK;
 }
 
@@ -604,6 +605,24 @@ int32_t PowerMgrServiceAdapter::SetProxFilteringStrategyIpc(
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetProxFilteringStrategyIpc", false);
     ProxFilteringStrategy proxFilteringStrategy = static_cast<ProxFilteringStrategy>(strategy);
     powerError = static_cast<int32_t>(SetProxFilteringStrategy(proxFilteringStrategy, token));
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::SetLidFilteringStrategyIpc(
+    int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetLidFilteringStrategyIpc", false);
+    auto lidStrategy = static_cast<LidFilteringStrategy>(strategy);
+    powerError = static_cast<int32_t>(SetLidFilteringStrategy(lidStrategy, token));
+    return ERR_OK;
+}
+
+int32_t PowerMgrServiceAdapter::SetInterfaceCallFilteringStrategyIpc(
+    int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError)
+{
+    PowerXCollie powerXCollie("PowerMgrServiceAdapter::SetInterfaceCallFilteringStrategyIpc", false);
+    auto ifStrategy = static_cast<InterfaceCallFilteringStrategy>(strategy);
+    powerError = static_cast<int32_t>(SetInterfaceCallFilteringStrategy(ifStrategy, token));
     return ERR_OK;
 }
 

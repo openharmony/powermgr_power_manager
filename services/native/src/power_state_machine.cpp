@@ -1360,6 +1360,35 @@ void PowerStateMachine::SetProxFilteringStrategy(ProxFilteringStrategy strategy)
 #endif
 }
 
+bool PowerStateMachine::IsScreenOffBlocked(ScreenOffBlockType type)
+{
+    std::lock_guard<ffrt::mutex> lock(screenOffBlockMutex_);
+    auto iter = screenOffBlockMap_.find(type);
+    if (iter == screenOffBlockMap_.end() || iter->second == nullptr) {
+        return false;
+    }
+    POWER_HILOGI(FEATURE_POWER_STATE, "IsScreenOffBlocked type=%{public}d is blocked",
+        static_cast<int32_t>(type));
+    return true;
+}
+
+void PowerStateMachine::UpdateScreenOffBlock(
+    ScreenOffBlockType type, const sptr<IRemoteObject>& token)
+{
+    std::lock_guard<ffrt::mutex> lock(screenOffBlockMutex_);
+    screenOffBlockMap_[type] = token;
+    POWER_HILOGI(FEATURE_POWER_STATE, "UpdateScreenOffBlock type=%{public}d",
+        static_cast<int32_t>(type));
+}
+
+void PowerStateMachine::RemoveScreenOffBlock(ScreenOffBlockType type)
+{
+    std::lock_guard<ffrt::mutex> lock(screenOffBlockMutex_);
+    screenOffBlockMap_.erase(type);
+    POWER_HILOGI(FEATURE_POWER_STATE, "RemoveScreenOffBlock type=%{public}d",
+        static_cast<int32_t>(type));
+}
+
 bool PowerStateMachine::FilterProximityCloseEvent()
 {
 #ifdef POWER_MANAGER_SUPPORT_FILTERING_PROXIMITY_EVENT

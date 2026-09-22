@@ -353,6 +353,26 @@ public:
     PowerErrors SetProxFilteringStrategy(ProxFilteringStrategy strategy);
 
     /**
+     * Set the lid filtering strategy. When LID_CLOSE_FILTERING is set,
+     * screen-off triggered by lid (hall sensor close) is blocked.
+     * When LID_CLOSE_NOT_FILTERING is set, the block is removed.
+     * The block is automatically cleared when the calling SA dies.
+     * @param strategy The lid filtering strategy.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors SetLidFilteringStrategy(LidFilteringStrategy strategy);
+
+    /**
+     * Set the interface call filtering strategy. When SUSPEND_DEVICE_FILTERING
+     * is set, screen-off triggered by external SuspendDevice interface call is
+     * blocked. When SUSPEND_DEVICE_NOT_FILTERING is set, the block is removed.
+     * The block is automatically cleared when the calling SA dies.
+     * @param strategy The interface call filtering strategy.
+     * @return PowerErrors::ERR_OK if the call success, otherwise return error code
+     */
+    PowerErrors SetInterfaceCallFilteringStrategy(InterfaceCallFilteringStrategy strategy);
+
+    /**
      * Register the asynchronous running lock state change callback interface.
      * @param callback Registered callback to running lock state change.
      *     The callback will execute asynchronously when holding or unholding running lock.

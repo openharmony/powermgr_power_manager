@@ -118,13 +118,18 @@ public:
     virtual int32_t UnRegisterUlsrCallbackIpc(const sptr<IUlsrCallback>& callback, int32_t& powerError) override;
     virtual int32_t RefreshActivityIpc(
         int64_t callTimeMs, int32_t activityType, const std::string& refreshReason, int32_t& powerError) override;
-    virtual int32_t SetPowerKeyFilteringStrategyIpc(int32_t strategy, int32_t& powerError) override;
+    virtual int32_t SetPowerKeyFilteringStrategyIpc(
+        int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError) override;
     virtual int32_t GetShutdownReasonIpc(std::string& reason, int32_t& powerError) override;
     virtual int32_t RegisterAsyncShutdownCallbackIpc(
         const sptr<IAsyncShutdownCallback>& callback, int32_t priorityValue, int32_t& powerError) override;
     virtual int32_t UnRegisterAsyncShutdownCallbackIpc(
         const sptr<IAsyncShutdownCallback>& callback, int32_t& powerError) override;
     virtual int32_t SetProxFilteringStrategyIpc(
+        int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError) override;
+    virtual int32_t SetLidFilteringStrategyIpc(
+        int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError) override;
+    virtual int32_t SetInterfaceCallFilteringStrategyIpc(
         int32_t strategy, const sptr<IRemoteObject>& token, int32_t& powerError) override;
 
     virtual int32_t GetPowerConfigIpc(
@@ -199,7 +204,8 @@ public:
         const RunningLockType type, bool& result, uint64_t displayId = UINT64_MAX) = 0;
     virtual PowerErrors RefreshActivity(
         int64_t callTimeMs, UserActivityType type, const std::string& refreshReason) = 0;
-    virtual PowerErrors SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy) = 0;
+    virtual PowerErrors SetPowerKeyFilteringStrategy(
+        PowerKeyFilteringStrategy strategy, const sptr<IRemoteObject>& token) = 0;
     virtual PowerErrors GetShutdownReason(std::string& reason) = 0;
     virtual void RegisterShutdownCallback(
         const sptr<ITakeOverShutdownCallback>& callback, ShutdownPriority priority) = 0;
@@ -227,6 +233,10 @@ public:
     virtual PowerErrors UnRegisterAsyncShutdownCallback(const sptr<IAsyncShutdownCallback>& callback) = 0;
     virtual PowerErrors SetProxFilteringStrategy(
         ProxFilteringStrategy strategy, const sptr<IRemoteObject>& token) = 0;
+    virtual PowerErrors SetLidFilteringStrategy(
+        LidFilteringStrategy strategy, const sptr<IRemoteObject>& token) = 0;
+    virtual PowerErrors SetInterfaceCallFilteringStrategy(
+        InterfaceCallFilteringStrategy strategy, const sptr<IRemoteObject>& token) = 0;
 
     virtual PowerErrors GetPowerConfig(const std::string& sceneName, std::string& configVal) = 0;
     virtual PowerErrors SetPowerConfig(const std::string& sceneName, const std::string& configVal) = 0;

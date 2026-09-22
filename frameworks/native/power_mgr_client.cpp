@@ -836,7 +836,7 @@ PowerErrors PowerMgrClient::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrate
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
     int32_t strategyValue = static_cast<int32_t>(strategy);
-    proxy->SetPowerKeyFilteringStrategyIpc(strategyValue, powerError);
+    proxy->SetPowerKeyFilteringStrategyIpc(strategyValue, token_, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 
@@ -869,6 +869,27 @@ PowerErrors PowerMgrClient::SetProxFilteringStrategy(ProxFilteringStrategy strat
     RETURN_IF_WITH_RET(strategy >= ProxFilteringStrategy::MAX, PowerErrors::ERR_PARAM_INVALID);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
     proxy->SetProxFilteringStrategyIpc(static_cast<int32_t>(strategy), token_, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
+PowerErrors PowerMgrClient::SetLidFilteringStrategy(LidFilteringStrategy strategy)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WITH_RET(strategy >= LidFilteringStrategy::STRATEGY_MAX, PowerErrors::ERR_PARAM_INVALID);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->SetLidFilteringStrategyIpc(static_cast<int32_t>(strategy), token_, powerError);
+    return static_cast<PowerErrors>(powerError);
+}
+
+PowerErrors PowerMgrClient::SetInterfaceCallFilteringStrategy(InterfaceCallFilteringStrategy strategy)
+{
+    sptr<IPowerMgr> proxy = GetPowerMgrProxy();
+    RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
+    RETURN_IF_WITH_RET(
+        strategy >= InterfaceCallFilteringStrategy::STRATEGY_MAX, PowerErrors::ERR_PARAM_INVALID);
+    int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
+    proxy->SetInterfaceCallFilteringStrategyIpc(static_cast<int32_t>(strategy), token_, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 

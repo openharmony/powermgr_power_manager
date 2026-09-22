@@ -1375,6 +1375,12 @@ PowerErrors PowerMgrService::SuspendDevice(
         POWER_HILOGW(FEATURE_SUSPEND, "System is shutting down, can't suspend");
         return PowerErrors::ERR_OK;
     }
+    if (powerStateMachine_->IsScreenOffBlocked(
+        PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice blocked by screen-off block strategy, reason=%{public}d",
+            static_cast<int32_t>(reason));
+        return PowerErrors::ERR_SCREEN_OFF_BLOCKED;
+    }
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     powerStateMachine_->ReportSuspendStart(uid, static_cast<int32_t>(reason), false);
 #endif
@@ -3043,7 +3049,8 @@ PowerErrors PowerMgrService::RefreshActivity(
 #endif
 }
 
-PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrategy strategy)
+PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(
+    PowerKeyFilteringStrategy strategy, const sptr<IRemoteObject>& token)
 {
     if (!Permission::IsSystem()) {
         POWER_HILOGI(FEATURE_INPUT, "SetPowerKeyFilteringStrategy failed, System permission intercept");
@@ -3057,12 +3064,34 @@ PowerErrors PowerMgrService::SetPowerKeyFilteringStrategy(PowerKeyFilteringStrat
     auto uid = IPCSkeleton::GetCallingUid();
     POWER_HILOGI(FEATURE_INPUT,
         "SetPowerKeyFilteringStrategy pid: %{public}d, uid: %{public}d, strategy: %{public}d", pid, uid, strategy);
+    std::function<void(const sptr<IRemoteObject>&)> cb = [](const sptr<IRemoteObject>& remote) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (!stateMachine) {
+            POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+            return;
+        }
+        stateMachine->RemoveScreenOffBlock(PowerStateMachine::ScreenOffBlockType::POWER_KEY);
+        POWER_HILOGI(COMP_SVC, "RemoveScreenOffBlock POWER_KEY on SA death");
+    };
     switch (strategy) {
         case PowerKeyFilteringStrategy::DISABLE_LONG_PRESS_FILTERING:
             shutdownDialog_.SetShutdownDialogForbid(false);
             break;
         case PowerKeyFilteringStrategy::LONG_PRESS_FILTERING_ONCE:
             shutdownDialog_.SetShutdownDialogForbid(true);
+            break;
+        case PowerKeyFilteringStrategy::POWER_KEY_UP_SHORT_PRESS_FILTERING:
+            powerStateMachine_->UpdateScreenOffBlock(PowerStateMachine::ScreenOffBlockType::POWER_KEY, token);
+            DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
+            break;
+        case PowerKeyFilteringStrategy::POWER_KEY_UP_SHORT_PRESS_NOT_FILTERING:
+            powerStateMachine_->RemoveScreenOffBlock(PowerStateMachine::ScreenOffBlockType::POWER_KEY);
+            DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
             break;
         default:
             POWER_HILOGW(FEATURE_INPUT, "SetPowerKeyFilteringStrategy out of range");
@@ -3149,6 +3178,101 @@ PowerErrors PowerMgrService::SetProxFilteringStrategy(
     };
     DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
     powerStateMachine_->SetProxFilteringStrategy(strategy);
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::SetLidFilteringStrategy(
+    LidFilteringStrategy strategy, const sptr<IRemoteObject>& token)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGW(FEATURE_INPUT, "SetLidFilteringStrategy failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGW(FEATURE_INPUT, "SetLidFilteringStrategy failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    if (strategy >= LidFilteringStrategy::STRATEGY_MAX) {
+        POWER_HILOGW(FEATURE_INPUT, "SetLidFilteringStrategy invalid strategy=%{public}d",
+            static_cast<int32_t>(strategy));
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(COMP_SVC,
+        "SetLidFilteringStrategy pid: %{public}d, uid: %{public}d, strategy: %{public}d",
+        pid, uid, static_cast<int32_t>(strategy));
+    std::function<void(const sptr<IRemoteObject>&)> cb = [](const sptr<IRemoteObject>& remote) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (!stateMachine) {
+            POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+            return;
+        }
+        stateMachine->RemoveScreenOffBlock(
+            PowerStateMachine::ScreenOffBlockType::LID);
+        POWER_HILOGI(COMP_SVC, "RemoveScreenOffBlock LID on SA death");
+    };
+    if (strategy == LidFilteringStrategy::LID_CLOSE_FILTERING) {
+        powerStateMachine_->UpdateScreenOffBlock(
+            PowerStateMachine::ScreenOffBlockType::LID, token);
+    } else {
+        powerStateMachine_->RemoveScreenOffBlock(
+            PowerStateMachine::ScreenOffBlockType::LID);
+    }
+    DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
+    return PowerErrors::ERR_OK;
+}
+
+PowerErrors PowerMgrService::SetInterfaceCallFilteringStrategy(
+    InterfaceCallFilteringStrategy strategy, const sptr<IRemoteObject>& token)
+{
+    if (!Permission::IsSystem()) {
+        POWER_HILOGW(FEATURE_INPUT, "SetInterfaceCallFilteringStrategy failed, System permission intercept");
+        return PowerErrors::ERR_SYSTEM_API_DENIED;
+    }
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        POWER_HILOGW(FEATURE_INPUT,
+            "SetInterfaceCallFilteringStrategy failed, The caller does not have the permission");
+        return PowerErrors::ERR_PERMISSION_DENIED;
+    }
+    if (strategy >= InterfaceCallFilteringStrategy::STRATEGY_MAX) {
+        POWER_HILOGW(FEATURE_INPUT, "SetInterfaceCallFilteringStrategy invalid strategy=%{public}d",
+            static_cast<int32_t>(strategy));
+        return PowerErrors::ERR_PARAM_INVALID;
+    }
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
+    POWER_HILOGI(COMP_SVC,
+        "SetInterfaceCallFilteringStrategy pid: %{public}d, uid: %{public}d, strategy: %{public}d",
+        pid, uid, static_cast<int32_t>(strategy));
+    std::function<void(const sptr<IRemoteObject>&)> cb = [](const sptr<IRemoteObject>& remote) {
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms == nullptr) {
+            POWER_HILOGE(COMP_SVC, "get PowerMgrService fail");
+            return;
+        }
+        auto stateMachine = pms->GetPowerStateMachine();
+        if (!stateMachine) {
+            POWER_HILOGE(COMP_SVC, "cannot get PowerStateMachine, return early");
+            return;
+        }
+        stateMachine->RemoveScreenOffBlock(
+            PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE);
+        POWER_HILOGI(COMP_SVC, "RemoveScreenOffBlock INTERFACE_CALL on SA death");
+    };
+    if (strategy == InterfaceCallFilteringStrategy::SUSPEND_DEVICE_FILTERING) {
+        powerStateMachine_->UpdateScreenOffBlock(
+            PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE, token);
+    } else {
+        powerStateMachine_->RemoveScreenOffBlock(
+            PowerStateMachine::ScreenOffBlockType::SUSPEND_DEVICE_INTERFACE);
+    }
+    DeathRecipientManager::GetInstance().AddDeathRecipient(token, {cb, __func__, pid, uid});
     return PowerErrors::ERR_OK;
 }
 
