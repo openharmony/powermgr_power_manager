@@ -445,6 +445,7 @@ private:
     bool isDuringCallStateEnable_ {false};
     bool isLidCheckEnable_ {false};
     bool isExternalScreenWakeup_ {false};
+    std::atomic_bool isHdiRemove_ { false };
     int32_t powerkeyBlockedFoldMode_ {-1};
     static std::atomic_bool foldScreenFlag_;
     ffrt::mutex wakeupMutex_;
