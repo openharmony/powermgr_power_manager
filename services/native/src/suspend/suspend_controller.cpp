@@ -637,16 +637,15 @@ void SuspendController::ControlListenerInner(SuspendDeviceType reason, uint32_t 
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     stateMachine_->ReportSuspendStart(static_cast<int32_t>(uid), static_cast<int32_t>(reason), force);
 #endif
-    bool ret = false;
-    std::string foldType = system::GetParameter("const.window.foldscreen.type", "");
     auto switchAction = stateMachine_->GetSwitchActionPtr();
-    if (foldType == "5,3,0,0" && switchAction != nullptr &&
-        reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH) {
-        ret =
-            switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE) == SwitchActionRet::HANDLED ? false : true;
-    } else {
-        ret = stateMachine_->SetState(
-            PowerState::INACTIVE, stateMachine_->GetReasonBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH && switchAction != nullptr &&
+        switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE) == SwitchActionRet::HANDLED) {
+        return;
+    }
+    bool ret = stateMachine_->SetState(
+        PowerState::INACTIVE, stateMachine_->GetReasonBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH && switchAction != nullptr) {
+        switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_AFTER_SET_STATE);
     }
     if (ret) {
         StartSleepTimer(reason, action, delay);
