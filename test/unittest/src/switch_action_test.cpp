@@ -40,14 +40,16 @@ class SPNSwitchActionStub : public ISwitchAction {
 public:
     bool IsWakeupInClosedStateCalled() const { return wakeupCalled_; }
     bool IsSwitchOpenCalled() const { return openCalled_; }
-    bool IsSwitchCloseCalled() const { return closeCalled_; }
+    bool IsSwitchCloseBeforeCalled() const { return closeBeforeCalled_; }
+    bool IsSwitchCloseAfterCalled() const { return closeAfterCalled_; }
     bool IsReportSwitchStateCalled() const { return reportCalled_; }
     bool IsIsScreenOnCalled() const { return screenOnCalled_; }
     void Reset()
     {
         wakeupCalled_ = false;
         openCalled_ = false;
-        closeCalled_ = false;
+        closeBeforeCalled_ = false;
+        closeAfterCalled_ = false;
         reportCalled_ = false;
         screenOnCalled_ = false;
     }
@@ -63,9 +65,14 @@ private:
         openCalled_ = true;
         return SwitchActionRet::HANDLED;
     }
-    SwitchActionRet DoSwitchClose() override
+    SwitchActionRet DoSwitchCloseBeforeSetState() override
     {
-        closeCalled_ = true;
+        closeBeforeCalled_ = true;
+        return SwitchActionRet::HANDLED;
+    }
+    SwitchActionRet DoSwitchCloseAfterSetState() override
+    {
+        closeAfterCalled_ = true;
         return SwitchActionRet::HANDLED;
     }
     SwitchActionRet DoReportSwitchState() override
@@ -81,7 +88,8 @@ private:
 
     bool wakeupCalled_ = false;
     bool openCalled_ = false;
-    bool closeCalled_ = false;
+    bool closeBeforeCalled_ = false;
+    bool closeAfterCalled_ = false;
     bool reportCalled_ = false;
     bool screenOnCalled_ = false;
 };
@@ -161,7 +169,9 @@ HWTEST_F(SwitchActionTest, ISwitchAction_HandleSwitchAction_DefaultRet_ReturnsDe
         SwitchActionRet::DEFAULT);
     EXPECT_EQ(defaultAction_->HandleSwitchAction(SwitchActionType::SWITCH_OPEN),
         SwitchActionRet::DEFAULT);
-    EXPECT_EQ(defaultAction_->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE),
+    EXPECT_EQ(defaultAction_->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE),
+        SwitchActionRet::DEFAULT);
+    EXPECT_EQ(defaultAction_->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_AFTER_SET_STATE),
         SwitchActionRet::DEFAULT);
     POWER_HILOGI(LABEL_TEST, "ISwitchAction_HandleSwitchAction_DefaultRet_ReturnsDefault end");
 }
@@ -179,7 +189,8 @@ HWTEST_F(SwitchActionTest, SPNSwitchActionStub_HandleSwitchAction_WakeupInClosed
     auto ret = stubAction_->HandleSwitchAction(SwitchActionType::WAKEUP_IN_CLOSED_STATE);
     EXPECT_TRUE(stubAction_->IsWakeupInClosedStateCalled());
     EXPECT_FALSE(stubAction_->IsSwitchOpenCalled());
-    EXPECT_FALSE(stubAction_->IsSwitchCloseCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseAfterCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
     POWER_HILOGI(LABEL_TEST, "SPNSwitchActionStub_HandleSwitchAction_WakeupInClosedState_Called end");
 }
@@ -197,14 +208,15 @@ HWTEST_F(SwitchActionTest, SPNSwitchActionStub_HandleSwitchAction_SwitchOpen_Cal
     auto ret = stubAction_->HandleSwitchAction(SwitchActionType::SWITCH_OPEN);
     EXPECT_FALSE(stubAction_->IsWakeupInClosedStateCalled());
     EXPECT_TRUE(stubAction_->IsSwitchOpenCalled());
-    EXPECT_FALSE(stubAction_->IsSwitchCloseCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseAfterCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
     POWER_HILOGI(LABEL_TEST, "SPNSwitchActionStub_HandleSwitchAction_SwitchOpen_Called end");
 }
 
 /**
  * @tc.name: SPNSwitchActionStub_HandleSwitchAction_SwitchClose_Called
- * @tc.desc: Test SPNSwitchActionStub correctly records SWITCH_CLOSE call
+ * @tc.desc: Test SPNSwitchActionStub correctly records SWITCH_CLOSE_BEFORE/AFTER_SET_STATE call
  * @tc.type: FUNC
  * @tc.require: issueNone
  */
@@ -212,10 +224,20 @@ HWTEST_F(SwitchActionTest, SPNSwitchActionStub_HandleSwitchAction_SwitchClose_Ca
 {
     POWER_HILOGI(LABEL_TEST, "SPNSwitchActionStub_HandleSwitchAction_SwitchClose_Called start");
     ASSERT_NE(stubAction_, nullptr);
-    auto ret = stubAction_->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE);
+    stubAction_->Reset();
+    auto ret = stubAction_->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE);
     EXPECT_FALSE(stubAction_->IsWakeupInClosedStateCalled());
     EXPECT_FALSE(stubAction_->IsSwitchOpenCalled());
-    EXPECT_TRUE(stubAction_->IsSwitchCloseCalled());
+    EXPECT_TRUE(stubAction_->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseAfterCalled());
+    EXPECT_EQ(ret, SwitchActionRet::HANDLED);
+ 
+    stubAction_->Reset();
+    ret = stubAction_->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_AFTER_SET_STATE);
+    EXPECT_FALSE(stubAction_->IsWakeupInClosedStateCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchOpenCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseBeforeCalled());
+    EXPECT_TRUE(stubAction_->IsSwitchCloseAfterCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
     POWER_HILOGI(LABEL_TEST, "SPNSwitchActionStub_HandleSwitchAction_SwitchClose_Called end");
 }
@@ -239,7 +261,8 @@ HWTEST_F(SwitchActionTest, HandleSwitchAction_InvalidType_NoCrash, TestSize.Leve
     EXPECT_EQ(ret, SwitchActionRet::DEFAULT);
     EXPECT_FALSE(stubAction_->IsWakeupInClosedStateCalled());
     EXPECT_FALSE(stubAction_->IsSwitchOpenCalled());
-    EXPECT_FALSE(stubAction_->IsSwitchCloseCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseAfterCalled());
     POWER_HILOGI(LABEL_TEST, "HandleSwitchAction_InvalidType_NoCrash end");
 }
 
@@ -332,7 +355,8 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_StubAction_SwitchOpen_WakeupSuccess
     auto ret = stub->HandleSwitchAction(SwitchActionType::SWITCH_OPEN);
     EXPECT_TRUE(stub->IsSwitchOpenCalled());
     EXPECT_FALSE(stub->IsWakeupInClosedStateCalled());
-    EXPECT_FALSE(stub->IsSwitchCloseCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseAfterCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
 
     stateMachine_->SetSwitchState(true);
@@ -361,8 +385,9 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_StubAction_SwitchClose_CalledBefore
     EXPECT_EQ(stateMachine_->GetState(), PowerState::AWAKE);
 
     stub->Reset();
-    auto ret = stub->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE);
-    EXPECT_TRUE(stub->IsSwitchCloseCalled());
+    auto ret = stub->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE);
+    EXPECT_TRUE(stub->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseAfterCalled());
     EXPECT_FALSE(stub->IsSwitchOpenCalled());
     EXPECT_FALSE(stub->IsWakeupInClosedStateCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
@@ -420,7 +445,8 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_WakeupInClosedState_StubActionCalle
     // Adapter's WAKEUP_IN_CLOSED_STATE should be called in IsWakeupDeviceSkip
     EXPECT_TRUE(stub->IsWakeupInClosedStateCalled());
     EXPECT_FALSE(stub->IsSwitchOpenCalled());
-    EXPECT_FALSE(stub->IsSwitchCloseCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseAfterCalled());
 
     // SPN stub returns HANDLED, so wakeup is NOT skipped
     EXPECT_EQ(stateMachine_->GetState(), PowerState::AWAKE);
@@ -455,7 +481,7 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_WakeupInOpenState_DefaultAction_NoE
 
 /**
  * @tc.name: PowerStateMachine_SwitchClose_InInactiveState_StubActionCalled
- * @tc.desc: Test HandleSwitchAction(SWITCH_CLOSE) is called even when device is already in
+ * @tc.desc: Test HandleSwitchAction(SWITCH_CLOSE_BEFORE_SET_STATE) is called even when device is already in
  *           INACTIVE (screen off) state. Verifies TC-07: strategy is always called regardless
  *           of current power state.
  * @tc.type: FUNC
@@ -481,8 +507,9 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_SwitchClose_InInactiveState_StubAct
 
     // Device is already in INACTIVE (screen off), trigger switch close
     stub->Reset();
-    auto ret = stub->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE);
-    EXPECT_TRUE(stub->IsSwitchCloseCalled());
+    auto ret = stub->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE);
+    EXPECT_TRUE(stub->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseAfterCalled());
     EXPECT_FALSE(stub->IsSwitchOpenCalled());
     EXPECT_FALSE(stub->IsWakeupInClosedStateCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
@@ -513,7 +540,9 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_DefaultInitAction_SetAndGet_Success
     EXPECT_EQ(stateMachine_->GetSwitchActionPtr()->HandleSwitchAction(
         SwitchActionType::SWITCH_OPEN), SwitchActionRet::DEFAULT);
     EXPECT_EQ(stateMachine_->GetSwitchActionPtr()->HandleSwitchAction(
-        SwitchActionType::SWITCH_CLOSE), SwitchActionRet::DEFAULT);
+        SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE), SwitchActionRet::DEFAULT);
+    EXPECT_EQ(stateMachine_->GetSwitchActionPtr()->HandleSwitchAction(
+        SwitchActionType::SWITCH_CLOSE_AFTER_SET_STATE), SwitchActionRet::DEFAULT);
 
     // Default action does not affect normal wakeup/suspend
     stateMachine_->SetSwitchState(true);
@@ -599,7 +628,8 @@ HWTEST_F(SwitchActionTest, SPNSwitchActionStub_HandleSwitchAction_ReportSwitchSt
     auto ret = stubAction_->HandleSwitchAction(SwitchActionType::REPORT_SWITCH_STATE);
     EXPECT_TRUE(stubAction_->IsReportSwitchStateCalled());
     EXPECT_FALSE(stubAction_->IsSwitchOpenCalled());
-    EXPECT_FALSE(stubAction_->IsSwitchCloseCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stubAction_->IsSwitchCloseAfterCalled());
     EXPECT_FALSE(stubAction_->IsWakeupInClosedStateCalled());
     EXPECT_FALSE(stubAction_->IsIsScreenOnCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
@@ -646,7 +676,8 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_ReportSwitchState_Compensation_Disp
         SwitchActionType::REPORT_SWITCH_STATE);
     EXPECT_TRUE(stub->IsReportSwitchStateCalled());
     EXPECT_FALSE(stub->IsSwitchOpenCalled());
-    EXPECT_FALSE(stub->IsSwitchCloseCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseAfterCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine_ReportSwitchState_Compensation_Dispatched end");
 }
@@ -719,7 +750,8 @@ HWTEST_F(SwitchActionTest, PowerStateMachine_ReportSwitchState_Compensation_Stil
         SwitchActionType::REPORT_SWITCH_STATE);
     EXPECT_TRUE(stub->IsReportSwitchStateCalled());
     EXPECT_FALSE(stub->IsSwitchOpenCalled());
-    EXPECT_FALSE(stub->IsSwitchCloseCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseBeforeCalled());
+    EXPECT_FALSE(stub->IsSwitchCloseAfterCalled());
     EXPECT_EQ(ret, SwitchActionRet::HANDLED);
     POWER_HILOGI(LABEL_TEST, "PowerStateMachine_ReportSwitchState_Compensation_StillClosed_NoOpenNotify end");
 }
