@@ -80,6 +80,7 @@ void SystemSuspendController::RegisterHdiStatusListener()
 void SystemSuspendController::ResetHandle()
 {
     POWER_HILOGW(COMP_SVC, "devmgr stop, ResetHandle");
+    std::lock_guard lock(interfaceMutex_);
     hdiServStatListener_ = nullptr;
     hdiServiceMgr_ = nullptr;
     powerInterface_ = nullptr;
