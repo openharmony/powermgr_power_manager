@@ -40,7 +40,7 @@ SwitchActionRet DualScreenSwitchAction::DoSwitchOpen()
     return SwitchActionRet::HANDLED;
 }
 
-SwitchActionRet DualScreenSwitchAction::DoSwitchClose()
+SwitchActionRet DualScreenSwitchAction::DoSwitchCloseBeforeSetState()
 {
     POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] %{public}s Enter", __func__);
     auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
@@ -52,12 +52,22 @@ SwitchActionRet DualScreenSwitchAction::DoSwitchClose()
         Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(Rosen::ScreenClosedState::CLOSE, isScreenOn);
         pms->RefreshActivity(GetTickCount(), UserActivityType::USER_ACTIVITY_TYPE_SWITCH, false);
         return SwitchActionRet::HANDLED;
-    } else {
-        stateMachine->SetState(PowerState::INACTIVE,
-            stateMachine->GetReasonBySuspendType(SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH), true);
-        Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(Rosen::ScreenClosedState::CLOSE, isScreenOn);
-        return SwitchActionRet::DEFAULT;
     }
+    return SwitchActionRet::DEFAULT;
+}
+ 
+SwitchActionRet DualScreenSwitchAction::DoSwitchCloseAfterSetState()
+{
+    POWER_HILOGI(FEATURE_POWER_STATE, "[UL_POWER] %{public}s Enter", __func__);
+    auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto stateMachine = pms->GetPowerStateMachine();
+    RETURN_IF_WITH_RET(stateMachine == nullptr, SwitchActionRet::DEFAULT);
+    bool isScreenOn = pms->IsFoldScreenOn();
+    uint32_t action = stateMachine->GetSwitchAction();
+    if (action != static_cast<uint32_t>(SuspendAction::ACTION_NONE)) {
+        Rosen::DisplayManagerLite::GetInstance().SetScreenSwitchState(Rosen::ScreenClosedState::CLOSE, isScreenOn);
+    }
+    return SwitchActionRet::DEFAULT;
 }
 
 SwitchActionRet DualScreenSwitchAction::DoReportSwitchState()
