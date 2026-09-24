@@ -918,7 +918,7 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
         POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID crash in PowerService.");
         displayManagerServiceCrash_ = true;
     }
-    if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID) {
+    if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID && !isHdiRemove_.load()) {
         SystemSuspendController::GetInstance().ResetHandle();
         isHdiRemove_.store(true, std::memory_order_relaxed);
     }
@@ -974,6 +974,7 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     OnAddSystemAbilityInner(systemAbilityId, deviceId);
     if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID && isHdiRemove_.load()) {
         SystemSuspendController::GetInstance().RegisterHdiStatusListener();
+        isHdiRemove_.store(false, std::memory_order_relaxed);
     }
 }
 
