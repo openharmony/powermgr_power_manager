@@ -24,7 +24,8 @@ namespace PowerMgr {
 enum class SwitchActionType : uint32_t {
     WAKEUP_IN_CLOSED_STATE = 0,
     SWITCH_OPEN,
-    SWITCH_CLOSE,
+    SWITCH_CLOSE_BEFORE_SET_STATE,
+    SWITCH_CLOSE_AFTER_SET_STATE,
     REPORT_SWITCH_STATE,
     IS_SCREEN_ON,
 };
@@ -47,8 +48,10 @@ public:
                 return DoWakeupInClosedState();
             case SwitchActionType::SWITCH_OPEN:
                 return DoSwitchOpen();
-            case SwitchActionType::SWITCH_CLOSE:
-                return DoSwitchClose();
+            case SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE:
+                return DoSwitchCloseBeforeSetState();
+            case SwitchActionType::SWITCH_CLOSE_AFTER_SET_STATE:
+                return DoSwitchCloseAfterSetState();
             case SwitchActionType::REPORT_SWITCH_STATE:
                 return DoReportSwitchState();
             case SwitchActionType::IS_SCREEN_ON:
@@ -61,7 +64,8 @@ public:
 private:
     virtual SwitchActionRet DoWakeupInClosedState() { return SwitchActionRet::DEFAULT; }
     virtual SwitchActionRet DoSwitchOpen() { return SwitchActionRet::DEFAULT; }
-    virtual SwitchActionRet DoSwitchClose() { return SwitchActionRet::DEFAULT; }
+    virtual SwitchActionRet DoSwitchCloseBeforeSetState() { return SwitchActionRet::DEFAULT; }
+    virtual SwitchActionRet DoSwitchCloseAfterSetState() { return SwitchActionRet::DEFAULT; }
     virtual SwitchActionRet DoReportSwitchState() { return SwitchActionRet::DEFAULT; }
     virtual SwitchActionRet DoIsScreenOn() { return SwitchActionRet::DEFAULT; }
 };
@@ -70,7 +74,8 @@ class DualScreenSwitchAction : public ISwitchAction {
 private:
     virtual SwitchActionRet DoWakeupInClosedState() override;
     virtual SwitchActionRet DoSwitchOpen() override;
-    virtual SwitchActionRet DoSwitchClose() override;
+    virtual SwitchActionRet DoSwitchCloseBeforeSetState() override;
+    virtual SwitchActionRet DoSwitchCloseAfterSetState() override;
     virtual SwitchActionRet DoReportSwitchState() override;
     virtual SwitchActionRet DoIsScreenOn() override;
 };
