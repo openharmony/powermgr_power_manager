@@ -29,6 +29,7 @@ namespace {
 // Permission switches: link-time symbol override for Permission::IsSystem/IsPermissionGranted.
 bool g_isSystem = true;
 bool g_isPermissionGranted = true;
+constexpr int32_t TEST_API_VERSION = 26;
 } // namespace
 
 namespace OHOS::PowerMgr {
@@ -39,6 +40,10 @@ bool Permission::IsSystem()
 bool Permission::IsPermissionGranted(const std::string& perm)
 {
     return g_isPermissionGranted;
+}
+int32_t Permission::GetCallerApiTargetVersion()
+{
+    return TEST_API_VERSION;
 }
 } // namespace OHOS::PowerMgr
 
@@ -79,20 +84,20 @@ HWTEST_F(PowerMgrServiceDecoupledTest, PowerMgrServiceDecoupled001, TestSize.Lev
     // Test case 1: not a system app -> ERR_SYSTEM_API_DENIED (202)
     g_isSystem = false;
     g_isPermissionGranted = true;
-    ret = pmsTest_->OverrideScreenOffTime(10000, "26");
+    ret = pmsTest_->OverrideScreenOffTime(10000);
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
 
     // Test case 2: system app without POWER_MANAGER permission -> ERR_PERMISSION_DENIED (201)
     g_isSystem = true;
     g_isPermissionGranted = false;
-    ret = pmsTest_->OverrideScreenOffTime(10000, "26");
+    ret = pmsTest_->OverrideScreenOffTime(10000);
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED) << "Test case 2 failed";
 
     // Test case 3: with permission. Returns 801 on decoupling; runs normally on non-decoupled.
     // The case always compiles (OverrideScreenOffTime always exists); the assertion flips with
     // the feature so it passes whether or not the image enables decoupling.
     g_isPermissionGranted = true;
-    ret = pmsTest_->OverrideScreenOffTime(10000, "26");
+    ret = pmsTest_->OverrideScreenOffTime(10000);
 #ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED) << "Test case 3 failed";
 #else
@@ -115,16 +120,16 @@ HWTEST_F(PowerMgrServiceDecoupledTest, PowerMgrServiceDecoupled002, TestSize.Lev
 
     g_isSystem = false;
     g_isPermissionGranted = true;
-    ret = pmsTest_->RestoreScreenOffTime("26");
+    ret = pmsTest_->RestoreScreenOffTime();
     EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED) << "Test case 1 failed";
 
     g_isSystem = true;
     g_isPermissionGranted = false;
-    ret = pmsTest_->RestoreScreenOffTime("26");
+    ret = pmsTest_->RestoreScreenOffTime();
     EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED) << "Test case 2 failed";
 
     g_isPermissionGranted = true;
-    ret = pmsTest_->RestoreScreenOffTime("26");
+    ret = pmsTest_->RestoreScreenOffTime();
 #ifdef POWER_MANAGER_ENABLE_SCREEN_DECOUPLING
     EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED) << "Test case 3 failed";
 #else

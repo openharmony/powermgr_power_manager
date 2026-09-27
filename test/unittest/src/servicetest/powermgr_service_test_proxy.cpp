@@ -456,7 +456,7 @@ int32_t PowerMgrServiceTestProxy::ShutDownDeviceIpc(const std::string& reason, i
 }
 
 int32_t PowerMgrServiceTestProxy::SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue,
-    bool suspendImmed, const std::string& apiVersion, int32_t& powerError)
+    bool suspendImmed, int32_t& powerError)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
 
@@ -481,10 +481,6 @@ int32_t PowerMgrServiceTestProxy::SuspendDeviceIpc(int64_t callTimeMs, int32_t r
         HiLog::Error(LABEL, "Write [suspendImmed] failed!");
         return ERR_INVALID_DATA;
     }
-    if (!data.WriteString16(Str8ToStr16(apiVersion))) {
-        HiLog::Error(LABEL, "Write [apiVersion] failed!");
-        return ERR_INVALID_DATA;
-    }
 
     int32_t result = stub_->OnRemoteRequest(
         static_cast<uint32_t>(IPowerMgrIpcCode::COMMAND_SUSPEND_DEVICE_IPC), data, reply, option);
@@ -505,7 +501,7 @@ int32_t PowerMgrServiceTestProxy::SuspendDeviceIpc(int64_t callTimeMs, int32_t r
 }
 
 int32_t PowerMgrServiceTestProxy::WakeupDeviceIpc(int64_t callTimeMs, int32_t reasonValue,
-    const std::string& details, const std::string& apiVersion, int32_t& powerError)
+    const std::string& details, int32_t& powerError)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
 
@@ -528,10 +524,6 @@ int32_t PowerMgrServiceTestProxy::WakeupDeviceIpc(int64_t callTimeMs, int32_t re
     }
     if (!data.WriteString16(Str8ToStr16(details))) {
         HiLog::Error(LABEL, "Write [details] failed!");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString16(Str8ToStr16(apiVersion))) {
-        HiLog::Error(LABEL, "Write [apiVersion] failed!");
         return ERR_INVALID_DATA;
     }
 
@@ -631,7 +623,7 @@ int32_t PowerMgrServiceTestProxy::OverrideScreenOffTimeIpc(int64_t timeout, int3
     return ERR_OK;
 }
 
-int32_t PowerMgrServiceTestProxy::RestoreScreenOffTimeIpc(const std::string& apiVersion, int32_t& powerError)
+int32_t PowerMgrServiceTestProxy::RestoreScreenOffTimeIpc(int32_t& powerError)
 {
     RETURN_IF_WITH_RET(stub_ == nullptr, ERR_INVALID_DATA);
 
@@ -642,11 +634,6 @@ int32_t PowerMgrServiceTestProxy::RestoreScreenOffTimeIpc(const std::string& api
     if (!data.WriteInterfaceToken(PowerMgrProxy::GetDescriptor())) {
         HiLog::Error(LABEL, "Write interface token failed!");
         return ERR_INVALID_VALUE;
-    }
-
-    if (!data.WriteString16(Str8ToStr16(apiVersion))) {
-        HiLog::Error(LABEL, "Write [apiVersion] failed!");
-        return ERR_INVALID_DATA;
     }
 
     int32_t result = stub_->OnRemoteRequest(
@@ -670,7 +657,7 @@ int32_t PowerMgrServiceTestProxy::RestoreScreenOffTimeIpc(const std::string& api
 int32_t PowerMgrServiceTestProxy::ForceSuspendDeviceIpc(int64_t callTimeMs)
 {
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
-    return PowerMgrProxy::ForceSuspendDeviceIpc(callTimeMs, "-1", asyncCallback);
+    return PowerMgrProxy::ForceSuspendDeviceIpc(callTimeMs, asyncCallback);
 }
 
 int32_t PowerMgrServiceTestProxy::GetStateIpc(int32_t& powerState)

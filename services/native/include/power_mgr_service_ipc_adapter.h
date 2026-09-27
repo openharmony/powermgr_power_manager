@@ -32,24 +32,23 @@ public:
     virtual int32_t ShutDownDeviceIpc(const std::string& reason, int32_t& powerError) override;
     virtual int32_t SetSuspendTagIpc(const std::string& tag, int32_t& powerError) override;
     virtual int32_t SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue, bool suspendImmed,
-        const std::string& apiVersion, int32_t& powerError) override;
+        int32_t& powerError) override;
     virtual int32_t WakeupDeviceIpc(int64_t callTimeMs, int32_t reasonValue, const std::string& details,
-        const std::string& apiVersion, int32_t& powerError) override;
-    virtual int32_t WakeupDeviceAsyncIpc(int64_t callTimeMs, int32_t reasonValue, const std::string& details,
-        const std::string& apiVersion) override;
+        int32_t& powerError) override;
+    virtual int32_t WakeupDeviceAsyncIpc(int64_t callTimeMs, int32_t reasonValue, const std::string& details) override;
     virtual int32_t RefreshActivityIpc(int64_t callTimeMs, int32_t activityType, bool needChangeBacklight) override;
     virtual int32_t OverrideScreenOffTimeIpc(
-        int64_t timeout, const std::string& apiVersion, int32_t& powerError) override;
-    virtual int32_t RestoreScreenOffTimeIpc(const std::string& apiVersion, int32_t& powerError) override;
+        int64_t timeout, int32_t& powerError) override;
+    virtual int32_t RestoreScreenOffTimeIpc(int32_t& powerError) override;
     virtual int32_t GetStateIpc(int32_t& powerState) override;
     virtual int32_t IsScreenOnIpc(bool needPrintLog, bool& isScreenOn) override;
     virtual int32_t IsFoldScreenOnIpc(bool& isFoldScreenOn) override;
     virtual int32_t IsCollaborationScreenOnIpc(bool& isCollaborationScreenOn) override;
     virtual int32_t IsForceSleepingIpc(bool& isForceSleeping) override;
     virtual int32_t ForceSuspendDeviceIpc(
-        int64_t callTimeMs, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
+        int64_t callTimeMs, const sptr<IPowerMgrAsync>& powerProxy) override;
     virtual int32_t HibernateIpc(bool clearMemory, const std::string& reason,
-        const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy) override;
+        const sptr<IPowerMgrAsync>& powerProxy) override;
     virtual int32_t CreateRunningLockIpc(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo, int32_t& powerError) override;
     virtual int32_t ReleaseRunningLockIpc(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") override;
@@ -138,21 +137,21 @@ public:
     virtual PowerErrors ShutDownDevice(const std::string& reason) = 0;
     virtual PowerErrors SetSuspendTag(const std::string& tag) = 0;
     virtual PowerErrors SuspendDevice(int64_t callTimeMs, SuspendDeviceType reason,
-        bool suspendImmed, const std::string& apiVersion = "-1") = 0;
+        bool suspendImmed) = 0;
     virtual PowerErrors WakeupDevice(int64_t callTimeMs, WakeupDeviceType reason,
-        const std::string& details, const std::string& apiVersion = "-1") = 0;
+        const std::string& details) = 0;
     virtual void WakeupDeviceAsync(int64_t callTimeMs, WakeupDeviceType reason, const std::string& details) = 0;
     virtual bool RefreshActivity(int64_t callTimeMs, UserActivityType type, bool needChangeBacklight) = 0;
-    virtual PowerErrors OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion = "-1") = 0;
-    virtual PowerErrors RestoreScreenOffTime(const std::string& apiVersion = "-1") = 0;
+    virtual PowerErrors OverrideScreenOffTime(int64_t timeout) = 0;
+    virtual PowerErrors RestoreScreenOffTime() = 0;
     virtual PowerState GetState() = 0;
     virtual bool IsScreenOn(bool needPrintLog = true) = 0;
     virtual bool IsFoldScreenOn() = 0;
     virtual bool IsCollaborationScreenOn() = 0;
     virtual bool IsForceSleeping() = 0;
-    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1") = 0;
+    virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) = 0;
     virtual PowerErrors Hibernate(
-        bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1") = 0;
+        bool clearMemory, const std::string& reason = "") = 0;
     virtual PowerErrors CreateRunningLock(
         const sptr<IRemoteObject>& remoteObj, const RunningLockInfo& runningLockInfo) = 0;
     virtual bool ReleaseRunningLock(const sptr<IRemoteObject>& remoteObj, const std::string& name = "") = 0;

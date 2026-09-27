@@ -1344,7 +1344,7 @@ PowerErrors PowerMgrService::SetSuspendTag(const std::string& tag)
 }
 
 PowerErrors PowerMgrService::SuspendDevice(
-    int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed, const std::string& apiVersion)
+    int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
 {
     std::lock_guard lock(suspendMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -1353,7 +1353,7 @@ PowerErrors PowerMgrService::SuspendDevice(
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    int32_t version = Permission::GetCallerApiTargetVersion();
     if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "SuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1380,14 +1380,14 @@ PowerErrors PowerMgrService::SuspendDevice(
 }
 
 PowerErrors PowerMgrService::WakeupDevice(
-    int64_t callTimeMs, WakeupDeviceType reason, const std::string& details, const std::string& apiVersion)
+    int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
 {
     std::lock_guard lock(wakeupMutex_);
     if (!Permission::IsSystem()) {
         POWER_HILOGI(FEATURE_WAKEUP, "WakeupDevice failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    int32_t version = Permission::GetCallerApiTargetVersion();
     if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "WakeupDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1453,7 +1453,7 @@ bool PowerMgrService::RefreshActivityInner(int64_t callTimeMs, UserActivityType 
     return true;
 }
 
-PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout)
 {
     std::lock_guard lock(screenMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -1462,7 +1462,7 @@ PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout, const std::s
         POWER_HILOGI(COMP_SVC, "OverrideScreenOffTime failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    int32_t version = Permission::GetCallerApiTargetVersion();
     if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "OverrideScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1479,14 +1479,14 @@ PowerErrors PowerMgrService::OverrideScreenOffTime(int64_t timeout, const std::s
 #endif
 }
 
-PowerErrors PowerMgrService::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrService::RestoreScreenOffTime()
 {
     std::lock_guard lock(screenMutex_);
     if (!Permission::IsSystem()) {
         POWER_HILOGI(COMP_SVC, "RestoreScreenOffTime failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    int32_t version = Permission::GetCallerApiTargetVersion();
     if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "RestoreScreenOffTime failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1551,7 +1551,7 @@ bool PowerMgrService::IsForceSleeping()
     return isForceSleeping;
 }
 
-PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion)
+PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs)
 {
     std::lock_guard lock(suspendMutex_);
     pid_t pid = IPCSkeleton::GetCallingPid();
@@ -1560,7 +1560,7 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    int32_t version = Permission::GetCallerApiTargetVersion();
     if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "ForceSuspendDevice failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
@@ -1591,14 +1591,14 @@ PowerErrors PowerMgrService::ForceSuspendDevice(int64_t callTimeMs, const std::s
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
+PowerErrors PowerMgrService::Hibernate(bool clearMemory, const std::string& reason)
 {
     POWER_HILOGI(FEATURE_SUSPEND, "power mgr service hibernate begin.");
     if (!Permission::IsSystem()) {
         POWER_HILOGI(FEATURE_SUSPEND, "Hibernate failed, System permission intercept");
         return PowerErrors::ERR_SYSTEM_API_DENIED;
     }
-    int32_t version = static_cast<int32_t>(strtol(apiVersion.c_str(), nullptr, 10));
+    int32_t version = Permission::GetCallerApiTargetVersion();
     if (version >= API19 && !Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
         POWER_HILOGI(FEATURE_SUSPEND, "Hibernate failed, The application does not have the permission");
         return PowerErrors::ERR_PERMISSION_DENIED;
