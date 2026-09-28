@@ -16,6 +16,7 @@
 #include "permission.h"
 
 #include "accesstoken_kit.h"
+#include "hap_token_info.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 
@@ -139,6 +140,27 @@ bool Permission::IsNativePermissionGranted(const std::string& perm)
         return false;
     }
     return true;
+}
+
+int32_t Permission::GetCallerApiTargetVersion()
+{
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (type != ATokenTypeEnum::TOKEN_HAP) {
+        POWER_HILOGD(COMP_UTILS, "Caller is not HAP (type=%{public}d), skip apiVersion check",
+            static_cast<int32_t>(type));
+        return -1;
+    }
+    HapTokenInfo hapInfo;
+    if (AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo) != 0) {
+        POWER_HILOGW(COMP_UTILS, "GetHapTokenInfo failed, tokenId=%{public}u", tokenId);
+        return -1;
+    }
+    constexpr int32_t API_VERSION_MOD = 1000;
+    int32_t apiVersion = hapInfo.apiVersion % API_VERSION_MOD;
+    POWER_HILOGD(COMP_UTILS, "Caller apiVersion=%{public}d, bundle=%{public}s",
+        apiVersion, hapInfo.bundleName.c_str());
+    return apiVersion;
 }
 } // namespace PowerMgr
 } // namespace OHOS

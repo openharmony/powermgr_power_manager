@@ -56,14 +56,14 @@ public:
     int32_t ResetRunningLocksIpc();
     int32_t IsUsedIpc(const sptr<IRemoteObject>& remoteObj, bool& isUsed);
     int32_t SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue, bool suspendImmed,
-        const std::string& apiVersion, int32_t& powerError);
+        int32_t& powerError);
     int32_t WakeupDeviceIpc(int64_t callTimeMs, int32_t reasonValue, const std::string& details,
-        const std::string& apiVersion, int32_t& powerError);
+        int32_t& powerError);
     int32_t RefreshActivityIpc(int64_t callTimeMs,
         int32_t activityType = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_OTHER),
         bool needChangeBacklight = true);
     int32_t OverrideScreenOffTimeIpc(int64_t timeout, int32_t& powerError);
-    int32_t RestoreScreenOffTimeIpc(const std::string& apiVersion, int32_t& powerError);
+    int32_t RestoreScreenOffTimeIpc(int32_t& powerError);
     int32_t GetStateIpc(int32_t& powerState);
     int32_t IsScreenOnIpc(bool needPrintLog, bool& isScreenOn);
     int32_t ForceSuspendDeviceIpc(int64_t callTimeMs);

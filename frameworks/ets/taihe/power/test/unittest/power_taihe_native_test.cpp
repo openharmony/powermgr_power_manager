@@ -56,20 +56,20 @@ bool PowerMgrClient::IsScreenOn(bool needPrintLog)
 }
 
 PowerErrors PowerMgrClient::WakeupDevice(
-    WakeupDeviceType reason, const std::string& detail, const std::string& apiVersion)
+    WakeupDeviceType reason, const std::string& detail)
 {
     g_pass = true;
     return g_error;
 }
 
-PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
+PowerErrors PowerMgrClient::ForceSuspendDevice()
 {
     g_pass = true;
     return g_error;
 }
 
 PowerErrors PowerMgrClient::SuspendDevice(
-    SuspendDeviceType reason, bool suspendImmed, const std::string& apiVersion)
+    SuspendDeviceType reason, bool suspendImmed)
 {
     g_pass = true;
     return g_error;
@@ -93,19 +93,19 @@ PowerErrors PowerMgrClient::IsStandby(bool& isStandby)
     return g_error;
 }
 
-PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
+PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason)
 {
     g_pass = true;
     return g_error;
 }
 
-PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrClient::RestoreScreenOffTime()
 {
     g_pass = true;
     return g_error;
 }
 
-PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
 {
     g_pass = true;
     return g_error;

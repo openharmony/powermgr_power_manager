@@ -122,22 +122,21 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest002, TestSi
     int32_t PARM_ONE = 1;
     int32_t powerError = 1;
     int32_t powerState = -1;
-    std::string apiVersion = "-1";
     int32_t ret = 0;
     bool isScreenOn = false;
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + PARM_ONE;
-    ret = g_powerMgrServiceProxy->SuspendDeviceIpc(0, suspendReason, false, apiVersion, powerError);
+    ret = g_powerMgrServiceProxy->SuspendDeviceIpc(0, suspendReason, false, powerError);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION),
-        std::string("app call"), apiVersion, powerError);
+        std::string("app call"), powerError);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     int32_t attention = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
     EXPECT_NE(g_powerMgrServiceProxy->RefreshActivityIpc(GetTickCount(), attention, true), ERR_OK);
     g_powerMgrServiceProxy->OverrideScreenOffTimeIpc(200, powerError);
     EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    g_powerMgrServiceProxy->RestoreScreenOffTimeIpc(apiVersion, powerError);
+    g_powerMgrServiceProxy->RestoreScreenOffTimeIpc(powerError);
     EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
     ret = g_powerMgrServiceProxy->GetStateIpc(powerState);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -163,7 +162,6 @@ HWTEST_F(PowerMgrServiceMockParcelTest, PowerMgrServiceMockParcelTest003, TestSi
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceMockParcelTest003 start.");
     int32_t powerError = 1;
-    std::string apiVersion = "-1";
     ASSERT_NE(g_powerMgrServiceProxy, nullptr);
     sptr<IPowerStateCallback> stateCb = new PowerStateTestCallback();
     sptr<IPowerModeCallback> modeCb = new PowerModeTestCallback();

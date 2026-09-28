@@ -70,28 +70,28 @@ int32_t PowerMgrServiceAdapter::SetSuspendTagIpc(const std::string& tag, int32_t
 }
 
 int32_t PowerMgrServiceAdapter::SuspendDeviceIpc(int64_t callTimeMs, int32_t reasonValue, bool suspendImmed,
-    const std::string& apiVersion, int32_t& powerError)
+    int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::SuspendDevice", false);
     SuspendDeviceType reason = static_cast<SuspendDeviceType>(reasonValue);
-    powerError = static_cast<int32_t>(SuspendDevice(callTimeMs, reason, suspendImmed, apiVersion));
+    powerError = static_cast<int32_t>(SuspendDevice(callTimeMs, reason, suspendImmed));
     return ERR_OK;
 }
 
 int32_t PowerMgrServiceAdapter::WakeupDeviceIpc(int64_t callTimeMs, int32_t reasonValue,
-    const std::string& details, const std::string& apiVersion, int32_t& powerError)
+    const std::string& details, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::WakeupDevice", false);
     WakeupDeviceType reason = static_cast<WakeupDeviceType>(reasonValue);
-    powerError = static_cast<int32_t>(WakeupDevice(callTimeMs, reason, details, apiVersion));
+    powerError = static_cast<int32_t>(WakeupDevice(callTimeMs, reason, details));
     return ERR_OK;
 }
 
 int32_t PowerMgrServiceAdapter::WakeupDeviceAsyncIpc(
-    int64_t callTimeMs, int32_t reasonValue, const std::string& details, const std::string& apiVersion)
+    int64_t callTimeMs, int32_t reasonValue, const std::string& details)
 {
     WakeupDeviceType reason = static_cast<WakeupDeviceType>(reasonValue);
-    return static_cast<int32_t>(WakeupDevice(callTimeMs, reason, details, apiVersion));
+    return static_cast<int32_t>(WakeupDevice(callTimeMs, reason, details));
 }
 
 int32_t PowerMgrServiceAdapter::RefreshActivityIpc(int64_t callTimeMs, int32_t activityType, bool needChangeBacklight)
@@ -103,17 +103,17 @@ int32_t PowerMgrServiceAdapter::RefreshActivityIpc(int64_t callTimeMs, int32_t a
 }
 
 int32_t PowerMgrServiceAdapter::OverrideScreenOffTimeIpc(
-    int64_t timeout, const std::string& apiVersion, int32_t& powerError)
+    int64_t timeout, int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::OverrideScreenOffTime", false);
-    powerError = static_cast<int32_t>(OverrideScreenOffTime(timeout, apiVersion));
+    powerError = static_cast<int32_t>(OverrideScreenOffTime(timeout));
     return ERR_OK;
 }
 
-int32_t PowerMgrServiceAdapter::RestoreScreenOffTimeIpc(const std::string& apiVersion, int32_t& powerError)
+int32_t PowerMgrServiceAdapter::RestoreScreenOffTimeIpc(int32_t& powerError)
 {
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::RestoreScreenOffTime", false);
-    powerError = static_cast<int32_t>(RestoreScreenOffTime(apiVersion));
+    powerError = static_cast<int32_t>(RestoreScreenOffTime());
     return ERR_OK;
 }
 
@@ -147,27 +147,27 @@ int32_t PowerMgrServiceAdapter::IsCollaborationScreenOnIpc(bool& isCollaboration
 }
 
 int32_t PowerMgrServiceAdapter::ForceSuspendDeviceIpc(
-    int64_t callTimeMs, const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy)
+    int64_t callTimeMs, const sptr<IPowerMgrAsync>& powerProxy)
 {
     if (!powerProxy) {
         POWER_HILOGE(FEATURE_SUSPEND, "the powerProxy is null");
         return INIT_VALUE;
     }
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::ForceSuspendDevice", false);
-    int32_t result = static_cast<int32_t>(ForceSuspendDevice(callTimeMs, apiVersion));
+    int32_t result = static_cast<int32_t>(ForceSuspendDevice(callTimeMs));
     powerProxy->SendAsyncReply(result);
     return result;
 }
 
 int32_t PowerMgrServiceAdapter::HibernateIpc(bool clearMemory, const std::string& reason,
-    const std::string& apiVersion, const sptr<IPowerMgrAsync>& powerProxy)
+    const sptr<IPowerMgrAsync>& powerProxy)
 {
     if (!powerProxy) {
         POWER_HILOGE(FEATURE_SUSPEND, "the powerProxy is null");
         return INIT_VALUE;
     }
     PowerXCollie powerXCollie("PowerMgrServiceAdapter::Hibernate", false);
-    int32_t result = static_cast<int32_t>(Hibernate(clearMemory, reason, apiVersion));
+    int32_t result = static_cast<int32_t>(Hibernate(clearMemory, reason));
     powerProxy->SendAsyncReply(result);
     return result;
 }

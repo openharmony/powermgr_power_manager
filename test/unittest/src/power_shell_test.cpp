@@ -127,7 +127,7 @@ PowerErrors PowerMgrClient::WakeupDevice(
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
+PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason)
 {
     g_lastCalled = "Hibernate";
     return PowerErrors::ERR_OK;
@@ -174,7 +174,7 @@ std::string PowerMgrClient::Dump(const std::vector<std::string>& args)
     return g_lastCalled;
 }
 
-PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrClient::RestoreScreenOffTime()
 {
     if (g_lastCalled != "RestoreScreenOffTime") {
         g_lastCalled = "RestoreScreenOffTime";
@@ -183,7 +183,7 @@ PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
     return PowerErrors::ERR_OK;
 }
 
-PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
 {
     if (g_lastCalled != "OverrideScreenOffTime") {
         g_lastCalled = "OverrideScreenOffTime";

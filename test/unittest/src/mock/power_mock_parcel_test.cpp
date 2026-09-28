@@ -206,7 +206,6 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     int32_t powerError = 1;
     int32_t powerMode = 0;
     int32_t powerState = -1;
-    std::string apiVersion = "-1";
     bool isScreenOn = false;
     POWER_HILOGI(LABEL_TEST, "PowerMockParcelTest006 function start!");
     sptr<IPCObjectStub> remote = new IPCObjectStub();
@@ -215,14 +214,14 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
-    sptrProxy->SuspendDeviceIpc(0, static_cast<int32_t>(abnormaltype), false, apiVersion, powerError);
+    sptrProxy->SuspendDeviceIpc(0, static_cast<int32_t>(abnormaltype), false, powerError);
     sptrProxy->WakeupDeviceIpc(GetTickCount(), static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION),
-        std::string("app call"), apiVersion, powerError);
+        std::string("app call"), powerError);
     int32_t userAttention = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
     sptrProxy->RefreshActivityIpc(GetTickCount(), userAttention, true);
-    sptrProxy->OverrideScreenOffTimeIpc(200, apiVersion, powerError);
+    sptrProxy->OverrideScreenOffTimeIpc(200, powerError);
     EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    sptrProxy->RestoreScreenOffTimeIpc(apiVersion, powerError);
+    sptrProxy->RestoreScreenOffTimeIpc(powerError);
     EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
     int32_t result = sptrProxy->GetStateIpc(powerState);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -234,7 +233,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     sptrProxy->GetDeviceModeIpc(powerMode);
     sptrProxy->RebootDeviceIpc(" ", powerError);
     sptrProxy->ShutDownDeviceIpc(" ", powerError);
-    sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
+    sptrProxy->ForceSuspendDeviceIpc(0, powerProxy);
     int waitTime = 100;
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(waitTime));
     static std::vector<std::string> dumpArgs;

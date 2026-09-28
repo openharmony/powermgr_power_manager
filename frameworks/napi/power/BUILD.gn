@@ -36,7 +36,6 @@ ohos_shared_library("power") {
   ]
   deps = [
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_utils_path}/appmgr:power_appmgr",
   ]
 
   deps_ex = [

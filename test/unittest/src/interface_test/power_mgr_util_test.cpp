@@ -221,6 +221,70 @@ HWTEST_F(PowerMgrUtilTest, IsNativePermissionGrantedInvalid, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PermissionGetCallerApiTargetVersionNonHap
+ * @tc.desc: Test GetCallerApiTargetVersion returns -1 for non-HAP token types (branch: type != TOKEN_HAP, true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, PermissionGetCallerApiTargetVersionNonHap, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PermissionGetCallerApiTargetVersionNonHap function start!");
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), -1);
+
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_SHELL);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), -1);
+
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), -1);
+
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_TYPE_BUTT);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), -1);
+    POWER_HILOGI(LABEL_TEST, "PermissionGetCallerApiTargetVersionNonHap function end!");
+}
+
+/**
+ * @tc.name: PermissionGetCallerApiTargetVersionHapFailed
+ * @tc.desc: Test GetCallerApiTargetVersion returns -1 when GetHapTokenInfo fails (branch: GetHapTokenInfo != 0, true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, PermissionGetCallerApiTargetVersionHapFailed, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PermissionGetCallerApiTargetVersionHapFailed function start!");
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    HapTokenInfo hapInfo;
+    hapInfo.apiVersion = 19;
+    MockAccesstokenKit::MockSetHapTokenInfo(hapInfo, -1);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), -1);
+    POWER_HILOGI(LABEL_TEST, "PermissionGetCallerApiTargetVersionHapFailed function end!");
+}
+
+/**
+ * @tc.name: PermissionGetCallerApiTargetVersionHapSuccess
+ * @tc.desc: Test GetCallerApiTargetVersion returns correct version when GetHapTokenInfo succeeds
+ *     (branch: GetHapTokenInfo != 0, false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrUtilTest, PermissionGetCallerApiTargetVersionHapSuccess, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PermissionGetCallerApiTargetVersionHapSuccess function start!");
+    MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    HapTokenInfo hapInfo;
+    hapInfo.apiVersion = 1019;
+    hapInfo.bundleName = "com.test.app";
+    MockAccesstokenKit::MockSetHapTokenInfo(hapInfo, 0);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), 19);
+
+    hapInfo.apiVersion = 2026;
+    MockAccesstokenKit::MockSetHapTokenInfo(hapInfo, 0);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), 26);
+
+    hapInfo.apiVersion = 18;
+    MockAccesstokenKit::MockSetHapTokenInfo(hapInfo, 0);
+    EXPECT_EQ(Permission::GetCallerApiTargetVersion(), 18);
+    POWER_HILOGI(LABEL_TEST, "PermissionGetCallerApiTargetVersionHapSuccess function end!");
+}
+
+/**
  * @tc.name: SettingObserver001
  * @tc.desc: test SetKey in proxy
  * @tc.type: FUNC

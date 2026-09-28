@@ -51,7 +51,6 @@ taihe_shared_library("power_manager_taihe_native") {
   deps = [
     ":run_taihe",
     "${powermgr_inner_api}:powermgr_client",
-    "${powermgr_utils_path}/appmgr:power_appmgr",
   ]
   external_deps = [
     "c_utils:utils",

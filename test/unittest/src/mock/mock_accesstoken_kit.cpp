@@ -22,6 +22,8 @@ namespace {
 ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_INVALID;
 PermissionState g_mockState = PermissionState::PERMISSION_DENIED;
 bool g_isSystemApp = false;
+HapTokenInfo g_mockHapTokenInfo;
+int32_t g_mockGetHapTokenInfoRet = -1;
 } // namespace
 
 void MockAccesstokenKit::MockSetTokenTypeFlag(ATokenTypeEnum mockRet)
@@ -38,6 +40,12 @@ void MockAccesstokenKit::MockSetSystemApp(bool isSystemApp)
 {
     g_isSystemApp = isSystemApp;
 }
+
+void MockAccesstokenKit::MockSetHapTokenInfo(const HapTokenInfo& info, int32_t retCode)
+{
+    g_mockHapTokenInfo = info;
+    g_mockGetHapTokenInfoRet = retCode;
+}
 } // namespace PowerMgr
 } // namespace OHOS
 
@@ -52,6 +60,15 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
 ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
 {
     return PowerMgr::g_mockGetTokenTypeFlagRet;
+}
+
+int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo& hapTokenInfoRes)
+{
+    if (PowerMgr::g_mockGetHapTokenInfoRet != 0) {
+        return PowerMgr::g_mockGetHapTokenInfoRet;
+    }
+    hapTokenInfoRes = PowerMgr::g_mockHapTokenInfo;
+    return 0;
 }
 
 bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)

@@ -74,7 +74,6 @@ void PowerServiceFuzzTest()
     int32_t powerError  = 0;
     int32_t lockType  = 0;
     int32_t reasonValue  = 0;
-    const std::string apiVersion = "-1";
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
     const sptr<IRemoteObject> remoteObj = new RunningLockTokenStub();
@@ -82,10 +81,10 @@ void PowerServiceFuzzTest()
     const std::vector<int32_t> workSources;
     const RunningLockInfo runningLockInfo("fuzztest", RunningLockType::RUNNINGLOCK_SCREEN);
 
-    g_service->WakeupDeviceAsyncIpc(callTimeMs, reasonValue, "", apiVersion);
+    g_service->WakeupDeviceAsyncIpc(callTimeMs, reasonValue, "");
 
-    g_service->ForceSuspendDeviceIpc(callTimeMs, apiVersion, powerProxy);
-    g_service->HibernateIpc(clearMemory, "", apiVersion, powerProxy);
+    g_service->ForceSuspendDeviceIpc(callTimeMs, powerProxy);
+    g_service->HibernateIpc(clearMemory, "", powerProxy);
     g_service->CreateRunningLockIpc(remoteObj, runningLockInfo, powerError);
     g_service->ReleaseRunningLockIpc(remoteObj, "");
 

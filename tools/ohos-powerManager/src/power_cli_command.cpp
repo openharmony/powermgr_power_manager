@@ -36,7 +36,6 @@
 namespace OHOS {
 namespace PowerMgr {
 
-static constexpr const char* API_VERSION = "23";
 static constexpr const char* WAKEUP_DETAIL_DEFAULT = "cli-call";
 static constexpr int MAX_DETAIL_LENGTH = 128;
 static constexpr int MIN_COMMAND_ARGC = 2;
@@ -445,7 +444,7 @@ int PowerCliCommand::RunAsSuspendCommand(const std::vector<std::string>& args)
 
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     PowerErrors ret = client.SuspendDevice(
-        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, immediately, API_VERSION);
+        SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, immediately);
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
@@ -507,7 +506,7 @@ int PowerCliCommand::RunAsWakeupCommand(const std::vector<std::string>& args)
 
     PowerMgrClient& client = PowerMgrClient::GetInstance();
     PowerErrors ret = client.WakeupDevice(
-        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail, API_VERSION);
+        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail);
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
@@ -651,7 +650,7 @@ int PowerCliCommand::RunAsOverrideScreenOffTimeCommand(const std::vector<std::st
     }
 
     PowerMgrClient& client = PowerMgrClient::GetInstance();
-    PowerErrors ret = client.OverrideScreenOffTime(timeout, API_VERSION);
+    PowerErrors ret = client.OverrideScreenOffTime(timeout);
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();
@@ -686,7 +685,7 @@ int PowerCliCommand::RunAsRestoreScreenOffTimeCommand(const std::vector<std::str
     }
 
     PowerMgrClient& client = PowerMgrClient::GetInstance();
-    PowerErrors ret = client.RestoreScreenOffTime(API_VERSION);
+    PowerErrors ret = client.RestoreScreenOffTime();
 
     if (ret == PowerErrors::ERR_OK) {
         cJSON* data = cJSON_CreateObject();

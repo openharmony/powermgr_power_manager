@@ -45,7 +45,6 @@ testing::NiceMock<MockLockAction>* lockActionMock {nullptr};
 constexpr int32_t DISPLAY_POWER_MANAGER_ID = 3308;
 constexpr int32_t FAIL_VALUE = -1;
 constexpr int32_t REASON_VALUE = static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION);
-const std::string API_VERSION = "-1";
 const std::string TEST_DEVICE_ID = "test_device_id";
 } // namespace
 
@@ -66,7 +65,7 @@ void PowerMgrServiceNativeTest::SetUpTestCase()
     if (g_powerMgrServiceProxy == nullptr) {
         g_powerMgrServiceProxy = std::make_shared<PowerMgrServiceTestProxy>(g_powerMgrService);
     }
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     // wait for "SetState for INIT" to be done
     sleep(WAIT_INIT_TIME_S);
 }
@@ -120,7 +119,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest001, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -150,7 +149,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest002, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -182,7 +181,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest003, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -214,7 +213,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest004, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -247,7 +246,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest005, TestSize.Level
     int32_t powerState = -1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -282,7 +281,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest006, TestSize.Level
     int32_t powerState = -1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -317,7 +316,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest007, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -348,14 +347,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest008, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
 
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     sleep(SLEEP_WAIT_TIME_S);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_FALSE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(), static_cast<int32_t>(abnormaltype),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_FALSE(g_powerMgrService->IsScreenOn());
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest008 function end!");
@@ -376,13 +375,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest009, TestSize.Level
     bool isScreenOn = false;
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), suspendReason, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), suspendReason, false, powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -405,7 +404,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest010, TestSize.Level
     bool isScreenOn = false;
     bool isUsed = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -460,7 +459,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest011, TestSize.Level
     bool isScreenOn = false;
     bool isUsed = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -508,7 +507,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
     bool isScreenOn = false;
     bool isUsed = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -529,7 +528,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest012, TestSize.Level
     EXPECT_EQ(isUsed, true);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
 
@@ -552,7 +551,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest013, TestSize.Level
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest013 function start!");
     int32_t powerError = 1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_OFF));
     EXPECT_FALSE(g_powerMgrService->IsScreenOn());
@@ -578,13 +577,13 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest014, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest014 function end!");
@@ -602,14 +601,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest015, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_DEVICE_ADMIN), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest015 function end!");
@@ -627,14 +626,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest016, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_TIMEOUT), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest016 function end!");
@@ -652,14 +651,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest017, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_LID), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest017 function end!");
@@ -677,14 +676,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest018, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_POWER_KEY), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest018 function end!");
@@ -702,14 +701,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest019, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_HDMI), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest019 function end!");
@@ -727,14 +726,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest020, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_SLEEP_KEY), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest020 function end!");
@@ -752,14 +751,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest021, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     int32_t suspendAcc = static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_ACCESSIBILITY);
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), suspendAcc, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), suspendAcc, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest021 function end!");
@@ -777,14 +776,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest022, TestSize.Level
     int32_t powerError = 1;
     bool isScreenOn = false;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(),
-        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), false, API_VERSION, powerError);
+        static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_FORCE_SUSPEND), false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest022 function end!");
@@ -802,14 +801,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest023, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -829,7 +828,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest024, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -837,7 +836,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest024, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_UNKNOWN),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -857,7 +856,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest025, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -865,7 +864,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest025, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_POWER_BUTTON),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -885,7 +884,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest026, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -893,7 +892,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest026, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_PLUGGED_IN),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -913,7 +912,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest027, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -921,7 +920,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest027, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_GESTURE),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -941,7 +940,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest028, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -949,7 +948,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest028, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_CAMERA_LAUNCH),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -969,7 +968,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest029, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -977,7 +976,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest029, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_WAKE_KEY),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -997,7 +996,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest030, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -1005,7 +1004,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest030, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_WAKE_MOTION),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1025,7 +1024,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest031, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
@@ -1033,7 +1032,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest031, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_HDMI),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1053,14 +1052,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest032, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(), static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_LID),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1080,7 +1079,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest033, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
@@ -1088,7 +1087,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest033, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_DOUBLE_CLICK),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1108,7 +1107,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest034, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
@@ -1116,7 +1115,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest034, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_KEYBOARD),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1136,7 +1135,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest035, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
@@ -1144,7 +1143,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest035, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MOUSE),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1179,10 +1178,10 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest036, TestSize.Level
     EXPECT_EQ(lockTypeSupported, true);
 #endif
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceNativeTest036 function end!");
@@ -1274,7 +1273,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
@@ -1282,7 +1281,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest040, TestSize.Level
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(),
         static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_AOD_SLIDING),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1302,14 +1301,14 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest041, TestSize.Level
     int32_t powerError = 1;
     int32_t powerState = -1;
     bool isScreenOn = false;
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     EXPECT_CALL(*stateActionMock, GetDisplayState())
         .WillRepeatedly(::testing::Return(DisplayState::DISPLAY_ON));
     EXPECT_TRUE(g_powerMgrService->IsScreenOn());
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(GetTickCount(), static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_PEN),
-        std::string("app call"), API_VERSION, powerError);
+        std::string("app call"), powerError);
     g_powerMgrServiceProxy->GetStateIpc(powerState);
 
     g_powerMgrServiceProxy->IsScreenOnIpc(true, isScreenOn);
@@ -1330,18 +1329,18 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level
     bool ret = true;
     int32_t wakeupReason = (static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_MAX)) + 1;
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     sleep(NEXT_WAIT_TIME_S);
     g_powerMgrServiceProxy->IsForceSleepingIpc(ret);
     EXPECT_EQ(ret, false);
 
-    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, API_VERSION, powerError);
+    g_powerMgrServiceProxy->SuspendDeviceIpc(GetTickCount(), REASON_VALUE, false, powerError);
     sleep(NEXT_WAIT_TIME_S);
     g_powerMgrServiceProxy->IsForceSleepingIpc(ret);
     EXPECT_EQ(ret, false);
 
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     sleep(NEXT_WAIT_TIME_S);
     g_powerMgrServiceProxy->IsForceSleepingIpc(ret);
     EXPECT_EQ(ret, false);
@@ -1354,7 +1353,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level
     EXPECT_EQ(ret, false);
 #endif
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), wakeupReason, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), wakeupReason, std::string("app call"), powerError);
     sleep(NEXT_WAIT_TIME_S);
     g_powerMgrServiceProxy->IsForceSleepingIpc(ret);
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
@@ -1363,7 +1362,7 @@ HWTEST_F(PowerMgrServiceNativeTest, PowerMgrServiceNativeTest042, TestSize.Level
     EXPECT_EQ(ret, false);
 #endif
     g_powerMgrServiceProxy->WakeupDeviceIpc(
-        GetTickCount(), REASON_VALUE, std::string("app call"), API_VERSION, powerError);
+        GetTickCount(), REASON_VALUE, std::string("app call"), powerError);
     sleep(NEXT_WAIT_TIME_S);
     g_powerMgrServiceProxy->IsForceSleepingIpc(ret);
     EXPECT_EQ(ret, false);
