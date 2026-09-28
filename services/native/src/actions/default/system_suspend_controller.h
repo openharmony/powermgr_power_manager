@@ -49,6 +49,7 @@ public:
     void SetSuspendTag(const std::string& tag);
     int32_t SetPowerConfig(const std::string& sceneName, const std::string& value);
     int32_t GetPowerConfig(const std::string& sceneName, std::string& value);
+    void ResetHandle();
     
 private:
     DECLARE_DELAYED_REF_SINGLETON(SystemSuspendController);

@@ -181,6 +181,7 @@ void PowerMgrService::OnStart()
     AddSystemAbilityListener(MSDP_MOTION_SERVICE_ID);
 #endif
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(DEVICE_SERVICE_MANAGER_SA_ID);
 #ifndef FUZZ_TEST
     SystemSuspendController::GetInstance().RegisterHdiStatusListener();
     PowerExtIntfWrapper::Instance().Init();
@@ -917,6 +918,10 @@ void PowerMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::
         POWER_HILOGI(COMP_SVC, "get DISPLAY_MANAGER_SERVICE_SA_ID crash in PowerService.");
         displayManagerServiceCrash_ = true;
     }
+    if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID && !isHdiRemove_.load()) {
+        SystemSuspendController::GetInstance().ResetHandle();
+        isHdiRemove_.store(true, std::memory_order_relaxed);
+    }
 }
 
 void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -974,6 +979,10 @@ void PowerMgrService::OnAddSystemAbilityInner(int32_t systemAbilityId, [[maybe_u
     if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         this->GetPowerModeModule().SubscribeCommonEvent();
         return;
+    }
+    if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID && isHdiRemove_.load()) {
+        SystemSuspendController::GetInstance().RegisterHdiStatusListener();
+        isHdiRemove_.store(false, std::memory_order_relaxed);
     }
 }
 
