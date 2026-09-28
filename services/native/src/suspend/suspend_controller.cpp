@@ -637,8 +637,16 @@ void SuspendController::ControlListenerInner(SuspendDeviceType reason, uint32_t 
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
     stateMachine_->ReportSuspendStart(static_cast<int32_t>(uid), static_cast<int32_t>(reason), force);
 #endif
+    auto switchAction = stateMachine_->GetSwitchActionPtr();
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH && switchAction != nullptr &&
+        switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_BEFORE_SET_STATE) == SwitchActionRet::HANDLED) {
+        return;
+    }
     bool ret = stateMachine_->SetState(
         PowerState::INACTIVE, stateMachine_->GetReasonBySuspendType(static_cast<SuspendDeviceType>(reason)), force);
+    if (reason == SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH && switchAction != nullptr) {
+        switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE_AFTER_SET_STATE);
+    }
     if (ret) {
         StartSleepTimer(reason, action, delay);
     }

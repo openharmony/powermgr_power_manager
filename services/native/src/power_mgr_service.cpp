@@ -689,12 +689,6 @@ void PowerMgrService::SwitchSubscriberInit()
                     return;
                 }
                 powerStateMachine_->SetSwitchState(false);
-                auto switchAction = powerStateMachine_->GetSwitchActionPtr();
-                if (switchAction != nullptr &&
-                    switchAction->HandleSwitchAction(SwitchActionType::SWITCH_CLOSE) == SwitchActionRet::HANDLED) {
-                    POWER_HILOGI(FEATURE_INPUT, "[UL_POWER] HandleSwitchClose return!");
-                    return;
-                }
                 SuspendDeviceType reason = SuspendDeviceType::SUSPEND_DEVICE_REASON_SWITCH;
                 suspendController->ExecSuspendMonitorByReason(reason);
             } else {
