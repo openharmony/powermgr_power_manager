@@ -972,10 +972,6 @@ void PowerMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     }
 #endif
     OnAddSystemAbilityInner(systemAbilityId, deviceId);
-    if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID && isHdiRemove_.load()) {
-        SystemSuspendController::GetInstance().RegisterHdiStatusListener();
-        isHdiRemove_.store(false, std::memory_order_relaxed);
-    }
 }
 
 void PowerMgrService::OnAddSystemAbilityInner(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
@@ -983,6 +979,10 @@ void PowerMgrService::OnAddSystemAbilityInner(int32_t systemAbilityId, [[maybe_u
     if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         this->GetPowerModeModule().SubscribeCommonEvent();
         return;
+    }
+    if (systemAbilityId == DEVICE_SERVICE_MANAGER_SA_ID && isHdiRemove_.load()) {
+        SystemSuspendController::GetInstance().RegisterHdiStatusListener();
+        isHdiRemove_.store(false, std::memory_order_relaxed);
     }
 }
 
