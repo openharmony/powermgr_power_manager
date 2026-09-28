@@ -968,7 +968,7 @@ HWTEST_F(PowerMgrServiceTest, PowerMgrService032, TestSize.Level0)
 {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService032 function start!");
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(""), PowerErrors::ERR_OK);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(), PowerErrors::ERR_OK);
     powerMgrClient.WakeupDevice();
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService032 function end!");
 }

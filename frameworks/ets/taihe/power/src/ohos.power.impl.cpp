@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include "app_manager_utils.h"
 
 #define SET_REBOOT _IOW(BOOT_DETECTOR_IOCTL_BASE, 109, int)
 
@@ -96,9 +95,8 @@ bool IsActive()
 void Wakeup(string_view detail)
 {
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup type: APPLICATION, reason: %{public}s", detail.c_str());
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
     PowerErrors code = g_powerMgrClient.WakeupDevice(
-        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string(detail), std::to_string(apiVersion));
+        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, std::string(detail));
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
     }
@@ -109,12 +107,11 @@ void Suspend(optional_view<bool> isImmediate)
     bool isForce = isImmediate.value_or(false);
 
     PowerErrors code;
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
     if (isForce) {
-        code = g_powerMgrClient.ForceSuspendDevice(std::to_string(apiVersion));
+        code = g_powerMgrClient.ForceSuspendDevice();
     } else {
         code = g_powerMgrClient.SuspendDevice(
-            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false, std::to_string(apiVersion));
+            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     }
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         POWER_HILOGE(FEATURE_SUSPEND, "Suspend Device fail, isForce:%{public}d", isForce);
@@ -169,8 +166,7 @@ bool IsStandby()
 
 void Hibernate(bool clearMemory)
 {
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
-    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, "", std::to_string(apiVersion));
+    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, "");
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         POWER_HILOGE(FEATURE_WAKEUP, "Hibernate failed.");
         taihe::set_business_error(static_cast<int32_t>(code), GetErrorMessage(code));
@@ -187,11 +183,10 @@ void SetScreenOffTime(int64_t timeout)
     }
 
     PowerErrors code;
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
     if (timeout == RESTORE_DEFAULT_SCREENOFF_TIME) {
-        code = g_powerMgrClient.RestoreScreenOffTime(std::to_string(apiVersion));
+        code = g_powerMgrClient.RestoreScreenOffTime();
     } else {
-        code = g_powerMgrClient.OverrideScreenOffTime(timeout, std::to_string(apiVersion));
+        code = g_powerMgrClient.OverrideScreenOffTime(timeout);
     }
     if (code != PowerErrors::ERR_OK && code != PowerErrors::ERR_FAILURE) {
         POWER_HILOGE(FEATURE_WAKEUP, "SetScreenOffTime failed.");

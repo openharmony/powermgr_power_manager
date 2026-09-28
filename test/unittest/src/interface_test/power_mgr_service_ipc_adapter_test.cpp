@@ -52,12 +52,12 @@ public:
         return PowerErrors::ERR_OK;
     }
     PowerErrors SuspendDevice(
-        int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed, const std::string& apiVersion = "-1")
+        int64_t callTimeMs, SuspendDeviceType reason, bool suspendImmed)
     {
         return PowerErrors::ERR_OK;
     }
     PowerErrors WakeupDevice(
-        int64_t callTimeMs, WakeupDeviceType reason, const std::string& details, const std::string& apiVersion = "-1")
+        int64_t callTimeMs, WakeupDeviceType reason, const std::string& details)
     {
         return PowerErrors::ERR_OK;
     }
@@ -66,11 +66,11 @@ public:
     {
         return true;
     }
-    PowerErrors OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion = "-1")
+    PowerErrors OverrideScreenOffTime(int64_t timeout)
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors RestoreScreenOffTime(const std::string& apiVersion = "-1")
+    PowerErrors RestoreScreenOffTime()
     {
         return PowerErrors::ERR_OK;
     }
@@ -94,7 +94,7 @@ public:
     {
         return true;
     }
-    PowerErrors ForceSuspendDevice(int64_t callTimeMs, const std::string& apiVersion = "-1")
+    PowerErrors ForceSuspendDevice(int64_t callTimeMs)
     {
         return PowerErrors::ERR_OK;
     }
@@ -106,7 +106,7 @@ public:
     {
         return PowerErrors::ERR_OK;
     }
-    PowerErrors Hibernate(bool clearMemory, const std::string& reason = "", const std::string& apiVersion = "-1")
+    PowerErrors Hibernate(bool clearMemory, const std::string& reason = "")
     {
         return PowerErrors::ERR_OK;
     }
@@ -394,12 +394,11 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter002, TestSize.L
  */
 HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter003, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter003 function start!");
-    std::string apiVersion = "-1";
     constexpr int64_t param = 0;
     auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
-    int32_t result = adapter->ForceSuspendDeviceIpc(param, apiVersion, powerProxy);
+    int32_t result = adapter->ForceSuspendDeviceIpc(param, powerProxy);
     EXPECT_NE(result, -1);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter003 function end!");
 }
@@ -411,10 +410,9 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter003, TestSize.L
  */
 HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter004, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter004 function start!");
-    std::string apiVersion = "-1";
     constexpr int64_t param = 0;
     auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
-    int32_t result = adapter->ForceSuspendDeviceIpc(param, apiVersion, nullptr);
+    int32_t result = adapter->ForceSuspendDeviceIpc(param, nullptr);
     EXPECT_EQ(result, -1);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter004 function end!");
 }
@@ -426,13 +424,12 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter004, TestSize.L
  */
 HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter005, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter005 function start!");
-    std::string apiVersion = "-1";
     bool clearMemory = true;
     std::string reason = "";
     auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
-    int32_t result = adapter->HibernateIpc(clearMemory, reason, apiVersion, powerProxy);
+    int32_t result = adapter->HibernateIpc(clearMemory, reason, powerProxy);
     EXPECT_NE(result, -1);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter005 function end!");
 }
@@ -444,11 +441,10 @@ HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter005, TestSize.L
  */
 HWTEST_F(PowerMgrServiceIpcAdapterTest, PowerMgrServiceIpcAdapter006, TestSize.Level2) {
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter006 function start!");
-    std::string apiVersion = "-1";
     bool clearMemory = true;
     std::string reason = "";
     auto adapter = DelayedSpSingleton<TestPowerMgrServiceAdapter>::GetInstance();
-    int32_t result = adapter->HibernateIpc(clearMemory, reason, apiVersion, nullptr);
+    int32_t result = adapter->HibernateIpc(clearMemory, reason, nullptr);
     EXPECT_EQ(result, -1);
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceIpcAdapter006 function end!");
 }

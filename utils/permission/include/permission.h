@@ -26,6 +26,7 @@ public:
     static bool IsSystem();
     static bool IsPermissionGranted(const std::string& perm);
     static bool IsNativePermissionGranted(const std::string& perm);
+    static int32_t GetCallerApiTargetVersion();
 };
 } // namespace PowerMgr
 } // namespace OHOS

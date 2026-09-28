@@ -17,6 +17,7 @@
 #define POWERMGR_MOCK_ACCESSTOKEN_KIT_H
 
 #include "accesstoken_kit.h"
+#include "hap_token_info.h"
 #include "tokenid_kit.h"
 
 namespace OHOS {
@@ -26,6 +27,7 @@ public:
     static void MockSetTokenTypeFlag(OHOS::Security::AccessToken::ATokenTypeEnum mockRet);
     static void MockSetPermissionState(OHOS::Security::AccessToken::PermissionState mockState);
     static void MockSetSystemApp(bool isSystemApp);
+    static void MockSetHapTokenInfo(const OHOS::Security::AccessToken::HapTokenInfo& info, int32_t retCode);
 };
 } // namespace PowerMgr
 } // namespace OHOS

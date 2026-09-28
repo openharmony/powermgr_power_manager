@@ -71,10 +71,10 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest001, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
-    EXPECT_EQ(powerMgrClient.ForceSuspendDevice("-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem"), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(powerMgrClient.InterruptForceSuspend(), PowerErrors::ERR_CONNECTION_FAIL);
-    EXPECT_EQ(powerMgrClient.Hibernate(true, "", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.Hibernate(true), PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerClientMockPeerTest001 function end!");
 }
 
@@ -98,10 +98,10 @@ HWTEST_F(MockPeerTest, PowerClientMockPeerTest002, TestSize.Level2)
     EXPECT_FALSE(powerMgrClient.UnRegisterPowerModeCallback(modeCallback));
     EXPECT_FALSE(powerMgrClient.RegisterRunningLockCallback(runninglockCallback));
     EXPECT_FALSE(powerMgrClient.UnRegisterRunningLockCallback(runninglockCallback));
-    EXPECT_EQ(powerMgrClient.ForceSuspendDevice("-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr"), PowerErrors::ERR_CONNECTION_FAIL);
     EXPECT_EQ(powerMgrClient.InterruptForceSuspend(), PowerErrors::ERR_CONNECTION_FAIL);
-    EXPECT_EQ(powerMgrClient.Hibernate(true, "", "-1"), PowerErrors::ERR_CONNECTION_FAIL);
+    EXPECT_EQ(powerMgrClient.Hibernate(true), PowerErrors::ERR_CONNECTION_FAIL);
     POWER_HILOGI(LABEL_TEST, "PowerClientMockPeerTest002 function end!");
 }
 
@@ -158,7 +158,6 @@ HWTEST_F(MockPeerTest, MockPeerTest002, TestSize.Level2)
     int32_t powerError = 1;
     int32_t powerMode = 0;
     int32_t powerState = -1;
-    std::string apiVersion = "-1";
     int32_t ret = 0;
     bool isScreenOn = false;
     POWER_HILOGI(LABEL_TEST, "MockPeerTest002 function start!");
@@ -166,16 +165,16 @@ HWTEST_F(MockPeerTest, MockPeerTest002, TestSize.Level2)
     std::shared_ptr<PowerMgrProxy> sptrProxy = std::make_shared<PowerMgrProxy>(remote);
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
-    ret = sptrProxy->SuspendDeviceIpc(0, static_cast<int32_t>(abnormaltype), false, apiVersion, powerError);
+    ret = sptrProxy->SuspendDeviceIpc(0, static_cast<int32_t>(abnormaltype), false, powerError);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->WakeupDeviceIpc(GetTickCount(), static_cast<int32_t>(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION),
-        std::string("app call"), apiVersion, powerError);
+        std::string("app call"), powerError);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     int32_t userAttention = static_cast<int32_t>(UserActivityType::USER_ACTIVITY_TYPE_ATTENTION);
     EXPECT_NE(sptrProxy->RefreshActivityIpc(GetTickCount(), userAttention, true), ERR_OK);
-    sptrProxy->OverrideScreenOffTimeIpc(200, apiVersion, powerError);
+    sptrProxy->OverrideScreenOffTimeIpc(200, powerError);
     EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
-    sptrProxy->RestoreScreenOffTimeIpc(apiVersion, powerError);
+    sptrProxy->RestoreScreenOffTimeIpc(powerError);
     EXPECT_FALSE(powerError == static_cast<int32_t>(PowerErrors::ERR_OK));
     ret = sptrProxy->GetStateIpc(powerState);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
@@ -199,7 +198,6 @@ HWTEST_F(MockPeerTest, MockPeerTest002, TestSize.Level2)
 HWTEST_F(MockPeerTest, MockPeerTest003, TestSize.Level2)
 {
     int32_t powerError = 1;
-    std::string apiVersion = "-1";
     int32_t ret = 0;
     POWER_HILOGI(LABEL_TEST, "MockPeerTest003 function start!");
     sptr<IPCObjectStub> remote = new IPCObjectStub();
@@ -225,7 +223,7 @@ HWTEST_F(MockPeerTest, MockPeerTest003, TestSize.Level2)
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->ShutDownDeviceIpc(" ", powerError);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
-    ret = sptrProxy->ForceSuspendDeviceIpc(0, apiVersion, powerProxy);
+    ret = sptrProxy->ForceSuspendDeviceIpc(0, powerProxy);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
     ret = sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem");
     EXPECT_EQ(ret, ERR_INVALID_DATA);

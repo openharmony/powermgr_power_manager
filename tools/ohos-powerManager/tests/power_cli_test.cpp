@@ -98,13 +98,13 @@ PowerErrors PowerMgrClient::SetDeviceMode(const PowerMode mode)
     return g_setModeResult;
 }
 
-PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
 {
     g_lastCalled = "OverrideScreenOffTime";
     return g_overrideResult;
 }
 
-PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrClient::RestoreScreenOffTime()
 {
     g_lastCalled = "RestoreScreenOffTime";
     return g_restoreResult;

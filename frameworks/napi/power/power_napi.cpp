@@ -24,7 +24,6 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <uv.h>
-#include "app_manager_utils.h"
 #ifdef POWER_API_METRICS_ENABLE
 #include "histogram_plugin_macros.h"
 #endif
@@ -177,9 +176,8 @@ napi_value PowerNapi::Wakeup(napi_env env, napi_callback_info info)
 
     std::string detail = NapiUtils::GetStringFromNapi(env, argv[INDEX_0]);
     POWER_HILOGD(FEATURE_WAKEUP, "Wakeup type: APPLICATION, reason: %{public}s", detail.c_str());
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
     PowerErrors code = g_powerMgrClient.WakeupDevice(
-        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail, std::to_string(apiVersion));
+        WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail);
     if (code != PowerErrors::ERR_OK) {
         error.ThrowError(env, code);
     }
@@ -206,12 +204,11 @@ napi_value PowerNapi::Suspend(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, argv[0], &isForce);
 
     PowerErrors code;
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
     if (isForce) {
-        code = g_powerMgrClient.ForceSuspendDevice(std::to_string(apiVersion));
+        code = g_powerMgrClient.ForceSuspendDevice();
     } else {
         code = g_powerMgrClient.SuspendDevice(
-            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false, std::to_string(apiVersion));
+            SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, false);
     }
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "Suspend Device fail, isForce:%{public}d", isForce);
@@ -239,8 +236,7 @@ napi_value PowerNapi::Hibernate(napi_env env, napi_callback_info info)
     bool clearMemory = false;
     napi_get_value_bool(env, argv[0], &clearMemory);
 
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
-    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, "", std::to_string(apiVersion));
+    PowerErrors code = g_powerMgrClient.Hibernate(clearMemory, "");
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "Hibernate failed.");
         error.ThrowError(env, code);
@@ -492,11 +488,10 @@ napi_value PowerNapi::SetScreenOffTime(napi_env env, napi_callback_info info)
     }
 
     PowerErrors code;
-    int32_t apiVersion = AppManagerUtils::GetApiTargetVersion();
     if (timeout == RESTORE_DEFAULT_SCREENOFF_TIME) {
-        code = g_powerMgrClient.RestoreScreenOffTime(std::to_string(apiVersion));
+        code = g_powerMgrClient.RestoreScreenOffTime();
     } else {
-        code = g_powerMgrClient.OverrideScreenOffTime(timeout, std::to_string(apiVersion));
+        code = g_powerMgrClient.OverrideScreenOffTime(timeout);
     }
     if (code != PowerErrors::ERR_OK) {
         POWER_HILOGE(FEATURE_WAKEUP, "SetScreenOffTime failed.");

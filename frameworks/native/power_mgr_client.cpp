@@ -49,7 +49,6 @@ namespace PowerMgr {
 std::vector<std::weak_ptr<RunningLock>> PowerMgrClient::runningLocks_;
 std::mutex PowerMgrClient::runningLocksMutex_;
 std::mutex g_instanceMutex;
-constexpr int32_t MAX_VERSION_STRING_SIZE = 4;
 constexpr int32_t MAX_SCENE_NAME_STRING_SIZE = 128;
 constexpr int32_t MAX_CONFIG_VALUE_STRING_SIZE = 128;
 constexpr uint32_t PARAM_MAX_NUM = 10;
@@ -284,8 +283,7 @@ PowerErrors PowerMgrClient::SuspendDevice(
     POWER_HILOGD(FEATURE_SUSPEND, " Calling SuspendDevice success");
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
     int32_t reasonValue = static_cast<int32_t>(reason);
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    proxy->SuspendDeviceIpc(GetTickCount(), reasonValue, suspendImmed, apiVersion, powerError);
+    proxy->SuspendDeviceIpc(GetTickCount(), reasonValue, suspendImmed, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 
@@ -297,8 +295,7 @@ PowerErrors PowerMgrClient::WakeupDevice(
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDevice success");
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
     int32_t reasonValue = static_cast<int32_t>(reason);
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    proxy->WakeupDeviceIpc(GetTickCount(), reasonValue, detail, apiVersion, powerError);
+    proxy->WakeupDeviceIpc(GetTickCount(), reasonValue, detail, powerError);
     return static_cast<PowerErrors>(powerError);
 }
 
@@ -308,8 +305,7 @@ void PowerMgrClient::WakeupDeviceAsync(WakeupDeviceType reason, const std::strin
     RETURN_IF(proxy == nullptr);
     POWER_HILOGD(FEATURE_WAKEUP, " Calling WakeupDeviceAsync success");
     int32_t reasonValue = static_cast<int32_t>(reason);
-    std::string apiVersion;
-    proxy->WakeupDeviceAsyncIpc(GetTickCount(), reasonValue, detail, apiVersion);
+    proxy->WakeupDeviceAsyncIpc(GetTickCount(), reasonValue, detail);
     return;
 }
 
@@ -327,7 +323,7 @@ bool PowerMgrClient::RefreshActivity(UserActivityType type)
     return ret;
 }
 
-PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::string& apiVersion)
+PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout)
 {
     if (timeout <= 0) {
         POWER_HILOGW(COMP_FWK, "Invalid timeout, timeout=%{public}" PRId64 "", timeout);
@@ -336,20 +332,18 @@ PowerErrors PowerMgrClient::OverrideScreenOffTime(int64_t timeout, const std::st
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    proxy->OverrideScreenOffTimeIpc(timeout, apiVersion, powerError);
+    proxy->OverrideScreenOffTimeIpc(timeout, powerError);
     PowerErrors ret = static_cast<PowerErrors>(powerError);
     POWER_HILOGD(COMP_FWK, "Calling OverrideScreenOffTime Success");
     return ret;
 }
 
-PowerErrors PowerMgrClient::RestoreScreenOffTime(const std::string& apiVersion)
+PowerErrors PowerMgrClient::RestoreScreenOffTime()
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     int32_t powerError = static_cast<int32_t>(PowerErrors::ERR_CONNECTION_FAIL);
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    proxy->RestoreScreenOffTimeIpc(apiVersion, powerError);
+    proxy->RestoreScreenOffTimeIpc(powerError);
     PowerErrors ret = static_cast<PowerErrors>(powerError);
     POWER_HILOGD(COMP_FWK, "Calling RestoreScreenOffTime Success");
     return ret;
@@ -372,8 +366,7 @@ PowerErrors PowerMgrClient::ForceSuspendDevice(const std::string& apiVersion)
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    int32_t result = proxy->ForceSuspendDeviceIpc(GetTickCount(), apiVersion, powerProxy);
+    int32_t result = proxy->ForceSuspendDeviceIpc(GetTickCount(), powerProxy);
     RETURN_IF_WITH_RET(result != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
     // Wait for the asynchronous callback to return, with a timeout of 100 milliseconds
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(100));
@@ -690,14 +683,13 @@ bool PowerMgrClient::SetDisplaySuspend(bool enable)
     return ret == ERR_OK;
 }
 
-PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason, const std::string& apiVersion)
+PowerErrors PowerMgrClient::Hibernate(bool clearMemory, const std::string& reason)
 {
     sptr<IPowerMgr> proxy = GetPowerMgrProxy();
     RETURN_IF_WITH_RET(proxy == nullptr, PowerErrors::ERR_CONNECTION_FAIL);
     sptr<PowerMgrStubAsync> asyncCallback = new PowerMgrStubAsync();
     sptr<IPowerMgrAsync> powerProxy = iface_cast<IPowerMgrAsync>(asyncCallback);
-    RETURN_IF_WITH_RET(apiVersion.size() >= MAX_VERSION_STRING_SIZE, PowerErrors::ERR_PARAM_INVALID);
-    int32_t result = proxy->HibernateIpc(clearMemory, reason, apiVersion, powerProxy);
+    int32_t result = proxy->HibernateIpc(clearMemory, reason, powerProxy);
     RETURN_IF_WITH_RET(result != ERR_OK, PowerErrors::ERR_CONNECTION_FAIL);
     // Wait for the asynchronous callback to return, with a timeout of 100 milliseconds
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(100));
