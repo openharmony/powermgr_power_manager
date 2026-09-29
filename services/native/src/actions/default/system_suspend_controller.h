@@ -27,6 +27,9 @@
 #include "suspend/isuspend_controller.h"
 #include "power_hdi_callback.h"
 #include "v1_3/ipower_interface.h"
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#include "v1_4/ipower_interface.h"
+#endif
 #include "ffrt_utils.h"
 
 namespace OHOS {
@@ -47,6 +50,9 @@ public:
     void AllowAutoSleep();
     void DisallowAutoSleep();
     void SetSuspendTag(const std::string& tag);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    bool ForceSuspendEx(const std::string& mode, const std::string& tag);
+#endif
     int32_t SetPowerConfig(const std::string& sceneName, const std::string& value);
     int32_t GetPowerConfig(const std::string& sceneName, std::string& value);
     void ResetHandle();

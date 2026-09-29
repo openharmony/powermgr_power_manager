@@ -135,4 +135,7 @@ interface OHOS.PowerMgr.IPowerMgr {
         [out] int powerError);
     void SetInterfaceCallFilteringStrategyIpc([in] int strategy, [in] IRemoteObject token,
         [out] int powerError);
+
+    void ForceSuspendDeviceIgnoringWakelockIpc([in] String tag);
+    void InterruptForceSuspendIpc();
 }

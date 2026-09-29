@@ -77,6 +77,10 @@ ohos_source_set("${powermgr_actions_default_target}") {
     external_deps += [ "hisysevent:libhisysevent" ]
   }
 
+  if (power_manager_feature_enable_force_suspend_ignoring_wakelock) {
+    external_deps += [ "drivers_interface_power:libpower_proxy_1.4" ]
+  }
+
   if (power_manager_feature_poweroff_charge && defined(global_parts_info) &&
       defined(global_parts_info.powermgr_battery_manager)) {
     defines += [ "POWER_MANAGER_POWEROFF_CHARGE" ]

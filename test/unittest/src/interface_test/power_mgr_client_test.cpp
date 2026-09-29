@@ -1972,4 +1972,81 @@ HWTEST_F(PowerMgrClientTest, PowerMgrClient064, TestSize.Level0) {
 #endif
     POWER_HILOGI(LABEL_TEST, "PowerMgrClient064 function end!");
 }
+
+/**
+ * @tc.name: PowerMgrClient068
+ * @tc.desc: test ForceSuspendDeviceIgnoringWakelock parameter validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient068, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient068 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("MEM"), PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock(""), PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("invalid"), PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient068 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient069
+ * @tc.desc: test ForceSuspendDeviceIgnoringWakelock with valid tags
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient069, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem"),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr"),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    PowerErrors ret = powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem");
+    EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
+    ret = powerMgrClient.ForceSuspendDeviceIgnoringWakelock("ulsr");
+    EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
+    powerMgrClient.WakeupDevice();
+#endif
+    EXPECT_EQ(powerMgrClient.ForceSuspendDeviceIgnoringWakelock("auto"), PowerErrors::ERR_PARAM_INVALID);
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient069 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient070
+ * @tc.desc: SuspendDevice/ForceSuspendDevice/WakeupDevice return 801 when ForceSuspendDeviceIgnoringWakelock is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient070, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient070 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    EXPECT_EQ(powerMgrClient.SuspendDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.ForceSuspendDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(powerMgrClient.WakeupDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    EXPECT_NE(powerMgrClient.WakeupDevice(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient070 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrClient071
+ * @tc.desc: test InterruptForceSuspend capability
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrClientTest, PowerMgrClient071, TestSize.Level0) {
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient071 function start!");
+    auto& powerMgrClient = PowerMgrClient::GetInstance();
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
+    !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    EXPECT_EQ(powerMgrClient.InterruptForceSuspend(), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    PowerErrors ret = powerMgrClient.InterruptForceSuspend();
+    EXPECT_NE(ret, PowerErrors::ERR_PARAM_INVALID);
+    EXPECT_NE(ret, PowerErrors::ERR_CONNECTION_FAIL);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrClient071 function end!");
+}
 } // namespace

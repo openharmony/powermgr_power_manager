@@ -157,6 +157,20 @@ public:
     PowerErrors ForceSuspendDevice(const std::string& apiVersion = "-1");
 
     /**
+     * Forcibly suspend the device into deepsleep, ignoring running locks.
+     * Only "mem" (S3) and "ulsr" (ULSR) are supported.
+     *
+     * @param tag Suspend tag. "mem" or "ulsr".
+     */
+    PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& tag);
+
+    /**
+     * Interrupt an in-progress ForceSuspendDeviceIgnoringWakelock.
+     * Returns immediately without HDI.
+     */
+    PowerErrors InterruptForceSuspend();
+
+    /**
      * Check whether the type of running lock is supported
      */
     bool IsRunningLockTypeSupported(RunningLockType type);

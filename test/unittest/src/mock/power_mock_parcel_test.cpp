@@ -75,6 +75,7 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest001, TestSize.Level2)
     powerMgrClient.RebootDeviceForDeprecated(" ");
     powerMgrClient.ShutDownDevice(" ");
     powerMgrClient.ForceSuspendDevice();
+    powerMgrClient.ForceSuspendDeviceIgnoringWakelock("mem");
     int32_t suspendReason = (static_cast<int32_t>(SuspendDeviceType::SUSPEND_DEVICE_REASON_MAX)) + 1;
     SuspendDeviceType abnormaltype = SuspendDeviceType(suspendReason);
     powerMgrClient.SuspendDevice(abnormaltype, false);
@@ -234,6 +235,8 @@ HWTEST_F(MockParcelTest, PowerMockParcelTest006, TestSize.Level2)
     sptrProxy->RebootDeviceIpc(" ", powerError);
     sptrProxy->ShutDownDeviceIpc(" ", powerError);
     sptrProxy->ForceSuspendDeviceIpc(0, powerProxy);
+    sptrProxy->ForceSuspendDeviceIgnoringWakelockIpc("mem");
+    sptrProxy->InterruptForceSuspendIpc();
     int waitTime = 100;
     PowerErrors ret = static_cast<PowerErrors>(asyncCallback->WaitForAsyncReply(waitTime));
     static std::vector<std::string> dumpArgs;

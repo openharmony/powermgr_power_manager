@@ -14,7 +14,10 @@
  */
 
 #include "suspend_controller.h"
+#include <chrono>
 #include <datetime_ex.h>
+#include <future>
+#include <thread>
 #include <display_manager_lite.h>
 #ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
 #include <hisysevent.h>
@@ -914,6 +917,190 @@ void SuspendController::HandleForceSleep(SuspendDeviceType reason)
         POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
     }
 }
+
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+bool SuspendController::HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag)
+{
+    POWER_HILOGI(FEATURE_SUSPEND, "Force suspend ignoring wakelock, reason=%{public}d, tag=%{public}s",
+        reason, tag.c_str());
+    if (!EnterForceSuspendSleepState(reason)) {
+        return false;
+    }
+    StartForceSuspendCallbacks(tag);
+    if (!WaitForceSuspendCallbacks()) {
+        return false;
+    }
+    return DoHdiForceSuspendEx(tag);
+}
+
+bool SuspendController::EnterForceSuspendSleepState(SuspendDeviceType reason)
+{
+    if (stateMachine_ == nullptr) {
+        POWER_HILOGE(FEATURE_SUSPEND, "Can't get PowerStateMachine");
+        return false;
+    }
+    if (!stateMachine_->SetState(PowerState::INACTIVE,
+        stateMachine_->GetReasonBySuspendType(reason), true)) {
+        POWER_HILOGW(FEATURE_SUSPEND, "SetState to INACTIVE failed");
+        return false;
+    }
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    SetForceSleepingFlag(true);
+    POWER_HILOGI(FEATURE_SUSPEND, "Set flag of force sleeping to true");
+#endif
+    if (!stateMachine_->SetState(PowerState::SLEEP,
+        stateMachine_->GetReasonBySuspendType(reason), true)) {
+        POWER_HILOGI(FEATURE_SUSPEND, "force suspend: State change failed");
+        RollbackForceSuspendState();
+        return false;
+    }
+    onForceSleep = true;
+    return true;
+}
+
+void SuspendController::StartForceSuspendCallbacks(const std::string& tag)
+{
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        forceSuspendSkipHdi_.store(false);
+        forceSuspendCallbackPending_ = true;
+        forceSuspendCallbackFinished_ = false;
+        forceSuspendTag_ = tag;
+    }
+    auto self = shared_from_this();
+    FFRTUtils::SubmitTask([self, tag] {
+        NoCoroutineSwitchGuard guard;
+        self->TriggerForceSuspendCallbacks(tag);
+        {
+            std::lock_guard lock(self->forceSuspendCbMutex_);
+            self->forceSuspendCallbackFinished_ = true;
+        }
+        self->forceSuspendWaitCv_.notify_all();
+    });
+}
+
+bool SuspendController::WaitForceSuspendCallbacks()
+{
+    bool skipHdi = false;
+    {
+        std::unique_lock lock(forceSuspendCbMutex_);
+        forceSuspendWaitCv_.wait(lock, [this] {
+            return forceSuspendSkipHdi_.load() || forceSuspendCallbackFinished_;
+        });
+        forceSuspendCallbackPending_ = false;
+        skipHdi = forceSuspendSkipHdi_.exchange(false);
+    }
+    if (skipHdi) {
+        POWER_HILOGI(FEATURE_SUSPEND, "Force suspend interrupted, return without waiting remaining callbacks");
+        return false;
+    }
+    return true;
+}
+
+bool SuspendController::DoHdiForceSuspendEx(const std::string& tag)
+{
+    POWER_HILOGI(FEATURE_SUSPEND,
+        "Callbacks done, call HDI ForceSuspendEx, tag=%{public}s", tag.c_str());
+    if (!SystemSuspendController::GetInstance().ForceSuspendEx("ignore_wakelock", tag)) {
+        POWER_HILOGE(FEATURE_SUSPEND, "HDI ForceSuspendEx failed, rollback state and wakeup callbacks");
+        RollbackForceSuspendAfterCallbacks();
+        return false;
+    }
+    return true;
+}
+
+bool SuspendController::InterruptForceSuspendCallback()
+{
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        if (!forceSuspendCallbackPending_) {
+            return false;
+        }
+        forceSuspendSkipHdi_.store(true);
+        forceSuspendWaitCv_.notify_all();
+    }
+    RollbackForceSuspendState();
+    ScheduleWakeupAfterInterrupt();
+    return true;
+}
+
+void SuspendController::TriggerForceSuspendCallbacks(const std::string& tag)
+{
+    if (tag == "ulsr") {
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+        auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+        if (pms != nullptr && !pms->TriggerUlsrSyncCallback()) {
+            POWER_HILOGW(FEATURE_SUSPEND, "ULSR sync callback timeout");
+        }
+#endif
+    }
+    TriggerForceSuspendMemCallbacks(false);
+}
+
+void SuspendController::TriggerForceSuspendMemCallbacks(bool isWakeup)
+{
+    int64_t beginTimeMs = GetTickCount();
+    auto notifyInnerTask = [this, isWakeup]() {
+        TriggerSyncSleepCallback(isWakeup);
+    };
+    std::packaged_task<void()> callbackTask(notifyInnerTask);
+    std::future<void> fut = callbackTask.get_future();
+    std::make_unique<std::thread>(std::move(callbackTask))->detach();
+    std::future_status status = fut.wait_for(
+        std::chrono::milliseconds(FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS));
+    if (status == std::future_status::timeout) {
+        int32_t elapsedMs = static_cast<int32_t>(GetTickCount() - beginTimeMs);
+        POWER_HILOGW(FEATURE_SUSPEND, "Force suspend mem %{public}s callback timeout",
+            isWakeup ? "wakeup" : "sleep");
+#ifdef HAS_HIVIEWDFX_HISYSEVENT_PART
+        pid_t pid = IPCSkeleton::GetCallingPid();
+        auto uid = IPCSkeleton::GetCallingUid();
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::POWER, "INTERFACE_CONSUMING_TIMEOUT",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PID", pid, "UID", uid,
+            "TYPE", static_cast<int32_t>(InterfaceTimeoutType::INTERFACE_TIMEOUT_TYPE_SYNC_SLEEP_CALLBACK),
+            "REASON", isWakeup ? "wakeup" : "sleep", "TIME", elapsedMs);
+#endif
+    }
+}
+
+void SuspendController::RollbackForceSuspendState()
+{
+#ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST
+    SetForceSleepingFlag(false);
+#endif
+    if (stateMachine_ != nullptr) {
+        stateMachine_->SetState(PowerState::AWAKE, StateChangeReason::STATE_CHANGE_REASON_APPLICATION, true);
+    }
+}
+
+void SuspendController::RollbackForceSuspendAfterCallbacks()
+{
+    RollbackForceSuspendState();
+    ScheduleWakeupAfterInterrupt();
+}
+
+void SuspendController::ScheduleWakeupAfterInterrupt()
+{
+    std::string tag;
+    {
+        std::lock_guard lock(forceSuspendCbMutex_);
+        tag = forceSuspendTag_;
+    }
+    auto self = shared_from_this();
+    FFRTUtils::SubmitTask([self, tag] {
+        NoCoroutineSwitchGuard guard;
+#ifdef POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG
+        if (tag == "ulsr") {
+            auto pms = DelayedSpSingleton<PowerMgrService>::GetInstance();
+            if (pms != nullptr) {
+                pms->TriggerUlsrWakeupCallback(false);
+            }
+        }
+#endif
+        self->TriggerForceSuspendMemCallbacks(true);
+    });
+}
+#endif
 
 void SuspendController::HandleHibernate(SuspendDeviceType reason)
 {

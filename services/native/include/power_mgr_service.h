@@ -107,6 +107,8 @@ public:
     virtual bool IsCollaborationScreenOn() override;
     virtual bool IsForceSleeping() override;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) override;
+    virtual PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& tag) override;
+    virtual PowerErrors InterruptForceSuspend() override;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "") override;
     virtual PowerErrors CreateRunningLock(

@@ -135,6 +135,8 @@ public:
         const std::string& sceneName, std::string& configVal, int32_t& powerError) override;
     virtual int32_t SetPowerConfigIpc(
         const std::string& sceneName, const std::string& configVal, int32_t& powerError) override;
+    virtual int32_t ForceSuspendDeviceIgnoringWakelockIpc(const std::string& tag) override;
+    virtual int32_t InterruptForceSuspendIpc() override;
 
     virtual PowerErrors RebootDevice(const std::string& reason) = 0;
     virtual PowerErrors RebootDeviceForDeprecated(const std::string& reason, bool force = false) = 0;
@@ -155,6 +157,8 @@ public:
     virtual bool IsCollaborationScreenOn() = 0;
     virtual bool IsForceSleeping() = 0;
     virtual PowerErrors ForceSuspendDevice(int64_t callTimeMs) = 0;
+    virtual PowerErrors ForceSuspendDeviceIgnoringWakelock(const std::string& tag) = 0;
+    virtual PowerErrors InterruptForceSuspend() = 0;
     virtual PowerErrors Hibernate(
         bool clearMemory, const std::string& reason = "") = 0;
     virtual PowerErrors CreateRunningLock(

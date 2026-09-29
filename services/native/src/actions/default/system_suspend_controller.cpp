@@ -146,6 +146,28 @@ void SystemSuspendController::SetSuspendTag(const std::string& tag)
     powerInterface->SetSuspendTag(tag);
 }
 
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+bool SystemSuspendController::ForceSuspendEx(const std::string& mode, const std::string& tag)
+{
+    sptr<V1_3::IPowerInterface> powerInterface = GetPowerInterface();
+    if (powerInterface == nullptr) {
+        POWER_HILOGE(COMP_SVC, "The hdf interface is null");
+        return false;
+    }
+    sptr<V1_4::IPowerInterface> v1_4Iface = V1_4::IPowerInterface::CastFrom(powerInterface);
+    if (v1_4Iface == nullptr) {
+        POWER_HILOGE(COMP_SVC, "v1_4 interface is not supported, cannot ForceSuspendEx");
+        return false;
+    }
+    int32_t ret = v1_4Iface->ForceSuspendEx(mode, tag);
+    if (ret != HDF_SUCCESS) {
+        POWER_HILOGE(COMP_SVC, "ForceSuspendEx failed, ret=%{public}d", ret);
+        return false;
+    }
+    return true;
+}
+#endif
+
 void SystemSuspendController::AllowAutoSleep()
 {
     allowSleepTask_ = true;

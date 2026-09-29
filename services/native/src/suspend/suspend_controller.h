@@ -19,6 +19,12 @@
 #include <cinttypes>
 #include <functional>
 #include <memory>
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <string>
+#endif
 #include <vector>
 
 #include "event_handler.h"
@@ -59,6 +65,10 @@ public:
     void HandleEvent(int64_t delayTime);
     void CancelEvent();
     void HandleAction(SuspendDeviceType reason, uint32_t action);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    bool HandleForceSuspendIgnoringWakelock(SuspendDeviceType reason, const std::string& tag);
+    bool InterruptForceSuspendCallback();
+#endif
     void RecordPowerKeyDown(bool interrupting = false);
     bool GetPowerkeyDownWhenScreenOff();
     bool IsPowerkeyScreenOffBlocked() const;
@@ -124,6 +134,17 @@ private:
     void HandleAutoSleep(SuspendDeviceType reason);
     void SetAutoSleep(SuspendDeviceType reason);
     void HandleForceSleep(SuspendDeviceType reason);
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    bool EnterForceSuspendSleepState(SuspendDeviceType reason);
+    void StartForceSuspendCallbacks(const std::string& tag);
+    bool WaitForceSuspendCallbacks();
+    bool DoHdiForceSuspendEx(const std::string& tag);
+    void TriggerForceSuspendCallbacks(const std::string& tag);
+    void TriggerForceSuspendMemCallbacks(bool isWakeup);
+    void RollbackForceSuspendState();
+    void RollbackForceSuspendAfterCallbacks();
+    void ScheduleWakeupAfterInterrupt();
+#endif
     void HandleHibernate(SuspendDeviceType reason);
     void HandleShutdown(SuspendDeviceType reason);
 #ifdef POWER_MANAGER_ENABLE_EXTERNAL_SCREEN_MANAGEMENT
@@ -139,6 +160,9 @@ private:
         const std::string& priority, SuspendDeviceType type);
 #endif
     static constexpr int32_t FORCE_SLEEP_DELAY_MS = 8000;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    static constexpr int32_t FORCE_SUSPEND_MEM_CALLBACK_TIMEOUT_MS = 30000;
+#endif
     void SuspendWhenScreenOff(SuspendDeviceType reason, uint32_t action, uint32_t delay);
     void SuspendWhenStateSleep(SuspendDeviceType reason, uint32_t action);
     bool CheckDuringCall(const sptr<PowerMgrService>& pms, SuspendDeviceType reason);
@@ -155,6 +179,14 @@ private:
     ffrt::mutex mutex_;
     ffrt::mutex sleepCbMutex_;
     ffrt::mutex suspendMutex_;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    std::mutex forceSuspendCbMutex_;
+    std::condition_variable forceSuspendWaitCv_;
+    bool forceSuspendCallbackPending_ {false};
+    bool forceSuspendCallbackFinished_ {false};
+    std::atomic<bool> forceSuspendSkipHdi_ {false};
+    std::string forceSuspendTag_;
+#endif
     std::shared_ptr<FFRTTimer> ffrtTimer_;
     FFRTMutexMap ffrtMutexMap_;
 #ifdef POWER_MANAGER_ENABLE_FORCE_SLEEP_BROADCAST

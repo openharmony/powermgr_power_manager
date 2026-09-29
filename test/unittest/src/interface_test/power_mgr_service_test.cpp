@@ -1446,4 +1446,124 @@ HWTEST_F(PowerMgrServiceTest, LockScreenAfterTimingOutAbnormal001, TestSize.Leve
     pmsTest_->LockScreenAfterTimingOut(true, false, true, testProxy); // reset to default
     POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::LockScreenAfterTimingOutWithAppidTestAbnormal001 end!");
 }
+
+/**
+ * @tc.name: PowerMgrService041
+ * @tc.desc: Test ForceSuspendDeviceIgnoringWakelock permission and capability
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService041, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService041 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
+
+    g_isPermissionGranted = true;
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("ulsr");
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("auto");
+    EXPECT_EQ(ret, PowerErrors::ERR_PARAM_INVALID);
+    ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+    EXPECT_NE(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+    EXPECT_NE(ret, PowerErrors::ERR_PERMISSION_DENIED);
+    PowerMgrClient::GetInstance().WakeupDevice();
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService041 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService042
+ * @tc.desc: Test ForceSuspendDeviceIgnoringWakelock when suspend controller is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService042, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService042 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    auto backup = pmsTest_->suspendController_;
+    pmsTest_->suspendController_ = nullptr;
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+    PowerErrors ret = pmsTest_->ForceSuspendDeviceIgnoringWakelock("mem");
+#if defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) && defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
+#else
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
+    pmsTest_->suspendController_ = backup;
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService042 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService043
+ * @tc.desc: SuspendDevice/ForceSuspendDevice/WakeupDevice return 801 when ForceSuspendDeviceIgnoringWakelock is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService043, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService043 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    g_isSystem = true;
+    g_isPermissionGranted = true;
+#ifdef POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK
+    EXPECT_EQ(pmsTest_->SuspendDevice(0, SuspendDeviceType::SUSPEND_DEVICE_REASON_APPLICATION, true),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(pmsTest_->ForceSuspendDevice(0), PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+    EXPECT_EQ(pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "app call"),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    EXPECT_NE(pmsTest_->WakeupDevice(0, WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, "app call"),
+        PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService043 function end!");
+}
+
+/**
+ * @tc.name: PowerMgrService044
+ * @tc.desc: Test InterruptForceSuspend permission, capability and skip-HDI window
+ * @tc.type: FUNC
+ */
+HWTEST_F(PowerMgrServiceTest, PowerMgrService044, TestSize.Level0)
+{
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService044 function start!");
+    auto pmsTest_ = DelayedSpSingleton<PowerMgrService>::GetInstance();
+    PowerErrors ret;
+
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_SYSTEM_API_DENIED);
+
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_PERMISSION_DENIED);
+
+    g_isPermissionGranted = true;
+#if !defined(POWER_MANAGER_ENABLE_FORCE_SUSPEND_IGNORING_WAKELOCK) || \
+    !defined(POWER_MANAGER_ENABLE_SUSPEND_WITH_TAG)
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    pmsTest_->SuspendControllerInit();
+    ASSERT_NE(pmsTest_->suspendController_, nullptr);
+    ret = pmsTest_->InterruptForceSuspend();
+    EXPECT_EQ(ret, PowerErrors::ERR_FAILURE);
+#endif
+    POWER_HILOGI(LABEL_TEST, "PowerMgrServiceTest::PowerMgrService044 function end!");
+}
 }
