@@ -14,6 +14,7 @@
  */
 
 #include "setting_provider.h"
+#include "parse_setting_int64.h"
 #include <thread>
 #include <regex>
 #include "datashare_predicates.h"
@@ -86,9 +87,8 @@ ErrCode SettingProvider::GetLongValue(const std::string& key, int64_t& value)
     if (ret != ERR_OK) {
         return ret;
     }
-    char* endptr = nullptr;
-    int64_t result = static_cast<int64_t>(strtoll(valueStr.c_str(), &endptr, 10));
-    if (endptr == nullptr || *endptr != '\0') {
+    int64_t result = 0;
+    if (!ParseSettingInt64(valueStr, result)) {
         POWER_HILOGE(COMP_UTILS, "GetLongValue error! key:%{public}s, value:%{public}s",
             key.c_str(), valueStr.c_str());
         return ERR_INVALID_VALUE;
